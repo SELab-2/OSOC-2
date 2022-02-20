@@ -417,8 +417,8 @@ Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you.
 ```
 
 ### Request with invalid ID
-**Cause:** Some endpoints require an ID in their URL. When given an invalid ID, this response is thrown.
-**Status Code:** 204 No Content
+**Cause:** Some endpoints require an ID in their URL. When given an invalid ID, this response is thrown.  
+**Status Code:** 204 No Content  
 **Response:** TBD
 ```json
 ```
