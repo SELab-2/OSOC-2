@@ -35,48 +35,278 @@
 
 ## Endpoints
 ### POST /login
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /student
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /student
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /student/all
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /student/\<student-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /student/\<student-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /student/\<student-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /student/\<student-id>/suggest
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /student/\<student-id>/suggest
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /student/\<student-id>/remove
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /student/\<student-id>/remove
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /student/\<student-id>/confirm
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /student/search
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /coach
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /coach/all
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /coach/\<coach-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /coach/\<coach-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /coach/\<coach-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /coach/request
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /coach/request
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /coach/request/\<request-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /coach/request/\<request-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /coach/request/\<request-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /admin
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /admin/all
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /admin/\<admin-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /admin/\<admin-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /admin/\<admin-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /project
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /project
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /project/all
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /project/\<project-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /project/\<project-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /project/\<project-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /project/\<project-id>/draft
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /project/\<project-id>/draft
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /project/conflicts
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /followup
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /followup/all
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /followup/\<student-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /followup/\<student-id>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /followup/template
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /followup/template
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### GET /followup/template/\<template-name>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### POST /followup/template/\<template-name>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
 ### DELETE /followup/template/\<template-name>
+**Arguments:** TBD  
+**Description:**  
+**Response:**  
+```json
+```
