@@ -2,7 +2,12 @@
 *An overview of API endpoints, verbs and their uses.*  
 *Note: this is still in-progress and will change over time.*
 
-## Overview table
+## Table of Contents
+ - [Table of Contents](table-of-contents)
+ - [Overview Table](overview-table)
+ - [Endpoint-independent Responses](endpoint-independent-responses)
+
+## Overview Table
 
  Endpoint | Supports GET | Supports POST | Supports DELETE
  --- | --- | --- | ---
@@ -361,5 +366,59 @@ Location: <server-url>/followup/all
 **Arguments:** TBD  
 **Description:** Remove sthe requested follow-up e-mail template.  
 **Response:** TBD  
+```json
+```
+
+### GET /easter/eggs
+**Arguments:** None  
+**Description:** An Easter Egg.  
+**Response:**
+```http
+HTTP/<version> 418 I'm A Teapot
+Content-Type: text; charset=utf-8
+
+Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you. Perhaps try my neighbor, the Coffee Pot. Would you like some peppermint tea while you wait?
+```
+
+## Endpoint-independent Responses
+### Request to a non-existent endpoint
+**Cause:** The user requested an endpoint URL which has no associated verbs (example `GET /admin/none`).  
+**Status Code:** 404 Not Found  
+**Response:** TBD
+```json
+```
+
+### Request with the wrong HTTP verb
+**Cause:** The user requested an endpoint URL for which the HTTP verb was invalid. Another verb should be used (example: `GET /login`).  
+**Status Code:** 405 Method Not Allowed  
+**Response:** TBD
+```json
+```
+
+### Request for non-JSON data
+**Cause:** The user used a header that didn't include `Accept: application/json`. Only JSON responses are supported.  
+**Status Code:** 406 Not Acceptable  
+**Response:** TBD
+```http
+```
+
+### Request without authentication
+**Cause:** The required authentication parameters aren't filled in. The only endpoint that can't throw this response is `POST /login`  
+**Status Code:** 401 Unauthorized  
+**Response:** TBD
+```json
+```
+
+### Request with insufficient rights
+**Cause:** The user requested a resource they don't have access to.  
+**Status Code:** 403 Forbidden  
+**Response:** TBD
+```json
+```
+
+### Request with invalid ID
+**Cause:** Some endpoints require an ID in their URL. When given an invalid ID, this response is thrown.
+**Status Code:** 204 No Content
+**Response:** TBD
 ```json
 ```
