@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '5000:8080' # 8080 is the port used by express, we map this to 5000
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000' # 3000 is used by next, we keep using this one
+  db:
+    image: 'postgres'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_USER: 'osoc2'
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
