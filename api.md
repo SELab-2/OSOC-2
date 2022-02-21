@@ -9,34 +9,34 @@
 
 ## Overview Table
 
- Endpoint | Supports GET | Supports POST | Supports DELETE
- --- | --- | --- | ---
- `/login` | No | [Yes](#post-login) | No
-`/student` | [Yes](#get-student) | [Yes](#post-student) | No
-`/student/all` | [Yes](#get-studentall) | No | No
-`/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id)
-`/student/<student-id>/suggest` | [Yes](#get-studentstudent-idsuggest) | [Yes](#post-studentstudent-idsuggest) | No
-`/student/<student-id>/remove` | No | [Yes](#post-studentstudent-idremove) | [Yes](#delete-studentstudent-idremove)
-`/student/<student-id>/confirm` | No | [Yes](#post-studentstudent-idconfirm) | No
-`/student/search` | [Yes](#get-studentsearch) | No | No
-`/coach` | [Yes](#get-coach) | No | No
-`/coach/all` | [Yes](#get-coachall) | No | No
-`/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id)
-`/coach/request` | [Yes](#get-coachrequest) | [Yes](#post-coachrequest) | No
-`/coach/request/<request-id>` | [Yes](#get-coachrequestrequest-id) | [Yes](#post-coachrequestrequest-id) | [Yes](#delete-coachrequestrequest-id)
-`/admin` | [Yes](#get-admin) | No | No
-`/admin/all` | [Yes](#get-adminall) | No | No
-`/admin/<admin-id>` | [Yes](#get-adminadmin-id) | [Yes](#post-adminadmin-id) | [Yes](#delete-adminadmin-id)
-`/project` | [Yes](#get-project) | [Yes](#post-project) | No
-`/project/all` | [Yes](#get-projectall) | No | No
-`/project/<project-id>` | [Yes](#get-projectproject-id) | [Yes](#post-projectproject-id) | [Yes](#delete-projectproject-id)
-`/project/<project-id>/draft` | [Yes](#get-projectproject-iddraft) | [Yes](#post-projectproject-iddraft) | No
-`/project/conflicts` | [Yes](#get-projectconflicts) | No | No
-`/followup` | [Yes](#get-followup) | No | No
-`/followup/all` | [Yes](#get-followupall) | No | No
-`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No
-`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No
-`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name)
+ Endpoint | Supports GET | Supports POST | Supports DELETE | Status
+ --- | --- | --- | --- | ---
+ `/login` | No | [Yes](#post-login) | No | ![todo]
+`/student` | [Yes](#get-student) | [Yes](#post-student) | No | ![todo]
+`/student/all` | [Yes](#get-studentall) | No | No | ![todo]
+`/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todo]
+`/student/<student-id>/suggest` | [Yes](#get-studentstudent-idsuggest) | [Yes](#post-studentstudent-idsuggest) | No | ![todo]
+`/student/<student-id>/remove` | No | [Yes](#post-studentstudent-idremove) | [Yes](#delete-studentstudent-idremove) | ![todo]
+`/student/<student-id>/confirm` | No | [Yes](#post-studentstudent-idconfirm) | No | ![todo]
+`/student/search` | [Yes](#get-studentsearch) | No | No | ![todo]
+`/coach` | [Yes](#get-coach) | No | No | ![todo]
+`/coach/all` | [Yes](#get-coachall) | No | No | ![todo]
+`/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id) | ![todo]
+`/coach/request` | [Yes](#get-coachrequest) | [Yes](#post-coachrequest) | No | ![todo]
+`/coach/request/<request-id>` | [Yes](#get-coachrequestrequest-id) | [Yes](#post-coachrequestrequest-id) | [Yes](#delete-coachrequestrequest-id) | ![todo]
+`/admin` | [Yes](#get-admin) | No | No | ![todo]
+`/admin/all` | [Yes](#get-adminall) | No | No | ![todo]
+`/admin/<admin-id>` | [Yes](#get-adminadmin-id) | [Yes](#post-adminadmin-id) | [Yes](#delete-adminadmin-id) | ![todo]
+`/project` | [Yes](#get-project) | [Yes](#post-project) | No | ![todo]
+`/project/all` | [Yes](#get-projectall) | No | No | ![todo]
+`/project/<project-id>` | [Yes](#get-projectproject-id) | [Yes](#post-projectproject-id) | [Yes](#delete-projectproject-id) | ![todo]
+`/project/<project-id>/draft` | [Yes](#get-projectproject-iddraft) | [Yes](#post-projectproject-iddraft) | No | ![todo]
+`/project/conflicts` | [Yes](#get-projectconflicts) | No | No | ![todo]
+`/followup` | [Yes](#get-followup) | No | No | ![todo]
+`/followup/all` | [Yes](#get-followupall) | No | No | ![todo]
+`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No | ![todo]
+`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No | ![todo]
+`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todo]
 
 ## Endpoints
 ### POST /login
@@ -424,3 +424,10 @@ Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you.
 **Response:** TBD
 ```json
 ```
+
+[#]: !links
+[todo]: https://shields.io/badge/Status-To_do-red
+[in-progress]: https://shields.io/badge/Status-In_progress-orange
+[to-test]: https://shields.io/badge/Status-Tests_required-yellow
+[merging]: https://shields.io/badge/Status-Merging-yellowgreen
+[done]: https://shields.io/badge/Status-Done-brightgreen
