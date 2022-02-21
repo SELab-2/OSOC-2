@@ -51,7 +51,7 @@
 **Description:** Redirects towards `GET /student/all`  
 **Response:** HTTP 303  
 ```http
-HTTP/<version> 303 See Other
+HTTP/2 303 See Other
 Location: <server-url>/student/all
 ```
 
@@ -137,7 +137,7 @@ Location: <server-url>/student/all
 **Description:** Redirects towards `GET /coach/all`  
 **Response:**
 ```http
-HTTP/<version> 303 See Other
+HTTP/2 303 See Other
 Location: <server-url>/coach/all
 ```
 
@@ -209,7 +209,7 @@ Location: <server-url>/coach/all
 **Description:** Redirects towards `GET /admin/all`  
 **Response:**
 ```http
-HTTP/<version> 303 See Other
+HTTP/2 303 See Other
 Location: <server-url>/admin/all
 ```
 
@@ -243,9 +243,11 @@ Location: <server-url>/admin/all
 
 ### GET /project
 **Arguments:** TBD  
-**Description:** Redirects towards `/projects/all`  
+**Description:** Redirects towards `/project/all`  
 **Response:**
 ```http
+HTTP/2 303 See Other
+Location: <server-url>/project/all
 ```
 
 ### POST /project
@@ -309,7 +311,7 @@ Location: <server-url>/admin/all
 **Description:** Redirects towards `GET /followup/all`   
 **Response:**
 ```http
-HTTP/<version> 303 See Other
+HTTP/2 303 See Other
 Location: <server-url>/followup/all
 ```
 
