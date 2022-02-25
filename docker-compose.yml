@@ -4,7 +4,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - '5000:8080' # 8080 is the port used by express, we map this to 5000
+      - '8080:8080' # 8080 is the port used by express, we map this to 8080
   frontend:
     build: ./frontend
     ports:
