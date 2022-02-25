@@ -39,11 +39,20 @@
 `/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todo]
 
 ## Endpoints
+The responses listed here are success responses; for error responses, see the [Endpoint-independent Responses](#endpoint-independent-responses) (for example [Argument error](#argument-error) or [Server error](#server-error)).
+
 ### POST /login
-**Arguments:** TBD  
+**Arguments:**  
+ - `name:string` The name of the user to log in.
+ - `pass:string` The password of the user to log in.
+
 **Description:** Attempts to log a user in into the system.  
 **Response:** TBD  
 ```json
+{
+  "success": true,
+  "key": "session-key-as-hex-string"
+}
 ```
 
 ### DELETE /login
@@ -51,7 +60,7 @@
 **Description:** Attempts to log out.  
 **Response:** TBD  
 ```json
-```2
+```
 
 ### GET /student
 **Arguments:** TBD  
@@ -429,6 +438,20 @@ Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you.
 **Cause:** Some endpoints require an ID in their URL. When given an invalid ID, this response is thrown.  
 **Status Code:** 204 No Content  
 **Response:** TBD
+```json
+```
+
+### Argument error
+**Cause:** When a required argument is omitted or an argument has the wrong type, this response is thrown.  
+**Status Code:** 400 Bad Request  
+**Response:** TBD  
+```json
+```
+
+### Server error
+**Cause:** Something went wrong while processing the request.  
+**Status Code:** 500 Internal Server Error  
+**Response:** TBD  
 ```json
 ```
 
