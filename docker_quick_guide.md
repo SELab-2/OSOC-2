@@ -23,7 +23,7 @@ set the context:
 ```
 
 Here is `remote-server` the name of the context that we will use to push the local code to our remote server.
-You are free to choose another name here (obviously use the name you chose for the commands later in this document)
+You are free to choose another name here (obviously use the name you chose for the commands later in this document).
 
 
 ## Running docker
@@ -46,13 +46,18 @@ list all images
 docker images
 ```
 
+remove unused images (will not remove images that have conflicts and that will need to be force removed)
+```
+docker image prune
+```
+
 remove docker image (only possible if no container is running that is using this image)
 ```
 docker rmi "image-name"
 ```
 > :warning: This might fail due to conflicts that get created automatically. To remove the image in this case it needs to be forced,use the `-f` flag to do this
 
-start the application **local** in docker (execute in root of project (same directory as `docker-compose.yml`-file))
+start the application in **local** docker containers (execute in root of project (same directory as `docker-compose.yml`-file))
 ```
 docker-compose up -d --build
 ```
@@ -64,9 +69,9 @@ shut down the **local** application
 docker-compose down
 ```
 
-start/push the application to the **remote** server (do this in your local terminal (pn needs to be active)
+start/push the application to the **remote** server (do this in your local terminal (vpn needs to be active)
 ```
-docker-compose --context remote-server up -d
+docker-compose --context remote-server up -d --build
 ```
 
 stop the **remote** application (do this in your local terminal, vpn needs to be active)
@@ -79,9 +84,12 @@ docker-compuse --context remote-server down
 
 ### Visual Studio Code
 
-#### Extentions
+#### Extensions
 - [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
     This allows to see the active images in the docker-extention tab inside vscode (but docker desktop for macOS and windows is better in my opinion)
 - [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
     This is used to start up/connect to the docker containers used in the application and to develop in them.
     The green "square" completely in the bottom left of the windows allows you to choose to which container you want to connect
+
+### Jetbrains
+There are also docker settings in the jetbrains IDE's that allow this, but I haven't looked into this specifically
