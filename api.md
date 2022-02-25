@@ -11,7 +11,7 @@
 
  Endpoint | Supports GET | Supports POST | Supports DELETE | Status
  --- | --- | --- | --- | ---
- `/login` | No | [Yes](#post-login) | No | ![todo]
+ `/login` | No | [Yes](#post-login) | [Yes](#delete-login) | ![todo]
 `/student` | [Yes](#get-student) | [Yes](#post-student) | No | ![todo]
 `/student/all` | [Yes](#get-studentall) | No | No | ![todo]
 `/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todo]
@@ -45,6 +45,13 @@
 **Response:** TBD  
 ```json
 ```
+
+### DELETE /login
+**Arguments:** TBD  
+**Description:** Attempts to log out.  
+**Response:** TBD  
+```json
+```2
 
 ### GET /student
 **Arguments:** TBD  
