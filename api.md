@@ -12,31 +12,30 @@
  Endpoint | Supports GET | Supports POST | Supports DELETE | Status
  --- | --- | --- | --- | ---
  `/login` | No | [Yes](#post-login) | [Yes](#delete-login) | ![todo]
-`/student` | [Yes](#get-student) | [Yes](#post-student) | No | ![todo]
+`/student` | [Yes](#get-student) | [Yes](#post-student) | No | ![todoc]
 `/student/all` | [Yes](#get-studentall) | No | No | ![todo]
-`/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todo]
+`/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todoc]
 `/student/<student-id>/suggest` | [Yes](#get-studentstudent-idsuggest) | [Yes](#post-studentstudent-idsuggest) | No | ![todo]
-`/student/<student-id>/remove` | No | [Yes](#post-studentstudent-idremove) | [Yes](#delete-studentstudent-idremove) | ![todo]
 `/student/<student-id>/confirm` | No | [Yes](#post-studentstudent-idconfirm) | No | ![todo]
-`/student/search` | [Yes](#get-studentsearch) | No | No | ![todo]
-`/coach` | [Yes](#get-coach) | No | No | ![todo]
-`/coach/all` | [Yes](#get-coachall) | No | No | ![todo]
-`/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id) | ![todo]
-`/coach/request` | [Yes](#get-coachrequest) | [Yes](#post-coachrequest) | No | ![todo]
-`/coach/request/<request-id>` | [Yes](#get-coachrequestrequest-id) | [Yes](#post-coachrequestrequest-id) | [Yes](#delete-coachrequestrequest-id) | ![todo]
-`/admin` | [Yes](#get-admin) | No | No | ![todo]
-`/admin/all` | [Yes](#get-adminall) | No | No | ![todo]
-`/admin/<admin-id>` | [Yes](#get-adminadmin-id) | [Yes](#post-adminadmin-id) | [Yes](#delete-adminadmin-id) | ![todo]
-`/project` | [Yes](#get-project) | [Yes](#post-project) | No | ![todo]
-`/project/all` | [Yes](#get-projectall) | No | No | ![todo]
-`/project/<project-id>` | [Yes](#get-projectproject-id) | [Yes](#post-projectproject-id) | [Yes](#delete-projectproject-id) | ![todo]
-`/project/<project-id>/draft` | [Yes](#get-projectproject-iddraft) | [Yes](#post-projectproject-iddraft) | No | ![todo]
-`/project/conflicts` | [Yes](#get-projectconflicts) | No | No | ![todo]
-`/followup` | [Yes](#get-followup) | No | No | ![todo]
-`/followup/all` | [Yes](#get-followupall) | No | No | ![todo]
-`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No | ![todo]
-`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No | ![todo]
-`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todo]
+`/student/search` | [Yes](#get-studentsearch) | No | No | ![todoc]
+`/coach` | [Yes](#get-coach) | No | No | ![todoc]
+`/coach/all` | [Yes](#get-coachall) | No | No | ![todoc]
+`/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id) | ![todoc]
+`/coach/request` | [Yes](#get-coachrequest) | [Yes](#post-coachrequest) | No | ![todoc]
+`/coach/request/<request-id>` | [Yes](#get-coachrequestrequest-id) | [Yes](#post-coachrequestrequest-id) | [Yes](#delete-coachrequestrequest-id) | ![todoc]
+`/admin` | [Yes](#get-admin) | No | No | ![todoc]
+`/admin/all` | [Yes](#get-adminall) | No | No | ![todoc]
+`/admin/<admin-id>` | [Yes](#get-adminadmin-id) | [Yes](#post-adminadmin-id) | [Yes](#delete-adminadmin-id) | ![todoc]
+`/project` | [Yes](#get-project) | [Yes](#post-project) | No | ![todoc]
+`/project/all` | [Yes](#get-projectall) | No | No | ![todoc]
+`/project/<project-id>` | [Yes](#get-projectproject-id) | [Yes](#post-projectproject-id) | [Yes](#delete-projectproject-id) | ![todoc]
+`/project/<project-id>/draft` | [Yes](#get-projectproject-iddraft) | [Yes](#post-projectproject-iddraft) | No | ![todoc]
+`/project/conflicts` | [Yes](#get-projectconflicts) | No | No | ![todoc]
+`/followup` | [Yes](#get-followup) | No | No | ![todoc]
+`/followup/all` | [Yes](#get-followupall) | No | No | ![todoc]
+`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No | ![todoc]
+`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No | ![todoc]
+`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todoc]
 
 ## Endpoints
 The responses listed here are success responses; for error responses, see the [Endpoint-independent Responses](#endpoint-independent-responses) (for example [Argument error](#argument-error) or [Server error](#server-error)).
@@ -47,23 +46,28 @@ The responses listed here are success responses; for error responses, see the [E
  - `pass:string` The password of the user to log in.
 
 **Description:** Attempts to log a user in into the system.  
-**Response:** TBD  
+**Response:**
 ```json
 {
-  "success": true,
-  "key": "session-key-as-hex-string"
+    "success": true,
+    "sessionkey": "session-key-as-hex-string"
 }
 ```
 
 ### DELETE /login
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` The session key of the user to log out.
+
 **Description:** Attempts to log out.  
-**Response:** TBD  
+**Response:**
 ```json
+{
+    "success": true
+}
 ```
 
 ### GET /student
-**Arguments:** TBD  
+**Arguments:** (none)  
 **Description:** Redirects towards `GET /student/all`  
 **Response:** HTTP 303  
 ```http
@@ -72,80 +76,177 @@ Location: <server-url>/student/all
 ```
 
 ### POST /student
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - TODO
+
 **Description:** Creates a new student in the system.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "newid": "new-student-id",
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /student/all
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** Lists all students in the system.  
-**Response:** TBD  
+**Response:**
 ```json
+{
+    "success": true,
+    "students": [
+        {
+            "id": "student-id",
+            "name": "student-name"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /student/\<student-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:key` Your current session key.
+ - Student ID is parsed from the URL.
+
 **Description:** Lists all details about the student with the given id.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "student": {},
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### POST /student/\<student-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Student ID is parsed from the URL.
+ - TODO
+
 **Description:** Modifies the details of the student.  
-**Response:** TBD  
+**Response:**  
+The `student` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
 ```json
+{
+    "success": true,
+    "student": {
+      "id": "student-id"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /student/\<student-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Student ID is parsed from the URL.
+
 **Description:** Removes the given student from the system.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /student/\<student-id>/suggest
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` You current session key.
+ - Student ID is parsed from the URL.
+
 **Description:** List the suggestions (yes/maybe/no) for this student.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "suggestions": {
+        "yes": [],
+        "maybe": [],
+        "no": []
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
+Where each suggestion array (`suggestions.yes`, `suggestions.maybe` and `suggestions.no`) contains 0 or more objects of the form (` | ` stands for `or`)
+```json
+{
+    "type": "yes | maybe | no",
+    "sender": {
+        "id": "user-id-of-the-suggester",
+        "name": "user-name-of-the-suggester"
+    },
+    "reason": "reason-for-the-suggestion"
+}
+```
+(The `reason` field is the only field that can be `undefined`, and thus omitted).
 
 ### POST /student/\<student-id>/suggest
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Student ID is parsed from the URL.
+ - `suggestion:string` Your suggestion. Should be one of `"yes"`, `"maybe"`, `"no"`. Another value results in an [Argument error](#argument-error).
+ - `reason:string` The reason for your suggestion. Can be omitted.
+
 **Description:** Add or modify your suggestion (yes/maybe/no) for this student.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "tally": {
+      "yes": 0,
+      "maybe": 0,
+      "no": 0
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
-
-### POST /student/\<student-id>/remove
-**Arguments:** TBD  
-**Description:** Allows a student to request the removal of their data.  
-**Response:** TBD  
-```json
-```
-
-### DELETE /student/\<student-id>/remove
-**Arguments:** TBD  
-**Description:** Allows an admin to remove the data of this student.  
-**Response:** TBD  
-```json
-```
+Each of the `tally` fields (`tally.yes`, `tally.maybe`, `tally.no`) will contain the amount of votes of that kind.
 
 ### POST /student/\<student-id>/confirm
-**Arguments:** TBD  
-**Description:** Confirms the reply to this student (yes/maybe/no). Does not modify the follow-up data in those endpoints. The second time this request is made for this student, the e-mail follow-up has been confirmed as well.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Student ID is parsed from the URL.
+ - `reply:string` The final reply. Should be one of `"yes"`, `"maybe"`, `"no"`. Any other value results in an [Argument error](#argument-error). This value can be omitted, and if it is, the final reply is decided by majority vote (from the existing suggestions).
+
+**Description:** Confirms the reply to this student (yes/maybe/no). Does not modify the follow-up data in those endpoints.   
+**Response:**  
 ```json
+{
+    "success": true,
+    "reply": "yes | maybe | no",
+    "sessionkey": "updated-session-key"
+}
 ```
+Here, the ` | ` in the `reply` field means `or`.
 
 ### GET /student/search
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - See [searching.md](./searching.md) for an overview of all filters. If no filter is given, this API endpoint will behave equivalent to [`GET /student/all`](#get-student-all).
+
 **Description:** Searches for a student by certain values.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "students": [
+        {
+            "id": "student-id",
+            "name": "student-name"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /coach
@@ -456,6 +557,7 @@ Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you.
 ```
 
 [#]: !links
+[todoc]: https://shields.io/badge/Status-To_document-black
 [todo]: https://shields.io/badge/Status-To_do-red
 [in-progress]: https://shields.io/badge/Status-In_progress-orange
 [to-test]: https://shields.io/badge/Status-Tests_required-yellow
