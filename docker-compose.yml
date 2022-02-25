@@ -10,7 +10,7 @@ services:
     ports:
       - '3000:3000' # 3000 is used by next, we keep using this one
   db:
-    image: 'postgres'
+    image: 'postgres:14.2'
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_USER: 'osoc2'
