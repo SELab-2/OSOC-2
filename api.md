@@ -120,10 +120,26 @@ Location: <server-url>/student/all
 ```json
 {
     "success": true,
-    "student": {},
+    "student": {
+        "id": "student-id",
+        "name": "student-name",
+        "email": "email-address",
+        "labels": [ "label-1", "label-2", "..." ],
+        "sollicitations": [ "id-1", "id-2", "..." ],
+        "project": {
+            "id": "project-id",
+            "contract": {
+                "id": "contract-id",
+                "info": "extra-contract-details"
+            },
+            "roles": [ "role-1-name", "role-2-name", "..." ]
+        }
+    },
     "sessionkey": "updated-session-key"
 }
 ```
+The `student.sollicitations` can be an empty list.  
+The `student.project` field can be omitted (`undefined`) if the student has not been assigned to a project yet.
 
 ### POST /student/\<student-id>
 **Arguments:**  
@@ -291,11 +307,13 @@ Location: <server-url>/coach/all
     "coach": {
         "id": "coach-id",
         "name": "coach-name",
-        "email": "coach-email"
+        "email": "coach-email",
+        "project": "project-id"
     },
     "sessionkey": "updated-session-key"
 }
 ```
+The `coach.project` field can be omitted (`undefined`) if the coach has not been assigned to a project yet.
 
 ### POST /coach/\<coach-id>
 **Arguments:**  
@@ -415,7 +433,7 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 ```
 
 ### GET /admin
-**Arguments:** TBD  
+**Arguments:** (none)  
 **Description:** Redirects towards `GET /admin/all`  
 **Response:**
 ```http
@@ -424,31 +442,75 @@ Location: <server-url>/admin/all
 ```
 
 ### GET /admin/all
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** List all admin accounts in the system.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "admins": [
+        {
+            "id": "admin-id",
+            "name": "admin-name"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /admin/\<admin-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Admin ID is parsed from the request URL.
+
 **Description:** Get all details about a single admin.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "admin": {
+        "id": "admin-id",
+        "name": "admin-name",
+        "email": "admin-email-address"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### POST /admin/\<admin-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Admin ID is parsed from the URL.
+ - TODO
+
 **Description:** Modify a single admin.  
-**Response:** TBD  
+**Response:**  
+The `admin` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
 ```json
+{
+    "success": true,
+    "admin": {
+        "id": "admin-id"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /admin/\<admin-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey`: Your current session key.
+ - Admin ID is parsed from the request.
+
 **Description:** Remove an admin from the system.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /project
