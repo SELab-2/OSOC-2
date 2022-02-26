@@ -78,7 +78,8 @@ Location: <server-url>/student/all
 ### POST /student
 **Arguments:**  
  - `sessionkey:string` Your current session key.
- - TODO
+ - `name:string` The new student's name.
+ - `email:string` The new student's email address.
 
 **Description:** Creates a new student in the system.  
 **Response:**  
@@ -145,7 +146,7 @@ The `student.project` field can be omitted (`undefined`) if the student has not 
 **Arguments:**  
  - `sessionkey:string` Your current session key.
  - Student ID is parsed from the URL.
- - TODO
+ - Any of the fields in the `student` field of the response for `GET /student/<student-id>` can be modified by adding it to the arguments (without the `student.` prefix). For the `project` field, you can only specify the project ID. Any values passed to `labels` or `sollicitations` (both are lists) are added to the list. If a value starting with `-` (a single minus sign) is passed in the `labels` or `sollicitations` list, those values are removed from the lists.
 
 **Description:** Modifies the details of the student.  
 **Response:**  
@@ -319,8 +320,9 @@ The `coach.project` field can be omitted (`undefined`) if the coach has not been
 **Arguments:**  
  - `sessionkey:string` Your current session key.
  - Coach ID is parsed from the URL.
- - `name:string` The updated name for the coach.
- - `email:string` The updated email address for the coach.
+ - `name:string` The updated name for the coach (optional).
+ - `email:string` The updated email address for the coach (optional).
+ - If the account for the `sessionkey` matches with the `<coach-id>` (the coach is modifying themselves), they can also change their password by adding the `pass:string` field.
 
 **Description:** Modify the given coach.  
 **Response:** TBD  
@@ -484,7 +486,9 @@ Location: <server-url>/admin/all
 **Arguments:**  
  - `sessionkey:string` Your current session key.
  - Admin ID is parsed from the URL.
- - TODO
+ - `name:string` The admin's updated name (optional).
+ - `email:string` The admin's updated email address (optional).
+ - If the `sessionkey` matches with the `sessionkey` for `<admin-id>` (the admin is modifying themselves), they can also change their password by using the field `pass:string`.
 
 **Description:** Modify a single admin.  
 **Response:**  
@@ -514,7 +518,7 @@ The `admin` field contains all updated fields. If no field is updated, an [Argum
 ```
 
 ### GET /project
-**Arguments:** TBD  
+**Arguments:** (none)  
 **Description:** Redirects towards `/project/all`  
 **Response:**
 ```http
@@ -523,56 +527,168 @@ Location: <server-url>/project/all
 ```
 
 ### POST /project
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - `project:json` A JSON-object representing the project. The following fields should be present:
+   - `name:string` The project name.
+   - `partner:string` The name of the partner requesting the project.
+   - `roles:[string]` A list of roles required (optional).
+   - `deadline:Date` The deadline date (optional).
+
 **Description:** Creates a new project.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "id": "new-project-id",
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /project/all
-**Arguments:** TBD  
+**Arguments:**
+ - `sessionkey:string` Your current session key.
+
 **Description:** Lists all projects in the current edition.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "projects": [
+        {
+            "id": "project-id",
+            "name": "project-name"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /project/\<project-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Project ID is parsed from the request URL.
+
 **Description:** Lists all details about a project.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "project": {
+        "id": "project-id",
+        "name": "project-name",
+        "partner": "project-partner-name",
+        "deadline": "project-deadline",
+        "coaches": [ "coach-1-id", "coach-2-id", "..." ],
+        "roles": [ "required-role-1", "required-role-2", "..." ],
+        "drafted": [
+            {
+                "id": "student-id",
+                "name": "student-name",
+                "role": "student-role"
+            },
+            ...
+        ],
+        "studentsreq": 0
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
+The `project.coaches` field can be empty, but not omitted.  
+The `project.roles` field can be empty, but not omitted.  
+The `project.drafted` field can be empty, but not omitted.  
+The `project.studentsreq` field contains the total amount of students required.
 
 ### POST /project/\<project-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Project ID is parsed from the URL.
+ - Any of the fields in the `project` field of the response for `GET /project/<project-id>` can be modified by adding it to the arguments (without the `project.` prefix). Some special values and exceptions:
+   - Values passed in the `coaches` and `roles` arrays are added to the arrays in the database. If a value starts with a `-` (a single minus sign), that value is removed instead.
+   - To add a student, simply use their ID in the `drafted` array. Similarly to the `coaches` and `roles`, you can remove students by adding `-<student-id>` in the `drafted` array. However, it is recommended to use the [`POST /project/<project-id>/draft`](#post-projectproject-iddraft) endpoint for this.
+
 **Description:** Modifies a project.  
-**Response:** TBD  
+**Response:**  
+The `project` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
 ```json
+{
+    "success": true,
+    "project": {
+      "id": "project-id"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /project/\<project-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - The project ID is parsed from the request URL.
+
 **Description:** Removes a project from the current edition.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /project/\<project-id>/draft
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - The project ID is parsed from the URL.
+
 **Description:** Get all students drafted for this project.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "project": {
+        "id": "project-id",
+        "name": "project-name"
+    },
+    "students": [
+        {
+            "id": "student-id",
+            "name": "student-name",
+            "roles": [ "role-1", "role-2", "..." ]
+        },
+        ...
+    ]
+}
 ```
+The `students` array can be empty, but not omitted.  
+For each student in the `students` array, the `roles` array can be empty, but not omitted.
 
 ### POST /project/\<project-id>/draft
-**Arguments:** TBD  
-**Description:** Draft a student for this project.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Project ID is parsed from the URL.
+ - `id:string` The student ID.
+ - `roles:[string]` An array containing all roles to add/remove for this student (optional). To remove a role, simply put `-` (a single minus sign) in front of the role.
+
+If the `roles` field is not set (`undefined`), the request causes the following behaviour:
+ - If the student is not yet on the project, it will be added (drafted).
+ - If the student is already on the project, it will be removed.
+
+**Description:** Modify a student on this project by either adding (drafting) them, modifying their roles or removing them.  
+**Response:**  
 ```json
+{
+    "success": true,
+    "drafted": true,
+    "roles": [ "role-1", "role-2", "..." ],
+    "sessionkey": "updated-session-key"
+}
 ```
+The `drafted` field will be `true` if the student is on the project, and `false` otherwise.
 
 ### GET /project/conflicts
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** List all conflicts in all projects. This endpoint only allows to list and view conflicts, not resolve them.  
 **Response:** TBD  
 ```json
