@@ -17,7 +17,7 @@
 `/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todoc]
 `/student/<student-id>/suggest` | [Yes](#get-studentstudent-idsuggest) | [Yes](#post-studentstudent-idsuggest) | No | ![todo]
 `/student/<student-id>/confirm` | No | [Yes](#post-studentstudent-idconfirm) | No | ![todo]
-`/student/search` | [Yes](#get-studentsearch) | No | No | ![todoc]
+`/student/search` (see [searching.md](./searching.md)) | [Yes](#get-studentsearch) | No | No | ![todoc]
 `/coach` | [Yes](#get-coach) | No | No | ![todoc]
 `/coach/all` | [Yes](#get-coachall) | No | No | ![todoc]
 `/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id) | ![todoc]
@@ -250,7 +250,7 @@ Here, the ` | ` in the `reply` field means `or`.
 ```
 
 ### GET /coach
-**Arguments:** TBD  
+**Arguments:** (none)  
 **Description:** Redirects towards `GET /coach/all`  
 **Response:**
 ```http
@@ -259,66 +259,159 @@ Location: <server-url>/coach/all
 ```
 
 ### GET /coach/all
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** Gets the list of all coaches.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "coaches": [
+        {
+            "id": "coach-id",
+            "name": "coach-name"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /coach/\<coach-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Coach ID is parsed from the URL.
+
 **Description:** Gets all details about a coach.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "coach": {
+        "id": "coach-id",
+        "name": "coach-name",
+        "email": "coach-email"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### POST /coach/\<coach-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Coach ID is parsed from the URL.
+ - `name:string` The updated name for the coach.
+ - `email:string` The updated email address for the coach.
+
 **Description:** Modify the given coach.  
 **Response:** TBD  
+The `coach` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
 ```json
+{
+    "success": true,
+    "coach": {
+      "id": "coach-id"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /coach/\<coach-id>
-**Arguments:** TBD  
-**Description:** Removes the given coach from the system. If the coach was a student coach, they remain in the system as a normal student.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Coach ID is parsed from the URL.
+
+**Description:** Removes the given coach from the system.  
+**Response:**
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /coach/request
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** Lists all coach requests.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "requests": [
+        {
+            "id": "request-id",
+            "name": "coach-name",
+            "email": "coach-email"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### POST /coach/request
-**Arguments:** TBD  
-**Description:** Access permission to be a coach, either by signing up or requesting as a student to become a student coach.  
-**Response:** TBD  
+**Arguments:**  
+ - `name:string` Your name.
+ - `email:string` Your email address.
+ - `pass:string` The password for your account, when it's activated.
+
+**Description:** Access permission to be a coach by signing up.  
+**Response:**  
 ```json
+{
+    "success": true,
+    "id": "request-id"
+}
 ```
 
 ### GET /coach/request/\<request-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Request ID is parsed from the URL.
+
 **Description:** View details about a coach request.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "id": "request-id",
+    "name": "requester-name",
+    "email": "requester-email",
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### POST /coach/request/\<request-id>
-**Arguments:** TBD  
-**Description:** Accept a request for becoming a (student) coach.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Request ID is parsed from the URL.
+
+**Description:** Accept a request for becoming a coach.  
+**Response:**  
 ```json
+{
+    "success": true,
+    "id": "request-id",
+    "name": "new-coach-name",
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /coach/request/\<request-id>
-**Arguments:** TBD  
-**Description:** Deny a request for becoming a (student) coach.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Request ID is parsed from the URL.
+
+**Description:** Deny a request for becoming a coach.  
+**Response:**  
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /admin
