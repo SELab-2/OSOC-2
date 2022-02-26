@@ -803,17 +803,6 @@ The `mails[i].sent` field is the JavaScript serialized date and time of the mome
 ```json
 ```
 
-### GET /easter/eggs
-**Arguments:** None  
-**Description:** An Easter Egg.  
-**Response:**
-```http
-HTTP/<version> 418 I'm A Teapot
-Content-Type: text; charset=utf-8
-
-Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you. Perhaps try my neighbor, the Coffee Pot. Would you like some peppermint tea while you wait?
-```
-
 ## Endpoint-independent Responses
 ### Request to a non-existent endpoint
 **Cause:** The user requested an endpoint URL which has no associated verbs (example `GET /admin/none`).  
