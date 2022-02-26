@@ -695,7 +695,7 @@ The `drafted` field will be `true` if the student is on the project, and `false`
 ```
 
 ### GET /followup
-**Arguments:** TBD  
+**Arguments:** (none)  
 **Description:** Redirects towards `GET /followup/all`   
 **Response:**
 ```http
@@ -704,24 +704,68 @@ Location: <server-url>/followup/all
 ```
 
 ### GET /followup/all
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** List all e-mails sent for each student.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "students": [
+        {
+            "id": "student-id",
+            "name": "student-name",
+            "sent": [ "type-1", "type-2", "..." ]
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
+The values in the `students[i].sent` array can be the following:
+ - `"hold-tight"` A "hold tight" email has been sent to a student marked as `"maybe"`.
+ - `"confirmed"` A confirmation email has been sent to this student.
+ - `"cancelled"` An email stating that a student has not been accepted has been sent.
+ - (This list is non-exhaustive. If more types of emails pop up during development, they will be added).
 
 ### GET /followup/\<student-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - The student ID is parsed from the URL.
+
 **Description:** Get all follow-up e-mails sent to this student.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "mails": [
+        {
+            "type": "email-type",
+            "sent": "2012-04-23T18:25:43.511Z"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
+The `mails[i].type` field is one of the values listed above (in the [`GET /followup/all`](#get-followupall)).  
+The `mails[i].sent` field is the JavaScript serialized date and time of the moment the mail was marked as sent.
 
 ### POST /followup/\<student-id>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - The student ID is parsed from the URL.
+ - `type:string` The type of email sent (see [`GET /followup/all`](#get-followupall)).
+
 **Description:** Mark a follow-up e-mail as sent (for this student).  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "id": "student-id",
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### GET /followup/template
@@ -774,57 +818,89 @@ Hi. I'm your friendly neighborhood teapot. Sadly I can't produce coffee for you.
 ### Request to a non-existent endpoint
 **Cause:** The user requested an endpoint URL which has no associated verbs (example `GET /admin/none`).  
 **Status Code:** 404 Not Found  
-**Response:** TBD
+**Response:**
 ```json
+{
+    "success": false,
+    "reason": "The endpoint request (<endpoint url>) does not exist."
+}
 ```
 
 ### Request with the wrong HTTP verb
 **Cause:** The user requested an endpoint URL for which the HTTP verb was invalid. Another verb should be used (example: `GET /login`).  
 **Status Code:** 405 Method Not Allowed  
-**Response:** TBD
+**Response:**
 ```json
+{
+    "success": false,
+    "reason": "This HTTP verb (<verb>) is not supported for this endpoint (<endpoint url>)."
+}
 ```
 
 ### Request for non-JSON data
 **Cause:** The user used a header that didn't include `Accept: application/json`. Only JSON responses are supported.  
 **Status Code:** 406 Not Acceptable  
-**Response:** TBD
-```http
+**Response:**
+```json
+{
+    "success": false,
+    "reason": "All endpoints only support JSON (<MIME type> requested)."
+}
 ```
 
 ### Request without authentication
-**Cause:** The required authentication parameters aren't filled in. The only endpoint that can't throw this response is `POST /login`  
+**Cause:** The required authentication parameters aren't filled in. The only endpoints that can't throw this response are `POST /login` and `POST /coach/request`  
 **Status Code:** 401 Unauthorized  
-**Response:** TBD
+**Response:**
 ```json
+{
+    "success": false,
+    "reason": "Unauthenticated request. Please log in first."
+}
 ```
 
 ### Request with insufficient rights
 **Cause:** The user requested a resource they don't have access to.  
 **Status Code:** 403 Forbidden  
-**Response:** TBD
+**Response:**
 ```json
+{
+    "success": false,
+    "reason": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+}
 ```
 
 ### Request with invalid ID
 **Cause:** Some endpoints require an ID in their URL. When given an invalid ID, this response is thrown.  
 **Status Code:** 204 No Content  
-**Response:** TBD
+**Response:**
 ```json
+{
+    "success": false,
+    "reason": "This endpoint requires an ID. The ID you provided was invalid."
+}
 ```
 
 ### Argument error
 **Cause:** When a required argument is omitted or an argument has the wrong type, this response is thrown.  
 **Status Code:** 400 Bad Request  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": false,
+    "reason": "One of the arguments is incorrect or not present. Please check your request."
+}
 ```
 
 ### Server error
 **Cause:** Something went wrong while processing the request.  
 **Status Code:** 500 Internal Server Error  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": false,
+    "reason": "Something went wrong while trying to execute your request."
+}
 ```
 
 [#]: !links
