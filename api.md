@@ -31,11 +31,11 @@
 `/project/<project-id>` | [Yes](#get-projectproject-id) | [Yes](#post-projectproject-id) | [Yes](#delete-projectproject-id) | ![todo]
 `/project/<project-id>/draft` | [Yes](#get-projectproject-iddraft) | [Yes](#post-projectproject-iddraft) | No | ![todo]
 `/project/conflicts` | [Yes](#get-projectconflicts) | No | No | ![todoc]
-`/followup` | [Yes](#get-followup) | No | No | ![todoc]
-`/followup/all` | [Yes](#get-followupall) | No | No | ![todoc]
-`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No | ![todoc]
-`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No | ![todoc]
-`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todoc]
+`/followup` | [Yes](#get-followup) | No | No | ![todo]
+`/followup/all` | [Yes](#get-followupall) | No | No | ![todo]
+`/followup/<student-id>` | [Yes](#get-followupstudent-id) | [Yes](#post-followupstudent-id) | No | ![todo]
+`/followup/template` | [Yes](#get-followuptemplate) | [Yes](#post-followuptemplate) | No | ![todo]
+`/followup/template/<template-name>` | [Yes](#get-followuptemplatetemplate-name) | [Yes](#post-followuptemplatetemplate-name) | [Yes](#delete-followuptemplatetemplate-name) | ![todo]
 
 ## Endpoints
 The responses listed here are success responses; for error responses, see the [Endpoint-independent Responses](#endpoint-independent-responses) (for example [Argument error](#argument-error) or [Server error](#server-error)).
@@ -769,38 +769,105 @@ The `mails[i].sent` field is the JavaScript serialized date and time of the mome
 ```
 
 ### GET /followup/template
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+
 **Description:** List all follow-up e-mail templates in the system.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "templates": [
+        {
+            "name": "template-name",
+            "desc": "description"
+        },
+        ...
+    ],
+    "sessionkey": "updated-session-key"
+}
 ```
+The `templates[i].desc` field can be omitted and/or empty.
 
 ### POST /followup/template
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - `name:string` The name for the new template.
+ - `desc:string` The description for the new template (optional).
+ - `subject:string` A template message for the email subject (optional).
+ - `cc:string` A list of email addresses to be in the CC field of the email (optional).
+ - `content:string` The content of the email template.
 **Description:** Add a follow-up e-mail template.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "template": {
+        "name": "template-name",
+        "desc": "template-description"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
+The `template.desc` field is omitted if the `desc` field of the request was not filled in.
 
 ### GET /followup/template/\<template-name>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Template name (the same as its ID) is parsed from the request.
+
 **Description:** Returns the requested follow-up e-mail template.  
-**Response:** TBD  
+**Response:**  
 ```json
+{
+    "success": true,
+    "template": {
+        "name": "template-name",
+        "desc": "template-description",
+        "subject": "email-subject",
+        "cc": [ "cc-address-1", "cc-address-2", "..." ],
+        "content": "email-content"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
+The `template.desc` and `template.subject` fields can be omitted (if they were not specified yet).  
+The `template.cc` can be an empty list.
 
 ### POST /followup/template/\<template-name>
-**Arguments:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - The template name (the same as its ID) is parsed from the request.
+ - `desc:string` The new description for the template (optional).
+ - `subject:string` The new subject line for the template (optional).
+ - `cc:[string]`: Each email address in the `cc` array is added to the `cc` array of the template, except those starting with `-`  (a single minus sign); those are removed.
+ - `content:string`: The updated content for the tempate.
+
 **Description:** Modifies the requested follow-up e-mail template.  
-**Response:** TBD  
+**Response:**  
+The `template` field contains all modified fields in the template. If no field was modified by this request, an [Argument error](#argument-error) is thrown.
 ```json
+{
+    "success": true,
+    "template": {
+        "name": "template-name"
+    },
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ### DELETE /followup/template/\<template-name>
-**Arguments:** TBD  
-**Description:** Remove sthe requested follow-up e-mail template.  
-**Response:** TBD  
+**Arguments:**  
+ - `sessionkey:string` Your current session key.
+ - Template name (the same as its ID) is parsed from request URL.
+
+**Description:** Removes the requested follow-up e-mail template.  
+**Response:**  
 ```json
+{
+    "success": true,
+    "sessionkey": "updated-session-key"
+}
 ```
 
 ## Endpoint-independent Responses
