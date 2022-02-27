@@ -5,10 +5,26 @@ services:
     build: ./backend
     ports:
       - '8080:8080' # 8080 is the port used by express, we map this to 8080
+    depends_on:
+      - db
+    deploy: # TODO: maybe change the restart policy later?
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   frontend:
     build: ./frontend
     ports:
       - '3000:3000' # 3000 is used by next, we keep using this one
+    depends_on:
+      - backend
+    deploy: # TODO: maybe change the restart policy later?
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
   db:
     image: 'postgres:14.2'
     environment:
@@ -16,6 +32,12 @@ services:
       POSTGRES_USER: 'osoc2'
     volumes:
       - data:/var/lib/postgresql/data
+    deploy: # TODO: maybe change the restart policy later?
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 volumes:
   data:

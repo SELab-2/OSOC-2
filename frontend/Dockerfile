@@ -18,4 +18,4 @@ COPY . .
 # THIS IS THE PORT THAT NEXT.JS USES
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["sh" , "-c", "npm run build ; npm run start"]

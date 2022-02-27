@@ -13,7 +13,7 @@ Install [docker-Engine](https://docs.docker.com/engine/install/) & [docker-compo
 
 To execute docker in linux without `sudo`: https://docs.docker.com/engine/install/linux-postinstall/
 
-## Configuration
+## Configuration to push to remote server
 Open a terminal and type following commands to set the remote context.
 This context is used to push the local code to the server. The code is then deployed on the server.
 
@@ -62,6 +62,18 @@ start the application in **local** docker containers (execute in root of project
 docker-compose up -d --build
 ```
 
+start the application **WITH DEBUGGER PORTS OPEN** in **local** docker container
+:warning: try to not run this on the remote server for security reasons
+```
+docker-compose -f "docker-compose.debug.yml"  up -d --build
+```
+
+stop the application **WITH DEBUGGER** in **local** docker container
+```
+docker-compose -f "docker-compose.debug.yml"  down
+```
+
+
 shut down the **local** application
  - shuts down the containers used in the application
  - removes the containers used in the application
@@ -83,13 +95,28 @@ docker-compuse --context remote-server down
 ## IDE-related
 
 ### Visual Studio Code
+The debugger scripts for vscode are located in `.vscode/launcher.json`. there are 3 scripts:
+- `Docker: backend`
+- `Docker: frontend-server`
+- `Docker: frontend-client`
 
-#### Extensions
-- [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker)
-    This allows to see the active images in the docker-extention tab inside vscode (but docker desktop for macOS and windows is better in my opinion)
-- [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-    This is used to start up/connect to the docker containers used in the application and to develop in them.
-    The green "square" completely in the bottom left of the windows allows you to choose to which container you want to connect
+###### Usage
+1. Start the application in the docker containers by running the docker-compose file **WITH DEBUGGING ENABLED**
+2. Run the appropriate debugger script:
+    - `Docker: backend`: connect the debugger to the backend container and debug the code there.
+    - `Docker: frontend-server`: connect the debugger to the frontend container and debug the code there.
+    - `Docker: frontend-client`: automatically open a browser to the correct port on localhost to see the website.
+
+
 
 ### Jetbrains
-There are also docker settings in the jetbrains IDE's that allow this, but I haven't looked into this specifically
+I image it is also possible to connect the debugger to the containers in Webstorm, but I have not looked into this specifically.
+
+## Connect the containers in the application
+The containers can reach each other with their respective hostname out of the `docker-compose.yml` file.
+In our case these host names are:
+- `db` (for the database)
+- `frontend` (for frontend)
+- `backend` (for backend)
+
+A short tutorial with extra information can be found [here](https://www.youtube.com/watch?v=A9bA5HpOk30)

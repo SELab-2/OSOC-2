@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '8080:8080' # 8080 is the port used by express, we map this to 8080
+      - '9229:9229' # debugging port
+    depends_on:
+      - db
+    command:  ["node", "--inspect=0.0.0.0:9229" ,"src/server.js" ]
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000' # 3000 is used by next, we keep using this one
+      - '9119:9119' # debugging port
+    depends_on:
+      - backend
+    command: ["npm", "run", "dev" ]
+  db:
+    image: 'postgres:14.2'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_USER: 'osoc2'
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
