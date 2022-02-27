@@ -26,10 +26,7 @@ services:
         max_attempts: 3
         window: 120s
   db:
-    image: 'postgres:14.2'
-    environment:
-      POSTGRES_PASSWORD: 'password'
-      POSTGRES_USER: 'osoc2'
+    build: ./database
     volumes:
       - data:/var/lib/postgresql/data
     deploy: # TODO: maybe change the restart policy later?

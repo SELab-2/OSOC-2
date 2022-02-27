@@ -92,6 +92,15 @@ docker-compuse --context remote-server down
 ```
 > :warning: this will probably throw errors that there was an error while removing, ignore this OR ssh to the server and remove the remaining images manually with `docker rmi "image-name"`
 
+
+### Postgres startup scripts
+The startup scripts **ONLY** get executed if the volume that is used by the database is completely empty.
+This means that if you change something in the startup scripts and want to test it. You need to remove the volume manually (in CLI of docker desktop GUI),
+then you can start te container and the scripts will execute
+
+:warning: the scripts get executed in alphabetical order, more info [here](https://hub.docker.com/_/postgres) under "initialization scripts"
+
+
 ## IDE-related
 
 ### Visual Studio Code
