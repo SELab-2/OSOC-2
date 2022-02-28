@@ -9,7 +9,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "express": "^4.17.3"
+      "express": "^4.17.3",
+      "prisma": "^3.10.0",
+      "passport": "^0.5.2"
     },
     "devDependencies": {
       "typedoc": "^0.22.12",
