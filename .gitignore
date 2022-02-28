@@ -40,3 +40,8 @@ yarn-error.log*
 package-lock.json
 
 .eslintcache
+
+# node modules of the backend and frontend
+# (add this just to be sure that this does not get added when someone runs npm install in these sub-folders)
+backend/node_modules
+frontend/node_modules

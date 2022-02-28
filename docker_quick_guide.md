@@ -68,12 +68,6 @@ start the application **WITH DEBUGGER PORTS OPEN** in **local** docker container
 docker-compose -f "docker-compose.debug.yml"  up -d --build
 ```
 
-stop the application **WITH DEBUGGER** in **local** docker container
-```
-docker-compose -f "docker-compose.debug.yml"  down
-```
-
-
 shut down the **local** application
  - shuts down the containers used in the application
  - removes the containers used in the application
