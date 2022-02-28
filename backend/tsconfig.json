@@ -1,4 +1,4 @@
-{
+{ // TODO: plaats hier een goede tsconfig file, ik heb hier geen kennis van
   "compilerOptions": {
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
