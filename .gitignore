@@ -43,3 +43,6 @@ yarn-error.log*
 package-lock.json
 
 .eslintcache
+
+# keep some (empty) directories
+!**/.gitkeep
