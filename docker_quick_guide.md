@@ -112,8 +112,20 @@ The debugger scripts for vscode are located in `.vscode/launcher.json`. there ar
 
 
 
-### Jetbrains
-I image it is also possible to connect the debugger to the containers in Webstorm, but I have not looked into this specifically.
+### Webstorm
+Define 2 debug configurations following [this](https://www.developers-notebook.com/development/debugging-node-js-in-a-docker-container-with-webstorm/) small tutorial.
+
+1.  - For the frontend the debugger port is `9119`
+    - for the backend the debugger port is `9229`
+    - if you want a debugger that automatically opens a browser, make such a new preset and use the launch-script option to add a browser (port to connect to the frontend is `3000`)
+2. check the box `Reconnect automatically`
+
+
+Give the debugger presets a name to make it clear to yourself which debugger you are running :smiley:.
+
+###### Usage
+1. Start the application in the docker containers by running the docker-compose file **WITH DEBUGGING ENABLED**
+2. start the right debugger
 
 ## Connect the containers in the application
 The containers can reach each other with their respective hostname out of the `docker-compose.yml` file.
