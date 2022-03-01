@@ -113,11 +113,11 @@ The debugger scripts for vscode are located in `.vscode/launcher.json`. there ar
 
 
 ### Webstorm
-Define 2 debug configurations following [this](https://www.developers-notebook.com/development/debugging-node-js-in-a-docker-container-with-webstorm/) small tutorial.
+Define debug configurations following [this](https://www.developers-notebook.com/development/debugging-node-js-in-a-docker-container-with-webstorm/) small tutorial.
 
 1.  - For the frontend the debugger port is `9119`
-    - for the backend the debugger port is `9229`
-    - if you want a debugger that automatically opens a browser, make such a new preset and use the launch-script option to add a browser (port to connect to the frontend is `3000`)
+    - For the backend the debugger port is `9229`
+    - Optionally: if you want a debugger that automatically opens a browser, make such a new preset and use the launch-script option to add a browser (port to connect to the frontend is `3000`)
 2. check the box `Reconnect automatically`
 
 
