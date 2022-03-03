@@ -1,0 +1,14 @@
+{
+    "port": 4096,
+    
+    "httpErrors": {
+        "invalidID": 204,
+        "argumentError": 400,
+        "unauthenticated": 401,
+        "insufficientRights": 403,
+        "nonExistent": 404,
+        "invalidVerb": 405,
+        "nonJSONRequest": 406,
+        "serverError": 500
+    }
+}

@@ -1,16 +1,18 @@
-// Import the express in typescript file
+import body from 'body-parser';
 import express from 'express';
 
-// Initialize the express engine
+import * as config from './config.json';
+import * as ep from './endpoints'
+import * as util from './utility';
+
 const app: express.Application = express();
+const port: number = config.port;
 
-// Take a port 3000 for running server.
-const port: number = 3000;
-
-// Handling '/' Request
-app.get('/',
-        (_req: express.Request,
-         _res: express.Response) => { _res.send("TypeScript With Expresss"); });
+app.use(body.urlencoded({extended : true}));
+app.use(express.json());
+app.use((req, _, next) => util.logRequest(req, next));
+ep.attach(app);
+util.addInvalidVerbs(app, '/');
 
 // Server setup
 app.listen(port, () => {

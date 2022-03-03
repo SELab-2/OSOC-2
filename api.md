@@ -3,9 +3,9 @@
 *Note: this is still in-progress and will change over time.*
 
 ## Table of Contents
- - [Table of Contents](table-of-contents)
- - [Overview Table](overview-table)
- - [Endpoint-independent Responses](endpoint-independent-responses)
+ - [Table of Contents](#table-of-contents)
+ - [Overview Table](#overview-table)
+ - [Endpoint-independent Responses](#endpoint-independent-responses)
 
 ## Overview Table
 
@@ -72,7 +72,7 @@ The responses listed here are success responses; for error responses, see the [E
 **Response:** HTTP 303  
 ```http
 HTTP/2 303 See Other
-Location: <server-url>/student/all
+Location: /student/all
 ```
 
 ### POST /student
@@ -86,7 +86,8 @@ Location: <server-url>/student/all
 ```json
 {
     "success": true,
-    "newid": "new-student-id",
+    "id": "new-student-id",
+    "name": "new-student-name",
     "sessionkey": "updated-session-key"
 }
 ```
@@ -126,7 +127,7 @@ Location: <server-url>/student/all
         "name": "student-name",
         "email": "email-address",
         "labels": [ "label-1", "label-2", "..." ],
-        "sollicitations": [ "id-1", "id-2", "..." ],
+        "sollicitation": "sollicitation-id",
         "project": {
             "id": "project-id",
             "contract": {
@@ -139,7 +140,8 @@ Location: <server-url>/student/all
     "sessionkey": "updated-session-key"
 }
 ```
-The `student.sollicitations` can be an empty list.  
+The `student.labels` field can be an empty array.
+The `student.sollicitation` field can be an empty omitted (`undefined`) if the student has not yet submitted a sollicitation.  
 The `student.project` field can be omitted (`undefined`) if the student has not been assigned to a project yet.
 
 ### POST /student/\<student-id>
@@ -272,7 +274,7 @@ Here, the ` | ` in the `reply` field means `or`.
 **Response:**
 ```http
 HTTP/2 303 See Other
-Location: <server-url>/coach/all
+Location: /coach/all
 ```
 
 ### GET /coach/all
@@ -440,7 +442,7 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 **Response:**
 ```http
 HTTP/2 303 See Other
-Location: <server-url>/admin/all
+Location: /admin/all
 ```
 
 ### GET /admin/all
@@ -523,7 +525,7 @@ The `admin` field contains all updated fields. If no field is updated, an [Argum
 **Response:**
 ```http
 HTTP/2 303 See Other
-Location: <server-url>/project/all
+Location: /project/all
 ```
 
 ### POST /project
@@ -700,7 +702,7 @@ The `drafted` field will be `true` if the student is on the project, and `false`
 **Response:**
 ```http
 HTTP/2 303 See Other
-Location: <server-url>/followup/all
+Location: /followup/all
 ```
 
 ### GET /followup/all
@@ -878,7 +880,7 @@ The `template` field contains all modified fields in the template. If no field w
 ```json
 {
     "success": false,
-    "reason": "The endpoint request (<endpoint url>) does not exist."
+    "reason": "The endpoint requested (<endpoint url>) does not exist."
 }
 ```
 
