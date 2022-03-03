@@ -4,11 +4,11 @@ services:
   backend:
     build: ./backend
     ports:
-      - '8080:8080' # 8080 is the port used by express, we map this to 8080
+      - '4096:4096' # 4096 is the port used by express, we map this to 4096
       - '9229:9229' # debugging port
     depends_on:
       - db
-    command:  ["node", "--inspect=0.0.0.0:9229" ,"src/server.js" ]
+    command:  ["nodemon", "--legacy-watch", "--exec", "node --inspect=0.0.0.0:9229 --require ts-node/register index.ts"] # there is a bug in nodemon that using the --inspect flag directly is broken, use this manual command instead
   frontend:
     build: ./frontend
     ports:

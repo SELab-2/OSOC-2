@@ -4,7 +4,7 @@ services:
   backend:
     build: ./backend
     ports:
-      - '8080:8080' # 8080 is the port used by express, we map this to 8080
+      - '4096:4096' # 4096 is the port used by express, we map this to 4096
     depends_on:
       - db
     deploy: # TODO: maybe change the restart policy later?
