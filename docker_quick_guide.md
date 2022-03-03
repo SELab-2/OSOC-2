@@ -36,7 +36,7 @@ for linux, mac & windows
 
 #### Most important commands
 
-list all running containers
+list all running containers (shows their name, container ID,...)
 ```
 docker containers ls --all
 ```
@@ -87,13 +87,6 @@ docker-compuse --context remote-server down
 > :warning: this will probably throw errors that there was an error while removing, ignore this OR ssh to the server and remove the remaining images manually with `docker rmi "image-name"`
 
 
-### Postgres startup scripts
-The startup scripts **ONLY** get executed if the volume that is used by the database is completely empty.
-This means that if you change something in the startup scripts and want to test it. You need to remove the volume manually (in CLI of docker desktop GUI),
-then you can start te container and the scripts will execute
-
-:warning: the scripts get executed in alphabetical order, more info [here](https://hub.docker.com/_/postgres) under "initialization scripts"
-
 
 ## IDE-related
 
@@ -135,3 +128,28 @@ In our case these host names are:
 - `backend` (for backend)
 
 A short tutorial with extra information can be found [here](https://www.youtube.com/watch?v=A9bA5HpOk30)
+
+
+## Database
+
+### Postgres startup scripts
+The startup scripts **ONLY** get executed if the volume that is used by the database is completely empty.
+This means that if you change something in the startup scripts and want to test it. You need to remove the volume manually (in CLI of docker desktop GUI),
+then you can start te container and the scripts will execute.
+
+:warning: the scripts get executed in alphabetical order, more info [here](https://hub.docker.com/_/postgres) under "initialization scripts"
+
+### connecting manually
+
+To check the database manually you need to connect a shell the the docker container.
+- GUI: go to containers/apps, select the right container and then press the button "CLI"
+- CLI: `docker exec -it "CONTAINER ID"` OR `docker exec -it "CONTAINER NAME"`
+
+Once your terminal is connected with the container you can start up psql with:
+```
+psql -U osoc2
+```
+This means that we login into psql with the usor "osoc2". This user is created by default when starting up the docker container.
+
+If you need the password of the osoc2 user in the database: the password is `password`.
+I haven't needed this password yet, but it's here just in case.
