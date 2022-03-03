@@ -3,11 +3,10 @@ import express from 'express';
 import * as types from '../types';
 import * as util from '../utility';
 
-async function login(_: express.Request):
-    Promise<types.orError<types.LoginResponse>> {
+async function login(_: express.Request): Promise<types.orError<types.Keyed>> {
   var sessionkey: string = "";
   // TODO: login logic
-  return Promise.resolve(sessionkey);
+  return Promise.resolve({sessionkey : sessionkey});
 }
 
 async function logout(req: express.Request):
