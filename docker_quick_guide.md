@@ -82,7 +82,7 @@ docker-compose --context remote-server up -d --build
 
 stop the **remote** application (do this in your local terminal, vpn needs to be active)
 ```
-docker-compuse --context remote-server down
+docker-compose --context remote-server down
 ```
 > :warning: this will probably throw errors that there was an error while removing, ignore this OR ssh to the server and remove the remaining images manually with `docker rmi "image-name"`
 
@@ -143,7 +143,7 @@ then you can start te container and the scripts will execute.
 
 To check the database manually you need to connect a shell the the docker container.
 - GUI: go to containers/apps, select the right container and then press the button "CLI"
-- CLI: `docker exec -it "CONTAINER ID"` OR `docker exec -it "CONTAINER NAME"`
+- CLI: `docker exec -it "CONTAINER ID" /bin/sh` OR `docker exec -it "CONTAINER NAME" /bin/sh`
 
 Once your terminal is connected with the container you can start up psql with:
 ```
