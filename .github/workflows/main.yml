@@ -5,11 +5,9 @@ on:
     types: [opened, edited, synchronize, reopened]
 
 jobs:
-  cc-check:
+  check-for-cc:
     name: Conventional Commits
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - uses: webiny/action-conventional-commits@v1.0.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: agenthunt/conventional-commit-checker-action@v1.0.0
