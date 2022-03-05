@@ -2,12 +2,14 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, edited, synchronize, reopened]
 
 jobs:
-  build:
+  cc-check:
     name: Conventional Commits
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - uses: webiny/action-conventional-commits@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
