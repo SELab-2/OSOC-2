@@ -105,57 +105,64 @@ export function logRequest(req: express.Request, next: express.NextFunction):
       next();
     }
 
-export async function respOrError(res: express.Response,
-                                  prom: Promise<Responses.ApiResponse>) {
-  const isError =
-      (err: any): boolean => { return 'http' in err && 'reason' in err };
+export async function respOrErrorNoReinject(
+    res: express.Response, prom: Promise<Responses.ApiResponse>):
+    Promise<void> {
+      const isError =
+          (err: any): boolean => { return 'http' in err && 'reason' in err };
 
-  return prom
-      .then((data: Responses.ApiResponse): Promise<void> =>
-                replySuccess(res, data as typeof data))
-      .catch((err: any): Promise<void> => {
-        if (isError(err))
-          return replyError(res, err);
-        console.log("UNCAUGHT ERROR " + JSON.stringify(err));
-        return replyError(res, errors.cookServerError());
-      });
+      return prom
+          .then((data: Responses.ApiResponse): Promise<void> =>
+                    replySuccess(res, data as typeof data))
+          .catch((err: any): Promise<void> => {
+            if (isError(err))
+              return replyError(res, err);
+            console.log("UNCAUGHT ERROR " + JSON.stringify(err));
+            return replyError(res, errors.cookServerError());
+          });
+    }
+
+export async function respOrError<T>(
+    res: express.Response,
+    prom: Promise<Responses.ApiResponse&Responses.Keyed<T>>): Promise<void> {
+  return respOrErrorNoReinject(
+      res, prom.then((res) => refreshAndInjectKey(res.sessionkey, res)));
 }
 
-export async function redirect(res: express.Response, url: string):
-    Promise<void> {
-      res.status(303);
-      res.header({'Location' : url});
-      res.send();
-      return Promise.resolve();
-    }
+export async function redirect(res: express.Response,
+                               url: string): Promise<void> {
+  res.status(303);
+  res.header({'Location' : url});
+  res.send();
+  return Promise.resolve();
+}
 
 export async function checkSessionKey(req: express.Request):
     Promise<express.Request> {
-      if ("sessionkey" in req.body) {
-        // TODO validate session key
-        // upon validation error:
-        // return Promise.reject(errors.cookUnauthenticated());
-        return Promise.resolve(req);
-      }
-      console.log("Session key requested - none given.");
-      return Promise.reject();
-    }
+  if ("sessionkey" in req.body) {
+    // TODO validate session key
+    // upon validation error:
+    // return Promise.reject(errors.cookUnauthenticated());
+    return Promise.resolve(req);
+  }
+  console.log("Session key requested - none given.");
+  return Promise.reject();
+}
 
-export async function isAdmin(req: express.Request):
-    Promise<express.Request> {
-      return checkSessionKey(req).then((rq) => {
-        // we know sessionkey is available and valid
-        // TODO do logic with sessionkey to check if the associated user is an
-        // admin if not: return Promise.reject(errors.cookInsufficientRights());
-        return Promise.resolve(rq);
-      })
-    }
+export async function isAdmin(req: express.Request): Promise<express.Request> {
+  return checkSessionKey(req).then((rq) => {
+    // we know sessionkey is available and valid
+    // TODO do logic with sessionkey to check if the associated user is an
+    // admin if not: return Promise.reject(errors.cookInsufficientRights());
+    return Promise.resolve(rq);
+  })
+}
 
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-      // TODO update key
-      return Promise.resolve(key);
-    }
+  // TODO update key
+  return Promise.resolve(key);
+}
 
 export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
                                              response: Responses.Keyed<T>):

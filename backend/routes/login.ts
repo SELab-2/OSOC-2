@@ -19,8 +19,9 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
 export function getRouter(): express.Router {
   var router: express.Router = express.Router();
 
-  router.post('/', (req, res) => util.respOrError(res, login(req)));
-  router.delete('/', (req, res) => util.respOrError(res, logout(req)));
+  router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
+  router.delete('/',
+                (req, res) => util.respOrErrorNoReinject(res, logout(req)));
   util.addInvalidVerbs(router, '/');
   return router;
 }
