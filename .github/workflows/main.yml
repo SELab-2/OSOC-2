@@ -7,12 +7,9 @@ on:
     types: [opened, edited, synchronize]
 
 jobs:
-  check-for-cc:
-    runs-on: ubuntu-latest
+  build:
+    name: Conventional Commits
+    runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: check-for-cc
-        id: check-for-cc
-        uses: agenthunt/conventional-commit-checker-action@v1.0.0
+      - uses: actions/checkout@v2
+      - uses: webiny/action-contventional-commits@v1.0.3
