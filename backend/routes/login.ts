@@ -1,22 +1,19 @@
 import express from 'express';
 
-import * as types from '../types';
+import {Responses} from '../types';
 import * as util from '../utility';
 
-async function login(_: express.Request): Promise<types.orError<types.Keyed>> {
+async function login(_: express.Request): Promise<Responses.Key> {
   var sessionkey: string = "";
   // TODO: login logic
   return Promise.resolve({sessionkey : sessionkey});
 }
 
-async function logout(req: express.Request):
-    Promise<types.orError<types.EmptyResponse>> {
-  return util.checkSessionKey(req)
-      .then((_: express.Request) => {
-        // TODO logout logic
-        return Promise.resolve({});
-      })
-      .catch(() => Promise.resolve(util.errors.cookUnauthenticated()));
+async function logout(req: express.Request): Promise<Responses.Empty> {
+  return util.checkSessionKey(req).then((_: express.Request) => {
+    // TODO logout logic
+    return Promise.resolve({});
+  });
 }
 
 export function getRouter(): express.Router {

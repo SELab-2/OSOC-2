@@ -1,13 +1,8 @@
 import express from 'express';
 
-export class ApiError {
+export interface ApiError {
   http: number;
   reason: string;
-
-  constructor(http: number, reason: string) {
-    this.http = http;
-    this.reason = reason;
-  }
 }
 
 export interface Errors {
@@ -21,35 +16,37 @@ export interface Errors {
   cookServerError: () => ApiError;
 }
 
+export namespace InternalTypes {
 export type SessionKey = string;
-export interface Keyed {
-  sessionkey: SessionKey;
-}
 
-export interface UnkeyedStudentResponse {
+export interface IdName {
   id: string;
   name: string;
 }
 
-export interface PartialStudentResponse extends Keyed, UnkeyedStudentResponse {}
-
-export interface StudentResponse extends Keyed {
-  student: {
-    id: string; name : string; email : string; labels : string[];
-    sollicitation?: string;
-    project?: {
-      id : string; contract : {id : string; info : string;}; roles : string[];
-    }
-  }
+export interface Student {}
 }
 
-export interface StudentList extends Keyed {
-  students: UnkeyedStudentResponse[];
+export namespace Responses {
+export interface Keyed<T> {
+  sessionkey: InternalTypes.SessionKey;
+  data: T;
 }
 
-export interface EmptyResponse {}
+export interface Key {
+  sessionkey: InternalTypes.SessionKey;
+}
 
-export type orError<T> = ApiError|T;
-export type BaseApiResponse = EmptyResponse|PartialStudentResponse|StudentList;
+export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
+
+export interface Student extends Keyed<InternalTypes.Student> {}
+
+export interface StudentList extends Keyed<InternalTypes.IdName[]> {}
+
+export interface Empty {}
+
+export type OrError<T> = ApiError|T;
+export type BaseApiResponse = Empty|Key|PartialStudent|StudentList;
 
 export type ApiResponse = ApiError|BaseApiResponse;
+}

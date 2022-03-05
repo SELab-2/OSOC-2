@@ -1,41 +1,44 @@
 import express from 'express';
 
-import * as types from '../types';
+import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 
 async function createStudent(req: express.Request):
-    Promise<types.orError<types.PartialStudentResponse>> {
+    Promise<Responses.PartialStudent> {
   return util.checkSessionKey(req)
       .then((_: express.Request) => {
         var name: string = '';
         var id: string = '';
         // TODO do insertion logic
 
-        return Promise.resolve({name : name, id : id, sessionkey : ''});
+        return Promise.resolve(
+            {data : {name : name, id : id}, sessionkey : ''});
       })
       .then(res => util.refreshAndInjectKey(req.body.sessionkey, res));
 }
 
 async function listStudents(req: express.Request):
-    Promise<types.orError<types.StudentList>> {
+    Promise<Responses.StudentList> {
   return util.checkSessionKey(req)
       .then((_: express.Request) => {
-        var students: types.UnkeyedStudentResponse[] = [];
+        var students: InternalTypes.IdName[] = [];
         // TODO list all students
 
-        return Promise.resolve({students : students, sessionkey : ''});
+        return Promise.resolve({data : students, sessionkey : ''});
       })
       .then(res => util.refreshAndInjectKey(req.body.sessionkey, res));
 }
 
-async function getStudent(req: express.Request):
-    Promise<types.orError<types.StudentResponse>> {
+async function getStudent(req: express.Request): Promise<Responses.Student> {
   return util.checkSessionKey(req).then(async (req) => {
     // check valid id
     // if invalid: return Promise.resolve(util.cookInvalidID())
     // if valid: get student data etc etc
     return Promise
-        .resolve({id : '', name : '', email : '', labels : [], sessionkey : ''})
+        .resolve({
+          data : {id : '', name : '', email : '', labels : []},
+          sessionkey : ''
+        })
         .then((data) => util.refreshAndInjectKey(req.body.sessionkey, data));
   })
 }

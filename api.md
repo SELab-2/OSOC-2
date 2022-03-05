@@ -86,9 +86,11 @@ Location: /student/all
 ```json
 {
     "success": true,
-    "id": "new-student-id",
-    "name": "new-student-name",
-    "sessionkey": "updated-session-key"
+    "data": {
+        "id": "new-student-id",
+        "name": "new-student-name",
+        "sessionkey": "updated-session-key"
+    }
 }
 ```
 
@@ -101,7 +103,7 @@ Location: /student/all
 ```json
 {
     "success": true,
-    "students": [
+    "data": [
         {
             "id": "student-id",
             "name": "student-name"
@@ -122,7 +124,7 @@ Location: /student/all
 ```json
 {
     "success": true,
-    "student": {
+    "data": {
         "id": "student-id",
         "name": "student-name",
         "email": "email-address",
@@ -156,7 +158,7 @@ The `student` field contains all updated fields. If no field is updated, an [Arg
 ```json
 {
     "success": true,
-    "student": {
+    "data": {
       "id": "student-id"
     },
     "sessionkey": "updated-session-key"
@@ -187,7 +189,7 @@ The `student` field contains all updated fields. If no field is updated, an [Arg
 ```json
 {
     "success": true,
-    "suggestions": {
+    "data": {
         "yes": [],
         "maybe": [],
         "no": []
@@ -195,7 +197,7 @@ The `student` field contains all updated fields. If no field is updated, an [Arg
     "sessionkey": "updated-session-key"
 }
 ```
-Where each suggestion array (`suggestions.yes`, `suggestions.maybe` and `suggestions.no`) contains 0 or more objects of the form (` | ` stands for `or`)
+Where each suggestion array (`data.yes`, `suggesdatations.maybe` and `data.no`) contains 0 or more objects of the form (` | ` stands for `or`)
 ```json
 {
     "type": "yes | maybe | no",
@@ -220,7 +222,7 @@ Where each suggestion array (`suggestions.yes`, `suggestions.maybe` and `suggest
 ```json
 {
     "success": true,
-    "tally": {
+    "data": {
       "yes": 0,
       "maybe": 0,
       "no": 0
@@ -228,7 +230,7 @@ Where each suggestion array (`suggestions.yes`, `suggestions.maybe` and `suggest
     "sessionkey": "updated-session-key"
 }
 ```
-Each of the `tally` fields (`tally.yes`, `tally.maybe`, `tally.no`) will contain the amount of votes of that kind.
+Each of the `data` fields (`data.yes`, `data.maybe`, `data.no`) will contain the amount of votes of that kind.
 
 ### POST /student/\<student-id>/confirm
 **Arguments:**  
@@ -241,7 +243,7 @@ Each of the `tally` fields (`tally.yes`, `tally.maybe`, `tally.no`) will contain
 ```json
 {
     "success": true,
-    "reply": "yes | maybe | no",
+    "data": "yes | maybe | no",
     "sessionkey": "updated-session-key"
 }
 ```
@@ -257,7 +259,7 @@ Here, the ` | ` in the `reply` field means `or`.
 ```json
 {
     "success": true,
-    "students": [
+    "data": [
         {
             "id": "student-id",
             "name": "student-name"
@@ -286,7 +288,7 @@ Location: /coach/all
 ```json
 {
     "success": true,
-    "coaches": [
+    "data": [
         {
             "id": "coach-id",
             "name": "coach-name"
@@ -307,7 +309,7 @@ Location: /coach/all
 ```json
 {
     "success": true,
-    "coach": {
+    "data": {
         "id": "coach-id",
         "name": "coach-name",
         "email": "coach-email",
@@ -332,7 +334,7 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 ```json
 {
     "success": true,
-    "coach": {
+    "data": {
       "id": "coach-id"
     },
     "sessionkey": "updated-session-key"
@@ -362,7 +364,7 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 ```json
 {
     "success": true,
-    "requests": [
+    "data": [
         {
             "id": "request-id",
             "name": "coach-name",
@@ -399,9 +401,11 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 ```json
 {
     "success": true,
-    "id": "request-id",
-    "name": "requester-name",
-    "email": "requester-email",
+    "data": {
+        "id": "request-id",
+        "name": "requester-name",
+        "email": "requester-email",
+    },
     "sessionkey": "updated-session-key"
 }
 ```
@@ -416,8 +420,10 @@ The `coach` field contains all updated fields. If no field is updated, an [Argum
 ```json
 {
     "success": true,
-    "id": "request-id",
-    "name": "new-coach-name",
+    "data": {
+        "id": "request-id",
+        "name": "new-coach-name",
+    },
     "sessionkey": "updated-session-key"
 }
 ```
@@ -454,7 +460,7 @@ Location: /admin/all
 ```json
 {
     "success": true,
-    "admins": [
+    "data": [
         {
             "id": "admin-id",
             "name": "admin-name"
@@ -475,7 +481,7 @@ Location: /admin/all
 ```json
 {
     "success": true,
-    "admin": {
+    "data": {
         "id": "admin-id",
         "name": "admin-name",
         "email": "admin-email-address"
@@ -494,11 +500,11 @@ Location: /admin/all
 
 **Description:** Modify a single admin.  
 **Response:**  
-The `admin` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
+The `data` field contains all updated fields. If no field is updated, an [Argument error](#argument-error) is thrown.
 ```json
 {
     "success": true,
-    "admin": {
+    "data": {
         "id": "admin-id"
     },
     "sessionkey": "updated-session-key"
@@ -542,7 +548,9 @@ Location: /project/all
 ```json
 {
     "success": true,
-    "id": "new-project-id",
+    "data": {
+        "id": "new-project-id"
+    },
     "sessionkey": "updated-session-key"
 }
 ```
@@ -556,7 +564,7 @@ Location: /project/all
 ```json
 {
     "success": true,
-    "projects": [
+    "data": [
         {
             "id": "project-id",
             "name": "project-name"
@@ -577,7 +585,7 @@ Location: /project/all
 ```json
 {
     "success": true,
-    "project": {
+    "data": {
         "id": "project-id",
         "name": "project-name",
         "partner": "project-partner-name",
@@ -616,7 +624,7 @@ The `project` field contains all updated fields. If no field is updated, an [Arg
 ```json
 {
     "success": true,
-    "project": {
+    "data": {
       "id": "project-id"
     },
     "sessionkey": "updated-session-key"
@@ -647,7 +655,7 @@ The `project` field contains all updated fields. If no field is updated, an [Arg
 ```json
 {
     "success": true,
-    "project": {
+    "data": {
         "id": "project-id",
         "name": "project-name"
     },
@@ -680,8 +688,10 @@ If the `roles` field is not set (`undefined`), the request causes the following 
 ```json
 {
     "success": true,
-    "drafted": true,
-    "roles": [ "role-1", "role-2", "..." ],
+    "data": {
+        "drafted": true,
+        "roles": [ "role-1", "role-2", "..." ]
+    },
     "sessionkey": "updated-session-key"
 }
 ```
@@ -714,7 +724,7 @@ Location: /followup/all
 ```json
 {
     "success": true,
-    "students": [
+    "data": [
         {
             "id": "student-id",
             "name": "student-name",
@@ -741,7 +751,7 @@ The values in the `students[i].sent` array can be the following:
 ```json
 {
     "success": true,
-    "mails": [
+    "data": [
         {
             "type": "email-type",
             "sent": "2012-04-23T18:25:43.511Z"
@@ -779,7 +789,7 @@ The `mails[i].sent` field is the JavaScript serialized date and time of the mome
 ```json
 {
     "success": true,
-    "templates": [
+    "data": [
         {
             "name": "template-name",
             "desc": "description"
@@ -804,7 +814,7 @@ The `templates[i].desc` field can be omitted and/or empty.
 ```json
 {
     "success": true,
-    "template": {
+    "data": {
         "name": "template-name",
         "desc": "template-description"
     },
@@ -823,7 +833,7 @@ The `template.desc` field is omitted if the `desc` field of the request was not 
 ```json
 {
     "success": true,
-    "template": {
+    "data": {
         "name": "template-name",
         "desc": "template-description",
         "subject": "email-subject",
@@ -851,7 +861,7 @@ The `template` field contains all modified fields in the template. If no field w
 ```json
 {
     "success": true,
-    "template": {
+    "data": {
         "name": "template-name"
     },
     "sessionkey": "updated-session-key"
