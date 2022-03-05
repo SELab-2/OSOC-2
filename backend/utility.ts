@@ -1,9 +1,12 @@
 import express from 'express';
 
 import * as config from './config.json';
-// import * as types from './types';
 import {ApiError, Errors, InternalTypes, Responses} from './types';
 
+/**
+ *  The API error cooking functions. HTTP error codes are loaded from
+ * config.json.
+ */
 export const errors: Errors = {
   cookInvalidID() {
     return {
@@ -65,23 +68,49 @@ export const errors: Errors = {
   }
 }
 
+/**
+ *  Promise-based debugging function. Logs the data, then passes it through
+ * (using `Promise.resolve`).
+ *
+ *  @param data The data to log and pass through.
+ *  @returns A `Promise<typeof data>` resolving with the given data.
+ */
 export function debug(data: any):
     Promise<typeof data> {
       console.log(data);
       return Promise.resolve(data);
     }
 
+/**
+ *  Finishes a promise chain by sending a response.
+ *  @param resp The Express.js response.
+ *  @param status The HTTP status.
+ *  @param data The data object to send.
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export function reply(resp: express.Response, status: number, data: any):
     Promise<void> {
       resp.status(status).send(data);
       return Promise.resolve();
     }
 
+/**
+ *  Replies to a request with an error. Wrapper for {@link reply}.
+ *  @param resp The Express.js response.
+ *  @param error The API error to send.
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export function replyError(resp: express.Response, error: ApiError):
     Promise<void> {
       return reply(resp, error.http, {success : false, reason : error.reason});
     }
 
+/**
+ *  Replies to a request with a success response. Wrapper for {@link reply}.
+ *  @param resp The Express.js response.
+ *  @param data The data to send.
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export function replySuccess(resp: express.Response, data: any):
     // yes, `data` should  should be a nicely typed value but
     // how in the hell are we otherwise supposed to add a single field
@@ -91,6 +120,13 @@ export function replySuccess(resp: express.Response, data: any):
       return reply(resp, 200, data);
     }
 
+/**
+ *  Adds an Invalid HTTP Verb response to this endpoint. Each HTTP verb that
+ * hasn't come before will receive this error.
+ *
+ *  @param router The Express.js router to install the route on.
+ *  @param ep The endpoint (partial) URL to add the verbs to.
+ */
 export function addInvalidVerbs(router: express.Router, ep: string):
     void {
       router.all(
@@ -99,12 +135,30 @@ export function addInvalidVerbs(router: express.Router, ep: string):
           });
     }
 
+/**
+ *  Logs the given request, then passes priority to the next Express.js
+ * callback.
+ *
+ *  @param req The request to log.
+ *  @param next The next callback.
+ */
 export function logRequest(req: express.Request, next: express.NextFunction):
     void {
       console.log(req.method + " " + req.url);
       next();
     }
 
+/**
+ *  Finalizes the promise chain by sending a success response (using
+ * `Promise.then`) or an  API error (using `Promise.catch`). No data fields are
+ * updated. Wrapper around both {@link replySuccess} and {@link replyError}.
+ * Use {@link respOrError} to modify the session key and then finalize the
+ * promise chain.
+ *
+ *  @param res The Express.js response to send.
+ *  @param prom The promise with the data or error.
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export async function respOrErrorNoReinject(
     res: express.Response, prom: Promise<Responses.ApiResponse>):
     Promise<void> {
@@ -122,13 +176,32 @@ export async function respOrErrorNoReinject(
           });
     }
 
+/**
+ *  Finalizes the promise chain by attempting to refresh the session key in the
+ * data, then  calling {@link respOrErrorNoReinject} to send the data.
+ *
+ *  @template T The data type of the response. Only the {@link Responses.Keyed}
+ * version will be used.
+ *  @param req The Express.js request holding the old session key.
+ *  @param res The Express.js response to send.
+ *  @param prom The promise with the data or error (should be an API response
+ * that's Keyed).
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export async function respOrError<T>(
-    res: express.Response,
+    req: express.Request, res: express.Response,
     prom: Promise<Responses.ApiResponse&Responses.Keyed<T>>): Promise<void> {
   return respOrErrorNoReinject(
-      res, prom.then((res) => refreshAndInjectKey(res.sessionkey, res)));
+      res, prom.then((res) => refreshAndInjectKey(req.body.sessionkey, res)));
 }
 
+/**
+ *  Responds with an HTTP 300 redirect.
+ *  @param res The Express.js response to send.
+ *  @param url The URL to redirect to. Can be either relative (to the server) or
+ * absolute.
+ *  @returns An empty promise (`Promise<void>`).
+ */
 export async function redirect(res: express.Response,
                                url: string): Promise<void> {
   res.status(303);
@@ -137,6 +210,13 @@ export async function redirect(res: express.Response,
   return Promise.resolve();
 }
 
+/**
+ *  Checks the existence and correctness of the session key.
+ *  @param req The Express.js request to extract and check the session key for.
+ *  @returns A promise which will resolve with the request upon success, or to
+ * an Unauthenticated Request API error upon failure (either the session key is
+ * not present, or it's not correct).
+ */
 export async function checkSessionKey(req: express.Request):
     Promise<express.Request> {
   if ("sessionkey" in req.body) {
@@ -146,9 +226,19 @@ export async function checkSessionKey(req: express.Request):
     return Promise.resolve(req);
   }
   console.log("Session key requested - none given.");
-  return Promise.reject();
+  return Promise.reject(errors.cookUnauthenticated());
 }
 
+/**
+ *  Checks the session key (see {@link checkSessionKey}), then checks whether or
+ * not it corresponds to an admin user.
+ *
+ *  @param req The Express.js request to extract and check the session key for.
+ *  @returns A promise which will resolve with the request upon success. If the
+ * session key is not present or invalid, returns a promise which rejects with
+ * an Unauthenticated API error. If the session key corresponds to a non-admin
+ * user, returns a promise rejecting with an Unauthorized API error.
+ */
 export async function isAdmin(req: express.Request): Promise<express.Request> {
   return checkSessionKey(req).then((rq) => {
     // we know sessionkey is available and valid
@@ -158,12 +248,27 @@ export async function isAdmin(req: express.Request): Promise<express.Request> {
   })
 }
 
+/**
+ *  Generates a new session key for the user associated with the given key.
+ *  @param key The old key.
+ *  @returns A promise resolving to the new key.
+ */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
   // TODO update key
   return Promise.resolve(key);
 }
 
+/**
+ *  Generates a new key and injects it in the response data; used by
+ * {@link respOrError} (which is the preferred way to use this function).
+ *
+ *  @template T The data type for the response data (the response itself is the
+ * Keyed version of this type).
+ *  @param key The old key.
+ *  @param response The response to inject the new key into.
+ *  @returns A promise resolving to the updated response.
+ */
 export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
                                              response: Responses.Keyed<T>):
     Promise<Responses.Keyed<T>> {

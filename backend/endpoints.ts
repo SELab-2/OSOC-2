@@ -3,7 +3,10 @@ import express from 'express';
 import * as login from './routes/login';
 import * as util from './utility'
 
-// attach endpoints
+/**
+ *  Attaches all endpoints to the application.
+ *  @param app The Express.js application to attach to.
+ */
 export function attach(app: express.Application): void {
   app.use('/login', login.getRouter());
 
