@@ -8,64 +8,34 @@ import {ApiError, Errors, InternalTypes, Responses} from './types';
  * config.json.
  */
 export const errors: Errors = {
-  cookInvalidID() {
-    return {
-      http : config.httpErrors.invalidID,
-      reason : "This endpoint requires an ID. The ID you provided was invalid."
-    };
-  },
+  cookInvalidID() { return config.apiErrors.invalidID;},
+  cookArgumentError() { return config.apiErrors.argumentError;},
+  cookUnauthenticated() { return config.apiErrors.unauthenticated;},
+  cookInsufficientRights() { return config.apiErrors.insufficientRights;},
 
-  cookArgumentError() {
+  cookNonExistent(url: string) {
     return {
-      http : config.httpErrors.argumentError,
-      reason :
-          "One of the arguments is incorrect or not present. Please check your request."
-    };
-  },
-
-  cookUnauthenticated() {
-    return {
-      http : config.httpErrors.unauthenticated,
-      reason : "Unauthenticated request. Please log in first."
-    };
-  },
-
-  cookInsufficientRights() {
-    return {
-      http : config.httpErrors.insufficientRights,
-      reason :
-          "Unauthorized request. You do not have sufficient rights to access this endpoint."
-    };
-  },
-
-  cookNonExistent(url: String) {
-    return {
-      http : config.httpErrors.nonExistent,
-      reason : "The endpoint requested (" + url + ") does not exist."
+      http : config.apiErrors.nonExistent.http,
+      reason : config.apiErrors.nonExistent.reason.replace(/$url/, url)
     };
   },
 
   cookInvalidVerb(req: express.Request) {
     return {
-      http : config.httpErrors.invalidVerb,
-      reason : "This HTTP verb (" + req.method +
-                   ") is not supported for this endpoint (" + req.url + ")."
+      http : config.apiErrors.invalidVerb.http,
+      reason : config.apiErrors.invalidVerb.reason.replace(/$verb/, req.method)
+                   .replace(/$url/, req.url)
     };
   },
 
-  cookNonJSON(mime: String) {
+  cookNonJSON(mime: string) {
     return {
-      http : config.httpErrors.nonJSONRequest,
-      reason : "All endpoints only support JSON (" + mime + " requested)."
+      http : config.apiErrors.nonJSONRequest.http,
+      reason : config.apiErrors.nonJSONRequest.reason.replace(/$mime/, mime)
     };
   },
 
-  cookServerError() {
-    return {
-      http : config.httpErrors.serverError,
-      reason : "Something went wrong while trying to execute your request."
-    };
-  }
+  cookServerError() { return config.apiErrors.serverError;}
 }
 
 /**
