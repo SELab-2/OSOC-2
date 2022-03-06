@@ -1,3 +1,6 @@
+# ignore handwritten notes
+*.xopp
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -40,3 +43,13 @@ yarn-error.log*
 package-lock.json
 
 .eslintcache
+
+# node modules of the backend and frontend
+# (add this just to be sure that this does not get added when someone runs npm install in these sub-folders)
+backend/node_modules
+frontend/node_modules
+
+# keep all docs folders, in empty form (at least)
+# prevent breaking of typedoc (possibly)
+# keep some (empty) directories
+!**/.gitkeep
