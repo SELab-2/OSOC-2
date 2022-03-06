@@ -38,7 +38,7 @@ for linux, mac & windows
 
 list all running containers (shows their name, container ID,...)
 ```
-docker containers ls --all
+docker container ls --all
 ```
 
 list all images
