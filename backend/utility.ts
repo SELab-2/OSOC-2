@@ -1,7 +1,14 @@
 import express from 'express';
 
 import * as config from './config.json';
-import {ApiError, Errors, InternalTypes, Responses} from './types';
+import {
+  ApiError,
+  Errors,
+  InternalTypes,
+  Responses,
+  RouteCallback,
+  Verb
+} from './types';
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -104,6 +111,12 @@ export function addInvalidVerbs(router: express.Router, ep: string):
             return replyError(res, errors.cookInvalidVerb(req));
           });
     }
+
+/**
+ *  Adds Invalid HTTP Verb responses to each endpoint in the list.
+ */
+export function addAllInvalidVerbs(router: express.Router, eps: string[]):
+    void { eps.forEach(ep => addInvalidVerbs(router, ep));}
 
 /**
  *  Logs the given request, then passes priority to the next Express.js
@@ -247,4 +260,23 @@ export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
         response.sessionkey = newkey;
         return Promise.resolve(response);
       });
+}
+
+/**
+ *  Contains all boilerplate for installing a route with a path and HTTP verb on
+ * a router. Requests that match the route will be responded to by the provided
+ * callback function, then their api session key will be refreshed an
+ * reinjected. Not viable for some endpoints (logout, login, ...).
+ *
+ *  @template T The type of data to be send back. This type will be Keyed.
+ *  @param router The router to install to.
+ *  @param verb The HTTP verb.
+ *  @param path The (relative) route path.
+ *  @param callback The function which will respond.
+ */
+export function route<T extends Responses.ApiResponse>(
+    router: express.Router, verb: Verb, path: string,
+    callback: RouteCallback<Responses.Keyed<T>>): void {
+  router[verb](path, (req: express.Request, res: express.Response) =>
+                         respOrError(req, res, callback(req)));
 }

@@ -42,16 +42,28 @@ async function listStudents(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudent(req: express.Request): Promise<Responses.Student> {
-  return util.checkSessionKey(req).then(
-      async (_) => {// check valid id
-                    // if invalid: return Promise.resolve(util.cookInvalidID())
-                    // if valid: get student data etc etc
-                    return Promise.resolve({
-                      data : {id : '', name : '', email : '', labels : []},
-                      sessionkey : ''
-                    })})
-}
+async function getStudent(req: express.Request):
+    Promise<Responses.Student>{return util.checkSessionKey(req).then(
+        async (_) => {// check valid id
+                      // if invalid: return Promise.reject(util.cookInvalidID())
+                      // if valid: get student data etc etc
+                      return Promise.resolve({
+                        data : {id : '', name : '', email : '', labels : []},
+                        sessionkey : ''
+                      })})}
+
+async function modStudent(req: express.Request):
+    Promise<Responses.Student> {
+      return util.checkSessionKey(req).then(async (_) => {
+        // check valid id
+        // if invalid: return Promise.reject(util.cookInvalidID());
+        // if valid: modify student data
+        return Promise.resolve({
+          data : {id : '', name : '', email : '', labels : []},
+          sessionkey : ''
+        });
+      });
+    }
 
 /**
  *  Gets the router for all `/student/` related endpoints.
@@ -61,11 +73,13 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 export function getRouter(): express.Router {
   var router: express.Router = express.Router();
 
-  router.get('/', (_, res) => util.redirect(res, '/all'));
-  router.post('/',
-              (req, res) => util.respOrError(req, res, createStudent(req)));
-  router.get('/all',
-             (req, res) => util.respOrError(req, res, listStudents(req)));
-  router.get('/:id', (req, res) => util.respOrError(req, res, getStudent(req)));
+  router.get("/", (_, res) => util.redirect(res, "/student/all"));
+  util.route(router, "post", "/", createStudent);
+  util.route(router, "get", "/all", listStudents);
+  util.route(router, "get", "/:id", getStudent);
+  util.route(router, "post", "/:id", modStudent);
+
+  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
+
   return router;
 }

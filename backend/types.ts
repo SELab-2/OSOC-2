@@ -151,3 +151,12 @@ export type OrError<T> = ApiError|T;
  */
 export type ApiResponse = Empty|Key|PartialStudent|StudentList;
 }
+
+export type Verb = "get"|"post"|"delete";
+
+/**
+ *  A route callback is a function taking an Express js request and returning a
+ * promise (resolving to an API response).
+ */
+export type RouteCallback<T extends Responses.ApiResponse> =
+    (req: express.Request) => Promise<T>;
