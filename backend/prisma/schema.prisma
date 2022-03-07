@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model applied_role {
+  applied_role_id    Int             @id @default(autoincrement())
+  job_application_id Int
+  role_id            Int
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  role               role            @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model attachment {
+  attachment_id      Int             @id @default(autoincrement())
+  job_application_id Int             @default(autoincrement())
+  url                String          @db.VarChar
+  type               String          @db.VarChar
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model contract {
+  contract_id              Int          @id @default(autoincrement())
+  student_id               Int          @default(autoincrement())
+  project_role_id          Int          @default(autoincrement())
+  information              String?      @db.VarChar
+  created_by_login_user_id Int          @default(autoincrement())
+  login_user               login_user   @relation(fields: [created_by_login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  project_role             project_role @relation(fields: [project_role_id], references: [project_role_id], onDelete: NoAction, onUpdate: NoAction)
+  student                  student      @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model evaluation {
+  evaluation_id      Int             @id @default(autoincrement())
+  login_user_id      Int
+  job_application_id Int
+  decision           decision_enum
+  motivation         String?         @db.VarChar
+  is_final           Boolean
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  login_user         login_user      @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model job_application {
+  job_application_id    Int                     @id @default(autoincrement())
+  student_id            Int
+  responsibilities      String?                 @db.VarChar
+  motivation            String?                 @db.VarChar
+  fun_fact              String?                 @db.VarChar
+  is_volunteer          Boolean
+  student_coach         Boolean
+  osoc_id               Int
+  edus                  String?                 @db.VarChar
+  edu_level             String?                 @db.VarChar(250)
+  edu_duration          Int?
+  edu_year              Int?
+  edu_institute         String?                 @db.VarChar(250)
+  osoc                  osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+  student               student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  applied_role          applied_role[]
+  attachment            attachment[]
+  evaluation            evaluation[]
+  job_application_skill job_application_skill[]
+}
+
+model job_application_skill {
+  job_application_skill_id Int             @id @default(autoincrement())
+  job_application_id       Int
+  skill                    String          @db.VarChar(50)
+  language_id              Int
+  level                    Int             @db.SmallInt
+  is_preferred             Boolean?
+  is_best                  Boolean?
+  job_application          job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  language                 language        @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model language {
+  language_id           Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(50)
+  job_application_skill job_application_skill[]
+  student_skill         student_skill[]
+}
+
+model login_user {
+  login_user_id Int            @id @default(autoincrement())
+  person_id     Int
+  password      String         @db.VarChar
+  is_admin      Boolean?
+  is_coach      Boolean?
+  person        person         @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract      contract[]
+  evaluation    evaluation[]
+  project_user  project_user[]
+}
+
+model osoc {
+  osoc_id         Int               @id @default(autoincrement())
+  year            Int               @db.SmallInt
+  job_application job_application[]
+  project         project[]
+}
+
+model person {
+  person_id  Int          @id @default(autoincrement())
+  email      String?      @db.VarChar(255)
+  github     String?      @db.VarChar(255)
+  firstname  String       @db.VarChar(50)
+  lastname   String       @db.VarChar(50)
+  gender     String       @db.VarChar(20)
+  login_user login_user[]
+  student    student[]
+}
+
+model project {
+  project_id   Int            @id @default(autoincrement())
+  name         String         @db.VarChar(255)
+  osoc_id      Int            @default(autoincrement())
+  partner      String         @db.VarChar(255)
+  start_date   DateTime       @db.Date
+  end_data     DateTime       @db.Date
+  positions    Int            @db.SmallInt
+  osoc         osoc           @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+  project_role project_role[]
+  project_user project_user[]
+}
+
+model project_role {
+  project_role_id Int        @id @default(autoincrement())
+  project_id      Int
+  role_id         Int
+  positions       Int        @db.SmallInt
+  project         project    @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+  role            role       @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  contract        contract[]
+}
+
+model project_user {
+  project_user_id Int        @id @default(autoincrement())
+  login_user_id   Int        @default(autoincrement())
+  project_id      Int        @default(autoincrement())
+  login_user      login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  project         project    @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model role {
+  role_id      Int            @id @default(autoincrement())
+  name         String?        @db.VarChar
+  applied_role applied_role[]
+  project_role project_role[]
+}
+
+model student {
+  student_id         Int               @id @default(autoincrement())
+  person_id          Int               @default(autoincrement())
+  pronouns           String[]
+  phone_number       String            @db.VarChar(13)
+  curr_edu_level     String            @db.VarChar(250)
+  curr_edu_duration  Int
+  curr_edu_year      Int
+  curr_edu_institute String            @db.VarChar(250)
+  person             person            @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract           contract[]
+  job_application    job_application[]
+  student_skill      student_skill[]
+}
+
+model student_skill {
+  student_skill_id Int      @id @default(autoincrement())
+  student_id       Int
+  skill            String   @db.VarChar(50)
+  language_id      Int
+  level            Int      @db.SmallInt
+  is_preferred     Boolean?
+  is_best          Boolean?
+  language         language @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+  student          student  @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum decision_enum {
+  YES
+  NO
+  MAYBE
+}
