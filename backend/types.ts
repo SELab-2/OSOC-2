@@ -68,6 +68,11 @@ export namespace InternalTypes {
 export type SessionKey = string;
 
 /**
+ *  Either yes, maybe or no. This is the enumeration type for student suggests.
+ */
+export type Suggestion = "YES"|"MAYBE"|"NO";
+
+/**
  *  Represents a partial type response. Usually these will only contain a name
  * and an ID.
  */
@@ -152,6 +157,77 @@ export type OrError<T> = ApiError|T;
 export type ApiResponse = Empty|Key|PartialStudent|StudentList;
 }
 
+export namespace Requests {
+export interface Login {
+  name: string;
+  pass: string;
+}
+
+export interface KeyRequest {
+  sessionkey: InternalTypes.SessionKey;
+}
+
+export interface IdRequest extends KeyRequest {
+  id: string;
+}
+
+export interface NewStudent extends KeyRequest {
+  emailOrGithub: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  pronouns: string[];
+  phone: string;
+  education:
+      {level: string; duration : number; year : number; institute : string;};
+}
+
+export interface UpdateStudent extends IdRequest {
+  emailOrGithub?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  pronouns?: string[];
+  phone?: string;
+  education?:
+      {level?: string; duration?: number; year?: number; institute?: string;};
+}
+
+export interface Suggest extends IdRequest {
+  suggestion: InternalTypes.Suggestion;
+  reason?: string;
+}
+
+export interface Confirm extends IdRequest {
+  reply?: InternalTypes.Suggestion;
+}
+
+export interface UpdateLoginUser extends IdRequest {
+  emailOrGithub?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  pass?: string;
+}
+
+export interface CoachRequest {
+  name: string;
+  email: string;
+  pass: string;
+}
+
+export interface Project extends KeyRequest {
+  project: {
+    name: string; partner : string; start : Date; end : Date;
+    positions : number;
+  }
+}
+}
+
+/**
+ *  The only verbs used are `GET` (`"get"`), `POST` (`"post"`) and `DELETE`
+ * (`"delete"`).
+ */
 export type Verb = "get"|"post"|"delete";
 
 /**
