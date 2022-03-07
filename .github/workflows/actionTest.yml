@@ -6,6 +6,9 @@ name: Node.js CI
 on:
   pull_request:
     branches: [ main, development]
+    paths:
+      - "backend/**"
+      - "frontend/**"
 
 jobs:
   build:
@@ -23,10 +26,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: cd backend
-    - run: npm install
-    - run: npm run build --if-present
-    - run: npm test
-    - run: cd ../frontend
     - run: npm install
     - run: npm run build --if-present
     - run: npm test --if-present
