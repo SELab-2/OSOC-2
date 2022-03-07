@@ -22,6 +22,7 @@ Key Sections:
 * [File Names](#filename)
 * [`type` vs `interface`](#type-vs-interface)
 * [`==` or `===`](#-or-)
+* [Github draft pullrequests](#github-draft-pull-requests)
 
 ## Variable and Function
 * Use `camelCase` for variable and function names
@@ -281,3 +282,12 @@ class X implements FooBar {
 
 ## `==` or `===`
 Both are [mostly safe for TypeScript users](https://www.youtube.com/watch?v=vBhRXMDlA18). I use `===` as that is what is used in the TypeScript codebase. 
+
+## Github draft pull requests
+* When working on a new branch, create a [draft pull request](https://github.blog/2019-02-14-introducing-draft-pull-requests/) as soon as possible.
+
+>Reason: A good pull request is as much about collaboration as it is about code. So let your coworkers know what you are working on.
+
+* **Dont** add a header tag (WIP, DRAFT, DO NOT MERGE...) to your draft pull request .
+
+> Reason:  When draft pull requests were not yet a feature on github, people used these header tags to let their coworkers know that the pull request was not ready to merge yet. This has become obsolete now.
