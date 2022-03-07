@@ -225,3 +225,20 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
                                                JSON.stringify(error));
        });
      });
+
+// test respOrError<T> has to wait -> ORM connection has to be mocked
+
+test("utility.redirect sends an HTTP 303", () => {
+  const {res, statSpy, sendSpy} = obtainResponse();
+  const headerSpy = jest.spyOn(res, 'header');
+  util.redirect(res, '/some/other/url').then(() => {
+    expect(statSpy).toHaveBeenCalledWith(303);
+    expect(sendSpy).toHaveBeenCalledTimes(1); // no args
+    expect(headerSpy).toHaveBeenCalledWith({Location : '/some/other/url'});
+  });
+});
+
+// test checkSessionKey has to wait -> ORM connection has to be mocked
+// test isAdmin has to wait -> ORM connection has to be mocked
+// test refreshKey has to wait -> ORM connection has to be mocked
+// test refreshAndInjectKey has to wait -> ORM connection has to be mocked
