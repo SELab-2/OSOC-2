@@ -1,0 +1,4 @@
+{
+    "entryPoints": ["pages/index.ts"],
+    "out": "docs"
+}
