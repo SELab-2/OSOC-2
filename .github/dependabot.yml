@@ -76,7 +76,7 @@ updates:
     open-pull-request-limit: 3
 
   # Enable version updates for Github Actions
-  - package-ecosystem: "github-action"
+  - package-ecosystem: "github-actions"
     # Look for workflow files in the `.github/workflows` directory (happens automatically when using `root` directory as key)
     directory: "/"
     # Check the docker registry for updates every day at 05:00 CET
