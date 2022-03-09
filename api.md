@@ -807,8 +807,8 @@ The `templates[i].desc` field can be omitted and/or empty.
  - `name:string` The name for the new template.
  - `desc:string` The description for the new template (optional).
  - `subject:string` A template message for the email subject (optional).
- - `cc:string` A list of email addresses to be in the CC field of the email (optional).
- - `content:string` The content of the email template.
+ - `cc:[string]` A list of email addresses to be in the CC field of the email (optional).
+ - `content:string` The content of the email template.  
 **Description:** Add a follow-up e-mail template.  
 **Response:**  
 ```json

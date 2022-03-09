@@ -217,10 +217,44 @@ export interface CoachRequest {
 }
 
 export interface Project extends KeyRequest {
-  project: {
-    name: string; partner : string; start : Date; end : Date;
-    positions : number;
-  }
+  name: string;
+  partner: string;
+  start: Date;
+  end: Date;
+  positions: number;
+}
+
+export interface ModProject extends IdRequest {
+  name?: string;
+  partner?: string;
+  start?: Date;
+  end?: Date;
+  positions?: number;
+}
+
+export interface Draft extends IdRequest {
+  studentId: string;
+  roles: string[];
+}
+
+export interface Followup extends IdRequest {
+  type: FollowupType;
+}
+
+export interface Template extends IdRequest {
+  name: string;
+  desc?: string;
+  subect?: string;
+  cc: string[];
+  content: string;
+}
+
+export interface ModTemplate extends IdRequest {
+  // name = ID so part of IdRequest
+  desc?: string;
+  subect?: string;
+  cc?: string[];
+  content?: string;
 }
 }
 
@@ -229,6 +263,8 @@ export interface Project extends KeyRequest {
  * (`"delete"`).
  */
 export type Verb = "get"|"post"|"delete";
+
+export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
 
 /**
  *  A route callback is a function taking an Express js request and returning a
