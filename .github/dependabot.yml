@@ -13,7 +13,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -25,7 +25,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -37,7 +37,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -49,7 +49,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
   
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -61,7 +61,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -73,7 +73,7 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
   # Enable version updates for Github Actions
   - package-ecosystem: "github-actions"
@@ -85,5 +85,5 @@ updates:
       time: "05:00"
       timezone: "CET"
     # Limit number of open pull requests for version updates
-    open-pull-request-limit: 3
+    open-pull-requests-limit: 3
 
