@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS project_user (
 
 CREATE TABLE IF NOT EXISTS project_role (
     project_role_id    SERIAL      PRIMARY KEY,
-    project_id         INT         NOT NULL REFERENCES project(project_id),
-    role_id            INT         NOT NULL REFERENCES role(role_id),
+    project_id         SERIAL      NOT NULL REFERENCES project(project_id),
+    role_id            SERIAL      NOT NULL REFERENCES role(role_id),
     positions          SMALLINT    NOT NULL
 );
 
@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS contract(
 
 CREATE TABLE IF NOT EXISTS applied_role (
     applied_role_id       SERIAL    PRIMARY KEY,
-    job_application_id    INT       NOT NULL REFERENCES job_application(job_application_id),
-    role_id               INT       NOT NULL REFERENCES role(role_id)
+    job_application_id    SERIAL    NOT NULL REFERENCES job_application(job_application_id),
+    role_id               SERIAL    NOT NULL REFERENCES role(role_id)
 );
 
 
