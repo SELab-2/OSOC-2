@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS osoc(
 
 
 /* enum used in job appliction for the email status */
-CREATE TYPE email_status_enum AS ENUM ('Scheduled', 'Sent', 'Failed', 'None');
+CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE');
 
 CREATE TABLE IF NOT EXISTS job_application (
     job_application_id    SERIAL               PRIMARY KEY,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS project (
    osoc_id       SERIAL           NOT NULL REFERENCES osoc (osoc_id),
    partner       VARCHAR (255)    NOT NULL,
    start_date    DATE             NOT NULL,
-   end_data      DATE             NOT NULL,
+   end_date      DATE             NOT NULL,
    positions     SMALLINT         NOT NULL
 );
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS project_role (
 
 
 /* enum used in job appliction for the contract status */
-CREATE TYPE contract_status_enum AS ENUM ('Draft', 'Approved', 'Cancelled', 'Wait_Approval', 'Signed', 'Sent');
+CREATE TYPE contract_status_enum AS ENUM ('DRAFT', 'APPROVED', 'CANCELLED', 'WAIT_APPROVAL', 'SIGNED', 'SENT');
 
 CREATE TABLE IF NOT EXISTS contract(
    contract_id                 SERIAL                  PRIMARY KEY,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS job_application_skill (
 
 
 /* enum used in attachment for the possible types */
-CREATE TYPE type_enum AS ENUM ('CV', 'Portfolio', 'File');
+CREATE TYPE type_enum AS ENUM ('CV', 'PORTFOLIO', 'FILE');
 
 CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
