@@ -211,9 +211,11 @@ export interface UpdateLoginUser extends IdRequest {
 }
 
 export interface CoachRequest {
-  name: string;
-  email: string;
-  pass: string;
+  firstName: string;
+  lastName: string;
+  emailOrGithub: string;
+  gender: string;
+  pass?: string;
 }
 
 export interface Project extends KeyRequest {
@@ -241,16 +243,16 @@ export interface Followup extends IdRequest {
   type: FollowupType;
 }
 
-export interface Template extends IdRequest {
+export interface Template extends KeyRequest {
   name: string;
   desc?: string;
   subect?: string;
-  cc: string[];
+  cc?: string[];
   content: string;
 }
 
 export interface ModTemplate extends IdRequest {
-  // name = ID so part of IdRequest
+  name?: string;
   desc?: string;
   subect?: string;
   cc?: string[];
