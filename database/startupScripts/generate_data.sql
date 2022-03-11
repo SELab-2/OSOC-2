@@ -21,7 +21,7 @@ INSERT INTO job_application(student_id, osoc_id, responsibilities, motivation, f
  edus, edu_level, edu_duration, edu_year, edu_institute, email_status)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
  'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, TRUE, 'Informatics', 
- 'Universitarian', 3, 3, 'Ghent University', 'None');
+ 'Universitarian', 3, 3, 'Ghent University', 'NONE');
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES
@@ -47,7 +47,7 @@ INSERT INTO project_role(project_id, role_id, positions) VALUES((SELECT project_
 INSERT INTO contract(student_id, project_role_id, information, created_by_login_user_id, contract_status) VALUES
 ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), 
 (SELECT project_role_id FROM project_role WHERE positions = 2), 'Developer contract for osoc platform', 
-(SELECT login_user_id FROM login_user WHERE is_admin = TRUE), 'Draft');
+(SELECT login_user_id FROM login_user WHERE is_admin = TRUE), 'DRAFT');
 
 /* Insert data into applied_role table */
 INSERT INTO applied_role(job_application_id, role_id)VALUES
