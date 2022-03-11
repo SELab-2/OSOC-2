@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Docker: backend",
+        "type": "node",
+        "request": "attach",
+        "restart": true,
+        "port": 9229,
+        "address": "localhost",
+        "localRoot": "${workspaceFolder}/backend",
+        "remoteRoot": "/app",
+        "protocol": "inspector"
+      },
+      {
+        "name": "Docker: frontend-server",
+        "type": "node",
+        "request": "attach",
+        "restart": true,
+        "port": 9119,
+        "address": "localhost",
+        "localRoot": "${workspaceFolder}/frontend",
+        "remoteRoot": "/app",
+        "protocol": "inspector"
+      },
+      {
+        "name": "Docker: frontend-client",
+        "type": "pwa-chrome", // optional: if you want to use edge instead of chrome use "pwa-msedge"
+        "request": "launch",
+        "restart": true,
+        "port": 9119,
+        "url": "http://localhost:3000",
+        "address": "localhost",
+        "localRoot": "${workspaceFolder}/frontend",
+        "remoteRoot": "/app",
+        "protocol": "inspector"
+      }
+    ]
+  }
