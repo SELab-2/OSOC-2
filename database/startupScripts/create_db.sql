@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS job_application_skill (
     job_application_id          SERIAL         NOT NULL REFERENCES job_application(job_application_id),
     skill                       TEXT           NOT NULL,
     language_id                 SERIAL         NOT NULL REFERENCES language(language_id),
-    level                       SMALLINT       NOT NULL CHECK(level >= 0 AND level <= 5),
+    level                       SMALLINT       NULL CHECK(level >= 0 AND level <= 5),
     is_preferred                BOOLEAN,
     is_best                     BOOLEAN
 );
