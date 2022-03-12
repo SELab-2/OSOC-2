@@ -29,6 +29,8 @@ services:
     build: ./database
     volumes:
       - data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
     deploy: # TODO: maybe change the restart policy later?
       restart_policy:
         condition: on-failure
