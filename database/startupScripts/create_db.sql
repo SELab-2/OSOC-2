@@ -2,10 +2,11 @@ CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320),      /* max email length is 320 characters */
    github       TEXT,   
-   firstname    TEXT      NOT NULL,
-   lastname     TEXT      NOT NULL,
-   gender       TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL)
+   firstname    TEXT               NOT NULL,
+   lastname     TEXT               NOT NULL,
+   gender       TEXT               NOT NULL,
+   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   CONSTRAINT email_check CHECK (email is NULL or email is LIKE '%_@__%.__%')
 );
 
 
@@ -13,7 +14,7 @@ CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
    person_id       SERIAL          NOT NULL     REFERENCES person (person_id),
    pronouns        TEXT [],
-   phone_number    TEXT    NOT NULL,
+   phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL
 );
@@ -34,7 +35,8 @@ CREATE TABLE IF NOT EXISTS login_user (
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL
+   year       SMALLINT    NOT NULL,
+   CONSTRAINT valid_year CHECK (year >= 2022)
 );
 
 
@@ -85,7 +87,9 @@ CREATE TABLE IF NOT EXISTS project (
    partner       TEXT             NOT NULL,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL
+   positions     SMALLINT         NOT NULL, 
+   CONSTRAINT dates CHECK (start_date >= Convert(datetime, '2022-01-01' ) and start_date > end_date),
+   CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
@@ -100,7 +104,8 @@ CREATE TABLE IF NOT EXISTS project_role (
     project_role_id    SERIAL      PRIMARY KEY,
     project_id         SERIAL      NOT NULL REFERENCES project(project_id),
     role_id            SERIAL      NOT NULL REFERENCES role(role_id),
-    positions          SMALLINT    NOT NULL
+    positions          SMALLINT    NOT NULL,
+    CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
