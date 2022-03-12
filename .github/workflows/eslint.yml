@@ -11,5 +11,5 @@ jobs:
       - uses: reviewdog/action-eslint@v1
         with:
           eslint_flags: 'src/'
-          working-directory: frontend
+          working-directory: backend
 
