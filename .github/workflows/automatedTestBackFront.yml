@@ -30,7 +30,7 @@ jobs:
       working-directory: backend
     - run: npm test
       working-directory: backend
-    - run: npx eslint --output-file eslint_report_backend.json --format json index.ts
+    - run: npx eslint $([ -z \"$GITHUB_WORKSPACE\" ] && echo \"\" || echo \"--output-file eslint_report.json --format json\") index.ts
       working-directory: backend
 
     - run: npm install
@@ -39,9 +39,3 @@ jobs:
       working-directory: frontend
     - run: npm test --if-present
       working-directory: frontend
-- name: Annotate Code Linting Results
-    uses: ataylorme/eslint-annotate-action@1.0.4
-    if: always()
-    with:
-      repo-token: '${{ secrets.GITHUB_TOKEN }}'
-      report-json: 'eslint_report.json'
