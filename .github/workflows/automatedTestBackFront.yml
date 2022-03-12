@@ -32,7 +32,7 @@ jobs:
       working-directory: backend
     - run: npm test
       working-directory: backend
-    - run: npx eslint --output-file eslint_report.json --format json index.ts
+    - run: npm run lint
       working-directory: backend
 
     - run: npm install
