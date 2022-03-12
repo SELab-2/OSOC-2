@@ -34,9 +34,5 @@ jobs:
       working-directory: frontend
     - run: npm test --if-present
       working-directory: frontend
-    - run: eslint --output-file eslint_report.json --format json src
-      working-directory: frontend
-    - run: eslint --output-file eslint_report.json --format json src
-      working-directory: backend
     - name: Run eslint with reviewdog
       uses: reviewdog/action-eslint@v1.14.0
