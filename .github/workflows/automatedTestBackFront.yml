@@ -38,9 +38,5 @@ jobs:
       working-directory: frontend
     - run: eslint --output-file eslint_report.json --format json src
       working-directory: backend
-
-    - name: Annotate Code Linting Results
-      uses: ataylorme/eslint-annotate-action@1.0.4
-      if: always()
-      with:
-        report-json: 'backend/eslint_report.json','frontend/eslint_report.json'
+    - name: Run eslint with reviewdog
+      uses: reviewdog/action-eslint@v1.14.0
