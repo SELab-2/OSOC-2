@@ -92,7 +92,7 @@ export function parseNewStudentRequest(req: express.Request):
     "education"
   ];
   const edF = [ "level", "duration", "year", "institute" ];
-  if (!hasFields(req, bodyF, types.id) ||
+  if (!hasFields(req, bodyF, types.key) ||
       !anyHasFields(req.body.education, edF))
     return rejector();
 
@@ -109,7 +109,7 @@ export function parseNewStudentRequest(req: express.Request):
       year : req.body.education.year,
       institute : req.body.education.institute
     },
-    sessionkey : req.params.sessionkey
+    sessionkey : req.body.sessionkey
   });
 }
 
