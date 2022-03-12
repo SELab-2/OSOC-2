@@ -39,3 +39,9 @@ jobs:
       working-directory: frontend
     - run: npm test --if-present
       working-directory: frontend
+  - name: Annotate Code Linting Results
+      uses: ataylorme/eslint-annotate-action@1.0.4
+      if: always()
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'
+        report-json: 'eslint_report.json'
