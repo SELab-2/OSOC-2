@@ -34,3 +34,13 @@ jobs:
       working-directory: frontend
     - run: npm test --if-present
       working-directory: frontend
+    - run: eslint --output-file eslint_report.json --format json src
+      working-directory: frontend
+    - run: eslint --output-file eslint_report.json --format json src
+      working-directory: backend
+
+    - name: Annotate Code Linting Results
+      uses: ataylorme/eslint-annotate-action@1.0.4
+      if: always()
+      with:
+        report-json: 'backend/eslint_report.json','frontend/eslint_report.json'
