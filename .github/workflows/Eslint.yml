@@ -1,0 +1,16 @@
+name: Node.js CI
+
+on:
+  pull_request:
+    branches: [ main, development]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+    steps:
+      - name: Annotate Code Linting Results
+      uses: JonnyBurger/eslint-annotate-action@1.0.8
+      if: always()
+      with:
+        report-json: 'eslint_report.json'
