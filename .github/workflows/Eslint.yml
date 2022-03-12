@@ -1,16 +1,21 @@
-name: Node.js CI
+name: Lint
 
 on:
   pull_request:
-    branches: [ main, development]
+    branches:
+      [ main, development ]
 
 jobs:
-  build:
-
+  eslint:
     runs-on: self-hosted
     steps:
-      - name: Annotate Code Linting Results
-      uses: JonnyBurger/eslint-annotate-action@1.0.8
-      if: always()
-      with:
-        report-json: 'eslint_report.json'
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm ci # or yarn install
+      - uses: sibiraj-s/action-eslint@v2
+        with:
+          eslint-args: '--ignore-path=.gitignore --quiet'
+          extensions: 'js,jsx,ts,tsx'
+          annotations: true
