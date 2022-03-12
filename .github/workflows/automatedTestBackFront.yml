@@ -28,6 +28,8 @@ jobs:
       working-directory: backend
     - run: npm install eslint --save-dev
       working-directory: backend
+    - run: npm init @eslint/config
+      working-directory: backend
     - run: npm test
       working-directory: backend
     - run: npx eslint --output-file eslint_report.json --format json index.ts
