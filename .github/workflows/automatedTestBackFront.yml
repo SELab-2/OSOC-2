@@ -30,7 +30,7 @@ jobs:
       working-directory: backend
     - run: npm test
       working-directory: backend
-    - run: npx eslint $([ -z \"$GITHUB_WORKSPACE\" ] && echo \"\" || echo \"--output-file eslint_report.json --format json\") index.ts
+    - run: npx eslint --format json index.ts
       working-directory: backend
 
     - run: npm install
