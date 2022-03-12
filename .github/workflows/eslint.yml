@@ -1,0 +1,13 @@
+name: reviewdog
+on:
+  pull_request:
+    branches: [ main, development]
+jobs:
+  eslint:
+    name: runner / eslint
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-eslint@v1
+        with:
+          eslint_flags: 'frontend/src/'
