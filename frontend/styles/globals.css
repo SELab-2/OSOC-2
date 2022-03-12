@@ -1,14 +1,26 @@
+/**
+ * Global variables, use with var(--variable)
+ */
+:root {
+  /* Colors
+   * A higher number means a darker color, a lower number indicates a lighter color, 100 being the base value.
+   */
+  --primary-100: #0A0839;
+  --primary-110: #070527;
+  --succes-100: #1DE1AE;
+  --succes-150: #11DDEE;
+  --warning-100: #FCB70F;
+  --error-100: #F14A3B;
+  --neutral-100: #FFFFFF;
+  --neutral-150: #F2F2F4;
+  --neutral-200: #DBDBDD;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
+  font-family: Montserrat, sans-serif;
 }
 
 * {
