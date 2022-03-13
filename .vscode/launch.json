@@ -10,7 +10,8 @@
         "address": "localhost",
         "localRoot": "${workspaceFolder}/backend",
         "remoteRoot": "/app",
-        "protocol": "inspector"
+        "protocol": "inspector",
+        "preLaunchTask": "start_docker_application"
       },
       {
         "name": "Docker: frontend-server",
@@ -21,7 +22,8 @@
         "address": "localhost",
         "localRoot": "${workspaceFolder}/frontend",
         "remoteRoot": "/app",
-        "protocol": "inspector"
+        "protocol": "inspector",
+        "preLaunchTask": "start_docker_application"
       },
       {
         "name": "Docker: frontend-client",
@@ -33,7 +35,8 @@
         "address": "localhost",
         "localRoot": "${workspaceFolder}/frontend",
         "remoteRoot": "/app",
-        "protocol": "inspector"
+        "protocol": "inspector",
+        "preLaunchTask": "start_docker_application"
       }
     ]
   }
