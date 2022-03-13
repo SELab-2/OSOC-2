@@ -11,3 +11,6 @@ Both frontend and backend can be treated as seperate projects. However, if you w
 ### Conventional commits
 
 You need to use conventional commits, or else PR's will fail. For more information see https://github.com/SELab-2/OSOC-2/issues/9
+
+
+codecov test
