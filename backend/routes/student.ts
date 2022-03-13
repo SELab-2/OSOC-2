@@ -2,6 +2,7 @@ import express from 'express';
 
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
+import StudentList = Responses.StudentList;
 
 /**
  *  Attempts to create a new student in the system.
@@ -139,6 +140,22 @@ async function createStudentConfirmation(req: express.Request):
 }
 
 /**
+ *  Attempts to create a student confirmation in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function searchStudents(req: express.Request):
+    Promise<Responses.StudentList> {
+  return util.checkSessionKey(req).then(async (_) => {
+    // check filter type (empty, name, role, status, mail status)
+    // get data
+    let students: InternalTypes.IdName[] = [];
+    return Promise.resolve({data : students, sessionkey : ''});
+  });
+}
+
+/**
  *  Gets the router for all `/student/` related endpoints.
  *  @returns An Epress.js {@link express.Router} routing all `/student/`
  * endpoints.
@@ -159,7 +176,9 @@ export function getRouter(): express.Router {
 
   util.route(router, "post", "/:id/confirm", createStudentConfirmation);
 
-  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id", "/:id/suggest", "/:id/confirm" ]);
+  util.route(router, "get", "/search", searchStudents);
+
+  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id", "/:id/suggest", "/:id/confirm", "/search" ]);
 
   return router;
 }
