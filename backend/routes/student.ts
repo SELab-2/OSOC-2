@@ -65,6 +65,16 @@ async function modStudent(req: express.Request):
       });
     }
 
+async function deleteStudent(req: express.Request):
+    Promise<Responses.Key> {
+  return util.checkSessionKey(req).then(async (_) => {
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: delete student data
+    return Promise.resolve({sessionkey : ''});
+  });
+}
+
 /**
  *  Gets the router for all `/student/` related endpoints.
  *  @returns An Epress.js {@link express.Router} routing all `/student/`
