@@ -1,4 +1,4 @@
-import { decision_enum } from '@prisma/client';
+import { contract_status_enum, decision_enum, type_enum } from '@prisma/client';
 import { prisma } from '../prisma/prisma'
 
 // TODO: how do we make sure there is no student for this person_id yet?
@@ -164,5 +164,63 @@ export async function create_suggestion_for_student(evaluation_exists: boolean, 
     return result;
 }
 
+// add contract created by login_user_id for student_id that has the role project_role_id
+export async function create_contract(student_id: number, project_role_id: number, information: string | null, login_user_id: number, contract_status: contract_status_enum) {
+    const result = prisma.contract.create({
+        data: {
+            student_id: student_id,
+            project_role_id: project_role_id,
+            information: information,
+            created_by_login_user_id: login_user_id,
+            contract_status: contract_status,
+        }
+    });
+    return result;
+}
+
+// add contract created by login_user_id for student_id that has the role project_role_id
+export async function change_contract_status(contract_id: number, contract_status: contract_status_enum) {
+    const result = prisma.contract.update({
+        where: {
+            contract_id: contract_id
+        },
+        data: {
+            contract_status: contract_status,
+        }
+    });
+    return result;
+}
+
+// remove all the contracts associated with student_id
+export async function remove_contracts_from_student(student_id: number) {
+    const result = prisma.contract.deleteMany({
+        where: {
+            student_id: student_id
+        }
+    });
+    return result;
+}
+
+// remove the contract with contract_id
+export async function remove_contract(contract_id: number) {
+    const result = prisma.contract.delete({
+        where: {
+            contract_id: contract_id
+        }
+    });
+    return result;
+}
+
+// create an attachemement for job_application_id
+export async function create_attachement(job_application_id: number, url: string, type: type_enum) {
+    const result = prisma.attachment.create({
+        data: {
+            job_application_id: job_application_id,
+            url: url,
+            type: type
+        }
+    });
+    return result;
+}
 
 
