@@ -88,6 +88,8 @@ export function getRouter(): express.Router {
   util.route(router, "get", "/all", listStudents);
   util.route(router, "get", "/:id", getStudent);
   util.route(router, "post", "/:id", modStudent);
+  router.delete('/:id',
+      (req, res) => util.respOrErrorNoReinject(res, deleteStudent(req)));
 
   util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
 
