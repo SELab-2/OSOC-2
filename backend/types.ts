@@ -149,6 +149,12 @@ export interface CoachRequest {
    */
   email: string;
 }
+
+/**
+ *  Represents an admin, with all associated data.
+ */
+export interface Admin {}
+
 }
 
 /**
@@ -219,6 +225,12 @@ export interface Empty {}
  * data.
  */
 export interface Coach extends Keyed<InternalTypes.Coach> {}
+
+/**
+ *  An admin response is the keyed version of the admin and their associated
+ * data.
+ */
+export interface Admin extends Keyed<InternalTypes.Admin> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of

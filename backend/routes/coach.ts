@@ -146,8 +146,8 @@ async function deleteCoachRequest(req: express.Request):
         })})}
 
 /**
- *  Gets the router for all `/student/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/student/`
+ *  Gets the router for all `/coaches/` related endpoints.
+ *  @returns An Express.js {@link express.Router} routing all `/coaches/`
  * endpoints.
  */
 export function getRouter(): express.Router {

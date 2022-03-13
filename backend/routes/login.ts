@@ -30,7 +30,7 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
 
 /**
  *  Gets the router for all `/login/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/login/`
+ *  @returns An Express.js {@link express.Router} routing all `/login/`
  * endpoints.
  */
 export function getRouter(): express.Router {

@@ -156,7 +156,7 @@ async function searchStudents(req: express.Request):
 
 /**
  *  Gets the router for all `/student/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/student/`
+ *  @returns An Express.js {@link express.Router} routing all `/student/`
  * endpoints.
  */
 export function getRouter(): express.Router {
