@@ -1,0 +1,23 @@
+.header {
+    box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
+    height: clamp(6rem, 10vw, 10rem);
+    padding-block: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.header div {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: min(95vw, 150rem);
+    gap: 1rem;
+}
+
+.header div h1 {
+    font-size: clamp(1.5rem, 10vw, 4rem);
+}
+
+.imagecontainer {
+    max-width: clamp(4rem, 8vw, 10rem);
+}
