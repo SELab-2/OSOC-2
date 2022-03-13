@@ -1,0 +1,154 @@
+# Basic dependabot.yml file with
+# minimum configuration for two package managers
+
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check the npm registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "npm-root"
+      include: "scope"
+    labels:
+      - "npm"
+      - "dependencies"
+
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `frontend` directory
+    directory: "/frontend"
+    # Check the npm registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "npm-frontend"
+      include: "scope"
+    labels:
+      - "npm"
+      - "dependencies"
+
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `backend` directory
+    directory: "/backend"
+    # Check the npm registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "npm-backend"
+      include: "scope"
+    labels:
+      - "npm"
+      - "dependencies"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    # Look for a `Dockerfile` in the `backend` directory
+    directory: "/backend"
+    # Check the docker registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "docker-backend"
+      include: "scope"
+    labels:
+      - "docker"
+      - "dependencies"
+  
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    # Look for a `Dockerfile` in the `database` directory
+    directory: "/database"
+    # Check the docker registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "docker-database"
+      include: "scope"
+    labels:
+      - "docker"
+      - "dependencies"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    # Look for a `Dockerfile` in the `frontend` directory
+    directory: "/frontend"
+    # Check the docker registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+    commit-message:
+      prefix: "docker-frontend"
+      include: "scope"
+    labels:
+      - "docker"
+      - "dependencies"
+    
+
+  # Enable version updates for Github Actions
+  - package-ecosystem: "github-actions"
+    # Look for workflow files in the `.github/workflows` directory (happens automatically when using `root` directory as key)
+    directory: "/"
+    # Check the docker registry for updates every day at 05:00 CET
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "CET"
+    # Limit number of open pull requests for version updates
+    open-pull-requests-limit: 3
+    assignees:
+      - "BramDevlaminck"
+      - "Jonathan-Vanbrabant"
+      - "HuanYu-Tan"
+    commit-message:
+      prefix: "github-actions"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "dependencies"
+
