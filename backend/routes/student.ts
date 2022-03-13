@@ -140,7 +140,7 @@ async function createStudentConfirmation(req: express.Request):
 }
 
 /**
- *  Attempts to create a student confirmation in the system.
+ *  Attempts to filter students in the system by name, role, status or mail status.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
