@@ -38,7 +38,4 @@ jobs:
     - run: npm test --if-present
       working-directory: frontend
 
-  - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
-      with:
-        token: ${{ secrets.a6279df3-0608-4d9b-ab16-e5c61aa20de2 }}
+
