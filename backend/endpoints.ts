@@ -1,8 +1,8 @@
 import express from 'express';
 
 import * as login from './routes/login';
-import * as student from './routes/student'
-import * as util from './utility'
+import * as student from './routes/student';
+import * as util from './utility';
 
 /**
  *  Attaches all endpoints to the application.
