@@ -1,11 +1,16 @@
-import prisma from '../prisma/prisma'
+import {prisma} from '../prisma/prisma'
 
 
-console.log(search_person_by_name("Alice"));
+// console.log(await search_person_by_name("Alice"));
+
+(async () => {
+    console.log(await search_person_by_name("Alice"));
+   }
+ )()
 
 // Create Person
-export function create_person(firstname : string, lastname : string, gender : string, github : string, email : string){
-    prisma.person.create({
+export async function create_person(firstname : string, lastname : string, gender : string, github : string, email : string){
+    const result = await prisma.person.create({
         data: {
             firstname: firstname,
             lastname: lastname,
@@ -13,7 +18,8 @@ export function create_person(firstname : string, lastname : string, gender : st
             github: github,
             email: email
         },
-    })
+    });
+    return result;
 }
 
 // Search Person by name
@@ -29,7 +35,7 @@ export async function search_person_by_name(search_string : string){
                 },
             ],
         },
-    })
+    });
     return result;
 }
 
@@ -37,7 +43,7 @@ export async function search_person_by_name(search_string : string){
 export async function search_person_by_gender(search_string : string){
     const result = prisma.person.findMany({
         where: { gender : search_string},
-    })
+    });
     return result;
 }
 
@@ -54,17 +60,18 @@ export async function search_person_by_login(search_string : string){
                 },
             ],
         },
-    })
+    });
     return result;
 }
 
 // Remove Person by id
-export function delete_person_by_id(delete_id : number){
-    prisma.person.deleteMany({
+export async function delete_person_by_id(delete_id : number){
+    const result = await prisma.person.deleteMany({
         where: {
             person_id: {
                 in: delete_id
             }
         }
-    })
+    });
+    return result;
 }
