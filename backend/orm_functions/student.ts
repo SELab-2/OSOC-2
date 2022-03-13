@@ -1,4 +1,4 @@
-import { contract_status_enum, decision_enum, type_enum } from '@prisma/client';
+import { contract_status_enum, decision_enum, email_status_enum, type_enum } from '@prisma/client';
 import { prisma } from '../prisma/prisma'
 
 // TODO: how do we make sure there is no student for this person_id yet?
@@ -251,3 +251,28 @@ export async function delete_all_attachements_application(job_application_id:num
     });
     return result;
 }
+
+// removes all job applications from a given student
+export async function delete_job_applications_from_student(student_id: number) {
+    const result = prisma.job_application.deleteMany({
+        where: {
+            student_id: student_id
+        }
+    });
+    return result;
+}
+
+// change the email status of a given job application
+export async function change_email_status_of_job_application(job_application_id: number, email_status: email_status_enum) {
+    const result = prisma.job_application.update({
+        where: {
+            job_application_id: job_application_id
+        },
+        data: {
+            email_status: email_status
+        }
+    });
+    return result;
+}
+
+// TODO: create add_job_application (but shouldn't we use some kind of object-type and not an argument per type for this?...)
