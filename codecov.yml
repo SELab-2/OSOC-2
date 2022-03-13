@@ -1,0 +1,6 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        if_ci_failed: error
