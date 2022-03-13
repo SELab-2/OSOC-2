@@ -119,6 +119,26 @@ async function getStudentSuggestions(req: express.Request):
 }
 
 /**
+ *  Attempts to create a student confirmation in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createStudentConfirmation(req: express.Request):
+    Promise<Responses.Keyed<InternalTypes.Suggestion>> {
+  return util.checkSessionKey(req).then(async (_) => {
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: create or modify confirmation
+    let suggestion: InternalTypes.Suggestion = "YES";
+    // check valid confirmation
+    // if invalid confirmation: return Promise.reject(util.cookArgumentError());
+    // if valid confirmation: create student confirmation
+    return Promise.resolve({data : suggestion, sessionkey : ''});
+  });
+}
+
+/**
  *  Gets the router for all `/student/` related endpoints.
  *  @returns An Epress.js {@link express.Router} routing all `/student/`
  * endpoints.
@@ -133,10 +153,13 @@ export function getRouter(): express.Router {
   util.route(router, "post", "/:id", modStudent);
   router.delete('/:id',
       (req, res) => util.respOrErrorNoReinject(res, deleteStudent(req)));
+
   util.route(router, "post", "/:id/suggest", createStudentSuggestion);
   util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
-  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
+  util.route(router, "post", "/:id/confirm", createStudentConfirmation);
+
+  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id", "/:id/suggest", "/:id/confirm" ]);
 
   return router;
 }
