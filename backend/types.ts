@@ -155,6 +155,43 @@ export interface CoachRequest {
  */
 export interface Admin {}
 
+/**
+ *  Represents a project, with all associated data.
+ */
+export interface Project {}
+
+/**
+ *  Represents the drafted students of a project. Usually these will only contain an id, name and list of students.
+ */
+export interface ProjectDraftedStudents {
+  /**
+   *  The id of the project.
+   */
+  id: string;
+  /**
+   *  The name of the project.
+   */
+  name: string;
+  /**
+   *  The students.
+   */
+  students: Student;
+}
+
+/**
+ *  Represents the drafted students of a project. Usually these will only contain an id, name and list of students.
+ */
+export interface ModProjectStudent {
+  /**
+   *  Was the student drafted or not.
+   */
+  drafted: boolean;
+  /**
+   *  The roles of the student.
+   */
+  roles: string[];
+}
+
 }
 
 /**
@@ -231,6 +268,24 @@ export interface Coach extends Keyed<InternalTypes.Coach> {}
  * data.
  */
 export interface Admin extends Keyed<InternalTypes.Admin> {}
+
+/**
+ *  A project response is the keyed version of the project and their associated
+ * data.
+ */
+export interface Project extends Keyed<InternalTypes.Project> {}
+
+/**
+ *  A project drafted students response is the keyed version of the students and the associated
+ * data of the project.
+ */
+export interface ProjectDraftedStudents extends Keyed<InternalTypes.ProjectDraftedStudents> {}
+
+/**
+ *  A project drafted students response is the keyed version of the students and the associated
+ * data of the project.
+ */
+export interface ModProjectStudent extends Keyed<InternalTypes.ModProjectStudent> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of

@@ -13,7 +13,7 @@ async function listCoaches(req: express.Request):
     Promise<Responses.IdNameList> {
     return util.checkSessionKey(req).then((_: express.Request) => {
         let coaches: InternalTypes.IdName[] = [];
-        // TODO list all students
+        // TODO list all coaches
 
         return Promise.resolve({data : coaches, sessionkey : ''});
     });

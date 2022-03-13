@@ -4,6 +4,7 @@ import * as login from './routes/login';
 import * as student from './routes/student';
 import * as coach from './routes/coach';
 import * as admin from './routes/admin';
+import * as project from './routes/project';
 import * as util from './utility';
 
 /**
@@ -15,6 +16,7 @@ export function attach(app: express.Application): void {
   app.use('/student', student.getRouter());
   app.use('/coach', coach.getRouter());
   app.use('/admin', admin.getRouter());
+  app.use('/project', project.getRouter());
 
   app.use((req: express.Request, res: express.Response): Promise<void> =>
               util.replyError(res, util.errors.cookNonExistent(req.url)));

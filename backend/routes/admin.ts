@@ -13,7 +13,7 @@ async function listAdmins(req: express.Request):
     Promise<Responses.IdNameList> {
     return util.checkSessionKey(req).then((_: express.Request) => {
         let admins: InternalTypes.IdName[] = [];
-        // TODO list all students
+        // TODO list all admins
 
         return Promise.resolve({data : admins, sessionkey : ''});
     });
