@@ -23,8 +23,7 @@ updates:
       prefix: "npm-root"
       include: "scope"
     labels:
-      - "npm"
-      - "dependencies"
+      - "CI/CD"
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -46,8 +45,7 @@ updates:
       prefix: "npm-frontend"
       include: "scope"
     labels:
-      - "npm"
-      - "dependencies"
+      - "CI/CD"
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -69,8 +67,7 @@ updates:
       prefix: "npm-backend"
       include: "scope"
     labels:
-      - "npm"
-      - "dependencies"
+      - "CI/CD"
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -92,8 +89,7 @@ updates:
       prefix: "docker-backend"
       include: "scope"
     labels:
-      - "docker"
-      - "dependencies"
+      - "CI/CD"
   
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -115,8 +111,7 @@ updates:
       prefix: "docker-database"
       include: "scope"
     labels:
-      - "docker"
-      - "dependencies"
+      - "CI/CD"
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -138,8 +133,7 @@ updates:
       prefix: "docker-frontend"
       include: "scope"
     labels:
-      - "docker"
-      - "dependencies"
+      - "CI/CD"
     
 
   # Enable version updates for Github Actions
@@ -163,6 +157,5 @@ updates:
       prefix: "github-actions"
       include: "scope"
     labels:
-      - "github-actions"
-      - "dependencies"
+      - "CI/CD"
 
