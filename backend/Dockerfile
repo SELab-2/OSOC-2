@@ -18,6 +18,7 @@ RUN npm install
 COPY . .
 
 RUN npm run
+RUN npx prisma generate
 
 EXPOSE 4096
 
