@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model applied_role {
+  applied_role_id    Int             @id @default(autoincrement())
+  job_application_id Int             @default(autoincrement())
+  role_id            Int             @default(autoincrement())
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  role               role            @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model attachment {
+  attachment_id      Int             @id @default(autoincrement())
+  job_application_id Int             @default(autoincrement())
+  url                String
+  type               type_enum
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model contract {
+  contract_id              Int                  @id @default(autoincrement())
+  student_id               Int                  @default(autoincrement())
+  project_role_id          Int                  @default(autoincrement())
+  information              String?
+  created_by_login_user_id Int                  @default(autoincrement())
+  contract_status          contract_status_enum
+  login_user               login_user           @relation(fields: [created_by_login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  project_role             project_role         @relation(fields: [project_role_id], references: [project_role_id], onDelete: NoAction, onUpdate: NoAction)
+  student                  student              @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model evaluation {
+  evaluation_id      Int             @id @default(autoincrement())
+  login_user_id      Int             @default(autoincrement())
+  job_application_id Int             @default(autoincrement())
+  decision           decision_enum
+  motivation         String?
+  is_final           Boolean
+  job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  login_user         login_user      @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model job_application {
+  job_application_id    Int                     @id @default(autoincrement())
+  student_id            Int                     @default(autoincrement())
+  responsibilities      String?
+  motivation            String?
+  fun_fact              String?
+  is_volunteer          Boolean
+  student_coach         Boolean
+  osoc_id               Int
+  edus                  String?
+  edu_level             String?
+  edu_duration          Int?
+  edu_year              Int?
+  edu_institute         String?
+  email_status          email_status_enum
+  osoc                  osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+  student               student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  applied_role          applied_role[]
+  attachment            attachment[]
+  evaluation            evaluation[]
+  job_application_skill job_application_skill[]
+}
+
+model job_application_skill {
+  job_application_skill_id Int             @id @default(autoincrement())
+  job_application_id       Int             @default(autoincrement())
+  skill                    String
+  language_id              Int             @default(autoincrement())
+  level                    Int?            @db.SmallInt
+  is_preferred             Boolean?
+  is_best                  Boolean?
+  job_application          job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
+  language                 language        @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model language {
+  language_id           Int                     @id @default(autoincrement())
+  name                  String
+  job_application_skill job_application_skill[]
+}
+
+model login_user {
+  login_user_id Int            @id @default(autoincrement())
+  person_id     Int            @default(autoincrement())
+  password      String
+  is_admin      Boolean?
+  is_coach      Boolean?
+  person        person         @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract      contract[]
+  evaluation    evaluation[]
+  project_user  project_user[]
+}
+
+model osoc {
+  osoc_id         Int               @id @default(autoincrement())
+  year            Int               @db.SmallInt
+  job_application job_application[]
+  project         project[]
+}
+
+model person {
+  person_id  Int          @id @default(autoincrement())
+  email      String?      @db.VarChar(320)
+  github     String?
+  firstname  String
+  lastname   String
+  gender     String
+  login_user login_user[]
+  student    student[]
+}
+
+model project {
+  project_id   Int            @id @default(autoincrement())
+  name         String
+  osoc_id      Int            @default(autoincrement())
+  partner      String
+  start_date   DateTime       @db.Date
+  end_date     DateTime       @db.Date
+  positions    Int            @db.SmallInt
+  osoc         osoc           @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+  project_role project_role[]
+  project_user project_user[]
+}
+
+model project_role {
+  project_role_id Int        @id @default(autoincrement())
+  project_id      Int        @default(autoincrement())
+  role_id         Int        @default(autoincrement())
+  positions       Int        @db.SmallInt
+  project         project    @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+  role            role       @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
+  contract        contract[]
+}
+
+model project_user {
+  project_user_id Int        @id @default(autoincrement())
+  login_user_id   Int        @default(autoincrement())
+  project_id      Int        @default(autoincrement())
+  login_user      login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  project         project    @relation(fields: [project_id], references: [project_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model role {
+  role_id      Int            @id @default(autoincrement())
+  name         String?
+  applied_role applied_role[]
+  project_role project_role[]
+}
+
+model student {
+  student_id      Int               @id @default(autoincrement())
+  person_id       Int               @default(autoincrement())
+  pronouns        String[]
+  phone_number    String
+  nickname        String?
+  alumni          Boolean
+  person          person            @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract        contract[]
+  job_application job_application[]
+}
+
+enum decision_enum {
+  YES
+  NO
+  MAYBE
+}
+
+enum contract_status_enum {
+  DRAFT
+  APPROVED
+  CANCELLED
+  WAIT_APPROVAL
+  SIGNED
+  SENT
+}
+
+enum email_status_enum {
+  SCHEDULED
+  SENT
+  FAILED
+  NONE
+  DRAFT
+}
+
+enum type_enum {
+  CV
+  PORTFOLIO
+  FILE
+}
