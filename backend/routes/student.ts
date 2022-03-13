@@ -2,7 +2,6 @@ import express from 'express';
 
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
-import StudentList = Responses.StudentList;
 
 /**
  *  Attempts to create a new student in the system.
@@ -28,7 +27,7 @@ async function createStudent(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listStudents(req: express.Request):
-    Promise<Responses.StudentList> {
+    Promise<Responses.IdNameList> {
   return util.checkSessionKey(req).then((_: express.Request) => {
     let students: InternalTypes.IdName[] = [];
     // TODO list all students
@@ -146,7 +145,7 @@ async function createStudentConfirmation(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function searchStudents(req: express.Request):
-    Promise<Responses.StudentList> {
+    Promise<Responses.IdNameList> {
   return util.checkSessionKey(req).then(async (_) => {
     // check filter type (empty, name, role, status, mail status)
     // get data

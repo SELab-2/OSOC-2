@@ -126,6 +126,29 @@ export interface IdName {
  * student in the database.
  */
 export interface Student {}
+
+/**
+ *  Represents a coach, with all associated data.
+ */
+export interface Coach {}
+
+/**
+ *  Represents a coach request response. Usually these will only contain an id, name and email.
+ */
+export interface CoachRequest {
+  /**
+   *  The id.
+   */
+  id: string;
+  /**
+   *  The name of the coach.
+   */
+  name: string;
+  /**
+   *  The id.
+   */
+  email: string;
+}
 }
 
 /**
@@ -172,7 +195,7 @@ export interface Student extends Keyed<InternalTypes.Student> {}
  *  A student list response is the keyed version of an array of partial
  * students.
  */
-export interface StudentList extends Keyed<InternalTypes.IdName[]> {}
+export interface IdNameList extends Keyed<InternalTypes.IdName[]> {}
 
 /**
  *  A student response is the keyed version of the student and their associated
@@ -192,6 +215,12 @@ export interface SuggestionInfo extends Keyed<InternalTypes.SuggestionInfo[]> {}
 export interface Empty {}
 
 /**
+ *  A coach response is the keyed version of the coach and their associated
+ * data.
+ */
+export interface Coach extends Keyed<InternalTypes.Coach> {}
+
+/**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
  * rejecting with API error or resolving with data ({@link Promise}).
  */
@@ -200,7 +229,7 @@ export type OrError<T> = ApiError|T;
 /**
  *  An API response is one of the previous response types.
  */
-export type ApiResponse = Empty|Key|PartialStudent|StudentList;
+export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
 }
 
 export namespace Requests {
