@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS person(
 
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
-   person_id       SERIAL          NOT NULL     REFERENCES person (person_id),
+   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person (person_id),
    pronouns        TEXT [],
    phone_number    TEXT    NOT NULL,
    nickname        TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS student(
 
 CREATE TABLE IF NOT EXISTS login_user (
     login_user_id    SERIAL     PRIMARY KEY,
-    person_id        SERIAL     NOT NULL REFERENCES person(person_id),
+    person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
     password         TEXT       NOT NULL, 
     /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
     /* TODO2: Wat als je zowel email als github hebt */

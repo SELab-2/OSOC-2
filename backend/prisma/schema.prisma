@@ -89,7 +89,7 @@ model language {
 
 model login_user {
   login_user_id Int            @id @default(autoincrement())
-  person_id     Int            @default(autoincrement())
+  person_id     Int            @unique @default(autoincrement())
   password      String
   is_admin      Boolean?
   is_coach      Boolean?
@@ -107,14 +107,14 @@ model osoc {
 }
 
 model person {
-  person_id  Int          @id @default(autoincrement())
-  email      String?      @db.VarChar(320)
+  person_id  Int         @id @default(autoincrement())
+  email      String?     @db.VarChar(320)
   github     String?
   firstname  String
   lastname   String
   gender     String
-  login_user login_user[]
-  student    student[]
+  login_user login_user?
+  student    student?
 }
 
 model project {
@@ -157,7 +157,7 @@ model role {
 
 model student {
   student_id      Int               @id @default(autoincrement())
-  person_id       Int               @default(autoincrement())
+  person_id       Int               @unique @default(autoincrement())
   pronouns        String[]
   phone_number    String
   nickname        String?
