@@ -14,6 +14,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -35,6 +37,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -56,6 +60,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -77,6 +83,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -98,6 +106,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -119,6 +129,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
@@ -141,6 +153,8 @@ updates:
       timezone: "CET"
     # Limit number of open pull requests for version updates
     open-pull-requests-limit: 3
+    # Set the target branch to `development` instead of default `main`
+    target-branch: "development"
     assignees:
       - "BramDevlaminck"
       - "Jonathan-Vanbrabant"
