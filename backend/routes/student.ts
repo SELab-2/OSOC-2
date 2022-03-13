@@ -12,8 +12,8 @@ import * as util from '../utility';
 async function createStudent(req: express.Request):
     Promise<Responses.PartialStudent> {
   return util.checkSessionKey(req).then((_: express.Request) => {
-    var name: string = '';
-    var id: string = '';
+    let name: string = '';
+    let id: string = '';
     // TODO do insertion logic
 
     return Promise.resolve({data : {name : name, id : id}, sessionkey : ''});
@@ -29,7 +29,7 @@ async function createStudent(req: express.Request):
 async function listStudents(req: express.Request):
     Promise<Responses.StudentList> {
   return util.checkSessionKey(req).then((_: express.Request) => {
-    var students: InternalTypes.IdName[] = [];
+    let students: InternalTypes.IdName[] = [];
     // TODO list all students
 
     return Promise.resolve({data : students, sessionkey : ''});
@@ -44,26 +44,79 @@ async function listStudents(req: express.Request):
  */
 async function getStudent(req: express.Request):
     Promise<Responses.Student>{return util.checkSessionKey(req).then(
-        async (_) => {// check valid id
-                      // if invalid: return Promise.reject(util.cookInvalidID())
-                      // if valid: get student data etc etc
-                      return Promise.resolve({
-                        data : {id : '', name : '', email : '', labels : []},
-                        sessionkey : ''
-                      })})}
+    async (_) => {// check valid id
+      // if invalid: return Promise.reject(util.cookInvalidID())
+      // if valid: get student data etc etc
+      return Promise.resolve({
+        data : {id : '', name : '', email : '', labels : []},
+        sessionkey : ''
+      })})}
 
 async function modStudent(req: express.Request):
     Promise<Responses.Student> {
-      return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: modify student data
-        return Promise.resolve({
-          data : {id : '', name : '', email : '', labels : []},
-          sessionkey : ''
-        });
-      });
-    }
+  return util.checkSessionKey(req).then(async (_) => {
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: modify student data
+    return Promise.resolve({
+      data : {id : '', name : '', email : '', labels : []},
+      sessionkey : ''
+    });
+  });
+}
+
+/**
+ *  Attempts to delete a student from the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function deleteStudent(req: express.Request):
+    Promise<Responses.Key> {
+  return util.checkSessionKey(req).then(async (_) => {
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: delete student data
+    return Promise.resolve({sessionkey : ''});
+  });
+}
+
+/**
+ *  Attempts to create a student suggestion in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createStudentSuggestion(req: express.Request):
+    Promise<Responses.Suggestion> {
+  return util.checkSessionKey(req).then(async (_) => {
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: create or modify and check valid suggestion
+    // if invalid suggestion: return Promise.reject(util.cookArgumentError());
+    // if valid suggestion: create student suggestion
+    let suggestions: InternalTypes.SuggestionCount[] = [];
+    return Promise.resolve({data : suggestions, sessionkey : ''});
+  });
+}
+
+/**
+ *  Attempts to list all student suggestions in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function getStudentSuggestions(req: express.Request):
+    Promise<Responses.SuggestionInfo> {
+  return util.checkSessionKey(req).then((_: express.Request) => {
+    let suggestions: InternalTypes.SuggestionInfo[] = [];
+    // check valid id
+    // if invalid: return Promise.reject(util.cookInvalidID());
+    // if valid: return all suggestions for this student
+
+    return Promise.resolve({data : suggestions, sessionkey : ''});
+  });
+}
 
 /**
  *  Gets the router for all `/student/` related endpoints.
@@ -71,13 +124,17 @@ async function modStudent(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  var router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
   router.get("/", (_, res) => util.redirect(res, "/student/all"));
   util.route(router, "post", "/", createStudent);
   util.route(router, "get", "/all", listStudents);
   util.route(router, "get", "/:id", getStudent);
   util.route(router, "post", "/:id", modStudent);
+  router.delete('/:id',
+      (req, res) => util.respOrErrorNoReinject(res, deleteStudent(req)));
+  util.route(router, "post", "/:id/suggest", createStudentSuggestion);
+  util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
   util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
 

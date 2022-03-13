@@ -10,7 +10,7 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function login(_: express.Request): Promise<Responses.Key> {
-  var sessionkey: string = "";
+  let sessionkey: string = "";
   // TODO: login logic
   return Promise.resolve({sessionkey : sessionkey});
 }
@@ -34,7 +34,7 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  var router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
   router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
   router.delete('/',
