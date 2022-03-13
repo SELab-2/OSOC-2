@@ -75,8 +75,11 @@ export async function get_student_suggestions_total(student_id: number) {
             student_id: student_id
         },
         select : {
-            osoc_id: true,
-            job_application_id: true,
+            osoc: {
+                select: {
+                    year: true,
+                }
+            },
             evaluation: {
                 select: {
                     decision: true,
@@ -95,8 +98,11 @@ export async function get_student_suggestions_final(student_id: number) {
             student_id: student_id
         },
         select : {
-            osoc_id: true,
-            job_application_id: true,
+            osoc: {
+                select: {
+                    year: true,
+                }
+            },
             evaluation: {
                 where:  {
                     is_final: true,
@@ -118,8 +124,11 @@ export async function get_student_suggestions_temp(student_id: number) {
             student_id: student_id
         },
         select : {
-            osoc_id: true,
-            job_application_id: true,
+            osoc: {
+                select: {
+                    year: true,
+                }
+            },
             evaluation: {
                 where:  {
                     is_final: false,
@@ -223,4 +232,22 @@ export async function create_attachement(job_application_id: number, url: string
     return result;
 }
 
+// removes the application with given attachement_id
+export async function delete_attachement(attachement_id:number) {
+    const result = prisma.attachment.delete({
+        where: {
+            attachment_id: attachement_id
+        }
+    });
+    return result;
+}
 
+// removes all attachements associated with given application
+export async function delete_all_attachements_application(job_application_id:number) {
+    const result = prisma.attachment.deleteMany({
+        where: {
+            job_application_id: job_application_id
+        }
+    });
+    return result;
+}
