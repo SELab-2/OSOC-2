@@ -8,6 +8,10 @@ on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
 
+  # Should run all tests and upload the codecoverage on main and development
+  push:
+    branches: [main, development]
+  
 jobs:
   build:
 
