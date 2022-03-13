@@ -9,7 +9,7 @@ fixes:
   # During CI on the self hosted runner path get set with this as root, but codecovs needs the file path's following the git
   # file structure
   # Codecov has built in functions to map file path to the git file structure
-  - "/home/selab2/actions-runner/_work/OSOC-2/::"
+  - "/home/selab2/actions-runner/_work/OSOC-2/OSOC-2/::"
 
 codecov:
   disable_default_path_fixes: true
