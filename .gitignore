@@ -40,8 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-package-lock.json
-
 .eslintcache
 
 # node modules of the backend and frontend
