@@ -6,7 +6,7 @@ name: Frontend build and test
 on:
   # Run on every open pull request
   pull_request:
-    types: [created, edited]
+    types: [opened, edited, reopened, synchronize]
 
 jobs:
   build:
