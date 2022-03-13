@@ -4,8 +4,9 @@
 name: Backend build and test
 
 on:
+  # Run on every open pull request
   pull_request:
-    branches: [ main, development]
+    types: [created, edited]
 
 jobs:
   build:
@@ -37,4 +38,3 @@ jobs:
         files: coverage.json
         flags: all_tests
         verbose: true
-
