@@ -10,4 +10,6 @@ fixes:
   # file structure
   # Codecov has built in functions to map file path to the git file structure
   - "/home/selab2/actions-runner/_work/OSOC-2/::"
-disable_default_path_fixes: true
+
+codecov:
+  disable_default_path_fixes: true
