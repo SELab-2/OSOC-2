@@ -2,14 +2,14 @@ import {prisma} from '../prisma/prisma'
 
 
 // Create Project
-export async function createProject(name : string, osoc_id : number, partner : string, start_date : Date, end_date : Date, positions : number){
+export async function createProject(name : string, osocId : number, partner : string, startDate : Date, endDate : Date, positions : number){
     const result = await prisma.project.create({
         data: {
             name: name,
-            osoc_id: osoc_id,
+            osoc_id: osocId,
             partner: partner,
-            start_date: start_date,
-            end_date : end_date,
+            start_date: startDate,
+            end_date : endDate,
             positions : positions
         },
     });
@@ -23,9 +23,9 @@ export async function getAllProjects() {
 }
 
 // Search Project by Name
-export async function getProjectByName(project_name : string) {
+export async function getProjectByName(projectName : string) {
     const result = prisma.project.findMany({
-        where: { name : project_name},
+        where: { name : projectName},
     });
     return result;
 }
@@ -111,19 +111,19 @@ export async function getProjectsEndedBeforeDate(date : Date) {
 }
 
 // Search all the Projects with a number of Positions
-export async function getProjectsByNumberPositions(number_positions : number) {
+export async function getProjectsByNumberPositions(numberPositions : number) {
     const result = prisma.project.findMany({
-        where: { positions :number_positions },
+        where: { positions :numberPositions },
     });
     return result;
 }
 
 // Search all the Projects with less or equal Positions than number
-export async function getProjectsLessPositions(number_positions : number) {
+export async function getProjectsLessPositions(numberPositions : number) {
     const result = prisma.project.findMany({
         where: { 
             positions: {
-                lte: number_positions,
+                lte: numberPositions,
               },
          },
     });
@@ -131,11 +131,11 @@ export async function getProjectsLessPositions(number_positions : number) {
 }
 
 // Search all the Projects with more or equal Positions than number
-export async function getProjectsMorePositions(number_positions : number) {
+export async function getProjectsMorePositions(numberPositions : number) {
     const result = prisma.project.findMany({
         where: { 
             positions: {
-                gte: number_positions,
+                gte: numberPositions,
               },
          },
     });
@@ -143,17 +143,17 @@ export async function getProjectsMorePositions(number_positions : number) {
 }
 
 // Update Project
-export async function updateProject(project_id : number, name : string, osoc_id : number, partner : string, start_date : Date, end_date : Date, positions : number){
+export async function updateProject(projectId : number, name : string, osocId : number, partner : string, startDate : Date, endDate : Date, positions : number){
     const result = await prisma.project.update({
         where : {
-            project_id : project_id
+            project_id : projectId
         },
         data: {
             name: name,
-            osoc_id: osoc_id,
+            osoc_id: osocId,
             partner: partner,
-            start_date: start_date,
-            end_date : end_date,
+            start_date: startDate,
+            end_date : endDate,
             positions : positions
         },
     });
@@ -161,20 +161,20 @@ export async function updateProject(project_id : number, name : string, osoc_id 
 }
 
 // Delete Project
-export async function deleteProject(project_id : number){
+export async function deleteProject(projectId : number){
     const result = await prisma.project.delete({
         where : {
-            project_id : project_id
+            project_id : projectId
         }
     });
     return result;
 }
 
 // Delete Project by Osoc Edition
-export async function deleteProjectByOsocEdition(osoc_edition_id : number){
+export async function deleteProjectByOsocEdition(osocEditionId : number){
     const result = await prisma.project.deleteMany({
         where : {
-            osoc_id : osoc_edition_id
+            osoc_id : osocEditionId
         }
     });
     return result;
