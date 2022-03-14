@@ -28,7 +28,7 @@ function anyHasFields(obj: any, fields: string[]): boolean {
 function hasFields(req: express.Request, fields: string[],
                    reqType: RequestType): Promise<void> {
   if ((reqType == types.key || reqType == types.id) &&
-      !("sessionkey" in req.body))
+      (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
     return Promise.reject(errors.cookUnauthenticated());
   if (reqType == types.id && !("id" in req.params))
     return rejector();

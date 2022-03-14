@@ -27,7 +27,7 @@ test("Can parse Key-only requests", () => {
 
   const failures = calls.flatMap(call => [call(invalid), call(wrongprop)])
                        .map(sub => expect(sub).rejects.toStrictEqual(
-                                errors.cookArgumentError()));
+                                errors.cookUnauthenticated()));
 
   return Promise.all([ successes, failures ].flat());
 });
