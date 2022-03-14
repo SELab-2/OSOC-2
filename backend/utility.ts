@@ -198,7 +198,7 @@ export async function redirect(res: express.Response,
  *  Checks the existence and correctness of the session key.
  *  @param obj The object which could hold a session key.
  *  @template T The type of the object. Should hold a session key.
- *  @returns A promise which will resolve with the request upon success, or to
+ *  @returns A promise which will resolve with the object upon success, or to
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
@@ -214,9 +214,9 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  *  Checks the session key (see {@link checkSessionKey}), then checks whether or
  * not it corresponds to an admin user.
  *
- *  @param req The Express.js request to extract and check the session key for.
+ *  @param obj The object which could hold a session key.
  *  @template T The type of the object. Should hold a session key.
- *  @returns A promise which will resolve with the request upon success. If the
+ *  @returns A promise which will resolve with the object upon success. If the
  * session key is not present or invalid, returns a promise which rejects with
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.

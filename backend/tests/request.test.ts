@@ -27,7 +27,7 @@ test("Can parse Key-only requests", () => {
 
   const failures = calls.flatMap(call => [call(invalid), call(wrongprop)])
                        .map(sub => expect(sub).rejects.toStrictEqual(
-                                errors.cookArgumentError()));
+                                errors.cookUnauthenticated()));
 
   return Promise.all([ successes, failures ].flat());
 });
@@ -61,12 +61,15 @@ test("Can parse Key-ID requests", () => {
   const successes =
       calls.map(call => expect(call(valid)).resolves.toStrictEqual(res));
 
-  const failures =
-      calls.flatMap(call => [call(neither), call(onlyKey), call(onlyid)])
-          .map(sub => expect(sub).rejects.toStrictEqual(
-                   errors.cookArgumentError()));
+  const failures = calls.flatMap(call => [call(neither), call(onlyid)])
+                       .map(sub => expect(sub).rejects.toStrictEqual(
+                                errors.cookUnauthenticated()));
 
-  return Promise.all([ successes, failures ].flat());
+  const otherfails = calls.map(call => call(onlyKey))
+                         .map(sub => expect(sub).rejects.toStrictEqual(
+                                  errors.cookArgumentError()));
+
+  return Promise.all([ successes, failures, otherfails ].flat());
 })
 
 test("Can parse update login user requests", () => {
@@ -133,12 +136,17 @@ test("Can parse update login user requests", () => {
       options.flatMap(v => funcs.map(f => ({val : f(v.val), og : v.og})))
           .map(x => x.val.then(v => check(v, x.og)));
 
-  const failures = [ noupdate, neither, onlyKey, onlyid ]
+  const failures = [ noupdate, onlyKey ]
                        .flatMap(v => funcs.map(f => f(v)))
                        .map(x => {expect(x).rejects.toStrictEqual(
                                 errors.cookArgumentError())});
 
-  return Promise.all([ successes, failures ].flat());
+  const failures2 = [ neither, onlyid ]
+                        .flatMap(v => funcs.map(f => f(v)))
+                        .map(x => {expect(x).rejects.toStrictEqual(
+                                 errors.cookUnauthenticated())});
+
+  return Promise.all([ successes, failures, failures2 ].flat());
 });
 
 test("Can parse login request", () => {
@@ -368,7 +376,7 @@ test("Can parse final decision request", () => {
     return expect(Rq.parseFinalizeDecisionRequest(r)).resolves.toStrictEqual(x);
   });
 
-  var q = [ dat5, dat6, dat7 ].map(x => {
+  var q = [ dat5, dat6 ].map(x => {
     var r: express.Request = getMockReq();
     r.body = {...x};
     r.params.id = id;
@@ -377,7 +385,16 @@ test("Can parse final decision request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  return Promise.all([ p, q ].flat());
+  var r = [ dat7 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    x.id = id;
+    return expect(Rq.parseFinalizeDecisionRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ p, q, r ].flat());
 });
 
 test("Can parse coach access request", () => {
@@ -448,7 +465,7 @@ test("Can parse new project request", () => {
   var p2: Promise<void> = expect(Rq.parseNewProjectRequest(req2))
                               .rejects.toBe(errors.cookArgumentError());
   var p3: Promise<void> = expect(Rq.parseNewProjectRequest(req3))
-                              .rejects.toBe(errors.cookArgumentError());
+                              .rejects.toBe(errors.cookUnauthenticated());
 
   return Promise.all([ p1, p2, p3 ]);
 });
@@ -509,9 +526,11 @@ test("Can parse update project request", () => {
   var p3: Promise<void> =
       expect(Rq.parseUpdateProjectRequest(req3)).resolves.toStrictEqual(d3);
   var p4: Promise<void> = expect(Rq.parseUpdateProjectRequest(req4))
+                              .rejects.toBe(errors.cookUnauthenticated());
+  var p5: Promise<void> = expect(Rq.parseUpdateProjectRequest(req5))
                               .rejects.toBe(errors.cookArgumentError());
 
-  return Promise.all([ p1, p2, p3, p4 ]);
+  return Promise.all([ p1, p2, p3, p4, p5 ]);
 });
 
 test("Can parse draft student request", () => {
@@ -552,7 +571,7 @@ test("Can parse draft student request", () => {
   var p2: Promise<void> = expect(Rq.parseDraftStudentRequest(r2))
                               .rejects.toBe(errors.cookArgumentError());
   var p3: Promise<void> = expect(Rq.parseDraftStudentRequest(r3))
-                              .rejects.toBe(errors.cookArgumentError());
+                              .rejects.toBe(errors.cookUnauthenticated());
   var p4: Promise<void> = expect(Rq.parseDraftStudentRequest(r4))
                               .rejects.toBe(errors.cookArgumentError());
 
@@ -579,7 +598,7 @@ test("Can parse mark as followed up request", () => {
         .resolves.toStrictEqual(x);
   });
 
-  var fails1 = [ i1, i2, i3 ].map(x => {
+  var fails1 = [ i1, i3 ].map(x => {
     var r: express.Request = getMockReq();
     r.body = {...x};
     r.params.id = id;
@@ -595,7 +614,16 @@ test("Can parse mark as followed up request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  return Promise.all([ okays, fails1, fails2 ].flat());
+  var fails3 = [ i2 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    x.id = id;
+    return expect(Rq.parseSetFollowupStudentRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ okays, fails1, fails2, fails3 ].flat());
 });
 
 test("Can parse new template request", () => {
@@ -661,14 +689,21 @@ test("Can parse new template request", () => {
     return expect(Rq.parseNewTemplateRequest(r)).resolves.toStrictEqual(x);
   });
 
-  var fails1 = [ f1, f2, f3 ].map(x => {
+  var fails1 = [ f1, f2 ].map(x => {
     var r: express.Request = getMockReq();
     r.body = {...x};
     return expect(Rq.parseNewTemplateRequest(r))
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  return Promise.all([ okays, fails1 ].flat());
+  var fails2 = [ f3 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    return expect(Rq.parseNewTemplateRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ okays, fails1, fails2 ].flat());
 });
 
 test("Can parse update template request", () => {
@@ -733,7 +768,7 @@ test("Can parse update template request", () => {
     return expect(Rq.parseUpdateTemplateRequest(r)).resolves.toStrictEqual(x);
   });
 
-  var fails1 = [ f1, f2 ].map(x => {
+  var fails1 = [ f1 ].map(x => {
     var r: express.Request = getMockReq();
     r.body = {...x};
     r.params.id = id;
@@ -748,5 +783,13 @@ test("Can parse update template request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  return Promise.all([ okays, fails1, fails2 ].flat());
+  var fails3 = [ f2 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    return expect(Rq.parseUpdateTemplateRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ okays, fails1, fails2, fails3 ].flat());
 });
