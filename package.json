@@ -12,5 +12,8 @@
   },
   "scripts": {
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "ejs": "^3.1.6"
   }
 }
