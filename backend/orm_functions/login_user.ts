@@ -1,61 +1,61 @@
 import {prisma} from '../prisma/prisma'
-import { search_person_by_name } from './person';
+import { searchPersonByName } from './person';
 
 (async () => {
-    const person = await search_person_by_name("Bob");
+    const person = await searchPersonByName("Bob");
     console.log(await person[0].person_id);
-    console.log(await search_login_user_by_person(person[0].person_id));
+    console.log(await searchLoginUserByPerson(person[0].person_id));
    }
  )()
 
 
 // Create Login User
-export async function create_login_user(person_id : number, password : string, is_admin : boolean, is_coach : boolean){
+export async function createLoginUser(personId : number, password : string, isAdmin : boolean, isCoach : boolean){
     const result = await prisma.login_user.create({
         data: {
-            person_id: person_id,
+            person_id: personId,
             password: password,
-            is_admin: is_admin,
-            is_coach: is_coach
+            is_admin: isAdmin,
+            is_coach: isCoach
         },
     });
     return result;
 }
 
 // Search Login User by Person
-export async function search_login_user_by_person(search_string : number){
+export async function searchLoginUserByPerson(personId : number){
     const result = await prisma.login_user.findMany({
-        where: { person_id : search_string },
+        where: { person_id : personId },
     });
     return result;
 }
 
 // Search all admin Login User
-export async function search_all_admin_login_users(search : boolean){
+export async function searchAllAdminLoginUsers(isAdmin : boolean){
     const result = await prisma.login_user.findMany({
-        where: { is_admin : search },
+        where: { is_admin : isAdmin },
     });
     return result;
 }
 
 // Search all coach Login User
-export async function search_all_coach_login_users(search : boolean){
+export async function searchAllCoachLoginUsers(isCoach : boolean){
     const result = await prisma.login_user.findMany({
-        where: { is_coach : search },
+        where: { is_coach : isCoach },
     });
     return result;
 }
 
 // Search all coach Login User
-export async function search_all_admin_and_coach_login_users(search : boolean){
+export async function searchAllAdminAndCoachLoginUsers(bool : boolean){
     const result = await prisma.login_user.findMany({
         where: { 
             AND: [
                 {
-                    is_admin: search
+                    is_admin: bool
                 },
                 {
-                    is_coach: search
+                    is_coach: bool
                 },
             ],
         }
@@ -63,18 +63,34 @@ export async function search_all_admin_and_coach_login_users(search : boolean){
     return result;
 }
 
+// Update Login User
+export async function updateLoginUser(loginUserId : number, personId : number, password : string, isAdmin : boolean, isCoach : boolean){
+    const result = await prisma.login_user.update({
+        where : {
+            login_user_id : loginUserId
+        },
+        data: {
+            person_id: personId,
+            password: password,
+            is_admin: isAdmin,
+            is_coach: isCoach
+        },
+    });
+    return result;
+}
+
 // Remove Login User by id
-export async function delete_login_user_by_id(delete_id : number){
+export async function deleteLoginUserById(deleteId : number){
     const result = await prisma.login_user.deleteMany({
-        where: { login_user_id: delete_id }
+        where: { login_user_id: deleteId }
     });
     return result;
 }
 
 // Remove Login User by Person id
-export async function delete_login_user_by_person_id(delete_id : number){
+export async function deleteLoginUserByPersonId(deleteId : number){
     const result = await prisma.login_user.deleteMany({
-        where: { person_id: delete_id},
+        where: { person_id: deleteId},
     });
     return result;
 }
