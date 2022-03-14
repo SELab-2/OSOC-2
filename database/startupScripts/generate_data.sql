@@ -18,10 +18,10 @@ INSERT INTO osoc(year)VALUES(2022);
 
 /* Insert data into job_application table */
 INSERT INTO job_application(student_id, osoc_id, responsibilities, motivation, fun_fact, is_volunteer, student_coach,
- edus, edu_level, edu_duration, edu_year, edu_institute, email_status)VALUES
+ edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
  'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, TRUE, 'Informatics', 
- 'Universitarian', 3, 3, 'Ghent University', 'NONE');
+ 'Universitarian', 3, 3, 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES

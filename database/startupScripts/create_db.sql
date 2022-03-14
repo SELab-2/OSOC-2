@@ -55,7 +55,8 @@ CREATE TABLE IF NOT EXISTS job_application (
     edu_duration          INT,
     edu_year              INT,
     edu_institute         TEXT,
-    email_status          email_status_enum    NOT NULL
+    email_status          email_status_enum    NOT NULL,
+    created_at            TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
 
 

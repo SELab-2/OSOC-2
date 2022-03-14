@@ -1,4 +1,4 @@
-import { contract_status_enum, decision_enum } from "@prisma/client"
+import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/client"
 
 /**
  * interface for the object needed to create a student
@@ -146,6 +146,68 @@ export interface UpdateContract {
      * status of the contract (draft, approved, cancelled,...)
      */
     contractStatus?: contract_status_enum
+}
+
+/**
+ * interface for the object needed in createJobApplication
+ */
+export interface CreateJobApplication {
+    /**
+     * the student who's application this is
+     */
+    studentId: number,
+    /**
+     * the responsibilities the students wants to take
+     */
+    responsibilities?: string | null,
+    /**
+     * optional motivation from the student
+     */
+    motivation?: string | null,
+    /**
+     * a fun fact about the student
+     */
+    funFact?: string | null,
+    /**
+     * boolean that indicates if the student is a volunteer or not
+     */
+    isVolunteer: boolean, 
+    /**
+     * boolean that indicates if the student is a student-coach or not
+     */
+    studentCoach: boolean,
+    /**
+     * id of the osoc edition this job application is for
+     */
+    osocId: number,
+    /**
+     * information about the educations of the student
+     */
+    edus?: string | null,
+    /**
+     * information about the education level of the student
+     */
+    eduLevel?: string | null,
+    /**
+     * how long this student has been studying for
+     */
+    eduDuration?: number | null,
+    /**
+     * expected graduation year
+     */
+    eduYear?: number | null,
+    /**
+     * institute the student is studying at
+     */
+    eduInstitute?: string | null,
+    /**
+     * information about a confirmation email for the evaluation
+     */
+    emailStatus: email_status_enum,
+    /**
+     * keeps track of when we received this application (used to pick the latest one)
+     */
+    created_at: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
 

@@ -61,6 +61,7 @@ model job_application {
   edu_year              Int?
   edu_institute         String?
   email_status          email_status_enum
+  created_at            DateTime                @db.Timestamptz(6)
   osoc                  osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
   student               student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
   applied_role          applied_role[]
