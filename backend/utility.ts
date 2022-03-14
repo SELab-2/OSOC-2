@@ -5,6 +5,7 @@ import {
   ApiError,
   Errors,
   InternalTypes,
+  Requests,
   Responses,
   RouteCallback,
   Verb
@@ -195,21 +196,18 @@ export async function redirect(res: express.Response,
 
 /**
  *  Checks the existence and correctness of the session key.
- *  @param req The Express.js request to extract and check the session key for.
+ *  @param obj The object which could hold a session key.
+ *  @template T The type of the object. Should hold a session key.
  *  @returns A promise which will resolve with the request upon success, or to
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
-export async function checkSessionKey(req: express.Request):
-    Promise<express.Request> {
-  if ("sessionkey" in req.body) {
-    // TODO validate session key
-    // upon validation error:
-    // return Promise.reject(errors.cookUnauthenticated());
-    return Promise.resolve(req);
-  }
-  console.log("Session key requested - none given.");
-  return Promise.reject(errors.cookUnauthenticated());
+export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
+    Promise<T> {
+  // TODO validate session key using obj.sessionkey
+  // upon validation error:
+  // return Promise.reject(errors.cookUnauthenticated());
+  return Promise.resolve(obj);
 }
 
 /**
@@ -217,17 +215,19 @@ export async function checkSessionKey(req: express.Request):
  * not it corresponds to an admin user.
  *
  *  @param req The Express.js request to extract and check the session key for.
+ *  @template T The type of the object. Should hold a session key.
  *  @returns A promise which will resolve with the request upon success. If the
  * session key is not present or invalid, returns a promise which rejects with
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.
  */
-export async function isAdmin(req: express.Request): Promise<express.Request> {
-  return checkSessionKey(req).then((rq) => {
+export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
+    Promise<T> {
+  return checkSessionKey(obj).then((x) => {
     // we know sessionkey is available and valid
     // TODO do logic with sessionkey to check if the associated user is an
     // admin if not: return Promise.reject(errors.cookInsufficientRights());
-    return Promise.resolve(rq);
+    return Promise.resolve(x);
   })
 }
 

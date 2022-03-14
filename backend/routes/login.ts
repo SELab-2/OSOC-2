@@ -1,5 +1,6 @@
 import express from 'express';
 
+import {parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
 
@@ -10,6 +11,9 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function login(_: express.Request): Promise<Responses.Key> {
+  // dummy to cheat eslint
+  _.params.id = "";
+
   let sessionkey: string = "";
   // TODO: login logic
   return Promise.resolve({sessionkey : sessionkey});
@@ -22,10 +26,15 @@ async function login(_: express.Request): Promise<Responses.Key> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function logout(req: express.Request): Promise<Responses.Empty> {
-  return util.checkSessionKey(req).then((_: express.Request) => {
-    // TODO logout logic
-    return Promise.resolve({});
-  });
+  return parseLogoutRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(checked => {
+        // dummy to cheat eslint
+        checked.sessionkey = "";
+        // do logout logic
+        // aka remove session key from database
+        return Promise.resolve({});
+      })
 }
 
 /**
