@@ -63,6 +63,22 @@ export async function searchAllAdminAndCoachLoginUsers(bool : boolean){
     return result;
 }
 
+// Update Login User
+export async function updateLoginUser(loginUserId : number, personId : number, password : string, isAdmin : boolean, isCoach : boolean){
+    const result = await prisma.login_user.update({
+        where : {
+            login_user_id : loginUserId
+        },
+        data: {
+            person_id: personId,
+            password: password,
+            is_admin: isAdmin,
+            is_coach: isCoach
+        },
+    });
+    return result;
+}
+
 // Remove Login User by id
 export async function deleteLoginUserById(deleteId : number){
     const result = await prisma.login_user.deleteMany({

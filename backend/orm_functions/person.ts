@@ -64,6 +64,23 @@ export async function searchPersonByLogin(login : string){
     return result;
 }
 
+// Update Person
+export async function updatePerson(personId : number, firstname : string, lastname : string, gender : string, github : string, email : string){
+    const result = await prisma.person.update({
+        where : {
+            person_id : personId
+        },
+        data: {
+            firstname: firstname,
+            lastname: lastname,
+            gender: gender,
+            github: github,
+            email: email
+        },
+    });
+    return result;
+}
+
 // Remove Person by id
 export async function deletePersonById(personId : number){
     const result = await prisma.person.deleteMany({
