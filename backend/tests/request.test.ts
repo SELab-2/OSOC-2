@@ -558,3 +558,195 @@ test("Can parse draft student request", () => {
 
   return Promise.all([ p1, p2, p3, p4 ]);
 });
+
+test("Can parse mark as followed up request", () => {
+  const key: string = "my-key-arrived-but";
+  const id: string = "my-id-is-gone-:(";
+
+  var ht: any = {sessionkey : key, type : "hold-tight"};
+  var cf: any = {sessionkey : key, type : "confirmed"};
+  var cd: any = {sessionkey : key, type : "cancelled"};
+  var i1: any = {sessionkey : key, type : "invalid"};
+  var i2: any = {type : "hold-tight"};
+  var i3: any = {sessionkey : key};
+
+  var okays = [ ht, cf, cd ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    x.id = id;
+    return expect(Rq.parseSetFollowupStudentRequest(r))
+        .resolves.toStrictEqual(x);
+  });
+
+  var fails1 = [ i1, i2, i3 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    x.id = id;
+    return expect(Rq.parseSetFollowupStudentRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  var fails2 = [ ht ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    return expect(Rq.parseSetFollowupStudentRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ okays, fails1, fails2 ].flat());
+});
+
+test("Can parse new template request", () => {
+  const key: string = "yet-another-session-key";
+
+  var ok1:
+      any = {name : "my-template", content : "hello-there", sessionkey : key};
+  var ok2: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?"
+  };
+  var ok3: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    cc : "cc@gmail.com"
+  };
+  var ok4: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var ok5: any = {
+    name : "my-template",
+    content : "hello-there",
+    subject : "I like C++",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+
+  var f1: any = {
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var f2: any = {
+    name : "my-template",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var f3: any = {
+    name : "my-template",
+    content : "hello-there",
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+
+  var okays = [ ok1, ok2, ok3, ok4, ok5 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    ["desc", "cc", "subject"].forEach(v => {
+      if (!(v in x))
+        x[v] = undefined;
+    });
+
+    return expect(Rq.parseNewTemplateRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  var fails1 = [ f1, f2, f3 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    return expect(Rq.parseNewTemplateRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ okays, fails1 ].flat());
+});
+
+test("Can parse update template request", () => {
+  const key: string = "yet-another-session-key";
+  const id: string = "what-did-you-expect-this-is-an-id";
+
+  var ok1:
+      any = {name : "my-template", content : "hello-there", sessionkey : key};
+  var ok2: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?"
+  };
+  var ok3: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    cc : "cc@gmail.com"
+  };
+  var ok4: any = {
+    name : "my-template",
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var ok5: any = {
+    content : "hello-there",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var ok6: any = {
+    name : "my-template",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+  var ok7: any = {
+    name : "my-template",
+    content : "hello-there",
+    subject : "I like C++",
+    sessionkey : key,
+    desc : "a description did you know that orcas have culture?",
+    cc : "cc@gmail.com"
+  };
+
+  var f1: any = {sessionkey : key};
+  var f2: any = {name : "my-template", content : "hello-there"};
+
+  var okays = [ ok1, ok2, ok3, ok4, ok5, ok6, ok7 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    x.id = id;
+    ["name", "content", "subject", "desc", "cc"].forEach(v => {
+      if (!(v in x))
+        x[v] = undefined;
+    });
+
+    return expect(Rq.parseUpdateTemplateRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  var fails1 = [ f1, f2 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id;
+    return expect(Rq.parseUpdateTemplateRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  var fails2 = [ ok1 ].map(x => {
+    var r: express.Request = getMockReq();
+    r.body = {...x};
+    return expect(Rq.parseUpdateTemplateRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ okays, fails1, fails2 ].flat());
+});

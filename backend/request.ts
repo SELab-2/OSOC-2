@@ -252,7 +252,8 @@ export function parseNewTemplateRequest(req: express.Request):
 
   return Promise.resolve({
     sessionkey : req.body.sessionkey,
-    name : maybe(req.body, "name"),
+    name : req.body.name,
+    subject : maybe(req.body, "subject"),
     desc : maybe(req.body, "desc"),
     cc : maybe(req.body, "cc"),
     content : req.body.content
