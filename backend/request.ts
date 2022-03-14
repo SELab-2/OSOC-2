@@ -57,7 +57,7 @@ function parseKeyIdRequest(req: express.Request): Promise<Requests.IdRequest> {
       {sessionkey : req.body.sessionkey, id : req.params.id});
 }
 
-function parseUpdateLUser(req: express.Request):
+function parseUpdateLoginUser(req: express.Request):
     Promise<Requests.UpdateLoginUser> {
   if (!hasFields(req, [], types.id))
     return rejector();
@@ -252,7 +252,8 @@ export function parseNewTemplateRequest(req: express.Request):
 
   return Promise.resolve({
     sessionkey : req.body.sessionkey,
-    name : maybe(req.body, "name"),
+    name : req.body.name,
+    subject : maybe(req.body, "subject"),
     desc : maybe(req.body, "desc"),
     cc : maybe(req.body, "cc"),
     content : req.body.content
@@ -303,5 +304,5 @@ export const parseGetFollowupStudentRequest = parseKeyIdRequest;
 export const parseGetTemplateRequest = parseKeyIdRequest;
 export const parseDeleteTemplateRequest = parseKeyIdRequest;
 
-export const parseUpdateCoachRequest = parseUpdateLUser;
-export const parseUpdateAdminRequest = parseUpdateLUser;
+export const parseUpdateCoachRequest = parseUpdateLoginUser;
+export const parseUpdateAdminRequest = parseUpdateLoginUser;
