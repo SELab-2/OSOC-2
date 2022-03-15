@@ -1,5 +1,5 @@
-import prisma from '../prisma/prisma'
-import { CreateContract, UpdateContract } from './orm_types';
+import prisma from '../prisma/prisma';
+import {CreateContract, UpdateContract} from './orm_types';
 
 /**
  * add contract created by login_user_id for student_id that has the role project_role_id
@@ -8,7 +8,7 @@ import { CreateContract, UpdateContract } from './orm_types';
  * @returns created contract object in the database
  */
  export async function createContract(contract: CreateContract) {
-    const result = await prisma.contract.create({
+    return await prisma.contract.create({
         data: {
             student_id: contract.studentId,
             project_role_id: contract.projectRoleId,
@@ -17,7 +17,6 @@ import { CreateContract, UpdateContract } from './orm_types';
             contract_status: contract.contractStatus,
         }
     });
-    return result;
 }
 
 /**
@@ -28,7 +27,7 @@ import { CreateContract, UpdateContract } from './orm_types';
  * @returns the updated contract
  */
 export async function updateContract(contract: UpdateContract) {
-    const result = await prisma.contract.update({
+    return await prisma.contract.update({
         where: {
             contract_id: contract.contractId
         },
@@ -38,7 +37,6 @@ export async function updateContract(contract: UpdateContract) {
             information: contract.information
         }
     });
-    return result;
 }
 
 /**
@@ -48,12 +46,11 @@ export async function updateContract(contract: UpdateContract) {
  * @returns the number of removed contracts {count: number}
  */ 
 export async function removeContractsFromStudent(studentId: number) {
-    const result = await prisma.contract.deleteMany({
+    return await prisma.contract.deleteMany({
         where: {
             student_id: studentId
         }
     });
-    return result;
 }
 
 /**
@@ -63,10 +60,9 @@ export async function removeContractsFromStudent(studentId: number) {
  * @returns the removed contract
  */ 
 export async function removeContract(contractId: number) {
-    const result = await prisma.contract.delete({
+    return await prisma.contract.delete({
         where: {
             contract_id: contractId
         }
     });
-    return result;
 }

@@ -1,4 +1,4 @@
-import { type_enum } from "@prisma/client";
+import {type_enum} from "@prisma/client";
 import prisma from "../prisma/prisma";
 
 /**
@@ -10,14 +10,13 @@ import prisma from "../prisma/prisma";
  * @returns the created attachment
  */
  export async function createAttachment(jobApplicationId: number, url: string, type: type_enum) {
-    const result = await prisma.attachment.create({
+    return await prisma.attachment.create({
         data: {
             job_application_id: jobApplicationId,
             url: url,
             type: type
         }
     });
-    return result;
 }
 
 /**
@@ -26,12 +25,11 @@ import prisma from "../prisma/prisma";
  * @returns the removed entry in the database
  */
 export async function deleteAttachment(attachmentId:number) {
-    const result = await prisma.attachment.delete({
+    return await prisma.attachment.delete({
         where: {
             attachment_id: attachmentId
         }
     });
-    return result;
 }
 
 
@@ -42,10 +40,9 @@ export async function deleteAttachment(attachmentId:number) {
  * @returns the number of removed attachments {count: number}
  */
 export async function deleteAllAttachmentsForApplication(jobApplicationId:number) {
-    const result = await prisma.attachment.deleteMany({
+    return await prisma.attachment.deleteMany({
         where: {
             job_application_id: jobApplicationId
         }
     });
-    return result;
 }
