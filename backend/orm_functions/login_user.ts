@@ -1,12 +1,12 @@
 import prisma from '../prisma/prisma'
-import { searchPersonByName } from './person';
+// import {searchPersonByName} from './person';
 
-(async () => {
-    const person = await searchPersonByName("Bob");
-    console.log(await person[0].person_id);
-    console.log(await searchLoginUserByPerson(person[0].person_id));
-   }
- )()
+// (async () => {
+//     const person = await searchPersonByName("Bob");
+//     console.log(await person[0].person_id);
+//     console.log(await searchLoginUserByPerson(person[0].person_id));
+//    }
+//  )()
 
 
 // Create Login User
@@ -101,7 +101,7 @@ export async function deleteLoginUserByPersonId(deleteId : number){
  * @returns the found sessionID or null if the session ID doesn't exist in the database
  */
 export async function checkValidSession(sessionId: string) {
-    const result = await prisma.login_user.findUnique({
+    return await prisma.login_user.findUnique({
         where: {
             session_id: sessionId,
         },
@@ -109,7 +109,6 @@ export async function checkValidSession(sessionId: string) {
             session_id: true,
         }
     });
-    return result;
 }
 
 /**
@@ -119,7 +118,7 @@ export async function checkValidSession(sessionId: string) {
  * @returns the updated session id
  */
 export async function setSessionId(loginUserId:number, sessionId: string) {
-    const result = await prisma.login_user.update({
+    return await prisma.login_user.update({
         where: {
             login_user_id: loginUserId,
         },
@@ -130,5 +129,4 @@ export async function setSessionId(loginUserId:number, sessionId: string) {
             session_id: true,
         }
     });
-    return result;
 }
