@@ -1,5 +1,5 @@
 {
-  "extends": ["eslint:recommended", "next/core-web-vitals"],
+  "extends": ["eslint:recommended", "next/core-web-vitals","next/babel"],
   "settings": {
     "next": {
       "rootDir": "frontend"
