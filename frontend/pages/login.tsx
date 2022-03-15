@@ -2,6 +2,7 @@ import type {NextPage} from 'next'
 import styles from '../styles/login.module.css'
 import Image from "next/image"
 import LogoOsocColor from "../public/images/logo-osoc-color.svg"
+import GitHubLogo from "../public/images/github-logo.svg"
 import {SyntheticEvent, useState} from "react";
 
 const Login: NextPage = () => {
@@ -69,10 +70,25 @@ const Login: NextPage = () => {
                                 <input type="password" name="loginPassword" value={loginPassword}
                                        onChange={e => setLoginPassword(e.target.value)}/>
                             </label>
-                            <input type="submit" value="LOG IN"/>
-                        </form>
+                            <button onClick={e => submitLogin(e)}>LOG IN</button>
+                            <a className={styles.resetPassword} href="#forgotPassword">Forgot password?</a>
+                            <div className={styles.orContainer}>
+                                <div />
+                                <p>or</p>
+                                <div />
+                            </div>
+                            <div className={styles.githubContainer} onClick={e => githubLogin(e)}>
+                                <div className={styles.githublogo}>
+                                    <Image
+                                        src={GitHubLogo}
+                                        layout="intrinsic"
+                                        alt="GitHub Logo"
+                                    />
+                                </div>
+                                <p className={styles.github} >Log in with GitHub</p>
+                            </div>
 
-                        <button onClick={e => githubLogin(e)}>Log in with GitHub</button>
+                        </form>
                     </div>
 
                     <div className={styles.registerContainer}>
@@ -95,7 +111,7 @@ const Login: NextPage = () => {
                                 <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
                                        onChange={e => setRegisterConfirmPassword(e.target.value)}/>
                             </label>
-                            <input type="submit" value="REGISTER"/>
+                            <button onClick={e => submitRegister(e)}>REGISTER</button>
                         </form>
                     </div>
                 </div>

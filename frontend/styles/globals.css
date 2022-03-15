@@ -39,3 +39,31 @@ h3 {
   font-weight: normal;
   opacity: 50%;
 }
+
+button {
+  border: none;
+  border-radius: 0;
+  width: auto;
+  flex-grow: 0;
+  font-weight: bold;
+  font-size: 1rem;
+  padding-block: 0.75rem;
+  padding-inline: 1.5rem;
+  background-color: var(--succes-100);
+  font-family: inherit
+}
+
+button:hover {
+  background-color: var(--warning-100);
+  transition: all 0.2s ease-in-out;
+}
+
+a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: var(--error-100);
+}
