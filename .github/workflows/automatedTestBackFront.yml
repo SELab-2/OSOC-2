@@ -6,9 +6,7 @@ name: Backend build and test
 on:
   # Run on every open pull request
   pull_request:
-    branches: [ main, development ]
-
-  #  types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize]
 
   # Should run all tests and upload the codecoverage on main and development
   push:
@@ -33,18 +31,12 @@ jobs:
       working-directory: backend
     - run: npm run build --if-present
       working-directory: backend
+    - run: npm test
+      working-directory: backend
 
     - name: Upload coverage to Codecov
-    - run: |
-          npm t
-          codecov
-
+      uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        working-directory: backend
-
-#      uses: codecov/codecov-action@v2
-#      with:
-#        token: ${{ secrets.CODECOV_TOKEN }}
-#        files: backend/coverage.json
-#        verbose: true
+        files: backend/coverage.json
+        verbose: true
