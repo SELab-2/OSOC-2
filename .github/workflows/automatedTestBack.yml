@@ -5,8 +5,8 @@ name: Backend build and test
 
 on:
   # Run on every open pull request
-  pull_request:
-    types: [opened, edited, reopened, synchronize]
+  #pull_request:
+  #  types: [opened, edited, reopened, synchronize]
 
   # Should run all tests and upload the codecoverage on main and development
   push:
