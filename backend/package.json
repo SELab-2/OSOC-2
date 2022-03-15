@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.ts",
-    "test": "jest --ci --coverage"
+    "test": "jest --ci --coverage --outputFile=coverage.json --json"
   },
   "author": "",
   "license": "ISC",

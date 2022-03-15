@@ -31,17 +31,12 @@ jobs:
       working-directory: backend
     - run: npm run build --if-present
       working-directory: backend
+    - run: npm test
+      working-directory: backend
 
     - name: Upload coverage to Codecov
-      run:
-        |
-        npm t
-        codecov
+      uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        working-directory: backend
-
-        # uses: codecov/codecov-action@v2
-      #with:
-        #files: backend/coverage.json
-        #verbose: true
+        files: backend/coverage.json
+        verbose: true
