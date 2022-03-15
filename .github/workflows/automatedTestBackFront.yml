@@ -34,7 +34,7 @@ jobs:
     - run: npm test
       working-directory: backend
 
-    - run: npm install yarn
+    - run: npm install --global yarn
     - name: Install modules
       run: yarn
     - name: Run ESLint
