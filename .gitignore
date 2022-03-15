@@ -55,3 +55,6 @@ frontend/node_modules
 .idea
 frontend/.idea
 backend/.idea
+
+# ignore test coverage files
+*coverage.json
