@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS login_user (
     /* TODO2: Wat als je zowel email als github hebt */
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
+    session_id       TEXT UNIQUE,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
 );

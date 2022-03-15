@@ -94,3 +94,41 @@ export async function deleteLoginUserByPersonId(deleteId : number){
     });
     return result;
 }
+
+/**
+ * 
+ * @param sessionId: the sessionID we want to check if it is valid/exists
+ * @returns the found sessionID or null if the session ID doesn't exist in the database
+ */
+export async function checkValidSession(sessionId: string) {
+    const result = await prisma.login_user.findUnique({
+        where: {
+            session_id: sessionId,
+        },
+        select: {
+            session_id: true,
+        }
+    });
+    return result;
+}
+
+/**
+ * 
+ * @param loginUserId: the user for which we are updating the ID
+ * @param sessionId: the new sessionID for this user
+ * @returns the updated session id
+ */
+export async function setSessionId(loginUserId:number, sessionId: string) {
+    const result = await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            session_id: sessionId,
+        },
+        select: {
+            session_id: true,
+        }
+    });
+    return result;
+}

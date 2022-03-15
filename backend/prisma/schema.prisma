@@ -94,6 +94,7 @@ model login_user {
   password      String
   is_admin      Boolean?
   is_coach      Boolean?
+  session_id    String?        @unique
   person        person         @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract      contract[]
   evaluation    evaluation[]
@@ -120,7 +121,7 @@ model person {
 
 model project {
   project_id   Int            @id @default(autoincrement())
-  name         String         // TODO: Should this be unique
+  name         String
   osoc_id      Int            @default(autoincrement())
   partner      String
   start_date   DateTime       @db.Date
