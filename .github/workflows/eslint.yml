@@ -28,11 +28,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm install --global yarn
-      - name: Install modules
-        run: yarn
-      - name: Run ESLint
-        run: eslint . --ext .js,.jsx,.ts,.tsx
+      - run: eslint . --ext .js,.jsx,.ts,.tsx
 
 
 
