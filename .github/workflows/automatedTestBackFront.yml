@@ -33,6 +33,10 @@ jobs:
       working-directory: backend
     - run: npm test
       working-directory: backend
+    - name: Install modules
+      run: yarn
+    - name: Run ESLint
+      run: eslint . --ext .js,.jsx,.ts,.tsx
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
