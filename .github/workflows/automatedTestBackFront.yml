@@ -39,5 +39,4 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: backend/coverage.json
-        flags: all_tests
         verbose: true
