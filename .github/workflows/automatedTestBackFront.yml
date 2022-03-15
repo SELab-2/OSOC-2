@@ -33,6 +33,8 @@ jobs:
       working-directory: backend
     - run: npm test
       working-directory: backend
+
+    - run: npm install yarn
     - name: Install modules
       run: yarn
     - name: Run ESLint
