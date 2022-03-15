@@ -1,5 +1,5 @@
 import prisma from '../prisma/prisma'
-import { CreateEvaluationForStudent, UpdateEvaluationForStudent } from './orm_types';
+import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from './orm_types';
 
 /**
  * helper function of createEvaluationForStudent
@@ -7,8 +7,8 @@ import { CreateEvaluationForStudent, UpdateEvaluationForStudent } from './orm_ty
  * @param jobApplicationId: the jobApplicationId we are checking for if there is already a final evaluation
  * @returns the found evaluation or null if no final evaluation exists yet
  */
- async function checkIfFinalEvaluationExists(jobApplicationId: number) {
-    const result = await prisma.evaluation.findFirst({
+export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
+    return await prisma.evaluation.findFirst({
         where: {
             job_application_id: jobApplicationId,
             is_final: true,
@@ -17,7 +17,6 @@ import { CreateEvaluationForStudent, UpdateEvaluationForStudent } from './orm_ty
             evaluation_id: true,
         },
     });
-    return result;
 }
 
 // TODO: check if this really works?
@@ -56,7 +55,7 @@ export async function createEvaluationForStudent(evaluation: CreateEvaluationFor
  * @returns the updated evaluation.
  */
 export async function updateEvaluationForStudent(evaluation:UpdateEvaluationForStudent) {
-    const result = await prisma.evaluation.update({
+    return await prisma.evaluation.update({
         where: {
             evaluation_id: evaluation.evaluation_id,
         },
@@ -66,5 +65,4 @@ export async function updateEvaluationForStudent(evaluation:UpdateEvaluationForS
             motivation: evaluation.motivation,
         }
     });
-    return result;
 }

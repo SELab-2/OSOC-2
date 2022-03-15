@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended'
 
+/*
+* this file creates a mock of the prisma client, this mock is used in all the unit tests
+*/
+
 import prisma from '../../prisma/prisma'
 
 jest.mock('../../prisma/prisma', () => ({
