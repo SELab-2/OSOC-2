@@ -1,5 +1,5 @@
 import { email_status_enum } from "@prisma/client";
-import { prisma } from "../prisma/prisma";
+import prisma from "../prisma/prisma";
 import { CreateJobApplication } from "./orm_types";
 
 /**

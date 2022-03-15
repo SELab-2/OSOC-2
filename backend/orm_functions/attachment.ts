@@ -1,18 +1,18 @@
 import { type_enum } from "@prisma/client";
-import { prisma } from "../prisma/prisma";
+import prisma from "../prisma/prisma";
 
 /**
  * create an attachment for job_application_id
  * 
- * @param job_application_id: the application to which this attachment belongs
+ * @param jobApplicationId: the application to which this attachment belongs
  * @param url: url where we can find this attachment back
  * @param type: the type of the attachment (CV, PORTFOLIO, FILE)
  * @returns the created attachment
  */
- export async function createAttachment(job_application_id: number, url: string, type: type_enum) {
+ export async function createAttachment(jobApplicationId: number, url: string, type: type_enum) {
     const result = await prisma.attachment.create({
         data: {
-            job_application_id: job_application_id,
+            job_application_id: jobApplicationId,
             url: url,
             type: type
         }

@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/prisma'
+import prisma from '../prisma/prisma'
 import { CreateEvaluationForStudent, UpdateEvaluationForStudent } from './orm_types';
 
 /**

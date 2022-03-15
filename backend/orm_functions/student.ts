@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/prisma'
+import prisma from '../prisma/prisma'
 import {CreateStudent, UpdateStudent } from './orm_types';
 
 // TODO: how do we make sure there is no student for this person_id yet?

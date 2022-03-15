@@ -1,4 +1,4 @@
-import {prisma} from '../prisma/prisma'
+import prisma from '../prisma/prisma'
 
 
 // console.log(await search_person_by_name("Alice"));

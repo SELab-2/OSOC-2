@@ -53,3 +53,6 @@ frontend/node_modules
 # prevent breaking of typedoc (possibly)
 # keep some (empty) directories
 !**/.gitkeep
+
+# jetbrains
+.idea
