@@ -1,6 +1,6 @@
-import { email_status_enum } from "@prisma/client";
+import {email_status_enum} from "@prisma/client";
 import prisma from "../prisma/prisma";
-import { CreateJobApplication } from "./orm_types";
+import {CreateJobApplication} from "./orm_types";
 
 /**
  * 
@@ -8,11 +8,11 @@ import { CreateJobApplication } from "./orm_types";
  * @returns al the evaluations associated with this student together with the osoc year
  */
  export async function getStudentEvaluationsTotal(studentId: number) {
-    const result = await prisma.job_application.findMany({
+    return await prisma.job_application.findMany({
         where: {
             student_id: studentId
         },
-        select : {
+        select: {
             osoc: {
                 select: {
                     year: true,
@@ -26,7 +26,6 @@ import { CreateJobApplication } from "./orm_types";
             }
         }
     });
-    return result;
 }
 
 /**
@@ -35,18 +34,18 @@ import { CreateJobApplication } from "./orm_types";
  * @returns al the evaluations associated with this student together with the osoc year
  */
 export async function getStudentEvaluationsFinal(studentId: number) {
-    const result = await prisma.job_application.findMany({
+    return await prisma.job_application.findMany({
         where: {
             student_id: studentId
         },
-        select : {
+        select: {
             osoc: {
                 select: {
                     year: true,
                 }
             },
             evaluation: {
-                where:  {
+                where: {
                     is_final: true,
                 },
                 select: {
@@ -56,7 +55,6 @@ export async function getStudentEvaluationsFinal(studentId: number) {
             }
         }
     });
-    return result;
 }
 
 /**
@@ -65,18 +63,18 @@ export async function getStudentEvaluationsFinal(studentId: number) {
  * @returns al the evaluations associated with this student together with the osoc year
  */
 export async function getStudentEvaluationsTemp(studentId: number) {
-    const result = await prisma.job_application.findMany({
+    return await prisma.job_application.findMany({
         where: {
             student_id: studentId
         },
-        select : {
+        select: {
             osoc: {
                 select: {
                     year: true,
                 }
             },
             evaluation: {
-                where:  {
+                where: {
                     is_final: false,
                 },
                 select: {
@@ -86,7 +84,6 @@ export async function getStudentEvaluationsTemp(studentId: number) {
             }
         }
     });
-    return result;
 }
 
 /**
@@ -96,12 +93,11 @@ export async function getStudentEvaluationsTemp(studentId: number) {
  * @returns the number of deleted job applications {count: number}
  */
  export async function deleteJobApplicationsFromStudent(studentId: number) {
-    const result = await prisma.job_application.deleteMany({
+    return await prisma.job_application.deleteMany({
         where: {
             student_id: studentId
         }
     });
-    return result;
 }
 
 /**
@@ -112,7 +108,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
  * @returns: the updated database record
  */
 export async function changeEmailStatusOfJobApplication(jobApplicationId: number, emailStatus: email_status_enum) {
-    const result = await prisma.job_application.update({
+    return await prisma.job_application.update({
         where: {
             job_application_id: jobApplicationId
         },
@@ -120,7 +116,6 @@ export async function changeEmailStatusOfJobApplication(jobApplicationId: number
             email_status: emailStatus
         }
     });
-    return result;
 }
 
 /**
@@ -130,12 +125,11 @@ export async function changeEmailStatusOfJobApplication(jobApplicationId: number
  * @returns the removed job application
  */
 export async function deleteJobApplication(jobApplicationId: number) {
-    const result = await prisma.job_application.delete({
+    return await prisma.job_application.delete({
         where: {
             job_application_id: jobApplicationId,
         }
     });
-    return result;
 }
 
 
@@ -144,8 +138,8 @@ export async function deleteJobApplication(jobApplicationId: number) {
  * @param jobApplication: CreateJobApplicationObject that contains all the information about the job application
  */
 export async function createJobApplication(jobApplication: CreateJobApplication) {
-    
-    const result = await prisma.job_application.create({
+
+    return await prisma.job_application.create({
         data: {
             student_id: jobApplication.studentId,
             motivation: jobApplication.motivation,
@@ -163,7 +157,6 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
             created_at: jobApplication.created_at
         }
     });
-    return result;
 }
 
 /**
@@ -172,7 +165,7 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
  * @returns the found job applications of the given student
  */
 export async function getLatestJobApplicationOfStudent(studentId: number) {
-    const result = await prisma.job_application.findFirst({
+    return await prisma.job_application.findFirst({
         where: {
             student_id: studentId
         },
@@ -185,7 +178,6 @@ export async function getLatestJobApplicationOfStudent(studentId: number) {
             applied_role: true
         }
     });
-    return result;
 }
 
 
@@ -195,7 +187,7 @@ export async function getLatestJobApplicationOfStudent(studentId: number) {
  * @returns the found job application
  */
 export async function getJobApplication(jobApplicationId: number) {
-    const result = await prisma.job_application.findUnique({
+    return await prisma.job_application.findUnique({
         where: {
             job_application_id: jobApplicationId,
         },
@@ -205,7 +197,6 @@ export async function getJobApplication(jobApplicationId: number) {
             applied_role: true
         }
     });
-    return result;
 }
 
 /**
@@ -214,7 +205,7 @@ export async function getJobApplication(jobApplicationId: number) {
  * @returns all the job applications associated with the given year
  */
  export async function getJobApplicationByYear(year:number) {
-    const result = await prisma.job_application.findMany({
+    return await prisma.job_application.findMany({
         where: {
             osoc: {
                 year: year
@@ -226,7 +217,6 @@ export async function getJobApplication(jobApplicationId: number) {
             applied_role: true
         }
     });
-    return result;
 }
 
 
