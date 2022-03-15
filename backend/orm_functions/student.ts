@@ -1,5 +1,5 @@
 import prisma from '../prisma/prisma'
-import {CreateStudent, UpdateStudent } from './orm_types';
+import {CreateStudent, UpdateStudent} from './orm_types';
 
 // TODO: how do we make sure there is no student for this person_id yet?
 /**
@@ -7,7 +7,7 @@ import {CreateStudent, UpdateStudent } from './orm_types';
  * @param student: student object with the needed information
  */
 export async function createStudent(student: CreateStudent) {
-    const result = prisma.student.create({
+    return prisma.student.create({
         data: {
             person_id: student.personId,
             pronouns: student.pronouns,
@@ -16,7 +16,6 @@ export async function createStudent(student: CreateStudent) {
             alumni: student.alumni,
         }
     });
-    return result;
 } 
 
 /**
@@ -24,12 +23,11 @@ export async function createStudent(student: CreateStudent) {
  * @returns a list of all the student objects in the database together with their personal info
  */
 export async function getAllStudents() {
-    const result = await prisma.student.findMany({
-         include : {
-             person: true,
-         }
-    });
-    return result
+    return await prisma.student.findMany({
+        include: {
+            person: true,
+        }
+    })
 }
 
 /**
@@ -38,7 +36,7 @@ export async function getAllStudents() {
  * @returns: object with all the info about this student together with their personal info
  */
 export async function getStudent(studentId: number) {
-    const result = await prisma.student.findUnique({
+    return await prisma.student.findUnique({
         where: {
             student_id: studentId,
         },
@@ -46,7 +44,6 @@ export async function getStudent(studentId: number) {
             person: true,
         }
     });
-    return result;
 }
 
 /**
@@ -55,7 +52,7 @@ export async function getStudent(studentId: number) {
  * @returns the updated entry in the database 
  */
 export async function updateStudent(student: UpdateStudent) {
-    const result = await prisma.student.update({
+    return await prisma.student.update({
         where: {
             student_id: student.studentId,
         },
@@ -66,7 +63,6 @@ export async function updateStudent(student: UpdateStudent) {
             alumni: student.alumni,
         }
     });
-    return result;
 }
 
 /**
@@ -75,7 +71,7 @@ export async function updateStudent(student: UpdateStudent) {
  * @returns personal info about the student, this info can be used to further remove the personal info about this student in other tables
  */
 export async function deleteStudent(studentId: number) {
-    const result = await prisma.student.delete({
+    return await prisma.student.delete({
         where: {
             student_id: studentId,
         },
@@ -83,5 +79,4 @@ export async function deleteStudent(studentId: number) {
             person: true
         }
     });
-    return result;
 }
