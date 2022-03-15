@@ -1,6 +1,6 @@
 import express from 'express';
 
-import {parseLogoutRequest} from '../request';
+import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
 
@@ -10,13 +10,13 @@ import * as util from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function login(_: express.Request): Promise<Responses.Key> {
-  // dummy to cheat eslint
-  _.params.id = "";
-
-  let sessionkey: string = "";
-  // TODO: login logic
-  return Promise.resolve({sessionkey : sessionkey});
+async function login(req: express.Request): Promise<Responses.Key> {
+    return parseLoginRequest(req)
+        .then(parsed => {
+            let sessionkey: string = "";
+            // TODO: login logic
+            return Promise.resolve({sessionkey : sessionkey});
+        })
 }
 
 /**
