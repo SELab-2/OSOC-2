@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS project (
    name          TEXT             NOT NULL,
    osoc_id       SERIAL           NOT NULL REFERENCES osoc (osoc_id),
    partner       TEXT             NOT NULL,
+   description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
    positions     SMALLINT         NOT NULL

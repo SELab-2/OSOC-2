@@ -121,9 +121,10 @@ model person {
 
 model project {
   project_id   Int            @id @default(autoincrement())
-  name         String
+  name         String         // TODO: Should this be unique
   osoc_id      Int            @default(autoincrement())
   partner      String
+  description  String?
   start_date   DateTime       @db.Date
   end_date     DateTime       @db.Date
   positions    Int            @db.SmallInt
