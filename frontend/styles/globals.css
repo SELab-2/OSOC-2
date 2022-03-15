@@ -25,8 +25,17 @@ body {
 
 * {
   box-sizing: border-box;
+  color: var(--primary-100);
 }
 
-h1 {
-  color: var(--primary-100);
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  margin-block: 0.4rem;
+}
+.subtext {
+  font-weight: normal;
+  opacity: 50%;
 }

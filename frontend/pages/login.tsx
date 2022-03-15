@@ -50,50 +50,56 @@ const Login: NextPage = () => {
                     <h1>Selections</h1>
                 </div>
             </header>
-            <body>
-            <h3>Welcome to OSOC Selections!</h3>
-            <h3>Please login, or register to proceed</h3>
-            <h2>Login</h2>
-            <form onSubmit={e => {
-                submitLogin(e)
-            }}>
-                <label>
-                    Email
-                    <input type="text" name="loginEmail" value={loginEmail}
-                           onChange={e => setLoginEmail(e.target.value)}/>
-                </label>
-                <label>
-                    Password
-                    <input type="password" name="loginPassword" value={loginPassword}
-                           onChange={e => setLoginPassword(e.target.value)}/>
-                </label>
-                <input type="submit" value="LOG IN"/>
-            </form>
+            <div className={styles.body}>
+                <h3>Welcome to OSOC Selections!</h3>
+                <h3 className="subtext">Please login, or register to proceed</h3>
+                <div className={styles.formContainer}>
+                    <div className={styles.loginContainer}>
+                        <h2>Login</h2>
+                        <form className={styles.form} onSubmit={e => {
+                            submitLogin(e)
+                        }}>
+                            <label className={styles.label}>
+                                Email
+                                <input type="text" name="loginEmail" value={loginEmail}
+                                       onChange={e => setLoginEmail(e.target.value)}/>
+                            </label>
+                            <label className={styles.label}>
+                                Password
+                                <input type="password" name="loginPassword" value={loginPassword}
+                                       onChange={e => setLoginPassword(e.target.value)}/>
+                            </label>
+                            <input type="submit" value="LOG IN"/>
+                        </form>
 
-            <button onClick={e => githubLogin(e)}>Log in with GitHub</button>
+                        <button onClick={e => githubLogin(e)}>Log in with GitHub</button>
+                    </div>
 
-            <h2>Register</h2>
-            <form onSubmit={e => {
-                submitRegister(e)
-            }}>
-                <label>
-                    Email
-                    <input type="text" name="registerEmail" value={registerEmail}
-                           onChange={e => setRegisterEmail(e.target.value)}/>
-                </label>
-                <label>
-                    Password
-                    <input type="password" name="registerPassword" value={registerPassword}
-                           onChange={e => setRegisterPassword(e.target.value)}/>
-                </label>
-                <label>
-                    Confirm Password
-                    <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
-                           onChange={e => setRegisterConfirmPassword(e.target.value)}/>
-                </label>
-                <input type="submit" value="REGISTER"/>
-            </form>
-            </body>
+                    <div className={styles.registerContainer}>
+                        <h2>Register</h2>
+                        <form className={styles.form} onSubmit={e => {
+                            submitRegister(e)
+                        }}>
+                            <label className={styles.label}>
+                                Email
+                                <input type="text" name="registerEmail" value={registerEmail}
+                                       onChange={e => setRegisterEmail(e.target.value)}/>
+                            </label>
+                            <label className={styles.label}>
+                                Password
+                                <input type="password" name="registerPassword" value={registerPassword}
+                                       onChange={e => setRegisterPassword(e.target.value)}/>
+                            </label>
+                            <label className={styles.label}>
+                                Confirm Password
+                                <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
+                                       onChange={e => setRegisterConfirmPassword(e.target.value)}/>
+                            </label>
+                            <input type="submit" value="REGISTER"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>)
 }
 
