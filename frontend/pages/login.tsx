@@ -7,34 +7,78 @@ import {SyntheticEvent, useState} from "react";
 
 const Login: NextPage = () => {
 
-    const [loginEmail, setLoginEmail] = useState<string>();
-    const [loginPassword, setLoginPassword] = useState<string>();
+    const [loginEmail, setLoginEmail] = useState<string>("");
+    const [loginEmailError, setLoginEmailError] = useState<string>("");
+    const [loginPassword, setLoginPassword] = useState<string>("");
+    const [loginPasswordError, setLoginPasswordError] = useState<string>("");
 
-    const [registerEmail, setRegisterEmail] = useState<string>();
-    const [registerPassword, setRegisterPassword] = useState<string>();
-    const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>();
+    const [registerEmail, setRegisterEmail] = useState<string>("");
+    const [registerEmailError, setRegisterEmailError] = useState<string>("");
+    const [registerPassword, setRegisterPassword] = useState<string>("");
+    const [registerPasswordError, setRegisterPasswordError] = useState<string>("");
+    const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
+    const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
 
+    /**
+     * Executed upon trying to login
+     * Checks that inputfields are not empty and sends a request to the backend
+     * Redirects to the home page if succesfull else returns an error message
+     *
+     * @param e - The event triggering this function call
+     */
     const submitLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        console.log(loginEmail);
-        console.log(loginPassword);
+
+        if (loginEmail === "") {
+            setLoginEmailError("Email cannot be empty");
+        } else {
+            setLoginEmailError("");
+        }
+
+        if (loginPassword === "") {
+            setLoginPasswordError("Password cannot be empty");
+        } else {
+            setLoginPasswordError("");
+        }
+
+
+        // TODO -- Send call to the backend
+        // TODO -- Handle response
         console.log("LOGGING IN...")
-        // TODO
     }
 
     const submitRegister = (e: SyntheticEvent) => {
         e.preventDefault();
-        console.log(registerEmail);
-        console.log(registerPassword);
-        console.log(registerConfirmPassword);
+
+        if (registerEmail === "") {
+            setRegisterEmailError("Email cannot be empty");
+        } else {
+            setRegisterEmailError("");
+        }
+
+        if (registerPassword === "") {
+            setRegisterPasswordError("Password cannot be empty");
+        } else {
+            setRegisterPasswordError("");
+        }
+
+        if (registerPassword != registerConfirmPassword) {
+            setRegisterConfirmPasswordError("Passwords do not match");
+        } else if (registerConfirmPasswordError === "") {
+            setRegisterConfirmPasswordError("Password cannot be empty")
+        } else {
+            setRegisterConfirmPasswordError("");
+        }
+
+        // TODO -- Send call to the backend
+        // TODO -- Handle response
         console.log("REGISTERING...")
-        // TODO
     }
 
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        console.log("LOGGING IT WITH GITHUB...");
         // TODO
+        console.log("LOGGING IT WITH GITHUB...");
     }
 
     return (
@@ -65,17 +109,19 @@ const Login: NextPage = () => {
                                 <input type="text" name="loginEmail" value={loginEmail}
                                        onChange={e => setLoginEmail(e.target.value)}/>
                             </label>
+                            <p className={`${styles.textFieldError} ${loginEmailError !== "" ? styles.anim : ""}`}>{loginEmailError}</p>
                             <label className={styles.label}>
                                 Password
                                 <input type="password" name="loginPassword" value={loginPassword}
                                        onChange={e => setLoginPassword(e.target.value)}/>
                             </label>
-                            <button onClick={e => submitLogin(e)}>LOG IN</button>
+                            <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
                             <a className={styles.resetPassword} href="#forgotPassword">Forgot password?</a>
+                            <button onClick={e => submitLogin(e)}>LOG IN</button>
                             <div className={styles.orContainer}>
-                                <div />
+                                <div/>
                                 <p>or</p>
-                                <div />
+                                <div/>
                             </div>
                             <div className={styles.githubContainer} onClick={e => githubLogin(e)}>
                                 <div className={styles.githublogo}>
@@ -85,7 +131,7 @@ const Login: NextPage = () => {
                                         alt="GitHub Logo"
                                     />
                                 </div>
-                                <p className={styles.github} >Log in with GitHub</p>
+                                <p className={styles.github}>Continue with GitHub</p>
                             </div>
 
                         </form>
@@ -101,16 +147,19 @@ const Login: NextPage = () => {
                                 <input type="text" name="registerEmail" value={registerEmail}
                                        onChange={e => setRegisterEmail(e.target.value)}/>
                             </label>
+                            <p className={`${styles.textFieldError} ${registerEmailError !== "" ? styles.anim : ""}`}>{registerEmailError}</p>
                             <label className={styles.label}>
                                 Password
                                 <input type="password" name="registerPassword" value={registerPassword}
                                        onChange={e => setRegisterPassword(e.target.value)}/>
                             </label>
+                            <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
                             <label className={styles.label}>
                                 Confirm Password
                                 <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
                                        onChange={e => setRegisterConfirmPassword(e.target.value)}/>
                             </label>
+                            <p className={`${styles.textFieldError} ${registerConfirmPasswordError !== "" ? styles.anim : ""}`}>{registerConfirmPasswordError}</p>
                             <button onClick={e => submitRegister(e)}>REGISTER</button>
                         </form>
                     </div>

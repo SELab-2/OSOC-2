@@ -75,13 +75,11 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
 }
 
 .label {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
     color: var(--primary-110);
 }
 
@@ -92,6 +90,7 @@
     background-color: var(--neutral-200);
     height: 2.5rem;
     padding-inline: 0.4rem;
+    margin-block: 0.4rem;
 }
 
 .label input:focus {
@@ -103,6 +102,7 @@
 .form button {
     margin-inline: -0.2rem;
     align-self: flex-start;
+    margin-top: 0.2rem;
 }
 
 
@@ -115,15 +115,15 @@
 .resetPassword {
     font-size: 0.7rem;
     font-weight: normal;
-    margin-top: -4rem;
-    margin-bottom: 2rem;
     align-self: flex-end;
+    height: 0;
 }
 
 .orContainer {
     margin-inline: -0.2rem;
     display: flex;
     align-items: center;
+    margin-block: 1rem;
 }
 
 .orContainer div {
@@ -157,4 +157,35 @@
 
 .githublogo {
     display: flex;
+}
+
+.textFieldError {
+    padding: 0;
+    text-align: right;
+    font-size: 0.7rem;
+    margin: 0 0 0.2rem;
+    color: var(--error-100);
+}
+
+.anim {
+    /* Shake upon visible */
+    animation: shake 0.3s;
+}
+
+/**
+ * A little animation that shakes whatever it is applied to
+ * from left to right
+ */
+@keyframes shake {
+    0% { transform: translate(1px, 0)}
+    10% { transform: translate(-1px, 0)}
+    20% { transform: translate(-3px, 0)}
+    30% { transform: translate(3px, 0)}
+    40% { transform: translate(1px, 0)}
+    50% { transform: translate(-1px, 0)}
+    60% { transform: translate(-3px, 0)}
+    70% { transform: translate(3px, 0)}
+    80% { transform: translate(-1px, 0)}
+    90% { transform: translate(1px, 0)}
+    100% { transform: translate(1px, 0)}
 }
