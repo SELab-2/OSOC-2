@@ -68,7 +68,7 @@ import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/
     /**
      * the password hash of the login user if email is used
      */
-    password?: string | null,
+    password: string,
     /**
      * true if the login user is an admin in the osoc system, otherwise false
      */
@@ -90,7 +90,7 @@ import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/
     /**
      * undefined if unchanged or the new password
      */
-    password?: string | null,
+    password?: string,
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is an admin 
      */
