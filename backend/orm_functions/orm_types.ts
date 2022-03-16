@@ -1,5 +1,102 @@
 import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/client"
 
+
+/**
+ * interface for the object needed to create a person
+ */
+ export interface CreatePerson {
+    /**
+     * the person's firstname
+     */
+    firstname : string,
+    /**
+     * the person's lastname
+     */
+    lastname : string,
+    /**
+     * the person's gender
+     */
+    gender : string,
+    /**
+     * the person's github account, only one of github/email can be used
+     */
+     github? : string,
+     /**
+     * the person's email, may not be null if github is null
+     */
+     email? : string
+}
+
+/**
+ * interface for the object needed to update a person's data
+ */
+ export interface UpdatePerson {
+    /**
+     * the person who's info we are updating
+     */
+    personId: number,
+    /**
+     * undefined if unchanged or new firstname
+     */
+    firstname?: string,
+    /**
+     * undefined if unchanged or the new lastname
+     */
+    lastname?: string,
+    /**
+     * undefined if unchanged or the new gender
+     */
+    gender?: string,
+    /**
+     * undefined if unchanged or the new github
+     */
+    github?: string,
+    /**
+     * undefined if unchanged or the new email
+     */
+    email?: string,
+}
+
+/**
+ * interface for the object needed to create a login user
+ */
+ export interface CreateLoginUser {
+    /**
+     * the person_id of the person the login user will be associated with
+     */
+    personId?: number,
+    /**
+     * the password hash of the login user if email is used
+     */
+    password?: string | null,
+    /**
+     * true if the login user is an admin in the osoc system, otherwise false
+     */
+    isAdmin: boolean
+    /**
+     * true if the login user is a coach in the osoc system, otherwise false
+     */
+    isCoach: boolean
+}
+
+/**
+ * interface for the object needed to update a login user's data
+ */
+ export interface UpdateLoginUser {
+    /**
+     * the login user who's info we are updating
+     */
+    loginUserId: number,
+    /**
+     * undefined if unchanged or the new boolean value that indicates if this login user is an admin 
+     */
+    isAdmin: boolean,
+    /**
+     * undefined if unchanged or the new boolean value that indicates if this login user is a coach
+     */
+    isCoach: boolean
+}
+
 /**
  * interface for the object needed to create a student
  */
