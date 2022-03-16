@@ -54,3 +54,9 @@ frontend/node_modules
 
 # jetbrains
 .idea
+frontend/.idea
+backend/.idea
+
+# ignore test coverage files
+*coverage.json
+>>>>>>> 1096fc5cf0daba5e5ad731a70e66a8ce101fecab
