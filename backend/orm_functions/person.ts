@@ -46,7 +46,9 @@ export async function create_person(person: CreatePerson){
         },
         select: {
             login_user: {
-                password: true,
+                select: {
+                    password: true
+                }
               }
         }
     });
