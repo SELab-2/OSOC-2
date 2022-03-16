@@ -11,7 +11,8 @@ export async function createLoginUser(loginUser: CreateLoginUser){
             person_id: loginUser.personId,
             password: loginUser.password,
             is_admin: loginUser.isAdmin,
-            is_coach: loginUser.isCoach
+            is_coach: loginUser.isCoach,
+            account_status: loginUser.accountStatus
         },
     });
     return result;

@@ -91,7 +91,7 @@ model language {
 model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
-  password       String
+  password       String?
   is_admin       Boolean?
   is_coach       Boolean?
   session_keys   String[]
@@ -111,8 +111,8 @@ model osoc {
 
 model person {
   person_id  Int         @id @default(autoincrement())
-  email      String?     @db.VarChar(320)
-  github     String?
+  email      String?     @unique @db.VarChar(320)
+  github     String?     @unique
   firstname  String
   lastname   String
   gender     String
@@ -122,7 +122,7 @@ model person {
 
 model project {
   project_id   Int            @id @default(autoincrement())
-  name         String         // TODO: Should this be unique
+  name         String
   osoc_id      Int            @default(autoincrement())
   partner      String
   description  String?

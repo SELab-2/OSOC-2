@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS person(
 
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
-   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person (person_id),
+   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
    pronouns        TEXT [],
    phone_number    TEXT            NOT NULL,
    nickname        TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS student(
 /* enum used in login_user to show the account status */
 CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
 
-CREATE TABLE IF NOT EXISTS login_user (
+CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
     password         TEXT, 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS login_user (
     session_keys     TEXT[]     NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
+    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
     /* TODO: CONSTRAINT password_not_null CHECK (SELECT email FROM person WHERE person_id = person_id; email NOT NULL AND password is NOT NULL) */
 );
 

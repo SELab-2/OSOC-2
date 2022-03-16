@@ -1,4 +1,4 @@
-import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/client"
+import { contract_status_enum, decision_enum, email_status_enum, account_status_enum } from "@prisma/client"
 
 
 /**
@@ -68,15 +68,19 @@ import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/
     /**
      * the password hash of the login user if email is used
      */
-    password: string,
+    password?: string | null,
     /**
      * true if the login user is an admin in the osoc system, otherwise false
      */
-    isAdmin: boolean
+    isAdmin: boolean,
     /**
      * true if the login user is a coach in the osoc system, otherwise false
      */
-    isCoach: boolean
+    isCoach: boolean,
+    /**
+     * the status of the account we are trying to create
+     */
+    accountStatus: account_status_enum
 }
 
 /**
@@ -90,7 +94,7 @@ import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/
     /**
      * undefined if unchanged or the new password
      */
-    password?: string,
+    password?: string | null,
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is an admin 
      */
