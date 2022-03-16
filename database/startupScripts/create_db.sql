@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
-   email        VARCHAR(320),      UNIQUE /* max email length is 320 characters */
-   github       TEXT,   
+   email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
+   github       TEXT               UNIQUE,   
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
    gender       TEXT      NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS login_user (
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
-    CONSTRAINT password_not_null CHECK (SELECT email FROM person WHERE person_id = person_id; email NOT NULL AND password is NOT NULL)
+    /* TODO: CONSTRAINT password_not_null CHECK (SELECT email FROM person WHERE person_id = person_id; email NOT NULL AND password is NOT NULL) */
 );
 
 
