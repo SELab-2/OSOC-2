@@ -1,5 +1,5 @@
 import {prismaMock} from "./singleton";
-import {checkValidSessionAndRemove, getSessionKeys, setSessionId} from "../login_user";
+import {checkValidSessionAndRemove, getSessionKeys, setSessionId} from "../../orm_functions/login_user";
 
 const response = {
     session_id: "50",

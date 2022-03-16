@@ -1,6 +1,6 @@
 import {prismaMock} from "./singleton";
 import {type_enum} from "@prisma/client";
-import {createAttachment, deleteAllAttachmentsForApplication, deleteAttachment} from "../attachment";
+import {createAttachment, deleteAllAttachmentsForApplication, deleteAttachment} from "../../orm_functions/attachment";
 
 test("should create a new attachment", async () => {
     const attachment = {

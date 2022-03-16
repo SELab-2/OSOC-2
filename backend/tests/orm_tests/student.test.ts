@@ -1,6 +1,6 @@
 import {prismaMock} from "./singleton";
-import {CreateStudent, UpdateStudent} from "../orm_types";
-import {createStudent, deleteStudent, getAllStudents, getStudent, updateStudent} from "../student";
+import {CreateStudent, UpdateStudent} from "../../orm_functions/orm_types";
+import {createStudent, deleteStudent, getAllStudents, getStudent, updateStudent} from "../../orm_functions/student";
 
 test("should create a student", async () => {
 

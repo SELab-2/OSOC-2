@@ -1,6 +1,6 @@
 import {prismaMock} from "./singleton";
 import {contract_status_enum} from "@prisma/client";
-import {createContract, removeContract, removeContractsFromStudent, updateContract} from "../contract";
+import {createContract, removeContract, removeContractsFromStudent, updateContract} from "../../orm_functions/contract";
 
 test("should create a contract", async () => {
 
