@@ -61,26 +61,6 @@ export async function createLoginUser(loginUser: CreateLoginUser){
 
 /**
  * 
- * @param email: this is the email of the login user we are looking up in the database
- * @returns: password of the login user object
- */
- export async function getPasswordLoginUserByEmail(email : string){
-    const result = await prisma.login_user.findUnique({
-        include: {
-            person: true
-        },
-        where: { 
-            email : email 
-        },
-        select: {
-            password: true
-        }
-    });
-    return result;
-}
-
-/**
- * 
  * @param personId: this is the person id of the login user we are looking up in the database
  * @returns: login user object
  */

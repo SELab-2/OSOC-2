@@ -36,6 +36,25 @@ export async function create_person(person: CreatePerson){
 
 /**
  * 
+ * @param email: this is the email of the person we are looking up in the database
+ * @returns: password of the login user matching with the person 
+ */
+ export async function getPasswordPersonByEmail(email : string){
+    const result = await prisma.person.findUnique({
+        where: { 
+            email : email 
+        },
+        select: {
+            login_user: {
+                password: true,
+              }
+        }
+    });
+    return result;
+}
+
+/**
+ * 
  * @param name: This is the name of the person we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */

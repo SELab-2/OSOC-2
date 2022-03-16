@@ -88,6 +88,10 @@ import { contract_status_enum, decision_enum, email_status_enum } from "@prisma/
      */
     loginUserId: number,
     /**
+     * undefined if unchanged or the new password
+     */
+    password?: string | null,
+    /**
      * undefined if unchanged or the new boolean value that indicates if this login user is an admin 
      */
     isAdmin: boolean,
