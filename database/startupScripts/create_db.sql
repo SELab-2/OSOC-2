@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS login_user (
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
     password         TEXT       NOT NULL, 
     /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
-    /* TODO2: Wat als je zowel email als github hebt */
+    /* TODO2: inloggen via github en email leidt tot verschillend account */
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
-    session_id       TEXT UNIQUE,
+    session_keys     TEXT[] NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
 );

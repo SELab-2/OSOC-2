@@ -9,9 +9,9 @@ VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'),
 '{None}', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
-INSERT INTO login_user(person_id, password, is_admin, is_coach)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE), 
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE);
+INSERT INTO login_user(person_id, password, is_admin, is_coach, session_keys)
+VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE, array[]::text[]),
+((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, array[]::text[]);
 
 /* Insert data into osoc table */
 INSERT INTO osoc(year)VALUES(2022);
