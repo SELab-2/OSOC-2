@@ -5,9 +5,9 @@ import {
     getStudentEvaluationsFinal,
     getStudentEvaluationsTemp,
     getStudentEvaluationsTotal
-} from "../job_application";
+} from "../../orm_functions/job_application";
 import {email_status_enum} from "@prisma/client";
-import {CreateJobApplication} from "../orm_types";
+import {CreateJobApplication} from "../../orm_functions/orm_types";
 
 const response = {
     job_application_id: 0,

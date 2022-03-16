@@ -1,7 +1,7 @@
 import {prismaMock} from "./singleton";
 import {decision_enum} from "@prisma/client";
-import {checkIfFinalEvaluationExists, createEvaluationForStudent, updateEvaluationForStudent} from "../evaluation";
-import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from "../orm_types";
+import {checkIfFinalEvaluationExists, createEvaluationForStudent, updateEvaluationForStudent} from "../../orm_functions/evaluation";
+import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from "../../orm_functions/orm_types";
 
 test("should return a final evaluation if it exists", async () => {
     const jobApplicationId = 5;
