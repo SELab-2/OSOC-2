@@ -1,5 +1,6 @@
 import {prismaMock} from "./singleton";
 import {checkValidSessionAndRemove, getSessionKeys, setSessionId} from "../../orm_functions/login_user";
+import {account_status_enum} from "@prisma/client";
 
 const response = {
     session_id: "50",
@@ -8,7 +9,8 @@ const response = {
     password: "password",
     is_admin: false,
     is_coach: false,
-    session_keys: ["key1", "key2"]
+    session_keys: ["key1", "key2"],
+    account_status: account_status_enum.DISABLED
 }
 
 test("should return true if the given session id is valid", async () => {
