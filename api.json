@@ -197,10 +197,45 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "student"
+        ],
+        "description": "Removes the given student from the system.",
+        "operationId": "student_id_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
       }
     }
   },
   "definitions": {
+    "Sessionkey": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Sessionkey"
+      }
+    },
     "NameId": {
       "type": "object",
       "properties": {
