@@ -155,7 +155,7 @@
           "student"
         ],
         "description": "Lists all details about the student with the given id.",
-        "operationId": "student_id",
+        "operationId": "student_id_get",
         "parameters": [
           {
             "in": "header",
@@ -170,6 +170,30 @@
             "description": "Sessionkey as hex string. The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
             "schema": {
               "$ref": "#/definitions/Student_Id"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "Modifies the details of the student.",
+        "operationId": "student_id_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Student ID is parsed from the URL. Student ID is parsed from the URL. - Any of the fields in the student field of the response for GET /student/<student-id> can be modified by adding it to the arguments (without the student. prefix). For the project field, you can only specify the project ID. Any values passed to labels or sollicitations (both are lists) are added to the list. If a value starting with - (a single minus sign) is passed in the labels or sollicitations list, those values are removed from the lists.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The student field contains all updated fields. If no field is updated, an Argument error is thrown.",
+            "schema": {
+              "$ref": "#/definitions/Student_Id_Modify"
             }
           }
         }
@@ -303,6 +327,25 @@
       },
       "xml": {
         "name": "Student_Id"
+      }
+    },
+    "Student_Id_Modify": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Student_Id_Modify"
       }
     }
   }
