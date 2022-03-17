@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
@@ -17,7 +17,7 @@ async function login(req: express.Request): Promise<Responses.Key> {
         .then(parsed => {
             let sessionkey: string = "";
             // TODO: login logic
-            return Promise.resolve({sessionkey : sessionkey});
+            return Promise.resolve({sessionkey: sessionkey});
         })
 }
 
@@ -28,15 +28,15 @@ async function login(req: express.Request): Promise<Responses.Key> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function logout(req: express.Request): Promise<Responses.Empty> {
-  return parseLogoutRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(checked => {
-        // dummy to cheat eslint
-        checked.sessionkey = "";
-        // do logout logic
-        // aka remove session key from database
-        return Promise.resolve({});
-      })
+    return parseLogoutRequest(req)
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(checked => {
+            // dummy to cheat eslint
+            checked.sessionkey = "";
+            // do logout logic
+            // aka remove session key from database
+            return Promise.resolve({});
+        })
 }
 
 /* eslint-enable no-unused-vars */
@@ -47,11 +47,18 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+    let router: express.Router = express.Router();
 
-  router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
-  router.delete('/',
-                (req, res) => util.respOrErrorNoReinject(res, logout(req)));
-  util.addInvalidVerbs(router, '/');
-  return router;
+    router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
+    router.delete('/',
+        (req, res) => util.respOrErrorNoReinject(res, logout(req)));
+    util.addInvalidVerbs(router, '/');
+    return router;
+}
+
+function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect("/login");
 }
