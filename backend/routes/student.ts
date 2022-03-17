@@ -4,6 +4,8 @@ import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 
+/* eslint-disable no-unused-vars */
+
 /**
  *  Attempts to create a new student in the system.
  *  @param req The Express.js request to extract all required data from.

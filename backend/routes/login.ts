@@ -4,6 +4,8 @@ import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
 
+/* eslint-disable no-unused-vars */
+
 /**
  *  Attempts to log a user into the system.
  *  @param _ The Express.js request to extract all required data from.
@@ -21,7 +23,7 @@ async function login(req: express.Request): Promise<Responses.Key> {
 
 /**
  *  Attempts to log a user out of the system.
- *  @param _ The Express.js request to extract all required data from.
+ *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
@@ -36,6 +38,8 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
         return Promise.resolve({});
       })
 }
+
+/* eslint-enable no-unused-vars */
 
 /**
  *  Gets the router for all `/login/` related endpoints.

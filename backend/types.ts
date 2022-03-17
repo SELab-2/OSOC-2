@@ -1,5 +1,7 @@
 import express from 'express';
 
+/* eslint-disable no-unused-vars */
+
 /**
  *  Interface for API errors. Specifies an HTTP status code and error reason.
  */

@@ -38,7 +38,5 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        working-directory: backend/
-        files: coverage.json
-        flags: all_tests
+        files: backend/coverage.json
         verbose: true

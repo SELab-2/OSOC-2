@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon index.ts",
     "test": "jest",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "codecov": "jest --ci --coverage --outputFile=coverage.json --json"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +26,7 @@
     "@types/jest": "^27.4.1",
     "eslint-plugin-jest": "^26.1.1",
     "jest": "^27.5.1",
+    "jest-mock-extended": "^2.0.4",
     "node-ts": "^5.1.2",
     "nodemon": "^2.0.15",
     "ts-node": "^10.5.0",
