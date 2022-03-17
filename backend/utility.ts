@@ -1,7 +1,10 @@
+import {createHash, randomBytes} from 'crypto';
 import express from 'express';
+import {v1} from 'uuid';
 
 import * as config from './config.json';
-// import {getSessionKeys} from './orm_functions/login_user';
+import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as skey from './orm_functions/session_key';
 import {
   ApiError,
   Errors,
@@ -206,10 +209,9 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<T> {
-  // TODO validate session key using obj.sessionkey
-  // upon validation error:
-  // return Promise.reject(errors.cookUnauthenticated());
-  return Promise.resolve(obj);
+  return skey.checkSessionKey(obj.sessionkey)
+      .then(() => Promise.resolve(obj))
+      .catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
 /**
@@ -225,12 +227,24 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  */
 export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
     Promise<T> {
-  return checkSessionKey(obj).then((x) => {
-    // we know sessionkey is available and valid
-    // TODO do logic with sessionkey to check if the associated user is an
-    // admin if not: return Promise.reject(errors.cookInsufficientRights());
-    return Promise.resolve(x);
-  })
+  return skey
+      .checkSessionKey(obj.sessionkey)                 // check session key
+      .then(id => searchAllAdminLoginUsers(true).then( // fetch all admins
+                admins => admins.some(
+                              admin => admin.login_user_id ==
+                                       id.login_user_id) // check if some admin
+                                                         // matches with id
+                              ? Promise.resolve(obj) // success -> return object
+                              : Promise.reject()))   // failure -> reject (catch
+                                                     // will throw HTTP error)
+      .catch(() => Promise.reject(errors.cookInsufficientRights()));
+}
+
+export function generateKey(): InternalTypes.SessionKey {
+  return createHash('sha256')
+      .update(v1())
+      .update(randomBytes(256))
+      .digest("hex");
 }
 
 /**
@@ -240,8 +254,8 @@ export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  // TODO update key
-  return Promise.resolve(key);
+  return skey.changeSessionKey(key, generateKey())
+      .then(upd => Promise.resolve(upd.session_key));
 }
 
 /**
