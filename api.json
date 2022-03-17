@@ -8,7 +8,11 @@
   "tags": [
     {
       "name": "login",
-      "description": "Everything about the login"
+      "description": "Everything about the login."
+    },
+    {
+      "name": "student",
+      "description": "Everything about students."
     }
   ],
   "schemes": [
@@ -47,7 +51,7 @@
       },
       "delete": {
         "tags": [
-          "logout"
+          "login"
         ],
         "description": "Attempts to log out.",
         "operationId": "logout",
@@ -55,7 +59,7 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "The session key of the user to log out",
+            "description": "The session key of the user to log out.",
             "required": true,
             "type": "string"
           }
@@ -65,6 +69,88 @@
             "description": "Logged out."
           }
         }
+      }
+    },
+    "/student": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Redirects towards GET /student/all.",
+        "operationId": "student",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Other Location: /student/all"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "Creates a new student in the system.",
+        "operationId": "create_student",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the student.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "email",
+            "description": "The email address of the student.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/CreateStudent"
+            }
+          }
+        }
+      }
+    },
+  },
+  "definitions": {
+    "NameId": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "StudentData"
+      }
+    },
+    "CreateStudent": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/NameId"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "CreateStudent"
       }
     }
   }
