@@ -1,5 +1,7 @@
 import express from 'express';
 
+import * as ormLU from '../orm_functions/login_user';
+import * as ormP from '../orm_functions/person';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
@@ -82,10 +84,35 @@ async function getCoachRequests(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createCoachRequest(req: express.Request): Promise<string> {
-  return rq.parseRequestCoachRequest(req).then(parsed => {
-    // INSERTION LOGIC -> NEEDS FIXING
-    return Promise.resolve(parsed.firstName);
+async function createCoachRequest(req: express.Request):
+    Promise<InternalTypes.IdOnly> {
+  return rq.parseRequestCoachRequest(req).then(async parsed => {
+    if (parsed.pass == undefined) {
+      console.log(" -> WARNING coach request without password - " +
+                  "currently only accepting email-based applications.");
+      return Promise.reject(util.errors.cookArgumentError());
+    }
+    return ormP
+        .create_person({
+          firstname : parsed.firstName,
+          lastname : parsed.lastName,
+          email : parsed.emailOrGithub,
+          gender : parsed.gender
+        })
+        .then(person => {
+          console.log("Created a person: " + person);
+          return ormLU.createLoginUser({
+            personId : person.person_id,
+            password : parsed.pass,
+            isAdmin : false,
+            isCoach : true,
+            accountStatus : 'PENDING'
+          })
+        })
+        .then(user => {
+          console.log("Attached a login user: " + user);
+          return Promise.resolve({id : user.login_user_id.toString()});
+        });
   });
 }
 
@@ -147,15 +174,9 @@ async function deleteCoachRequest(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
-
+  let router: express.Router = express.Router({strict : true});
   router.get("/", (_, res) => util.redirect(res, "/coach/all"));
   util.route(router, "get", "/all", listCoaches);
-  util.route(router, "get", "/:id", getCoach);
-
-  util.route(router, "post", "/:id", modCoach);
-  router.delete('/:id', (req, res) =>
-                            util.respOrErrorNoReinject(res, deleteCoach(req)));
 
   util.route(router, "get", "/request", getCoachRequests);
   // signup is not a keyed request - doesn't match the callback type.
@@ -167,6 +188,12 @@ export function getRouter(): express.Router {
   util.route(router, "post", "/request/:id", createCoachAcceptance);
   router.delete('/request/:id', (req, res) => util.respOrErrorNoReinject(
                                     res, deleteCoachRequest(req)));
+
+  util.route(router, "get", "/:id", getCoach);
+
+  util.route(router, "post", "/:id", modCoach);
+  router.delete('/:id', (req, res) =>
+                            util.respOrErrorNoReinject(res, deleteCoach(req)));
 
   util.addAllInvalidVerbs(router,
                           [ "/", "/all", "/:id", "/request", "/request/:id" ]);

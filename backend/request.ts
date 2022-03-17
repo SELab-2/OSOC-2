@@ -22,7 +22,15 @@ function rejector<T>(): Promise<T> {
 }
 
 function anyHasFields(obj: any, fields: string[]): boolean {
-  return fields.every(s => (s in obj));
+  for (var f of fields) {
+    if (!(f in obj)) {
+      console.log("!!! Missing argument " + f + " in `" + JSON.stringify(obj) +
+                  "`!!!");
+      return false;
+    }
+  }
+  return true;
+  // return fields.every(s => (s in obj));
 }
 
 function hasFields(req: express.Request, fields: string[],
