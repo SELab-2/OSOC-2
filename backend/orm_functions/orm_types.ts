@@ -460,3 +460,67 @@ export interface UpdateProjectRole {
      */
     name: string
 }
+
+/**
+ * interface for the object needed to create a project
+ */
+ export interface CreateJobApplicationSkill {
+    /**
+     * the jobapplicaton id to which the skill is linked
+     */
+    JobApplicationId: number,
+    /**
+     * the skill of this job application
+     */
+    skill: string,
+    /**
+     * the language id to which this skill is linked
+     */
+    langueageId: number,
+    /**
+     * the level of the skill of the applicant
+     */
+    level: number,
+    /**
+     * true if this skill is the preffered skill of the applicant
+     */
+    isPreffered: boolean,
+    /**
+     * true if this skill is the best skill of the applicant
+     */
+    isBest: boolean
+}
+
+/**
+ * interface for the object needed to update a job application skill's data
+ */
+export interface UpdateJobApplicationSkill {
+    /**
+     * the jobapplicaton we are updating
+     */
+    JobApplicationSkillId: number,
+    /**
+     * undefined if unchanged or new job application
+     */
+    JobApplicationId: number,
+    /**
+     * undefined if unchanged or the new skill
+     */
+    skill: string,
+    /**
+     * undefined if unchanged or the new language of the job application skill
+     */
+    langueageId: number,
+    /**
+     * undefined if unchanged or the new level
+     */
+    level: number
+    /**
+     * undefined if unchanged or the new preffered status
+     */
+    isPreffered: boolean,
+    /**
+     * undefined if unchanged or the new is best status
+     */
+    is_best: boolean
+}
