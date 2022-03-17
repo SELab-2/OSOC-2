@@ -4,5 +4,9 @@
     "next": {
       "rootDir": "frontend"
     }
+  },
+  "plugins": ["jest"],
+  "env": {
+    "jest": true
   }
 }

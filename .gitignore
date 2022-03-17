@@ -40,8 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-package-lock.json
-
 .eslintcache
 
 # node modules of the backend and frontend
@@ -54,6 +52,10 @@ frontend/node_modules
 # keep some (empty) directories
 !**/.gitkeep
 
+# jetbrains
 .idea
 frontend/.idea
 backend/.idea
+
+# ignore test coverage files
+*coverage.json

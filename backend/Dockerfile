@@ -1,4 +1,4 @@
-FROM node:16.14
+FROM node:17.7.1
 
 # Create app directory
 WORKDIR /app
@@ -18,6 +18,7 @@ RUN npm install
 COPY . .
 
 RUN npm run
+RUN npx prisma generate
 
 EXPOSE 4096
 
