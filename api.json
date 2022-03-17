@@ -123,6 +123,32 @@
         }
       }
     },
+    "/student/all": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Lists all students in the system",
+        "operationId": "all_students",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/AllStudents"
+            }
+          }
+        }
+      }
+    }
   },
   "definitions": {
     "NameId": {
@@ -136,7 +162,24 @@
         }
       },
       "xml": {
-        "name": "StudentData"
+        "name": "NameId"
+      }
+    },
+    "NameIdList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/NameId"
+      },
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "NameIdList"
       }
     },
     "CreateStudent": {
@@ -151,6 +194,20 @@
       },
       "xml": {
         "name": "CreateStudent"
+      }
+    },
+    "AllStudents": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/NameIdList"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "AllStudents"
       }
     }
   }
