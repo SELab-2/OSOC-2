@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS applied_role (
 
 CREATE TABLE IF NOT EXISTS language (
     language_id    SERIAL         PRIMARY KEY,
-    name           TEXT           NOT NULL
+    name           TEXT           NOT NULL UNIQUE
 );
 
 

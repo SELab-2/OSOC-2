@@ -446,3 +446,17 @@ export interface UpdateProjectRole {
      */
     name: string
 }
+
+/**
+ * interface for the object needed in updateRole
+ */
+ export interface UpdateLanguage {
+    /**
+     * the language object we are changing
+     */
+    languageId: number,
+    /**
+     * the name we want to set
+     */
+    name: string
+}
