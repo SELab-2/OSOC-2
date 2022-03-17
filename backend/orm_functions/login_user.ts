@@ -31,10 +31,10 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @param personId: this is the person id of the login user we are looking up in the database
  * @returns: password of the login user object
  */
- export async function getPasswordLoginUserByPerson(personId : number){
+ export async function getPasswordLoginUserByPerson(personId: number){
     const result = await prisma.login_user.findUnique({
         where: { 
-            person_id : personId 
+            person_id: personId 
         },
         select: {
             password: true
@@ -48,10 +48,10 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @param loginUserId: this is the login user id of the login user we are looking up in the database
  * @returns: password of the login user object
  */
- export async function getPasswordLoginUser(loginUserId : number){
+ export async function getPasswordLoginUser(loginUserId: number){
     const result = await prisma.login_user.findUnique({
         where: { 
-            login_user_id : loginUserId 
+            login_user_id: loginUserId 
         },
         select: {
             password: true
@@ -65,9 +65,11 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @param personId: this is the person id of the login user we are looking up in the database
  * @returns: login user object
  */
-export async function searchLoginUserByPerson(personId : number){
+export async function searchLoginUserByPerson(personId: number){
     const result = await prisma.login_user.findMany({
-        where: { person_id : personId },
+        where: { 
+            person_id: personId
+        },
     });
     return result;
 }
@@ -77,9 +79,11 @@ export async function searchLoginUserByPerson(personId : number){
  * @param isAdmin: boolean value for the admin status
  * @returns: all login user objects that match with the admin status
  */
-export async function searchAllAdminLoginUsers(isAdmin : boolean){
+export async function searchAllAdminLoginUsers(isAdmin: boolean){
     const result = await prisma.login_user.findMany({
-        where: { is_admin : isAdmin },
+        where: { 
+            is_admin: isAdmin
+        },
     });
     return result;
 }
@@ -89,9 +93,11 @@ export async function searchAllAdminLoginUsers(isAdmin : boolean){
  * @param isCoach: boolean value for the coach status
  * @returns: all login user objects that match with the coach status
  */
-export async function searchAllCoachLoginUsers(isCoach : boolean){
+export async function searchAllCoachLoginUsers(isCoach: boolean){
     const result = await prisma.login_user.findMany({
-        where: { is_coach : isCoach },
+        where: { 
+            is_coach: isCoach
+        },
     });
     return result;
 }
@@ -101,7 +107,7 @@ export async function searchAllCoachLoginUsers(isCoach : boolean){
  * @param bool: boolean value for the admin and coach status
  * @returns: all login user objects where the bool matches with both the admin and coach status
  */
-export async function searchAllAdminAndCoachLoginUsers(bool : boolean){
+export async function searchAllAdminAndCoachLoginUsers(bool: boolean){
     const result = await prisma.login_user.findMany({
         where: { 
             AND: [
@@ -125,7 +131,7 @@ export async function searchAllAdminAndCoachLoginUsers(bool : boolean){
 export async function updateLoginUser(loginUser: UpdateLoginUser){
     const result = await prisma.login_user.update({
         where : {
-            login_user_id : loginUser.loginUserId
+            login_user_id: loginUser.loginUserId
         },
         data: {
             password: loginUser.password,
@@ -141,7 +147,7 @@ export async function updateLoginUser(loginUser: UpdateLoginUser){
  * @param loginUserId the login user who's info we are deleting from the login user-table
  * @returns personal info about the login user, this info can be used to further remove the person
  */
-export async function deleteLoginUserById(loginUserId : number){
+export async function deleteLoginUserById(loginUserId: number){
     const result = await prisma.login_user.delete({
         where: { 
             login_user_id: loginUserId 
@@ -158,7 +164,7 @@ export async function deleteLoginUserById(loginUserId : number){
  * @param personId the login user who's info we are deleting from the login user-table
  * @returns personal info about the login user, this info can be used to further remove the person
  */
-export async function deleteLoginUserByPersonId(personId : number){
+export async function deleteLoginUserByPersonId(personId: number){
     const result = await prisma.login_user.delete({
         where: { 
             person_id: personId

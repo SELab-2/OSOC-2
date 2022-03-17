@@ -39,10 +39,10 @@ export async function create_person(person: CreatePerson){
  * @param email: this is the email of the person we are looking up in the database
  * @returns: password of the login user matching with the person 
  */
- export async function getPasswordPersonByEmail(email : string){
+ export async function getPasswordPersonByEmail(email: string){
     const result = await prisma.person.findUnique({
         where: { 
-            email : email 
+            email: email 
         },
         select: {
             login_user: {
@@ -60,7 +60,7 @@ export async function create_person(person: CreatePerson){
  * @param name: This is the name of the person we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
-export async function searchPersonByName(name : string){
+export async function searchPersonByName(name: string){
     const result = await prisma.person.findMany({
         where: {
             OR: [
@@ -81,9 +81,11 @@ export async function searchPersonByName(name : string){
  * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
-export async function searchPersonByGender(gender : string){
+export async function searchPersonByGender(gender: string){
     const result = prisma.person.findMany({
-        where: { gender : gender },
+        where: { 
+            gender: gender 
+        },
     });
     return result;
 }
@@ -93,7 +95,7 @@ export async function searchPersonByGender(gender : string){
  * @param login: This is the email or GitHub of the person we are looking for
  * @returns: a list of all the person objects in the database that match either the email or github
  */
-export async function searchPersonByLogin(login : string){
+export async function searchPersonByLogin(login: string){
     const result = prisma.person.findMany({
         where: {
             OR: [
@@ -135,7 +137,7 @@ export async function updatePerson(person: UpdatePerson){
  * @param personId the person who's info we are deleting from the person-table
  * @returns message //TODO: what does this return
  */
-export async function deletePersonById(personId : number){
+export async function deletePersonById(personId: number){
     const result = await prisma.person.deleteMany({
         where: {
             person_id: personId
