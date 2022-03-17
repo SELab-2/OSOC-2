@@ -30,4 +30,4 @@ jobs:
     - uses: ArtiomTr/jest-coverage-report-action@v2
       with:
         working-directory: backend
-        skip-step: all
+        skip-step: install
