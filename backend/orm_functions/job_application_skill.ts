@@ -54,7 +54,7 @@ import {CreateJobApplicationSkill, UpdateJobApplicationSkill} from './orm_types'
 
 /**
  * 
- * @param jobApplicationSkill: UpdateStudent object with the values that need to be updated
+ * @param jobApplicationSkill: UpdateJobapplicationSkill object with the values that need to be updated
  * @returns the updated entry in the database 
  */
  export async function updateJobApplicationSkill(jobApplicationSkill: UpdateJobApplicationSkill) {
