@@ -8,6 +8,7 @@ import {
   Requests,
   Responses,
   RouteCallback,
+  Table,
   Verb
 } from './types';
 
@@ -279,4 +280,15 @@ export function route<T extends Responses.ApiResponse>(
     callback: RouteCallback<Responses.Keyed<T>>): void {
   router[verb](path, (req: express.Request, res: express.Response) =>
                          respOrError(req, res, callback(req)));
+}
+
+/**
+ *  Checks whether the object contains a valid ID.
+ */
+export async function isValidID<T extends Requests.IdRequest>(
+    obj: T, table: Table): Promise<T> {
+  // TODO validate ID (obj.id) using database from table table
+  // upon failure: return Promise.reject(errors.cookInvalidID());
+  return Promise.resolve(obj).catch(() => Promise.reject(table));
+  // the catch is just to "fix" the unused variable
 }

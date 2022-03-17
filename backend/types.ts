@@ -14,6 +14,8 @@ export interface ApiError {
   reason: string;
 }
 
+/*eslint-disable no-unused-vars*/
+
 /**
  *  Interface for error cooking functions. Each function corresponds to an
  * endpoint-independent error response. This is instantiated in the utility.ts
@@ -40,22 +42,26 @@ export interface Errors {
    *  Cooks up a Non-existent Endpoint response.
    *  @param url The requested endpoint URL.
    */
-  cookNonExistent: (url: string) => ApiError;
+  cookNonExistent: (_: string) => ApiError;
   /**
    *  Cooks up an Invalid HTTP-verb response
    *  @param req The request with the invalid verb.
    */
-  cookInvalidVerb: (req: express.Request) => ApiError;
+  cookInvalidVerb: (_: express.Request) => ApiError;
   /**
    *  Cooks up an Invalid MIME Response Type Requested response.
    *  @param mime The requested invalid MIME type.
    */
-  cookNonJSON: (mime: string) => ApiError;
+  cookNonJSON: (_: string) => ApiError;
   /**
    *  Cooks up an Internal Server Error response.
    */
   cookServerError: () => ApiError;
 }
+
+/*eslint-enable no-unused-vars*/
+// we disabled the unused vars - the interface defines the fields and their
+// types, but we don't use parameters here. ESlint is just too dumb to see this.
 
 /**
  *  Namespace for internal response types. For actual response types, see
@@ -73,8 +79,9 @@ export type SessionKey = string;
 export type Suggestion = "YES"|"MAYBE"|"NO";
 
 /**
- *  Represents a partial type response. Usually these will only contain a suggestion type,
- * the name and id of the sender and the reason why this suggestion exists.
+ *  Represents a partial type response. Usually these will only contain a
+ * suggestion type, the name and id of the sender and the reason why this
+ * suggestion exists.
  */
 export interface SuggestionInfo {
   /**
@@ -92,8 +99,8 @@ export interface SuggestionInfo {
 }
 
 /**
- *  Represents a partial type response. Usually these will only contain a suggestion type
- * and a number of occurrences.
+ *  Represents a partial type response. Usually these will only contain a
+ * suggestion type and a number of occurrences.
  */
 export interface SuggestionCount {
   /**
@@ -133,7 +140,8 @@ export interface Student {}
 export interface Coach {}
 
 /**
- *  Represents a coach request response. Usually these will only contain an id, name and email.
+ *  Represents a coach request response. Usually these will only contain an id,
+ * name and email.
  */
 export interface CoachRequest {
   /**
@@ -161,7 +169,8 @@ export interface Admin {}
 export interface Project {}
 
 /**
- *  Represents the drafted students of a project. Usually these will only contain an id, name and list of students.
+ *  Represents the drafted students of a project. Usually these will only
+ * contain an id, name and list of students.
  */
 export interface ProjectDraftedStudents {
   /**
@@ -179,7 +188,8 @@ export interface ProjectDraftedStudents {
 }
 
 /**
- *  Represents the drafted students of a project. Usually these will only contain an id, name and list of students.
+ *  Represents the drafted students of a project. Usually these will only
+ * contain an id, name and list of students.
  */
 export interface ModProjectStudent {
   /**
@@ -276,16 +286,18 @@ export interface Admin extends Keyed<InternalTypes.Admin> {}
 export interface Project extends Keyed<InternalTypes.Project> {}
 
 /**
- *  A project drafted students response is the keyed version of the students and the associated
- * data of the project.
+ *  A project drafted students response is the keyed version of the students and
+ * the associated data of the project.
  */
-export interface ProjectDraftedStudents extends Keyed<InternalTypes.ProjectDraftedStudents> {}
+export interface ProjectDraftedStudents extends
+    Keyed<InternalTypes.ProjectDraftedStudents> {}
 
 /**
- *  A project drafted students response is the keyed version of the students and the associated
- * data of the project.
+ *  A project drafted students response is the keyed version of the students and
+ * the associated data of the project.
  */
-export interface ModProjectStudent extends Keyed<InternalTypes.ModProjectStudent> {}
+export interface ModProjectStudent extends
+    Keyed<InternalTypes.ModProjectStudent> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -410,9 +422,18 @@ export type Verb = "get"|"post"|"delete";
 
 export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
 
+export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
+    "job_application"|"job_application_skill"|"language"|"login_user"|"osoc"|
+    "person"|"project_role"|"project_user"|"role"|"student";
+
+/*eslint-disable no-unused-vars*/
+
 /**
  *  A route callback is a function taking an Express js request and returning a
  * promise (resolving to an API response).
  */
 export type RouteCallback<T extends Responses.ApiResponse> =
     (req: express.Request) => Promise<T>;
+
+/*eslint-enable no-unused-vars*/
+// again, we introduce a type alias, but ESLint is just too stupid.
