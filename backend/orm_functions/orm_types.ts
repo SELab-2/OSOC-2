@@ -432,3 +432,17 @@ export interface UpdateProjectRole {
      */
     positions: number
 }
+
+/**
+ * interface for the object needed in updateRole
+ */
+ export interface UpdateRole {
+    /**
+     * the role object we are changing
+     */
+    roleId: number,
+    /**
+     * the name we want to set
+     */
+    name: string
+}
