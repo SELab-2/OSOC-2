@@ -128,7 +128,7 @@
         "tags": [
           "student"
         ],
-        "description": "Lists all students in the system",
+        "description": "Lists all students in the system.",
         "operationId": "all_students",
         "parameters": [
           {
@@ -144,6 +144,32 @@
             "description": "Sessionkey as hex string.",
             "schema": {
               "$ref": "#/definitions/AllStudents"
+            }
+          }
+        }
+      }
+    },
+    "/student/<student-id>": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Lists all details about the student with the given id.",
+        "operationId": "student_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string. The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
+            "schema": {
+              "$ref": "#/definitions/Student_Id"
             }
           }
         }
@@ -169,14 +195,6 @@
       "type": "array",
       "items": {
         "$ref": "#/definitions/NameId"
-      },
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
       },
       "xml": {
         "name": "NameIdList"
@@ -208,6 +226,83 @@
       },
       "xml": {
         "name": "AllStudents"
+      }
+    },
+    "Student_Id_contract": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "info": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Student_Id_contract"
+      }
+    },
+    "Student_Id_project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "contract": {
+          "$ref": "#/definitions/Student_Id_contract"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "xml": {
+        "name": "Student_Id_project"
+      }
+    },
+    "Student_Id_data": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sollicitation": {
+          "type": "string"
+        },
+        "project": {
+          "$ref": "#/definitions/Student_Id_project"
+        }
+      },
+      "xml": {
+        "name": "Student_Id_data"
+      }
+    },
+    "Student_Id": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Student_Id_data"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Student_Id"
       }
     }
   }
