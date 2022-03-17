@@ -1,0 +1,71 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "An overview of API endpoints, verbs and their uses. Note: this is still in-progress and will change over time.",
+    "version": "2.0.0",
+    "title": "OSOC - API"
+  },
+  "tags": [
+    {
+      "name": "login",
+      "description": "Everything about the login"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "description": "Attempts to log a user in into the system",
+        "operationId": "login",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the user to log in.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "pass",
+            "description": "The name of the user to log in.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "logout"
+        ],
+        "description": "Attempts to log out.",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "The session key of the user to log out",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged out."
+          }
+        }
+      }
+    }
+  }
+}
