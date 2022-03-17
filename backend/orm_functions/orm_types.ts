@@ -315,5 +315,120 @@ export interface CreateJobApplication {
     created_at: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
+/**
+ * interface for the object needed in updateOsoc
+ */
+ export interface UpdateOsoc {
+    /**
+     * the osoc edition we are changing
+     */
+    osocId: number,
+    /**
+     * the year we want to set
+     */
+    year: number
+}
 
+/**
+ * interface for the object needed to create a project
+ */
+export interface CreateProject {
+    /**
+     * the name of the project
+     */
+    name: string,
+    /**
+     * the id of the osoc edition this project belongs to
+     */
+    osocId: number,
+    /**
+     * the partner for who this project is made
+     */
+    partner: string,
+    /**
+     * the start date of the project
+     */
+    startDate: Date,
+    /**
+     * the end date of the project
+     */
+     endDate: Date,
+    /**
+     * the amount of people who need to assigned to the project
+     */
+    positions: number
+}
 
+/**
+ * interface for the object needed to update a project's data
+ */
+export interface UpdateProject {
+    /**
+     * the project we are updating
+     */
+    projectId: number,
+    /**
+     * undefined if unchanged or new project name
+     */
+    name: string,
+    /**
+     * undefined if unchanged or the new osoc id
+     */
+    osocId: number,
+    /**
+     * undefined if unchanged or the new partner of the project
+     */
+    partner: string,
+    /**
+     * undefined if unchanged or the new start date of the project
+     */
+    startDate: Date
+    /**
+     * undefined if unchanged or the new end date of the project
+     */
+    endDate: Date,
+    /**
+     * undefined if unchanged or the new number of positions of the project
+     */
+    positions: number
+}
+
+/**
+ * interface for the object needed to create a project
+ */
+ export interface CreateProjectRole {
+    /**
+     * the id of the project this role belongs to
+     */
+    projectId: number,
+    /**
+     * the id of the role this project role represents
+     */
+    roleId: number,
+    /**
+     * the number of positions that are needed for this role
+     */
+    positions: number
+}
+
+/**
+ * interface for the object needed to update a project's data
+ */
+export interface UpdateProjectRole {
+    /**
+     * the project we are updating
+     */
+    projectRoleId: number,
+    /**
+     * undefined if unchanged or the new project id
+     */
+    projectId: number,
+    /**
+     * undefined if unchanged or the new role id
+     */
+    roleId: number,
+    /**
+     * undefined if unchanged or the new number of positions for this role in the project
+     */
+    positions: number
+}
