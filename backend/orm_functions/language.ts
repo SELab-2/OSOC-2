@@ -6,12 +6,11 @@ import {UpdateLanguage} from './orm_types';
  * @param name: the name of the language we want to add to the database
  */
  export async function createLanguage(name: string){
-    const result = await prisma.language.create({
+    return await prisma.language.create({
         data: {
             name: name
         },
     });
-    return result;
 }
 
 /**
@@ -67,7 +66,7 @@ export async function getAllLanguages() {
 /**
  * 
  * @param languageId: the language we are deleting from the language-table
- * @returns TODO: what does this return
+ * @returns the deleted record in the database
  */
  export async function deleteLanguage(languageId: number) {
     return await prisma.language.delete({
@@ -80,7 +79,7 @@ export async function getAllLanguages() {
 /**
  * 
  * @param name the name of the language we are deleting from the language-table
- * @returns TODO: what does this return
+ * @returns the deleted record in the database
  */
  export async function deleteLanguageByName(name: string) {
     return await prisma.language.delete({
