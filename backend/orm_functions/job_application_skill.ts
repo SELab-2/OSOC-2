@@ -8,11 +8,11 @@ import {CreateJobApplicationSkill, UpdateJobApplicationSkill} from './orm_types'
  export async function createJobApplicationSkill(jobApplicationSkill: CreateJobApplicationSkill) {
     return prisma.job_application_skill.create({
         data: {
-            job_application_id: jobApplicationSkill.JobApplicationId,
+            job_application_id: jobApplicationSkill.jobApplicationId,
             skill: jobApplicationSkill.skill,
-            language_id: jobApplicationSkill.langueageId,
+            language_id: jobApplicationSkill.languageId,
             level: jobApplicationSkill.level,
-            is_preferred: jobApplicationSkill.isPreffered,
+            is_preferred: jobApplicationSkill.isPreferred,
             is_best: jobApplicationSkill.isBest
         }
     });
@@ -65,9 +65,9 @@ import {CreateJobApplicationSkill, UpdateJobApplicationSkill} from './orm_types'
         data: {
             job_application_id: jobApplicationSkill.JobApplicationId,
             skill: jobApplicationSkill.skill,
-            language_id: jobApplicationSkill.langueageId,
+            language_id: jobApplicationSkill.languageId,
             level: jobApplicationSkill.level,
-            is_preferred: jobApplicationSkill.isPreffered,
+            is_preferred: jobApplicationSkill.isPreferred,
             is_best: jobApplicationSkill.is_best
         }
     });

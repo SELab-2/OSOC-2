@@ -468,7 +468,7 @@ export interface UpdateProjectRole {
     /**
      * the jobapplicaton id to which the skill is linked
      */
-    JobApplicationId: number,
+    jobApplicationId: number,
     /**
      * the skill of this job application
      */
@@ -476,7 +476,7 @@ export interface UpdateProjectRole {
     /**
      * the language id to which this skill is linked
      */
-    langueageId: number,
+    languageId: number,
     /**
      * the level of the skill of the applicant
      */
@@ -484,7 +484,7 @@ export interface UpdateProjectRole {
     /**
      * true if this skill is the preffered skill of the applicant
      */
-    isPreffered: boolean,
+    isPreferred: boolean,
     /**
      * true if this skill is the best skill of the applicant
      */
@@ -510,7 +510,7 @@ export interface UpdateJobApplicationSkill {
     /**
      * undefined if unchanged or the new language of the job application skill
      */
-    langueageId: number,
+    languageId: number,
     /**
      * undefined if unchanged or the new level
      */
@@ -518,7 +518,7 @@ export interface UpdateJobApplicationSkill {
     /**
      * undefined if unchanged or the new preffered status
      */
-    isPreffered: boolean,
+    isPreferred: boolean,
     /**
      * undefined if unchanged or the new is best status
      */
