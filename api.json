@@ -13,6 +13,18 @@
     {
       "name": "student",
       "description": "Everything about students."
+    },
+    {
+      "name": "loginuser",
+      "description": "Everything about login user."
+    },
+    {
+      "name": "project",
+      "description": "Everything about projects."
+    },
+    {
+      "name": "followup",
+      "description": "Everything about followups."
     }
   ],
   "schemes": [
@@ -39,6 +51,13 @@
             "in": "header",
             "name": "pass",
             "description": "The name of the user to log in.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "email",
+            "description": "The email of the user to log in.",
             "required": true,
             "type": "string"
           }
@@ -222,6 +241,502 @@
           }
         }
       }
+    },
+    "/student/<student-id>/suggest": {
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "Login user suggest if the student is suitable for OSOC.",
+        "operationId": "suggest_student",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "suggestion",
+            "description": "The suggestion for the student.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "motivation",
+            "description": "The motivation for the suggestion.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "login user id",
+            "description": "The id of the one that made the suggestion.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The suggestion field contains all updated fields. If no field is updated, an Argument error is thrown.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/student/<student-id>/confirm": {
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "Admin if the student is suitable for OSOC.",
+        "operationId": "confirm_student",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "confirmation",
+            "description": "The suggestion for the student.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "motivation",
+            "description": "The motivation for the suggestion.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "login user id",
+            "description": "The id of the one that made the confirmation.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The confirmation field contains all updated fields. If no field is updated, an Argument error is thrown.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/project": {
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Attempts to insert a new project in into the system",
+        "operationId": "create_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "osoc_id",
+            "description": "The id of the osoc edition this project is connected to",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "partner",
+            "description": "The partner's name of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "start_date",
+            "description": "The start date of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "end_date",
+            "description": "The end date of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "positions",
+            "description": "The amount of positions for the project",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/project/all": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Lists all projects in the system.",
+        "operationId": "all_projects",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/All_projects"
+            }
+          }
+        }
+      }
+    },
+    "/project/<project-id>": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Get the selected project from the system.",
+        "operationId": "get_project_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "project_id",
+            "description": "The unique id of the project.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/All_projects"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Updates the project in the system.",
+        "operationId": "update_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "osoc_id",
+            "description": "The id of the osoc edition this project is connected to",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "partner",
+            "description": "The partner's name of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "start_date",
+            "description": "The start date of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "end_date",
+            "description": "The end date of this project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "positions",
+            "description": "The amount of positions for the project",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "project"
+        ],
+        "description": "Removes the given project from the system.",
+        "operationId": "project_id_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/project/<project-id>/draft": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Lists all students for the selected project.",
+        "operationId": "all_students_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/AllStudents"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Add all selected students for the selected project.",
+        "operationId": "add_students_to_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "students",
+            "description": "The ids of the selected students.",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string."
+          }
+        }
+      }
+    },
+    "/loginuser/all": {
+      "get": {
+        "tags": [
+          "loginuser"
+        ],
+        "description": "Lists all projects in the system.",
+        "operationId": "all_login_users",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/AllLoginUser"
+            }
+          }
+        }
+      }
+    },
+    "/loginuser/<loginuser-id>": {
+      "get": {
+        "tags": [
+          "loginuser"
+        ],
+        "description": "Get the selected loginuser from the system.",
+        "operationId": "get_loginuser_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "login_user_id",
+            "description": "The unique id of the login user.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/LoginUserSession"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "loginuser"
+        ],
+        "description": "Updates the loginuser in the system.",
+        "operationId": "update_loginuser",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the project.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "coach",
+            "description": "Shows the user is a coach.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "admin",
+            "description": "Shows if the user is a coach.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "activated",
+            "description": "Shows if the account is activated",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The login user field contains all updated fields. If no field is updated, an Argument error is thrown. Sessionkey as hex string.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "loginuser"
+        ],
+        "description": "Removes the given project from the system.",
+        "operationId": "loginuser_id_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a sessionkey for the next action.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -381,6 +896,166 @@
       },
       "xml": {
         "name": "Student_Id_Modify"
+      }
+    },
+    "Project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "partner": {
+          "type": "string"
+        },
+        "start_date": {
+          "type": "string"
+        },
+        "end_date": {
+          "type": "string"
+        },
+        "positions": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "Project"
+      }
+    },
+    "Project_list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Project"
+      },
+      "xml": {
+        "name": "ProjectList"
+      }
+    },
+    "All_projects": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Project_list"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Allprojects"
+      }
+    },
+    "Project_session": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Project"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Project_session"
+      }
+    },
+    "LoginUser": {
+      "type": "object",
+      "properties": {
+        "person_data": {
+          "$ref": "#/definitions/NameId"
+        },
+        "coach": {
+          "type": "boolean"
+        },
+        "admin": {
+          "type": "boolean"
+        },
+        "activated": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "LoginUser"
+      }
+    },
+    "LoginUserSession": {
+      "type": "object",
+      "properties": {
+        "login person_data": {
+          "$ref": "#/definitions/LoginUser"
+        },
+        "sessionkey": {
+          "$ref": "#/definitions/Sessionkey"
+        }
+      },
+      "xml": {
+        "name": "LoginUser"
+      }
+    },
+    "LoginUserList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/LoginUser"
+      },
+      "xml": {
+        "name": "LoginUserList"
+      }
+    },
+    "AllLoginUser": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/LoginUserList"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "AllLoginUser"
+      }
+    },
+    "Suggestion": {
+      "type": "object",
+      "properties": {
+        "motivation": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "loginuserid": {
+          "type": "number"
+        },
+        "jobapplicationid": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "Suggestion"
+      }
+    },
+    "Confirmation": {
+      "type": "object",
+      "properties": {
+        "motivation": {
+          "type": "string"
+        },
+        "confirmation": {
+          "type": "string"
+        },
+        "loginuserid": {
+          "type": "number"
+        },
+        "jobapplicationid": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "confirmation"
       }
     }
   }
