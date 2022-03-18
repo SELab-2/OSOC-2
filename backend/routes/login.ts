@@ -3,6 +3,7 @@ import express, {NextFunction, Request, Response} from 'express';
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
+import passport from 'passport';
 
 /* eslint-disable no-unused-vars */
 
@@ -49,16 +50,13 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
 export function getRouter(): express.Router {
     let router: express.Router = express.Router();
 
-    router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
+    router.post('/', passport.authenticate('local-login',
+    {
+        successRedirect: '/', // TODO
+        failureRedirect: '/' //terug naar login redirecten bij een verkeerde login
+    }));
     router.delete('/',
         (req, res) => util.respOrErrorNoReinject(res, logout(req)));
     util.addInvalidVerbs(router, '/');
     return router;
-}
-
-function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect("/login");
 }
