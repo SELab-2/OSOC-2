@@ -1,6 +1,7 @@
 import express from 'express';
 
-import {InternalTypes, Responses} from '../types';
+import * as rq from '../request';
+import {Responses} from '../types';
 import * as util from '../utility';
 
 /**
@@ -11,12 +12,12 @@ import * as util from '../utility';
  */
 async function createProject(req: express.Request):
     Promise<Responses.Keyed<string>> {
-    return util.checkSessionKey(req).then((_: express.Request) => {
-        let id: string = '';
-        // TODO do insertion logic
-
-        return Promise.resolve({data : id, sessionkey : ''});
-    });
+  return rq.parseNewProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
+        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -27,12 +28,12 @@ async function createProject(req: express.Request):
  */
 async function listProjects(req: express.Request):
     Promise<Responses.IdNameList> {
-    return util.checkSessionKey(req).then((_: express.Request) => {
-        let projects: InternalTypes.IdName[] = [];
-        // TODO list all projects
-
-        return Promise.resolve({data : projects, sessionkey : ''});
-    });
+  return rq.parseProjectAllRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
+        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -41,31 +42,23 @@ async function listProjects(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getProject(req: express.Request):
-    Promise<Responses.Project>{return util.checkSessionKey(req).then(
-    async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID())
-        // if valid: get project data etc etc
-        let coachids : string[] = [];
-        let roles : string[] = [];
-        let students : InternalTypes.Student[] = [];
-        return Promise.resolve({
-            data : {id : '', name : '', partner : '', deadline : '', coaches : coachids, roles : roles, drafted : students, studentsRequired : 0},
-            sessionkey : ''
-        })})}
+async function getProject(req: express.Request): Promise<Responses.Project> {
+  return rq.parseSingleProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
+        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+      });
+}
 
 async function modProject(req: express.Request):
     Promise<Responses.Keyed<string>> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: modify project data
-        return Promise.resolve({
-            data : '',
-            sessionkey : ''
-        });
-    });
+  return rq.parseUpdateProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // UPDATING LOGIC
+        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -74,14 +67,13 @@ async function modProject(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteProject(req: express.Request):
-    Promise<Responses.Key> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: delete project data
-        return Promise.resolve({sessionkey : ''});
-    });
+async function deleteProject(req: express.Request): Promise<Responses.Key> {
+  return rq.parseDeleteProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // REMOVING LOGIC
+        return Promise.resolve({sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -91,29 +83,30 @@ async function deleteProject(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getDraftedStudents(req: express.Request):
-    Promise<Responses.ProjectDraftedStudents>{return util.checkSessionKey(req).then(
-    async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: get drafted students for this project
-        let students: InternalTypes.Student[] = [];
+    Promise<Responses.ProjectDraftedStudents> {
+
+  return rq.parseGetDraftedStudentsRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
         return Promise.resolve({
-            data : {id : '', name : '', students: students},
-            sessionkey : ''
-        })})}
+          data : {id : '', name : '', students : []},
+          sessionkey : parsed.sessionkey
+        });
+      });
+}
 
 async function modProjectStudent(req: express.Request):
     Promise<Responses.ModProjectStudent> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: modify a student of this project
-        let roles : string[] = [];
+  return rq.parseDraftStudentRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
         return Promise.resolve({
-            data : {drafted : true, roles : roles},
-            sessionkey : ''
+          data : {drafted : false, roles : []},
+          sessionkey : parsed.sessionkey
         });
-    });
+      });
 }
 
 // TODO project conflicts
@@ -137,24 +130,25 @@ async function modProjectStudent(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-    let router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
-    router.get("/", (_, res) => util.redirect(res, "/project/all"));
-    util.route(router, "get", "/all", listProjects);
-    util.route(router, "post", "/:id", createProject);
-    util.route(router, "get", "/:id", getProject);
+  router.get("/", (_, res) => util.redirect(res, "/project/all"));
+  util.route(router, "get", "/all", listProjects);
+  util.route(router, "post", "/:id", createProject);
+  util.route(router, "get", "/:id", getProject);
 
-    util.route(router, "post", "/:id", modProject);
-    router.delete('/:id',
-        (req, res) => util.respOrErrorNoReinject(res, deleteProject(req)));
+  util.route(router, "post", "/:id", modProject);
+  router.delete('/:id', (req, res) => util.respOrErrorNoReinject(
+                            res, deleteProject(req)));
 
-    util.route(router, "get", "/:id/draft", getDraftedStudents);
-    util.route(router, "post", "/:id/draft", modProjectStudent);
-    // TODO project conflicts
-    //util.route(router, "get", "/conflicts", getProjectConflicts);
+  util.route(router, "get", "/:id/draft", getDraftedStudents);
+  util.route(router, "post", "/:id/draft", modProjectStudent);
+  // TODO project conflicts
+  // util.route(router, "get", "/conflicts", getProjectConflicts);
 
-    // TODO add project conflicts
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/:id", "/:id/draft", "/request/:id" ]);
+  // TODO add project conflicts
+  util.addAllInvalidVerbs(
+      router, [ "/", "/all", "/:id", "/:id/draft", "/request/:id" ]);
 
-    return router;
+  return router;
 }

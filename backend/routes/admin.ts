@@ -1,6 +1,7 @@
 import express from 'express';
 
-import {InternalTypes, Responses} from '../types';
+import * as rq from '../request';
+import {Responses} from '../types';
 import * as util from '../utility';
 
 /**
@@ -9,14 +10,13 @@ import * as util from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listAdmins(req: express.Request):
-    Promise<Responses.IdNameList> {
-    return util.checkSessionKey(req).then((_: express.Request) => {
-        let admins: InternalTypes.IdName[] = [];
-        // TODO list all admins
-
-        return Promise.resolve({data : admins, sessionkey : ''});
-    });
+async function listAdmins(req: express.Request): Promise<Responses.IdNameList> {
+  return rq.parseAdminAllRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // FETCHING LOGIC
+        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -25,27 +25,23 @@ async function listAdmins(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getAdmin(req: express.Request):
-    Promise<Responses.Admin>{return util.checkSessionKey(req).then(
-    async (_) => {// check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID())
-        // if valid: get admin data etc etc
-        return Promise.resolve({
-            data : {id : '', name : '', email : ''},
-            sessionkey : ''
-        })})}
+async function getAdmin(req: express.Request): Promise<Responses.Admin> {
+  return rq.parseSingleAdminRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // FETCHING LOGIC
+        return Promise.resolve({data : {}, sessionkey : parsed.sessionkey});
+      });
+}
 
 async function modAdmin(req: express.Request):
     Promise<Responses.Keyed<string>> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: modify admin data
-        return Promise.resolve({
-            data : '',
-            sessionkey : ''
-        });
-    });
+  return rq.parseUpdateAdminRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // UPDATING LOGIC
+        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -54,14 +50,13 @@ async function modAdmin(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteAdmin(req: express.Request):
-    Promise<Responses.Key> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: delete admin data
-        return Promise.resolve({sessionkey : ''});
-    });
+async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
+  return rq.parseDeleteAdminRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        // REMOVING LOGIC
+        return Promise.resolve({sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -70,17 +65,17 @@ async function deleteAdmin(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-    let router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
-    router.get("/", (_, res) => util.redirect(res, "/admin/all"));
-    util.route(router, "get", "/all", listAdmins);
-    util.route(router, "get", "/:id", getAdmin);
+  router.get("/", (_, res) => util.redirect(res, "/admin/all"));
+  util.route(router, "get", "/all", listAdmins);
+  util.route(router, "get", "/:id", getAdmin);
 
-    util.route(router, "post", "/:id", modAdmin);
-    router.delete('/:id',
-        (req, res) => util.respOrErrorNoReinject(res, deleteAdmin(req)));
+  util.route(router, "post", "/:id", modAdmin);
+  router.delete('/:id', (req, res) =>
+                            util.respOrErrorNoReinject(res, deleteAdmin(req)));
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
+  util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
 
-    return router;
+  return router;
 }
