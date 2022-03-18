@@ -50,11 +50,11 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
     /**
      * undefined if unchanged or the new github
      */
-    github?: string,
+    github?: string | null,
     /**
      * undefined if unchanged or the new email
      */
-    email?: string,
+    email?: string | null,
 }
 
 /**
