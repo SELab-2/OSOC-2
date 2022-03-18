@@ -420,6 +420,17 @@ export interface ModTemplate extends IdRequest {
   cc?: string[];
   content?: string;
 }
+
+export interface Form {
+  eventId : string,
+  eventType : string,
+  createdAt : string,
+  data : DataForm
+}
+
+export interface DataForm {
+  fields : Array<object>
+}
 }
 
 /**

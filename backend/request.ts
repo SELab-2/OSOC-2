@@ -424,6 +424,24 @@ export async function parseUpdateTemplateRequest(req: express.Request):
 }
 
 /**
+ *  Parses a request to `POST /form`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFormRequest(req: express.Request):
+    Promise<Requests.Form> {
+  return hasFields(req, ["eventId", "eventType", "createdAt", "data"], types.neither).then(() => {
+    return Promise.resolve({
+      eventId : req.body.eventId,
+      eventType : req.body.eventType,
+      createdAt : req.body.createdAt,
+      data : req.body.data
+    });
+  });
+}
+
+/**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
  */
