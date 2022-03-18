@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS login_user(
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL
+   year       SMALLINT    NOT NULL UNIQUE
 );
 
 

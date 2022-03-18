@@ -104,7 +104,7 @@ model login_user {
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
-  year            Int               @db.SmallInt
+  year            Int               @unique @db.SmallInt
   job_application job_application[]
   project         project[]
 }

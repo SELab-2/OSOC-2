@@ -6,12 +6,11 @@ import {UpdateOsoc} from './orm_types';
  * @param year: create osoc edition, only needs year
  */
 export async function createOsoc(year: number){
-    const result = await prisma.osoc.create({
+    return await prisma.osoc.create({
         data: {
             year: year
         },
     });
-    return result;
 }
 
 /**
@@ -19,8 +18,7 @@ export async function createOsoc(year: number){
  * @returns a list of all the osoc objects in the database
  */
 export async function getAllOsoc() {
-    const result = prisma.osoc.findMany();
-    return result;
+    return prisma.osoc.findMany();
 }
 
 /**
@@ -29,12 +27,11 @@ export async function getAllOsoc() {
  * @returns: osoc object
  */
 export async function getOsocByYear(year: number) {
-    const result = prisma.osoc.findMany({
-        where: { 
+    return prisma.osoc.findUnique({
+        where: {
             year: year
         },
     });
-    return result;
 }
 
 /**
@@ -43,14 +40,13 @@ export async function getOsocByYear(year: number) {
  * @returns: all the osoc objects that took place before the supplied year
  */
 export async function getOsocBeforeYear(year: number) {
-    const result = prisma.osoc.findMany({
+    return prisma.osoc.findMany({
         where: {
             year: {
-              lt: year,
+                lt: year,
             },
         },
     });
-    return result;
 }
 
 /**
@@ -59,14 +55,13 @@ export async function getOsocBeforeYear(year: number) {
  * @returns: all the osoc objects that took place after the supplied year
  */
 export async function getOsocAfterYear(year: number) {
-    const result = prisma.osoc.findMany({
+    return prisma.osoc.findMany({
         where: {
             year: {
-              gt: year,
+                gt: year,
             },
         },
     });
-    return result;
 }
 
 /**
@@ -75,7 +70,7 @@ export async function getOsocAfterYear(year: number) {
  * @returns the updated entry in the database 
  */
 export async function updateOsoc(osoc: UpdateOsoc){
-        const result = await prisma.osoc.update({
+    return await prisma.osoc.update({
         where: {
             osoc_id: osoc.osocId
         },
@@ -83,33 +78,30 @@ export async function updateOsoc(osoc: UpdateOsoc){
             year: osoc.year
         },
     });
-    return result;
 }
 
 /**
  * 
  * @param osocId the osoc edition we are deleting from the osoc-table
- * @returns TODO: WHAT DOES THIS RETURNS
+ * @returns the deleted osoc record
  */
 export async function deleteOsoc(osocId: number){
-    const result = await prisma.osoc.delete({
+    return await prisma.osoc.delete({
         where: {
             osoc_id: osocId
         }
     });
-    return result;
 }
 
 /**
  * 
  * @param year the year we are deleting from the osoc-table
- * @returns TODO: WHAT DOES THIS RETURNS
+ * @returns the deleted osoc record
  */
 export async function deleteOsocByYear(year: number){
-    const result = await prisma.osoc.deleteMany({
+    return await prisma.osoc.delete({
         where: {
             year: year
         }
     });
-    return result;
 }
