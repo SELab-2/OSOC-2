@@ -155,9 +155,14 @@ export async function respOrErrorNoReinject(
           (err: any): boolean => { return 'http' in err && 'reason' in err };
 
       return prom
+          .then(data => {
+            console.log(data);
+            return Promise.resolve(data);
+          })
           .then((data: Responses.ApiResponse): Promise<void> =>
                     replySuccess(res, data as typeof data))
           .catch((err: any): Promise<void> => {
+            console.log(err);
             if (isError(err))
               return replyError(res, err);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));

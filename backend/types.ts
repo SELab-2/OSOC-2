@@ -116,14 +116,20 @@ export interface SuggestionCount {
 }
 
 /**
- *  Represents a partial type response. Usually these will only contain a name
- * and an ID.
+ *  Represents a response that only contains an ID.
  */
-export interface IdName {
+export interface IdOnly {
   /**
    *  The ID.
    */
   id: string;
+}
+
+/**
+ *  Represents a partial type response. Usually these will only contain a name
+ * and an ID.
+ */
+export interface IdName extends IdOnly {
   /**
    *  The name.
    */
@@ -186,7 +192,7 @@ export interface ProjectDraftedStudents {
   /**
    *  The students.
    */
-  students: Student;
+  students: Student[];
 }
 
 /**
