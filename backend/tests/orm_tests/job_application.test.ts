@@ -1,7 +1,13 @@
 import {prismaMock} from "./singleton";
 import {
-    changeEmailStatusOfJobApplication, createJobApplication, deleteJobApplication,
-    deleteJobApplicationsFromStudent, getJobApplication, getJobApplicationByYear, getLatestJobApplicationOfStudent,
+    changeEmailStatusOfJobApplication,
+    createJobApplication,
+    deleteJobApplication,
+    deleteJobApplicationsFromStudent,
+    getJobApplication,
+    getJobApplicationByYear,
+    getLatestApplicationRolesForStudent,
+    getLatestJobApplicationOfStudent,
     getStudentEvaluationsFinal,
     getStudentEvaluationsTemp,
     getStudentEvaluationsTotal
@@ -95,4 +101,9 @@ test("should return a job application", async () => {
 test("should return all job applications of the given year", async () => {
     prismaMock.job_application.findMany.mockResolvedValue([response]);
     await expect(getJobApplicationByYear(2022)).resolves.toEqual([response]);
+});
+
+test("should return the latest roles this student has applied for", async () => {
+    prismaMock.job_application.findFirst.mockResolvedValue(response);
+    await expect(getLatestApplicationRolesForStudent(0)).resolves.toEqual(response);
 })

@@ -100,3 +100,25 @@ export async function deleteProject(projectRoleId: number){
     });
     return result;
 }
+
+/**
+ *
+ * @param projectRoleId: the id of the projectRule we are searching the number of free positions for
+ * @return the number of free positions if free (in a promise) else the error from the db
+ */
+export async function getNumberOfFreePositions(projectRoleId: number) {
+    const result = await prisma.project_role.findUnique({
+        where: {
+            project_role_id: projectRoleId
+        },
+        select : {
+            positions: true,
+            contract: true
+        }
+    });
+
+    if (result) {
+        return result.positions - result.contract.length
+    }
+    return result;
+}

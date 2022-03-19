@@ -524,3 +524,27 @@ export interface UpdateJobApplicationSkill {
      */
     is_best: boolean
 }
+
+export interface AddStudentToProject {
+    /**
+     * the id of the loginsuer that wants to add a student to the project
+     */
+    loginUserId: number,
+    /**
+     * the id of the student that will be added to the project
+     */
+    studentId: number,
+    /**
+     * the id of the project that the student will be added to
+     */
+    projectId: number,
+    /**
+     * the name of the role the student will be added for
+     */
+    roleName: string,
+    /**
+     * extra information
+     */
+    information?: string | null,
+
+}

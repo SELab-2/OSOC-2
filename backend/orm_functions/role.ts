@@ -49,6 +49,32 @@ export async function getAllRoles() {
 }
 
 /**
+ *
+ * @param name the name of the role
+ * @param projectId: the id of the project the searched project_role belongs to
+ * @returns the project_role or an error from the database
+ */
+export async function getProjectRoleWithRoleName(name: string, projectId: number) {
+     const id = await prisma.role.findUnique({
+         where : {
+             name : name,
+         },
+         select: {
+             role_id: true
+         }
+     });
+     if (id) {
+         return await prisma.project_role.findFirst({
+             where: {
+                 role_id: id.role_id,
+                 project_id: projectId
+             }
+         });
+     }
+     return id
+}
+
+/**
  * 
  * @param role: UpdateRole object with the values that need to be updated
  * @returns the updated entry in the database 
