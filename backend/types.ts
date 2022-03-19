@@ -431,6 +431,15 @@ export interface Form {
 export interface DataForm {
   fields : Array<object>
 }
+
+export interface IdLiveInBelgium {
+  id : string
+}
+
+/*export interface Question {
+  value : string
+  options : Array<IdLiveInBelgium>
+}*/
 }
 
 /**
