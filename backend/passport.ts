@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from "express";
 import * as personDB from "./orm_functions/person";
+import bcrypt from 'bcrypt'
 
-const bcrypt = require('bcrypt-nodejs');
 
 let LocalStrategy = require('passport-local').Strategy;
 
@@ -32,7 +32,7 @@ module.exports = function (passport: any) {
         }));
 
     function generatePasswordHash(password: string) {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+        return bcrypt.hashSync(password, bcrypt.genSaltSync(8));
     }
 
     function validPassword(curPass: string, dbPass: string) {
