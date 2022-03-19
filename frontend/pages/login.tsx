@@ -4,6 +4,7 @@ import Image from "next/image"
 import LogoOsocColor from "../public/images/logo-osoc-color.svg"
 import GitHubLogo from "../public/images/github-logo.svg"
 import {SyntheticEvent, useState} from "react";
+import {Modal} from "../components/Modal/Modal";
 
 const Login: NextPage = () => {
 
@@ -19,6 +20,10 @@ const Login: NextPage = () => {
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
 
+    const [passwordResetMail, setPasswordResetMail] = useState<string>("");
+    const [passwordResetMailError, setPasswordResetMailError] = useState<string>("");
+    const [showPasswordReset, setShowPasswordReset] = useState<boolean>(false);
+
     /**
      * Executed upon trying to login
      * Checks that inputfields are not empty and sends a request to the backend
@@ -29,56 +34,114 @@ const Login: NextPage = () => {
     const submitLogin = (e: SyntheticEvent) => {
         e.preventDefault();
 
+        let error: boolean = false
+
         if (loginEmail === "") {
             setLoginEmailError("Email cannot be empty");
+            error = true
         } else {
             setLoginEmailError("");
         }
 
         if (loginPassword === "") {
             setLoginPasswordError("Password cannot be empty");
+            error = true
         } else {
             setLoginPasswordError("");
         }
 
+        if (!error) {
+            // TODO -- Send call to the backend
+            // TODO -- Handle response
+            console.log("LOGGING IN...")
+        }
 
-        // TODO -- Send call to the backend
-        // TODO -- Handle response
-        console.log("LOGGING IN...")
     }
 
+    /**
+     * Executed upon trying to register
+     * Checks that inputfields are not empty and sends a request to the backend
+     * Redirects to the home page if succesfull else returns an error message
+     *
+     * @param e - The event triggering this function call
+     */
     const submitRegister = (e: SyntheticEvent) => {
         e.preventDefault();
 
+        let error: boolean = false
+
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
+            error = true
         } else {
             setRegisterEmailError("");
         }
 
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
+            error = true
         } else {
             setRegisterPasswordError("");
         }
 
         if (registerPassword != registerConfirmPassword) {
             setRegisterConfirmPasswordError("Passwords do not match");
+            error = true
         } else if (registerConfirmPasswordError === "") {
             setRegisterConfirmPasswordError("Password cannot be empty")
+            error = true
         } else {
             setRegisterConfirmPasswordError("");
         }
 
-        // TODO -- Send call to the backend
-        // TODO -- Handle response
-        console.log("REGISTERING...")
+        if (!error) {
+            // TODO -- Send call to the backend
+            // TODO -- Handle response
+            console.log("REGISTERING...")
+        }
     }
 
+    /**
+     * When the users want to login with github we follow the github web authentication application flow
+     * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
+     *
+     * Redirect to homepage upon succes
+     *
+     * @param e - The event triggering this function call
+     */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
         // TODO
         console.log("LOGGING IT WITH GITHUB...");
+    }
+
+    const resetPassword = (e: SyntheticEvent) => {
+        e.preventDefault()
+
+        let error: boolean = false
+
+        if (passwordResetMail === "") {
+            setPasswordResetMailError("Email cannot be empty")
+            error = true
+        } else {
+            setPasswordResetMailError("")
+        }
+
+        if (!error) {
+            console.log("RESETTING PASSWORD")
+            setShowPasswordReset(false)
+        }
+
+    }
+
+    const showModal = (e: SyntheticEvent) => {
+        e.preventDefault()
+        setShowPasswordReset(true)
+    }
+
+    const closeModal = (e: SyntheticEvent) => {
+        e.preventDefault();
+        setShowPasswordReset(false)
     }
 
     return (
@@ -116,7 +179,17 @@ const Login: NextPage = () => {
                                        onChange={e => setLoginPassword(e.target.value)}/>
                             </label>
                             <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
-                            <a className={styles.resetPassword} href="#forgotPassword">Forgot password?</a>
+                            <a className={styles.resetPassword} onClick={showModal}>Forgot password?</a>
+                            <Modal handleClose={closeModal} visible={showPasswordReset}>
+                                <p>Please enter your email below and we will send you a link to reset your password.</p>
+                                <label className={styles.label}>
+                                    <input type="text" name="loginEmail"
+                                           value={passwordResetMail === "" ? loginEmail : passwordResetMail}
+                                           onChange={e => setPasswordResetMail(e.target.value)}/>
+                                </label>
+                                <p className={`${styles.textFieldError} ${passwordResetMailError !== "" ? styles.anim : ""}`}>{passwordResetMailError}</p>
+                                <button onClick={resetPassword}>CONFIRM</button>
+                            </Modal>
                             <button onClick={e => submitLogin(e)}>LOG IN</button>
                             <div className={styles.orContainer}>
                                 <div/>

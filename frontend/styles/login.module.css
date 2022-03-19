@@ -37,7 +37,7 @@
 /**
  * Vertical version of login and register
  */
-@media (max-width: 35rem) {
+@media (max-width: 45rem) {
     .formContainer {
         flex-direction: column;
     }
