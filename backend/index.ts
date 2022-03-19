@@ -10,12 +10,6 @@ import * as util from './utility';
 const app: express.Application = express();
 const port: number = config.port;
 
-declare module 'express-session' {
-  export interface SessionData {
-    passport: any;
-  }
-}
-
 app.use(body.urlencoded({extended : true}));
 app.use(express.json());
 app.use((req, _, next) => util.logRequest(req, next));
@@ -28,6 +22,7 @@ app.use(session({
 app.use(passport.initialize());
 // allow passport to use "express-session".
 app.use(passport.session());
+require('./passport')(passport);
 
 ep.attach(app);
 util.addInvalidVerbs(app, '/');

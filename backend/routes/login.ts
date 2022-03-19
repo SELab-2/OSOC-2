@@ -50,9 +50,9 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
 export function getRouter(): express.Router {
     let router: express.Router = express.Router();
 
-    router.post('/', passport.authenticate('local-login',
+    router.post('/', passport.authenticate('local',
     {
-        successRedirect: '/', // TODO
+        successRedirect: '/', // TODO: return naar homepagina, current: returnt terug naar login
         failureRedirect: '/' //terug naar login redirecten bij een verkeerde login
     }));
     router.delete('/',
