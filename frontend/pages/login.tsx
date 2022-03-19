@@ -17,6 +17,10 @@ const Login: NextPage = () => {
     // Register field values with corresponding error messages
     const [registerEmail, setRegisterEmail] = useState<string>("");
     const [registerEmailError, setRegisterEmailError] = useState<string>("");
+    const [registerFirstName, setRegisterFirstName] = useState<string>("");
+    const [registerFirstNameError, setRegisterFirstNameError] = useState<string>("");
+    const [registerLastName, setRegisterLastName] = useState<string>("");
+    const [registerLastNameError, setRegisterLastNameError] = useState<string>("");
     const [registerPassword, setRegisterPassword] = useState<string>("");
     const [registerPasswordError, setRegisterPasswordError] = useState<string>("");
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
@@ -79,6 +83,20 @@ const Login: NextPage = () => {
             error = true
         } else {
             setRegisterEmailError("");
+        }
+
+        if (registerFirstName === "") {
+            setRegisterFirstNameError("First name cannot be empty")
+            error = true
+        } else {
+            setRegisterFirstNameError("")
+        }
+
+        if (registerLastNameError === "") {
+            setRegisterLastNameError("Last name cannot be empty")
+            error = true
+        } else {
+            setRegisterLastNameError("")
         }
 
         if (registerPassword === "") {
@@ -228,6 +246,18 @@ const Login: NextPage = () => {
                         <form className={styles.form} onSubmit={e => {
                             submitRegister(e)
                         }}>
+                            <label className={styles.label}>
+                                First Name
+                                <input type="text" name="registerFirstName" value={registerFirstName}
+                                       onChange={e => setRegisterFirstName(e.target.value)}/>
+                            </label>
+                            <p className={`${styles.textFieldError} ${registerFirstNameError !== "" ? styles.anim : ""}`}>{registerFirstNameError}</p>
+                            <label className={styles.label}>
+                                Last Name
+                                <input type="text" name="registerLastName" value={registerLastName}
+                                       onChange={e => setRegisterLastName(e.target.value)}/>
+                            </label>
+                            <p className={`${styles.textFieldError} ${registerLastNameError !== "" ? styles.anim : ""}`}>{registerLastNameError}</p>
                             <label className={styles.label}>
                                 Email
                                 <input type="text" name="registerEmail" value={registerEmail}
