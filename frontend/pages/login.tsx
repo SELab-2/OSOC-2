@@ -8,11 +8,13 @@ import {Modal} from "../components/Modal/Modal";
 
 const Login: NextPage = () => {
 
+    // Login field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
     const [loginEmailError, setLoginEmailError] = useState<string>("");
     const [loginPassword, setLoginPassword] = useState<string>("");
     const [loginPasswordError, setLoginPasswordError] = useState<string>("");
 
+    // Register field values with corresponding error messages
     const [registerEmail, setRegisterEmail] = useState<string>("");
     const [registerEmailError, setRegisterEmailError] = useState<string>("");
     const [registerPassword, setRegisterPassword] = useState<string>("");
@@ -20,6 +22,7 @@ const Login: NextPage = () => {
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
 
+    // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
     const [passwordResetMailError, setPasswordResetMailError] = useState<string>("");
     const [showPasswordReset, setShowPasswordReset] = useState<boolean>(false);
@@ -50,6 +53,7 @@ const Login: NextPage = () => {
             setLoginPasswordError("");
         }
 
+        // Fields are not empty
         if (!error) {
             // TODO -- Send call to the backend
             // TODO -- Handle response
@@ -94,6 +98,7 @@ const Login: NextPage = () => {
             setRegisterConfirmPasswordError("");
         }
 
+        // Fields are not empty
         if (!error) {
             // TODO -- Send call to the backend
             // TODO -- Handle response
@@ -115,6 +120,11 @@ const Login: NextPage = () => {
         console.log("LOGGING IT WITH GITHUB...");
     }
 
+    /**
+     * Handles password reset requests from the popup modal
+     *
+     * @param e - The event triggering this function call
+     */
     const resetPassword = (e: SyntheticEvent) => {
         e.preventDefault()
 
@@ -127,6 +137,7 @@ const Login: NextPage = () => {
             setPasswordResetMailError("")
         }
 
+        // Field is not empty
         if (!error) {
             console.log("RESETTING PASSWORD")
             setShowPasswordReset(false)
@@ -134,11 +145,13 @@ const Login: NextPage = () => {
 
     }
 
+    // Show password reset modal
     const showModal = (e: SyntheticEvent) => {
         e.preventDefault()
         setShowPasswordReset(true)
     }
 
+    // Close password reset modal
     const closeModal = (e: SyntheticEvent) => {
         e.preventDefault();
         setShowPasswordReset(false)

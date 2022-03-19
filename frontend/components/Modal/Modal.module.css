@@ -9,7 +9,7 @@
 
 .modalMain {
     position:fixed;
-    background: white;
+    background: var(--neutral-100);
     width: clamp(10rem, 90vw, 30rem);
     height: auto;
     left:50%;
@@ -19,7 +19,6 @@
     flex-direction: column;
     padding: 1rem;
 }
-
 
 
 .displayBlock {
