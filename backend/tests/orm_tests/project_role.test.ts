@@ -70,3 +70,8 @@ test("should return the number of free positions", async () => {
     // expected length is 3, because positions == 5 and contract == ["", ""] (array with length 2)
     await expect(getNumberOfFreePositions(0)).resolves.toEqual(3)
 });
+
+test("should return null because the project_role with given ID was not found", async () => {
+    prismaMock.project_role.findUnique.mockResolvedValue(null);
+    await expect(getNumberOfFreePositions(0)).resolves.toEqual(null);
+});
