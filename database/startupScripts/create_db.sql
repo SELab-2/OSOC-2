@@ -19,19 +19,40 @@ CREATE TABLE IF NOT EXISTS student(
    alumni          BOOLEAN         NOT NULL
 );
 
+/* function used in login user to retrieve if email is used in person */
+CREATE OR REPLACE FUNCTION get_email_used(personId integer, value text)
+RETURNS BOOLEAN AS
+$$
+declare 
+    email_used text;
+begin
+    select email into email_used from person where person_id = personId;
 
-CREATE TABLE IF NOT EXISTS login_user (
+    if (email_used IS NOT NULL) and (value is null) then 
+        return false; 
+    end if;
+
+    return true; 
+END;
+$$ LANGUAGE PLpgSQL;
+
+/* enum used in login_user to show the account status */
+CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
+
+CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
-    person_id        SERIAL     NOT NULL REFERENCES person(person_id),
-    password         TEXT       NOT NULL, 
+    person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
+    "password"         TEXT     NULL, 
     /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
-    /* TODO2: Wat als je zowel email als github hebt */
+    /* TODO2: inloggen via github en email leidt tot verschillend account */
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
+    session_keys     TEXT[]     NOT NULL,
+    account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
+    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
+    CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
-
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
