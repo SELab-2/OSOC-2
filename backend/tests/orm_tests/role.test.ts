@@ -1,5 +1,55 @@
 import {prismaMock} from "./singleton";
-import {getProjectRoleWithRoleName} from "../../orm_functions/role";
+import { UpdateRole } from "../../orm_functions/orm_types";
+import {getProjectRoleWithRoleName, createProjectRole, getAllRoles,
+    getRole, getRolesByName, updateRole, deleteRole, deleteRoleByName} 
+    from "../../orm_functions/role";
+
+const returnValue = {
+    role_id: 0,
+    name: "Developer"
+}
+
+test("should create a role in the db with the given name, returns the new record", async () => {
+     prismaMock.role.create.mockResolvedValue(returnValue)
+     await expect(createProjectRole("Developer")).resolves.toEqual(returnValue);
+ });
+
+
+ test("should return all roles in the db", async () => {
+    prismaMock.role.findMany.mockResolvedValue([returnValue]);
+    await expect(getAllRoles()).resolves.toEqual([returnValue]);
+});
+
+test("should return the role object for the given role id", async () => {
+    prismaMock.role.findUnique.mockResolvedValue(returnValue);
+    await expect(getRole(0)).resolves.toEqual(returnValue);
+});
+
+test("should return the role object for the given name", async () => {
+    prismaMock.role.findUnique.mockResolvedValue(returnValue);
+    await expect(getRolesByName("Developer")).resolves.toEqual(returnValue);
+});
+
+test("should update the role with the new data and return the updated record", async () => {
+    const role : UpdateRole = {
+        roleId: 0,
+        name: "Data scientist"
+    };
+
+    prismaMock.role.update.mockResolvedValue(returnValue);
+    await expect(updateRole(role)).resolves.toEqual(returnValue);
+});
+
+test("should delete the role with the given id and return the deleted record", async () => {
+    prismaMock.role.delete.mockResolvedValue(returnValue);
+    await expect(deleteRole(0)).resolves.toEqual(returnValue);
+});
+
+test("should delete the role with the given name and return the deleted record", async () => {
+    prismaMock.role.delete.mockResolvedValue(returnValue);
+    await expect(deleteRoleByName("Data scientist")).resolves.toEqual(returnValue);
+});
+
 
 test("should return the id of the project_role with the given role name", async () => {
 
