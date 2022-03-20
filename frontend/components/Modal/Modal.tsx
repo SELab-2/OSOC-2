@@ -6,7 +6,7 @@ import styles from './Modal.module.css'
  * Will display it's children inside the modal
  * @param children - The children to be shown inside the modal
  * @param visible - Set the modal to be visible or not
- * @param handleClose - The callback to close the modaazl
+ * @param handleClose - The callback to close the modal
  */
 // eslint-disable-next-line no-unused-vars
 export const Modal: React.FC<{ visible: boolean, handleClose: (e :SyntheticEvent) => void }> = ({
