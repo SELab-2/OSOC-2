@@ -3,6 +3,7 @@ import { CreateProjectUser } from "../../orm_functions/orm_types";
 import {createProjectUser } from "../../orm_functions/project_user";
 
 const returnValue = {
+    project_user_id: 0,
     login_user_id: 0,
     project_id: 0
 }

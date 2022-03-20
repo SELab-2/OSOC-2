@@ -3,6 +3,7 @@ import { CreateAppliedRole } from "../../orm_functions/orm_types";
 import {createAppliedRole } from "../../orm_functions/applied_role";
 
 const returnValue = {
+    applied_role_id: 0,
     role_id: 0,
     job_application_id: 0
 }
