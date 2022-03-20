@@ -175,7 +175,7 @@ async function deleteCoachRequest(req: express.Request):
  */
 export function getRouter(): express.Router {
   let router: express.Router = express.Router({strict : true});
-  router.get("/", (_, res) => util.redirect(res, "/coach/all"));
+  util.setupRedirect(router, '/coach');
   util.route(router, "get", "/all", listCoaches);
 
   util.route(router, "get", "/request", getCoachRequests);

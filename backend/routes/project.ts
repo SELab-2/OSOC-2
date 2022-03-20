@@ -132,7 +132,7 @@ async function modProjectStudent(req: express.Request):
 export function getRouter(): express.Router {
   let router: express.Router = express.Router();
 
-  router.get("/", (_, res) => util.redirect(res, "/project/all"));
+  util.setupRedirect(router, '/project');
   util.route(router, "get", "/all", listProjects);
   util.route(router, "post", "/:id", createProject);
   util.route(router, "get", "/:id", getProject);

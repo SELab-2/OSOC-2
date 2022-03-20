@@ -36,7 +36,10 @@
         }
     },
 
-    "homes": [
-        "", "/api"
-    ]
+    "global": {
+        "homes": [
+            "", "/api"
+        ],
+        "preferred": "/api"
+    }
 }

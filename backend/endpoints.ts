@@ -14,7 +14,7 @@ import * as util from './utility';
  *  @param app The Express.js application to attach to.
  */
 export function attach(app: express.Application): void {
-  config.homes.forEach(home => {
+  config.global.homes.forEach(home => {
     app.use(home + '/login', login.getRouter());
     app.use(home + '/student', student.getRouter());
     app.use(home + '/coach', coach.getRouter());
