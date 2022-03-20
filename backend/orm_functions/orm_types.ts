@@ -550,7 +550,7 @@ export interface AddStudentToProject {
 }
 
 /**
- * interface for the object needed to create a project
+ * interface for the object needed to create a project user
  */
  export interface CreateProjectUser {
     /**
@@ -561,4 +561,18 @@ export interface AddStudentToProject {
      * the id of the login user this user belongs to
      */
     loginUserId: number,
+}
+
+/**
+ * interface for the object needed to create an applied role
+ */
+ export interface CreateAppliedRole {
+    /**
+     * the id of the job application this applied role belongs to
+     */
+    jobApplicationId: number,
+    /**
+     * the id of the role this applied role belongs to
+     */
+    roleId: number,
 }
