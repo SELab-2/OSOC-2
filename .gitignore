@@ -52,5 +52,10 @@ frontend/node_modules
 # keep some (empty) directories
 !**/.gitkeep
 
-# ignore ide / editor files and folders
-.idea/
+# jetbrains
+.idea
+frontend/.idea
+backend/.idea
+
+# ignore test coverage files
+*coverage.json

@@ -1,40 +1,63 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
-   email        VARCHAR(320),      /* max email length is 320 characters */
-   github       TEXT,   
+   email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
+   github       TEXT               UNIQUE,   
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
    gender       TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL)
+   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   CONSTRAINT email_check CHECK (email is NULL or email is LIKE '%_@__%.__%')
 );
 
 
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
-   person_id       SERIAL          NOT NULL     REFERENCES person (person_id),
+   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
    pronouns        TEXT [],
-   phone_number    TEXT    NOT NULL,
+   phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS login_user (
+/* function used in login user to retrieve if email is used in person */
+CREATE OR REPLACE FUNCTION get_email_used(personId integer, given_password text)
+RETURNS BOOLEAN AS
+$$
+declare 
+    email_used text;
+begin
+    select email into email_used from person where person_id = personId;
+
+    if (email_used IS NOT NULL) and (given_password is null) then 
+        return false; 
+    end if;
+
+    return true; 
+END;
+$$ LANGUAGE PLpgSQL;
+
+/* enum used in login_user to show the account status */
+CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
+
+CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
-    person_id        SERIAL     NOT NULL REFERENCES person(person_id),
-    password         TEXT       NOT NULL, 
-    /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
-    /* TODO2: Wat als je zowel email als github hebt */
+    person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
+    "password"         TEXT     NULL, 
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
+    session_keys     TEXT[]     NOT NULL,
+    account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
+    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
+    CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
 
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL
+   year       SMALLINT    NOT NULL,
+   CONSTRAINT valid_year CHECK (year >= 2022)
 );
 
 
@@ -55,7 +78,8 @@ CREATE TABLE IF NOT EXISTS job_application (
     edu_duration          INT,
     edu_year              INT,
     edu_institute         TEXT,
-    email_status          email_status_enum    NOT NULL
+    email_status          email_status_enum    NOT NULL,
+    created_at            TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
 
 
@@ -74,7 +98,7 @@ CREATE TABLE IF NOT EXISTS evaluation (
 
 CREATE TABLE IF NOT EXISTS role (
     role_id    SERIAL    PRIMARY KEY,
-    name       TEXT
+    name       TEXT      NOT NULL UNIQUE
 );
 
 
@@ -83,9 +107,12 @@ CREATE TABLE IF NOT EXISTS project (
    name          TEXT             NOT NULL,
    osoc_id       SERIAL           NOT NULL REFERENCES osoc (osoc_id),
    partner       TEXT             NOT NULL,
+   description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL
+   positions     SMALLINT         NOT NULL, 
+   CONSTRAINT dates CHECK (start_date <= end_date),
+   CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
@@ -100,7 +127,8 @@ CREATE TABLE IF NOT EXISTS project_role (
     project_role_id    SERIAL      PRIMARY KEY,
     project_id         SERIAL      NOT NULL REFERENCES project(project_id),
     role_id            SERIAL      NOT NULL REFERENCES role(role_id),
-    positions          SMALLINT    NOT NULL
+    positions          SMALLINT    NOT NULL,
+    CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
@@ -126,7 +154,7 @@ CREATE TABLE IF NOT EXISTS applied_role (
 
 CREATE TABLE IF NOT EXISTS language (
     language_id    SERIAL         PRIMARY KEY,
-    name           TEXT           NOT NULL
+    name           TEXT           NOT NULL UNIQUE
 );
 
 

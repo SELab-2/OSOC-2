@@ -1,0 +1,8 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+        "label": "start_docker_application",
+        "command": "docker-compose -f docker-compose.debug.yml up -d --build",
+        "type": "shell"
+    }]
+}
