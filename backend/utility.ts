@@ -1,7 +1,20 @@
+import {createHash, randomBytes} from 'crypto';
 import express from 'express';
+import {v1} from 'uuid';
 
 import * as config from './config.json';
-import {ApiError, Errors, InternalTypes, Responses} from './types';
+import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as skey from './orm_functions/session_key';
+import {
+  ApiError,
+  Errors,
+  InternalTypes,
+  Requests,
+  Responses,
+  RouteCallback,
+  Table,
+  Verb
+} from './types';
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -106,6 +119,12 @@ export function addInvalidVerbs(router: express.Router, ep: string):
     }
 
 /**
+ *  Adds Invalid HTTP Verb responses to each endpoint in the list.
+ */
+export function addAllInvalidVerbs(router: express.Router, eps: string[]):
+    void { eps.forEach(ep => addInvalidVerbs(router, ep));}
+
+/**
  *  Logs the given request, then passes priority to the next Express.js
  * callback.
  *
@@ -136,9 +155,14 @@ export async function respOrErrorNoReinject(
           (err: any): boolean => { return 'http' in err && 'reason' in err };
 
       return prom
+          .then(data => {
+            console.log(data);
+            return Promise.resolve(data);
+          })
           .then((data: Responses.ApiResponse): Promise<void> =>
                     replySuccess(res, data as typeof data))
           .catch((err: any): Promise<void> => {
+            console.log(err);
             if (isError(err))
               return replyError(res, err);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
@@ -182,40 +206,50 @@ export async function redirect(res: express.Response,
 
 /**
  *  Checks the existence and correctness of the session key.
- *  @param req The Express.js request to extract and check the session key for.
- *  @returns A promise which will resolve with the request upon success, or to
+ *  @param obj The object which could hold a session key.
+ *  @template T The type of the object. Should hold a session key.
+ *  @returns A promise which will resolve with the object upon success, or to
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
-export async function checkSessionKey(req: express.Request):
-    Promise<express.Request> {
-  if ("sessionkey" in req.body) {
-    // TODO validate session key
-    // upon validation error:
-    // return Promise.reject(errors.cookUnauthenticated());
-    return Promise.resolve(req);
-  }
-  console.log("Session key requested - none given.");
-  return Promise.reject(errors.cookUnauthenticated());
+export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
+    Promise<T> {
+  return skey.checkSessionKey(obj.sessionkey)
+      .then(() => Promise.resolve(obj))
+      .catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
 /**
  *  Checks the session key (see {@link checkSessionKey}), then checks whether or
  * not it corresponds to an admin user.
  *
- *  @param req The Express.js request to extract and check the session key for.
- *  @returns A promise which will resolve with the request upon success. If the
+ *  @param obj The object which could hold a session key.
+ *  @template T The type of the object. Should hold a session key.
+ *  @returns A promise which will resolve with the object upon success. If the
  * session key is not present or invalid, returns a promise which rejects with
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.
  */
-export async function isAdmin(req: express.Request): Promise<express.Request> {
-  return checkSessionKey(req).then((rq) => {
-    // we know sessionkey is available and valid
-    // TODO do logic with sessionkey to check if the associated user is an
-    // admin if not: return Promise.reject(errors.cookInsufficientRights());
-    return Promise.resolve(rq);
-  })
+export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
+    Promise<T> {
+  return skey
+      .checkSessionKey(obj.sessionkey)                 // check session key
+      .then(id => searchAllAdminLoginUsers(true).then( // fetch all admins
+                admins => admins.some(
+                              admin => admin.login_user_id ==
+                                       id.login_user_id) // check if some admin
+                                                         // matches with id
+                              ? Promise.resolve(obj) // success -> return object
+                              : Promise.reject()))   // failure -> reject (catch
+                                                     // will throw HTTP error)
+      .catch(() => Promise.reject(errors.cookInsufficientRights()));
+}
+
+export function generateKey(): InternalTypes.SessionKey {
+  return createHash('sha256')
+      .update(v1())
+      .update(randomBytes(256))
+      .digest("hex");
 }
 
 /**
@@ -225,8 +259,8 @@ export async function isAdmin(req: express.Request): Promise<express.Request> {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  // TODO update key
-  return Promise.resolve(key);
+  return skey.changeSessionKey(key, generateKey())
+      .then(upd => Promise.resolve(upd.session_key));
 }
 
 /**
@@ -247,4 +281,34 @@ export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
         response.sessionkey = newkey;
         return Promise.resolve(response);
       });
+}
+
+/**
+ *  Contains all boilerplate for installing a route with a path and HTTP verb on
+ * a router. Requests that match the route will be responded to by the provided
+ * callback function, then their api session key will be refreshed an
+ * reinjected. Not viable for some endpoints (logout, login, ...).
+ *
+ *  @template T The type of data to be send back. This type will be Keyed.
+ *  @param router The router to install to.
+ *  @param verb The HTTP verb.
+ *  @param path The (relative) route path.
+ *  @param callback The function which will respond.
+ */
+export function route<T extends Responses.ApiResponse>(
+    router: express.Router, verb: Verb, path: string,
+    callback: RouteCallback<Responses.Keyed<T>>): void {
+  router[verb](path, (req: express.Request, res: express.Response) =>
+                         respOrError(req, res, callback(req)));
+}
+
+/**
+ *  Checks whether the object contains a valid ID.
+ */
+export async function isValidID<T extends Requests.IdRequest>(
+    obj: T, table: Table): Promise<T> {
+  // TODO validate ID (obj.id) using database from table table
+  // upon failure: return Promise.reject(errors.cookInvalidID());
+  return Promise.resolve(obj).catch(() => Promise.reject(table));
+  // the catch is just to "fix" the unused variable
 }

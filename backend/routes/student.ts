@@ -1,5 +1,6 @@
 import express from 'express';
 
+import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 
@@ -13,13 +14,13 @@ import * as util from '../utility';
  */
 async function createStudent(req: express.Request):
     Promise<Responses.PartialStudent> {
-  return util.checkSessionKey(req).then((_: express.Request) => {
-    var name: string = '';
-    var id: string = '';
-    // TODO do insertion logic
-
-    return Promise.resolve({data : {name : name, id : id}, sessionkey : ''});
-  });
+  return rq.parseNewStudentRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        // INSERTION LOGIC
+        return Promise.resolve(
+            {data : {name : '', id : ''}, sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -29,13 +30,13 @@ async function createStudent(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listStudents(req: express.Request):
-    Promise<Responses.StudentList> {
-  return util.checkSessionKey(req).then((_: express.Request) => {
-    var students: InternalTypes.IdName[] = [];
-    // TODO list all students
-
-    return Promise.resolve({data : students, sessionkey : ''});
-  });
+    Promise<Responses.IdNameList> {
+  return rq.parseStudentAllRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        // LISTING LOGIC
+        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+      });
 }
 
 /**
@@ -45,29 +46,136 @@ async function listStudents(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getStudent(req: express.Request): Promise<Responses.Student> {
-  return util.checkSessionKey(req).then(
-      async (_) => {// check valid id
-                    // if invalid: return Promise.resolve(util.cookInvalidID())
-                    // if valid: get student data etc etc
-                    return Promise.resolve({
-                      data : {id : '', name : '', email : '', labels : []},
-                      sessionkey : ''
-                    })})
+  return rq.parseSingleStudentRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => util.isValidID(parsed, "student"))
+      .then(parsed => {
+        // FETCHING LOGIC
+        return Promise.resolve({
+          data : {id : parsed.id, name : '', email : '', labels : []},
+          sessionkey : parsed.sessionkey
+        });
+      });
+}
+
+async function modStudent(req: express.Request): Promise<Responses.Student> {
+  return rq.parseUpdateStudentRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => {
+        // UPDATE LOGIC
+        return Promise.resolve({
+          data : {id : '', name : '', email : '', labels : []},
+          sessionkey : parsed.sessionkey
+        });
+      });
+}
+
+/**
+ *  Attempts to delete a student from the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function deleteStudent(req: express.Request): Promise<Responses.Key> {
+  return rq.parseDeleteStudentRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => {
+        // DELETE LOGIC
+        return Promise.resolve({sessionkey : parsed.sessionkey});
+      });
+}
+
+/**
+ *  Attempts to create a student suggestion in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createStudentSuggestion(req: express.Request):
+    Promise<Responses.Suggestion> {
+  return rq.parseSuggestStudentRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        // SUGGESTING LOGIC
+        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+      });
+}
+
+/**
+ *  Attempts to list all student suggestions in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function getStudentSuggestions(req: express.Request):
+    Promise<Responses.SuggestionInfo> {
+  return rq.parseStudentGetSuggestsRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => {
+        // FETCHING LOGIC
+        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+      });
+}
+
+/**
+ *  Attempts to create a student confirmation in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createStudentConfirmation(req: express.Request):
+    Promise<Responses.Keyed<InternalTypes.Suggestion>> {
+  return rq.parseFinalizeDecisionRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => {
+        // UPDATING LOGIC
+        return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
+      });
+}
+
+/**
+ *  Attempts to filter students in the system by name, role, status or mail
+ * status.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function searchStudents(req: express.Request):
+    Promise<Responses.IdNameList> {
+  // SEARCHING NOT DISCUSSED YET - NO PARSER EITHER
+  return Promise.resolve({data : [], sessionkey : req.body.sessionkey});
 }
 
 /**
  *  Gets the router for all `/student/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/student/`
+ *  @returns An Express.js {@link express.Router} routing all `/student/`
  * endpoints.
  */
 export function getRouter(): express.Router {
-  var router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
-  router.get('/', (_, res) => util.redirect(res, '/all'));
-  router.post('/',
-              (req, res) => util.respOrError(req, res, createStudent(req)));
-  router.get('/all',
-             (req, res) => util.respOrError(req, res, listStudents(req)));
-  router.get('/:id', (req, res) => util.respOrError(req, res, getStudent(req)));
+  router.get("/", (_, res) => util.redirect(res, "/student/all"));
+  util.route(router, "post", "/", createStudent);
+  util.route(router, "get", "/all", listStudents);
+  util.route(router, "get", "/:id", getStudent);
+  util.route(router, "post", "/:id", modStudent);
+  router.delete('/:id', (req, res) => util.respOrErrorNoReinject(
+                            res, deleteStudent(req)));
+
+  util.route(router, "post", "/:id/suggest", createStudentSuggestion);
+  util.route(router, "get", "/:id/suggest", getStudentSuggestions);
+
+  util.route(router, "post", "/:id/confirm", createStudentConfirmation);
+
+  util.route(router, "get", "/search", searchStudents);
+
+  util.addAllInvalidVerbs(
+      router,
+      [ "/", "/all", "/:id", "/:id/suggest", "/:id/confirm", "/search" ]);
+
   return router;
 }

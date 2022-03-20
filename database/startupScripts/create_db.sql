@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
-   github       TEXT               UNIQUE,   
+   github       TEXT               UNIQUE,
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
    gender       TEXT      NOT NULL,
@@ -24,16 +24,21 @@ CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UN
 CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
-    password         TEXT, 
+    password         TEXT,
     /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
     /* TODO2: inloggen via github en email leidt tot verschillend account */
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
-    session_keys     TEXT[]     NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
     /* TODO: CONSTRAINT password_not_null CHECK (SELECT email FROM person WHERE person_id = person_id; email NOT NULL AND password is NOT NULL) */
+);
+
+CREATE TABLE IF NOT EXISTS session_keys(
+  session_key_id     SERIAL         PRIMARY KEY,
+  login_user_id      SERIAL         NOT NULL REFERENCES login_user(login_user_id),
+  session_key        VARCHAR(128)   NOT NULL UNIQUE
 );
 
 
