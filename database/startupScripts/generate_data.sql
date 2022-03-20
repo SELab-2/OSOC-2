@@ -1,12 +1,12 @@
 /* Insert data into person table */
-INSERT INTO person(email, firstname, lastname, gender)
-VALUES('Alice.student@gmail.com', 'Alice', 'Smith', 'Female'),
-('Bob@admin@osoc.com', 'Bob', 'Jones', 'Male'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor', 'Female');
+INSERT INTO person(email, firstname, lastname)
+VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
+('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor');
 
 /* Insert data into student table */
-INSERT INTO student(person_id, pronouns, phone_number, nickname, alumni) 
+INSERT INTO student(person_id, gender, pronouns, phone_number, nickname, alumni)
 VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'), 
-'{None}', '0032476553498', 'Unicorn', TRUE);
+'Female', '{None}', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, session_keys, account_status)
@@ -17,10 +17,10 @@ VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE,
 INSERT INTO osoc(year)VALUES(2022);
 
 /* Insert data into job_application table */
-INSERT INTO job_application(student_id, osoc_id, responsibilities, motivation, fun_fact, is_volunteer, student_coach,
+INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, responsibilities, motivation, fun_fact, student_coach,
  edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
- 'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, TRUE, 'Informatics', 
+ 'Yes, I can work with a student employment agreement in Belgium', 'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, 'Informatics',
  'Universitarian', 3, 3, 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
