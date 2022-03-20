@@ -11,10 +11,10 @@ import {createProject, getProjectByName, getAllProjects,
 const returnValue = {
     project_id: 0,
     name: "Test project",
-    osocId: 0,
+    osoc_id: 0,
     partner: "Best partner",
-    startDate: new Date("2022-07-13"),
-    endDate: new Date("2022-08-31"),
+    start_date: new Date("2022-07-13"),
+    end_date: new Date("2022-08-31"),
     positions: 10
 }
 
