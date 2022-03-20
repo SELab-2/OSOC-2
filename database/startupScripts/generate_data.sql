@@ -9,19 +9,19 @@ VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'),
 '{None}', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
-INSERT INTO login_user(person_id, password, is_admin, is_coach)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE), 
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE);
+INSERT INTO login_user(person_id, password, is_admin, is_coach, session_keys, account_status)
+VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE, array[]::text[], 'ACTIVATED'),
+((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, array[]::text[], 'PENDING');
 
 /* Insert data into osoc table */
 INSERT INTO osoc(year)VALUES(2022);
 
 /* Insert data into job_application table */
 INSERT INTO job_application(student_id, osoc_id, responsibilities, motivation, fun_fact, is_volunteer, student_coach,
- edus, edu_level, edu_duration, edu_year, edu_institute, email_status)VALUES
+ edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
  'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, TRUE, 'Informatics', 
- 'Universitarian', 3, 3, 'Ghent University', 'NONE');
+ 'Universitarian', 3, 3, 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES

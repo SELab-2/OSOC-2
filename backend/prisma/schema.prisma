@@ -61,6 +61,7 @@ model job_application {
   edu_year              Int?
   edu_institute         String?
   email_status          email_status_enum
+  created_at            DateTime                @db.Timestamptz(6)
   osoc                  osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
   student               student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
   applied_role          applied_role[]
@@ -88,15 +89,17 @@ model language {
 }
 
 model login_user {
-  login_user_id Int            @id @default(autoincrement())
-  person_id     Int            @default(autoincrement())
-  password      String
-  is_admin      Boolean?
-  is_coach      Boolean?
-  person        person         @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
-  contract      contract[]
-  evaluation    evaluation[]
-  project_user  project_user[]
+  login_user_id  Int                 @id @default(autoincrement())
+  person_id      Int                 @unique @default(autoincrement())
+  password       String?
+  is_admin       Boolean?
+  is_coach       Boolean?
+  session_keys   String[]
+  account_status account_status_enum
+  person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract       contract[]
+  evaluation     evaluation[]
+  project_user   project_user[]
 }
 
 model osoc {
@@ -107,14 +110,14 @@ model osoc {
 }
 
 model person {
-  person_id  Int          @id @default(autoincrement())
-  email      String?      @db.VarChar(320)
-  github     String?
+  person_id  Int         @id @default(autoincrement())
+  email      String?     @unique @db.VarChar(320)
+  github     String?     @unique
   firstname  String
   lastname   String
   gender     String
-  login_user login_user[]
-  student    student[]
+  login_user login_user?
+  student    student?
 }
 
 model project {
@@ -122,6 +125,7 @@ model project {
   name         String
   osoc_id      Int            @default(autoincrement())
   partner      String
+  description  String?
   start_date   DateTime       @db.Date
   end_date     DateTime       @db.Date
   positions    Int            @db.SmallInt
@@ -157,7 +161,7 @@ model role {
 
 model student {
   student_id      Int               @id @default(autoincrement())
-  person_id       Int               @default(autoincrement())
+  person_id       Int               @unique @default(autoincrement())
   pronouns        String[]
   phone_number    String
   nickname        String?
@@ -194,4 +198,11 @@ enum type_enum {
   CV
   PORTFOLIO
   FILE
+}
+
+enum account_status_enum {
+  ACTIVATED
+  PENDING
+  DISABLED
+  UNVERIFIED
 }
