@@ -6,7 +6,7 @@ import {SyntheticEvent, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
 
-const Login: NextPage = (props) => {
+const Login: NextPage = () => {
 
     const router = useRouter()
 
@@ -64,7 +64,6 @@ const Login: NextPage = (props) => {
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("LOGGING IN...")
-            console.log(props)
             router.push("/students").then()
         }
 
@@ -125,6 +124,7 @@ const Login: NextPage = (props) => {
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("REGISTERING...")
+            router.push("/students").then()
         }
     }
 
