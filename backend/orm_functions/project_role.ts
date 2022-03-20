@@ -75,7 +75,7 @@ export async function getProjectRoleNamesByProject(projectId: number) {
  * @param projectRole: UpdateProject object with the values that need to be updated
  * @returns the updated entry in the database 
  */
-export async function updateProject(projectRole: UpdateProjectRole){
+export async function updateProjectRole(projectRole: UpdateProjectRole){
         const result = await prisma.project_role.update({
         where: {
             project_role_id: projectRole.projectRoleId
@@ -92,7 +92,7 @@ export async function updateProject(projectRole: UpdateProjectRole){
  * @param projectRoleId the projectRole we are deleting from the project role-table
  * @returns TODO: what does this return?
  */
-export async function deleteProject(projectRoleId: number){
+export async function deleteProjectRole(projectRoleId: number){
     const result = await prisma.project_role.delete({
         where: {
             project_role_id: projectRoleId
