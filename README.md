@@ -1,7 +1,5 @@
 # OSOC-2
 
-[![codecov](https://codecov.io/gh/SELab-2/OSOC-2/branch/main/graph/badge.svg?token=CU687M8DPV)](https://codecov.io/gh/SELab-2/OSOC-2)
-
 ## How to contribute
 
 This repository is a monorepo, meaning that both frontend and backend share the same github repository.
