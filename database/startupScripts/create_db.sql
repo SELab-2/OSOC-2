@@ -1,10 +1,10 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
-   email        VARCHAR(320),      /* max email length is 320 characters */
-   github       TEXT,   
-   firstname    TEXT               NOT NULL,
-   lastname     TEXT               NOT NULL,
-   gender       TEXT               NOT NULL,
+   email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
+   github       TEXT               UNIQUE,   
+   firstname    TEXT      NOT NULL,
+   lastname     TEXT      NOT NULL,
+   gender       TEXT      NOT NULL,
    CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
    CONSTRAINT email_check CHECK (email is NULL or email is LIKE '%_@__%.__%')
 );
@@ -12,12 +12,13 @@ CREATE TABLE IF NOT EXISTS person(
 
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
-   person_id       SERIAL          NOT NULL     REFERENCES person (person_id),
+   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
    pronouns        TEXT [],
    phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL
 );
+
 
 /* function used in login user to retrieve if email is used in person */
 CREATE OR REPLACE FUNCTION get_email_used(personId integer, given_password text)
@@ -43,8 +44,6 @@ CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
     "password"         TEXT     NULL, 
-    /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
-    /* TODO2: inloggen via github en email leidt tot verschillend account */
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
     session_keys     TEXT[]     NOT NULL,
@@ -53,6 +52,7 @@ CREATE TABLE IF NOT EXISTS login_user(
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
     CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
+
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
@@ -78,7 +78,8 @@ CREATE TABLE IF NOT EXISTS job_application (
     edu_duration          INT,
     edu_year              INT,
     edu_institute         TEXT,
-    email_status          email_status_enum    NOT NULL
+    email_status          email_status_enum    NOT NULL,
+    created_at            TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
 
 
@@ -106,6 +107,7 @@ CREATE TABLE IF NOT EXISTS project (
    name          TEXT             NOT NULL,
    osoc_id       SERIAL           NOT NULL REFERENCES osoc (osoc_id),
    partner       TEXT             NOT NULL,
+   description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
    positions     SMALLINT         NOT NULL, 
