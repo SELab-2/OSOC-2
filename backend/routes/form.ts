@@ -57,7 +57,7 @@ function jsonToPerson(form : Requests.Form):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createForm(req: express.Request):
-    Promise<Responses.Keyed<string>> {
+    Promise<Responses.Empty> {
     return rq.parseFormRequest(req).then(async form => {
         if(!checkInBelgium(form) || !checkCanWorkJuly(form)) {
             return Promise.reject(util.errors.cookNonJSON("Invalid json"));
@@ -65,7 +65,7 @@ async function createForm(req: express.Request):
 
         return jsonToPerson(form)
             .then(() => {
-                return Promise.resolve({data : "", sessionkey : ""});
+                return Promise.resolve({});
             });
     });
 }
@@ -78,7 +78,7 @@ async function createForm(req: express.Request):
 export function getRouter(): express.Router {
     let router: express.Router = express.Router();
 
-    util.route(router, "post", "/", createForm);
+    router.post('/', (req, res) => util.respOrErrorNoReinject(res, createForm(req)));
 
     util.addAllInvalidVerbs(
         router,
