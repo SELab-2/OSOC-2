@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-vars */
+
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import express from 'express';
+
+import * as session_key from '../orm_functions/session_key';
+jest.mock('../orm_functions/session_key');
+const session_keyMock = session_key as jest.Mocked<typeof session_key>;
 
 import * as config from '../config.json';
 import {ApiError} from '../types';
@@ -175,6 +180,8 @@ test("utility.addInvalidVerbs adds verbs", () => {
   expect(routerSpy).toHaveBeenCalledTimes(1);
 });
 
+// we need to check line_#117 but I have no idea on how to do that...
+
 test("utility.logRequest logs request and passes control", () => {
   const writeSpy = jest.spyOn(console, "log");
   const request: express.Request = getMockReq();
@@ -239,7 +246,28 @@ test("utility.redirect sends an HTTP 303", () => {
   });
 });
 
-// test checkSessionKey has to wait -> ORM connection has to be mocked
+test("utility.checkSessionKey works on valid session key", async () => {
+  session_keyMock.checkSessionKey.mockResolvedValue(
+      {login_user_id : 123456789});
+  const obj = {sessionkey : "key"};
+
+  await expect(util.checkSessionKey(obj)).resolves.toStrictEqual(obj);
+  expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+  expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith('key');
+});
+
+test("utility.checkSessionKey fails on invalid session key", async () => {
+  session_keyMock.checkSessionKey.mockReset();
+  session_keyMock.checkSessionKey.mockRejectedValue(new Error());
+
+  await expect(util.checkSessionKey({
+    sessionkey : "key"
+  })).rejects.toStrictEqual(util.errors.cookUnauthenticated());
+
+  expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+  expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
 // test isAdmin has to wait -> ORM connection has to be mocked
 // test refreshKey has to wait -> ORM connection has to be mocked
 // test refreshAndInjectKey has to wait -> ORM connection has to be mocked
