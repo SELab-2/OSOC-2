@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS student(
 );
 
 /* function used in login user to retrieve if email is used in person */
-CREATE OR REPLACE FUNCTION get_email_used(personId integer, value text)
+CREATE OR REPLACE FUNCTION get_email_used(personId integer, given_password text)
 RETURNS BOOLEAN AS
 $$
 declare 
@@ -28,7 +28,7 @@ declare
 begin
     select email into email_used from person where person_id = personId;
 
-    if (email_used IS NOT NULL) and (value is null) then 
+    if (email_used IS NOT NULL) and (given_password is null) then 
         return false; 
     end if;
 
