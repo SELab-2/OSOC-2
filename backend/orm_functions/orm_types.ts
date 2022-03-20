@@ -548,3 +548,17 @@ export interface AddStudentToProject {
     information?: string | null,
 
 }
+
+/**
+ * interface for the object needed to create a project
+ */
+ export interface CreateProjectUser {
+    /**
+     * the id of the project this user belongs to
+     */
+    projectId: number,
+    /**
+     * the id of the login user this user belongs to
+     */
+    loginUserId: number,
+}
