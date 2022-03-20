@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS project (
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
    positions     SMALLINT         NOT NULL, 
-   CONSTRAINT dates CHECK (start_date >= Convert(datetime, '2022-01-01' ) and start_date > end_date),
+   CONSTRAINT dates CHECK (start_date <= end_date),
    CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
