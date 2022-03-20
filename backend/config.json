@@ -34,5 +34,9 @@
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
         }
-    }
+    },
+
+    "homes": [
+        "", "/api"
+    ]
 }
