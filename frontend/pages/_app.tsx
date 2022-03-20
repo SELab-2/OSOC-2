@@ -9,7 +9,7 @@ import {useRouter} from "next/router";
 
 function App({Component, pageProps}: AppProps) {
 
-    const router = useRouter();
+    const router = useRouter()
 
     // TODO keep user state (logged in, pending, coach / admin, ...)
     const [loggedIn, setLoggedIn] = useState<boolean>(true);
