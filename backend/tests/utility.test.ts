@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import express from 'express';
 
