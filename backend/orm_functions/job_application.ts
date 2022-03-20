@@ -87,6 +87,29 @@ export async function getStudentEvaluationsTemp(studentId: number) {
 }
 
 /**
+ *
+ * @param studentId: the id of the student who's selected roles we are searching from his most recent job application
+ * @return the list of selected roles in the application (if it exists)
+ */
+export async function getLatestApplicationRolesForStudent(studentId: number) {
+    return await prisma.job_application.findFirst({
+        where: {
+            student_id: studentId
+        },
+        orderBy: { // use descending order in combination with findFirst to search further for the applied roles in the latest application
+            created_at: "desc"
+        },
+        select: {
+            applied_role: {
+                select: {
+                    role_id: true
+                }
+            }
+        }
+    });
+}
+
+/**
  * removes all job applications from a given student
  * 
  * @param studentId: the student who's applications will be deleted

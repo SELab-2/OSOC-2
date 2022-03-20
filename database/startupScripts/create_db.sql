@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS login_user(
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL
+   year       SMALLINT    NOT NULL UNIQUE
 );
 
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS evaluation (
 
 CREATE TABLE IF NOT EXISTS role (
     role_id    SERIAL    PRIMARY KEY,
-    name       TEXT
+    name       TEXT      NOT NULL UNIQUE
 );
 
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS applied_role (
 
 CREATE TABLE IF NOT EXISTS language (
     language_id    SERIAL         PRIMARY KEY,
-    name           TEXT           NOT NULL
+    name           TEXT           NOT NULL UNIQUE
 );
 
 

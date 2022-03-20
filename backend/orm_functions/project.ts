@@ -1,61 +1,95 @@
 import prisma from '../prisma/prisma'
+import {CreateProject, UpdateProject} from './orm_types';
 
-
-// Create Project
-export async function createProject(name : string, osocId : number, partner : string, startDate : Date, endDate : Date, positions : number){
+/**
+ * 
+ * @param project: project object with the needed information
+ */
+export async function createProject(project: CreateProject){
     const result = await prisma.project.create({
         data: {
-            name: name,
-            osoc_id: osocId,
-            partner: partner,
-            start_date: startDate,
-            end_date : endDate,
-            positions : positions
+            name: project.name,
+            osoc_id: project.osocId,
+            partner: project.partner,
+            start_date: project.startDate,
+            end_date: project.endDate,
+            positions: project.positions
         },
     });
     return result;
 }
 
-// Search all the Projects
+/**
+ * 
+ * @returns a list of all the project objects in the database
+ */
 export async function getAllProjects() {
     const result = await prisma.project.findMany();
     return result
 }
 
-// Search Project by Name
-export async function getProjectByName(projectName : string) {
+/**
+ * 
+ * @param projectName: this is the name of the project we are looking up in the database
+ * @returns: object with all the info about this project
+ */
+export async function getProjectByName(projectName: string) {
     const result = prisma.project.findMany({
-        where: { name : projectName},
+        where: { 
+            name: projectName
+        },
     });
     return result;
 }
 
-// Search all the Projects for certain Osoc Edition
-export async function getProjectsByOsocEdition(edition : number) {
+/**
+ * 
+ * @param osocId: this is the id of the osoc edition for wich we want al the projects
+ * @returns: all projects with all the info
+ */
+export async function getProjectsByOsocEdition(osocId: number) {
     const result = prisma.project.findMany({
-        where: { osoc_id : edition},
+        where: { 
+            osoc_id: osocId
+        },
     });
     return result;
 }
 
-// Search all the Projects for certain Partner
-export async function getProjectsByPartner(name : string) {
+/**
+ * 
+ * @param partner: this is the name of the partner for which we want the project
+ * @returns all the project objects for that partner 
+ */
+export async function getProjectsByPartner(partner: string) {
     const result = prisma.project.findMany({
-        where: { partner : name},
+        where: { 
+            partner: partner
+        },
     });
     return result;
 }
 
-// Search all the Projects with certain Start Date
-export async function getProjectsByStartDate(date : Date) {
+/**
+ * 
+ * @param startDate: the  start date of the project we are looking for
+ * @returns all the projects with a matching start date in the database 
+ */
+export async function getProjectsByStartDate(startDate: Date) {
     const result = prisma.project.findMany({
-        where: { start_date: date },
+        where: { 
+            start_date: startDate 
+        },
     });
     return result;
 }
 
-// Search all the Projects that start after a certain Date
-export async function getProjectsStartedAfterDate(date : Date) {
+/**
+ * 
+ * @param date: the  start date of the project we are looking for
+ * @returns all the projects that started after the supplied date 
+ */
+export async function getProjectsStartedAfterDate(date: Date) {
     const result = prisma.project.findMany({
         where: {
             start_date: {
@@ -66,8 +100,12 @@ export async function getProjectsStartedAfterDate(date : Date) {
     return result;
 }
 
-// Search all the Projects that start before a certain Date
-export async function getProjectsStartedBeforeDate(date : Date) {
+/**
+ * 
+ * @param date: the  start date of the project we are looking for
+ * @returns all the projects that started before the supplied date 
+ */
+export async function getProjectsStartedBeforeDate(date: Date) {
     const result = prisma.project.findMany({
         where: {
             start_date: {
@@ -78,16 +116,26 @@ export async function getProjectsStartedBeforeDate(date : Date) {
     return result;
 }
 
-// Search all the Projects with certain End Date
-export async function getProjectsByEndDate(date : Date) {
+/**
+ * 
+ * @param endDate: the  end date of the project we are looking for
+ * @returns all the projects with a matching end date in the database 
+ */
+export async function getProjectsByEndDate(endDate: Date) {
     const result = prisma.project.findMany({
-        where: { end_date: date },
+        where: { 
+            end_date: endDate 
+        },
     });
     return result;
 }
 
-// Search all the Projects that end after a certain Date
-export async function getProjectsEndedAfterDate(date : Date) {
+/**
+ * 
+ * @param date: the  end date of the project we are looking for
+ * @returns all the projects that ended after the supplied date 
+ */
+export async function getProjectsEndedAfterDate(date: Date) {
     const result = prisma.project.findMany({
         where: {
             end_date: {
@@ -98,8 +146,12 @@ export async function getProjectsEndedAfterDate(date : Date) {
     return result;
 }
 
-// Search all the Projects that start before a certain Date
-export async function getProjectsEndedBeforeDate(date : Date) {
+/**
+ * 
+ * @param date: the  end date of the project we are looking for
+ * @returns all the projects that ended before the supplied date 
+ */
+export async function getProjectsEndedBeforeDate(date: Date) {
     const result = prisma.project.findMany({
         where: {
             end_date: {
@@ -110,81 +162,111 @@ export async function getProjectsEndedBeforeDate(date : Date) {
     return result;
 }
 
-// Search all the Projects with a number of Positions
-export async function getProjectsByNumberPositions(numberPositions : number) {
+/**
+ * 
+ * @param positions: this is the number of positions in the project
+ * @returns all the project objects that have the exact amount of positions
+ */
+export async function getProjectsByNumberPositions(positions: number) {
     const result = prisma.project.findMany({
-        where: { positions :numberPositions },
+        where: { 
+            positions: positions 
+        },
     });
     return result;
 }
 
-// Search all the Projects with less or equal Positions than number
-export async function getProjectsLessPositions(numberPositions : number) {
+/**
+ * 
+ * @param positions: this is the number of positions in the project
+ * @returns all the project objects that have less positions
+ */
+export async function getProjectsLessPositions(positions: number) {
     const result = prisma.project.findMany({
         where: { 
             positions: {
-                lte: numberPositions,
+                lt: positions,
               },
          },
     });
     return result;
 }
 
-// Search all the Projects with more or equal Positions than number
-export async function getProjectsMorePositions(numberPositions : number) {
+/**
+ * 
+ * @param positions: this is the number of positions in the project
+ * @returns all the project objects that have more positions
+ */
+export async function getProjectsMorePositions(positions: number) {
     const result = prisma.project.findMany({
         where: { 
             positions: {
-                gte: numberPositions,
+                gt: positions,
               },
          },
     });
     return result;
 }
 
-// Update Project
-export async function updateProject(projectId : number, name : string, osocId : number, partner : string, startDate : Date, endDate : Date, positions : number){
+/**
+ * 
+ * @param project: UpdateProject object with the values that need to be updated
+ * @returns the updated entry in the database 
+ */
+export async function updateProject(project: UpdateProject){
     const result = await prisma.project.update({
-        where : {
-            project_id : projectId
+        where: {
+            project_id :project.projectId
         },
         data: {
-            name: name,
-            osoc_id: osocId,
-            partner: partner,
-            start_date: startDate,
-            end_date : endDate,
-            positions : positions
+            name: project.name,
+            osoc_id: project.osocId,
+            partner: project.partner,
+            start_date: project.startDate,
+            end_date: project.endDate,
+            positions: project.positions
         },
     });
     return result;
 }
 
-// Delete Project
-export async function deleteProject(projectId : number){
+/**
+ * 
+ * @param projectId the project that we are deleting from the project-table
+ * @returns TODO what does this return?
+ */
+export async function deleteProject(projectId: number){
     const result = await prisma.project.delete({
-        where : {
-            project_id : projectId
+        where: {
+            project_id: projectId
         }
     });
     return result;
 }
 
-// Delete Project by Osoc Edition
-export async function deleteProjectByOsocEdition(osocEditionId : number){
+/**
+ * 
+ * @param osocId the osoc id of all the projects we want to delete
+ * @returns TODO what does this return?
+ */
+export async function deleteProjectByOsocEdition(osocId: number){
     const result = await prisma.project.deleteMany({
-        where : {
-            osoc_id : osocEditionId
+        where: {
+            osoc_id: osocId
         }
     });
     return result;
 }
 
-// Delete Project by Partner
-export async function deleteProjectByPartner(name : string){
+/**
+ * 
+ * @param partner the partner of who we want to delete all the projects
+ * @returns TODO what does this return?
+ */
+export async function deleteProjectByPartner(partner: string){
     const result = await prisma.project.deleteMany({
-        where : {
-            partner : name
+        where: {
+            partner: partner
         }
     });
     return result;

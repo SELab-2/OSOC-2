@@ -50,11 +50,11 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
     /**
      * undefined if unchanged or the new github
      */
-    github?: string,
+    github?: string | null,
     /**
      * undefined if unchanged or the new email
      */
-    email?: string,
+    email?: string | null,
 }
 
 /**
@@ -315,5 +315,264 @@ export interface CreateJobApplication {
     created_at: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
+/**
+ * interface for the object needed in updateOsoc
+ */
+ export interface UpdateOsoc {
+    /**
+     * the osoc edition we are changing
+     */
+    osocId: number,
+    /**
+     * the year we want to set
+     */
+    year: number
+}
 
+/**
+ * interface for the object needed to create a project
+ */
+export interface CreateProject {
+    /**
+     * the name of the project
+     */
+    name: string,
+    /**
+     * the id of the osoc edition this project belongs to
+     */
+    osocId: number,
+    /**
+     * the partner for who this project is made
+     */
+    partner: string,
+    /**
+     * the start date of the project
+     */
+    startDate: Date,
+    /**
+     * the end date of the project
+     */
+     endDate: Date,
+    /**
+     * the amount of people who need to assigned to the project
+     */
+    positions: number
+}
 
+/**
+ * interface for the object needed to update a project's data
+ */
+export interface UpdateProject {
+    /**
+     * the project we are updating
+     */
+    projectId: number,
+    /**
+     * undefined if unchanged or new project name
+     */
+    name: string,
+    /**
+     * undefined if unchanged or the new osoc id
+     */
+    osocId: number,
+    /**
+     * undefined if unchanged or the new partner of the project
+     */
+    partner: string,
+    /**
+     * undefined if unchanged or the new start date of the project
+     */
+    startDate: Date
+    /**
+     * undefined if unchanged or the new end date of the project
+     */
+    endDate: Date,
+    /**
+     * undefined if unchanged or the new number of positions of the project
+     */
+    positions: number
+}
+
+/**
+ * interface for the object needed to create a project
+ */
+ export interface CreateProjectRole {
+    /**
+     * the id of the project this role belongs to
+     */
+    projectId: number,
+    /**
+     * the id of the role this project role represents
+     */
+    roleId: number,
+    /**
+     * the number of positions that are needed for this role
+     */
+    positions: number
+}
+
+/**
+ * interface for the object needed to update a project's data
+ */
+export interface UpdateProjectRole {
+    /**
+     * the project we are updating
+     */
+    projectRoleId: number,
+    /**
+     * undefined if unchanged or the new project id
+     */
+    projectId: number,
+    /**
+     * undefined if unchanged or the new role id
+     */
+    roleId: number,
+    /**
+     * undefined if unchanged or the new number of positions for this role in the project
+     */
+    positions: number
+}
+
+/**
+ * interface for the object needed in updateRole
+ */
+ export interface UpdateRole {
+    /**
+     * the role object we are changing
+     */
+    roleId: number,
+    /**
+     * the name we want to set
+     */
+    name: string
+}
+
+/**
+ * interface for the object needed in updateRole
+ */
+ export interface UpdateLanguage {
+    /**
+     * the language object we are changing
+     */
+    languageId: number,
+    /**
+     * the name we want to set
+     */
+    name: string
+}
+
+/**
+ * interface for the object needed to create a project
+ */
+ export interface CreateJobApplicationSkill {
+    /**
+     * the jobapplicaton id to which the skill is linked
+     */
+    jobApplicationId: number,
+    /**
+     * the skill of this job application
+     */
+    skill: string,
+    /**
+     * the language id to which this skill is linked
+     */
+    languageId: number,
+    /**
+     * the level of the skill of the applicant
+     */
+    level: number,
+    /**
+     * true if this skill is the preffered skill of the applicant
+     */
+    isPreferred: boolean,
+    /**
+     * true if this skill is the best skill of the applicant
+     */
+    isBest: boolean
+}
+
+/**
+ * interface for the object needed to update a job application skill's data
+ */
+export interface UpdateJobApplicationSkill {
+    /**
+     * the jobapplicaton we are updating
+     */
+    JobApplicationSkillId: number,
+    /**
+     * undefined if unchanged or new job application
+     */
+    JobApplicationId: number,
+    /**
+     * undefined if unchanged or the new skill
+     */
+    skill: string,
+    /**
+     * undefined if unchanged or the new language of the job application skill
+     */
+    languageId: number,
+    /**
+     * undefined if unchanged or the new level
+     */
+    level: number
+    /**
+     * undefined if unchanged or the new preffered status
+     */
+    isPreferred: boolean,
+    /**
+     * undefined if unchanged or the new is best status
+     */
+    is_best: boolean
+}
+
+export interface AddStudentToProject {
+    /**
+     * the id of the loginsuer that wants to add a student to the project
+     */
+    loginUserId: number,
+    /**
+     * the id of the student that will be added to the project
+     */
+    studentId: number,
+    /**
+     * the id of the project that the student will be added to
+     */
+    projectId: number,
+    /**
+     * the name of the role the student will be added for
+     */
+    roleName: string,
+    /**
+     * extra information
+     */
+    information?: string | null,
+
+}
+
+/**
+ * interface for the object needed to create a project user
+ */
+ export interface CreateProjectUser {
+    /**
+     * the id of the project this user belongs to
+     */
+    projectId: number,
+    /**
+     * the id of the login user this user belongs to
+     */
+    loginUserId: number,
+}
+
+/**
+ * interface for the object needed to create an applied role
+ */
+ export interface CreateAppliedRole {
+    /**
+     * the id of the job application this applied role belongs to
+     */
+    jobApplicationId: number,
+    /**
+     * the id of the role this applied role belongs to
+     */
+    roleId: number,
+}

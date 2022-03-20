@@ -84,7 +84,7 @@ model job_application_skill {
 
 model language {
   language_id           Int                     @id @default(autoincrement())
-  name                  String
+  name                  String                  @unique
   job_application_skill job_application_skill[]
 }
 
@@ -104,7 +104,7 @@ model login_user {
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
-  year            Int               @db.SmallInt
+  year            Int               @unique @db.SmallInt
   job_application job_application[]
   project         project[]
 }
@@ -154,7 +154,7 @@ model project_user {
 
 model role {
   role_id      Int            @id @default(autoincrement())
-  name         String?
+  name         String         @unique
   applied_role applied_role[]
   project_role project_role[]
 }

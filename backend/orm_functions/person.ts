@@ -1,7 +1,7 @@
 import prisma from '../prisma/prisma'
 import {CreatePerson, UpdatePerson} from './orm_types';
 
-
+// TODO: remove this piece of code that was here for testing purposes
 // console.log(await search_person_by_name("Alice"));
 
 /*(async () => {
@@ -13,8 +13,8 @@ import {CreatePerson, UpdatePerson} from './orm_types';
  * 
  * @param person: person object with the needed information
  */
-export async function create_person(person: CreatePerson){
-    const result = await prisma.person.create({
+export async function createPerson(person: CreatePerson){
+    return await prisma.person.create({
         data: {
             firstname: person.firstname,
             lastname: person.lastname,
@@ -23,7 +23,6 @@ export async function create_person(person: CreatePerson){
             email: person.email
         },
     });
-    return result;
 }
 
 /**
@@ -39,20 +38,19 @@ export async function create_person(person: CreatePerson){
  * @param email: this is the email of the person we are looking up in the database
  * @returns: password of the login user matching with the person 
  */
- export async function getPasswordPersonByEmail(email : string){
-    const result = await prisma.person.findUnique({
-        where: { 
-            email : email 
+ export async function getPasswordPersonByEmail(email: string){
+    return await prisma.person.findUnique({
+        where: {
+            email: email
         },
         select: {
             login_user: {
                 select: {
                     password: true
                 }
-              }
+            }
         }
     });
-    return result;
 }
 
 /**
@@ -60,20 +58,19 @@ export async function create_person(person: CreatePerson){
  * @param name: This is the name of the person we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
-export async function searchPersonByName(name : string){
-    const result = await prisma.person.findMany({
+export async function searchPersonByName(name: string){
+    return await prisma.person.findMany({
         where: {
             OR: [
                 {
-                    firstname: { contains: name },
+                    firstname: {contains: name},
                 },
                 {
-                    lastname: { contains: name },
+                    lastname: {contains: name},
                 },
             ],
         },
     });
-    return result;
 }
 
 /**
@@ -81,11 +78,12 @@ export async function searchPersonByName(name : string){
  * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
-export async function searchPersonByGender(gender : string){
-    const result = prisma.person.findMany({
-        where: { gender : gender },
+export async function searchPersonByGender(gender: string){
+    return prisma.person.findMany({
+        where: {
+            gender: gender
+        },
     });
-    return result;
 }
 
 /**
@@ -93,20 +91,19 @@ export async function searchPersonByGender(gender : string){
  * @param login: This is the email or GitHub of the person we are looking for
  * @returns: a list of all the person objects in the database that match either the email or github
  */
-export async function searchPersonByLogin(login : string){
-    const result = prisma.person.findMany({
+export async function searchPersonByLogin(login: string){
+    return prisma.person.findMany({
         where: {
             OR: [
                 {
-                    email: { contains: login },
+                    email: {contains: login},
                 },
                 {
-                    github: { contains: login },
+                    github: {contains: login},
                 },
             ],
         },
     });
-    return result;
 }
 
 /**
@@ -115,8 +112,8 @@ export async function searchPersonByLogin(login : string){
  * @returns the updated entry in the database 
  */
 export async function updatePerson(person: UpdatePerson){
-    const result = await prisma.person.update({
-        where : {
+    return await prisma.person.update({
+        where: {
             person_id: person.personId
         },
         data: {
@@ -127,19 +124,17 @@ export async function updatePerson(person: UpdatePerson){
             email: person.email
         },
     });
-    return result;
 }
 
 /**
  * 
- * @param personId the person who's info we are deleting from the person-table
- * @returns message //TODO: what does this return
+ * @param personId the person whose info we are deleting from the person-table
+ * @returns the deleted person record
  */
-export async function deletePersonById(personId : number){
-    const result = await prisma.person.deleteMany({
+export async function deletePersonById(personId: number){
+    return await prisma.person.delete({
         where: {
             person_id: personId
         }
     });
-    return result;
 }

@@ -27,26 +27,27 @@ export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
  * @returns a promise with the created evaluation
  */
 export async function createEvaluationForStudent(evaluation: CreateEvaluationForStudent) {
-    
-    const foundEvaluation = await checkIfFinalEvaluationExists(evaluation.jobApplicationId);
-    if (foundEvaluation) {
-        return await updateEvaluationForStudent({
-            evaluation_id: foundEvaluation.evaluation_id,
-            loginUserId: evaluation.loginUserId,
-            decision: evaluation.decision,
-            motivation: evaluation.motivation
-        });
-    } else {
-        return await prisma.evaluation.create({
-            data: {
-                login_user_id: evaluation.loginUserId,
-                job_application_id: evaluation.jobApplicationId,
+
+    if (evaluation.isFinal) {
+        const foundEvaluation = await checkIfFinalEvaluationExists(evaluation.jobApplicationId);
+        if (foundEvaluation) {
+            return await updateEvaluationForStudent({
+                evaluation_id: foundEvaluation.evaluation_id,
+                loginUserId: evaluation.loginUserId,
                 decision: evaluation.decision,
-                motivation: evaluation.motivation,
-                is_final: evaluation.isFinal
-            }
-        });
+                motivation: evaluation.motivation
+            });
+        }
     }
+    return await prisma.evaluation.create({
+        data: {
+            login_user_id: evaluation.loginUserId,
+            job_application_id: evaluation.jobApplicationId,
+            decision: evaluation.decision,
+            motivation: evaluation.motivation,
+            is_final: evaluation.isFinal
+        }
+    });
 }
 
 /**
