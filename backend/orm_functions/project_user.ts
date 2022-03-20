@@ -5,7 +5,7 @@ import {CreateProjectUser} from './orm_types';
  * 
  * @param projectUser: project user object with the needed information
  */
-export async function createProject(projectUser: CreateProjectUser){
+export async function createProjectUser(projectUser: CreateProjectUser){
     const result = await prisma.project_user.create({
         data: {
             login_user_id: projectUser.loginUserId,
