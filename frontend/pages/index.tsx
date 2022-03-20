@@ -1,5 +1,4 @@
 import type {NextPage} from 'next'
-import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
 import {useRouter} from "next/router";
 import {useEffect} from "react";
 
@@ -11,9 +10,7 @@ const Home: NextPage = () => {
         router.push("/login").then()
     }, [router])
 
-    return (
-        <UnderConstruction/>
-    )
+    return (<></>)
 }
 
 export default Home;

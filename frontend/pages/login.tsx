@@ -96,7 +96,7 @@ const Login: NextPage = (props) => {
             setRegisterFirstNameError("")
         }
 
-        if (registerLastNameError === "") {
+        if (registerLastName === "") {
             setRegisterLastNameError("Last name cannot be empty")
             error = true
         } else {
@@ -113,7 +113,7 @@ const Login: NextPage = (props) => {
         if (registerPassword != registerConfirmPassword) {
             setRegisterConfirmPasswordError("Passwords do not match");
             error = true
-        } else if (registerConfirmPasswordError === "") {
+        } else if (registerConfirmPassword === "") {
             setRegisterConfirmPasswordError("Password cannot be empty")
             error = true
         } else {
