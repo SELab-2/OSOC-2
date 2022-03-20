@@ -40,6 +40,38 @@ test("should create an evaluation for a student", async () => {
    await expect(createEvaluationForStudent(evaluation)).resolves.toEqual(response);
 });
 
+test("should update the final evaluation that already exists", async () => {
+    const evaluationFinal: CreateEvaluationForStudent = {
+        decision: decision_enum.MAYBE,
+        isFinal: true,
+        jobApplicationId: 0,
+        loginUserId: 0,
+        motivation: undefined
+    }
+
+    const response = {
+        evaluation_id: 0,
+        login_user_id: evaluationFinal.loginUserId,
+        job_application_id: evaluationFinal.jobApplicationId,
+        decision: evaluationFinal.decision,
+        motivation: "test",
+        is_final: evaluationFinal.isFinal
+    }
+
+    const existingEvaluation = {
+        evaluation_id: 0,
+        login_user_id: 1,
+        job_application_id: 1,
+        decision: decision_enum.NO,
+        motivation: "test",
+        is_final: true
+    }
+    prismaMock.evaluation.findFirst.mockResolvedValue(existingEvaluation);
+    prismaMock.evaluation.create.mockResolvedValue(response);
+    prismaMock.evaluation.update.mockResolvedValue(response);
+    await expect(createEvaluationForStudent(evaluationFinal)).resolves.toEqual(response)
+});
+
 test("should update the evaluation", async () => {
     const evaluation: UpdateEvaluationForStudent = {
         decision: decision_enum.NO,
