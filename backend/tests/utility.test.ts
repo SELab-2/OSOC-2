@@ -2,10 +2,20 @@
 
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import express from 'express';
+import {mockDeep} from 'jest-mock-extended';
 
 import * as session_key from '../orm_functions/session_key';
+
 jest.mock('../orm_functions/session_key');
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
+
+import * as login_user from '../orm_functions/login_user';
+jest.mock('../orm_functions/login_user');
+const login_userMock = login_user as jest.Mocked<typeof login_user>;
+
+import * as crypto from 'crypto';
+jest.mock('crypto');
+const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 
 import * as config from '../config.json';
 import {ApiError} from '../types';
@@ -193,16 +203,21 @@ test("utility.logRequest logs request and passes control", () => {
   expect(callback).toHaveReturnedTimes(1);
 });
 
-test("utility.respOrErrorNoReinject sends successes", () => {
+test("utility.respOrErrorNoReinject sends successes", async () => {
   // positive case
   const {res, statSpy, sendSpy} = obtainResponse();
-  var obj:
+  const obj:
       any = {data : {"some" : "data"}, "sessionkey" : "updated-session-key"};
-  util.respOrErrorNoReinject(res, Promise.resolve(obj)).then(() => {
-    obj.success = true;
-    expect(statSpy).toHaveBeenCalledWith(200);
-    expect(sendSpy).toHaveBeenCalledWith(obj);
-  });
+  const exp: any = {
+    data : {"some" : "data"},
+    "sessionkey" : "updated-session-key",
+    success : true
+  };
+
+  await expect(util.respOrErrorNoReinject(res, Promise.resolve(obj)))
+      .resolves.not.toThrow();
+  expect(sendSpy).toHaveBeenCalledWith(exp);
+  expect(statSpy).toHaveBeenCalledWith(200);
 });
 
 test("utility.respOrErrorNoReinject sends api errors", () => {
@@ -235,6 +250,33 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
      });
 
 // test respOrError<T> has to wait -> ORM connection has to be mocked
+test("utility.respOrError sends responses with updated keys", async () => {
+  const {res, statSpy, sendSpy} = obtainResponse();
+  var req = getMockReq();
+  req.body.sessionkey = "key";
+
+  session_keyMock.changeSessionKey.mockReset();
+  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
+    return Promise.resolve(
+        {session_key_id : 0, login_user_id : 0, session_key : nw});
+  });
+
+  cryptoMock.createHash.mockReset();
+  cryptoMock.createHash.mockImplementation(() => {
+    var h = mockDeep<crypto.Hash>();
+    h.update.mockImplementation(() => h);
+    h.digest.mockImplementation(() => 'abcd');
+    return h;
+  });
+
+  var obj = {data : {"some" : "data"}, "sessionkey" : ""};
+  var exp = {data : {"some" : "data"}, "sessionkey" : "abcd", success : true};
+
+  await expect(util.respOrError(req, res, Promise.resolve(obj)))
+      .resolves.not.toThrow();
+  expect(sendSpy).toHaveBeenCalledWith(exp);
+  expect(statSpy).toHaveBeenCalledWith(200);
+});
 
 test("utility.redirect sends an HTTP 303", () => {
   const {res, statSpy, sendSpy} = obtainResponse();
@@ -247,6 +289,7 @@ test("utility.redirect sends an HTTP 303", () => {
 });
 
 test("utility.checkSessionKey works on valid session key", async () => {
+  session_keyMock.checkSessionKey.mockReset();
   session_keyMock.checkSessionKey.mockResolvedValue(
       {login_user_id : 123456789});
   const obj = {sessionkey : "key"};
@@ -268,6 +311,98 @@ test("utility.checkSessionKey fails on invalid session key", async () => {
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-// test isAdmin has to wait -> ORM connection has to be mocked
-// test refreshKey has to wait -> ORM connection has to be mocked
-// test refreshAndInjectKey has to wait -> ORM connection has to be mocked
+test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
+         "and fail on non-admin keys",
+     async () => {
+       session_keyMock.checkSessionKey.mockReset();
+       session_keyMock.checkSessionKey.mockImplementation((key: string) => {
+         if (key == "key_1")
+           return Promise.resolve({login_user_id : 1});
+         if (key == "key_2")
+           return Promise.resolve({login_user_id : 2});
+         return Promise.reject(new Error());
+       });
+
+       login_userMock.searchAllAdminLoginUsers.mockReset();
+       login_userMock.searchAllAdminLoginUsers.mockImplementation(
+           (isAdmin: boolean) => {
+             if (!isAdmin)
+               return Promise.resolve([]);
+             return Promise.resolve([ {
+               login_user_id : 1,
+               person_id : -1,
+               password : "imapassword",
+               is_admin : true,
+               is_coach : false,
+               account_status : 'ACTIVATED'
+             } ]);
+           });
+
+       // test 1: succesfull
+       await expect(util.isAdmin({
+         sessionkey : "key_1"
+       })).resolves.toStrictEqual({sessionkey : "key_1"});
+       // test 2: not an admin
+       await expect(util.isAdmin({
+         sessionkey : "key_2"
+       })).rejects.toStrictEqual(util.errors.cookInsufficientRights());
+       // test 3: invalid key
+       await expect(util.isAdmin({sessionkey : "key_3"}).catch(e => {
+         console.log(e);
+         return Promise.reject(e)
+       })).rejects.toStrictEqual(util.errors.cookUnauthenticated());
+
+       expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(3);
+       expect(login_userMock.searchAllAdminLoginUsers).toHaveBeenCalledTimes(2);
+     });
+
+test("utility.refreshKey removes a key and replaces it", async () => {
+  session_keyMock.changeSessionKey.mockReset();
+  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
+    return Promise.resolve(
+        {session_key_id : 0, login_user_id : 0, session_key : nw});
+  });
+
+  cryptoMock.createHash.mockReset();
+  cryptoMock.createHash.mockImplementation(() => {
+    var h = mockDeep<crypto.Hash>();
+    h.update.mockImplementation(() => h);
+    h.digest.mockImplementation(() => 'abcd');
+    return h;
+  });
+
+  await expect(util.refreshKey('ab')).resolves.toBe('abcd');
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd');
+});
+
+test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
+  session_keyMock.changeSessionKey.mockReset();
+  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
+    return Promise.resolve(
+        {session_key_id : 0, login_user_id : 0, session_key : nw});
+  });
+
+  cryptoMock.createHash.mockReset();
+  cryptoMock.createHash.mockImplementation(() => {
+    var h = mockDeep<crypto.Hash>();
+    h.update.mockImplementation(() => h);
+    h.digest.mockImplementation(() => 'abcd');
+    return h;
+  });
+
+  const initial = {
+    sessionkey : '',
+    data : {id : 5, name : 'jef', email : 'jef@jef.com'}
+  };
+
+  const result = {
+    sessionkey : 'abcd',
+    data : {id : 5, name : 'jef', email : 'jef@jef.com'}
+  };
+
+  expect(util.refreshAndInjectKey('ab', initial))
+      .resolves.toStrictEqual(result);
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd');
+});
