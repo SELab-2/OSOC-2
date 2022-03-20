@@ -1,12 +1,14 @@
 import type {NextPage} from 'next'
 import styles from '../styles/login.module.css'
 import Image from "next/image"
-import LogoOsocColor from "../public/images/logo-osoc-color.svg"
 import GitHubLogo from "../public/images/github-logo.svg"
 import {SyntheticEvent, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
+import {useRouter} from "next/router";
 
-const Login: NextPage = () => {
+const Login: NextPage = (props) => {
+
+    const router = useRouter()
 
     // Login field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
@@ -62,6 +64,8 @@ const Login: NextPage = () => {
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("LOGGING IN...")
+            console.log(props)
+            router.push("/students").then()
         }
 
     }
@@ -177,18 +181,6 @@ const Login: NextPage = () => {
 
     return (
         <div>
-            <header className={styles.header}>
-                <div>
-                    <div className={styles.imagecontainer}>
-                        <Image
-                            src={LogoOsocColor}
-                            layout="intrinsic"
-                            alt="OSOC Logo"
-                        />
-                    </div>
-                    <h1>Selections</h1>
-                </div>
-            </header>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>
