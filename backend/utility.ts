@@ -312,3 +312,12 @@ export async function isValidID<T extends Requests.IdRequest>(
   return Promise.resolve(obj).catch(() => Promise.reject(table));
   // the catch is just to "fix" the unused variable
 }
+
+/**
+ *  Sets up the redirection response (for the `/<endpoint>` requests). Uses the
+ * preferred home from the config file.
+ */
+export function setupRedirect(router: express.Router, ep: string): void {
+  router.get('/',
+             (_, res) => redirect(res, config.global.preferred + ep + "/all"));
+}

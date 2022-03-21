@@ -158,7 +158,7 @@ async function searchStudents(req: express.Request):
 export function getRouter(): express.Router {
   let router: express.Router = express.Router();
 
-  router.get("/", (_, res) => util.redirect(res, "/student/all"));
+  util.setupRedirect(router, '/student');
   util.route(router, "post", "/", createStudent);
   util.route(router, "get", "/all", listStudents);
   util.route(router, "get", "/:id", getStudent);

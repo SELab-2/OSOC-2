@@ -5,49 +5,52 @@ import * as rq from '../request';
 import {Requests, Responses} from '../types';
 import * as util from "../utility";
 
-function filterQuestion(form : Requests.Form, key : string) :
-    Requests.Question {
-    return form.data.fields.filter(question => question.key == key)[0];
+function filterQuestion(form: Requests.Form, key: string): Requests.Question {
+  return form.data.fields.filter(question => question.key == key)[0];
 }
 
-function checkYesAnswer(question : Requests.Question) :
-    Boolean {
-    if (question.options !== undefined) {
-        return question.options.filter(option => option.id === question.value)[0].text.toLowerCase().includes("yes");
-    }
-    return false;
+function checkYesAnswer(question: Requests.Question): Boolean {
+  if (question.options !== undefined) {
+    return question.options.filter(option => option.id === question.value)[0]
+        .text.toLowerCase()
+        .includes("yes");
+  }
+  return false;
 }
 
-function checkInBelgium(form : Requests.Form) :
-    Boolean {
-    return checkYesAnswer(filterQuestion(form, "question_wkNolR"));
+function checkInBelgium(form: Requests.Form): Boolean {
+  return checkYesAnswer(filterQuestion(form, "question_wkNolR"));
 }
 
-function checkCanWorkJuly(form : Requests.Form) :
-    Boolean {
-    return checkYesAnswer(filterQuestion(form, "question_mKVEz8"));
+function checkCanWorkJuly(form: Requests.Form): Boolean {
+  return checkYesAnswer(filterQuestion(form, "question_mKVEz8"));
 }
 
-function jsonToPerson(form : Requests.Form):
-    Promise<Responses.Empty> {
-    let questionBirthName : Requests.Question = filterQuestion(form, "question_npDErJ");
-    let questionLastName : Requests.Question = filterQuestion(form, "question_319eXp");
-    let questionEmail : Requests.Question = filterQuestion(form, "question_mY46PB");
-    // TODO check email
-    let questionGender : Requests.Question = filterQuestion(form, "question_wg9laO");
-    let gender : string = "";
-    if (questionGender.options !== undefined) {
-        gender = questionGender.options.filter(option => option.id === questionGender.value)[0].text;
-    }
+function jsonToPerson(form: Requests.Form): Promise<Responses.Empty> {
+  let questionBirthName: Requests.Question =
+      filterQuestion(form, "question_npDErJ");
+  let questionLastName: Requests.Question =
+      filterQuestion(form, "question_319eXp");
+  let questionEmail: Requests.Question =
+      filterQuestion(form, "question_mY46PB");
+  // TODO check email
+  let questionGender: Requests.Question =
+      filterQuestion(form, "question_wg9laO");
+  let gender: string = "";
+  if (questionGender.options !== undefined) {
+    gender = questionGender.options
+                 .filter(option => option.id === questionGender.value)[0]
+                 .text;
+  }
 
-    return ormP.create_person({
+  return ormP
+      .create_person({
         firstname : questionBirthName.value,
         lastname : questionLastName.value,
         email : questionEmail.value,
         gender : gender
-    }).then(() => {
-        return Promise.resolve({});
-    });
+      })
+      .then(() => { return Promise.resolve({}); });
 }
 
 /**
@@ -79,15 +82,10 @@ async function createForm(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-    let router: express.Router = express.Router();
+  let router: express.Router = express.Router();
 
-    router.post('/', (req, res) => util.respOrErrorNoReinject(res, createForm(req)));
+  util.route(router, "post", "/", createForm);
+  util.addAllInvalidVerbs(router, [ "/" ]);
 
-    util.addAllInvalidVerbs(
-        router,
-        [ "/" ]);
-
-    return router;
+  return router;
 }
-
-
