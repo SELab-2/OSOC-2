@@ -48,13 +48,17 @@ CREATE TABLE IF NOT EXISTS login_user(
     "password"         TEXT     NULL, 
     is_admin         BOOLEAN,
     is_coach         BOOLEAN,
-    session_keys     TEXT[]     NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
     CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
     CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
 
+CREATE TABLE IF NOT EXISTS session_keys(
+   session_key_id     SERIAL         PRIMARY KEY,
+   login_user_id      SERIAL         NOT NULL REFERENCES login_user(login_user_id),
+   session_key        VARCHAR(128)   NOT NULL UNIQUE
+ );
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
