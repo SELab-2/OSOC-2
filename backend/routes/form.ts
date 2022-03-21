@@ -51,7 +51,7 @@ function jsonToPerson(form : Requests.Form):
 }
 
 /**
- *  Attempts to create a new user in the system.
+ *  Attempts to create a new form in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -62,6 +62,9 @@ async function createForm(req: express.Request):
         if(!checkInBelgium(form) || !checkCanWorkJuly(form)) {
             return Promise.reject(util.errors.cookNonJSON("Invalid json"));
         }
+
+        // TODO kan je 128 uur werken
+        // TODO gender verandert naar student
 
         return jsonToPerson(form)
             .then(() => {
