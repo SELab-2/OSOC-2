@@ -1,4 +1,6 @@
 import prisma from '../../prisma/prisma'
+import {CreatePerson} from "../../orm_functions/orm_types";
+import {createPerson} from "../../orm_functions/person";
 
 beforeAll(async () => {
 
@@ -7,13 +9,11 @@ beforeAll(async () => {
         data: [
             {
                 email: 'email@testmail.com',
-                github: "",
                 firstname: "firstNameTest",
                 lastname: "lastNameTest",
                 gender: "Male",
             },
             {
-                email: '',
                 github: "test@github.com",
                 firstname: "firstNameTest2",
                 lastname: "lastNameTest2",
@@ -75,6 +75,25 @@ afterAll(async () => {
 
     await prisma.$disconnect()
 })
+
+it('should create 1 new person', async () => {
+    const person: CreatePerson = {
+        email: "test@email.be",
+        firstname: "first_name",
+        gender: "Male",
+        lastname: "last_name"
+    }
+
+    const created_person = await createPerson(person);
+    console.log(created_person);
+    expect(created_person).toHaveProperty("github", null);
+    expect(created_person).toHaveProperty("firstname", person.firstname);
+    // expect(created_person.github).toEqual(person.github);
+    // expect(created_person.firstname).toEqual(person.firstname);
+    // expect(created_person.lastname).toEqual(person.lastname);
+    // expect(created_person.email).toEqual(person.email);
+    // expect(created_person.gender).toEqual(person.gender);
+});
 
 // it('should create 1 new customer with 1 order', async () => {
 //     // The new customers details
