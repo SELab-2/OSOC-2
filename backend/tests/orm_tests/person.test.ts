@@ -4,7 +4,7 @@ import {
     createPerson, deletePersonById,
     getAllPersons,
     getPasswordPersonByEmail,
-    searchPersonByGender, searchPersonByLogin,
+    searchPersonByLogin,
     searchPersonByName, updatePerson
 } from "../../orm_functions/person";
 
@@ -13,7 +13,6 @@ const returnValue = {
     email: "email@mail.com",
     firstname: "FirstName",
     lastname: "LastName",
-    gender: "M",
     github: null
 }
 
@@ -21,7 +20,6 @@ test("should create a person in the db with the given object, returns the new re
    const person: CreatePerson = {
        email: "email@mail.com",
        firstname: "FirstName",
-       gender: "M",
        lastname: "LastName"
    };
 
@@ -44,11 +42,6 @@ test("should return the searched person record with the given name", async () =>
     await expect(searchPersonByName("name")).resolves.toEqual([returnValue]);
 });
 
-test("should return all the people with the selected gender", async () => {
-    prismaMock.person.findMany.mockResolvedValue([returnValue]);
-    await expect(searchPersonByGender("female")).resolves.toEqual([returnValue]);
-});
-
 test("should return all the people with the given login (email or github)", async () => {
     prismaMock.person.findMany.mockResolvedValue([returnValue]);
     await expect(searchPersonByLogin("dvl@github.com")).resolves.toEqual([returnValue]);
@@ -58,7 +51,6 @@ test("should update the person with the new data and return the updated record",
     const person : UpdatePerson = {
         email: "email@mail.com",
         firstname: "newFirst",
-        gender: "Male",
         github: null,
         lastname: "",
         personId: 0

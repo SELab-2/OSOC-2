@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS person(
    github       TEXT               UNIQUE,   
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
-   gender       TEXT      NOT NULL,
    CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
    CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
 );
@@ -13,6 +12,7 @@ CREATE TABLE IF NOT EXISTS person(
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
    person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
+   gender          TEXT            NOT NULL,
    pronouns        TEXT [],
    phone_number    TEXT            NOT NULL,
    nickname        TEXT,
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS login_user(
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL,
-   CONSTRAINT valid_year CHECK (year >= 2022)
+   year       SMALLINT    NOT NULL UNIQUE,
+   CONSTRAINT valid_year CHECK (year >= date_part('year', CURRENT_DATE))
 );
 
 
@@ -67,21 +67,22 @@ CREATE TABLE IF NOT EXISTS osoc(
 CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE', 'DRAFT');
 
 CREATE TABLE IF NOT EXISTS job_application (
-    job_application_id    SERIAL               PRIMARY KEY,
-    student_id            SERIAL               NOT NULL REFERENCES student(student_id),
-    responsibilities      TEXT,
-    motivation            TEXT,
-    fun_fact              TEXT,
-    is_volunteer          BOOLEAN              NOT NULL,
-    student_coach         BOOLEAN              NOT NULL,
-    osoc_id               INT                  NOT NULL REFERENCES osoc(osoc_id),
-    edus                  TEXT,
-    edu_level             TEXT,
-    edu_duration          INT,
-    edu_year              INT,
-    edu_institute         TEXT,
-    email_status          email_status_enum    NOT NULL,
-    created_at            TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
+    job_application_id        SERIAL               PRIMARY KEY,
+    student_id                SERIAL               NOT NULL REFERENCES student(student_id),
+    student_volunteer_info    TEXT                 NOT NULL,
+    responsibilities          TEXT,
+    motivation                TEXT,
+    fun_fact                  TEXT,
+    /*is_volunteer            BOOLEAN              NOT NULL,*/
+    student_coach             BOOLEAN              NOT NULL,
+    osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
+    edus                      TEXT,
+    edu_level                 TEXT,
+    edu_duration              INT,
+    edu_year                  INT,
+    edu_institute             TEXT,
+    email_status              email_status_enum    NOT NULL,
+    created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
 
 

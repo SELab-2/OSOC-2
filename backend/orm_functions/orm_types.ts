@@ -13,10 +13,7 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
      * the person's lastname
      */
     lastname : string,
-    /**
-     * the person's gender
-     */
-    gender : string,
+
     /**
      * the person's github account, only one of github/email can be used
      */
@@ -43,10 +40,6 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
      * undefined if unchanged or the new lastname
      */
     lastname?: string,
-    /**
-     * undefined if unchanged or the new gender
-     */
-    gender?: string,
     /**
      * undefined if unchanged or the new github
      */
@@ -114,6 +107,10 @@ export interface CreateStudent {
      */
     personId?: number,
     /**
+     * the person's gender
+     */
+    gender : string,
+    /**
      * the pronouns the student wants to be addressed with
      */
     pronouns?: string[],
@@ -139,6 +136,10 @@ export interface UpdateStudent {
      * the student who's info we are updating
      */
     studentId: number,
+    /**
+     * undefined if unchanged or the new gender
+     */
+    gender?: string,
     /**
      * undefined if unchanged or new list of pronouns
      */
@@ -262,7 +263,7 @@ export interface CreateJobApplication {
      */
     studentId: number,
     /**
-     * the responsibilities the students wants to take
+     * the responsibilities the students has during the summer that might keep him from working for osoc
      */
     responsibilities?: string | null,
     /**
@@ -274,9 +275,9 @@ export interface CreateJobApplication {
      */
     funFact?: string | null,
     /**
-     * boolean that indicates if the student is a volunteer or not
+     * string that has info if the student is available to work, and if he wants to work as volunteer for free or not
      */
-    isVolunteer: boolean, 
+    studentVolunteerInfo: string,
     /**
      * boolean that indicates if the student is a student-coach or not
      */
