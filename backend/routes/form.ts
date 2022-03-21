@@ -54,21 +54,26 @@ function jsonToPerson(form: Requests.Form): Promise<Responses.Empty> {
 }
 
 /**
- *  Attempts to create a new user in the system.
+ *  Attempts to create a new form in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createForm(req: express.Request):
-    Promise<Responses.Keyed<string>> {
-  return rq.parseFormRequest(req).then(async form => {
-    if (!checkInBelgium(form) || !checkCanWorkJuly(form)) {
-      return Promise.reject(util.errors.cookNonJSON("Invalid json"));
-    }
+    Promise<Responses.Empty> {
+    return rq.parseFormRequest(req).then(async form => {
+        if(!checkInBelgium(form) || !checkCanWorkJuly(form)) {
+            return Promise.reject(util.errors.cookNonJSON("Invalid json"));
+        }
 
-    return jsonToPerson(form).then(
-        () => { return Promise.resolve({data : "", sessionkey : ""}); });
-  });
+        // TODO kan je 128 uur werken
+        // TODO gender verandert naar student
+
+        return jsonToPerson(form)
+            .then(() => {
+                return Promise.resolve({});
+            });
+    });
 }
 
 /**
@@ -80,7 +85,6 @@ export function getRouter(): express.Router {
   let router: express.Router = express.Router();
 
   util.route(router, "post", "/", createForm);
-
   util.addAllInvalidVerbs(router, [ "/" ]);
 
   return router;
