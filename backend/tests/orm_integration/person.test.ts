@@ -11,16 +11,16 @@ beforeAll(async () => {
                 email: 'email@testmail.com',
                 firstname: "firstNameTest",
                 lastname: "lastNameTest",
+                gender: "Male"
             },
             {
                 github: "test@github.com",
                 firstname: "firstNameTest2",
                 lastname: "lastNameTest2",
+                gender: "Female"
             },
         ],
     })
-
-    console.log('2 persons successfully made')
 
     // // create the customer
     // await prisma.customer.create({
@@ -78,11 +78,11 @@ it('should create 1 new person', async () => {
     const person: CreatePerson = {
         email: "test@email.be",
         firstname: "first_name",
-        lastname: "last_name"
+        lastname: "last_name",
+        gender: "Male"
     }
 
     const created_person = await createPerson(person);
-    console.log(created_person);
     expect(created_person).toHaveProperty("github", null);
     expect(created_person).toHaveProperty("firstname", person.firstname);
     // expect(created_person.github).toEqual(person.github);
