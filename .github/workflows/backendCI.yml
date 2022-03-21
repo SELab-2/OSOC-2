@@ -49,10 +49,6 @@ jobs:
       run: npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init
       working-directory: backend
 
-    - name: Generate the prisma types
-      run: npx prisma generate
-      working-directory: backend
-
     - name: Coverage Report
       uses: ArtiomTr/jest-coverage-report-action@v2
       with:
