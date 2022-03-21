@@ -9,7 +9,7 @@
     "migrate:postgres": "npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init",
     "docker:up": "docker-compose -f docker-compose.integrationtest.yml up -d --build",
     "docker:down": "docker-compose down",
-    "testIntegration": "npm run docker:up && npm run migrate:postgres && jest -i --ci --coverage --outputFile=coverage.json --json"
+    "testIntegration": "npm run docker:up && npm run migrate:postgres && jest -i"
   },
   "author": "",
   "license": "ISC",

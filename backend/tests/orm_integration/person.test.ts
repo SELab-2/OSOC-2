@@ -11,13 +11,11 @@ beforeAll(async () => {
                 email: 'email@testmail.com',
                 firstname: "firstNameTest",
                 lastname: "lastNameTest",
-                gender: "Male",
             },
             {
                 github: "test@github.com",
                 firstname: "firstNameTest2",
                 lastname: "lastNameTest2",
-                gender: "Female",
             },
         ],
     })
@@ -80,7 +78,6 @@ it('should create 1 new person', async () => {
     const person: CreatePerson = {
         email: "test@email.be",
         firstname: "first_name",
-        gender: "Male",
         lastname: "last_name"
     }
 
