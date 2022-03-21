@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS person(
    github       TEXT               UNIQUE,   
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL)/*,
-   CONSTRAINT email_check CHECK (email is NULL or email is LIKE '%_@__%.__%')*/
+   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
 );
 
 
@@ -21,8 +21,10 @@ CREATE TABLE IF NOT EXISTS student(
 
 
 /* function used in login user to retrieve if email is used in person */
-CREATE OR REPLACE FUNCTION get_email_used(personId integer, given_password text)
-RETURNS BOOLEAN AS
+CREATE FUNCTION get_email_used(personId integer, given_password text)
+RETURNS BOOLEAN 
+LANGUAGE plpgsql
+AS
 $$
 declare 
     email_used text;
@@ -35,7 +37,7 @@ begin
 
     return true; 
 END;
-$$ LANGUAGE PLpgSQL;
+$$;
 
 /* enum used in login_user to show the account status */
 CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
