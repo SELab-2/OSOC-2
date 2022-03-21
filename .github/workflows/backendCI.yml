@@ -36,6 +36,9 @@ jobs:
         touch backend/prisma/.env
         echo DATABASE_URL="postgresql://osoc2:password@db:5432/osoc2?connect_timeout=30&pool_timeout=30" >> backend/prisma/.env
         cat backend/prisma/.env
+    - name: Push schema to docker file
+      run: npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init
+      working-directory: backend
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
