@@ -18,7 +18,6 @@ export async function createPerson(person: CreatePerson){
         data: {
             firstname: person.firstname,
             lastname: person.lastname,
-            gender: person.gender,
             github: person.github,
             email: person.email
         },
@@ -73,18 +72,7 @@ export async function searchPersonByName(name: string){
     });
 }
 
-/**
- * 
- * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
- * @returns: a list of all the person objects in the database that match
- */
-export async function searchPersonByGender(gender: string){
-    return prisma.person.findMany({
-        where: {
-            gender: gender
-        },
-    });
-}
+
 
 /**
  * 
@@ -119,7 +107,6 @@ export async function updatePerson(person: UpdatePerson){
         data: {
             firstname: person.firstname,
             lastname: person.lastname,
-            gender: person.gender,
             github: person.github,
             email: person.email
         },

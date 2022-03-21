@@ -168,7 +168,7 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
             motivation: jobApplication.motivation,
             responsibilities: jobApplication.responsibilities,
             fun_fact: jobApplication.funFact,
-            is_volunteer: jobApplication.isVolunteer,
+            student_volunteer_info: jobApplication.studentVolunteerInfo,
             student_coach: jobApplication.studentCoach,
             osoc_id: jobApplication.osocId,
             edus: jobApplication.edus,
