@@ -29,9 +29,14 @@ jobs:
 
     - run: npm install
       working-directory: backend
+    - run: npm run testIntegration
+      working-directory: backend
     
     - name: Coverage Report
       uses: ArtiomTr/jest-coverage-report-action@v2
       with:
         working-directory: backend
         skip-step: install
+
+    - run: npm run docker:down
+      working-directory: backend
