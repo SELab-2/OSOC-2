@@ -7,8 +7,8 @@ import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
-import bcrypt from "bcrypt"
 
+const crypto = require('crypto');
 const Login: NextPage = () => {
 
     const router = useRouter()
@@ -63,13 +63,18 @@ const Login: NextPage = () => {
         }
 
         // We encrypt the password before sending it to the backend api
-        const encryptedPassword = bcrypt.hashSync(loginPassword, bcrypt.genSaltSync(8))
+        const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
+        console.log(encryptedPassword)
 
         // Fields are not empty
         if (!error) {
             // TODO -- Send call to the backend
+            const response = await fetch("http://localhost:3000", {
+                method: 'POST',
+                body: JSON.stringify({pass:encryptedPassword,email:loginEmail}),
+                headers: {'Content-Type': 'application/json; charset=UTF-8'} });
+            console.log(response)
             // TODO -- Handle response
-            
             signIn('credentials', {
                 username: loginEmail,
                 password: encryptedPassword,
