@@ -7,6 +7,7 @@ import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
+import bcrypt from "bcrypt"
 
 const Login: NextPage = () => {
 
@@ -61,15 +62,17 @@ const Login: NextPage = () => {
             setLoginPasswordError("");
         }
 
+        // We encrypt the password before sending it to the backend api
+        const encryptedPassword = bcrypt.hashSync(loginPassword, bcrypt.genSaltSync(8))
+
         // Fields are not empty
         if (!error) {
             // TODO -- Send call to the backend
             // TODO -- Handle response
-            console.log(loginEmail)
-            console.log(loginPassword)
+            
             signIn('credentials', {
                 username: loginEmail,
-                password: loginPassword,
+                password: encryptedPassword,
                 redirect: false
             }).then(res => {
                     // TODO -- Redirect or handle errors
