@@ -4,6 +4,7 @@ import * as ormP from '../orm_functions/person';
 //import * as ormSt from '../orm_functions/student';
 import * as rq from '../request';
 import {Requests, Responses} from '../types';
+//import {InternalTypes} from '../types';
 import * as util from "../utility";
 
 /**
