@@ -69,10 +69,14 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // TODO -- Send call to the backend
-            const response = await fetch("http://localhost:3000", {
+            const response = await fetch("http://localhost:4096/login", {
                 method: 'POST',
-                body: JSON.stringify({pass:encryptedPassword,email:loginEmail}),
-                headers: {'Content-Type': 'application/json; charset=UTF-8'} });
+                body: JSON.stringify({pass:encryptedPassword,name:loginEmail}),
+                headers : {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }})
+                .then(response => response.json());
             console.log(response)
             // TODO -- Handle response
             signIn('credentials', {
