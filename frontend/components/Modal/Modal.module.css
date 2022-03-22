@@ -1,0 +1,34 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width:100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.modalMain {
+    position:fixed;
+    background: var(--neutral-100);
+    width: clamp(10rem, 90vw, 30rem);
+    height: auto;
+    left:50%;
+    margin-top: 20rem;
+    transform: translate(-50%,-50%);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+
+.displayBlock {
+    display: block;
+}
+
+.displayNone {
+    display: none;
+}
+
+.modal .modalMain button {
+    align-self: flex-end;
+}
