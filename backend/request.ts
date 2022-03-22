@@ -168,43 +168,6 @@ export async function parseLoginRequest(req: express.Request):
 }
 
 /**
- *  @deprecated ! use the form endpoint instead !
- *  Parses a request to `POST /student/`.
- *  @param req The request to check.
- *  @returns A Promise resolving to the parsed data or rejecting with an
- * Argument or Unauthenticated error.
- */
-export async function parseNewStudentRequest(req: express.Request):
-    Promise<Requests.NewStudent> {
-  const bodyF = [
-    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone",
-    "education"
-  ];
-  const edF = [ "level", "duration", "year", "institute" ];
-
-  return hasFields(req, bodyF, types.key).then(() => {
-    if (!anyHasFields(req.body.education, edF))
-      return rejector();
-
-    return Promise.resolve({
-      emailOrGithub : req.body.emailOrGithub,
-      firstName : req.body.firstName,
-      lastName : req.body.lastName,
-      gender : req.body.gender,
-      pronouns : req.body.pronouns,
-      phone : req.body.phone,
-      education : {
-        level : req.body.education.level,
-        duration : req.body.education.duration,
-        year : req.body.education.year,
-        institute : req.body.education.institute
-      },
-      sessionkey : req.body.sessionkey
-    });
-  });
-}
-
-/**
  *  Parses a request to `POST /student/<id>`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an

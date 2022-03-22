@@ -361,17 +361,6 @@ export interface IdRequest extends KeyRequest {
   id: string;
 }
 
-export interface NewStudent extends KeyRequest {
-  emailOrGithub: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  pronouns: string[];
-  phone: string;
-  education:
-      {level: string; duration : number; year : number; institute : string;};
-}
-
 export interface UpdateStudent extends IdRequest {
   emailOrGithub?: string;
   firstName?: string;

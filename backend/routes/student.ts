@@ -7,23 +7,6 @@ import * as util from '../utility';
 /* eslint-disable no-unused-vars */
 
 /**
- *  Attempts to create a new student in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function createStudent(req: express.Request):
-    Promise<Responses.PartialStudent> {
-  return rq.parseNewStudentRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => {
-        // INSERTION LOGIC
-        return Promise.resolve(
-            {data : {name : '', id : ''}, sessionkey : parsed.sessionkey});
-      });
-}
-
-/**
  *  Attempts to list all students in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -159,7 +142,6 @@ export function getRouter(): express.Router {
   let router: express.Router = express.Router();
 
   util.setupRedirect(router, '/student');
-  util.route(router, "post", "/", createStudent);
   util.route(router, "get", "/all", listStudents);
   util.route(router, "get", "/:id", getStudent);
   util.route(router, "post", "/:id", modStudent);
