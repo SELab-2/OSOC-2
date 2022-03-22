@@ -376,7 +376,6 @@ export interface CoachRequest {
   firstName: string;
   lastName: string;
   emailOrGithub: string;
-  gender: string;
   pass?: string;
 }
 

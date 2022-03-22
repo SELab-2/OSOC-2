@@ -288,13 +288,12 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
  */
 export async function parseRequestCoachRequest(req: express.Request):
     Promise<Requests.CoachRequest> {
-  return hasFields(req, [ "firstName", "lastName", "emailOrGithub", "gender" ],
+  return hasFields(req, [ "firstName", "lastName", "emailOrGithub" ],
                    types.neither)
       .then(() => Promise.resolve({
         firstName : req.body.firstName,
         lastName : req.body.lastName,
         emailOrGithub : req.body.emailOrGithub,
-        gender : req.body.gender,
         pass : maybe(req.body, "pass")
       }));
 }

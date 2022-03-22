@@ -93,11 +93,10 @@ async function createCoachRequest(req: express.Request):
       return Promise.reject(util.errors.cookArgumentError());
     }
     return ormP
-        .create_person({
+        .createPerson({
           firstname : parsed.firstName,
           lastname : parsed.lastName,
-          email : parsed.emailOrGithub,
-          gender : parsed.gender
+          email : parsed.emailOrGithub
         })
         .then(person => {
           console.log("Created a person: " + person);
