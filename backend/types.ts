@@ -137,6 +137,28 @@ export interface IdName extends IdOnly {
 }
 
 /**
+ *  Represents a person, with all associated data.
+ */
+export interface Person {
+  /**
+   *  The person id.
+   */
+  person_id: number;
+  /**
+   *  The firstname of this person.
+   */
+  firstname: string;
+  /**
+   *  The lastname of this person.
+   */
+  lastname: string;
+  /**
+   *  The email of this person.
+   */
+  email?: string;
+}
+
+/**
  *  Represents a student, with all associated data. Does not correspond to a
  * student in the database.
  */
@@ -161,7 +183,7 @@ export interface CoachRequest {
    */
   name: string;
   /**
-   *  The id.
+   *  The email.
    */
   email: string;
 }
@@ -280,6 +302,12 @@ export interface Empty {}
  * data.
  */
 export interface Coach extends Keyed<InternalTypes.Coach> {}
+
+/**
+ *  A person response is the keyed version of the person and their associated
+ * data.
+ */
+export interface Person extends InternalTypes.Person {}
 
 /**
  *  An admin response is the keyed version of the admin and their associated
