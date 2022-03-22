@@ -1,7 +1,7 @@
 import prisma from "../../prisma/prisma";
 
 beforeAll(async () => {
-    // create products
+    // create persons
     await prisma.person.createMany({
         data: [
             {
@@ -13,6 +13,27 @@ beforeAll(async () => {
                 github: "test@github.com",
                 firstname: "firstNameTest2",
                 lastname: "lastNameTest2",
+            },
+        ],
+    });
+    const persons = await prisma.person.findMany();
+    
+    // create login users
+    await prisma.login_user.createMany({
+        data: [
+            {   
+                person_id: persons[0].person_id,
+                password: "easy_password",
+                is_admin: true,
+                is_coach: true,
+                account_status: "ACTIVATED"
+            },
+            {
+                person_id: persons[1].person_id,
+                password: "123_bad_pass",
+                is_admin: true,
+                is_coach: false,
+                account_status: "PENDING"
             },
         ],
     });

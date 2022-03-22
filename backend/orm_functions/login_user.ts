@@ -66,7 +66,7 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @returns: login user object
  */
 export async function searchLoginUserByPerson(personId: number){
-    const result = await prisma.login_user.findMany({
+    const result = await prisma.login_user.findUnique({
         where: { 
             person_id: personId
         },
@@ -136,7 +136,8 @@ export async function updateLoginUser(loginUser: UpdateLoginUser){
         data: {
             password: loginUser.password,
             is_admin: loginUser.isAdmin,
-            is_coach: loginUser.isCoach
+            is_coach: loginUser.isCoach,
+            account_status: loginUser.accountStatus
         },
     });
     return result;
