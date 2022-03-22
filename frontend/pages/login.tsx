@@ -6,6 +6,7 @@ import {SyntheticEvent, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
+import {Header} from "../components/Header/Header";
 
 const Login: NextPage = () => {
 
@@ -64,26 +65,26 @@ const Login: NextPage = () => {
         if (!error) {
             // TODO -- Send call to the backend
             // TODO -- Handle response
-            //const token = getCsrfToken()
-            //console.log(token)
-            //const res = await fetch('/api/auth/callback/credentials', {
-            //    method: 'POST',
-            //    body: JSON.stringify({crsfToken: token, username: loginEmail, password: loginPassword}),
-            //    headers: {'Content-Type': 'application/json'}
-            //})
-            //console.log(res)
-            //console.log("LOGGING IN...")
-            //console.log(providers.credentials)
             console.log(loginEmail)
             console.log(loginPassword)
-            signIn('credentials', {username: loginEmail, password: loginPassword, redirect: false}).then(res => {
+            signIn('credentials', {
+                username: loginEmail,
+                password: loginPassword,
+                redirect: false
+            }).then(res => {
                     // TODO -- Redirect or handle errors
                     console.log(res)
+                    if (res !== undefined) {
+                        const signInRes = res as SignInResult
+                        // The user is succesfully logged in => redirect to /students
+                        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                            console.log("redirect")
+                            router.push("/students")
+                        }
+                    }
                 }
             )
-            // router.push("/students").then()
         }
-
     }
 
     /**
@@ -198,6 +199,7 @@ const Login: NextPage = () => {
 
     return (
         <div>
+            <Header/>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>
@@ -294,3 +296,27 @@ const Login: NextPage = () => {
 }
 
 export default Login;
+
+
+export type SignInResult = {
+    /**
+     * Will be different error codes,
+     * depending on the type of error.
+     */
+    error: string | undefined
+    /**
+     * HTTP status code,
+     * hints the kind of error that happened.
+     */
+    status: number
+    /**
+     * `true` if the signin was successful
+     */
+    ok: boolean
+    /**
+     * `null` if there was an error,
+     * otherwise the url the user
+     * should have been redirected to.
+     */
+    url: string | null
+}

@@ -19,36 +19,30 @@ export default NextAuth({
             // e.g. domain, username, password, 2FA token, etc.
             // You can pass any HTML attribute to the <input> tag through the object.
             credentials: {
-                username: { type: "text" },
+                email: { type: "text" },
                 password: { type: "password" }
             },
             // Make call to our own api
             async authorize(credentials, req) {
                 // Add logic here to look up the user from the credentials supplied
+                console.log(req)
                 console.log(credentials)
 
                 // TODO -- Check if users exists in the database
 
-                // @ts-ignore
-                const user = { id: 1, name: "J Smith", email: credentials.username }
+                let user = null;
+                if (credentials) {
+                    user = {id: 1, email: credentials.email}
+                }
 
-                console.log(req)
+                console.log(user)
                 return user
-                //if (user) {
-                //    // Any object returned will be saved in `user` property of the JWT
-                //    return user
-                //} else {
-                //    // If you return null then an error will be displayed advising the user to check their details.
-                //    return null
-//
-                //    // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
-                //}
             }
         }),
     ],
 
     pages: {
         signIn: '/login',
-        signOut: '/login'
+        signOut: '/'
     }
 })
