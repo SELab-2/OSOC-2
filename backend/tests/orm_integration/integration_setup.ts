@@ -37,6 +37,18 @@ beforeAll(async () => {
             },
         ],
     });
+
+    // create osoc editions
+    await prisma.osoc.createMany({
+       data: [
+           {
+               year: 2022
+           },
+           {
+               year: 2023
+           }
+       ]
+    });
 });
 
 afterAll(async () => {
