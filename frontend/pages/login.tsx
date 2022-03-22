@@ -142,7 +142,22 @@ const Login: NextPage = () => {
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("REGISTERING...")
-            router.push("/students").then()
+            signIn('credentials', {
+                username: registerEmail,
+                password: registerPassword,
+                redirect: false
+            }).then(res => {
+                // TODO -- Redirect or handle errors
+                console.log(res)
+                if (res !== undefined) {
+                    const signInRes = res as SignInResult
+                    // The user is succesfully logged in => redirect to /students
+                    if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                        console.log("redirect")
+                        router.push("/students").then()
+                    }
+                }
+            })
         }
     }
 
@@ -156,8 +171,6 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        // TODO
-        console.log("LOGGING IT WITH GITHUB...");
         signIn("github", {callbackUrl: "/students"}).then(res => {
             console.log(`github response: ${res}`)
         })
