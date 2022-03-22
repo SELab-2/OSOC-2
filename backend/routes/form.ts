@@ -1,10 +1,9 @@
 import express from 'express';
 
 import * as ormP from '../orm_functions/person';
-//import * as ormSt from '../orm_functions/student';
+import * as ormSt from '../orm_functions/student';
 import * as rq from '../request';
 import {Requests, Responses} from '../types';
-//import {InternalTypes} from '../types';
 import * as util from "../utility";
 
 /**
@@ -28,24 +27,6 @@ function checkYesAnswer(question: Requests.Question): Boolean {
         .includes("yes");
   }
   return false;
-}
-
-/**
- *  Checks if the student will be in Belgium in July.
- *  @param form The form with the answers.
- *  @returns A boolean that answers the question.
- */
-function checkInBelgium(form: Requests.Form): Boolean {
-  return checkYesAnswer(filterQuestion(form, "question_wkNolR"));
-}
-
-/**
- *  Checks if the student can work enough in July.
- *  @param form The form with the answers.
- *  @returns A boolean that answers the question.
- */
-function checkCanWorkJuly(form: Requests.Form): Boolean {
-  return checkYesAnswer(filterQuestion(form, "question_mKVEz8"));
 }
 
 /**
@@ -89,15 +70,28 @@ function jsonToPerson(form: Requests.Form) : Promise<Responses.Person> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-/*function jsonToStudent(form: Requests.Form): Promise<Responses.Empty> {
-    let questionBirthName: Requests.Question =
-        filterQuestion(form, "question_npDErJ");
-    let questionLastName: Requests.Question =
-        filterQuestion(form, "question_319eXp");
-    let questionEmail: Requests.Question =
-        filterQuestion(form, "question_mY46PB");
-    // TODO check email
-    let questionGender: Requests.Question =
+function jsonToStudent(form: Requests.Form, person: Responses.Person): Promise<Responses.Empty> {
+    // The pronouns of this student
+    const questionAddPronouns: Requests.Question =
+        filterQuestion(form, "question_3yJQMg");
+    const questionPreferedPronouns: Requests.Question =
+        filterQuestion(form, "question_3X4aLg");
+    const questionEnterPronouns: Requests.Question =
+        filterQuestion(form, "question_w8ZBq5");
+
+    let pronouns : string[] = [];
+
+    if(checkYesAnswer(questionAddPronouns) && questionPreferedPronouns.options !== undefined) {
+        const chosenValue = questionPreferedPronouns.options?.filter(option => option.id === questionPreferedPronouns.value)[0];
+        if(chosenValue.text !== "other") {
+            pronouns = chosenValue.text.split("/");
+        } else {
+            pronouns = questionEnterPronouns.value.split("/");
+        }
+    }
+
+    // The gender of this student
+    const questionGender: Requests.Question =
         filterQuestion(form, "question_wg9laO");
     let gender: string = "";
     if (questionGender.options !== undefined) {
@@ -106,15 +100,43 @@ function jsonToPerson(form: Requests.Form) : Promise<Responses.Person> {
                    .text;
     }
 
+    // The phone number of this student
+    const questionPhoneNumber: Requests.Question =
+        filterQuestion(form, "question_wd9MEo");
+    const phoneNumber = questionPhoneNumber.value;
+
+    // The nickname of this student
+    const questionCheckNicknamePronouns: Requests.Question =
+        filterQuestion(form, "question_wME4XM");
+    const questionEnterNicknamePronouns: Requests.Question =
+        filterQuestion(form, "question_mJOPqo");
+
+    let nickname;
+
+    if(checkYesAnswer(questionCheckNicknamePronouns)) {
+        nickname = questionEnterNicknamePronouns.value;
+    }
+
+    // Checks if this student has participated before
+    const questionAlumni: Requests.Question =
+        filterQuestion(form, "question_mVzejJ");
+    let alumni = false;
+
+    if(questionAlumni.options !== undefined) {
+        alumni = questionAlumni.options?.filter(option => option.id === questionAlumni.value)[0].text.includes("yes");
+    }
+
     return ormSt
         .createStudent({
-            personId :
-            firstname : questionBirthName.value,
-            lastname : questionLastName.value,
-            email : questionEmail.value
+            personId : person.person_id,
+            gender : gender,
+            pronouns : pronouns,
+            phoneNumber : phoneNumber,
+            nickname : nickname,
+            alumni : alumni
         })
         .then(() => { return Promise.resolve({}); });
-}*/
+}
 
 
 
@@ -127,7 +149,8 @@ function jsonToPerson(form: Requests.Form) : Promise<Responses.Person> {
 async function createForm(req: express.Request):
     Promise<Responses.Empty> {
     return rq.parseFormRequest(req).then(async form => {
-        if(!checkInBelgium(form) || !checkCanWorkJuly(form)) {
+        // Checks if the student will be in Belgium in July and if the student can work enough in July.
+        if(!checkYesAnswer(filterQuestion(form, "question_wkNolR")) || !checkYesAnswer(filterQuestion(form, "question_mKVEz8"))) {
             return Promise.reject(util.errors.cookNonJSON("Invalid json"));
         }
 
@@ -135,6 +158,9 @@ async function createForm(req: express.Request):
         // TODO gender verandert naar student
 
         return jsonToPerson(form)
+            .then(person => {
+                return jsonToStudent(form, person);
+            })
             .then(() => {
                 return Promise.resolve({});
             });
