@@ -17,7 +17,7 @@
 `/student/<student-id>` | [Yes](#get-studentstudent-id) | [Yes](#post-studentstudent-id) | [Yes](#delete-studentstudent-id) | ![todo]
 `/student/<student-id>/suggest` | [Yes](#get-studentstudent-idsuggest) | [Yes](#post-studentstudent-idsuggest) | No | ![todo]
 `/student/<student-id>/confirm` | No | [Yes](#post-studentstudent-idconfirm) | No | ![todo]
-`/student/search` (see [searching.md](./searching.md)) | [Yes](#get-studentsearch) | No | No | ![todoc]
+`/student/search` (see [searching.md](../searching.md)) | [Yes](#get-studentsearch) | No | No | ![todoc]
 `/coach` | [Yes](#get-coach) | No | No | ![todo]
 `/coach/all` | [Yes](#get-coachall) | No | No | ![todo]
 `/coach/<coach-id>` | [Yes](#get-coachcoach-id) | [Yes](#post-coachcoach-id) | [Yes](#delete-coachcoach-id) | ![todo]
@@ -252,7 +252,7 @@ Here, the ` | ` in the `reply` field means `or`.
 ### GET /student/search
 **Arguments:**  
  - `sessionkey:string` Your current session key.
- - See [searching.md](./searching.md) for an overview of all filters. If no filter is given, this API endpoint will behave equivalent to [`GET /student/all`](#get-student-all).
+ - See [searching.md](../searching.md) for an overview of all filters. If no filter is given, this API endpoint will behave equivalent to [`GET /student/all`](#get-student-all).
 
 **Description:** Searches for a student by certain values.  
 **Response:**  
