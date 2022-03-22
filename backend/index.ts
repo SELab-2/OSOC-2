@@ -12,7 +12,7 @@ app.use(body.urlencoded({extended : true}));
 app.use(express.json());
 app.use((req, _, next) => util.logRequest(req, next));
 ep.attach(app);
-util.addInvalidVerbs(app, '/');
+config.global.homes.forEach(home => util.addInvalidVerbs(app, home + "/"));
 
 // Server setup
 app.listen(port, () => {
