@@ -126,19 +126,61 @@ function jsonToStudent(form: Requests.Form, person: Responses.Person): Promise<R
         alumni = questionAlumni.options?.filter(option => option.id === questionAlumni.value)[0].text.includes("yes");
     }
 
-    return ormSt
-        .createStudent({
-            personId : person.person_id,
-            gender : gender,
-            pronouns : pronouns,
-            phoneNumber : phoneNumber,
-            nickname : nickname,
-            alumni : alumni
-        })
-        .then(() => { return Promise.resolve({}); });
+    if(nickname !== undefined) {
+        return ormSt
+            .createStudent({
+                personId : person.person_id,
+                gender : gender,
+                pronouns : pronouns,
+                phoneNumber : phoneNumber,
+                nickname : nickname,
+                alumni : alumni
+            })
+            .then(() => { return Promise.resolve({}); });
+    } else {
+        return ormSt
+            .createStudent({
+                personId : person.person_id,
+                gender : gender,
+                pronouns : pronouns,
+                phoneNumber : phoneNumber,
+                alumni : alumni
+            })
+            .then(() => { return Promise.resolve({}); });
+    }
 }
 
+/**
+ *  Attempts to parse the answers in the form into a job application entity.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+/*function jsonToJobApplication(form: Requests.Form, student: Responses.Student): Promise<Responses.Empty> {
+    // The volunteer info of the student
+    const questionVolunteerInfo: Requests.Question =
+        filterQuestion(form, "question_wvPZM0");
 
+    let volunteerInfo : string = "";
+
+    if(questionVolunteerInfo.options !== undefined) {
+        volunteerInfo = questionVolunteerInfo.options?.filter(option => option.id === questionVolunteerInfo.value)[0].text;
+    }
+
+    // The responsibilities of the student
+    const responsibilities: string =
+        filterQuestion(form, "question_wLPr9v").value;
+
+    // The volunteer info of the student
+    const questionMotivation: Requests.Question =
+        filterQuestion(form, "question_wvPZM0");
+
+    let volunteerInfo : string = "";
+
+    if(questionVolunteerInfo.options !== undefined) {
+
+    }
+}*/
 
 /**
  *  Attempts to create a new form in the system.
