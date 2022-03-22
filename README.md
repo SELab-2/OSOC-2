@@ -1,11 +1,24 @@
 # OSOC-2
 
-## How to contribute
+### All the usefull documentations can be found here
+[Mock Ups](docs/mock_ups/README.md)
 
-This repository is a monorepo, meaning that both frontend and backend share the same github repository.
+[Docker setup guide](docs/docker_quick_guide.md)
 
-Both frontend and backend can be treated as seperate projects. However, if you wish to commit a change you will first need to run `npm install`. The root folder is configured in a way to automatically make some checks on your code and commit messages and needs some dependencies.
+[Use cases](https://ugentbe-my.sharepoint.com/:w:/r/personal/bart_mesuere_ugent_be/_layouts/15/Doc.aspx?sourcedoc=%7B00A86029-106D-4B9E-93CD-852B4E3CA90C%7D&file=Use%20cases.docx&action=default&mobileredirect=true)
 
-### Conventional commits
+[Component diagram](https://ugentbe-my.sharepoint.com/personal/bart_mesuere_ugent_be/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2FUML%20diagrammen%2Fcomponent%5Fdiagram%2Edrawio%2Epdf&parent=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2FUML%20diagrammen)
 
-You need to use conventional commits, or else PR's will fail. For more information see https://github.com/SELab-2/OSOC-2/issues/9
+[Sequence diagram](https://ugentbe-my.sharepoint.com/personal/bart_mesuere_ugent_be/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2FUML%20diagrammen%2Fsequence%5Fdiagrams%2Edrawio%2Epdf&parent=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2FUML%20diagrammen)
+
+[Domain model](https://ugentbe-my.sharepoint.com/personal/bart_mesuere_ugent_be/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2Fdomeinmodel%2FDomeinmodel%5Fversion10%2Edrawio%2Epng&parent=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2Fdomeinmodel)
+
+[Deployment diagram](https://ugentbe-my.sharepoint.com/personal/bart_mesuere_ugent_be/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie%2FDeployment%20diagram%2Epdf&parent=%2Fpersonal%2Fbart%5Fmesuere%5Fugent%5Fbe%2FDocuments%2FOnderwijs%2FSELab2%2F2021%2D2022%2Fgroep2%2FDocumentatie)
+
+[The valid filter parameters](docs/searching.md)
+
+[The valid filter parameters](docs/searching.md)
+
+[Programming Conventions](docs/conventions.md)
+
+[Contribution](docs/contribute.md)
