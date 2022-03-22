@@ -77,7 +77,7 @@ const Login: NextPage = () => {
             console.log(loginEmail)
             console.log(loginPassword)
             signIn('credentials', {username: loginEmail, password: loginPassword, redirect: false}).then(res => {
-                    // TODO
+                    // TODO -- Redirect or handle errors
                     console.log(res)
                 }
             )
