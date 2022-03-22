@@ -15,7 +15,7 @@ beforeAll(async () => {
                 lastname: "lastNameTest2",
             },
         ],
-    })
+    });
 });
 
 afterAll(async () => {
@@ -53,7 +53,7 @@ afterAll(async () => {
         deleteLoginUserDetails,
         deleteRoleDetails,
         deletePersonDetails,
-    ])
+    ]);
 
     await prisma.$disconnect()
 });
