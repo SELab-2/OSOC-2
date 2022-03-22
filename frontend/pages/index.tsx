@@ -7,7 +7,7 @@ const Home: NextPage = () => {
     const router = useRouter();
 
     useEffect(() => {
-        router.push("/login").then()
+        // router.push("/login").then()
     }, [router])
 
     return (<></>)

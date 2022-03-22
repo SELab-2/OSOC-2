@@ -5,6 +5,7 @@ import GitHubLogo from "../public/images/github-logo.svg"
 import {SyntheticEvent, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
+import {signIn} from "next-auth/react";
 
 const Login: NextPage = () => {
 
@@ -40,7 +41,7 @@ const Login: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const submitLogin = (e: SyntheticEvent) => {
+    const submitLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let error: boolean = false
@@ -63,8 +64,24 @@ const Login: NextPage = () => {
         if (!error) {
             // TODO -- Send call to the backend
             // TODO -- Handle response
-            console.log("LOGGING IN...")
-            router.push("/students").then()
+            //const token = getCsrfToken()
+            //console.log(token)
+            //const res = await fetch('/api/auth/callback/credentials', {
+            //    method: 'POST',
+            //    body: JSON.stringify({crsfToken: token, username: loginEmail, password: loginPassword}),
+            //    headers: {'Content-Type': 'application/json'}
+            //})
+            //console.log(res)
+            //console.log("LOGGING IN...")
+            //console.log(providers.credentials)
+            console.log(loginEmail)
+            console.log(loginPassword)
+            signIn('credentials', {username: loginEmail, password: loginPassword, redirect: false}).then(res => {
+                    // TODO
+                    console.log(res)
+                }
+            )
+            // router.push("/students").then()
         }
 
     }

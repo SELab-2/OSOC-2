@@ -6,8 +6,9 @@ import Image from "next/image";
 import LogoOsocColor from "../public/images/logo-osoc-color.svg";
 import Link from "next/link";
 import {useRouter} from "next/router";
+import {SessionProvider} from "next-auth/react";
 
-function App({Component, pageProps}: AppProps) {
+function App({Component, pageProps: {session, ...pageProps}}: AppProps) {
 
     const router = useRouter()
 
@@ -19,7 +20,9 @@ function App({Component, pageProps}: AppProps) {
         router.push("/login").then(() => setLoggedIn(false))
     }
 
-    return (<div>
+    return (
+        <SessionProvider session={session}>
+            <div>
             <header className={styles.header}>
                 <div>
                     <div className={styles.imagecontainer}>
@@ -40,6 +43,7 @@ function App({Component, pageProps}: AppProps) {
             </header>
             <Component {...pageProps} />
         </div>
+        </SessionProvider>
     )
 }
 
