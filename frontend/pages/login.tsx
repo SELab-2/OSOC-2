@@ -158,6 +158,9 @@ const Login: NextPage = () => {
         e.preventDefault();
         // TODO
         console.log("LOGGING IT WITH GITHUB...");
+        signIn("github", {callbackUrl: "/students"}).then(res => {
+            console.log(`github response: ${res}`)
+        })
     }
 
     /**
