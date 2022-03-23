@@ -327,6 +327,12 @@ export interface Person extends InternalTypes.Person {}
 export interface Admin extends Keyed<InternalTypes.Admin> {}
 
 /**
+ *  An adminList response is the keyed version of a list of admins and their associated
+ * data.
+ */
+export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
+
+/**
  *  A project response is the keyed version of the project and their associated
  * data.
  */
@@ -400,10 +406,8 @@ export interface Confirm extends IdRequest {
 }
 
 export interface UpdateLoginUser extends IdRequest {
-  emailOrGithub?: string;
-  firstName?: string;
-  lastName?: string;
-  gender?: string;
+  isAdmin: boolean;
+  isCoach: boolean;
   pass?: string;
 }
 

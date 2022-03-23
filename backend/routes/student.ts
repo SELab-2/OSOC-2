@@ -72,9 +72,7 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 }
 
 async function modStudent(req: express.Request): Promise<Responses.Student> {
-  return rq
-      .parseUpdateStudentRequest(req)
-      // TODO why isAdmin?
+  return rq.parseUpdateStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(async parsed => {
@@ -98,12 +96,7 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
                                           alumni : student.alumni,
                                         },
                                         sessionkey : parsed.sessionkey
-                                      })})
-                /*return Promise.resolve({
-                  data : {id : '', name : '', email : '', labels : []},
-                  sessionkey : parsed.sessionkey
-                  });*/
-            });
+                                      })})});
 }
 
 /**

@@ -92,14 +92,14 @@ model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
   password       String?
-  is_admin       Boolean?
-  is_coach       Boolean?
+  is_admin       Boolean
+  is_coach       Boolean
+  session_keys   String[]
   account_status account_status_enum
   person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract       contract[]
   evaluation     evaluation[]
   project_user   project_user[]
-  session_keys   session_keys[]
 }
 
 model osoc {
@@ -169,13 +169,6 @@ model student {
   person          person            @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract        contract[]
   job_application job_application[]
-}
-
-model session_keys {
-  session_key_id Int        @id @default(autoincrement())
-  login_user_id  Int        @default(autoincrement())
-  session_key    String     @unique @db.VarChar(128)
-  login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum decision_enum {
