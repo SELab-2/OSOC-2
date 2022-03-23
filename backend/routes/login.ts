@@ -1,5 +1,6 @@
 import express from 'express';
 
+import {getPasswordPersonByEmail} from '../orm_functions/person';
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -8,17 +9,21 @@ import * as util from '../utility';
 
 /**
  *  Attempts to log a user into the system.
- *  @param _ The Express.js request to extract all required data from.
+ *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function login(req: express.Request): Promise<Responses.Key> {
-    return parseLoginRequest(req)
-        .then(parsed => {
-            let sessionkey: string = "";
-            // TODO: login logic
-            return Promise.resolve({sessionkey : sessionkey});
-        })
+  return parseLoginRequest(req).then(
+      parsed => getPasswordPersonByEmail(parsed.name).then(pass => {
+        if (pass?.login_user?.password != parsed.pass) {
+          return Promise.reject(
+              {http : 409, reason : 'Invalid e-mail or password.'});
+        }
+        const key: string = util.generateKey();
+        // set key
+        return Promise.resolve({sessionkey : key});
+      }));
 }
 
 /**
