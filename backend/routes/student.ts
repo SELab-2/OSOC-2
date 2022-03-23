@@ -3,6 +3,7 @@ import express from 'express';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
+import * as ormSt from '../orm_functions/student';
 
 /* eslint-disable no-unused-vars */
 
@@ -13,12 +14,27 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listStudents(req: express.Request):
-    Promise<Responses.IdNameList> {
+    Promise<Responses.StudentList> {
   return rq.parseStudentAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
+          const studentList : InternalTypes.Student[] = [];
+          ormSt.getAllStudents().then(students => {
+            return students.forEach(student => {
+                studentList.push({
+                    firstname: student.person.firstname,
+                    lastname: student.person.lastname,
+                    email: student.person.email,
+                    gender: student.gender,
+                    pronouns: student.pronouns,
+                    phoneNumber: student.phone_number,
+                    nickname: student.nickname,
+                    alumni: student.alumni
+                })
+            })
+          })
         // LISTING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        return Promise.resolve({data : studentList, sessionkey : parsed.sessionkey});
       });
 }
 
@@ -38,6 +54,10 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
           data : {id : parsed.id, name : '', email : '', labels : []},
           sessionkey : parsed.sessionkey
         });
+
+          /*return ormSt.getStudent(parsed.id).then({
+
+          })*/
       });
 }
 

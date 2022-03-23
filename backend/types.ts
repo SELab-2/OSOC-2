@@ -122,7 +122,7 @@ export interface IdOnly {
   /**
    *  The ID.
    */
-  id: string;
+  id: number;
 }
 
 /**
@@ -177,7 +177,7 @@ export interface CoachRequest {
   /**
    *  The id.
    */
-  id: string;
+  id: number;
   /**
    *  The name of the coach.
    */
@@ -206,7 +206,7 @@ export interface ProjectDraftedStudents {
   /**
    *  The id of the project.
    */
-  id: string;
+  id: number;
   /**
    *  The name of the project.
    */
@@ -273,6 +273,12 @@ export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
  * data.
  */
 export interface Student extends Keyed<InternalTypes.Student> {}
+
+/**
+ *  A studentList response is the keyed version of a list of students and their associated
+ * data.
+ */
+export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
  *  A student list response is the keyed version of an array of partial
@@ -358,7 +364,7 @@ export interface KeyRequest {
 }
 
 export interface IdRequest extends KeyRequest {
-  id: string;
+  id: number;
 }
 
 export interface UpdateStudent extends IdRequest {
@@ -413,7 +419,7 @@ export interface ModProject extends IdRequest {
 }
 
 export interface Draft extends IdRequest {
-  studentId: string;
+  studentId: number;
   roles: string[];
 }
 

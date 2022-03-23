@@ -124,7 +124,7 @@ async function parseKeyIdRequest(req: express.Request):
     Promise<Requests.IdRequest> {
   return hasFields(req, [], types.id).then(() => Promise.resolve({
     sessionkey : req.body.sessionkey,
-    id : req.params.id
+    id : Number(req.params.id)
   }));
 }
 
@@ -144,7 +144,7 @@ async function parseUpdateLoginUser(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       emailOrGithub : maybe(req.body, "emailOrGithub"),
       firstName : maybe(req.body, "firstName"),
       lastName : maybe(req.body, "lastName"),
@@ -186,7 +186,7 @@ export async function parseUpdateStudentRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       emailOrGithub : maybe(req.body, "emailOrGithub"),
       firstName : maybe(req.body, "firstName"),
       lastName : maybe(req.body, "lastName"),
@@ -213,7 +213,7 @@ export async function parseSuggestStudentRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       suggestion : sug,
       reason : maybe(req.body, "reason")
     });
@@ -237,7 +237,7 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       reply : maybe(req.body, "reply")
     });
   });
@@ -297,7 +297,7 @@ export async function parseUpdateProjectRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       name : maybe(req.body, "name"),
       partner : maybe(req.body, "partner"),
       start : maybe(req.body, "start"),
@@ -318,7 +318,7 @@ export async function parseDraftStudentRequest(req: express.Request):
   return hasFields(req, [ "studentId", "roles" ], types.id)
       .then(() => Promise.resolve({
         sessionkey : req.body.sessionkey,
-        id : req.params.id,
+        id : Number(req.params.id),
         studentId : req.body.studentId,
         roles : req.body.roles
       }));
@@ -338,7 +338,7 @@ export async function parseSetFollowupStudentRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve(
-        {sessionkey : req.body.sessionkey, id : req.params.id, type : type});
+        {sessionkey : req.body.sessionkey, id : Number(req.params.id), type : type});
   });
 }
 
@@ -375,7 +375,7 @@ export async function parseUpdateTemplateRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       name : maybe(req.body, "name"),
       desc : maybe(req.body, "desc"),
       subject : maybe(req.body, "subject"),
