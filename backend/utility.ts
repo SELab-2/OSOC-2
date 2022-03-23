@@ -233,16 +233,17 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
 export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
     Promise<T> {
   return skey
-      .checkSessionKey(obj.sessionkey)                 // check session key
-      .then(id => searchAllAdminLoginUsers(true).then( // fetch all admins
-                admins => admins.some(
-                              admin => admin.login_user_id ==
-                                       id.login_user_id) // check if some admin
-                                                         // matches with id
-                              ? Promise.resolve(obj) // success -> return object
-                              : Promise.reject()))   // failure -> reject (catch
-                                                     // will throw HTTP error)
-      .catch(() => Promise.reject(errors.cookInsufficientRights()));
+      .checkSessionKey(obj.sessionkey) // check session key
+      .catch(() => Promise.reject(errors.cookUnauthenticated()))
+      .then(
+          async id =>
+              searchAllAdminLoginUsers(true)
+                  .catch(() => Promise.reject(errors.cookInsufficientRights()))
+                  .then(admins => {
+                    if (admins.some(a => a.login_user_id == id.login_user_id))
+                      return Promise.resolve(obj);
+                    return Promise.reject(errors.cookInsufficientRights());
+                  }));
 }
 
 export function generateKey(): InternalTypes.SessionKey {
