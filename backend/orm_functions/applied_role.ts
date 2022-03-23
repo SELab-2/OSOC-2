@@ -14,3 +14,17 @@ export async function createAppliedRole(appliedRole: CreateAppliedRole){
     });
     return result;
 }
+
+/**
+ * 
+ * @param jobApplicationId: this is the jobapplication of the appliedroles we are looking up in the database
+ * @returns: all the applied roles
+ */
+ export async function getAppliedRolesByJobApplication(jobApplicationId: number) {
+    const result = prisma.applied_role.findMany({
+        where: { 
+            job_application_id: jobApplicationId
+        },
+    });
+    return result;
+}
