@@ -58,7 +58,7 @@ afterAll(async () => {
     const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
     const deleteEvaluationDetails = prisma.evaluation.deleteMany();
     const deleteApplicationDetails = prisma.job_application.deleteMany();
-    // const deleteSessionKeysDetails = prisam.session_keys.deleteMany();
+    const deleteSessionKeysDetails = prisma.session_keys.deleteMany();
     const deleteProjectUserDetails = prisma.project_user.deleteMany();
     const deleteContractDetails = prisma.contract.deleteMany();
     const deleteProjectRoleDetails = prisma.project_role.deleteMany();
@@ -76,7 +76,7 @@ afterAll(async () => {
         deleteAppliedRoleDetails,
         deleteEvaluationDetails,
         deleteApplicationDetails,
-        //deleteSessionKeysDetails,
+        deleteSessionKeysDetails,
         deleteProjectUserDetails,
         deleteContractDetails,
         deleteProjectRoleDetails,
