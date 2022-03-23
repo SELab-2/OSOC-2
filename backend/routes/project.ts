@@ -90,7 +90,7 @@ async function getDraftedStudents(req: express.Request):
       .then(parsed => {
         // INSERTION LOGIC
         return Promise.resolve({
-          data : {id : '', name : '', students : []},
+          data : {id : 0, name : '', students : []},
           sessionkey : parsed.sessionkey
         });
       });
