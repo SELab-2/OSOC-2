@@ -285,7 +285,7 @@ export interface CreateJobApplication {
     /**
      * information about the educations of the student
      */
-    edus?: string | null,
+    edus?: string[],
     /**
      * information about the education level of the student
      */
