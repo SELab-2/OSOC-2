@@ -76,7 +76,7 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 async function modStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseUpdateStudentRequest(req)
       // TODO why isAdmin?
-      //.then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
           // TODO the student name can also be modified
