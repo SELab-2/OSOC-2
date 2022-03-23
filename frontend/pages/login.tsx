@@ -183,9 +183,9 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"}).then(res => {
-            console.log(`github response: ${res}`)
-        })
+        signIn("github").then(() => {
+            router.push("/students").then()
+        }).catch(res => console.log(`github catched response ${res}`))
     }
 
     /**
