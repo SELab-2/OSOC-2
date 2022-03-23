@@ -18,7 +18,7 @@ model applied_role {
 model attachment {
   attachment_id      Int             @id @default(autoincrement())
   job_application_id Int             @default(autoincrement())
-  url                String
+  data               String
   type               type_enum
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -83,7 +83,7 @@ model job_application_skill {
 
 model language {
   language_id           Int                     @id @default(autoincrement())
-  name                  String
+  name                  String                  @unique
   job_application_skill job_application_skill[]
 }
 
@@ -103,7 +103,7 @@ model login_user {
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
-  year            Int               @db.SmallInt
+  year            Int               @unique @db.SmallInt
   job_application job_application[]
   project         project[]
 }
@@ -114,7 +114,6 @@ model person {
   github     String?     @unique
   firstname  String
   lastname   String
-  gender     String
   login_user login_user?
   student    student?
 }
@@ -153,7 +152,7 @@ model project_user {
 
 model role {
   role_id      Int            @id @default(autoincrement())
-  name         String?
+  name         String         @unique
   applied_role applied_role[]
   project_role project_role[]
 }
@@ -161,6 +160,7 @@ model role {
 model student {
   student_id      Int               @id @default(autoincrement())
   person_id       Int               @unique @default(autoincrement())
+  gender          String
   pronouns        String[]
   phone_number    String
   nickname        String?
@@ -194,9 +194,11 @@ enum email_status_enum {
 }
 
 enum type_enum {
-  CV
-  PORTFOLIO
-  FILE
+  CV_URL
+  PORTFOLIO_URL
+  FILE_URL
+  MOTIVATION_STRING
+  MOTIVATION_URL
 }
 
 enum account_status_enum {
