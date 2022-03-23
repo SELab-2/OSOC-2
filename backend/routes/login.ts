@@ -1,6 +1,7 @@
 import express from 'express';
 
 import {getPasswordPersonByEmail} from '../orm_functions/person';
+import {addSessionKey} from '../orm_functions/session_key';
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -14,15 +15,16 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function login(req: express.Request): Promise<Responses.Key> {
+  console.log("Calling login endpoint " + JSON.stringify(req.body));
   return parseLoginRequest(req).then(
-      parsed => getPasswordPersonByEmail(parsed.name).then(pass => {
+      parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
         if (pass?.login_user?.password != parsed.pass) {
           return Promise.reject(
               {http : 409, reason : 'Invalid e-mail or password.'});
         }
         const key: string = util.generateKey();
-        // set key
-        return Promise.resolve({sessionkey : key});
+        return addSessionKey(pass.login_user.login_user_id, key)
+            .then(ins => ({sessionkey : ins.session_key}));
       }));
 }
 
