@@ -18,7 +18,8 @@ async function listCoaches(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
         // FETCHING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : [], sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -33,7 +34,8 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
         // FETCHING LOGIC
-        return Promise.resolve({data : {}, sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : {}, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -43,7 +45,8 @@ async function modCoach(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
         // UPDATING LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : '', sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -58,7 +61,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // REMOVING LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+        return Promise.resolve({sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -74,7 +77,8 @@ async function getCoachRequests(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // FETCHING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : [], sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -129,7 +133,7 @@ async function getCoachRequest(req: express.Request):
         // FETCHING LOGIC
         return Promise.resolve({
           data : {id : 0, name : '', email : ''},
-          sessionkey : parsed.sessionkey
+          sessionkey : parsed.data.sessionkey
         });
       });
 }
@@ -147,7 +151,7 @@ async function createCoachAcceptance(req: express.Request):
       .then(parsed => {
         // UPDATING LOGIC
         return Promise.resolve(
-            {data : {id : 0, name : ''}, sessionkey : parsed.sessionkey});
+            {data : {id : 0, name : ''}, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -163,7 +167,7 @@ async function deleteCoachRequest(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // UPDATING LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+        return Promise.resolve({sessionkey : parsed.data.sessionkey});
       });
 }
 

@@ -333,6 +333,11 @@ export interface Admin extends Keyed<InternalTypes.Admin> {}
 export interface Project extends Keyed<InternalTypes.Project> {}
 
 /**
+ *  An admin list response is the keyed version of the list of admins.
+ */
+export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
+
+/**
  *  A project drafted students response is the keyed version of the students and
  * the associated data of the project.
  */

@@ -1,9 +1,9 @@
 import express from 'express';
 
+import * as ormL from "../orm_functions/login_user";
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
-import * as ormL from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all admins in the system.
@@ -15,23 +15,22 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
   return rq.parseAdminAllRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
-          const adminList : InternalTypes.Admin[] = [];
-          ormL.getAllLoginUsers().then(loginUsers => {
-              return loginUsers.forEach(loginUser => {
-                  adminList.push({
-                      firstname: loginUser.person.firstname,
-                      lastname: loginUser.person.lastname,
-                      email: loginUser.person.email,
-                      github: loginUser.person.github,
-                      personId: loginUser.person.person_id,
-                      isAdmin: loginUser.is_admin,
-                      isCoach: loginUser.is_coach,
-                      accountStatus: loginUser.account_status
-                  })
-              })
-          })
-          // LISTING LOGIC
-          return Promise.resolve({data : adminList, sessionkey : parsed.sessionkey});
+        const adminList: InternalTypes.Admin[] = [];
+        ormL.getAllLoginUsers().then(
+            loginUsers => {return loginUsers.forEach(
+                loginUser => {adminList.push({
+                  firstname : loginUser.person.firstname,
+                  lastname : loginUser.person.lastname,
+                  email : loginUser.person.email,
+                  github : loginUser.person.github,
+                  personId : loginUser.person.person_id,
+                  isAdmin : loginUser.is_admin,
+                  isCoach : loginUser.is_coach,
+                  accountStatus : loginUser.account_status
+                })})})
+        // LISTING LOGIC
+        return Promise.resolve(
+            {data : adminList, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -46,7 +45,8 @@ async function getAdmin(req: express.Request): Promise<Responses.Admin> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // FETCHING LOGIC
-        return Promise.resolve({data : {}, sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : {}, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -56,7 +56,8 @@ async function modAdmin(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // UPDATING LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : '', sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -71,7 +72,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // REMOVING LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+        return Promise.resolve({sessionkey : parsed.data.sessionkey});
       });
 }
 

@@ -1,10 +1,10 @@
 import express from 'express';
 
+import * as ormSt from '../orm_functions/student';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
-import * as ormSt from '../orm_functions/student';
 
 /* eslint-disable no-unused-vars */
 
@@ -19,23 +19,21 @@ async function listStudents(req: express.Request):
   return rq.parseStudentAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
-          const studentList : InternalTypes.Student[] = [];
-          ormSt.getAllStudents().then(students => {
-            return students.forEach(student => {
-                studentList.push({
-                    firstname: student.person.firstname,
-                    lastname: student.person.lastname,
-                    email: student.person.email,
-                    gender: student.gender,
-                    pronouns: student.pronouns,
-                    phoneNumber: student.phone_number,
-                    nickname: student.nickname,
-                    alumni: student.alumni
-                })
-            })
-          })
+        const studentList: InternalTypes.Student[] = [];
+        ormSt.getAllStudents().then(students => {return students.forEach(
+                                        student => {studentList.push({
+                                          firstname : student.person.firstname,
+                                          lastname : student.person.lastname,
+                                          email : student.person.email,
+                                          // gender: student.gender,
+                                          pronouns : student.pronouns,
+                                          phoneNumber : student.phone_number,
+                                          nickname : student.nickname,
+                                          alumni : student.alumni
+                                        })})})
         // LISTING LOGIC
-        return Promise.resolve({data : studentList, sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : studentList, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -48,62 +46,64 @@ async function listStudents(req: express.Request):
 async function getStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseSingleStudentRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => util.isValidID(parsed, "student"))
-      .then(parsed => {
-          // FETCHING LOGIC
-          // TODO what should be shown?
-          return ormSt.getStudent(parsed.id).then(student => {
-              if(student !== null) {
-                  return Promise.resolve({data: {
-                          firstname: student.person.firstname,
-                          lastname: student.person.lastname,
-                          email: student.person.email,
-                          gender: student.gender,
-                          pronouns: student.pronouns,
-                          phoneNumber: student.phone_number,
-                          nickname: student.nickname,
-                          alumni: student.alumni
-                      },
-                      sessionkey: parsed.sessionkey
-                  })
-              } else {
-                  return Promise.reject(errors.cookInvalidID());
-              }
-          })
-      });
+      .then(parsed => util.isValidID(parsed.data, "student"))
+      .then(
+          async parsed => {// FETCHING LOGIC
+                           // TODO what should be shown?
+                           return ormSt.getStudent(parsed.id).then(student => {
+                             if (student !== null) {
+                               return Promise.resolve({
+                                 data : {
+                                   firstname : student.person.firstname,
+                                   lastname : student.person.lastname,
+                                   email : student.person.email,
+                                   // gender : student.gender,
+                                   pronouns : student.pronouns,
+                                   phoneNumber : student.phone_number,
+                                   nickname : student.nickname,
+                                   alumni : student.alumni
+                                 },
+                                 sessionkey : parsed.sessionkey
+                               })
+                             } else {
+                               return Promise.reject(errors.cookInvalidID());
+                             }
+                           })});
 }
 
 async function modStudent(req: express.Request): Promise<Responses.Student> {
-  return rq.parseUpdateStudentRequest(req)
+  return rq
+      .parseUpdateStudentRequest(req)
       // TODO why isAdmin?
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
-      .then(parsed => {
-          // TODO the student name can also be modified
-          // UPDATE LOGIC
-          return ormSt.updateStudent({
-              studentId: parsed.id,
-              gender: parsed.gender,
-              pronouns: parsed.pronouns,
-              phoneNumber: parsed.phone,
-              nickname: parsed.nickname,
-              alumni: parsed.alumni
-          }).then(student => {
-              // TODO why this return data?
-              return Promise.resolve({data: {
-                      pronouns: student.pronouns,
-                      phone_number: student.phone_number,
-                      nickname: student.nickname,
-                      alumni: student.alumni,
-                  },
-                  sessionkey: parsed.sessionkey
-              })
-          })
-          /*return Promise.resolve({
-            data : {id : '', name : '', email : '', labels : []},
-            sessionkey : parsed.sessionkey
-            });*/
-      });
+      .then(parsed => util.isValidID(parsed.data, 'student'))
+      .then(async parsed => {
+                // TODO the student name can also be modified
+                // UPDATE LOGIC
+                return ormSt
+                    .updateStudent({
+                      studentId : parsed.id,
+                      gender : parsed.gender,
+                      pronouns : parsed.pronouns,
+                      phoneNumber : parsed.phone,
+                      nickname : parsed.nickname,
+                      alumni : parsed.alumni
+                    })
+                    .then(student => {// TODO why this return data?
+                                      return Promise.resolve({
+                                        data : {
+                                          pronouns : student.pronouns,
+                                          phone_number : student.phone_number,
+                                          nickname : student.nickname,
+                                          alumni : student.alumni,
+                                        },
+                                        sessionkey : parsed.sessionkey
+                                      })})
+                /*return Promise.resolve({
+                  data : {id : '', name : '', email : '', labels : []},
+                  sessionkey : parsed.sessionkey
+                  });*/
+            });
 }
 
 /**
@@ -115,7 +115,7 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
 async function deleteStudent(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
         // DELETE LOGIC
         return Promise.resolve({sessionkey : parsed.sessionkey});
@@ -134,7 +134,8 @@ async function createStudentSuggestion(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
         // SUGGESTING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : [], sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -148,7 +149,7 @@ async function getStudentSuggestions(req: express.Request):
     Promise<Responses.SuggestionInfo> {
   return rq.parseStudentGetSuggestsRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
         // FETCHING LOGIC
         return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
@@ -165,7 +166,7 @@ async function createStudentConfirmation(req: express.Request):
     Promise<Responses.Keyed<InternalTypes.Suggestion>> {
   return rq.parseFinalizeDecisionRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
         // UPDATING LOGIC
         return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
