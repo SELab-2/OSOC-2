@@ -5,19 +5,25 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.ts",
-    "test": "jest --ci --coverage --outputFile=coverage.json --json",
     "migrate:postgres": "npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init",
     "dockerIntegration:up": "docker-compose -f docker-compose.integrationtest.yml up -d --build",
     "docker:down": "docker-compose down",
-    "integrationTests": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i"
+    "integrationTests": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "codecov": "jest --ci --coverage --outputFile=coverage.json --json"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@jest-mock/express": "^1.4.5",
     "@prisma/client": "^3.10.0",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.21",
+    "@types/uuid": "^8.3.4",
     "body-parser": "^1.19.2",
+    "cors": "^2.8.5",
     "express": "^4.17.3",
     "passport": "^0.5.2",
     "prisma": "3.11",
@@ -26,6 +32,8 @@
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "dotenv-cli": "^5.0.0",
+    "uuid": "^8.3.2",
+    "eslint-plugin-jest": "^26.1.1",
     "jest": "^27.5.1",
     "jest-mock-extended": "^2.0.4",
     "node-ts": "^5.1.2",

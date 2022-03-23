@@ -6,6 +6,10 @@ on:
   # Run on every open pull request
   pull_request:
     types: [opened, edited, reopened, synchronize]
+
+  # Should run all tests and upload the codecoverage on main
+  push:
+    branches: [main]
   
 jobs:
   ci:
