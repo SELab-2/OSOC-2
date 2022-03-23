@@ -62,6 +62,9 @@ export async function updateStudent(student: UpdateStudent) {
             phone_number: student.phoneNumber,
             nickname: student.nickname,
             alumni: student.alumni,
+        },
+        include: {
+            person: true,
         }
     });
 }
@@ -92,5 +95,8 @@ export async function searchStudentByGender(gender: string){
         where: {
             gender: gender
         },
+        include: {
+            person: true,
+        }
     });
 }
