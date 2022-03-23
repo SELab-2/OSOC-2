@@ -65,6 +65,7 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // We encrypt the password before sending it to the backend api
+            // TODO use encryption
             //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
             //console.log(encryptedPassword)
             // TODO -- Send call to the backend
