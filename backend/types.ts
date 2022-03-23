@@ -327,8 +327,8 @@ export interface Person extends InternalTypes.Person {}
 export interface Admin extends Keyed<InternalTypes.Admin> {}
 
 /**
- *  An adminList response is the keyed version of a list of admins and their associated
- * data.
+ *  An adminList response is the keyed version of a list of admins and their
+ * associated data.
  */
 export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
 
@@ -398,7 +398,7 @@ export interface UpdateStudent extends IdRequest {
 
 export interface Suggest extends IdRequest {
   suggestion: InternalTypes.Suggestion;
-  senderId: number;
+  // senderId: number;
   reason?: string;
 }
 
