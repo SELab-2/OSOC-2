@@ -10,6 +10,7 @@ export async function createStudent(student: CreateStudent) {
     return prisma.student.create({
         data: {
             person_id: student.personId,
+            gender: student.gender,
             pronouns: student.pronouns,
             phone_number: student.phoneNumber,
             nickname: student.nickname,
@@ -61,6 +62,9 @@ export async function updateStudent(student: UpdateStudent) {
             phone_number: student.phoneNumber,
             nickname: student.nickname,
             alumni: student.alumni,
+        },
+        include: {
+            person: true,
         }
     });
 }
@@ -77,6 +81,22 @@ export async function deleteStudent(studentId: number) {
         },
         include: { // returns the person info of the removed student, can later be used to also remove everything from this person?
             person: true
+        }
+    });
+}
+
+/**
+ *
+ * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
+ * @returns: a list of all the person objects in the database that match
+ */
+export async function searchStudentByGender(gender: string){
+    return prisma.student.findMany({
+        where: {
+            gender: gender
+        },
+        include: {
+            person: true,
         }
     });
 }

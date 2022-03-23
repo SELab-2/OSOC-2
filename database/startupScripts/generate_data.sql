@@ -1,26 +1,26 @@
 /* Insert data into person table */
-INSERT INTO person(email, firstname, lastname, gender)
-VALUES('Alice.student@gmail.com', 'Alice', 'Smith', 'Female'),
-('Bob@admin@osoc.com', 'Bob', 'Jones', 'Male'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor', 'Female');
+INSERT INTO person(email, firstname, lastname)
+VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
+('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor');
 
 /* Insert data into student table */
-INSERT INTO student(person_id, pronouns, phone_number, nickname, alumni) 
+INSERT INTO student(person_id, gender, pronouns, phone_number, nickname, alumni)
 VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'), 
-'{None}', '0032476553498', 'Unicorn', TRUE);
+'Female', '{None}', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
-INSERT INTO login_user(person_id, password, is_admin, is_coach, session_keys, account_status)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE, array[]::text[], 'ACTIVATED'),
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, array[]::text[], 'PENDING');
+INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
+VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE, 'ACTIVATED'),
+((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, 'PENDING');
 
 /* Insert data into osoc table */
 INSERT INTO osoc(year)VALUES(2022);
 
 /* Insert data into job_application table */
-INSERT INTO job_application(student_id, osoc_id, responsibilities, motivation, fun_fact, is_volunteer, student_coach,
+INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, responsibilities, fun_fact, student_coach,
  edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
- 'Very responsible', 'Open data for the world and beyond',  'I am a very funny fact', TRUE, TRUE, 'Informatics', 
+ 'Yes, I can work with a student employment agreement in Belgium', 'Very responsible',  'I am a very funny fact', TRUE, '{"Informatics"}',
  'Universitarian', 3, 3, 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
@@ -63,6 +63,10 @@ INSERT INTO job_application_skill(job_application_id, skill, language_id, level,
 (SELECT language_id FROM language WHERE name = 'Dutch'), 2, TRUE, TRUE);
 
 /* Insert data into attachment table */
-INSERT INTO attachment(job_application_id, url , type)VALUES
+INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'), 
-'https://github.com/SELab-2/OSOC-2', 'CV');
+'https://github.com/SELab-2/OSOC-2', 'CV_URL');
+
+INSERT INTO attachment(job_application_id, data, type)VALUES
+((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'),
+'I really need the money', 'MOTIVATION_STRING');

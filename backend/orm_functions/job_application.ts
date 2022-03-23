@@ -22,6 +22,7 @@ import {CreateJobApplication} from "./orm_types";
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -51,6 +52,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -80,6 +82,30 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
+                }
+            }
+        }
+    });
+}
+
+/**
+ *
+ * @param studentId: the id of the student who's selected roles we are searching from his most recent job application
+ * @return the list of selected roles in the application (if it exists)
+ */
+export async function getLatestApplicationRolesForStudent(studentId: number) {
+    return await prisma.job_application.findFirst({
+        where: {
+            student_id: studentId
+        },
+        orderBy: { // use descending order in combination with findFirst to search further for the applied roles in the latest application
+            created_at: "desc"
+        },
+        select: {
+            applied_role: {
+                select: {
+                    role_id: true
                 }
             }
         }
@@ -142,10 +168,9 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
     return await prisma.job_application.create({
         data: {
             student_id: jobApplication.studentId,
-            motivation: jobApplication.motivation,
             responsibilities: jobApplication.responsibilities,
             fun_fact: jobApplication.funFact,
-            is_volunteer: jobApplication.isVolunteer,
+            student_volunteer_info: jobApplication.studentVolunteerInfo,
             student_coach: jobApplication.studentCoach,
             osoc_id: jobApplication.osocId,
             edus: jobApplication.edus,
