@@ -110,7 +110,7 @@ async function createCoachRequest(req: express.Request):
         })
         .then(user => {
           console.log("Attached a login user: " + user);
-          return Promise.resolve({id : user.login_user_id.toString()});
+          return Promise.resolve({id : user.login_user_id});
         });
   });
 }
@@ -128,7 +128,7 @@ async function getCoachRequest(req: express.Request):
       .then(parsed => {
         // FETCHING LOGIC
         return Promise.resolve({
-          data : {id : '', name : '', email : ''},
+          data : {id : 0, name : '', email : ''},
           sessionkey : parsed.sessionkey
         });
       });
@@ -147,7 +147,7 @@ async function createCoachAcceptance(req: express.Request):
       .then(parsed => {
         // UPDATING LOGIC
         return Promise.resolve(
-            {data : {id : '', name : ''}, sessionkey : parsed.sessionkey});
+            {data : {id : 0, name : ''}, sessionkey : parsed.sessionkey});
       });
 }
 
