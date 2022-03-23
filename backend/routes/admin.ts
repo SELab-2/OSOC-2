@@ -1,8 +1,9 @@
 import express from 'express';
 
 import * as rq from '../request';
-import {Responses} from '../types';
+import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
+import * as ormL from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all admins in the system.
@@ -10,12 +11,27 @@ import * as util from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listAdmins(req: express.Request): Promise<Responses.IdNameList> {
+async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
   return rq.parseAdminAllRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+          const adminList : InternalTypes.Admin[] = [];
+          ormL.getAllLoginUsers().then(loginUsers => {
+              return loginUsers.forEach(loginUser => {
+                  adminList.push({
+                      firstname: loginUser.person.firstname,
+                      lastname: loginUser.person.lastname,
+                      email: loginUser.person.email,
+                      github: loginUser.person.github,
+                      personId: loginUser.person.person_id,
+                      isAdmin: loginUser.is_admin,
+                      isCoach: loginUser.is_coach,
+                      accountStatus: loginUser.account_status
+                  })
+              })
+          })
+          // LISTING LOGIC
+          return Promise.resolve({data : adminList, sessionkey : parsed.sessionkey});
       });
 }
 
