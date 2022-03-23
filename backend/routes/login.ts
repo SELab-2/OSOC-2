@@ -39,7 +39,7 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
       .then(parsed => util.checkSessionKey(parsed))
       .then(checked => {
         // dummy to cheat eslint
-        checked.sessionkey = "";
+        checked.data.sessionkey = "";
         // do logout logic
         // aka remove session key from database
         return Promise.resolve({});
