@@ -165,7 +165,6 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
     return await prisma.job_application.create({
         data: {
             student_id: jobApplication.studentId,
-            motivation: jobApplication.motivation,
             responsibilities: jobApplication.responsibilities,
             fun_fact: jobApplication.funFact,
             student_volunteer_info: jobApplication.studentVolunteerInfo,
