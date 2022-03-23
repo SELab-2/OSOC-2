@@ -23,7 +23,11 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @returns a list of all the login user objects in the database
  */
  export async function getAllLoginUsers() {
-    return await prisma.login_user.findMany()
+    return await prisma.login_user.findMany({
+        include: {
+            person: true
+        }
+    });
 }
 
 /**

@@ -75,9 +75,7 @@ CREATE TABLE IF NOT EXISTS job_application (
     student_id                SERIAL               NOT NULL REFERENCES student(student_id),
     student_volunteer_info    TEXT                 NOT NULL,
     responsibilities          TEXT,
-    motivation                TEXT,
     fun_fact                  TEXT,
-    /*is_volunteer            BOOLEAN              NOT NULL,*/
     student_coach             BOOLEAN              NOT NULL,
     osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
     edus                      TEXT,
@@ -177,11 +175,11 @@ CREATE TABLE IF NOT EXISTS job_application_skill (
 
 
 /* enum used in attachment for the possible types */
-CREATE TYPE type_enum AS ENUM ('CV', 'PORTFOLIO', 'FILE');
+CREATE TYPE type_enum AS ENUM ('CV_URL', 'PORTFOLIO_URL', 'FILE_URL', 'MOTIVATION_STRING', 'MOTIVATION_URL');
 
 CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
    job_application_id    SERIAL       NOT NULL REFERENCES job_application (job_application_id),
-   url                   TEXT         NOT NULL,
+   data                  TEXT         NOT NULL,
    type                  type_enum    NOT NULL
 );
