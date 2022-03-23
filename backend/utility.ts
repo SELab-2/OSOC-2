@@ -13,7 +13,8 @@ import {
   Responses,
   RouteCallback,
   Table,
-  Verb
+  Verb,
+  WithUserID
 } from './types';
 
 /**
@@ -213,9 +214,9 @@ export async function redirect(res: express.Response,
  * not present, or it's not correct).
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
-    Promise<T> {
+    Promise<WithUserID<T>> {
   return skey.checkSessionKey(obj.sessionkey)
-      .then(() => Promise.resolve(obj))
+      .then((uid) => Promise.resolve({data : obj, userId : uid.login_user_id}))
       .catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
@@ -231,20 +232,23 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  * user, returns a promise rejecting with an Unauthorized API error.
  */
 export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
-    Promise<T> {
-  return skey
-      .checkSessionKey(obj.sessionkey)                 // check session key
-      .then(id => searchAllAdminLoginUsers(true).then( // fetch all admins
-                admins => admins.some(
-                              admin => admin.login_user_id ==
-                                       id.login_user_id) // check if some admin
-                                                         // matches with id
-                              ? Promise.resolve(obj) // success -> return object
-                              : Promise.reject()))   // failure -> reject (catch
-                                                     // will throw HTTP error)
-      .catch(() => Promise.reject(errors.cookInsufficientRights()));
+    Promise<WithUserID<T>> {
+  return checkSessionKey(obj)
+      .catch(() => Promise.reject(errors.cookUnauthenticated()))
+      .then(
+          async id =>
+              searchAllAdminLoginUsers(true)
+                  .catch(() => Promise.reject(errors.cookInsufficientRights()))
+                  .then(admins => admins.some(a => a.login_user_id == id.userId)
+                                      ? Promise.resolve(id)
+                                      : Promise.reject(
+                                            errors.cookInsufficientRights())));
 }
 
+/**
+ *  Generates a new session key.
+ *  @returns The newly generated session key.
+ */
 export function generateKey(): InternalTypes.SessionKey {
   return createHash('sha256')
       .update(v1())

@@ -124,7 +124,7 @@ async function parseKeyIdRequest(req: express.Request):
     Promise<Requests.IdRequest> {
   return hasFields(req, [], types.id).then(() => Promise.resolve({
     sessionkey : req.body.sessionkey,
-    id : req.params.id
+    id : Number(req.params.id)
   }));
 }
 
@@ -138,17 +138,15 @@ async function parseUpdateLoginUser(req: express.Request):
     Promise<Requests.UpdateLoginUser> {
   return hasFields(req, [], types.id).then(() => {
     const optional =
-        [ "emailOrGithub", "firstName", "lastName", "gender", "pass" ];
+        [ "isAdmin", "isCoach", "pass" ];
     if (!atLeastOneField(req, optional))
       return rejector();
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
-      emailOrGithub : maybe(req.body, "emailOrGithub"),
-      firstName : maybe(req.body, "firstName"),
-      lastName : maybe(req.body, "lastName"),
-      gender : maybe(req.body, "gender"),
+      id : Number(req.params.id),
+      isAdmin : maybe(req.body, "isAdmin"),
+      isCoach : maybe(req.body, "isCoach"),
       pass : maybe(req.body, "pass")
     });
   });
@@ -168,43 +166,6 @@ export async function parseLoginRequest(req: express.Request):
 }
 
 /**
- *  @deprecated ! use the form endpoint instead !
- *  Parses a request to `POST /student/`.
- *  @param req The request to check.
- *  @returns A Promise resolving to the parsed data or rejecting with an
- * Argument or Unauthenticated error.
- */
-export async function parseNewStudentRequest(req: express.Request):
-    Promise<Requests.NewStudent> {
-  const bodyF = [
-    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone",
-    "education"
-  ];
-  const edF = [ "level", "duration", "year", "institute" ];
-
-  return hasFields(req, bodyF, types.key).then(() => {
-    if (!anyHasFields(req.body.education, edF))
-      return rejector();
-
-    return Promise.resolve({
-      emailOrGithub : req.body.emailOrGithub,
-      firstName : req.body.firstName,
-      lastName : req.body.lastName,
-      gender : req.body.gender,
-      pronouns : req.body.pronouns,
-      phone : req.body.phone,
-      education : {
-        level : req.body.education.level,
-        duration : req.body.education.duration,
-        year : req.body.education.year,
-        institute : req.body.education.institute
-      },
-      sessionkey : req.body.sessionkey
-    });
-  });
-}
-
-/**
  *  Parses a request to `POST /student/<id>`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -213,7 +174,7 @@ export async function parseNewStudentRequest(req: express.Request):
 export async function parseUpdateStudentRequest(req: express.Request):
     Promise<Requests.UpdateStudent> {
   const bodyF = [
-    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone",
+    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone", "nickname", "alumni",
     "education"
   ];
 
@@ -223,14 +184,16 @@ export async function parseUpdateStudentRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       emailOrGithub : maybe(req.body, "emailOrGithub"),
       firstName : maybe(req.body, "firstName"),
       lastName : maybe(req.body, "lastName"),
       gender : maybe(req.body, "gender"),
       pronouns : maybe(req.body, "pronouns"),
       phone : maybe(req.body, "phone"),
-      education : maybe(req.body, "education")
+      education : maybe(req.body, "education"),
+      alumni : maybe(req.body, "alumni"),
+      nickname: maybe(req.body, "nickname")
     });
   });
 }
@@ -250,7 +213,7 @@ export async function parseSuggestStudentRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       suggestion : sug,
       reason : maybe(req.body, "reason")
     });
@@ -274,7 +237,7 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       reply : maybe(req.body, "reply")
     });
   });
@@ -334,7 +297,7 @@ export async function parseUpdateProjectRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       name : maybe(req.body, "name"),
       partner : maybe(req.body, "partner"),
       start : maybe(req.body, "start"),
@@ -355,7 +318,7 @@ export async function parseDraftStudentRequest(req: express.Request):
   return hasFields(req, [ "studentId", "roles" ], types.id)
       .then(() => Promise.resolve({
         sessionkey : req.body.sessionkey,
-        id : req.params.id,
+        id : Number(req.params.id),
         studentId : req.body.studentId,
         roles : req.body.roles
       }));
@@ -375,7 +338,7 @@ export async function parseSetFollowupStudentRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve(
-        {sessionkey : req.body.sessionkey, id : req.params.id, type : type});
+        {sessionkey : req.body.sessionkey, id : Number(req.params.id), type : type});
   });
 }
 
@@ -412,7 +375,7 @@ export async function parseUpdateTemplateRequest(req: express.Request):
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
-      id : req.params.id,
+      id : Number(req.params.id),
       name : maybe(req.body, "name"),
       desc : maybe(req.body, "desc"),
       subject : maybe(req.body, "subject"),

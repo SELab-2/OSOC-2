@@ -1,14 +1,6 @@
 import prisma from '../prisma/prisma'
 import {CreatePerson, UpdatePerson} from './orm_types';
 
-// TODO: remove this piece of code that was here for testing purposes
-// console.log(await search_person_by_name("Alice"));
-
-/*(async () => {
-    console.log(await searchPersonByName("Alice"));
-   }
- )()*/
-
 /**
  * 
  * @param person: person object with the needed information
@@ -45,7 +37,8 @@ export async function createPerson(person: CreatePerson){
         select: {
             login_user: {
                 select: {
-                    password: true
+                    password: true,
+                    login_user_id: true
                 }
             }
         }

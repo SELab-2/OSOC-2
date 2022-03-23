@@ -122,7 +122,7 @@ export interface IdOnly {
   /**
    *  The ID.
    */
-  id: string;
+  id: number;
 }
 
 /**
@@ -177,7 +177,7 @@ export interface CoachRequest {
   /**
    *  The id.
    */
-  id: string;
+  id: number;
   /**
    *  The name of the coach.
    */
@@ -206,7 +206,7 @@ export interface ProjectDraftedStudents {
   /**
    *  The id of the project.
    */
-  id: string;
+  id: number;
   /**
    *  The name of the project.
    */
@@ -232,6 +232,11 @@ export interface ModProjectStudent {
   roles: string[];
 }
 
+}
+
+export interface WithUserID<T> {
+  userId: number;
+  data: T;
 }
 
 /**
@@ -275,6 +280,12 @@ export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
 export interface Student extends Keyed<InternalTypes.Student> {}
 
 /**
+ *  A studentList response is the keyed version of a list of students and their
+ * associated data.
+ */
+export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+
+/**
  *  A student list response is the keyed version of an array of partial
  * students.
  */
@@ -316,10 +327,21 @@ export interface Person extends InternalTypes.Person {}
 export interface Admin extends Keyed<InternalTypes.Admin> {}
 
 /**
+ *  An adminList response is the keyed version of a list of admins and their associated
+ * data.
+ */
+export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
+
+/**
  *  A project response is the keyed version of the project and their associated
  * data.
  */
 export interface Project extends Keyed<InternalTypes.Project> {}
+
+/**
+ *  An admin list response is the keyed version of the list of admins.
+ */
+export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
 
 /**
  *  A project drafted students response is the keyed version of the students and
@@ -358,18 +380,7 @@ export interface KeyRequest {
 }
 
 export interface IdRequest extends KeyRequest {
-  id: string;
-}
-
-export interface NewStudent extends KeyRequest {
-  emailOrGithub: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  pronouns: string[];
-  phone: string;
-  education:
-      {level: string; duration : number; year : number; institute : string;};
+  id: number;
 }
 
 export interface UpdateStudent extends IdRequest {
@@ -378,6 +389,8 @@ export interface UpdateStudent extends IdRequest {
   lastName?: string;
   gender?: string;
   pronouns?: string[];
+  nickname?: string;
+  alumni?: boolean;
   phone?: string;
   education?:
       {level?: string; duration?: number; year?: number; institute?: string;};
@@ -393,10 +406,8 @@ export interface Confirm extends IdRequest {
 }
 
 export interface UpdateLoginUser extends IdRequest {
-  emailOrGithub?: string;
-  firstName?: string;
-  lastName?: string;
-  gender?: string;
+  isAdmin: boolean;
+  isCoach: boolean;
   pass?: string;
 }
 
@@ -424,7 +435,7 @@ export interface ModProject extends IdRequest {
 }
 
 export interface Draft extends IdRequest {
-  studentId: string;
+  studentId: number;
   roles: string[];
 }
 
@@ -449,25 +460,19 @@ export interface ModTemplate extends IdRequest {
 }
 
 export interface Form {
-  eventId : string,
-  eventType : string,
-  createdAt : string,
-  data : DataForm
+  eventId: string, eventType: string, createdAt: string, data: DataForm
 }
 
 export interface DataForm {
-  fields : Array<Question>
+  fields: Array<Question>
 }
 
 export interface Question {
-  key : string,
-  value : string,
-  options? : Array<Option>
+  key: string, value: string, options?: Array<Option>
 }
 
 export interface Option {
-  id : string,
-  text : string
+  id: string, text: string
 }
 }
 

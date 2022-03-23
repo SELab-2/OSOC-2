@@ -16,7 +16,8 @@ async function createProject(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // INSERTION LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : '', sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -32,7 +33,8 @@ async function listProjects(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
         // INSERTION LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : [], sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -47,7 +49,8 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // INSERTION LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : '', sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -57,7 +60,8 @@ async function modProject(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // UPDATING LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+        return Promise.resolve(
+            {data : '', sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -72,7 +76,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // REMOVING LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+        return Promise.resolve({sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -90,8 +94,8 @@ async function getDraftedStudents(req: express.Request):
       .then(parsed => {
         // INSERTION LOGIC
         return Promise.resolve({
-          data : {id : '', name : '', students : []},
-          sessionkey : parsed.sessionkey
+          data : {id : 0, name : '', students : []},
+          sessionkey : parsed.data.sessionkey
         });
       });
 }
@@ -104,7 +108,7 @@ async function modProjectStudent(req: express.Request):
         // INSERTION LOGIC
         return Promise.resolve({
           data : {drafted : false, roles : []},
-          sessionkey : parsed.sessionkey
+          sessionkey : parsed.data.sessionkey
         });
       });
 }

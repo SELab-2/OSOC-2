@@ -59,6 +59,7 @@ backend/.idea
 
 # ignore test coverage files
 *coverage.json
+/backend/prisma/migrations/
 
 # NEVER, EVER push .env file
 .env

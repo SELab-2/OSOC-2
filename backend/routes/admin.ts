@@ -1,7 +1,8 @@
 import express from 'express';
 
+import * as ormL from "../orm_functions/login_user";
 import * as rq from '../request';
-import {Responses} from '../types';
+import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 
 /**
@@ -10,12 +11,26 @@ import * as util from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listAdmins(req: express.Request): Promise<Responses.IdNameList> {
+async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
   return rq.parseAdminAllRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+        const adminList: InternalTypes.Admin[] = [];
+        ormL.searchAllAdminLoginUsers(true).then(
+            admins => {
+                return admins.forEach(admin => {adminList.push({
+                                        firstname : admin.person.firstname,
+                                        lastname : admin.person.lastname,
+                                        email : admin.person.email,
+                                        github : admin.person.github,
+                                        personId : admin.person.person_id,
+                                        isAdmin : admin.is_admin,
+                                        isCoach : admin.is_coach,
+                                        accountStatus : admin.account_status
+                                      })})})
+        // LISTING LOGIC
+        return Promise.resolve(
+            {data : adminList, sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -25,22 +40,59 @@ async function listAdmins(req: express.Request): Promise<Responses.IdNameList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getAdmin(req: express.Request): Promise<Responses.Admin> {
+/*async function getAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseSingleAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve({data : {}, sessionkey : parsed.sessionkey});
+          // FETCHING LOGIC
+          // TODO what should be shown?
+          return ormL.searchLoginUserByPerson(parsed.).then(student => {
+              if(student !== null) {
+                  return Promise.resolve({data: {
+                          firstname: student.person.firstname,
+                          lastname: student.person.lastname,
+                          email: student.person.email,
+                          gender: student.gender,
+                          pronouns: student.pronouns,
+                          phoneNumber: student.phone_number,
+                          nickname: student.nickname,
+                          alumni: student.alumni
+                      },
+                      sessionkey: parsed.sessionkey
+                  })
+              } else {
+                  return Promise.reject(errors.cookInvalidID());
+              }
+          })
       });
-}
+}*/
 
-async function modAdmin(req: express.Request):
-    Promise<Responses.Keyed<string>> {
+async function modAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseUpdateAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => {
-        // UPDATING LOGIC
-        return Promise.resolve({data : '', sessionkey : parsed.sessionkey});
+      .then(async parsed_ => {
+        const parsed = parsed_.data;
+        // UPDATE LOGIC
+        return ormL
+            .updateLoginUser({
+              loginUserId : parsed.id,
+              isAdmin : parsed.isAdmin,
+              isCoach : parsed.isCoach
+            })
+            .then(admin => {// TODO why this return data?
+                            return Promise.resolve({
+                              data : {
+                                firstname : admin.person.firstname,
+                                lastname : admin.person.lastname,
+                                email : admin.person.email,
+                                github : admin.person.github,
+                                personId : admin.person.person_id,
+                                isAdmin : admin.is_admin,
+                                isCoach : admin.is_coach,
+                                accountStatus : admin.account_status
+                              },
+                              sessionkey : parsed.sessionkey
+                            })})
       });
 }
 
@@ -55,7 +107,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => {
         // REMOVING LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+        return Promise.resolve({sessionkey : parsed.data.sessionkey});
       });
 }
 
@@ -69,7 +121,7 @@ export function getRouter(): express.Router {
 
   util.setupRedirect(router, '/admin');
   util.route(router, "get", "/all", listAdmins);
-  util.route(router, "get", "/:id", getAdmin);
+  // util.route(router, "get", "/:id", getAdmin);
 
   util.route(router, "post", "/:id", modAdmin);
   router.delete('/:id', (req, res) =>

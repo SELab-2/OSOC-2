@@ -51,11 +51,10 @@ model job_application {
   student_id             Int                     @default(autoincrement())
   student_volunteer_info String
   responsibilities       String?
-  motivation             String?
   fun_fact               String?
   student_coach          Boolean
   osoc_id                Int
-  edus                   String?
+  edus                   String[]
   edu_level              String?
   edu_duration           Int?
   edu_year               Int?
@@ -84,7 +83,7 @@ model job_application_skill {
 
 model language {
   language_id           Int                     @id @default(autoincrement())
-  name                  String                  @unique
+  name                  String
   job_application_skill job_application_skill[]
 }
 
@@ -92,19 +91,19 @@ model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
   password       String?
-  is_admin       Boolean?
-  is_coach       Boolean?
+  is_admin       Boolean
+  is_coach       Boolean
+  session_keys   String[]
   account_status account_status_enum
   person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract       contract[]
   evaluation     evaluation[]
   project_user   project_user[]
-  session_keys   session_keys[]
 }
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
-  year            Int               @unique @db.SmallInt
+  year            Int               @db.SmallInt
   job_application job_application[]
   project         project[]
 }
@@ -115,6 +114,7 @@ model person {
   github     String?     @unique
   firstname  String
   lastname   String
+  gender     String
   login_user login_user?
   student    student?
 }
@@ -153,7 +153,7 @@ model project_user {
 
 model role {
   role_id      Int            @id @default(autoincrement())
-  name         String         @unique
+  name         String?
   applied_role applied_role[]
   project_role project_role[]
 }
@@ -161,7 +161,6 @@ model role {
 model student {
   student_id      Int               @id @default(autoincrement())
   person_id       Int               @unique @default(autoincrement())
-  gender          String
   pronouns        String[]
   phone_number    String
   nickname        String?
@@ -169,13 +168,6 @@ model student {
   person          person            @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract        contract[]
   job_application job_application[]
-}
-
-model session_keys {
-  session_key_id Int        @id @default(autoincrement())
-  login_user_id  Int        @default(autoincrement())
-  session_key    String     @unique @db.VarChar(128)
-  login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum decision_enum {
