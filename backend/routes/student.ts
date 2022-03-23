@@ -75,14 +75,34 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
 async function modStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseUpdateStudentRequest(req)
-      .then(parsed => util.isAdmin(parsed))
+      // TODO why isAdmin?
+      //.then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
-        // UPDATE LOGIC
-        return Promise.resolve({
-          data : {id : '', name : '', email : '', labels : []},
-          sessionkey : parsed.sessionkey
-        });
+          // TODO the student name can also be modified
+          // UPDATE LOGIC
+          return ormSt.updateStudent({
+              studentId: parsed.id,
+              gender: parsed.gender,
+              pronouns: parsed.pronouns,
+              phoneNumber: parsed.phone,
+              nickname: parsed.nickname,
+              alumni: parsed.alumni
+          }).then(student => {
+              // TODO why this return data?
+              return Promise.resolve({data: {
+                      pronouns: student.pronouns,
+                      phone_number: student.phone_number,
+                      nickname: student.nickname,
+                      alumni: student.alumni,
+                  },
+                  sessionkey: parsed.sessionkey
+              })
+          })
+          /*return Promise.resolve({
+            data : {id : '', name : '', email : '', labels : []},
+            sessionkey : parsed.sessionkey
+            });*/
       });
 }
 

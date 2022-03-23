@@ -373,6 +373,8 @@ export interface UpdateStudent extends IdRequest {
   lastName?: string;
   gender?: string;
   pronouns?: string[];
+  nickname?: string;
+  alumni?: boolean;
   phone?: string;
   education?:
       {level?: string; duration?: number; year?: number; institute?: string;};

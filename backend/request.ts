@@ -176,7 +176,7 @@ export async function parseLoginRequest(req: express.Request):
 export async function parseUpdateStudentRequest(req: express.Request):
     Promise<Requests.UpdateStudent> {
   const bodyF = [
-    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone",
+    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone", "nickname", "alumni",
     "education"
   ];
 
@@ -193,7 +193,9 @@ export async function parseUpdateStudentRequest(req: express.Request):
       gender : maybe(req.body, "gender"),
       pronouns : maybe(req.body, "pronouns"),
       phone : maybe(req.body, "phone"),
-      education : maybe(req.body, "education")
+      education : maybe(req.body, "education"),
+      alumni : maybe(req.body, "alumni"),
+      nickname: maybe(req.body, "nickname")
     });
   });
 }
