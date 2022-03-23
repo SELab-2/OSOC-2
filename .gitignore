@@ -59,3 +59,4 @@ backend/.idea
 
 # ignore test coverage files
 *coverage.json
+/backend/prisma/migrations/
