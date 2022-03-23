@@ -8,7 +8,7 @@ import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
 
-const crypto = require('crypto');
+//const crypto = require('crypto');
 const Login: NextPage = () => {
 
     const router = useRouter()
@@ -65,37 +65,41 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // We encrypt the password before sending it to the backend api
-            const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
-            console.log(encryptedPassword)
+            //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
+            //console.log(encryptedPassword)
             // TODO -- Send call to the backend
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
-                body: JSON.stringify({pass:encryptedPassword,name:loginEmail}),
-                headers : {
+                body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                }})
-                .then(response => response.json());
+                }
+            })
+                .then(response => response.json())
+                .catch(() => router.push("/login"));
             console.log(response)
             // TODO -- Handle response
-            signIn('credentials', {
-                username: loginEmail,
-                password: encryptedPassword,
-                redirect: false
-            }).then(res => {
-                    // TODO -- Redirect or handle errors
-                    console.log(res)
-                    if (res !== undefined) {
-                        const signInRes = res as SignInResult
-                        // The user is succesfully logged in => redirect to /students
-                        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                            console.log("redirect")
-                            router.push("/students")
+            if (response.success !== false) {
+                signIn('credentials', {
+                    username: loginEmail,
+                    password: loginPassword,
+                    redirect: false
+                }).then(res => {
+                        // TODO -- Redirect or handle errors
+                        console.log(res)
+                        if (res !== undefined) {
+                            const signInRes = res as SignInResult
+                            // The user is succesfully logged in => redirect to /students
+                            if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                                console.log("redirect")
+                                router.push("/students")
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 
