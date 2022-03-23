@@ -91,8 +91,8 @@ model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
   password       String?
-  is_admin       Boolean?
-  is_coach       Boolean?
+  is_admin       Boolean
+  is_coach       Boolean
   session_keys   String[]
   account_status account_status_enum
   person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
