@@ -22,6 +22,7 @@ import {CreateJobApplication} from "./orm_types";
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -51,6 +52,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -80,6 +82,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -165,7 +168,6 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
     return await prisma.job_application.create({
         data: {
             student_id: jobApplication.studentId,
-            motivation: jobApplication.motivation,
             responsibilities: jobApplication.responsibilities,
             fun_fact: jobApplication.funFact,
             student_volunteer_info: jobApplication.studentVolunteerInfo,

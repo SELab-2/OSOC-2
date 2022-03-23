@@ -214,7 +214,7 @@ Where each suggestion array (`data.yes`, `suggesdatations.maybe` and `data.no`) 
 **Arguments:**  
  - `sessionkey:string` Your current session key.
  - Student ID is parsed from the URL.
- - `suggestion:string` Your suggestion. Should be one of `"yes"`, `"maybe"`, `"no"`. Another value results in an [Argument error](#argument-error).
+ - `suggestion:string` Your suggestion. Should be one of `"YES"`, `"MAYBE"`, `"NO"`. Another value results in an [Argument error](#argument-error).
  - `reason:string` The reason for your suggestion. Can be omitted.
 
 **Description:** Add or modify your suggestion (yes/maybe/no) for this student.  
@@ -236,7 +236,7 @@ Each of the `data` fields (`data.yes`, `data.maybe`, `data.no`) will contain the
 **Arguments:**  
  - `sessionkey:string` Your current session key.
  - Student ID is parsed from the URL.
- - `reply:string` The final reply. Should be one of `"yes"`, `"maybe"`, `"no"`. Any other value results in an [Argument error](#argument-error). This value can be omitted, and if it is, the final reply is decided by majority vote (from the existing suggestions).
+ - `reply:string` The final reply. Should be one of `"YES"`, `"MAYBE"`, `"NO"`. Any other value results in an [Argument error](#argument-error). This value can be omitted, and if it is, the final reply is decided by majority vote (from the existing suggestions).
 
 **Description:** Confirms the reply to this student (yes/maybe/no). Does not modify the follow-up data in those endpoints.   
 **Response:**  
@@ -807,8 +807,8 @@ The `templates[i].desc` field can be omitted and/or empty.
  - `name:string` The name for the new template.
  - `desc:string` The description for the new template (optional).
  - `subject:string` A template message for the email subject (optional).
- - `cc:string` A list of email addresses to be in the CC field of the email (optional).
- - `content:string` The content of the email template.
+ - `cc:[string]` A list of email addresses to be in the CC field of the email (optional).
+ - `content:string` The content of the email template.  
 **Description:** Add a follow-up e-mail template.  
 **Response:**  
 ```json

@@ -67,3 +67,18 @@ export async function updateEvaluationForStudent(evaluation:UpdateEvaluationForS
         }
     });
 }
+
+export async function getLoginUserByEvaluationId(evaluationId: number) {
+    return await prisma.evaluation.findUnique({
+        where : {
+            evaluation_id: evaluationId
+        },
+        include: {
+            login_user: {
+                include: {
+                    person: true
+                }
+            }
+        }
+    });
+}
