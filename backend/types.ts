@@ -234,6 +234,11 @@ export interface ModProjectStudent {
 
 }
 
+export interface WithUserID<T> {
+  userId: number;
+  data: T;
+}
+
 /**
  *  Namespace for response types. Most of the data types come from the namespace
  * {@link InternalTypes}. The success boolean is added when sending.
@@ -275,8 +280,8 @@ export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
 export interface Student extends Keyed<InternalTypes.Student> {}
 
 /**
- *  A studentList response is the keyed version of a list of students and their associated
- * data.
+ *  A studentList response is the keyed version of a list of students and their
+ * associated data.
  */
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
@@ -446,25 +451,19 @@ export interface ModTemplate extends IdRequest {
 }
 
 export interface Form {
-  eventId : string,
-  eventType : string,
-  createdAt : string,
-  data : DataForm
+  eventId: string, eventType: string, createdAt: string, data: DataForm
 }
 
 export interface DataForm {
-  fields : Array<Question>
+  fields: Array<Question>
 }
 
 export interface Question {
-  key : string,
-  value : string,
-  options? : Array<Option>
+  key: string, value: string, options?: Array<Option>
 }
 
 export interface Option {
-  id : string,
-  text : string
+  id: string, text: string
 }
 }
 

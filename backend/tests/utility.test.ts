@@ -293,8 +293,9 @@ test("utility.checkSessionKey works on valid session key", async () => {
   session_keyMock.checkSessionKey.mockResolvedValue(
       {login_user_id : 123456789});
   const obj = {sessionkey : "key"};
+  const res = {data : {sessionkey : "key"}, userId : 123456789};
 
-  await expect(util.checkSessionKey(obj)).resolves.toStrictEqual(obj);
+  await expect(util.checkSessionKey(obj)).resolves.toStrictEqual(res);
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith('key');
 });
@@ -341,15 +342,14 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
        // test 1: succesfull
        await expect(util.isAdmin({
          sessionkey : "key_1"
-       })).resolves.toStrictEqual({sessionkey : "key_1"});
+       })).resolves.toStrictEqual({data : {sessionkey : "key_1"}, userId : 1});
        // test 2: not an admin
        await expect(util.isAdmin({
          sessionkey : "key_2"
        })).rejects.toStrictEqual(util.errors.cookInsufficientRights());
        // test 3: invalid key
-       await expect(util.isAdmin({sessionkey : "key_3"}).catch(e => {
-         console.log(e);
-         return Promise.reject(e)
+       await expect(util.isAdmin({
+         sessionkey : "key_3"
        })).rejects.toStrictEqual(util.errors.cookUnauthenticated());
 
        expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(3);
