@@ -15,8 +15,12 @@
       "description": "Everything about students."
     },
     {
-      "name": "loginuser",
-      "description": "Everything about login user."
+      "name": "coach",
+      "description": "Everything about coaches."
+    },
+    {
+      "name": "admin",
+      "description": "Everything about admins."
     },
     {
       "name": "project",
@@ -42,15 +46,8 @@
         "parameters": [
           {
             "in": "header",
-            "name": "name",
-            "description": "The name of the user to log in.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "pass",
-            "description": "The name of the user to log in.",
+            "name": "password",
+            "description": "The hashed password of the user to log in.",
             "required": true,
             "type": "string"
           },
@@ -64,7 +61,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string."
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\"."
           }
         }
       },
@@ -99,45 +96,7 @@
         "operationId": "student",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Other Location: /student/all"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "student"
-        ],
-        "description": "Creates a new student in the system.",
-        "operationId": "create_student",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "name",
-            "description": "The name of the student.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "email",
-            "description": "The email address of the student.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Sessionkey as hex string.",
-            "schema": {
-              "$ref": "#/definitions/CreateStudent"
-            }
+            "description": "http HTTP/2 303 See Location: /student/all"
           }
         }
       }
@@ -160,7 +119,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/AllStudents"
             }
@@ -186,7 +145,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string. The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\". The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
             "schema": {
               "$ref": "#/definitions/Student_Id"
             }
@@ -268,7 +227,6 @@
             "in": "header",
             "name": "motivation",
             "description": "The motivation for the suggestion.",
-            "required": true,
             "type": "string"
           },
           {
@@ -294,7 +252,7 @@
         "tags": [
           "student"
         ],
-        "description": "Admin if the student is suitable for OSOC.",
+        "description": "Admin gives out final yes/maybe/no that decides if the student is suitable for OSOC or not.",
         "operationId": "confirm_student",
         "parameters": [
           {
@@ -306,7 +264,7 @@
           },
           {
             "in": "header",
-            "name": "confirmation",
+            "name": "suggestion",
             "description": "The suggestion for the student.",
             "required": true,
             "type": "string"
@@ -315,7 +273,6 @@
             "in": "header",
             "name": "motivation",
             "description": "The motivation for the suggestion.",
-            "required": true,
             "type": "string"
           },
           {
@@ -353,13 +310,6 @@
           },
           {
             "in": "header",
-            "name": "osoc_id",
-            "description": "The id of the osoc edition this project is connected to",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
             "name": "partner",
             "description": "The partner's name of this project",
             "required": true,
@@ -389,7 +339,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -415,7 +365,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/All_projects"
             }
@@ -448,7 +398,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/All_projects"
             }
@@ -514,7 +464,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Sessionkey as hex string.",
+            "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -564,7 +514,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/AllStudents"
             }
@@ -598,17 +548,152 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string."
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\"."
           }
         }
       }
     },
-    "/loginuser/all": {
+    "/coach/all": {
       "get": {
         "tags": [
-          "loginuser"
+          "coach"
         ],
-        "description": "Lists all projects in the system.",
+        "description": "Lists all the coaches that are in the system.",
+        "operationId": "all_coaches",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllLoginUser"
+            }
+          }
+        }
+      }
+    },
+    "/coach/<coach-id>": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Get the selected coach from the system.",
+        "operationId": "get_coach_id",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "coach_id",
+            "description": "The unique id of the coach.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/LoginUserSession"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Updates the coach in the system.",
+        "operationId": "update_coach",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the project.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "coach",
+            "description": "Shows the user is a coach.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "admin",
+            "description": "Shows if the user is a coach.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "status",
+            "description": "Shows the status of the account.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The login user field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Removes the given coach from the system.",
+        "operationId": "coach_id_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a sessionkey for the next action.",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/admin/all": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Lists all the users that have a login in the system.",
         "operationId": "all_login_users",
         "parameters": [
           {
@@ -621,7 +706,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/AllLoginUser"
             }
@@ -629,13 +714,13 @@
         }
       }
     },
-    "/loginuser/<loginuser-id>": {
+    "/admin/<admin-id>": {
       "get": {
         "tags": [
-          "loginuser"
+          "admin"
         ],
-        "description": "Get the selected loginuser from the system.",
-        "operationId": "get_loginuser_id",
+        "description": "Get the selected admin from the system.",
+        "operationId": "get_admin_id",
         "parameters": [
           {
             "in": "header",
@@ -647,14 +732,14 @@
           {
             "in": "header",
             "name": "login_user_id",
-            "description": "The unique id of the login user.",
+            "description": "The unique id of the admin.",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Sessionkey as hex string.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/LoginUserSession"
             }
@@ -663,10 +748,10 @@
       },
       "post": {
         "tags": [
-          "loginuser"
+          "admin"
         ],
-        "description": "Updates the loginuser in the system.",
-        "operationId": "update_loginuser",
+        "description": "Updates the admin in the system.",
+        "operationId": "update_admin",
         "parameters": [
           {
             "in": "header",
@@ -706,7 +791,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The login user field contains all updated fields. If no field is updated, an Argument error is thrown. Sessionkey as hex string.",
+            "description": "The admin field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -715,10 +800,10 @@
       },
       "delete": {
         "tags": [
-          "loginuser"
+          "admin"
         ],
-        "description": "Removes the given project from the system.",
-        "operationId": "loginuser_id_delete",
+        "description": "Removes the given admin from the system.",
+        "operationId": "admin_id_delete",
         "parameters": [
           {
             "in": "header",
@@ -848,13 +933,16 @@
         "email": {
           "type": "string"
         },
+        "gender": {
+          "type": "string"
+        },
         "labels": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "sollicitation": {
+        "motivation": {
           "type": "string"
         },
         "project": {
