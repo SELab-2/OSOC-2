@@ -525,7 +525,7 @@
         "tags": [
           "project"
         ],
-        "description": "Add all selected students for the selected project.",
+        "description": "Add the selected students for the selected project.",
         "operationId": "add_students_to_project",
         "parameters": [
           {
