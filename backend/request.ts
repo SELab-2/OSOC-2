@@ -138,17 +138,15 @@ async function parseUpdateLoginUser(req: express.Request):
     Promise<Requests.UpdateLoginUser> {
   return hasFields(req, [], types.id).then(() => {
     const optional =
-        [ "emailOrGithub", "firstName", "lastName", "gender", "pass" ];
+        [ "isAdmin", "isCoach", "pass" ];
     if (!atLeastOneField(req, optional))
       return rejector();
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
       id : Number(req.params.id),
-      emailOrGithub : maybe(req.body, "emailOrGithub"),
-      firstName : maybe(req.body, "firstName"),
-      lastName : maybe(req.body, "lastName"),
-      gender : maybe(req.body, "gender"),
+      isAdmin : maybe(req.body, "isAdmin"),
+      isCoach : maybe(req.body, "isCoach"),
       pass : maybe(req.body, "pass")
     });
   });
