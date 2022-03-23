@@ -168,19 +168,33 @@ function jsonToStudent(form: Requests.Form, person: Responses.Person): Promise<R
     }
 
     // The responsibilities of the student
-    const responsibilities: string =
+    const responsibilities: string | null =
         filterQuestion(form, "question_wLPr9v").value;
 
-    // The volunteer info of the student
-    const questionMotivation: Requests.Question =
-        filterQuestion(form, "question_wvPZM0");
+    // A fun fact of this student
+    const funFact : string | null = filterQuestion(form, "question_nPzxpV").value;
 
-    let volunteerInfo : string = "";
+    // Does this student want to be a student-coach
+    const questionStudentCoach: Requests.Question =
+        filterQuestion(form, "question_nPzxD5");
 
-    if(questionVolunteerInfo.options !== undefined) {
+    let studentCoach : Boolean = false;
 
+    if(questionStudentCoach.options !== undefined && questionStudentCoach.value !== null && questionStudentCoach.value === "2055442c-a9a6-429d-9ada-045078295f86") {
+        studentCoach = true;
+    }
+
+    // The educations of the student
+    const questionStudentCoach: Requests.Question =
+        filterQuestion(form, "question_nPzxD5");
+
+    let studentCoach : Boolean = false;
+
+    if(questionStudentCoach.options !== undefined && questionStudentCoach.value !== null && questionStudentCoach.value === "2055442c-a9a6-429d-9ada-045078295f86") {
+        studentCoach = true;
     }
 }*/
+
 
 /**
  *  Attempts to create a new form in the system.

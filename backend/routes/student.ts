@@ -5,6 +5,9 @@ import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
 import * as ormSt from '../orm_functions/student';
+import * as ormJo from '../orm_functions/job_application';
+import * as ormLa from '../orm_functions/language';
+import * as ormEv from '../orm_functions/evaluation';
 
 /* eslint-disable no-unused-vars */
 
@@ -16,27 +19,48 @@ import * as ormSt from '../orm_functions/student';
  */
 async function listStudents(req: express.Request):
     Promise<Responses.StudentList> {
-  return rq.parseStudentAllRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => {
-          const studentList : InternalTypes.Student[] = [];
-          ormSt.getAllStudents().then(students => {
-            return students.forEach(student => {
-                studentList.push({
-                    firstname: student.person.firstname,
-                    lastname: student.person.lastname,
-                    email: student.person.email,
-                    gender: student.gender,
-                    pronouns: student.pronouns,
-                    phoneNumber: student.phone_number,
-                    nickname: student.nickname,
-                    alumni: student.alumni
+    return rq.parseStudentAllRequest(req)
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(parsed => {
+            const studentList : InternalTypes.Student[] = [];
+            ormSt.getAllStudents().then(students => {
+                students.forEach(student => {
+                    ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
+                        if(jobApplication !== null) {
+                            ormJo.getStudentEvaluationsTotal(student.student_id).then(evaluations => {
+                                let languages : string[] = [];
+                                jobApplication.job_application_skill.forEach(skill => {
+                                    ormLa.getLanguage(skill.language_id).then(language => {
+                                        if(language !== null) {
+                                            languages.push(language.name);
+                                        } else {
+                                            return Promise.reject(errors.cookInvalidID);
+                                        }
+                                    })
+                                });
+                                studentList.push({
+                                    firstname: student.person.firstname,
+                                    lastname: student.person.lastname,
+                                    email: student.person.email,
+                                    gender: student.gender,
+                                    pronouns: student.pronouns,
+                                    phoneNumber: student.phone_number,
+                                    nickname: student.nickname,
+                                    alumni: student.alumni,
+                                    languages: languages,
+                                    jobApplication: jobApplication,
+                                    evaluations: evaluations
+                                })
+                            })
+                        } else {
+                            return Promise.reject(errors.cookInvalidID);
+                        }
+                    })
                 })
-            })
-          })
-        // LISTING LOGIC
-        return Promise.resolve({data : studentList, sessionkey : parsed.sessionkey});
-      });
+            });
+
+            return Promise.resolve({data : studentList, sessionkey : parsed.sessionkey});
+        });
 }
 
 /**
@@ -51,34 +75,61 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
       .then(parsed => util.isValidID(parsed, "student"))
       .then(parsed => {
           // FETCHING LOGIC
-          // TODO what should be shown?
-          return ormSt.getStudent(parsed.id).then(student => {
-              if(student !== null) {
-                  return Promise.resolve({data: {
-                          firstname: student.person.firstname,
-                          lastname: student.person.lastname,
-                          email: student.person.email,
-                          gender: student.gender,
-                          pronouns: student.pronouns,
-                          phoneNumber: student.phone_number,
-                          nickname: student.nickname,
-                          alumni: student.alumni
-                      },
-                      sessionkey: parsed.sessionkey
-                  })
-              } else {
-                  return Promise.reject(errors.cookInvalidID());
-              }
-          })
+          return ormSt
+              .getStudent(parsed.id)
+              .then(student => {
+                  if(student !== null) {
+                      return ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
+                          if(jobApplication !== null) {
+                              return ormJo.getStudentEvaluationsTotal(student.student_id).then(evaluations => {
+                                  let languages : string[] = [];
+                                  jobApplication.job_application_skill.forEach(skill => {
+                                      ormLa.getLanguage(skill.language_id).then(language => {
+                                          if(language !== null) {
+                                              languages.push(language.name);
+                                          } else {
+                                              return Promise.reject(errors.cookInvalidID);
+                                          }
+                                      })
+                                  });
+                                  return Promise.resolve({data: {
+                                          firstname: student.person.firstname,
+                                          lastname: student.person.lastname,
+                                          email: student.person.email,
+                                          gender: student.gender,
+                                          pronouns: student.pronouns,
+                                          phoneNumber: student.phone_number,
+                                          nickname: student.nickname,
+                                          alumni: student.alumni,
+                                          languages: languages,
+                                          jobApplication: jobApplication,
+                                          evaluations: evaluations,
+                                      },
+                                      sessionkey: parsed.sessionkey
+                                  })
+                              })
+                          } else {
+                              return Promise.reject(errors.cookInvalidID);
+                          }
+                      })
+                  } else {
+                      return Promise.reject(errors.cookInvalidID());
+                  }
+              })
       });
 }
 
+/**
+ *  Attempts to update a student.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function modStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseUpdateStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
-          // TODO the student name can also be modified
           // UPDATE LOGIC
           return ormSt.updateStudent({
               studentId: parsed.id,
@@ -88,7 +139,6 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
               nickname: parsed.nickname,
               alumni: parsed.alumni
           }).then(student => {
-              // TODO why this return data?
               return Promise.resolve({data: {
                       pronouns: student.pronouns,
                       phone_number: student.phone_number,
@@ -112,8 +162,12 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
-        // DELETE LOGIC
-        return Promise.resolve({sessionkey : parsed.sessionkey});
+          // DELETE LOGIC
+          return ormSt.deleteStudent(parsed.id).then(() => {
+              return Promise.resolve({
+                  sessionkey: parsed.sessionkey
+              })
+          })
       });
 }
 
@@ -124,12 +178,36 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createStudentSuggestion(req: express.Request):
-    Promise<Responses.Suggestion> {
+    Promise<Responses.Key> {
   return rq.parseSuggestStudentRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
-        // SUGGESTING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+          // SUGGESTING LOGIC
+          return ormSt
+              .getStudent(parsed.id)
+              .then(student => {
+                  if (student !== null) {
+                      return ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
+                            if(jobApplication !== null) {
+                                return ormEv.createEvaluationForStudent({
+                                    loginUserId: parsed.senderId,
+                                    jobApplicationId: jobApplication.job_application_id,
+                                    decision: parsed.suggestion,
+                                    motivation: parsed.reason,
+                                    isFinal: true
+                                }).then(() => {
+                                    return Promise.resolve({
+                                        sessionkey: parsed.sessionkey
+                                    })
+                                })
+                            } else {
+                                return Promise.reject(errors.cookInvalidID());
+                            }
+                      })
+                  } else {
+                      return Promise.reject(errors.cookInvalidID());
+                  }
+              })
       });
 }
 
@@ -145,8 +223,31 @@ async function getStudentSuggestions(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve({data : [], sessionkey : parsed.sessionkey});
+          // FETCHING LOGIC
+          /*let suggestionsList : InternalTypes.SuggestionInfo[] = [];
+          ormSt.getStudent(parsed.id)
+              .then(student => {
+                  if (student !== null) {
+                      ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
+                          if(jobApplication !== null) {
+                              ormJo.getStudentEvaluationsTemp(student.student_id).then(suggestions => {
+                                  suggestions.forEach(suggestion => {
+                                      suggestionsList.push({
+                                          suggestion: suggestion,
+                                          sender: ormEv.getLoginUserByEvaluationId(suggestion.evaluation.evaluation_id)
+                                      })
+                                  })
+                              })
+                          } else {
+                              return Promise.reject(errors.cookInvalidID());
+                          }
+                      })
+                  } else {
+                      return Promise.reject(errors.cookInvalidID());
+                  }
+              })*/
+
+          return Promise.resolve({data : [{suggestion: "YES", sender: {id: 0, name: "Darth Vader"}, reason: "no reason"}], sessionkey : parsed.sessionkey});
       });
 }
 
@@ -162,8 +263,11 @@ async function createStudentConfirmation(req: express.Request):
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed, 'student'))
       .then(parsed => {
-        // UPDATING LOGIC
-        return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
+          // UPDATING LOGIC
+          /*return ormEv.createEvaluationForStudent({
+              loginUserId: parsed.
+          })*/
+          return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
       });
 }
 
@@ -195,7 +299,9 @@ export function getRouter(): express.Router {
   router.delete('/:id', (req, res) => util.respOrErrorNoReinject(
                             res, deleteStudent(req)));
 
-  util.route(router, "post", "/:id/suggest", createStudentSuggestion);
+  router.post('/:id', (req, res) => util.respOrErrorNoReinject(
+        res, createStudentSuggestion(req)));
+
   util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
   util.route(router, "post", "/:id/confirm", createStudentConfirmation);

@@ -388,6 +388,7 @@ export interface UpdateStudent extends IdRequest {
 
 export interface Suggest extends IdRequest {
   suggestion: InternalTypes.Suggestion;
+  senderId: number;
   reason?: string;
 }
 
