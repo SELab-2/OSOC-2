@@ -5,7 +5,10 @@ import GitHubLogo from "../public/images/github-logo.svg"
 import {SyntheticEvent, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
+import {signIn} from "next-auth/react";
+import {Header} from "../components/Header/Header";
 
+//const crypto = require('crypto');
 const Login: NextPage = () => {
 
     const router = useRouter()
@@ -40,7 +43,7 @@ const Login: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const submitLogin = (e: SyntheticEvent) => {
+    const submitLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let error: boolean = false
@@ -61,12 +64,44 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
+            // We encrypt the password before sending it to the backend api
+            // TODO use encryption
+            //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
+            //console.log(encryptedPassword)
             // TODO -- Send call to the backend
-            // TODO -- Handle response
-            console.log("LOGGING IN...")
-            router.push("/students").then()
-        }
 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+                method: 'POST',
+                body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .catch(() => router.push("/login"));
+            console.log(response)
+            // TODO -- Handle response
+            if (response.success !== false) {
+                signIn('credentials', {
+                    username: loginEmail,
+                    password: loginPassword,
+                    redirect: false
+                }).then(res => {
+                        // TODO -- Redirect or handle errors
+                        console.log(res)
+                        if (res !== undefined) {
+                            const signInRes = res as SignInResult
+                            // The user is succesfully logged in => redirect to /students
+                            if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                                console.log("redirect")
+                                router.push("/students")
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 
     /**
@@ -124,7 +159,22 @@ const Login: NextPage = () => {
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("REGISTERING...")
-            router.push("/students").then()
+            signIn('credentials', {
+                username: registerEmail,
+                password: registerPassword,
+                redirect: false
+            }).then(res => {
+                // TODO -- Redirect or handle errors
+                console.log(res)
+                if (res !== undefined) {
+                    const signInRes = res as SignInResult
+                    // The user is succesfully logged in => redirect to /students
+                    if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                        console.log("redirect")
+                        router.push("/students").then()
+                    }
+                }
+            })
         }
     }
 
@@ -138,8 +188,9 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        // TODO
-        console.log("LOGGING IT WITH GITHUB...");
+        signIn("github").then(() => {
+            router.push("/students").then()
+        }).catch(res => console.log(`github catched response ${res}`))
     }
 
     /**
@@ -181,6 +232,7 @@ const Login: NextPage = () => {
 
     return (
         <div>
+            <Header/>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>
@@ -277,3 +329,27 @@ const Login: NextPage = () => {
 }
 
 export default Login;
+
+
+export type SignInResult = {
+    /**
+     * Will be different error codes,
+     * depending on the type of error.
+     */
+    error: string | undefined
+    /**
+     * HTTP status code,
+     * hints the kind of error that happened.
+     */
+    status: number
+    /**
+     * `true` if the signin was successful
+     */
+    ok: boolean
+    /**
+     * `null` if there was an error,
+     * otherwise the url the user
+     * should have been redirected to.
+     */
+    url: string | null
+}
