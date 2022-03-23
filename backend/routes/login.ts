@@ -19,6 +19,8 @@ async function login(req: express.Request): Promise<Responses.Key> {
   return parseLoginRequest(req).then(
       parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
         if (pass?.login_user?.password != parsed.pass) {
+          console.log("Comparing pass `" + pass?.login_user?.password +
+                      "` to `" + parsed.pass + "`");
           return Promise.reject(
               {http : 409, reason : 'Invalid e-mail or password.'});
         }

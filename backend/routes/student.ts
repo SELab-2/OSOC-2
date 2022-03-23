@@ -1,13 +1,13 @@
 import express from 'express';
 
+import * as ormEv from '../orm_functions/evaluation';
+import * as ormJo from '../orm_functions/job_application';
+import * as ormLa from '../orm_functions/language';
+import * as ormSt from '../orm_functions/student';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
-import * as ormSt from '../orm_functions/student';
-import * as ormJo from '../orm_functions/job_application';
-import * as ormLa from '../orm_functions/language';
-import * as ormEv from '../orm_functions/evaluation';
 
 /* eslint-disable no-unused-vars */
 
@@ -19,48 +19,52 @@ import * as ormEv from '../orm_functions/evaluation';
  */
 async function listStudents(req: express.Request):
     Promise<Responses.StudentList> {
-    return rq.parseStudentAllRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(parsed => {
-            const studentList : InternalTypes.Student[] = [];
-            ormSt.getAllStudents().then(students => {
-                students.forEach(student => {
-                    ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
-                        if(jobApplication !== null) {
-                            ormJo.getStudentEvaluationsTotal(student.student_id).then(evaluations => {
-                                let languages : string[] = [];
-                                jobApplication.job_application_skill.forEach(skill => {
-                                    ormLa.getLanguage(skill.language_id).then(language => {
-                                        if(language !== null) {
-                                            languages.push(language.name);
-                                        } else {
-                                            return Promise.reject(errors.cookInvalidID);
-                                        }
-                                    })
-                                });
-                                studentList.push({
-                                    firstname: student.person.firstname,
-                                    lastname: student.person.lastname,
-                                    email: student.person.email,
-                                    gender: student.gender,
-                                    pronouns: student.pronouns,
-                                    phoneNumber: student.phone_number,
-                                    nickname: student.nickname,
-                                    alumni: student.alumni,
-                                    languages: languages,
-                                    jobApplication: jobApplication,
-                                    evaluations: evaluations
+  return rq.parseStudentAllRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
+        const studentList: InternalTypes.Student[] = [];
+        ormSt.getAllStudents().then(
+            students => {students.forEach(
+                student => {
+                    ormJo.getLatestJobApplicationOfStudent(student.student_id)
+                        .then(jobApplication => {
+                          if (jobApplication !== null) {
+                            ormJo.getStudentEvaluationsTotal(student.student_id)
+                                .then(evaluations => {
+                                  let languages: string[] = [];
+                                  jobApplication.job_application_skill.forEach(
+                                      skill => {
+                                          ormLa.getLanguage(skill.language_id)
+                                              .then(language => {
+                                                if (language !== null) {
+                                                  languages.push(language.name);
+                                                } else {
+                                                  return Promise.reject(
+                                                      errors.cookInvalidID);
+                                                }
+                                              })});
+                                  studentList.push({
+                                    firstname : student.person.firstname,
+                                    lastname : student.person.lastname,
+                                    email : student.person.email,
+                                    // gender : student.gender,
+                                    pronouns : student.pronouns,
+                                    phoneNumber : student.phone_number,
+                                    nickname : student.nickname,
+                                    alumni : student.alumni,
+                                    languages : languages,
+                                    jobApplication : jobApplication,
+                                    evaluations : evaluations
+                                  })
                                 })
-                            })
-                        } else {
+                          } else {
                             return Promise.reject(errors.cookInvalidID);
-                        }
-                    })
-                })
-            });
+                          }
+                        })})});
 
-            return Promise.resolve({data : studentList, sessionkey : parsed.sessionkey});
-        });
+        return Promise.resolve(
+            {data : studentList, sessionkey : parsed.data.sessionkey});
+      });
 }
 
 /**
@@ -72,51 +76,55 @@ async function listStudents(req: express.Request):
 async function getStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseSingleStudentRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => util.isValidID(parsed, "student"))
-      .then(parsed => {
-          // FETCHING LOGIC
-          return ormSt
-              .getStudent(parsed.id)
-              .then(student => {
-                  if(student !== null) {
-                      return ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
-                          if(jobApplication !== null) {
-                              return ormJo.getStudentEvaluationsTotal(student.student_id).then(evaluations => {
-                                  let languages : string[] = [];
-                                  jobApplication.job_application_skill.forEach(skill => {
-                                      ormLa.getLanguage(skill.language_id).then(language => {
-                                          if(language !== null) {
-                                              languages.push(language.name);
-                                          } else {
-                                              return Promise.reject(errors.cookInvalidID);
-                                          }
-                                      })
-                                  });
-                                  return Promise.resolve({data: {
-                                          firstname: student.person.firstname,
-                                          lastname: student.person.lastname,
-                                          email: student.person.email,
-                                          gender: student.gender,
-                                          pronouns: student.pronouns,
-                                          phoneNumber: student.phone_number,
-                                          nickname: student.nickname,
-                                          alumni: student.alumni,
-                                          languages: languages,
-                                          jobApplication: jobApplication,
-                                          evaluations: evaluations,
-                                      },
-                                      sessionkey: parsed.sessionkey
+      .then(parsed => util.isValidID(parsed.data, "student"))
+      .then(async parsed => {
+                // FETCHING LOGIC
+                return ormSt.getStudent(parsed.id).then(async student => {
+                  if (student !== null) {
+                    return ormJo
+                        .getLatestJobApplicationOfStudent(student.student_id)
+                        .then(async jobApplication => {
+                          if (jobApplication !== null) {
+                            return ormJo
+                                .getStudentEvaluationsTotal(student.student_id)
+                                .then(evaluations => {
+                                  let languages: string[] = [];
+                                  jobApplication.job_application_skill.forEach(
+                                      skill => {
+                                          ormLa.getLanguage(skill.language_id)
+                                              .then(language => {
+                                                if (language !== null) {
+                                                  languages.push(language.name);
+                                                } else {
+                                                  return Promise.reject(
+                                                      errors.cookInvalidID);
+                                                }
+                                              })});
+                                  return Promise.resolve({
+                                    data : {
+                                      firstname : student.person.firstname,
+                                      lastname : student.person.lastname,
+                                      email : student.person.email,
+                                      // gender : student.gender,
+                                      pronouns : student.pronouns,
+                                      phoneNumber : student.phone_number,
+                                      nickname : student.nickname,
+                                      alumni : student.alumni,
+                                      languages : languages,
+                                      jobApplication : jobApplication,
+                                      evaluations : evaluations,
+                                    },
+                                    sessionkey : parsed.sessionkey
                                   })
-                              })
+                                })
                           } else {
-                              return Promise.reject(errors.cookInvalidID);
+                            return Promise.reject(errors.cookInvalidID);
                           }
-                      })
+                        })
                   } else {
-                      return Promise.reject(errors.cookInvalidID());
+                    return Promise.reject(errors.cookInvalidID());
                   }
-              })
-      });
+                })});
 }
 
 /**
@@ -128,27 +136,26 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 async function modStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseUpdateStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
-      .then(parsed => {
-          // UPDATE LOGIC
-          return ormSt.updateStudent({
-              studentId: parsed.id,
-              gender: parsed.gender,
-              pronouns: parsed.pronouns,
-              phoneNumber: parsed.phone,
-              nickname: parsed.nickname,
-              alumni: parsed.alumni
-          }).then(student => {
-              return Promise.resolve({data: {
-                      pronouns: student.pronouns,
-                      phone_number: student.phone_number,
-                      nickname: student.nickname,
-                      alumni: student.alumni,
-                  },
-                  sessionkey: parsed.sessionkey
-              })
-          })
-      });
+      .then(parsed => util.isValidID(parsed.data, 'student'))
+      .then(async parsed => {// UPDATE LOGIC
+                             return ormSt
+                                 .updateStudent({
+                                   studentId : parsed.id,
+                                   gender : parsed.gender,
+                                   pronouns : parsed.pronouns,
+                                   phoneNumber : parsed.phone,
+                                   nickname : parsed.nickname,
+                                   alumni : parsed.alumni
+                                 })
+                                 .then(student => {return Promise.resolve({
+                                         data : {
+                                           pronouns : student.pronouns,
+                                           phone_number : student.phone_number,
+                                           nickname : student.nickname,
+                                           alumni : student.alumni,
+                                         },
+                                         sessionkey : parsed.sessionkey
+                                       })})});
 }
 
 /**
@@ -160,15 +167,11 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
 async function deleteStudent(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
-      .then(parsed => {
-          // DELETE LOGIC
-          return ormSt.deleteStudent(parsed.id).then(() => {
-              return Promise.resolve({
-                  sessionkey: parsed.sessionkey
-              })
-          })
-      });
+      .then(parsed => util.isValidID(parsed.data, 'student'))
+      .then(async parsed => {// DELETE LOGIC
+                             return ormSt.deleteStudent(parsed.id).then(
+                                 () => {return Promise.resolve(
+                                     {sessionkey : parsed.sessionkey})})});
 }
 
 /**
@@ -181,34 +184,34 @@ async function createStudentSuggestion(req: express.Request):
     Promise<Responses.Key> {
   return rq.parseSuggestStudentRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => {
-          // SUGGESTING LOGIC
-          return ormSt
-              .getStudent(parsed.id)
-              .then(student => {
+      .then(async parsed => {
+                // SUGGESTING LOGIC
+                return ormSt.getStudent(parsed.data.id).then(async student => {
                   if (student !== null) {
-                      return ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
-                            if(jobApplication !== null) {
-                                return ormEv.createEvaluationForStudent({
-                                    loginUserId: parsed.senderId,
-                                    jobApplicationId: jobApplication.job_application_id,
-                                    decision: parsed.suggestion,
-                                    motivation: parsed.reason,
-                                    isFinal: true
-                                }).then(() => {
-                                    return Promise.resolve({
-                                        sessionkey: parsed.sessionkey
-                                    })
+                    return ormJo
+                        .getLatestJobApplicationOfStudent(student.student_id)
+                        .then(async jobApplication => {
+                          if (jobApplication !== null) {
+                            return ormEv
+                                .createEvaluationForStudent({
+                                  loginUserId : parsed.userId,
+                                  jobApplicationId :
+                                      jobApplication.job_application_id,
+                                  decision : parsed.data.suggestion,
+                                  motivation : parsed.data.reason,
+                                  isFinal : true
                                 })
-                            } else {
-                                return Promise.reject(errors.cookInvalidID());
-                            }
-                      })
+                                .then(
+                                    () => {return Promise.resolve(
+                                        {sessionkey : parsed.data.sessionkey})})
+                          } else {
+                            return Promise.reject(errors.cookInvalidID());
+                          }
+                        })
                   } else {
-                      return Promise.reject(errors.cookInvalidID());
+                    return Promise.reject(errors.cookInvalidID());
                   }
-              })
-      });
+                })});
 }
 
 /**
@@ -221,33 +224,40 @@ async function getStudentSuggestions(req: express.Request):
     Promise<Responses.SuggestionInfo> {
   return rq.parseStudentGetSuggestsRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
-          // FETCHING LOGIC
-          /*let suggestionsList : InternalTypes.SuggestionInfo[] = [];
-          ormSt.getStudent(parsed.id)
-              .then(student => {
-                  if (student !== null) {
-                      ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication => {
-                          if(jobApplication !== null) {
-                              ormJo.getStudentEvaluationsTemp(student.student_id).then(suggestions => {
-                                  suggestions.forEach(suggestion => {
-                                      suggestionsList.push({
-                                          suggestion: suggestion,
-                                          sender: ormEv.getLoginUserByEvaluationId(suggestion.evaluation.evaluation_id)
-                                      })
-                                  })
-                              })
-                          } else {
-                              return Promise.reject(errors.cookInvalidID());
-                          }
-                      })
-                  } else {
-                      return Promise.reject(errors.cookInvalidID());
-                  }
-              })*/
+        // FETCHING LOGIC
+        /*let suggestionsList : InternalTypes.SuggestionInfo[] = [];
+        ormSt.getStudent(parsed.id)
+            .then(student => {
+                if (student !== null) {
+                    ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication
+        => { if(jobApplication !== null) {
+                            ormJo.getStudentEvaluationsTemp(student.student_id).then(suggestions
+        => { suggestions.forEach(suggestion => { suggestionsList.push({
+                                        suggestion: suggestion,
+                                        sender:
+        ormEv.getLoginUserByEvaluationId(suggestion.evaluation.evaluation_id)
+                                    })
+                                })
+                            })
+                        } else {
+                            return Promise.reject(errors.cookInvalidID());
+                        }
+                    })
+                } else {
+                    return Promise.reject(errors.cookInvalidID());
+                }
+            })*/
 
-          return Promise.resolve({data : [{suggestion: "YES", sender: {id: 0, name: "Darth Vader"}, reason: "no reason"}], sessionkey : parsed.sessionkey});
+        return Promise.resolve({
+          data : [ {
+            suggestion : "YES",
+            sender : {id : 0, name : "Darth Vader"},
+            reason : "no reason"
+          } ],
+          sessionkey : parsed.sessionkey
+        });
       });
 }
 
@@ -261,13 +271,13 @@ async function createStudentConfirmation(req: express.Request):
     Promise<Responses.Keyed<InternalTypes.Suggestion>> {
   return rq.parseFinalizeDecisionRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => util.isValidID(parsed, 'student'))
+      .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
-          // UPDATING LOGIC
-          /*return ormEv.createEvaluationForStudent({
-              loginUserId: parsed.
-          })*/
-          return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
+        // UPDATING LOGIC
+        /*return ormEv.createEvaluationForStudent({
+            loginUserId: parsed.
+        })*/
+        return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
       });
 }
 
@@ -300,7 +310,7 @@ export function getRouter(): express.Router {
                             res, deleteStudent(req)));
 
   router.post('/:id', (req, res) => util.respOrErrorNoReinject(
-        res, createStudentSuggestion(req)));
+                          res, createStudentSuggestion(req)));
 
   util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
