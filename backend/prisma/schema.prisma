@@ -18,7 +18,7 @@ model applied_role {
 model attachment {
   attachment_id      Int             @id @default(autoincrement())
   job_application_id Int             @default(autoincrement())
-  url                String
+  data               String
   type               type_enum
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -51,7 +51,6 @@ model job_application {
   student_id             Int                     @default(autoincrement())
   student_volunteer_info String
   responsibilities       String?
-  motivation             String?
   fun_fact               String?
   student_coach          Boolean
   osoc_id                Int
@@ -92,8 +91,8 @@ model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
   password       String?
-  is_admin       Boolean?
-  is_coach       Boolean?
+  is_admin       Boolean
+  is_coach       Boolean
   session_keys   String[]
   account_status account_status_enum
   person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
@@ -195,9 +194,11 @@ enum email_status_enum {
 }
 
 enum type_enum {
-  CV
-  PORTFOLIO
-  FILE
+  CV_URL
+  PORTFOLIO_URL
+  FILE_URL
+  MOTIVATION_STRING
+  MOTIVATION_URL
 }
 
 enum account_status_enum {

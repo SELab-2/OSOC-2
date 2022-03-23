@@ -23,7 +23,11 @@ export async function createLoginUser(loginUser: CreateLoginUser){
  * @returns a list of all the login user objects in the database
  */
  export async function getAllLoginUsers() {
-    return await prisma.login_user.findMany()
+    return await prisma.login_user.findMany({
+        include: {
+            person: true
+        }
+    });
 }
 
 /**
@@ -70,6 +74,9 @@ export async function searchLoginUserByPerson(personId: number){
         where: { 
             person_id: personId
         },
+        include : {
+            person: true,
+        }
     });
     return result;
 }
@@ -84,6 +91,9 @@ export async function searchAllAdminLoginUsers(isAdmin: boolean){
         where: { 
             is_admin: isAdmin
         },
+        include: {
+            person: true,
+        }
     });
     return result;
 }
@@ -98,6 +108,9 @@ export async function searchAllCoachLoginUsers(isCoach: boolean){
         where: { 
             is_coach: isCoach
         },
+        include: {
+            person: true,
+        }
     });
     return result;
 }
@@ -118,6 +131,9 @@ export async function searchAllAdminAndCoachLoginUsers(bool: boolean){
                     is_coach: bool
                 },
             ],
+        },
+        include: {
+            person: true,
         }
     });
     return result;
@@ -139,6 +155,9 @@ export async function updateLoginUser(loginUser: UpdateLoginUser){
             is_coach: loginUser.isCoach,
             account_status: loginUser.accountStatus
         },
+        include: {
+            person: true,
+        }
     });
     return result;
 }
@@ -241,4 +260,20 @@ export async function setSessionId(loginUserId:number, sessionKey: string) {
     }
     return Promise.reject(new Error("login user id does not exist in the database"));
 
+}
+
+/**
+ *
+ * @param loginUserId: the id of the loginUser we are searching
+ * @returns promise with the found data, or promise with null inside if no loginUser has the given id
+ */
+export async function getLoginUserById(loginUserId: number) {
+    return await prisma.login_user.findUnique({
+        where: {
+            login_user_id: loginUserId,
+        },
+        include: {
+            person: true
+        }
+    });
 }

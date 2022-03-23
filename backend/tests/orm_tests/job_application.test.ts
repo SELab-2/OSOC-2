@@ -78,7 +78,6 @@ test("should create a job application", async () => {
         emailStatus: email_status_enum.DRAFT,
         funFact: "cool",
         studentVolunteerInfo: "Yes, I can work with a student employment agreement in Belgium",
-        motivation: "moneyyy",
         osocId: 0,
         responsibilities: undefined,
         studentCoach: false,
