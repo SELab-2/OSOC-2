@@ -3,6 +3,7 @@ import express from 'express';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
+import {errors} from '../utility';
 import * as ormSt from '../orm_functions/student';
 
 /* eslint-disable no-unused-vars */
@@ -49,15 +50,26 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => util.isValidID(parsed, "student"))
       .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve({
-          data : {id : parsed.id, name : '', email : '', labels : []},
-          sessionkey : parsed.sessionkey
-        });
-
-          /*return ormSt.getStudent(parsed.id).then({
-
-          })*/
+          // FETCHING LOGIC
+          // TODO what should be shown?
+          return ormSt.getStudent(parsed.id).then(student => {
+              if(student !== null) {
+                  return Promise.resolve({data: {
+                          firstname: student.person.firstname,
+                          lastname: student.person.lastname,
+                          email: student.person.email,
+                          gender: student.gender,
+                          pronouns: student.pronouns,
+                          phoneNumber: student.phone_number,
+                          nickname: student.nickname,
+                          alumni: student.alumni
+                      },
+                      sessionkey: parsed.sessionkey
+                  })
+              } else {
+                  return Promise.reject(errors.cookInvalidID());
+              }
+          })
       });
 }
 
