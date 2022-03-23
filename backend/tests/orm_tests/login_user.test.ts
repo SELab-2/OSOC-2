@@ -60,8 +60,8 @@ test("should return the HASHED password of the given login user", async () => {
 });
 
 test("should return the searched login user record with the given person id", async () => {
-    prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-    await expect(searchLoginUserByPerson(0)).resolves.toEqual([returnValue]);
+    prismaMock.login_user.findUnique.mockResolvedValue(returnValue);
+    await expect(searchLoginUserByPerson(0)).resolves.toEqual(returnValue);
 });
 
 test("should return all the login user records that are admin", async () => {
@@ -85,6 +85,7 @@ test("should update the login user with the new data and return the updated reco
         password: "New_pass",
         isAdmin: false,
         isCoach: false,
+        accountStatus: "ACTIVATED"
     };
 
     prismaMock.login_user.update.mockResolvedValue(returnValue);

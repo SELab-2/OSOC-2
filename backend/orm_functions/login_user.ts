@@ -57,14 +57,16 @@ export async function getPasswordLoginUser(loginUserId: number) {
  *     the database
  * @returns: login user object
  */
-export async function searchLoginUserByPerson(personId: number) {
-  const result = await prisma.login_user.findMany({
-    where : {person_id : personId},
-    include : {
-      person : true,
-    }
-  });
-  return result;
+export async function searchLoginUserByPerson(personId: number){
+    const result = await prisma.login_user.findUnique({
+        where: { 
+            person_id: personId
+        },
+        include : {
+            person: true,
+        }
+    });
+    return result;
 }
 
 /**
@@ -100,61 +102,65 @@ export async function searchAllCoachLoginUsers(isCoach: boolean) {
 /**
  *
  * @param bool: boolean value for the admin and coach status
- * @returns: all login user objects where the bool matches with both the admin
- * and coach status
+ * @returns: all login user objects where the bool matches with both the admin and coach status
  */
-export async function searchAllAdminAndCoachLoginUsers(bool: boolean) {
-  const result = await prisma.login_user.findMany({
-    where : {
-      AND : [
-        {is_admin : bool},
-        {is_coach : bool},
-      ],
-    },
-    include : {
-      person : true,
-    }
-  });
-  return result;
+export async function searchAllAdminAndCoachLoginUsers(bool: boolean){
+    const result = await prisma.login_user.findMany({
+        where: { 
+            AND: [
+                {
+                    is_admin: bool
+                },
+                {
+                    is_coach: bool
+                },
+            ],
+        },
+        include: {
+            person: true,
+        }
+    });
+    return result;
 }
 
 /**
- *
- * @param loginUser: UpdateLoginUser object with the values that need to be
- *     updated
- * @returns the updated entry in the database
+ * 
+ * @param loginUser: UpdateLoginUser object with the values that need to be updated
+ * @returns the updated entry in the database 
  */
-export async function updateLoginUser(loginUser: UpdateLoginUser) {
-  const result = await prisma.login_user.update({
-    where : {login_user_id : loginUser.loginUserId},
-    data : {
-      password : loginUser.password,
-      is_admin : loginUser.isAdmin,
-      is_coach : loginUser.isCoach
-    },
-    include : {
-      person : true,
-    }
-  });
-  return result;
+export async function updateLoginUser(loginUser: UpdateLoginUser){
+    const result = await prisma.login_user.update({
+        where : {
+            login_user_id: loginUser.loginUserId
+        },
+        data: {
+            password: loginUser.password,
+            is_admin: loginUser.isAdmin,
+            is_coach: loginUser.isCoach,
+            account_status: loginUser.accountStatus
+        },
+        include: {
+            person: true,
+        }
+    });
+    return result;
 }
 
 /**
- *
- * @param loginUserId the login user who's info we are deleting from the login
- *     user-table
- * @returns personal info about the login user, this info can be used to further
- *     remove the person
+ * 
+ * @param loginUserId the login user who's info we are deleting from the login user-table
+ * @returns personal info about the login user, this info can be used to further remove the person
  */
-export async function deleteLoginUserById(loginUserId: number) {
-  const result = await prisma.login_user.delete({
-    where : {login_user_id : loginUserId},
-    include : {
-      // returns the person info of the removed login user
-      person : true
-    }
-  });
-  return result;
+export async function deleteLoginUserById(loginUserId: number){
+    const result = await prisma.login_user.delete({
+        where: { 
+            login_user_id: loginUserId 
+        },
+        include: { // returns the person info of the removed login user
+            person: true
+        }   
+    });
+    return result;
 }
 
 /**

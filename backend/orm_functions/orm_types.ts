@@ -95,7 +95,11 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is a coach
      */
-    isCoach: boolean
+    isCoach: boolean,
+    /**
+     * undefined if unchanged or the new account status that indicates the login user status
+     */
+    accountStatus: account_status_enum
 }
 
 /**
