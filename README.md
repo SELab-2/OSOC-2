@@ -1,9 +1,7 @@
 # OSOC-2
 
-### All the usefull documentations can be found here
+### Index of all the useful documentations
 [Mock Ups](docs/mock_ups/README.md)
-
-[Docker setup guide](docs/docker_quick_guide.md)
 
 [Use cases](https://ugentbe-my.sharepoint.com/:w:/r/personal/bart_mesuere_ugent_be/_layouts/15/Doc.aspx?sourcedoc=%7B00A86029-106D-4B9E-93CD-852B4E3CA90C%7D&file=Use%20cases.docx&action=default&mobileredirect=true)
 
@@ -17,8 +15,10 @@
 
 [The valid filter parameters](docs/searching.md)
 
-[The valid filter parameters](docs/searching.md)
-
 [Programming Conventions](docs/conventions.md)
 
-[Contribution](docs/contribute.md)
+[Docker setup guide](docs/docker_quick_guide.md)
+
+[User manual](docs/user_manual.md)
+
+[How to contribute](docs/contribute.md)
