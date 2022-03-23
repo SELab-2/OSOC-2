@@ -260,3 +260,19 @@ export async function setSessionId(loginUserId:number, sessionKey: string) {
     return Promise.reject(new Error("login user id does not exist in the database"));
 
 }
+
+/**
+ *
+ * @param loginUserId: the id of the loginUser we are searching
+ * @returns promise with the found data, or promise with null inside if no loginUser has the given id
+ */
+export async function getLoginUserById(loginUserId: number) {
+    return await prisma.login_user.findUnique({
+        where: {
+            login_user_id: loginUserId,
+        },
+        include: {
+            person: true
+        }
+    });
+}

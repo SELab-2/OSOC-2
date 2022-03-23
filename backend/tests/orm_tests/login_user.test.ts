@@ -1,11 +1,13 @@
 import {prismaMock} from "./singleton";
 import {account_status_enum} from "@prisma/client";
 import { CreateLoginUser, UpdateLoginUser } from "../../orm_functions/orm_types";
-import {checkValidSessionAndRemove, createLoginUser, getAllLoginUsers, 
-    getSessionKeys, setSessionId, getPasswordLoginUserByPerson, 
+import {
+    checkValidSessionAndRemove, createLoginUser, getAllLoginUsers,
+    getSessionKeys, setSessionId, getPasswordLoginUserByPerson,
     getPasswordLoginUser, searchLoginUserByPerson, searchAllAdminLoginUsers,
-    searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser, 
-    deleteLoginUserById, deleteLoginUserByPersonId} 
+    searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser,
+    deleteLoginUserById, deleteLoginUserByPersonId, getLoginUserById
+}
     from "../../orm_functions/login_user";
 
 
@@ -134,3 +136,8 @@ test("should return a rejected promise", async () => {
     // for the return value of getSessionKeys
     await expect(setSessionId(0, "50")).rejects.toEqual(new Error("login user id does not exist in the database"))
 });
+
+test("should return the login_user with given id", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(response);
+    await expect(getLoginUserById(0)).resolves.toEqual(response);
+})
