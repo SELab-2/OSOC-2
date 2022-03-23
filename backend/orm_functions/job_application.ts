@@ -22,6 +22,7 @@ import {CreateJobApplication} from "./orm_types";
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -51,6 +52,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
@@ -80,6 +82,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                 select: {
                     decision: true,
                     motivation: true,
+                    evaluation_id: true,
                 }
             }
         }
