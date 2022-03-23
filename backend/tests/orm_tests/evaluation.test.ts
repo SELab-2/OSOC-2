@@ -1,7 +1,13 @@
 import {prismaMock} from "./singleton";
 import {decision_enum} from "@prisma/client";
-import {checkIfFinalEvaluationExists, createEvaluationForStudent, updateEvaluationForStudent} from "../../orm_functions/evaluation";
+import {
+    checkIfFinalEvaluationExists,
+    createEvaluationForStudent,
+    getLoginUserByEvaluationId,
+    updateEvaluationForStudent
+} from "../../orm_functions/evaluation";
 import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from "../../orm_functions/orm_types";
+
 
 test("should return a final evaluation if it exists", async () => {
     const jobApplicationId = 5;
@@ -93,3 +99,17 @@ test("should update the evaluation", async () => {
 
     await expect(updateEvaluationForStudent(evaluation)).resolves.toEqual(response);
 })
+
+test("should return the loginUser with his info that made this evaluation", async () => {
+
+    const result = {
+        evaluation_id: 7,
+        login_user_id: 0,
+        job_application_id: 0,
+        decision: decision_enum.MAYBE,
+        motivation: null,
+        is_final: true
+    }
+    prismaMock.evaluation.findUnique.mockResolvedValue(result);
+    await expect(getLoginUserByEvaluationId(7)).resolves.toEqual(result);
+});
