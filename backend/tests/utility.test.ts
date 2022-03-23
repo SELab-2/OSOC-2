@@ -335,7 +335,14 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
                password : "imapassword",
                is_admin : true,
                is_coach : false,
-               account_status : 'ACTIVATED'
+               account_status : 'ACTIVATED',
+               person: {
+                 lastname: "lastname",
+                 firstname: "firstname",
+                 github: "hiethub",
+                 person_id: 0,
+                 email: "email@mail.com"
+               }
              } ]);
            });
 

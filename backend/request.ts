@@ -136,9 +136,8 @@ async function parseKeyIdRequest(req: express.Request):
  */
 async function parseUpdateLoginUser(req: express.Request):
     Promise<Requests.UpdateLoginUser> {
-  return hasFields(req, [], types.id).then(() => {
-    const optional =
-        [ "isAdmin", "isCoach", "pass" ];
+  return hasFields(req, [ "isAdmin", "isCoach", "id", "sessionkey"], types.id).then(() => {
+    const optional = [ "pass" ];
     if (!atLeastOneField(req, optional))
       return rejector();
 
@@ -206,16 +205,17 @@ export async function parseUpdateStudentRequest(req: express.Request):
  */
 export async function parseSuggestStudentRequest(req: express.Request):
     Promise<Requests.Suggest> {
-  return hasFields(req, [ "suggestion" ], types.id).then(() => {
+  return hasFields(req, [ "suggestion", "senderId" ], types.id).then(() => {
     const sug: any = req.body.suggestion;
-    if (sug != "YES" && sug != "MAYBE" && sug != "NO")
+    if (sug != "YES" && sug != "MAYBE" && sug != "NO" && req.body.senderId !== null)
       return rejector();
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
       id : Number(req.params.id),
       suggestion : sug,
-      reason : maybe(req.body, "reason")
+      reason : maybe(req.body, "reason"),
+      senderId: Number(req.body.senderId)
     });
   });
 }

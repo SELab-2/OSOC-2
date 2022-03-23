@@ -1,12 +1,25 @@
 import {prismaMock} from "./singleton";
 import {account_status_enum} from "@prisma/client";
 import { CreateLoginUser, UpdateLoginUser } from "../../orm_functions/orm_types";
-import { createLoginUser, getAllLoginUsers,
-    getPasswordLoginUserByPerson,
+import {
+    createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson,
     getPasswordLoginUser, searchLoginUserByPerson, searchAllAdminLoginUsers,
-    searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser, 
-    deleteLoginUserById, deleteLoginUserByPersonId} 
+    searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser,
+    deleteLoginUserById, deleteLoginUserByPersonId, getLoginUserById
+}
     from "../../orm_functions/login_user";
+
+
+const response = {
+    session_id: "50",
+    login_user_id: 1,
+    person_id: 0,
+    password: "password",
+    is_admin: false,
+    is_coach: false,
+    session_keys: ["key1", "key2"],
+    account_status: account_status_enum.DISABLED
+}
 
 const returnValue = {
     login_user_id: 0,
@@ -87,3 +100,8 @@ test("should delete the login user with the given person id and return the delet
     prismaMock.login_user.delete.mockResolvedValue(returnValue);
     await expect(deleteLoginUserByPersonId(0)).resolves.toEqual(returnValue);
 });
+
+test("should return the login_user with given id", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(response);
+    await expect(getLoginUserById(0)).resolves.toEqual(response);
+})

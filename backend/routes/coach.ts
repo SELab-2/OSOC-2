@@ -16,10 +16,15 @@ async function listCoaches(req: express.Request):
     Promise<Responses.IdNameList> {
   return rq.parseCoachAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => {
-        // FETCHING LOGIC
-        return Promise.resolve(
-            {data : [], sessionkey : parsed.data.sessionkey});
+      .then(async parsed => {
+        return ormLU.searchAllCoachLoginUsers(true)
+            .then(obj => obj.map(val => Promise.resolve({
+              id : val.person_id,
+              name : val.person.firstname + " " + val.person.lastname
+            })))
+            .then(arr => Promise.all(arr))
+            .then(arr => Promise.resolve(
+                      {sessionkey : parsed.data.sessionkey, data : arr}));
       });
 }
 
