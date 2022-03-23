@@ -54,7 +54,7 @@ model job_application {
   fun_fact               String?
   student_coach          Boolean
   osoc_id                Int
-  edus                   String?
+  edus                   String[]
   edu_level              String?
   edu_duration           Int?
   edu_year               Int?
