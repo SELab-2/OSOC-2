@@ -46,7 +46,7 @@ function rejector<T>(): Promise<T> {
  *  @returns `true` if and only if the object contains all of the fields.
  */
 function anyHasFields(obj: any, fields: string[]): boolean {
-  for (var f of fields) {
+  for (const f of fields) {
     if (!(f in obj)) {
       console.log("!!! Missing argument " + f + " in `" + JSON.stringify(obj) +
                   "`!!!");

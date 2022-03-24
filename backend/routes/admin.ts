@@ -117,7 +117,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/admin');
   util.route(router, "get", "/all", listAdmins);

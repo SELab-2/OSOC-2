@@ -182,7 +182,7 @@ async function deleteCoachRequest(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router({strict : true});
+  const router: express.Router = express.Router({strict : true});
   util.setupRedirect(router, '/coach');
   util.route(router, "get", "/all", listCoaches);
 
