@@ -111,7 +111,7 @@ const Login: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const submitRegister = (e: SyntheticEvent) => {
+    const submitRegister = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let error: boolean = false
@@ -156,25 +156,41 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    firstName: registerFirstName,
+                    lastName: registerLastName,
+                    emailOrGithub: registerEmail,
+                    pass: registerPassword
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json());
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("REGISTERING...")
-            signIn('credentials', {
-                username: registerEmail,
-                password: registerPassword,
-                redirect: false
-            }).then(res => {
-                // TODO -- Redirect or handle errors
-                console.log(res)
-                if (res !== undefined) {
-                    const signInRes = res as SignInResult
-                    // The user is succesfully logged in => redirect to /students
-                    if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                        console.log("redirect")
-                        router.push("/students").then()
+            if(res.success){
+                signIn('credentials', {
+                    username: registerEmail,
+                    password: registerPassword,
+                    redirect: false
+                }).then(res => {
+                    // TODO -- Redirect or handle errors
+                    console.log(res)
+                    if (res !== undefined) {
+                        const signInRes = res as SignInResult
+                        // The user is succesfully logged in => redirect to /students
+                        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                            console.log("redirect")
+                            router.push("/students").then()
+                        }
                     }
-                }
-            })
+                });
+            }
         }
     }
 
