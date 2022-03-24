@@ -209,8 +209,8 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"}).then(() => {
-        }).catch(res => console.log(`github catched response ${res}`))
+        signIn("github", {callbackUrl: "/students"})
+        .catch(res => console.log(`github catched response ${res}`))
     }
 
     /**
