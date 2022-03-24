@@ -134,7 +134,7 @@ async function modProjectStudent(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/project');
   util.route(router, "get", "/all", listProjects);

@@ -1,8 +1,6 @@
 import express from 'express';
 import {account_status_enum} from "@prisma/client";
 
-/* eslint-disable no-unused-vars */
-
 /**
  *  Interface for API errors. Specifies an HTTP status code and error reason.
  */
@@ -16,8 +14,6 @@ export interface ApiError {
    */
   reason: string;
 }
-
-/*eslint-disable no-unused-vars*/
 
 /**
  *  Interface for error cooking functions. Each function corresponds to an
@@ -61,10 +57,6 @@ export interface Errors {
    */
   cookServerError: () => ApiError;
 }
-
-/*eslint-enable no-unused-vars*/
-// we disabled the unused vars - the interface defines the fields and their
-// types, but we don't use parameters here. ESlint is just too dumb to see this.
 
 /**
  *  Namespace for internal response types. For actual response types, see
@@ -491,8 +483,6 @@ export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
     "job_application"|"job_application_skill"|"language"|"login_user"|"osoc"|
     "person"|"project_role"|"project_user"|"role"|"student";
 
-/*eslint-disable no-unused-vars*/
-
 /**
  *  A route callback is a function taking an Express js request and returning a
  * promise (resolving to an API response).
@@ -500,5 +490,9 @@ export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
 export type RouteCallback<T extends Responses.ApiResponse> =
     (req: express.Request) => Promise<T>;
 
-/*eslint-enable no-unused-vars*/
-// again, we introduce a type alias, but ESLint is just too stupid.
+/**
+ *  Helper type for unsafe type checks.
+ */
+export interface Anything {
+  [key: string]: unknown;
+}
