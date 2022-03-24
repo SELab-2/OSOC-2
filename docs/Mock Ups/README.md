@@ -7,3 +7,5 @@ https://www.figma.com/team_invite/redeem/qGdH3OZIbh5RS5WtAxTu2m
 
 For editing rights please contact me at:
 mauricevanwassenhove@gmail.com
+
+The mock-ups figma file can be found in this folder under mock-ups.fig.
