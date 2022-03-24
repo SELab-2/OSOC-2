@@ -10,3 +10,4 @@ This folder contains all the required documentations:
 - [User Manual](https://github.com/SELab-2/OSOC-2/blob/documentation/docs/user_manual.md)
 - [API Manual](https://github.com/SELab-2/OSOC-2/blob/documentation/docs/searching.md)
 - [Code Conventions](https://github.com/SELab-2/OSOC-2/blob/documentation/docs/conventions.md)
+- [How to contribute](https://github.com/SELab-2/OSOC-2/blob/documentation/docs/contribute.md)
