@@ -136,7 +136,7 @@ async function parseKeyIdRequest(req: express.Request):
  */
 async function parseUpdateLoginUser(req: express.Request):
     Promise<Requests.UpdateLoginUser> {
-  return hasFields(req, [ "isAdmin", "isCoach", "id", "sessionkey"], types.id).then(() => {
+  return hasFields(req, [ "isAdmin", "isCoach", "id", "sessionkey", "accountStatus"], types.id).then(() => {
     const optional = [ "pass" ];
     if (!atLeastOneField(req, optional))
       return rejector();
@@ -146,7 +146,8 @@ async function parseUpdateLoginUser(req: express.Request):
       id : Number(req.params.id),
       isAdmin : maybe(req.body, "isAdmin"),
       isCoach : maybe(req.body, "isCoach"),
-      pass : maybe(req.body, "pass")
+      pass : maybe(req.body, "pass"),
+      accountStatus: req.body.accountStatus
     });
   });
 }

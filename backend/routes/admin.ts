@@ -4,7 +4,6 @@ import * as ormL from "../orm_functions/login_user";
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
-import {account_status_enum} from "@prisma/client";
 
 /**
  *  Attempts to list all admins in the system.
@@ -79,7 +78,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                 loginUserId : parsed.id,
                 isAdmin : parsed.isAdmin,
                 isCoach : parsed.isCoach,
-                accountStatus: account_status_enum.PENDING // TODO? wat moet dit zijn?
+                accountStatus: parsed.accountStatus
             })
             .then(admin => {// TODO why this return data?
                             return Promise.resolve({

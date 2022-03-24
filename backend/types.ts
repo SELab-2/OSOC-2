@@ -1,4 +1,5 @@
 import express from 'express';
+import {account_status_enum} from "@prisma/client";
 
 /* eslint-disable no-unused-vars */
 
@@ -410,6 +411,7 @@ export interface UpdateLoginUser extends IdRequest {
   isAdmin: boolean;
   isCoach: boolean;
   pass?: string;
+  accountStatus: account_status_enum;
 }
 
 export interface CoachRequest {
