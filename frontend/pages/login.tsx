@@ -221,7 +221,7 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students   "}).then()
+        signIn("github", {callbackUrl: "/students"}).then()
         // TODO -- How are we supposed to send the data to the backend?
     }
 
