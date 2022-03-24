@@ -1,6 +1,6 @@
 import express from 'express';
 
-import {Requests} from './types';
+import {Anything, InternalTypes, Requests} from './types';
 import {errors} from './utility';
 
 /**
@@ -45,8 +45,8 @@ function rejector<T>(): Promise<T> {
  *  @param fields The fields the object should contain.
  *  @returns `true` if and only if the object contains all of the fields.
  */
-function anyHasFields(obj: any, fields: string[]): boolean {
-  for (var f of fields) {
+function anyHasFields(obj: Anything, fields: string[]): boolean {
+  for (const f of fields) {
     if (!(f in obj)) {
       console.log("!!! Missing argument " + f + " in `" + JSON.stringify(obj) +
                   "`!!!");
@@ -97,8 +97,8 @@ function atLeastOneField(req: express.Request, fields: string[]): boolean {
  *  @param key The key to find in the object.
  *  @returns `obj[key]` if the key is present, otherwise `undefined`.
  */
-function maybe<T>(obj: any, key: string): T {
-  return (key in obj) ? obj[key] : undefined;
+function maybe<T>(obj: Anything, key: string): T|undefined {
+  return (key in obj) ? (obj[key] as T) : undefined;
 }
 
 /**
@@ -144,9 +144,9 @@ async function parseUpdateLoginUser(req: express.Request):
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
       id : Number(req.params.id),
-      isAdmin : maybe(req.body, "isAdmin"),
-      isCoach : maybe(req.body, "isCoach"),
-      pass : maybe(req.body, "pass"),
+      isAdmin : maybe(req.body, "isAdmin") as boolean,
+      isCoach : maybe(req.body, "isCoach") as boolean,
+      pass : maybe(req.body, "pass") as string,
       accountStatus: req.body.accountStatus
     });
   });
@@ -174,8 +174,8 @@ export async function parseLoginRequest(req: express.Request):
 export async function parseUpdateStudentRequest(req: express.Request):
     Promise<Requests.UpdateStudent> {
   const bodyF = [
-    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone", "nickname", "alumni",
-    "education"
+    "emailOrGithub", "firstName", "lastName", "gender", "pronouns", "phone",
+    "nickname", "alumni", "education"
   ];
 
   return hasFields(req, [], types.id).then(() => {
@@ -193,7 +193,7 @@ export async function parseUpdateStudentRequest(req: express.Request):
       phone : maybe(req.body, "phone"),
       education : maybe(req.body, "education"),
       alumni : maybe(req.body, "alumni"),
-      nickname: maybe(req.body, "nickname")
+      nickname : maybe(req.body, "nickname")
     });
   });
 }
@@ -207,16 +207,17 @@ export async function parseUpdateStudentRequest(req: express.Request):
 export async function parseSuggestStudentRequest(req: express.Request):
     Promise<Requests.Suggest> {
   return hasFields(req, [ "suggestion", "senderId" ], types.id).then(() => {
-    const sug: any = req.body.suggestion;
-    if (sug != "YES" && sug != "MAYBE" && sug != "NO" && req.body.senderId !== null)
+    const sug: unknown = req.body.suggestion;
+    if (sug != "YES" && sug != "MAYBE" && sug != "NO" &&
+        req.body.senderId !== null)
       return rejector();
 
     return Promise.resolve({
       sessionkey : req.body.sessionkey,
       id : Number(req.params.id),
-      suggestion : sug,
+      suggestion : sug as InternalTypes.Suggestion,
       reason : maybe(req.body, "reason"),
-      senderId: Number(req.body.senderId)
+      senderId : Number(req.body.senderId)
     });
   });
 }
@@ -338,8 +339,11 @@ export async function parseSetFollowupStudentRequest(req: express.Request):
     if (type != "hold-tight" && type != "confirmed" && type != "cancelled")
       return rejector();
 
-    return Promise.resolve(
-        {sessionkey : req.body.sessionkey, id : Number(req.params.id), type : type});
+    return Promise.resolve({
+      sessionkey : req.body.sessionkey,
+      id : Number(req.params.id),
+      type : type
+    });
   });
 }
 
@@ -394,14 +398,16 @@ export async function parseUpdateTemplateRequest(req: express.Request):
  */
 export async function parseFormRequest(req: express.Request):
     Promise<Requests.Form> {
-  return hasFields(req, ["eventId", "eventType", "createdAt", "data"], types.neither).then(() => {
-    return Promise.resolve({
-      eventId : req.body.eventId,
-      eventType : req.body.eventType,
-      createdAt : req.body.createdAt,
-      data : req.body.data
-    });
-  });
+  return hasFields(req, [ "eventId", "eventType", "createdAt", "data" ],
+                   types.neither)
+      .then(() => {
+        return Promise.resolve({
+          eventId : req.body.eventId,
+          eventType : req.body.eventType,
+          createdAt : req.body.createdAt,
+          data : req.body.data
+        });
+      });
 }
 
 /**

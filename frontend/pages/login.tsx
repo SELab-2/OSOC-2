@@ -49,7 +49,7 @@ const Login: NextPage = () => {
     const submitLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
 
-        let error: boolean = false
+        let error = false
 
         if (loginEmail === "") {
             setLoginEmailError("Email cannot be empty");
@@ -125,7 +125,7 @@ const Login: NextPage = () => {
     const submitRegister = async (e: SyntheticEvent) => {
         e.preventDefault();
 
-        let error: boolean = false
+        let error = false
 
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
@@ -227,8 +227,8 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"}).then(() => {
-        }).catch(res => console.log(`github catched response ${res}`))
+        signIn("github", {callbackUrl: "/students"})
+        .catch(res => console.log(`github catched response ${res}`))
     }
 
     /**
@@ -239,7 +239,7 @@ const Login: NextPage = () => {
     const resetPassword = (e: SyntheticEvent) => {
         e.preventDefault()
 
-        let error: boolean = false
+        let error = false
 
         if (passwordResetMail === "") {
             setPasswordResetMailError("Email cannot be empty")
