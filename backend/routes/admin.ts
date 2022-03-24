@@ -1,8 +1,9 @@
+import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
 import * as ormL from "../orm_functions/login_user";
 import * as rq from '../request';
-import {InternalTypes, Responses} from '../types';
+import {Responses} from '../types';
 import * as util from '../utility';
 
 /**
@@ -13,25 +14,24 @@ import * as util from '../utility';
  */
 async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
   return rq.parseAdminAllRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(parsed => {
-        const adminList: InternalTypes.Admin[] = [];
-        ormL.searchAllAdminLoginUsers(true).then(
-            admins => {
-                return admins.forEach(admin => {adminList.push({
-                                        firstname : admin.person.firstname,
-                                        lastname : admin.person.lastname,
-                                        email : admin.person.email,
-                                        github : admin.person.github,
-                                        personId : admin.person.person_id,
-                                        isAdmin : admin.is_admin,
-                                        isCoach : admin.is_coach,
-                                        accountStatus : admin.account_status
-                                      })})})
-        // LISTING LOGIC
-        return Promise.resolve(
-            {data : adminList, sessionkey : parsed.data.sessionkey});
-      });
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(
+          async parsed =>
+              ormL.searchAllCoachLoginUsers(true)
+                  .then(obj =>
+                            obj.map(val => ({
+                                      person_data : {
+                                        id : val.person.person_id,
+                                        name : val.person.firstname + " " +
+                                                   val.person.lastname
+                                      },
+                                      coach : val.is_coach,
+                                      admin : val.is_admin,
+                                      activated : val.account_status as string
+                                    })))
+                  .then(
+                      obj => Promise.resolve(
+                          {sessionkey : parsed.data.sessionkey, data : obj})));
 }
 
 /**
@@ -40,60 +40,32 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-/*async function getAdmin(req: express.Request): Promise<Responses.Admin> {
+async function getAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseSingleAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => {
-          // FETCHING LOGIC
-          // TODO what should be shown?
-          return ormL.searchLoginUserByPerson(parsed.).then(student => {
-              if(student !== null) {
-                  return Promise.resolve({data: {
-                          firstname: student.person.firstname,
-                          lastname: student.person.lastname,
-                          email: student.person.email,
-                          gender: student.gender,
-                          pronouns: student.pronouns,
-                          phoneNumber: student.phone_number,
-                          nickname: student.nickname,
-                          alumni: student.alumni
-                      },
-                      sessionkey: parsed.sessionkey
-                  })
-              } else {
-                  return Promise.reject(errors.cookInvalidID());
-              }
-          })
-      });
-}*/
+      .then(() =>
+                Promise.reject({http : 410, reason : 'Deprecated endpoint.'}));
+}
 
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseUpdateAdminRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed_ => {
-        const parsed = parsed_.data;
-        // UPDATE LOGIC
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(async parsed => {
         return ormL
             .updateLoginUser({
-                loginUserId : parsed.id,
-                isAdmin : parsed.isAdmin,
-                isCoach : parsed.isCoach,
-                accountStatus: parsed.accountStatus
+              loginUserId : parsed.data.id,
+              password : parsed.data.pass,
+              isAdmin : parsed.data.isAdmin,
+              isCoach : parsed.data.isCoach,
+              accountStatus : parsed.data.accountStatus as account_status_enum
             })
-            .then(admin => {// TODO why this return data?
-                            return Promise.resolve({
-                              data : {
-                                firstname : admin.person.firstname,
-                                lastname : admin.person.lastname,
-                                email : admin.person.email,
-                                github : admin.person.github,
-                                personId : admin.person.person_id,
-                                isAdmin : admin.is_admin,
-                                isCoach : admin.is_coach,
-                                accountStatus : admin.account_status
-                              },
-                              sessionkey : parsed.sessionkey
-                            })})
+            .then(res => Promise.resolve({
+              sessionkey : parsed.data.sessionkey,
+              data : {
+                id : res.person_id,
+                name : res.person.firstname + " " + res.person.lastname
+              }
+            }));
       });
 }
 
@@ -106,9 +78,9 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
 async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => {
-        // REMOVING LOGIC
-        return Promise.resolve({sessionkey : parsed.data.sessionkey});
+      .then(async parsed => {
+        return ormL.deleteLoginUserByPersonId(parsed.data.id)
+            .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}));
       });
 }
 
@@ -122,7 +94,7 @@ export function getRouter(): express.Router {
 
   util.setupRedirect(router, '/admin');
   util.route(router, "get", "/all", listAdmins);
-  // util.route(router, "get", "/:id", getAdmin);
+  util.route(router, "get", "/:id", getAdmin);
 
   util.route(router, "post", "/:id", modAdmin);
   router.delete('/:id', (req, res) =>
