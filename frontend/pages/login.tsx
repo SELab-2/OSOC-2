@@ -8,7 +8,7 @@ import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
 
-// import * as crypto from 'crypto'; // enable later
+import * as crypto from 'crypto';
 
 const Login: NextPage = () => {
 
@@ -66,11 +66,7 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // We encrypt the password before sending it to the backend api
-            // TODO use encryption
-            const encryptedPassword = loginPassword; // disable later
-            // const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
-            //console.log(encryptedPassword)
-            // TODO -- Send call to the backend
+            const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
@@ -159,8 +155,8 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            const encryptedPassword = registerPassword; // disable later
-            // const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
+            const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
+            console.log(encryptedPassword);
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
                 method: 'POST',
                 body: JSON.stringify({
