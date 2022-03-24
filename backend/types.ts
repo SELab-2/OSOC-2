@@ -1,3 +1,4 @@
+import {account_status_enum} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -412,7 +413,7 @@ export interface UpdateLoginUser extends IdRequest {
   isAdmin: boolean;
   isCoach: boolean;
   pass?: string;
-  status: string;
+  accountStatus: account_status_enum;
 }
 
 export interface CoachRequest {
