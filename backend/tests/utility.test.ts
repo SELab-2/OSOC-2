@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import express from 'express';
 import {mockDeep} from 'jest-mock-extended';
@@ -18,19 +16,19 @@ jest.mock('crypto');
 const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 
 import * as config from '../config.json';
-import {ApiError} from '../types';
+import {ApiError, Anything} from '../types';
 import * as util from '../utility';
 
 interface Req {
   url: string, verb: string
 }
 
-function genPromises(): Promise<any>[] {
-  const data: any[] = [
+function genPromises(): Promise<unknown>[] {
+  const data: unknown[] = [
     6, "abc", {"key" : "value"},
     {"complex" : {"object" : "with", "array" : [ 1, 2, 3, 4 ]}}
   ];
-  const promises: Promise<any>[] =
+  const promises: Promise<unknown>[] =
       data.map((val) => util.debug(val).then((res) => {
         expect(res).toBe(val);
         return res;
@@ -79,7 +77,7 @@ test("utility.errors.cook* work as expected", () => {
     {verb : "OPTIONS", url : "/student/abcdeabcde"}
   ];
   const verbExpect: {err: ApiError, req: express.Request}[] = verbs.map(v => {
-    var req: express.Request = getMockReq();
+    const req: express.Request = getMockReq();
     req.method = v.verb;
     req.url = v.url;
     const msg = config.apiErrors.invalidVerb.reason.replace(/$url/, v.url)
@@ -117,7 +115,7 @@ test("utility.debug logs their data", () => {
 });
 
 test("utility.reply writes to a response", () => {
-  const data: {status: number, data: any}[] = [
+  const data: {status: number, data: unknown}[] = [
     {status : 200, data : "success!"}, {status : 405, data : "invalid"},
     {status : 200, data : {using : "some", kind : {of : "data"}}}
   ];
@@ -140,7 +138,7 @@ test("utility.replyError writes to a response", () => {
     {verb : "DELETE", url : "/student/all"}
   ];
   const someReqs: express.Request[] = someVerbs.map(req => {
-    var request: express.Request = getMockReq();
+    const request: express.Request = getMockReq();
     request.method = req.verb;
     request.url = req.url;
     return request;
@@ -148,7 +146,7 @@ test("utility.replyError writes to a response", () => {
   const someMimes: string[] =
       [ 'text/html', 'audio/aac', 'image/bmp', 'text/css', 'video/mp4' ];
 
-  var errors: ApiError[] = [
+  const errors: ApiError[] = [
     util.errors.cookInvalidID(), util.errors.cookArgumentError(),
     util.errors.cookUnauthenticated(), util.errors.cookInsufficientRights(),
     util.errors.cookServerError()
@@ -160,7 +158,7 @@ test("utility.replyError writes to a response", () => {
   // run tests
   errors.forEach(err => {
     const {res, statSpy, sendSpy} = obtainResponse();
-    const datafield: any = {success : false, reason : err.reason};
+    const datafield: unknown = {success : false, reason : err.reason};
     util.replyError(res, err).then(() => {
       expect(statSpy).toBeCalledWith(err.http);
       expect(sendSpy).toBeCalledWith(datafield);
@@ -169,7 +167,7 @@ test("utility.replyError writes to a response", () => {
 });
 
 test("utility.replySuccess writes to a response", () => {
-  const successes: any[] = [];
+  const successes: Anything[] = [ {} ];
 
   successes.forEach(succ => {
     const {res, statSpy, sendSpy} = obtainResponse();
@@ -182,7 +180,7 @@ test("utility.replySuccess writes to a response", () => {
 });
 
 test("utility.addInvalidVerbs adds verbs", () => {
-  var router: express.Router = express.Router();
+  const router: express.Router = express.Router();
   const routerSpy = jest.spyOn(router, 'all');
   util.addInvalidVerbs(router, '/');
   // we seem unable to trigger the route with jest?
@@ -206,9 +204,11 @@ test("utility.logRequest logs request and passes control", () => {
 test("utility.respOrErrorNoReinject sends successes", async () => {
   // positive case
   const {res, statSpy, sendSpy} = obtainResponse();
-  const obj:
-      any = {data : {"some" : "data"}, "sessionkey" : "updated-session-key"};
-  const exp: any = {
+  const obj: Anything = {
+    data : {"some" : "data"},
+    "sessionkey" : "updated-session-key"
+  };
+  const exp: unknown = {
     data : {"some" : "data"},
     "sessionkey" : "updated-session-key",
     success : true
@@ -223,8 +223,8 @@ test("utility.respOrErrorNoReinject sends successes", async () => {
 test("utility.respOrErrorNoReinject sends api errors", () => {
   // api error case
   const {res, statSpy, sendSpy} = obtainResponse();
-  var err: ApiError = util.errors.cookArgumentError();
-  var errObj: any = {success : false, reason : err.reason};
+  const err: ApiError = util.errors.cookArgumentError();
+  const errObj: unknown = {success : false, reason : err.reason};
   util.respOrErrorNoReinject(res, Promise.reject(err)).then(() => {
     expect(statSpy).toHaveBeenCalledWith(err.http);
     expect(sendSpy).toHaveBeenCalledWith(errObj);
@@ -252,7 +252,7 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
 // test respOrError<T> has to wait -> ORM connection has to be mocked
 test("utility.respOrError sends responses with updated keys", async () => {
   const {res, statSpy, sendSpy} = obtainResponse();
-  var req = getMockReq();
+  const req = getMockReq();
   req.body.sessionkey = "key";
 
   session_keyMock.changeSessionKey.mockReset();
@@ -263,14 +263,14 @@ test("utility.respOrError sends responses with updated keys", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;
   });
 
-  var obj = {data : {"some" : "data"}, "sessionkey" : ""};
-  var exp = {data : {"some" : "data"}, "sessionkey" : "abcd", success : true};
+  const obj = {data : {"some" : "data"}, "sessionkey" : ""};
+  const exp = {data : {"some" : "data"}, "sessionkey" : "abcd", success : true};
 
   await expect(util.respOrError(req, res, Promise.resolve(obj)))
       .resolves.not.toThrow();
@@ -336,13 +336,14 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
                is_admin : true,
                is_coach : false,
                account_status : 'ACTIVATED',
-               person: {
-                 lastname: "lastname",
-                 firstname: "firstname",
-                 github: "hiethub",
-                 person_id: 0,
-                 email: "email@mail.com"
-               }
+               person : {
+                 lastname : "lastname",
+                 firstname : "firstname",
+                 github : "hiethub",
+                 person_id : 0,
+                 email : "email@mail.com"
+               },
+               session_keys : []
              } ]);
            });
 
@@ -372,7 +373,7 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;
@@ -392,7 +393,7 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;

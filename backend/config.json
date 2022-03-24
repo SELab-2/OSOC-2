@@ -38,8 +38,8 @@
 
     "global": {
         "homes": [
-            "", "/api"
+            "", "/api-osoc"
         ],
-        "preferred": "/api"
+        "preferred": "/api-osoc"
     }
 }

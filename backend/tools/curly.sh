@@ -17,7 +17,7 @@ function main() {
     printf 'Endpoint to access (or -h for help)? '
     read ep
     if [[ $ep = '-h' ]]; then help $1; exit 0; fi
-    if [[ $2 = '-no' ]]; then api=''; else api='/api'; fi
+    if [[ $2 = '-no' ]]; then api=''; else api='/api-osoc'; fi
 
     printf 'HTTP Verb? '
     read verb

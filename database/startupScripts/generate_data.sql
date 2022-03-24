@@ -1,7 +1,8 @@
 /* Insert data into person table */
 INSERT INTO person(email, firstname, lastname)
 VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
-('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor');
+('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
+('osoc2@mail.com', 'Osoc', 'TeamTwo');
 
 /* Insert data into student table */
 INSERT INTO student(person_id, gender, pronouns, phone_number, nickname, alumni)
@@ -10,8 +11,9 @@ VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'),
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, TRUE, 'ACTIVATED'),
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, 'PENDING');
+VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, FALSE , 'ACTIVATED'),
+((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, 'PENDING'),
+((SELECT person_id FROM person WHERE email = 'osoc2@mail.com'), '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', TRUE, TRUE, 'ACTIVATED');
 
 /* Insert data into osoc table */
 INSERT INTO osoc(year)VALUES(2022);
@@ -25,7 +27,7 @@ INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, respons
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES
- ((SELECT login_user_id FROM login_user WHERE is_admin = TRUE), (SELECT job_application_id FROM job_application), 
+ ((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), (SELECT job_application_id FROM job_application),
  'YES', 'Simply the best', TRUE);
 
 /* Insert data into role table */
@@ -36,7 +38,7 @@ INSERT INTO role(name)VALUES('Developer');
  (SELECT osoc_id FROM osoc WHERE year = 2022), 'UGent', DATE '2022-07-01', DATE '2022-08-15', 7);
 
 /* Insert data into project_user table */
-INSERT INTO project_user(login_user_id, project_id)VALUES((SELECT login_user_id FROM login_user WHERE is_admin = TRUE), 
+INSERT INTO project_user(login_user_id, project_id)VALUES((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2),
 (SELECT project_id FROM project WHERE name = 'OSOC Platform'));
 
 /* Insert data into project_role table */
@@ -47,7 +49,7 @@ INSERT INTO project_role(project_id, role_id, positions) VALUES((SELECT project_
 INSERT INTO contract(student_id, project_role_id, information, created_by_login_user_id, contract_status) VALUES
 ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), 
 (SELECT project_role_id FROM project_role WHERE positions = 2), 'Developer contract for osoc platform', 
-(SELECT login_user_id FROM login_user WHERE is_admin = TRUE), 'DRAFT');
+(SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'DRAFT');
 
 /* Insert data into applied_role table */
 INSERT INTO applied_role(job_application_id, role_id)VALUES

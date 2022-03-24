@@ -20,7 +20,7 @@ function filterQuestion(form: Requests.Form, key: string): Requests.Question {
  *  @param question The question with 'yes' and 'no' as possible answers.
  *  @returns A boolean that answers the question.
  */
-function checkYesAnswer(question: Requests.Question): Boolean {
+function checkYesAnswer(question: Requests.Question): boolean {
   if (question.options !== undefined) {
     return question.options.filter(option => option.id === question.value)[0]
         .text.toLowerCase()
@@ -36,11 +36,11 @@ function checkYesAnswer(question: Requests.Question): Boolean {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
-  let questionBirthName: Requests.Question =
+  const questionBirthName: Requests.Question =
       filterQuestion(form, "question_npDErJ");
-  let questionLastName: Requests.Question =
+  const questionLastName: Requests.Question =
       filterQuestion(form, "question_319eXp");
-  let questionEmail: Requests.Question =
+  const questionEmail: Requests.Question =
       filterQuestion(form, "question_mY46PB");
 
   if (questionBirthName.value == null || questionLastName.value == null ||
@@ -96,7 +96,7 @@ async function jsonToStudent(form: Requests.Form, person: Responses.Person):
   // The gender of this student
   const questionGender: Requests.Question =
       filterQuestion(form, "question_wg9laO");
-  let gender: string = "";
+  let gender = "";
   if (questionGender.options !== undefined) {
     gender = questionGender.options
                  .filter(option => option.id === questionGender.value)[0]
@@ -233,7 +233,7 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
  *  endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
   router.post('/',
               (req, res) => util.respOrErrorNoReinject(res, createForm(req)));

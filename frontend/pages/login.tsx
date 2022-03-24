@@ -8,7 +8,8 @@ import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
 
-//const crypto = require('crypto');
+import * as crypto from 'crypto';
+
 const Login: NextPage = () => {
 
     const router = useRouter()
@@ -18,6 +19,7 @@ const Login: NextPage = () => {
     const [loginEmailError, setLoginEmailError] = useState<string>("");
     const [loginPassword, setLoginPassword] = useState<string>("");
     const [loginPasswordError, setLoginPasswordError] = useState<string>("");
+    const [loginBackendError, setLoginBackendError] = useState<string>("");
 
     // Register field values with corresponding error messages
     const [registerEmail, setRegisterEmail] = useState<string>("");
@@ -30,6 +32,7 @@ const Login: NextPage = () => {
     const [registerPasswordError, setRegisterPasswordError] = useState<string>("");
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
+    const [registerBackendError, setRegisterBackendError] = useState<string>("");
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -46,7 +49,7 @@ const Login: NextPage = () => {
     const submitLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
 
-        let error: boolean = false
+        let error = false
 
         if (loginEmail === "") {
             setLoginEmailError("Email cannot be empty");
@@ -65,21 +68,29 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // We encrypt the password before sending it to the backend api
-            // TODO use encryption
-            //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
-            //console.log(encryptedPassword)
-            // TODO -- Send call to the backend
+            const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
-                body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                //body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                body: JSON.stringify({pass: encryptedPassword, name: loginEmail}),
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             })
-                .then(response => response.json())
-                .catch(() => router.push("/login"));
+                .then(response => response.json()).then(json => {
+                    if(!json.success) {
+                        setLoginBackendError('Failed to login. Please check all fields. ' + json.reason);
+                        return {success: false};
+                    }
+                    else return json;
+                })
+                .catch(err => {
+                    // router.push("/login")
+                    setLoginBackendError('Failed to login. Please check all fields. ' + err.reason);
+                    return {success: false};
+                });
             console.log(response)
             // TODO -- Handle response
             if (response.success !== false) {
@@ -111,10 +122,10 @@ const Login: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const submitRegister = (e: SyntheticEvent) => {
+    const submitRegister = async (e: SyntheticEvent) => {
         e.preventDefault();
 
-        let error: boolean = false
+        let error = false
 
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
@@ -156,25 +167,53 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
+            const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
+            console.log(encryptedPassword);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    firstName: registerFirstName,
+                    lastName: registerLastName,
+                    emailOrGithub: registerEmail,
+                    pass: encryptedPassword
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.json()).then(json => {
+                    if(!json.success) {
+                        setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                        return Promise.resolve({success: false});
+                    }
+                    else return json;
+                })
+                .catch(json => {
+                    setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                    return Promise.resolve({success: false});
+                });
             // TODO -- Send call to the backend
             // TODO -- Handle response
             console.log("REGISTERING...")
-            signIn('credentials', {
-                username: registerEmail,
-                password: registerPassword,
-                redirect: false
-            }).then(res => {
-                // TODO -- Redirect or handle errors
-                console.log(res)
-                if (res !== undefined) {
-                    const signInRes = res as SignInResult
-                    // The user is succesfully logged in => redirect to /students
-                    if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                        console.log("redirect")
-                        router.push("/students").then()
+            if(res.success){
+                signIn('credentials', {
+                    username: registerEmail,
+                    password: registerPassword,
+                    redirect: false
+                }).then(res => {
+                    // TODO -- Redirect or handle errors
+                    console.log(res)
+                    if (res !== undefined) {
+                        const signInRes = res as SignInResult
+                        // The user is succesfully logged in => redirect to /students
+                        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                            console.log("redirect")
+                            router.push("/students").then()
+                        }
                     }
-                }
-            })
+                });
+            }
         }
     }
 
@@ -188,9 +227,8 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github").then(() => {
-            router.push("/students").then()
-        }).catch(res => console.log(`github catched response ${res}`))
+        signIn("github", {callbackUrl: "/students"})
+        .catch(res => console.log(`github catched response ${res}`))
     }
 
     /**
@@ -201,7 +239,7 @@ const Login: NextPage = () => {
     const resetPassword = (e: SyntheticEvent) => {
         e.preventDefault()
 
-        let error: boolean = false
+        let error = false
 
         if (passwordResetMail === "") {
             setPasswordResetMailError("Email cannot be empty")
@@ -281,7 +319,7 @@ const Login: NextPage = () => {
                                 </div>
                                 <p className={styles.github}>Continue with GitHub</p>
                             </div>
-
+                            <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
                         </form>
                     </div>
 
@@ -321,6 +359,7 @@ const Login: NextPage = () => {
                             </label>
                             <p className={`${styles.textFieldError} ${registerConfirmPasswordError !== "" ? styles.anim : ""}`}>{registerConfirmPasswordError}</p>
                             <button onClick={e => submitRegister(e)}>REGISTER</button>
+                            <p className={`${styles.textFieldError} ${registerBackendError !== "" ? styles.anim : ""}`}>{registerBackendError}</p>
                         </form>
                     </div>
                 </div>
