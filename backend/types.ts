@@ -159,7 +159,12 @@ export interface Student {}
 /**
  *  Represents a coach, with all associated data.
  */
-export interface Coach {}
+export interface Coach {
+  person_data: {id: number, name: string};
+  coach: boolean;
+  admin: boolean;
+  activated: string;
+}
 
 /**
  *  Represents a coach request response. Usually these will only contain an id,
@@ -307,6 +312,11 @@ export interface Empty {}
 export interface Coach extends Keyed<InternalTypes.Coach> {}
 
 /**
+ *  A coach list response is the keyed version of a list of coaches
+ */
+export interface CoachList extends Keyed<InternalTypes.Coach[]> {}
+
+/**
  *  A person response is the keyed version of the person and their associated
  * data.
  */
@@ -402,6 +412,7 @@ export interface UpdateLoginUser extends IdRequest {
   isAdmin: boolean;
   isCoach: boolean;
   pass?: string;
+  status: string;
 }
 
 export interface CoachRequest {
