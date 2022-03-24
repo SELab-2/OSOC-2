@@ -209,10 +209,7 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        console.log("HEEEEERREEEEE\n");
-        signIn("github").then(res => {
-            console.log(res);
-            router.push("/students").then() // for what is this needed a callback does this?
+        signIn("github", {callbackUrl: "/students"}).then(() => {
         }).catch(res => console.log(`github catched response ${res}`))
     }
 

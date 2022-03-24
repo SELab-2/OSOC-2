@@ -47,9 +47,4 @@ export default NextAuth({
         signOut: '/'
     },
 
-    callbacks: {
-        redirect({baseUrl }) {
-            return `${baseUrl}/students`;
-        }
-    }
 })
