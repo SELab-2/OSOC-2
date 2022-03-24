@@ -274,16 +274,16 @@ export async function parseRequestCoachRequest(req: express.Request):
  */
 export async function parseNewProjectRequest(req: express.Request):
     Promise<Requests.Project> {
-  return hasFields(req, [ "name", "partner", "start", "end", "positions" ],
-                   types.key)
-      .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
-        name : req.body.name,
-        partner : req.body.partner,
-        start : req.body.start,
-        end : req.body.end,
-        positions : req.body.positions
-      }));
+    return hasFields(req, [ "name", "partner", "start", "end", "positions", "osocId" ], types.key)
+        .then(() => Promise.resolve({
+            sessionkey : req.body.sessionkey,
+            name : req.body.name,
+            partner : req.body.partner,
+            start : req.body.start,
+            end : req.body.end,
+            osocId: req.body.osocId,
+            positions : req.body.positions
+        }));
 }
 
 /**

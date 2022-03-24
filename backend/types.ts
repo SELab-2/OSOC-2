@@ -194,7 +194,14 @@ export interface Admin {}
 /**
  *  Represents a project, with all associated data.
  */
-export interface Project {}
+export interface Project {
+  id: number;
+  name: string;
+  partner: string;
+  start_date: string;
+  end_date: string;
+  positions: number;
+}
 
 /**
  *  Represents the drafted students of a project. Usually these will only
@@ -342,6 +349,11 @@ export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
 export interface Project extends Keyed<InternalTypes.Project> {}
 
 /**
+ *  A project list response is the keyed version of a list of projects
+ */
+export interface ProjectList extends Keyed<InternalTypes.Project[]> {}
+
+/**
  *  An admin list response is the keyed version of the list of admins.
  */
 export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
@@ -424,6 +436,7 @@ export interface CoachRequest {
 }
 
 export interface Project extends KeyRequest {
+  osocId: number;
   name: string;
   partner: string;
   start: Date;
@@ -437,6 +450,7 @@ export interface ModProject extends IdRequest {
   start?: Date;
   end?: Date;
   positions?: number;
+  osocId?: number;
 }
 
 export interface Draft extends IdRequest {

@@ -45,7 +45,7 @@ async function listStudents(req: express.Request):
                                     firstname : student.person.firstname,
                                     lastname : student.person.lastname,
                                     email : student.person.email,
-                                    // gender : student.gender,
+                                    gender : student.gender,
                                     pronouns : student.pronouns,
                                     phoneNumber : student.phone_number,
                                     nickname : student.nickname,
@@ -76,7 +76,6 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => util.isValidID(parsed.data, "student"))
       .then(async parsed => {
-                // FETCHING LOGIC
                 return ormSt.getStudent(parsed.id).then(async student => {
                   if (student !== null) {
                     return ormJo
@@ -166,10 +165,10 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed.data, 'student'))
-      .then(async parsed => {// DELETE LOGIC
-                             return ormSt.deleteStudent(parsed.id).then(
-                                 () => {return Promise.resolve(
-                                     {sessionkey : parsed.sessionkey})})});
+      .then(async parsed => {
+          return ormSt.deleteStudent(parsed.id).then(
+              () => {return Promise.resolve(
+                  {sessionkey : parsed.sessionkey})})});
 }
 
 /**
@@ -180,36 +179,32 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
  */
 async function createStudentSuggestion(req: express.Request):
     Promise<Responses.Key> {
-  return rq.parseSuggestStudentRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(async parsed => {
-                // SUGGESTING LOGIC
-                return ormSt.getStudent(parsed.data.id).then(async student => {
-                  if (student !== null) {
+    return rq.parseSuggestStudentRequest(req)
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(async parsed => {
+            return ormSt.getStudent(parsed.data.id).then(async student => {
+                if (student !== null) {
                     return ormJo
                         .getLatestJobApplicationOfStudent(student.student_id)
                         .then(async jobApplication => {
-                          if (jobApplication !== null) {
-                            return ormEv
-                                .createEvaluationForStudent({
-                                  loginUserId : parsed.userId,
-                                  jobApplicationId :
-                                      jobApplication.job_application_id,
-                                  decision : parsed.data.suggestion,
-                                  motivation : parsed.data.reason,
-                                  isFinal : true
-                                })
-                                .then(
-                                    () => {return Promise.resolve(
-                                        {sessionkey : parsed.data.sessionkey})})
-                          } else {
-                            return Promise.reject(errors.cookInvalidID());
-                          }
+                            if (jobApplication !== null) {
+                                return ormEv
+                                    .createEvaluationForStudent({
+                                        loginUserId : parsed.userId,
+                                        jobApplicationId : jobApplication.job_application_id,
+                                        decision : parsed.data.suggestion,
+                                        motivation : parsed.data.reason,
+                                        isFinal : true
+                                    })
+                                    .then(() => {return Promise.resolve({sessionkey : parsed.data.sessionkey})})
+                            } else {
+                                return Promise.reject(errors.cookInvalidID());
+                            }
                         })
-                  } else {
+                } else {
                     return Promise.reject(errors.cookInvalidID());
-                  }
-                })});
+                }
+            })});
 }
 
 /**
@@ -224,25 +219,41 @@ async function getStudentSuggestions(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => util.isValidID(parsed.data, 'student'))
       .then(parsed => {
-        // FETCHING LOGIC
         /*let suggestionsList : InternalTypes.SuggestionInfo[] = [];
         ormSt.getStudent(parsed.id)
             .then(student => {
                 if (student !== null) {
-                    ormJo.getLatestJobApplicationOfStudent(student.student_id).then(jobApplication
-        => { if(jobApplication !== null) {
-                            ormJo.getStudentEvaluationsTemp(student.student_id).then(suggestions
-        => { suggestions.forEach(suggestion => { suggestionsList.push({
-                                        suggestion: suggestion,
-                                        sender:
-        ormEv.getLoginUserByEvaluationId(suggestion.evaluation.evaluation_id)
+                    ormJo.getLatestJobApplicationOfStudent(student.student_id)
+                        .then(jobApplication => {
+                            if (jobApplication !== null) {
+                                ormJo.getStudentEvaluationsTemp(student.student_id)
+                                    .then(suggestions => {
+                                        suggestions.forEach(suggestion =>
+                                            suggestion.evaluation.forEach(sug => {
+                                                ormEv.getLoginUserByEvaluationId(sug.evaluation_id)
+                                                    .then(loginUser => {
+                                                        if(loginUser !== null) {
+                                                            suggestionsList.push({
+                                                                suggestion: sug.decision,
+                                                                sender: {
+                                                                    name: loginUser.login_user.person.firstname + loginUser.login_user.person.lastname,
+                                                                    id: loginUser.login_user_id
+                                                                },
+                                                                reason: sug.motivation
+                                                            }))
+                                                    }
+                                            })
+                                        )
+                                        suggestions.forEach(suggestion =>
+                                            suggestion.evaluation.forEach()
+                                            ormEv.getLoginUserByEvaluationId()
+                                        )
                                     })
-                                })
-                            })
-                        } else {
-                            return Promise.reject(errors.cookInvalidID());
-                        }
-                    })
+
+                            } else {
+                                return Promise.reject(errors.cookInvalidID());
+                            }
+                        })
                 } else {
                     return Promise.reject(errors.cookInvalidID());
                 }
