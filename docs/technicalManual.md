@@ -1,19 +1,27 @@
-# Docker/Docker-compose
+# Technical Manual
+Table of content
+1. [Docker/Docker-compose](#docker)
+2. [Database](#database)
+3. [Frontend](#frontend)
+4. [Testing](#testing)
 
-## Installation
 
-### MacOS & Windows
+## Docker/Docker-compose <a name="docker"></a>
+
+### Installation
+
+#### MacOS & Windows
 Install docker desktop.
 - [mac](https://docs.docker.com/desktop/mac/install/)
 - [windows](https://docs.docker.com/desktop/windows/install/)
     - make sure WSL2 is enabled to be able to run linux-containers.
 
-### Linux
+#### Linux
 Install [docker-Engine](https://docs.docker.com/engine/install/) & [docker-compose](https://docs.docker.com/compose/install/)
 
 To execute docker in linux without `sudo`: https://docs.docker.com/engine/install/linux-postinstall/
 
-## Configuration to push to remote server
+### Configuration to push to remote server
 Open a terminal and type following commands to set the remote context.
 This context is used to push the local code to the server. The code is then deployed on the server.
 
@@ -26,15 +34,15 @@ Here is `remote-server` the name of the context that we will use to push the loc
 You are free to choose another name here (obviously use the name you chose for the commands later in this document).
 
 
-## Running docker
+### Running docker
 
-### GUI
+#### GUI
 only available for macOS & windows with docker desktop.
 
-### Commandline
+#### Commandline
 for linux, mac & windows
 
-#### Most important commands
+##### Most important commands
 
 list all running containers (shows their name, container ID,...)
 ```
@@ -88,9 +96,9 @@ docker-compose --context remote-server down
 
 
 
-## IDE-related
+### IDE-related
 
-### Visual Studio Code
+#### Visual Studio Code
 The debugger scripts for vscode are located in `.vscode/launcher.json`. there are 3 scripts:
 - `Docker: backend`
 - `Docker: frontend-server`
@@ -105,7 +113,7 @@ The debugger scripts for vscode are located in `.vscode/launcher.json`. there ar
 
 
 
-### Webstorm
+#### Webstorm
 Define debug configurations following [this](https://www.developers-notebook.com/development/debugging-node-js-in-a-docker-container-with-webstorm/) small tutorial.
 
 1.  - For the frontend the debugger port is `9119`
@@ -120,7 +128,7 @@ Give the debugger presets a name to make it clear to yourself which debugger you
 1. Start the application in the docker containers by running the docker-compose file **WITH DEBUGGING ENABLED**
 2. start the right debugger
 
-## Connect the containers in the application
+### Connect the containers in the application
 The containers can reach each other with their respective hostname out of the `docker-compose.yml` file.
 In our case these host names are:
 - `db` (for the database)
@@ -130,7 +138,7 @@ In our case these host names are:
 A short tutorial with extra information can be found [here](https://www.youtube.com/watch?v=A9bA5HpOk30)
 
 
-## Database
+## Database <a name="database"></a>
 
 ### Postgres startup scripts
 The startup scripts **ONLY** get executed if the volume that is used by the database is completely empty.
@@ -153,3 +161,46 @@ This means that we login into psql with the usor "osoc2". This user is created b
 
 If you need the password of the osoc2 user in the database: the password is `password`.
 I haven't needed this password yet, but it's here just in case.
+
+### List all table
+You can only insert records into existing tables, following command lists all tables
+```\dt```
+### Insert records into table
+To insert a record (row) into a table, execute following command:
+```INSERT INTO table_name(column1, column2, …)
+VALUES (value1, value2, …);
+```
+
+## Frontend guide <a name="frontend"></a>
+
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+### Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+
+### Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+## Testing <a name="testing"></a>
+In order to run the tests, make sure the docker daemon is running.  
+The tests are performed with npm, if it is the first time you want to run the test, consider running `npm install` in the `/backend` folder first.  
+The test can be executed by running the `npm run integrationTests` command in the `/backend` folder.
