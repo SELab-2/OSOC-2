@@ -9,7 +9,6 @@ const Home: NextPage = () => {
     const session = useSession()
 
     useEffect(() => {
-        console.log(session)
         // The user is logged in
         if (session !== null && session.status === "authenticated") {
             router.push("/students").then()

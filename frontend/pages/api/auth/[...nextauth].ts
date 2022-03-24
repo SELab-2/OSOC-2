@@ -22,20 +22,15 @@ export default NextAuth({
                 email: { type: "text" },
                 password: { type: "password" }
             },
-            // Make call to our own api
-            async authorize(credentials, req) {
-                // Add logic here to look up the user from the credentials supplied
-                console.log(req)
-                console.log(credentials)
+            async authorize(credentials) {
 
-                // TODO -- Check if users exists in the database
+                console.log(credentials)
 
                 let user = null;
                 if (credentials) {
-                    user = {id: 1, email: credentials.email}
+                    user = {email: credentials.email}
                 }
 
-                console.log(user)
                 return user
             }
         }),

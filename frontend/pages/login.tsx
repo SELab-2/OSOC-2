@@ -79,12 +79,11 @@ const Login: NextPage = () => {
                 }
             })
                 .then(response => response.json())
-                .catch(() => router.push("/login"));
             console.log(response)
             // TODO -- Handle response
-            if (response.success !== false) {
+            if (response.success) {
                 signIn('credentials', {
-                    username: loginEmail,
+                    email: loginEmail,
                     password: loginPassword,
                     redirect: false
                 }).then(res => {
@@ -94,7 +93,6 @@ const Login: NextPage = () => {
                             const signInRes = res as SignInResult
                             // The user is succesfully logged in => redirect to /students
                             if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                                console.log("redirect")
                                 router.push("/students")
                             }
                         }
@@ -156,9 +154,7 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            // TODO -- Send call to the backend
             // TODO -- Handle response
-            console.log("REGISTERING...")
             signIn('credentials', {
                 username: registerEmail,
                 password: registerPassword,
@@ -188,8 +184,9 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"})
-        .catch(res => console.log(`github catched response ${res}`))
+        signIn("github").then(() => {
+            router.push("/students").then()
+        })
     }
 
     /**
