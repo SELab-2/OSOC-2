@@ -1,7 +1,7 @@
 import express from 'express';
 
 import {getPasswordPersonByEmail} from '../orm_functions/person';
-import {addSessionKey} from '../orm_functions/session_key';
+import {addSessionKey, removeAllKeysForUser} from '../orm_functions/session_key';
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -40,11 +40,9 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
   return parseLogoutRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(checked => {
-        // dummy to cheat eslint
-        checked.data.sessionkey = "";
-        // do logout logic
-        // aka remove session key from database
-        return Promise.resolve({});
+          return removeAllKeysForUser(checked.data.sessionkey).then(() => {
+              return Promise.resolve({});
+          });
       })
 }
 
