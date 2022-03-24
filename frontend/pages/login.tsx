@@ -87,15 +87,13 @@ const Login: NextPage = () => {
                     else return json;
                 })
                 .catch(err => {
-                    // router.push("/login")
                     setLoginBackendError('Failed to login. Please check all fields. ' + err.reason);
                     return {success: false};
                 });
             console.log(response)
-            // TODO -- Handle response
             if (response.success !== false) {
                 signIn('credentials', {
-                    username: loginEmail,
+                    email: loginEmail,
                     password: loginPassword,
                     redirect: false
                 }).then(res => {
@@ -193,22 +191,18 @@ const Login: NextPage = () => {
                     setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
                     return Promise.resolve({success: false});
                 });
-            // TODO -- Send call to the backend
             // TODO -- Handle response
-            console.log("REGISTERING...")
             if(res.success){
                 signIn('credentials', {
-                    username: registerEmail,
+                    email: registerEmail,
                     password: registerPassword,
                     redirect: false
                 }).then(res => {
-                    // TODO -- Redirect or handle errors
                     console.log(res)
                     if (res !== undefined) {
                         const signInRes = res as SignInResult
                         // The user is succesfully logged in => redirect to /students
                         if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                            console.log("redirect")
                             router.push("/students").then()
                         }
                     }
@@ -227,8 +221,8 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"})
-        .catch(res => console.log(`github catched response ${res}`))
+        signIn("github", {callbackUrl: "/students   "}).then()
+        // TODO -- How are we supposed to send the data to the backend?
     }
 
     /**
