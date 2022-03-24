@@ -40,9 +40,11 @@ export default NextAuth({
             }
         }),
     ],
+    secret: "azYIimcD4TmSNlsH7JiaBrt84ZeRa8ShgstBJAIGWiw=",
 
     pages: {
         signIn: '/login',
         signOut: '/'
-    }
+    },
+
 })

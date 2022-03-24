@@ -1,4 +1,5 @@
 import express from 'express';
+import {account_status_enum} from "@prisma/client";
 
 /**
  *  Interface for API errors. Specifies an HTTP status code and error reason.
@@ -402,6 +403,7 @@ export interface UpdateLoginUser extends IdRequest {
   isAdmin: boolean;
   isCoach: boolean;
   pass?: string;
+  accountStatus: account_status_enum;
 }
 
 export interface CoachRequest {

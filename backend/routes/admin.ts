@@ -75,9 +75,10 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
         // UPDATE LOGIC
         return ormL
             .updateLoginUser({
-              loginUserId : parsed.id,
-              isAdmin : parsed.isAdmin,
-              isCoach : parsed.isCoach
+                loginUserId : parsed.id,
+                isAdmin : parsed.isAdmin,
+                isCoach : parsed.isCoach,
+                accountStatus: parsed.accountStatus
             })
             .then(admin => {// TODO why this return data?
                             return Promise.resolve({
