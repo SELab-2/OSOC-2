@@ -45,5 +45,11 @@ export default NextAuth({
     pages: {
         signIn: '/login',
         signOut: '/'
+    },
+
+    callbacks: {
+        redirect({baseUrl }) {
+            return `${baseUrl}/students`;
+        }
     }
 })

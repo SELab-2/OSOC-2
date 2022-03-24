@@ -191,7 +191,7 @@ const Login: NextPage = () => {
         console.log("HEEEEERREEEEE\n");
         signIn("github").then(res => {
             console.log(res);
-            router.push("/students").then()
+            router.push("/students").then() // for what is this needed a callback does this?
         }).catch(res => console.log(`github catched response ${res}`))
     }
 
