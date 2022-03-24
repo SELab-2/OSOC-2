@@ -9,8 +9,6 @@ import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
 
-/* eslint-disable no-unused-vars */
-
 /**
  *  Attempts to list all students in the system.
  *  @param req The Express.js request to extract all required data from.
@@ -31,7 +29,7 @@ async function listStudents(req: express.Request):
                           if (jobApplication !== null) {
                             ormJo.getStudentEvaluationsTotal(student.student_id)
                                 .then(evaluations => {
-                                  let languages: string[] = [];
+                                  const languages: string[] = [];
                                   jobApplication.job_application_skill.forEach(
                                       skill => {
                                           ormLa.getLanguage(skill.language_id)
@@ -88,7 +86,7 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
                             return ormJo
                                 .getStudentEvaluationsTotal(student.student_id)
                                 .then(evaluations => {
-                                  let languages: string[] = [];
+                                  const languages: string[] = [];
                                   jobApplication.job_application_skill.forEach(
                                       skill => {
                                           ormLa.getLanguage(skill.language_id)
@@ -300,7 +298,7 @@ async function searchStudents(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/student');
   util.route(router, "get", "/all", listStudents);

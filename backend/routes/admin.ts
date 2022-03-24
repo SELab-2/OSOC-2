@@ -75,9 +75,10 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
         // UPDATE LOGIC
         return ormL
             .updateLoginUser({
-              loginUserId : parsed.id,
-              isAdmin : parsed.isAdmin,
-              isCoach : parsed.isCoach
+                loginUserId : parsed.id,
+                isAdmin : parsed.isAdmin,
+                isCoach : parsed.isCoach,
+                accountStatus: parsed.accountStatus
             })
             .then(admin => {// TODO why this return data?
                             return Promise.resolve({
@@ -117,7 +118,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  let router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/admin');
   util.route(router, "get", "/all", listAdmins);
