@@ -1,3 +1,4 @@
+import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
 import {Anything, InternalTypes, Requests} from './types';
@@ -149,7 +150,7 @@ async function parseUpdateLoginUser(req: express.Request):
           isAdmin : maybe(req.body, "isAdmin") as boolean,
           isCoach : maybe(req.body, "isCoach") as boolean,
           pass : maybe(req.body, "pass") as string,
-          status : maybe(req.body, "status") as string
+          accountStatus : maybe(req.body, "status") as account_status_enum
         });
       });
 }

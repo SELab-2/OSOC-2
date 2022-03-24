@@ -66,7 +66,7 @@ async function modCoach(req: express.Request):
               password : parsed.data.pass,
               isAdmin : parsed.data.isAdmin,
               isCoach : parsed.data.isCoach,
-              accountStatus : parsed.data.status as account_status_enum
+              accountStatus : parsed.data.accountStatus as account_status_enum
             })
             .then(res => Promise.resolve({
               sessionkey : parsed.data.sessionkey,
