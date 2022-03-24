@@ -1,6 +1,6 @@
 # Documentations
 This folder contains all the required documentations:
-- [Domain Model](https://github.com/SELab-2/OSOC-2/blob/documentation/docs/modellen.md)
+- [Domain Model](https://github.com/SELab-2/OSOC-2/tree/documentation/docs/Domain%20Model)
 - [Mock Ups](https://github.com/SELab-2/OSOC-2/tree/documentation/docs/mock_ups)
 - [Use Cases]()
 - [Deployment Diagram]()
