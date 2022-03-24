@@ -12,3 +12,4 @@ This folder contains all the required documentations:
 - [Programming Conventions](conventions.md)
 - [How to contribute](contribute.md)
 - [How to deploy](deploymentGuide.md)
+- [Inline Code Documentation](https://github.com/SELab-2/OSOC-2/blob/documentation/backend/docs/index.html)
