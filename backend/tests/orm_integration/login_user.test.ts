@@ -5,7 +5,7 @@ import {createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson,
     searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers,
     updateLoginUser, deleteLoginUserById, deleteLoginUserByPersonId} from "../../orm_functions/login_user";
 
-let login_user: CreateLoginUser = {
+const login_user: CreateLoginUser = {
     personId: 0,
     password: "easy_password",
     isAdmin: true,
