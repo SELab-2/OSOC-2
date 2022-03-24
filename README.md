@@ -17,7 +17,7 @@
 
 [User Manual](docs/user_manual.md)
 
-[API Manual](docs/searching.md)
+[API Manual](docs/API)
 
 [Programming Conventions](docs/conventions.md)
 
