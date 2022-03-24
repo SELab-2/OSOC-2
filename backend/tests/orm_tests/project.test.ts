@@ -5,7 +5,7 @@ import {createProject, getProjectByName, getAllProjects,
     getProjectsByStartDate, getProjectsStartedBeforeDate, getProjectsByEndDate,
     getProjectsEndedBeforeDate, getProjectsEndedAfterDate, getProjectsByNumberPositions,
     getProjectsLessPositions, getProjectsMorePositions, deleteProject, updateProject,
-    deleteProjectByOsocEdition, deleteProjectByPartner}
+    deleteProjectByOsocEdition, deleteProjectByPartner, getProjectById}
     from "../../orm_functions/project";
 
 const returnValue = {
@@ -36,6 +36,11 @@ test("should create a project in the db with the given object, returns the new r
 test("should return all projects in the db", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
     await expect(getAllProjects()).resolves.toEqual([returnValue]);
+});
+
+test("should return the project with the given project id", async () => {
+    prismaMock.project.findUnique.mockResolvedValue(returnValue);
+    await expect(getProjectById(0)).resolves.toEqual(returnValue);
 });
 
 test("should return all the projects with the given name", async () => {
