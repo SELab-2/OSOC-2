@@ -2,6 +2,7 @@
 Table of content
 1. [Docker/Docker-compose](#docker)
 2. [Database](#database)
+3. [Frontend](#frontend)
 
 
 ## Docker/Docker-compose <a name="docker"></a>
@@ -169,7 +170,7 @@ To insert a record (row) into a table, execute following command:
 VALUES (value1, value2, …);
 ```
 
-## Frontend guide
+## Frontend guide <a name="frontend"></a>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
