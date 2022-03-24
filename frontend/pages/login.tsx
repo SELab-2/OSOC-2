@@ -81,14 +81,14 @@ const Login: NextPage = () => {
             })
                 .then(response => response.json()).then(json => {
                     if(!json.success) {
-                        setLoginBackendError('Failed to register. Please check all fields. ' + json.reason);
+                        setLoginBackendError('Failed to login. Please check all fields. ' + json.reason);
                         return {success: false};
                     }
                     else return json;
                 })
                 .catch(err => {
                     // router.push("/login")
-                    setLoginBackendError('Failed to register. Please check all fields. ' + err.reason);
+                    setLoginBackendError('Failed to login. Please check all fields. ' + err.reason);
                     return {success: false};
                 });
             console.log(response)
