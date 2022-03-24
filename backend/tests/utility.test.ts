@@ -16,19 +16,19 @@ jest.mock('crypto');
 const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 
 import * as config from '../config.json';
-import {ApiError} from '../types';
+import {ApiError, Anything} from '../types';
 import * as util from '../utility';
 
 interface Req {
   url: string, verb: string
 }
 
-function genPromises(): Promise<any>[] {
-  const data: any[] = [
+function genPromises(): Promise<unknown>[] {
+  const data: unknown[] = [
     6, "abc", {"key" : "value"},
     {"complex" : {"object" : "with", "array" : [ 1, 2, 3, 4 ]}}
   ];
-  const promises: Promise<any>[] =
+  const promises: Promise<unknown>[] =
       data.map((val) => util.debug(val).then((res) => {
         expect(res).toBe(val);
         return res;
@@ -115,7 +115,7 @@ test("utility.debug logs their data", () => {
 });
 
 test("utility.reply writes to a response", () => {
-  const data: {status: number, data: any}[] = [
+  const data: {status: number, data: unknown}[] = [
     {status : 200, data : "success!"}, {status : 405, data : "invalid"},
     {status : 200, data : {using : "some", kind : {of : "data"}}}
   ];
@@ -158,7 +158,7 @@ test("utility.replyError writes to a response", () => {
   // run tests
   errors.forEach(err => {
     const {res, statSpy, sendSpy} = obtainResponse();
-    const datafield: any = {success : false, reason : err.reason};
+    const datafield: unknown = {success : false, reason : err.reason};
     util.replyError(res, err).then(() => {
       expect(statSpy).toBeCalledWith(err.http);
       expect(sendSpy).toBeCalledWith(datafield);
@@ -167,7 +167,7 @@ test("utility.replyError writes to a response", () => {
 });
 
 test("utility.replySuccess writes to a response", () => {
-  const successes: any[] = [];
+  const successes: Anything[] = [ {} ];
 
   successes.forEach(succ => {
     const {res, statSpy, sendSpy} = obtainResponse();
@@ -204,9 +204,11 @@ test("utility.logRequest logs request and passes control", () => {
 test("utility.respOrErrorNoReinject sends successes", async () => {
   // positive case
   const {res, statSpy, sendSpy} = obtainResponse();
-  const obj:
-      any = {data : {"some" : "data"}, "sessionkey" : "updated-session-key"};
-  const exp: any = {
+  const obj: Anything = {
+    data : {"some" : "data"},
+    "sessionkey" : "updated-session-key"
+  };
+  const exp: unknown = {
     data : {"some" : "data"},
     "sessionkey" : "updated-session-key",
     success : true
@@ -222,7 +224,7 @@ test("utility.respOrErrorNoReinject sends api errors", () => {
   // api error case
   const {res, statSpy, sendSpy} = obtainResponse();
   const err: ApiError = util.errors.cookArgumentError();
-  const errObj: any = {success : false, reason : err.reason};
+  const errObj: unknown = {success : false, reason : err.reason};
   util.respOrErrorNoReinject(res, Promise.reject(err)).then(() => {
     expect(statSpy).toHaveBeenCalledWith(err.http);
     expect(sendSpy).toHaveBeenCalledWith(errObj);
@@ -340,7 +342,8 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
                  github : "hiethub",
                  person_id : 0,
                  email : "email@mail.com"
-               }
+               },
+               session_keys : []
              } ]);
            });
 

@@ -487,3 +487,10 @@ export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
  */
 export type RouteCallback<T extends Responses.ApiResponse> =
     (req: express.Request) => Promise<T>;
+
+/**
+ *  Helper type for unsafe type checks.
+ */
+export interface Anything {
+  [key: string]: unknown;
+}

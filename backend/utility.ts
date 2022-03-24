@@ -6,6 +6,7 @@ import * as config from './config.json';
 import {searchAllAdminLoginUsers} from './orm_functions/login_user';
 import * as skey from './orm_functions/session_key';
 import {
+  Anything,
   ApiError,
   Errors,
   InternalTypes,
@@ -59,7 +60,7 @@ export const errors: Errors = {
  *  @param data The data to log and pass through.
  *  @returns A `Promise<typeof data>` resolving with the given data.
  */
-export function debug(data: any):
+export function debug(data: unknown):
     Promise<typeof data> {
       console.log(data);
       return Promise.resolve(data);
@@ -72,7 +73,7 @@ export function debug(data: any):
  *  @param data The data object to send.
  *  @returns An empty promise (`Promise<void>`).
  */
-export function reply(resp: express.Response, status: number, data: any):
+export function reply(resp: express.Response, status: number, data: unknown):
     Promise<void> {
       resp.status(status).send(data);
       return Promise.resolve();
@@ -95,12 +96,13 @@ export function replyError(resp: express.Response, error: ApiError):
  *  @param data The data to send.
  *  @returns An empty promise (`Promise<void>`).
  */
-export function replySuccess(resp: express.Response, data: any):
+export function replySuccess(resp: express.Response, data: unknown):
     // yes, `data` should  should be a nicely typed value but
     // how in the hell are we otherwise supposed to add a single field
     // without messing with the entire type hierarchy???
     Promise<void> {
-      data.success = true;
+      const _data = data as Anything;
+      _data.success = true;
       return reply(resp, 200, data);
     }
 
@@ -152,8 +154,8 @@ export function logRequest(req: express.Request, next: express.NextFunction):
 export async function respOrErrorNoReinject(
     res: express.Response, prom: Promise<Responses.ApiResponse>):
     Promise<void> {
-      const isError =
-          (err: any): boolean => { return 'http' in err && 'reason' in err };
+      const isError = (err: Anything):
+          boolean => { return 'http' in err && 'reason' in err };
 
       return prom
           .then(data => {
@@ -162,10 +164,10 @@ export async function respOrErrorNoReinject(
           })
           .then((data: Responses.ApiResponse): Promise<void> =>
                     replySuccess(res, data as typeof data))
-          .catch((err: any): Promise<void> => {
+          .catch((err: unknown): Promise<void> => {
             console.log(err);
-            if (isError(err))
-              return replyError(res, err);
+            if (isError(err as Anything))
+              return replyError(res, err as ApiError);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
             return replyError(res, errors.cookServerError());
           });
