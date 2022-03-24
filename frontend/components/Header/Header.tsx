@@ -1,4 +1,4 @@
-import styles from "../../styles/index.module.css";
+import styles from "./Header.module.css";
 import Image from "next/image";
 import LogoOsocColor from "../../public/images/logo-osoc-color.svg";
 import Link from "next/link";

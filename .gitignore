@@ -63,3 +63,5 @@ backend/.idea
 
 # NEVER, EVER push .env file
 .env
+frontend/.env.development
+frontend/.env.production

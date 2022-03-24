@@ -16,13 +16,13 @@ async function login(req: express.Request): Promise<Responses.Key> {
   console.log("Calling login endpoint " + JSON.stringify(req.body));
   return parseLoginRequest(req).then(
       parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
-        if (pass?.login_user?.account_status != 'ACTIVATED') {
-          return Promise.reject(
-              {http : 409, reason : 'Account isn\'t activated yet.'});
-        }
         if (pass?.login_user?.password != parsed.pass) {
           return Promise.reject(
               {http : 409, reason : 'Invalid e-mail or password.'});
+        }
+        if (pass?.login_user?.account_status != 'ACTIVATED') {
+          return Promise.reject(
+              {http : 409, reason : 'Account isn\'t activated yet.'});
         }
         const key: string = util.generateKey();
         return addSessionKey(pass.login_user.login_user_id, key)

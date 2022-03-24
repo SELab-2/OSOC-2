@@ -19,6 +19,7 @@ const Login: NextPage = () => {
     const [loginEmailError, setLoginEmailError] = useState<string>("");
     const [loginPassword, setLoginPassword] = useState<string>("");
     const [loginPasswordError, setLoginPasswordError] = useState<string>("");
+    const [loginBackendError, setLoginBackendError] = useState<string>("");
 
     // Register field values with corresponding error messages
     const [registerEmail, setRegisterEmail] = useState<string>("");
@@ -31,6 +32,7 @@ const Login: NextPage = () => {
     const [registerPasswordError, setRegisterPasswordError] = useState<string>("");
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
+    const [registerBackendError, setRegisterBackendError] = useState<string>("");
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -77,13 +79,21 @@ const Login: NextPage = () => {
                     'Accept': 'application/json'
                 }
             })
-                .then(response => response.json())
-                .catch(() => router.push("/login"));
+                .then(response => response.json()).then(json => {
+                    if(!json.success) {
+                        setLoginBackendError(`Failed to login. ${json.reason}`);
+                        return {success: false};
+                    }
+                    else return json;
+                })
+                .catch(err => {
+                    setLoginBackendError(`Failed to login. ${err.reason}`);
+                    return {success: false};
+                });
             console.log(response)
-            // TODO -- Handle response
             if (response.success !== false) {
                 signIn('credentials', {
-                    username: loginEmail,
+                    email: loginEmail,
                     password: loginPassword,
                     redirect: false
                 }).then(res => {
@@ -170,23 +180,29 @@ const Login: NextPage = () => {
                     'Accept': 'application/json'
                 }
             })
-                .then(response => response.json());
-            // TODO -- Send call to the backend
+                .then(response => response.json()).then(json => {
+                    if(!json.success) {
+                        setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                        return Promise.resolve({success: false});
+                    }
+                    else return json;
+                })
+                .catch(json => {
+                    setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                    return Promise.resolve({success: false});
+                });
             // TODO -- Handle response
-            console.log("REGISTERING...")
             if(res.success){
                 signIn('credentials', {
-                    username: registerEmail,
+                    email: registerEmail,
                     password: registerPassword,
                     redirect: false
                 }).then(res => {
-                    // TODO -- Redirect or handle errors
                     console.log(res)
                     if (res !== undefined) {
                         const signInRes = res as SignInResult
                         // The user is succesfully logged in => redirect to /students
                         if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                            console.log("redirect")
                             router.push("/students").then()
                         }
                     }
@@ -205,8 +221,8 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"})
-        .catch(res => console.log(`github catched response ${res}`))
+        signIn("github", {callbackUrl: "/students"}).then()
+        // TODO -- How are we supposed to send the data to the backend?
     }
 
     /**
@@ -282,6 +298,7 @@ const Login: NextPage = () => {
                                 <button onClick={resetPassword}>CONFIRM</button>
                             </Modal>
                             <button onClick={e => submitLogin(e)}>LOG IN</button>
+                            <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
                             <div className={styles.orContainer}>
                                 <div/>
                                 <p>or</p>
@@ -297,7 +314,6 @@ const Login: NextPage = () => {
                                 </div>
                                 <p className={styles.github}>Continue with GitHub</p>
                             </div>
-
                         </form>
                     </div>
 
@@ -337,6 +353,7 @@ const Login: NextPage = () => {
                             </label>
                             <p className={`${styles.textFieldError} ${registerConfirmPasswordError !== "" ? styles.anim : ""}`}>{registerConfirmPasswordError}</p>
                             <button onClick={e => submitRegister(e)}>REGISTER</button>
+                            <p className={`${styles.textFieldError} ${registerBackendError !== "" ? styles.anim : ""}`}>{registerBackendError}</p>
                         </form>
                     </div>
                 </div>
