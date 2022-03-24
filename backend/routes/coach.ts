@@ -101,7 +101,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
  */
 async function getCoachRequests(req: express.Request):
     Promise<Responses.CoachList> {
-  return rq.parseGetCoachRequestRequest(req)
+  return rq.parseGetAllCoachRequestsRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
         return ormLU.getAllLoginUsers()

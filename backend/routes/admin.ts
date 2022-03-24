@@ -70,10 +70,11 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseUpdateAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(async parsed_ => {
-        const parsed = parsed_.data;
+      .then(async () => { // parsed_ => {
+        // const parsed = parsed_.data;
+        return Promise.reject({http : 501, reason : 'Under construction.'});
         // UPDATE LOGIC
-        return ormL
+        /*return ormL
             .updateLoginUser({
               loginUserId : parsed.id,
               isAdmin : parsed.isAdmin,
@@ -92,7 +93,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                                 accountStatus : admin.account_status
                               },
                               sessionkey : parsed.sessionkey
-                            })})
+                          })})*/
       });
 }
 
