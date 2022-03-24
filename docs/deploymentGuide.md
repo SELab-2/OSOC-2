@@ -20,7 +20,7 @@ location /api-osoc/ {
 ```
 
 It's also a good idea to redirect `http` to `https`. We achieve this using [certbot](https://certbot.eff.org).  
-This is a simple utility that automatically can change your nginx file to achieve this AND it creates and refreshes the needed TLS certificate.
+This is a simple utility that automatically can change your nginx config file to achieve this AND it creates and refreshes the needed TLS certificate.
 
 ## Project configuration
 
