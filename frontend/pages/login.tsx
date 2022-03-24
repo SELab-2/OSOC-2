@@ -81,13 +81,13 @@ const Login: NextPage = () => {
             })
                 .then(response => response.json()).then(json => {
                     if(!json.success) {
-                        setLoginBackendError('Failed to login. Please check all fields. ' + json.reason);
+                        setLoginBackendError(`Failed to login. ${json.reason}`);
                         return {success: false};
                     }
                     else return json;
                 })
                 .catch(err => {
-                    setLoginBackendError('Failed to login. Please check all fields. ' + err.reason);
+                    setLoginBackendError(`Failed to login. ${err.reason}`);
                     return {success: false};
                 });
             console.log(response)
@@ -298,6 +298,7 @@ const Login: NextPage = () => {
                                 <button onClick={resetPassword}>CONFIRM</button>
                             </Modal>
                             <button onClick={e => submitLogin(e)}>LOG IN</button>
+                            <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
                             <div className={styles.orContainer}>
                                 <div/>
                                 <p>or</p>
@@ -313,7 +314,6 @@ const Login: NextPage = () => {
                                 </div>
                                 <p className={styles.github}>Continue with GitHub</p>
                             </div>
-                            <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
                         </form>
                     </div>
 
