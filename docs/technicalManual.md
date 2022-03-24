@@ -3,6 +3,7 @@ Table of content
 1. [Docker/Docker-compose](#docker)
 2. [Database](#database)
 3. [Frontend](#frontend)
+4. [Testing](#testing)
 
 
 ## Docker/Docker-compose <a name="docker"></a>
@@ -198,3 +199,8 @@ To learn more about Next.js, take a look at the following resources:
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+## Testing <a name="testing"></a>
+In order to run the tests, make sure the docker containers are running.
+<br/>The tests are performed with npm, if it is the first time you want to run the test, consider running `npm install` in the root folder first.
+<br/>The test can be excecuted by running the `npm run integrationTests` command in the /backend folder.
