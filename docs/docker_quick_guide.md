@@ -1,19 +1,25 @@
-# Docker/Docker-compose
+# Technical Manual
+Table of content
+1. [Docker/Docker-compose](#docker)
+2. [Database](#database)
 
-## Installation
 
-### MacOS & Windows
+## Docker/Docker-compose <a name="docker"></a>
+
+### Installation
+
+#### MacOS & Windows
 Install docker desktop.
 - [mac](https://docs.docker.com/desktop/mac/install/)
 - [windows](https://docs.docker.com/desktop/windows/install/)
     - make sure WSL2 is enabled to be able to run linux-containers.
 
-### Linux
+#### Linux
 Install [docker-Engine](https://docs.docker.com/engine/install/) & [docker-compose](https://docs.docker.com/compose/install/)
 
 To execute docker in linux without `sudo`: https://docs.docker.com/engine/install/linux-postinstall/
 
-## Configuration to push to remote server
+### Configuration to push to remote server
 Open a terminal and type following commands to set the remote context.
 This context is used to push the local code to the server. The code is then deployed on the server.
 
@@ -26,15 +32,15 @@ Here is `remote-server` the name of the context that we will use to push the loc
 You are free to choose another name here (obviously use the name you chose for the commands later in this document).
 
 
-## Running docker
+### Running docker
 
-### GUI
+#### GUI
 only available for macOS & windows with docker desktop.
 
-### Commandline
+#### Commandline
 for linux, mac & windows
 
-#### Most important commands
+##### Most important commands
 
 list all running containers (shows their name, container ID,...)
 ```
@@ -88,9 +94,9 @@ docker-compose --context remote-server down
 
 
 
-## IDE-related
+### IDE-related
 
-### Visual Studio Code
+#### Visual Studio Code
 The debugger scripts for vscode are located in `.vscode/launcher.json`. there are 3 scripts:
 - `Docker: backend`
 - `Docker: frontend-server`
@@ -105,7 +111,7 @@ The debugger scripts for vscode are located in `.vscode/launcher.json`. there ar
 
 
 
-### Webstorm
+#### Webstorm
 Define debug configurations following [this](https://www.developers-notebook.com/development/debugging-node-js-in-a-docker-container-with-webstorm/) small tutorial.
 
 1.  - For the frontend the debugger port is `9119`
@@ -120,7 +126,7 @@ Give the debugger presets a name to make it clear to yourself which debugger you
 1. Start the application in the docker containers by running the docker-compose file **WITH DEBUGGING ENABLED**
 2. start the right debugger
 
-## Connect the containers in the application
+### Connect the containers in the application
 The containers can reach each other with their respective hostname out of the `docker-compose.yml` file.
 In our case these host names are:
 - `db` (for the database)
@@ -130,7 +136,7 @@ In our case these host names are:
 A short tutorial with extra information can be found [here](https://www.youtube.com/watch?v=A9bA5HpOk30)
 
 
-## Database
+## Database <a name="database"></a>
 
 ### Postgres startup scripts
 The startup scripts **ONLY** get executed if the volume that is used by the database is completely empty.
