@@ -18,7 +18,7 @@ model applied_role {
 model attachment {
   attachment_id      Int             @id @default(autoincrement())
   job_application_id Int             @default(autoincrement())
-  url                String
+  data               String
   type               type_enum
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -47,26 +47,26 @@ model evaluation {
 }
 
 model job_application {
-  job_application_id    Int                     @id @default(autoincrement())
-  student_id            Int                     @default(autoincrement())
-  responsibilities      String?
-  motivation            String?
-  fun_fact              String?
-  is_volunteer          Boolean
-  student_coach         Boolean
-  osoc_id               Int
-  edus                  String?
-  edu_level             String?
-  edu_duration          Int?
-  edu_year              Int?
-  edu_institute         String?
-  email_status          email_status_enum
-  osoc                  osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
-  student               student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
-  applied_role          applied_role[]
-  attachment            attachment[]
-  evaluation            evaluation[]
-  job_application_skill job_application_skill[]
+  job_application_id     Int                     @id @default(autoincrement())
+  student_id             Int                     @default(autoincrement())
+  student_volunteer_info String
+  responsibilities       String?
+  fun_fact               String?
+  student_coach          Boolean
+  osoc_id                Int
+  edus                   String[]
+  edu_level              String?
+  edu_duration           Int?
+  edu_year               Int?
+  edu_institute          String?
+  email_status           email_status_enum
+  created_at             DateTime                @db.Timestamptz(6)
+  osoc                   osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+  student                student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  applied_role           applied_role[]
+  attachment             attachment[]
+  evaluation             evaluation[]
+  job_application_skill  job_application_skill[]
 }
 
 model job_application_skill {
@@ -83,38 +83,39 @@ model job_application_skill {
 
 model language {
   language_id           Int                     @id @default(autoincrement())
-  name                  String
+  name                  String                  @unique
   job_application_skill job_application_skill[]
 }
 
 model login_user {
-  login_user_id Int            @id @default(autoincrement())
-  person_id     Int            @default(autoincrement())
-  password      String
-  is_admin      Boolean?
-  is_coach      Boolean?
-  person        person         @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
-  contract      contract[]
-  evaluation    evaluation[]
-  project_user  project_user[]
+  login_user_id  Int                 @id @default(autoincrement())
+  person_id      Int                 @unique @default(autoincrement())
+  password       String?
+  is_admin       Boolean
+  is_coach       Boolean
+  account_status account_status_enum
+  person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract       contract[]
+  evaluation     evaluation[]
+  project_user   project_user[]
+  session_keys   session_keys[]
 }
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
-  year            Int               @db.SmallInt
+  year            Int               @unique @db.SmallInt
   job_application job_application[]
   project         project[]
 }
 
 model person {
-  person_id  Int          @id @default(autoincrement())
-  email      String?      @db.VarChar(320)
-  github     String?
+  person_id  Int         @id @default(autoincrement())
+  email      String?     @unique @db.VarChar(320)
+  github     String?     @unique
   firstname  String
   lastname   String
-  gender     String
-  login_user login_user[]
-  student    student[]
+  login_user login_user?
+  student    student?
 }
 
 model project {
@@ -122,6 +123,7 @@ model project {
   name         String
   osoc_id      Int            @default(autoincrement())
   partner      String
+  description  String?
   start_date   DateTime       @db.Date
   end_date     DateTime       @db.Date
   positions    Int            @db.SmallInt
@@ -150,14 +152,15 @@ model project_user {
 
 model role {
   role_id      Int            @id @default(autoincrement())
-  name         String?
+  name         String         @unique
   applied_role applied_role[]
   project_role project_role[]
 }
 
 model student {
   student_id      Int               @id @default(autoincrement())
-  person_id       Int               @default(autoincrement())
+  person_id       Int               @unique @default(autoincrement())
+  gender          String
   pronouns        String[]
   phone_number    String
   nickname        String?
@@ -165,6 +168,13 @@ model student {
   person          person            @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract        contract[]
   job_application job_application[]
+}
+
+model session_keys {
+  session_key_id Int        @id @default(autoincrement())
+  login_user_id  Int        @default(autoincrement())
+  session_key    String     @unique @db.VarChar(128)
+  login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum decision_enum {
@@ -191,7 +201,16 @@ enum email_status_enum {
 }
 
 enum type_enum {
-  CV
-  PORTFOLIO
-  FILE
+  CV_URL
+  PORTFOLIO_URL
+  FILE_URL
+  MOTIVATION_STRING
+  MOTIVATION_URL
+}
+
+enum account_status_enum {
+  ACTIVATED
+  PENDING
+  DISABLED
+  UNVERIFIED
 }

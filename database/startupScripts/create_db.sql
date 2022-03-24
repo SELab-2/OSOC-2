@@ -1,40 +1,70 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
-   email        VARCHAR(320),      /* max email length is 320 characters */
-   github       TEXT,   
+   email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
+   github       TEXT               UNIQUE,   
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
-   gender       TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL)
+   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
 );
 
 
 CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
-   person_id       SERIAL          NOT NULL     REFERENCES person (person_id),
+   person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
+   gender          TEXT            NOT NULL,
    pronouns        TEXT [],
-   phone_number    TEXT    NOT NULL,
+   phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS login_user (
+/* function used in login user to retrieve if email is used in person */
+CREATE FUNCTION get_email_used(personId integer, given_password text)
+RETURNS BOOLEAN 
+LANGUAGE plpgsql
+AS
+$$
+declare 
+    email_used text;
+begin
+    select email into email_used from person where person_id = personId;
+
+    if (email_used IS NOT NULL) and (given_password is null) then 
+        return false; 
+    end if;
+
+    return true; 
+END;
+$$;
+
+/* enum used in login_user to show the account status */
+CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
+
+CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
-    person_id        SERIAL     NOT NULL REFERENCES person(person_id),
-    password         TEXT       NOT NULL, 
-    /* TODO: dit mag wel null zijn als we inloggen met github? via een trigger? */
-    /* TODO2: Wat als je zowel email als github hebt */
-    is_admin         BOOLEAN,
-    is_coach         BOOLEAN,
+    person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
+    "password"         TEXT     NULL, 
+    is_admin         BOOLEAN NOT NULL,
+    is_coach         BOOLEAN NOT NULL,
+    account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE)
+    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
+    CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
+
+CREATE TABLE IF NOT EXISTS session_keys(
+   session_key_id     SERIAL         PRIMARY KEY,
+   login_user_id      SERIAL         NOT NULL REFERENCES login_user(login_user_id),
+   session_key        VARCHAR(128)   NOT NULL UNIQUE
+ );
 
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
-   year       SMALLINT    NOT NULL
+   year       SMALLINT    NOT NULL UNIQUE,
+   CONSTRAINT valid_year CHECK (year >= date_part('year', CURRENT_DATE))
 );
 
 
@@ -42,20 +72,20 @@ CREATE TABLE IF NOT EXISTS osoc(
 CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE', 'DRAFT');
 
 CREATE TABLE IF NOT EXISTS job_application (
-    job_application_id    SERIAL               PRIMARY KEY,
-    student_id            SERIAL               NOT NULL REFERENCES student(student_id),
-    responsibilities      TEXT,
-    motivation            TEXT,
-    fun_fact              TEXT,
-    is_volunteer          BOOLEAN              NOT NULL,
-    student_coach         BOOLEAN              NOT NULL,
-    osoc_id               INT                  NOT NULL REFERENCES osoc(osoc_id),
-    edus                  TEXT,
-    edu_level             TEXT,
-    edu_duration          INT,
-    edu_year              INT,
-    edu_institute         TEXT,
-    email_status          email_status_enum    NOT NULL
+    job_application_id        SERIAL               PRIMARY KEY,
+    student_id                SERIAL               NOT NULL REFERENCES student(student_id),
+    student_volunteer_info    TEXT                 NOT NULL,
+    responsibilities          TEXT,
+    fun_fact                  TEXT,
+    student_coach             BOOLEAN              NOT NULL,
+    osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
+    edus                      TEXT [],
+    edu_level                 TEXT,
+    edu_duration              INT,
+    edu_year                  INT,
+    edu_institute             TEXT,
+    email_status              email_status_enum    NOT NULL,
+    created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
 
 
@@ -74,7 +104,7 @@ CREATE TABLE IF NOT EXISTS evaluation (
 
 CREATE TABLE IF NOT EXISTS role (
     role_id    SERIAL    PRIMARY KEY,
-    name       TEXT
+    name       TEXT      NOT NULL UNIQUE
 );
 
 
@@ -83,9 +113,12 @@ CREATE TABLE IF NOT EXISTS project (
    name          TEXT             NOT NULL,
    osoc_id       SERIAL           NOT NULL REFERENCES osoc (osoc_id),
    partner       TEXT             NOT NULL,
+   description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL
+   positions     SMALLINT         NOT NULL, 
+   CONSTRAINT dates CHECK (start_date <= end_date),
+   CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
@@ -100,7 +133,8 @@ CREATE TABLE IF NOT EXISTS project_role (
     project_role_id    SERIAL      PRIMARY KEY,
     project_id         SERIAL      NOT NULL REFERENCES project(project_id),
     role_id            SERIAL      NOT NULL REFERENCES role(role_id),
-    positions          SMALLINT    NOT NULL
+    positions          SMALLINT    NOT NULL,
+    CONSTRAINT valid_positions CHECK (positions > 0)
 );
 
 
@@ -126,7 +160,7 @@ CREATE TABLE IF NOT EXISTS applied_role (
 
 CREATE TABLE IF NOT EXISTS language (
     language_id    SERIAL         PRIMARY KEY,
-    name           TEXT           NOT NULL
+    name           TEXT           NOT NULL UNIQUE
 );
 
 
@@ -142,11 +176,11 @@ CREATE TABLE IF NOT EXISTS job_application_skill (
 
 
 /* enum used in attachment for the possible types */
-CREATE TYPE type_enum AS ENUM ('CV', 'PORTFOLIO', 'FILE');
+CREATE TYPE type_enum AS ENUM ('CV_URL', 'PORTFOLIO_URL', 'FILE_URL', 'MOTIVATION_STRING', 'MOTIVATION_URL');
 
 CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
    job_application_id    SERIAL       NOT NULL REFERENCES job_application (job_application_id),
-   url                   TEXT         NOT NULL,
+   data                  TEXT         NOT NULL,
    type                  type_enum    NOT NULL
 );

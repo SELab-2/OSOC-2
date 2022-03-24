@@ -1,14 +1,45 @@
 {
     "port": 4096,
-    
-    "httpErrors": {
-        "invalidID": 204,
-        "argumentError": 400,
-        "unauthenticated": 401,
-        "insufficientRights": 403,
-        "nonExistent": 404,
-        "invalidVerb": 405,
-        "nonJSONRequest": 406,
-        "serverError": 500
+
+    "apiErrors": {
+        "invalidID": {
+            "http": 204,
+            "reason": "This endpoint requires an ID. The ID you provided was invalid."
+        },
+        "argumentError": {
+            "http": 400,
+            "reason": "One of the arguments is incorrect or not present. Please check your request."
+        },
+        "unauthenticated": {
+            "http": 401,
+            "reason": "Unauthenticated request. Please log in first."
+        },
+        "insufficientRights": {
+            "http": 403,
+            "reason": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+        },
+        "nonExistent": {
+            "http": 404,
+            "reason": "The endpoint requested ($url) does not exist."
+        },
+        "invalidVerb": {
+            "http": 405,
+            "reason": "This HTTP verb ($verb) is not supported for this endpoint ($url)"
+        },
+        "nonJSONRequest": {
+            "http": 406,
+            "reason": "All endpoints only support JSON ($mime requested)."
+        },
+        "serverError": {
+            "http": 500,
+            "reason": "Something went wrong while trying to execute your request."
+        }
+    },
+
+    "global": {
+        "homes": [
+            "", "/api-osoc"
+        ],
+        "preferred": "/api-osoc"
     }
 }

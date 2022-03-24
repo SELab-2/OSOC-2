@@ -1,0 +1,167 @@
+.body {
+    padding-block: clamp(1rem, 2vw, 2.5rem);
+    width: clamp(18rem, 80vw, 45rem);
+    margin-inline: auto;
+}
+
+.formContainer {
+    padding-block: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+/**
+ * Vertical version of login and register
+ */
+@media (max-width: 45rem) {
+    .formContainer {
+        flex-direction: column;
+    }
+
+    .loginContainer, .registerContainer {
+        width: 100%;
+    }
+
+    .loginContainer {
+        padding-bottom: 3rem;
+        padding-right: 0 !important;
+        border-bottom: 2px solid var(--primary-100);
+        border-right: none !important;
+    }
+
+    .registerContainer {
+        padding-top: 1.5rem;
+        padding-left: 0 !important;
+    }
+}
+
+.loginContainer, .registerContainer {
+    flex: 1 0 50%;
+}
+
+.loginContainer {
+    border-right: 2px solid var(--primary-100);
+    padding-right: clamp(2rem, 4vw, 4rem);
+}
+
+.registerContainer {
+    padding-left: clamp(2rem, 4vw, 4rem);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+    color: var(--primary-110);
+}
+
+.label input {
+    margin-inline: -0.2rem;
+    border-radius: 0;
+    border: none;
+    background-color: var(--neutral-200);
+    height: 2.5rem;
+    padding-inline: 0.4rem;
+    margin-block: 0.4rem;
+}
+
+.label input:focus {
+    border: none;
+    background-color: var(--neutral-150);
+    padding-inline: 0.5rem;
+}
+
+.form button {
+    margin-inline: -0.2rem;
+    align-self: flex-start;
+    margin-top: 0.2rem;
+}
+
+
+.github {
+    color: white;
+    font-weight: bold;
+    margin-inline: auto;
+}
+
+.resetPassword {
+    font-size: 0.7rem;
+    font-weight: normal;
+    align-self: flex-end;
+    height: 0;
+}
+
+.orContainer {
+    margin-inline: -0.2rem;
+    display: flex;
+    align-items: center;
+    margin-block: 1rem;
+}
+
+.orContainer div {
+    border: 1px solid var(--neutral-200);
+    flex-grow: 1;
+}
+
+.orContainer p {
+    margin-inline: 0.5rem;
+    line-height: 0;
+}
+
+.githubContainer {
+    display: flex;
+    background-color: black;
+    padding-inline: 1rem;
+    padding-block: 0.25rem;
+    transition: all .2s ease-in-out;
+    margin-inline: -0.2rem;
+}
+
+.githubContainer:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+    box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.githublogo {
+    width: 2rem;
+}
+
+.githublogo {
+    display: flex;
+}
+
+.textFieldError {
+    padding: 0;
+    text-align: left;
+    font-size: 0.7rem;
+    margin: 0 0 0.2rem;
+    color: var(--error-100);
+}
+
+.anim {
+    /* Shake upon visible */
+    animation: shake 0.3s;
+}
+
+/**
+ * A little animation that shakes whatever it is applied to
+ * from left to right
+ */
+@keyframes shake {
+    0% { transform: translate(1px, 0)}
+    10% { transform: translate(-1px, 0)}
+    20% { transform: translate(-3px, 0)}
+    30% { transform: translate(3px, 0)}
+    40% { transform: translate(1px, 0)}
+    50% { transform: translate(-1px, 0)}
+    60% { transform: translate(-3px, 0)}
+    70% { transform: translate(3px, 0)}
+    80% { transform: translate(-1px, 0)}
+    90% { transform: translate(1px, 0)}
+    100% { transform: translate(1px, 0)}
+}

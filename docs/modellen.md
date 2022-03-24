@@ -1,1 +1,0 @@
-A link to the domain model can be found [here](https://ugentbe-my.sharepoint.com/:u:/g/personal/bart_mesuere_ugent_be/Ef6ZzAc43KVFt2Uf6LCGiqYBOwz6Vpq21vIxSNDeRBi6Fg?e=a6cc0C).

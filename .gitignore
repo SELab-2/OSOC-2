@@ -52,6 +52,16 @@ frontend/node_modules
 # keep some (empty) directories
 !**/.gitkeep
 
+# jetbrains
 .idea
 frontend/.idea
 backend/.idea
+
+# ignore test coverage files
+*coverage.json
+/backend/prisma/migrations/
+
+# NEVER, EVER push .env file
+.env
+frontend/.env.development
+frontend/.env.production
