@@ -1,11 +1,11 @@
 .body {
-    padding-block: clamp(1rem, 4vw, 2.5rem);
+    padding-block: clamp(1rem, 2vw, 2.5rem);
     width: clamp(18rem, 80vw, 45rem);
     margin-inline: auto;
 }
 
 .formContainer {
-    padding-block: 1rem;
+    padding-block: clamp(0rem, 0.5vw, 4rem);
     display: flex;
     justify-content: center;
 }

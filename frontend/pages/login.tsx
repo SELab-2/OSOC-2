@@ -240,7 +240,7 @@ const Login: NextPage = () => {
                     <div className={styles.loginContainer}>
                         <h2>Login</h2>
                         <form className={styles.form} onSubmit={e => {
-                            submitLogin(e)
+                            submitLogin(e).then()
                         }}>
                             <label className={styles.label}>
                                 Email
