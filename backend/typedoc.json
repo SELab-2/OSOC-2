@@ -1,4 +1,4 @@
 {
-    "entryPoints": ["index.ts"],
+    "entryPoints": ["routes/admin.ts", "routes/coach.ts", "routes/form.ts", "routes/login.ts", "routes/project.ts", "routes/student.ts","orm_functions/applied_role.ts", "orm_functions/job_application.ts", "orm_functions/osoc.ts", "orm_functions/role.ts", "orm_functions/attachment.ts", "orm_functions/job_application_skill.ts", "orm_functions/person.ts", "orm_functions/session_key.ts", "orm_functions/contract.ts", "orm_functions/language.ts", "orm_functions/project.ts", "orm_functions/student.ts", "orm_functions/evaluation.ts", "orm_functions/login_user.ts", "orm_functions/project_role.ts", "orm_functions/general_purpose.ts", "orm_functions/orm_types.ts", "orm_functions/project_user.ts"],
     "out": "docs"
 }
