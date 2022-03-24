@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import express from 'express';
 import {mockDeep} from 'jest-mock-extended';
@@ -79,7 +77,7 @@ test("utility.errors.cook* work as expected", () => {
     {verb : "OPTIONS", url : "/student/abcdeabcde"}
   ];
   const verbExpect: {err: ApiError, req: express.Request}[] = verbs.map(v => {
-    var req: express.Request = getMockReq();
+    const req: express.Request = getMockReq();
     req.method = v.verb;
     req.url = v.url;
     const msg = config.apiErrors.invalidVerb.reason.replace(/$url/, v.url)
@@ -140,7 +138,7 @@ test("utility.replyError writes to a response", () => {
     {verb : "DELETE", url : "/student/all"}
   ];
   const someReqs: express.Request[] = someVerbs.map(req => {
-    var request: express.Request = getMockReq();
+    const request: express.Request = getMockReq();
     request.method = req.verb;
     request.url = req.url;
     return request;
@@ -148,7 +146,7 @@ test("utility.replyError writes to a response", () => {
   const someMimes: string[] =
       [ 'text/html', 'audio/aac', 'image/bmp', 'text/css', 'video/mp4' ];
 
-  var errors: ApiError[] = [
+  const errors: ApiError[] = [
     util.errors.cookInvalidID(), util.errors.cookArgumentError(),
     util.errors.cookUnauthenticated(), util.errors.cookInsufficientRights(),
     util.errors.cookServerError()
@@ -182,7 +180,7 @@ test("utility.replySuccess writes to a response", () => {
 });
 
 test("utility.addInvalidVerbs adds verbs", () => {
-  var router: express.Router = express.Router();
+  const router: express.Router = express.Router();
   const routerSpy = jest.spyOn(router, 'all');
   util.addInvalidVerbs(router, '/');
   // we seem unable to trigger the route with jest?
@@ -223,8 +221,8 @@ test("utility.respOrErrorNoReinject sends successes", async () => {
 test("utility.respOrErrorNoReinject sends api errors", () => {
   // api error case
   const {res, statSpy, sendSpy} = obtainResponse();
-  var err: ApiError = util.errors.cookArgumentError();
-  var errObj: any = {success : false, reason : err.reason};
+  const err: ApiError = util.errors.cookArgumentError();
+  const errObj: any = {success : false, reason : err.reason};
   util.respOrErrorNoReinject(res, Promise.reject(err)).then(() => {
     expect(statSpy).toHaveBeenCalledWith(err.http);
     expect(sendSpy).toHaveBeenCalledWith(errObj);
@@ -252,7 +250,7 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
 // test respOrError<T> has to wait -> ORM connection has to be mocked
 test("utility.respOrError sends responses with updated keys", async () => {
   const {res, statSpy, sendSpy} = obtainResponse();
-  var req = getMockReq();
+  const req = getMockReq();
   req.body.sessionkey = "key";
 
   session_keyMock.changeSessionKey.mockReset();
@@ -263,14 +261,14 @@ test("utility.respOrError sends responses with updated keys", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;
   });
 
-  var obj = {data : {"some" : "data"}, "sessionkey" : ""};
-  var exp = {data : {"some" : "data"}, "sessionkey" : "abcd", success : true};
+  const obj = {data : {"some" : "data"}, "sessionkey" : ""};
+  const exp = {data : {"some" : "data"}, "sessionkey" : "abcd", success : true};
 
   await expect(util.respOrError(req, res, Promise.resolve(obj)))
       .resolves.not.toThrow();
@@ -336,12 +334,12 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
                is_admin : true,
                is_coach : false,
                account_status : 'ACTIVATED',
-               person: {
-                 lastname: "lastname",
-                 firstname: "firstname",
-                 github: "hiethub",
-                 person_id: 0,
-                 email: "email@mail.com"
+               person : {
+                 lastname : "lastname",
+                 firstname : "firstname",
+                 github : "hiethub",
+                 person_id : 0,
+                 email : "email@mail.com"
                }
              } ]);
            });
@@ -372,7 +370,7 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;
@@ -392,7 +390,7 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
 
   cryptoMock.createHash.mockReset();
   cryptoMock.createHash.mockImplementation(() => {
-    var h = mockDeep<crypto.Hash>();
+    const h = mockDeep<crypto.Hash>();
     h.update.mockImplementation(() => h);
     h.digest.mockImplementation(() => 'abcd');
     return h;
