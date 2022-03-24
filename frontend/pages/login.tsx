@@ -69,7 +69,7 @@ const Login: NextPage = () => {
             //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
             //console.log(encryptedPassword)
             // TODO -- Send call to the backend
-
+            console.log(`FIELDS: ${process.env.NEXT_PUBLIC_API_URL}/login`);
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
                 body: JSON.stringify({pass: loginPassword, name: loginEmail}),
