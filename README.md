@@ -1,24 +1,16 @@
-# OSOC-2
+# Software Engineering Lab 2 - 2021-2022: Team 2
 
-### List of all the useful documentations
-[Mock Ups](docs/Mock%20Ups)
+## Introduction 
+This repo is the osoc selection solution team 2 made for [Open Knowledge Belgium](https://openknowledge.be/).
+In order to create a selection tool, we created an [online platform](https://sel2-2.ugent.be/login) where coaches can assign students to projects.
+<br/>The tool is made with a variety of technologies, the main ones being PostGres, Prsima.js, Next.js and Express.js.
+<br/>An extensive list of all the documentations can be found [here](https://selab-2.github.io/OSOC-2/).
 
-[Domain Model](docs/Domain%20Model)
-
-[Use Cases](docs/Use%20cases.pdf)
-
-[Deployment Diagram](docs/Deployment%20diagram.pdf)
-
-[Sequence Diagram](docs/Sequence%20Diagram)
-
-[Component Diagram](docs/Component%20Diagram)
-
-[Technical Manual](docs/docker_quick_guide.md)
-
-[User Manual](docs/user_manual.md)
-
-[API Manual](docs/API)
-
-[Programming Conventions](docs/conventions.md)
-
-[How to contribute](docs/contribute.md)
+## Team 2:
+- Norick Beterams
+- Koen Desplenter
+- Bram Devlaminck
+- Jonas Sys
+- Huan Tan
+- Jonathan Vanbrabant
+- Maurice Van Wassenhove
