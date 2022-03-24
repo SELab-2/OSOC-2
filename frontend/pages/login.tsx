@@ -8,7 +8,8 @@ import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
 
-//const crypto = require('crypto');
+// import * as crypto from 'crypto'; // enable later
+
 const Login: NextPage = () => {
 
     const router = useRouter()
@@ -66,13 +67,15 @@ const Login: NextPage = () => {
         if (!error) {
             // We encrypt the password before sending it to the backend api
             // TODO use encryption
-            //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
+            const encryptedPassword = loginPassword; // disable later
+            // const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
             //console.log(encryptedPassword)
             // TODO -- Send call to the backend
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
-                body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                //body: JSON.stringify({pass: loginPassword, name: loginEmail}),
+                body: JSON.stringify({pass: encryptedPassword, name: loginEmail}),
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
@@ -156,13 +159,15 @@ const Login: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
+            const encryptedPassword = registerPassword; // disable later
+            // const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
                 method: 'POST',
                 body: JSON.stringify({
                     firstName: registerFirstName,
                     lastName: registerLastName,
                     emailOrGithub: registerEmail,
-                    pass: registerPassword
+                    pass: encryptedPassword
                 }),
                 headers: {
                     'Content-Type': 'application/json',
