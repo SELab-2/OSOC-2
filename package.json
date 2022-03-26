@@ -15,9 +15,7 @@
     "*.{js,jsx,ts,tsx}": "eslint --cache --fix"
   },
   "scripts": {
-    "prepare": "husky install"
-  },
-  "dependencies": {
-    "eslint-plugin-jest": "^26.1.1"
+    "prepare": "husky install",
+    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx"
   }
 }
