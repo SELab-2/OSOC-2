@@ -12,3 +12,4 @@ This folder contains all the required documentations:
 - [Programming Conventions](conventions.md)
 - [How to contribute](contribute.md)
 - [How to deploy](deploymentGuide.md)
+- [Inline Code Documentation](../backend/docs/index.html)
