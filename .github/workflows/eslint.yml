@@ -5,7 +5,7 @@ name: ESLint
 
 on:
   # Run on every open pull request, default types are [opened, edited, reopened]
-  pull_request
+  pull_request:
 
   # Should run on every push to main
   push:

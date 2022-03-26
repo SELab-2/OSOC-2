@@ -4,7 +4,7 @@
 name: BackendCI
 on:
   # Run on every open pull request, default types are [opened, edited, reopened]
-  pull_request
+  pull_request:
 
   # Should run all tests and upload the codecoverage on main
   push:
