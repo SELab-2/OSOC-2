@@ -4,9 +4,8 @@
 name: FrontendCI
 
 on:
-  # Run on every open pull request
-  pull_request:
-    types: [opened, edited, reopened, synchronize]
+  # Run on every open pull request, default types are [opened, edited, reopened]
+  pull_request
 
   # Should run all tests and upload the codecoverage on main
   push:
