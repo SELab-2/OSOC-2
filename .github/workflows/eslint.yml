@@ -21,4 +21,4 @@ jobs:
         with:
           node-version: 17.x
       - run: npm install
-      - run: eslint . --ext .js,.jsx,.ts,.tsx
+      - run: npm run eslint
