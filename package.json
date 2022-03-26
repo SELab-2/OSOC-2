@@ -16,8 +16,5 @@
   },
   "scripts": {
     "prepare": "husky install"
-  },
-  "dependencies": {
-    "eslint-plugin-jest": "^26.1.1"
   }
 }
