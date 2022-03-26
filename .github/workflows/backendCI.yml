@@ -14,9 +14,6 @@ jobs:
   ci:
     runs-on: self-hosted
     
-    strategy:
-      matrix:
-        node-version: [16.x]
     services:
      postgres: # this is for the integration testing of the orm functions
        image: postgres:14.2
@@ -39,10 +36,10 @@ jobs:
         touch backend/prisma/.env
         echo DATABASE_URL="postgresql://osoc2:password@db:5432/osoc2?connect_timeout=30&pool_timeout=30" >> backend/prisma/.env
         cat backend/prisma/.env
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 17.x
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 17.x
 
     - run: npm install
       working-directory: backend
