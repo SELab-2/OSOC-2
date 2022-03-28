@@ -49,6 +49,29 @@ beforeAll(async () => {
            }
        ]
     });
+    const osocs = await prisma.osoc.findMany();
+
+    // create projects
+    await prisma.project.createMany({
+        data: [
+            {   
+                name: "project-test",
+                osoc_id: osocs[1].osoc_id,
+                partner: "partner-test",
+                start_date: new Date("2022-05-22"),
+                end_date: new Date("2022-06-31"),
+                positions: 10
+            },
+            {
+                name: "project-test-2",
+                osoc_id: osocs[1].osoc_id,
+                partner: "partner-test-2",
+                start_date: new Date("2022-09-15"),
+                end_date: new Date("2022-10-23"),
+                positions: 9
+            },
+        ],
+    });
 });
 
 afterAll(async () => {
