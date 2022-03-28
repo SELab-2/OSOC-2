@@ -4,7 +4,9 @@ This little guide will show you the very basic principles of Next.JS and how to 
 
 ## File structure
 
-Next.JS uses file based routing. This means that every file in the paging folder will result in something like `/login` for the login file. Using nested folders you can achieve longer routes and have dynamic routes. For example when you have a folder named `student` containing a file named `[<id].tsx`, it will automatically setup the route given an id and resolve to `/student/02264212` for example where the number is the id representing the student.
+![image](https://user-images.githubusercontent.com/56763273/160392058-d4109691-2a5a-4ce3-9331-80a07311aba1.png)
+
+Next.JS uses file based routing. This means that every file in the pages folder will result in something like `/login` for the login file. Using nested folders you can achieve longer routes and have dynamic routes. For example when you have a folder named `student` containing a file named `[id].tsx`, it will automatically setup the route given an id and resolve to `/student/02264212` for example where the number is the id representing the student.
 
 Everything else that does not directly correspond to a route should be placed in the `components` directory, where every component lives in its own folder as a `.tsx` and `.module.css` file. Next.JS is allows us to split CSS files into modules to not have name collisions with other css files. More info on CSS will follow once we have chosen a framework.
 
@@ -199,6 +201,11 @@ Also notice that every variable that needs to update the page is part of the pag
 ## Further reading
 
 To get an more broad overview and quick start see the official Next.JS quickstart guide: https://nextjs.org/learn
+
+I highly recommend reading through these items:
+![image](https://user-images.githubusercontent.com/56763273/160392222-322c4cda-0a60-428a-a141-23e1dfa82c96.png)
+
+Except for **Pre-Rendering and Data Fetching**.
 
 And the official complete documentation can be found here:
 https://nextjs.org/docs
