@@ -272,6 +272,7 @@ export interface Key {
  */
 export interface Login extends Key {
   is_admin: boolean;
+  is_coach: boolean;
 }
 
 /**

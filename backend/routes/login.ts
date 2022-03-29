@@ -36,7 +36,8 @@ async function login(req: express.Request): Promise<Responses.Login> {
         return addSessionKey(pass.login_user.login_user_id, key)
             .then(ins => ({
                     sessionkey : ins.session_key,
-                    is_admin : orDefault(pass?.login_user?.is_admin, false)
+                    is_admin : orDefault(pass?.login_user?.is_admin, false),
+                    is_coach : orDefault(pass?.login_user?.is_coach, false)
                   }));
       }));
 }

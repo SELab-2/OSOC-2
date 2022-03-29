@@ -38,7 +38,8 @@ export async function getPasswordPersonByEmail(email: string) {
           password : true,
           login_user_id : true,
           account_status : true,
-          is_admin : true
+          is_admin : true,
+          is_coach : true
         }
       }
     }
