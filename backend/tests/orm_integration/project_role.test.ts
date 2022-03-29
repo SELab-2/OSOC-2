@@ -41,9 +41,9 @@ it('should create 1 new project role with role developer', async () => {
 
 it('should return the project role, by searching for its project', async () => {
     const searched_project_role = await getProjectRolesByProject(projectRole1.projectId);
-    expect(searched_project_role[0]).toHaveProperty("project_id", projectRole1.projectId);
-    expect(searched_project_role[0]).toHaveProperty("role_id", projectRole1.roleId);
-    expect(searched_project_role[0]).toHaveProperty("positions", projectRole1.positions);
+    expect(searched_project_role[2]).toHaveProperty("project_id", projectRole1.projectId);
+    expect(searched_project_role[2]).toHaveProperty("role_id", projectRole1.roleId);
+    expect(searched_project_role[2]).toHaveProperty("positions", projectRole1.positions);
 });
 
 it('should return the project role, by searching for its project and projectrole', async () => {
@@ -55,9 +55,9 @@ it('should return the project role, by searching for its project and projectrole
 
 it('should return the project role and role, by searching for its project role id', async () => {
     const searched_project_role = await getProjectRoleNamesByProject(projectRole1.projectId);
-    expect(searched_project_role[0]).toHaveProperty("project_id", projectRole1.projectId);
-    expect(searched_project_role[0]).toHaveProperty("role_id", projectRole1.roleId);
-    expect(searched_project_role[0]).toHaveProperty("positions", projectRole1.positions);
+    expect(searched_project_role[2]).toHaveProperty("project_id", projectRole1.projectId);
+    expect(searched_project_role[2]).toHaveProperty("role_id", projectRole1.roleId);
+    expect(searched_project_role[2]).toHaveProperty("positions", projectRole1.positions);
 });
 
 it('should return the the number of free positions, by searching for its project role id', async () => {

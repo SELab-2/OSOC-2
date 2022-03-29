@@ -47,13 +47,13 @@ it('should create 1 new project where osoc is 2022', async () => {
 
 it('should find all the projects in the db, 3 in total', async () => {
     const searched_projects = await getAllProjects();
-    expect(searched_projects.length).toEqual(3);
-    expect(searched_projects[2]).toHaveProperty("name", project1.name);
-    expect(searched_projects[2]).toHaveProperty("osoc_id", project1.osocId);
-    expect(searched_projects[2]).toHaveProperty("partner", project1.partner);
-    expect(searched_projects[2]).toHaveProperty("start_date", project1.startDate);
-    expect(searched_projects[2]).toHaveProperty("end_date", project1.endDate);
-    expect(searched_projects[2]).toHaveProperty("positions", project1.positions);
+    expect(searched_projects.length).toEqual(4);
+    expect(searched_projects[3]).toHaveProperty("name", project1.name);
+    expect(searched_projects[3]).toHaveProperty("osoc_id", project1.osocId);
+    expect(searched_projects[3]).toHaveProperty("partner", project1.partner);
+    expect(searched_projects[3]).toHaveProperty("start_date", project1.startDate);
+    expect(searched_projects[3]).toHaveProperty("end_date", project1.endDate);
+    expect(searched_projects[3]).toHaveProperty("positions", project1.positions);
 });
 
 it('should return the project, by searching for its name', async () => {
@@ -69,12 +69,12 @@ it('should return the project, by searching for its name', async () => {
 it('should return the project, by searching for its osoc edition', async () => {
     const osoc = await getOsocByYear(2022);
     const searched_project = await getProjectsByOsocEdition(osoc!.osoc_id);
-    expect(searched_project[0]).toHaveProperty("name", project1.name);
-    expect(searched_project[0]).toHaveProperty("osoc_id", project1.osocId);
-    expect(searched_project[0]).toHaveProperty("partner", project1.partner);
-    expect(searched_project[0]).toHaveProperty("start_date", project1.startDate);
-    expect(searched_project[0]).toHaveProperty("end_date", project1.endDate);
-    expect(searched_project[0]).toHaveProperty("positions", project1.positions);
+    expect(searched_project[1]).toHaveProperty("name", project1.name);
+    expect(searched_project[1]).toHaveProperty("osoc_id", project1.osocId);
+    expect(searched_project[1]).toHaveProperty("partner", project1.partner);
+    expect(searched_project[1]).toHaveProperty("start_date", project1.startDate);
+    expect(searched_project[1]).toHaveProperty("end_date", project1.endDate);
+    expect(searched_project[1]).toHaveProperty("positions", project1.positions);
 });
 
 it('should return the projects, by searching for its partner name', async () => {
@@ -119,12 +119,12 @@ it('should return the projects, by searching for all projects starting before da
 
 it('should return the projects, by searching for all projects starting after date', async () => {
     const searched_projects = await getProjectsStartedAfterDate(new Date("2022-07-01"));
-    expect(searched_projects[1]).toHaveProperty("name", project1.name);
-    expect(searched_projects[1]).toHaveProperty("osoc_id", project1.osocId);
-    expect(searched_projects[1]).toHaveProperty("partner", project1.partner);
-    expect(searched_projects[1]).toHaveProperty("start_date", project1.startDate);
-    expect(searched_projects[1]).toHaveProperty("end_date", project1.endDate);
-    expect(searched_projects[1]).toHaveProperty("positions", project1.positions);
+    expect(searched_projects[2]).toHaveProperty("name", project1.name);
+    expect(searched_projects[2]).toHaveProperty("osoc_id", project1.osocId);
+    expect(searched_projects[2]).toHaveProperty("partner", project1.partner);
+    expect(searched_projects[2]).toHaveProperty("start_date", project1.startDate);
+    expect(searched_projects[2]).toHaveProperty("end_date", project1.endDate);
+    expect(searched_projects[2]).toHaveProperty("positions", project1.positions);
 });
 
 it('should return the projects, by searching for all projects ending before date', async () => {
@@ -169,12 +169,12 @@ it('should return the projects, by searching for all projects with less position
 
 it('should return the projects, by searching for all projects with more positions', async () => {
     const searched_projects = await getProjectsMorePositions(project1.positions - 1);
-    expect(searched_projects[2]).toHaveProperty("name", project1.name);
-    expect(searched_projects[2]).toHaveProperty("osoc_id", project1.osocId);
-    expect(searched_projects[2]).toHaveProperty("partner", project1.partner);
-    expect(searched_projects[2]).toHaveProperty("start_date", project1.startDate);
-    expect(searched_projects[2]).toHaveProperty("end_date", project1.endDate);
-    expect(searched_projects[2]).toHaveProperty("positions", project1.positions);
+    expect(searched_projects[3]).toHaveProperty("name", project1.name);
+    expect(searched_projects[3]).toHaveProperty("osoc_id", project1.osocId);
+    expect(searched_projects[3]).toHaveProperty("partner", project1.partner);
+    expect(searched_projects[3]).toHaveProperty("start_date", project1.startDate);
+    expect(searched_projects[3]).toHaveProperty("end_date", project1.endDate);
+    expect(searched_projects[3]).toHaveProperty("positions", project1.positions);
 });
 
 it('should update project based upon project id', async () => {
@@ -201,7 +201,7 @@ it('should delete the project based upon project id', async () => {
 });
 
 it('should delete the project based upon project partner', async () => {
-    const deleted_project = await deleteProjectByPartner("partner-test");
+    const deleted_project = await deleteProjectByPartner("partner-test-2");
     expect(deleted_project).toHaveProperty("count", 1);
 });
 
