@@ -70,80 +70,86 @@ test("Can parse Key-ID requests", () => {
   return Promise.all([ successes, failures, otherfails ].flat());
 })
 
-// TODO: fix deze test
+test("Can parse update login user requests", () => {
+  const id = 1234;
+  const valid1: T.Anything = {
+    isAdmin : false,
+    isCoach : false,
+    accountStatus : 'PENDING',
+    sessionkey : 'abc'
+  };
+  const valid2: T.Anything = {
+    isAdmin : false,
+    isCoach : false,
+    accountStatus : 'PENDING',
+    pass : 'mypass',
+    sessionkey : 'abc'
+  };
 
-// test("Can parse update login user requests", () => {
-//   const key: string = "key_u1";
-//   const id: number = 64564;
-//
-//   const fillReq = (v: any) => {
-//     var r = getMockReq();
-//     r.params.id = v.id;
-//     r.body.sessionkey = v.sessionkey;
-//     ["pass", "isAdmin", "isCoach"].forEach(k => {
-//       if (k in v)
-//         r.body[k] = v[k]
-//     });
-//     return r;
-//   };
-//
-//   const check =
-//       (v: T.Requests.UpdateLoginUser, og: T.Requests.UpdateLoginUser) => {
-//         expect(v.id).toBe(og.id);
-//         expect(v.sessionkey).toBe(og.sessionkey);
-//         expect(v.pass).toBe(og.pass);
-//       };
-//
-//   const funcs = [ Rq.parseUpdateCoachRequest, Rq.parseUpdateAdminRequest ];
-//
-//   const options = [
-//     {pass : "user1iscool", id : id, sessionkey : key, isAdmin: true, isCoach:
-//     true},
-//     // {emailOrGithub : "user1@user2.be", id : id, sessionkey : key},
-//     // {firstName : "User", id : id, sessionkey : key},
-//     // {lastName : "One", id : id, sessionkey : key},
-//     // {gender : "eno", id : id, sessionkey : key},
-//     // {pass : "user1iscool", id : id, sessionkey : key},
-//     // {gender : "eno", firstName : "Dead", id : id, sessionkey : key}, {
-//     //   emailOrGithub : "user-1_git",
-//     //   firstName : "Jef",
-//     //   lastName : "Pollaq",
-//     //   gender : "male",
-//     //   pass : "",
-//     //   id : id,
-//     //   sessionkey : key
-//     // }
-//   ].map(v => ({val : fillReq(v), og : v}));
-//
-//   const res:
-//       T.Requests.IdRequest = {sessionkey : "Hello I am a key", id : 684684};
-//
-//   var noupdate: express.Request = getMockReq();
-//   var neither: express.Request = getMockReq();
-//   var onlyKey: express.Request = getMockReq();
-//   var onlyid: express.Request = getMockReq();
-//
-//   noupdate.body.sessionkey = res.sessionkey;
-//   noupdate.params.id = res.id.toString();
-//   onlyKey.body.sessionkey = res.sessionkey;
-//   onlyid.params.id = res.id.toString();
-//
-//   const successes =
-//       options.flatMap(v => funcs.map(f => ({val : f(v.val), og : v.og})))
-//           .map(x => x.val.then(v => check(v, x.og)));
-//
-//   const failures = [ noupdate, onlyKey ]
-//                        .flatMap(v => funcs.map(f => f(v)))
-//                        .map(x => {expect(x).rejects.toStrictEqual(
-//                                 errors.cookArgumentError())});
-//
-//   const failures2 = [ neither, onlyid ]
-//                         .flatMap(v => funcs.map(f => f(v)))
-//                         .map(x => {expect(x).rejects.toStrictEqual(
-//                                  errors.cookUnauthenticated())});
-//
-//   return Promise.all([ successes, failures, failures2 ].flat());
-// });
+  const invalid1: T.Anything = {
+    isCoach : false,
+    accountStatus : 'PENDING',
+    sessionkey : 'abc'
+  };
+  const invalid2: T.Anything = {
+    isCoach : false,
+    accountStatus : 'PENDING',
+    pass : 'mypass',
+    sessionkey : 'abc'
+  };
+  const invalid_sk: T.Anything = {
+    isAdmin : false,
+    isCoach : false,
+    accountStatus : 'PENDING',
+    pass : 'mypass'
+  };
+
+  const s = [ valid1, valid2 ].map(x => {
+    const r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+    x.id = id;
+    if (!("pass" in x))
+      x.pass = undefined;
+    return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const f = [ invalid1, invalid2 ].map(x => {
+    const r: express.Request = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+    x.id = id;
+    return expect(Rq.parseUpdateCoachRequest(r))
+        .rejects.toBe(errors.cookArgumentError())
+  });
+
+  const s_ = [ valid1, valid2 ].map(x => {
+    const r: express.Request = getMockReq();
+    r.body = {...x};
+    if (!("pass" in x))
+      x.pass = undefined;
+    r.params.id = id.toString();
+    x.id = id;
+    return expect(Rq.parseUpdateAdminRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const f_ = [ invalid1, invalid2 ].map(x => {
+    const r: express.Request = getMockReq();
+    r.body = {...x};
+    return expect(Rq.parseUpdateAdminRequest(r))
+        .rejects.toBe(errors.cookArgumentError())
+  });
+
+  const f__ =
+      [ Rq.parseUpdateAdminRequest, Rq.parseUpdateCoachRequest ].map(f => {
+        const r: express.Request = getMockReq();
+        r.body = {...invalid_sk};
+        r.params.id = id.toString();
+        return expect(f(r)).rejects.toBe(errors.cookUnauthenticated())
+      })
+
+  return Promise.all([ s, f, s_, f_, f__ ].flat());
+});
 
 test("Can parse login request", () => {
   const valid: express.Request = getMockReq();
