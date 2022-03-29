@@ -34,7 +34,12 @@ export async function getPasswordPersonByEmail(email: string) {
     where : {email : email},
     select : {
       login_user : {
-        select : {password : true, login_user_id : true, account_status : true}
+        select : {
+          password : true,
+          login_user_id : true,
+          account_status : true,
+          is_admin : true
+        }
       }
     }
   });
