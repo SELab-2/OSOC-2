@@ -3,7 +3,7 @@ import Image from "next/image";
 import LogoOsocColor from "../../public/images/logo-osoc-color.svg";
 import Link from "next/link";
 import React, {SyntheticEvent, useContext} from "react";
-import SessionContext from "../../pages/contexts/sessionProvider";
+import SessionContext from "../../contexts/sessionProvider";
 import {useRouter} from "next/router";
 
 export const Header: React.FC = () => {

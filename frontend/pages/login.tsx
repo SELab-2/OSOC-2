@@ -8,7 +8,7 @@ import {useRouter} from "next/router";
 import {Header} from "../components/Header/Header";
 
 import * as crypto from 'crypto';
-import SessionContext from "./contexts/sessionProvider";
+import SessionContext from "../contexts/sessionProvider";
 
 const Login: NextPage = () => {
 

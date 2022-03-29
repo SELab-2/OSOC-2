@@ -1,6 +1,6 @@
 import '../styles/globals.css'
 import type {AppProps} from 'next/app'
-import { SessionProvider } from "./contexts/sessionProvider";
+import { SessionProvider } from "../contexts/sessionProvider";
 
 function App({Component, pageProps}: AppProps) {
 

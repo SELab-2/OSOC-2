@@ -1,6 +1,6 @@
 import type {NextPage} from 'next'
 import {useContext} from "react";
-import SessionContext from "./contexts/sessionProvider";
+import SessionContext from "../contexts/sessionProvider";
 
 /**
  * Checks if the logged in user is an admin or not.
