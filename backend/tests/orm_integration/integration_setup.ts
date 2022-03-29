@@ -64,7 +64,7 @@ beforeAll(async () => {
         data: [
             {   
                 name: "project-test",
-                osoc_id: osocs[1].osoc_id,
+                osoc_id: osocs[0].osoc_id,
                 partner: "partner-test",
                 start_date: new Date("2022-05-22"),
                 end_date: new Date("2022-06-31"),
@@ -78,6 +78,14 @@ beforeAll(async () => {
                 end_date: new Date("2022-10-23"),
                 positions: 9
             },
+            {
+                name: "project-test-3",
+                osoc_id: osocs[1].osoc_id,
+                partner: "partner-test-3",
+                start_date: new Date("2022-09-15"),
+                end_date: new Date("2022-10-23"),
+                positions: 9
+            }
         ],
     });
 
@@ -151,6 +159,38 @@ beforeAll(async () => {
             }
         ]
     })
+
+    // create roles
+    await prisma.role.createMany({
+        data: [
+            {   
+                name: "Developer",
+
+            },
+            {
+                name: "Marketeer"
+            },
+        ],
+    });
+
+    const projects = await prisma.project.findFirst();
+    const role = await prisma.role.findFirst();
+    // create roles
+    await prisma.project_role.createMany({
+        data: [
+            {   
+                project_id: projects!.project_id,
+                role_id: role!.role_id,
+                positions: 3
+
+            },
+            {
+                project_id: projects!.project_id,
+                role_id: role!.role_id,
+                positions: 1
+            },
+        ],
+    }); 
 });
 
 afterAll(async () => {
