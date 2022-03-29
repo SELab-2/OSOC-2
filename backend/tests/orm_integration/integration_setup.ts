@@ -1,4 +1,5 @@
 import prisma from "../../prisma/prisma";
+import {decision_enum, email_status_enum} from "@prisma/client";
 
 beforeAll(async () => {
     // create persons
@@ -14,6 +15,11 @@ beforeAll(async () => {
                 firstname: "firstNameTest2",
                 lastname: "lastNameTest2",
             },
+            {
+                email: 'testmail2@mail.com',
+                firstname: "first",
+                lastname: "last"
+            }
         ],
     });
     const persons = await prisma.person.findMany();
@@ -37,6 +43,8 @@ beforeAll(async () => {
             },
         ],
     });
+
+    const login_users = await prisma.login_user.findMany();
 
     // create osoc editions
     await prisma.osoc.createMany({
@@ -72,6 +80,76 @@ beforeAll(async () => {
             },
         ],
     });
+
+    await prisma.student.createMany({
+        data : [
+            {
+                person_id: persons[2].person_id,
+                gender: "Male",
+                pronouns: ["He", "Him"],
+                phone_number: "112",
+                alumni: false,
+            }
+        ]
+    })
+    const students = await prisma.student.findMany();
+    // create evaluations
+    await prisma.job_application.createMany({
+       data : [
+           {
+               student_id: students[0].student_id,
+               student_volunteer_info: "no volunteer",
+               responsibilities: "no responsibilities",
+               fun_fact: "this is a fun fact",
+               student_coach: false,
+               osoc_id: osocs[0].osoc_id,
+               edus: ["basic education"],
+               edu_level: "higher education",
+               edu_duration: 5,
+               edu_institute: "Ugent",
+               edu_year: 2022,
+               email_status: email_status_enum.DRAFT,
+               created_at: new Date(),
+           },
+           {
+               student_id: students[0].student_id,
+               student_volunteer_info: "I'd like to volunteer",
+               responsibilities: "no responsibilities2",
+               fun_fact: "this is a fun fact too",
+               student_coach: true,
+               osoc_id: osocs[0].osoc_id,
+               edus: ["higher education"],
+               edu_level: "MaNaMa",
+               edu_duration: 8,
+               edu_institute: "Ugent",
+               edu_year: 2023,
+               email_status: email_status_enum.SENT,
+               created_at: new Date(),
+           }
+       ]
+    });
+
+    const job_applications = await prisma.job_application.findMany();
+
+    // create evaluations
+    await prisma.evaluation.createMany({
+        data : [
+            {
+                login_user_id: login_users[0].login_user_id,
+                job_application_id: job_applications[0].job_application_id,
+                decision: decision_enum.MAYBE,
+                motivation: "low education level",
+                is_final: false,
+            },
+            {
+                login_user_id: login_users[0].login_user_id,
+                job_application_id: job_applications[1].job_application_id,
+                decision: decision_enum.YES,
+                motivation: "awesome job applicaton",
+                is_final: true
+            }
+        ]
+    })
 });
 
 afterAll(async () => {
