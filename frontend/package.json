@@ -9,10 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "bcrypt": "^5.0.1",
     "crypto-js": "^4.1.1",
     "next": "12.1.2",
-    "nodemailer": "^6.7.3",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
@@ -26,10 +24,5 @@
     "eslint-config-next": "12.1.2",
     "typedoc": "^0.22.12",
     "typescript": "4.6.3"
-  },
-  "browser": {
-    "fs": false,
-    "path": false,
-    "os": false
   }
 }
