@@ -2,15 +2,17 @@ import type {NextPage} from 'next'
 import styles from '../styles/login.module.css'
 import Image from "next/image"
 import GitHubLogo from "../public/images/github-logo.svg"
-import {SyntheticEvent, useState} from "react";
+import {SyntheticEvent, useContext, useState} from "react";
 import {Modal} from "../components/Modal/Modal";
 import {useRouter} from "next/router";
-import {signIn} from "next-auth/react";
 import {Header} from "../components/Header/Header";
 
 import * as crypto from 'crypto';
+import SessionContext from "./contexts/sessionProvider";
 
 const Login: NextPage = () => {
+
+    const {sessionKey, setSessionKey} = useContext(SessionContext)
 
     const router = useRouter()
 
@@ -72,7 +74,6 @@ const Login: NextPage = () => {
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
-                //body: JSON.stringify({pass: loginPassword, name: loginEmail}),
                 body: JSON.stringify({pass: encryptedPassword, name: loginEmail}),
                 headers: {
                     'Content-Type': 'application/json',
@@ -90,25 +91,13 @@ const Login: NextPage = () => {
                     setLoginBackendError(`Failed to login. ${err.reason}`);
                     return {success: false};
                 });
-            console.log(response)
-            if (response.success !== false) {
-                signIn('credentials', {
-                    email: loginEmail,
-                    password: loginPassword,
-                    redirect: false
-                }).then(res => {
-                        // TODO -- Redirect or handle errors
-                        console.log(res)
-                        if (res !== undefined) {
-                            const signInRes = res as SignInResult
-                            // The user is succesfully logged in => redirect to /students
-                            if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                                console.log("redirect")
-                                router.push("/students")
-                            }
-                        }
-                    }
-                )
+
+            if (response.success) {
+                console.log(response)
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey)
+                    await router.push("/")
+                }
             }
         }
     }
@@ -193,20 +182,21 @@ const Login: NextPage = () => {
                 });
             // TODO -- Handle response
             if(res.success){
-                signIn('credentials', {
-                    email: registerEmail,
-                    password: registerPassword,
-                    redirect: false
-                }).then(res => {
-                    console.log(res)
-                    if (res !== undefined) {
-                        const signInRes = res as SignInResult
-                        // The user is succesfully logged in => redirect to /students
-                        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                            router.push("/students").then()
-                        }
-                    }
-                });
+                // TODO
+                //signIn('credentials', {
+                //    email: registerEmail,
+                //    password: registerPassword,
+                //    redirect: false
+                //}).then(res => {
+                //    console.log(res)
+                //    if (res !== undefined) {
+                //        const signInRes = res as SignInResult
+                //        // The user is succesfully logged in => redirect to /students
+                //        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
+                //            router.push("/students").then()
+                //        }
+                //    }
+                //});
             }
         }
     }
@@ -221,7 +211,10 @@ const Login: NextPage = () => {
      */
     const githubLogin = (e: SyntheticEvent) => {
         e.preventDefault();
-        signIn("github", {callbackUrl: "/students"}).then()
+        if (setSessionKey) {
+            setSessionKey("123test")
+            router.push("/")
+        }
         // TODO -- How are we supposed to send the data to the backend?
     }
 
@@ -265,6 +258,7 @@ const Login: NextPage = () => {
     return (
         <div>
             <Header/>
+            <p>{sessionKey}</p>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>

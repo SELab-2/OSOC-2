@@ -2,16 +2,16 @@ import styles from "./Header.module.css";
 import Image from "next/image";
 import LogoOsocColor from "../../public/images/logo-osoc-color.svg";
 import Link from "next/link";
-import React, {SyntheticEvent} from "react";
-import {signOut, useSession} from "next-auth/react";
+import React, {SyntheticEvent, useContext} from "react";
+import SessionContext from "../../pages/contexts/sessionProvider";
 
 export const Header: React.FC = () => {
 
-    const {status} = useSession()
+    const { sessionKey } = useContext(SessionContext)
 
     const logOut = (e: SyntheticEvent) => {
         e.preventDefault()
-        signOut({callbackUrl: "/login"}).then()
+        // TODO
     }
 
     return (
@@ -26,7 +26,7 @@ export const Header: React.FC = () => {
                 </div>
                 <h1>Selections</h1>
             </div>
-            <div className={`${styles.links} ${status === "authenticated" ? "" : styles.displayNone}`}>
+            <div className={`${styles.links} ${sessionKey !== "" ? "" : styles.displayNone}`}>
                 <Link href={"/students"}>Students</Link>
                 <Link href={"/projects"}>Projects</Link>
                 <Link href={"/users"}>Manage Users</Link>

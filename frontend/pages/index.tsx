@@ -1,25 +1,15 @@
 import type {NextPage} from 'next'
-import {useRouter} from "next/router";
-import { useSession } from "next-auth/react"
-import {useEffect} from "react";
+import {useContext} from "react";
+import SessionContext from "./contexts/sessionProvider";
 
 const Home: NextPage = () => {
 
-    const router = useRouter()
-    const session = useSession()
+    // TODO
+    const {sessionKey} = useContext(SessionContext)
 
-    useEffect(() => {
-        console.log(session)
-        // The user is logged in
-        if (session !== null && session.status === "authenticated") {
-            router.push("/students").then()
-        } else {
-            // The user is not logged in and will be redirected to /login
-            router.push("/login").then()
-        }
-    })
-
-    return (<></>)
+    return (<>
+        <p>{sessionKey}</p>
+    </>)
 }
 
 export default Home;
