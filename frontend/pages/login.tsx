@@ -12,7 +12,7 @@ import SessionContext from "../contexts/sessionProvider";
 
 const Login: NextPage = () => {
 
-    const {sessionKey, setSessionKey} = useContext(SessionContext)
+    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
     const router = useRouter()
 
@@ -95,8 +95,14 @@ const Login: NextPage = () => {
             if (response.success) {
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
-                    await router.push("/")
                 }
+                if (setIsAdmin) {
+                    setIsAdmin(response.is_admin)
+                }
+                if (setIsCoach) {
+                    setIsCoach(response.is_coach)
+                }
+                router.push("/").then()
             }
         }
     }
