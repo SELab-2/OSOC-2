@@ -382,6 +382,20 @@ export type OrError<T> = ApiError|T;
  *  An API response is one of the previous response types.
  */
 export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
+
+/**
+ *  Either an error while parsing the form or a data value.
+ */
+export interface FormResponse<T> {
+  /**
+   *  The data.
+   */
+  data: T | null;
+  /**
+   *  The error reason.
+   */
+  error: boolean;
+}
 }
 
 export namespace Requests {

@@ -20,7 +20,7 @@ export function attach(app: express.Application): void {
     app.use(home + '/coach', coach.getRouter());
     app.use(home + '/admin', admin.getRouter());
     app.use(home + '/project', project.getRouter());
-    app.use(home + '/form', form.getRouter);
+    app.use(home + '/form', form.getRouter());
   });
 
   app.use((req: express.Request, res: express.Response): Promise<void> =>

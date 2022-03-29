@@ -15,6 +15,7 @@ import * as util from '../utility';
 async function login(req: express.Request): Promise<Responses.Key> {
   console.log("Calling login endpoint " + JSON.stringify(req.body));
   return parseLoginRequest(req).then(
+      // TODO normalize email
       parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
         if (pass?.login_user?.account_status != 'ACTIVATED') {
           return Promise.reject(

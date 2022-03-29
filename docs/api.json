@@ -298,7 +298,7 @@
         "tags": [
           "project"
         ],
-        "description": "Attempts to insert a new project in into the system",
+        "description": "Attempts to insert a new project into the system.",
         "operationId": "create_project",
         "parameters": [
           {
@@ -335,13 +335,20 @@
             "description": "The amount of positions for the project",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "osocId",
+            "description": "The id of the osoc event",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/Sessionkey"
+              "$ref": "#/definitions/CreateProject"
             }
           }
         }
@@ -400,7 +407,7 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/All_projects"
+              "$ref": "#/definitions/CreateProject"
             }
           }
         }
@@ -423,42 +430,42 @@
             "in": "header",
             "name": "name",
             "description": "The name of the project",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
             "name": "osoc_id",
             "description": "The id of the osoc edition this project is connected to",
-            "required": true,
+            "required": false,
             "type": "number"
           },
           {
             "in": "header",
             "name": "partner",
             "description": "The partner's name of this project",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
             "name": "start_date",
             "description": "The start date of this project",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
             "name": "end_date",
             "description": "The end date of this project",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
             "name": "positions",
             "description": "The amount of positions for the project",
-            "required": true,
+            "required": false,
             "type": "number"
           }
         ],
@@ -466,7 +473,7 @@
           "200": {
             "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/Sessionkey"
+              "$ref": "#/definitions/CreateProject"
             }
           }
         }
@@ -484,6 +491,13 @@
             "description": "Your current session key. - Project ID is parsed from the URL.",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
@@ -1006,10 +1020,27 @@
         },
         "positions": {
           "type": "number"
+        },
+        "osoc_id": {
+          "type": "number"
         }
       },
       "xml": {
         "name": "Project"
+      }
+    },
+    "CreateProject": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Project"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "CreateProject"
       }
     },
     "Project_list": {
