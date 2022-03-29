@@ -81,11 +81,10 @@ const Login: NextPage = () => {
                 }
             })
                 .then(response => response.json()).then(json => {
-                    if(!json.success) {
+                    if (!json.success) {
                         setLoginBackendError(`Failed to login. ${json.reason}`);
                         return {success: false};
-                    }
-                    else return json;
+                    } else return json;
                 })
                 .catch(err => {
                     setLoginBackendError(`Failed to login. ${err.reason}`);
@@ -169,11 +168,10 @@ const Login: NextPage = () => {
                 }
             })
                 .then(response => response.json()).then(json => {
-                    if(!json.success) {
+                    if (!json.success) {
                         setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
                         return Promise.resolve({success: false});
-                    }
-                    else return json;
+                    } else return json;
                 })
                 .catch(json => {
                     setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
@@ -194,12 +192,8 @@ const Login: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const githubLogin = (e: SyntheticEvent) => {
+    const githubLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (setSessionKey) {
-            setSessionKey("123test")
-            router.push("/")
-        }
         // TODO -- How are we supposed to send the data to the backend?
     }
 

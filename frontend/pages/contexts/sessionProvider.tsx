@@ -14,7 +14,7 @@ const defaultState = {
 // eslint-disable-next-line no-unused-vars
 const SessionContext = createContext<ISessionContext>(defaultState);
 
-export const SessionProvider: React.FC<{value: { sessionKey: string; setSessionKey: React.Dispatch<React.SetStateAction<string>>; }}> = ({ children }) => {
+export const SessionProvider: React.FC = ({ children }) => {
     const [sessionKey, setSessionKey] = useState<string>("");
 
 
