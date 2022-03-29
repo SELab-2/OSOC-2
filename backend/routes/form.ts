@@ -15,7 +15,7 @@ import * as validator from 'validator';
  */
 function filterQuestion(form: Requests.Form, key: string): Responses.FormResponse<Requests.Question> {
     const filteredQuestion = form.data.fields.filter(question => question.key == key);
-    return filteredQuestion.length > 0 ? {data : filteredQuestion[0], error : false} : {data : null, error : true};
+    return filteredQuestion.length > 0 ? {data : filteredQuestion[0]} : {data : null};
 }
 
 /**
@@ -26,9 +26,9 @@ function filterQuestion(form: Requests.Form, key: string): Responses.FormRespons
 function filterChosenOption(question: Requests.Question): Responses.FormResponse<Requests.Option> {
     if(question.options != undefined) {
         const filteredOption = question.options.filter(option => option.id === question.value);
-        return {data : filteredOption[0], error : false};
+        return {data : filteredOption[0]};
     }
-    return {data : null, error : true}
+    return {data : null}
 }
 
 /**
@@ -38,10 +38,10 @@ function filterChosenOption(question: Requests.Question): Responses.FormResponse
  */
 function checkWordInAnswer(question: Requests.Question, word : string): Responses.FormResponse<boolean> {
     const chosenOption : Responses.FormResponse<Requests.Option> = filterChosenOption(question);
-    return chosenOption.data != null ? {data : chosenOption.data.text.toLowerCase().includes(word), error : false} : {data : null, error : false};
+    return chosenOption.data != null ? {data : chosenOption.data.text.toLowerCase().includes(word)} : {data : null};
 }
 
-function checkQuestionExist(questions: Responses.FormResponse<Requests.Question>[]) : boolean {
+function checkQuestionsExist(questions: Responses.FormResponse<Requests.Question>[]) : boolean {
     const checkErrorInForm : Responses.FormResponse<Requests.Question>[] = questions.filter(dataError => dataError.data == null);
     return checkErrorInForm.length === 0;
 }
@@ -57,8 +57,8 @@ function checkQuestionExist(questions: Responses.FormResponse<Requests.Question>
  */
 function getBirthName(form: Requests.Form) : Promise<string> {
     const questionBirthName: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_npDErJ");
-    const questionExist : boolean = checkQuestionExist([questionBirthName]);
-    if(!questionExist || questionBirthName.data?.value == null) {
+    const questionsExist : boolean = checkQuestionsExist([questionBirthName]);
+    if(!questionsExist || questionBirthName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
     return Promise.resolve(questionBirthName.data.value);
@@ -72,8 +72,8 @@ function getBirthName(form: Requests.Form) : Promise<string> {
  */
 function getLastName(form: Requests.Form) : Promise<string> {
     const questionLastName: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_319eXp");
-    const questionExist : boolean = checkQuestionExist([questionLastName]);
-    if(!questionExist || questionLastName.data?.value == null) {
+    const questionsExist : boolean = checkQuestionsExist([questionLastName]);
+    if(!questionsExist || questionLastName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
     return Promise.resolve(questionLastName.data.value);
@@ -87,8 +87,8 @@ function getLastName(form: Requests.Form) : Promise<string> {
  */
 function getEmail(form: Requests.Form) : Promise<string> {
     const questionEmail: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mY46PB");
-    const questionExist : boolean = checkQuestionExist([questionEmail]);
-    if(!questionExist || questionEmail.data?.value == null || !validator.default.isEmail(questionEmail.data.value)) {
+    const questionsExist : boolean = checkQuestionsExist([questionEmail]);
+    if(!questionsExist || questionEmail.data?.value == null || !validator.default.isEmail(questionEmail.data.value)) {
         return Promise.reject(errors.cookArgumentError());
     }
     return Promise.resolve(validator.default.normalizeEmail(questionEmail.data.value).toString());
@@ -124,50 +124,38 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
         })
 }
 
+/* parse form to student
+***********************/
+
 /**
- *  Attempts to parse the answers in the form into a student entity.
+ *  Parse the form to the pronouns of this student.
  *  @param form The form with the answers.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-/*async function jsonToStudent(form: Requests.Form, person: Responses.Person):
-    Promise<Responses.Empty> {
-
-    // The pronouns of this student
-    const questionAddPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
+function getPronouns(form: Requests.Form) : Promise<string[]> {
+    const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
     const questionPreferedPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
     const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w8ZBq5");
 
-    const questionGender: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wg9laO");
-
-    const questionPhoneNumber: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wd9MEo");
-
-    const questionCheckNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wME4XM");
-    const questionEnterNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mJOPqo");
-
-    const questionAlumni: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mVzejJ");
-
-    const questionsExist : boolean = checkQuestionExist(
-        [questionAddPronouns, questionPreferedPronouns, questionEnterPronouns, questionGender,
-            questionPhoneNumber, questionCheckNickname, questionEnterPronouns, questionAlumni]);
-
-    if(!questionsExist) {
+    const questionsExist : boolean = checkQuestionsExist([questionPronouns, questionPreferedPronouns, questionEnterPronouns]);
+    if(!questionsExist || questionPronouns.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
-    }
-
-    if (questionAddPronouns.data?.value == null || questionGender.data?.value == null ||
-        questionPhoneNumber.data?.value == null || questionCheckNickname.data?.value == null ||
-        questionAlumni.data?.value == null) {
-        return Promise.reject(util.errors.cookArgumentError());
     }
 
     let pronouns: string[] = [];
 
-    if(checkWordInAnswer(questionAddPronouns.data, "yes")) {
+    const wordInAnswer :  Responses.FormResponse<boolean> = checkWordInAnswer(questionPronouns.data, "yes");
+
+    if(wordInAnswer.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(wordInAnswer) {
         const chosenOption : Responses.FormResponse<Requests.Option> = filterChosenOption(questionPreferedPronouns.data as Requests.Question);
-        if(chosenOption.error || chosenOption.data?.id.length === 0 || questionPreferedPronouns.data?.value == null) {
+        if(chosenOption.data == null || chosenOption.data?.id.length === 0 || questionPreferedPronouns.data?.value == null || checkWordInAnswer(questionPreferedPronouns.data, "other").data == null) {
             return Promise.reject(util.errors.cookArgumentError());
-        } else if(!checkWordInAnswer(questionPreferedPronouns.data, "other") && chosenOption.data?.text != undefined) {
+        } else if(!checkWordInAnswer(questionPreferedPronouns.data, "other").data && chosenOption.data?.text != undefined) {
             pronouns = chosenOption.data.text.split("/");
         } else {
             if(questionEnterPronouns.data?.value == null) {
@@ -177,59 +165,141 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
         }
     }
 
-    // The gender of this student
+    return Promise.resolve(pronouns);
+}
+
+/**
+ *  Parse the form to the gender of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getGender(form: Requests.Form) : Promise<string> {
+    const questionGender: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wg9laO");
+    const questionsExist : boolean = checkQuestionsExist([questionGender]);
+    if(!questionsExist || questionGender.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
     let gender;
-    const chosenGender : Requests.Option = filterChosenOption(questionGender);
+    const chosenGender : Responses.FormResponse<Requests.Option> = filterChosenOption(questionGender.data);
 
-    if(chosenGender.id.length === 0) {
-        return Promise.reject(errors.cookNonJSON("Invalid form"));
+    if(chosenGender.data == null || chosenGender.data.id.length === 0) {
+        return Promise.reject(errors.cookArgumentError());
     } else {
-        gender = chosenGender.text;
+        gender = chosenGender.data.text;
     }
 
-    // The phone number of this student
-    const phoneNumber = questionPhoneNumber.value;
+    return Promise.resolve(gender);
+}
 
-    // The nickname of this student
+/**
+ *  Parse the form to the phone number of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getPhoneNumber(form: Requests.Form) : Promise<string> {
+    const questionPhoneNumber: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wd9MEo");
+    const questionsExist : boolean = checkQuestionsExist([questionPhoneNumber]);
+    if(!questionsExist || questionPhoneNumber.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+    return Promise.resolve(questionPhoneNumber.data.value);
+}
 
-    let nickname;
+/**
+ *  Parse the form to the email of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getNickname(form: Requests.Form) : Promise<string | null> {
+    const questionCheckNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wME4XM");
+    const questionEnterNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mJOPqo");
 
-    if (checkWordInAnswer(questionCheckNickname, "yes")) {
-        nickname = questionEnterNickname.value;
+    const questionsExist : boolean = checkQuestionsExist([questionCheckNickname, questionEnterNickname]);
+    if(!questionsExist || questionCheckNickname.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
     }
 
-  // Checks if this student has participated before
-  let alumni = false;
+    let nickname = null;
 
-  if (questionAlumni.options !== undefined) {
-    alumni = questionAlumni.options
-                 ?.filter(option => option.id === questionAlumni.value)[0]
-                 .text.includes("yes");
-  }
+    if (checkWordInAnswer(questionCheckNickname.data, "yes")) {
+        if(questionEnterNickname.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+        nickname = questionEnterNickname.data.value;
+    }
 
-  if (nickname !== undefined) {
-    return ormSt
-        .createStudent({
-          personId : person.person_id,
-          gender : gender,
-          pronouns : pronouns,
-          phoneNumber : phoneNumber,
-          nickname : nickname,
-          alumni : alumni
-        })
-        .then(() => { return Promise.resolve({}); });
-  } else {
-    return ormSt
-        .createStudent({
-          personId : person.person_id,
-          gender : gender,
-          pronouns : pronouns,
-          phoneNumber : phoneNumber,
-          alumni : alumni
-        })
-        .then(() => { return Promise.resolve({}); });
-  }
-}*/
+    return Promise.resolve(nickname);
+}
+
+/**
+ *  Parse the form to the email of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getAlumni(form: Requests.Form) : Promise<boolean> {
+    const questionCheckAlumni: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mVzejJ");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckAlumni]);
+
+    if(!questionsExist || questionCheckAlumni.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const wordInAnswer : boolean | null = checkWordInAnswer(questionCheckAlumni.data, "yes").data;
+
+    if(wordInAnswer == null) {
+        return Promise.reject(errors.cookArgumentError());
+    } else {
+        return Promise.resolve(wordInAnswer);
+    }
+}
+
+/**
+ *  Attempts to parse the answers in the form into a student entity.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function jsonToStudent(form: Requests.Form, person: Responses.Person): Promise<Responses.Empty> {
+    return getPronouns(form)
+        .then(pronounsResponse => {
+            return getGender(form)
+                .then(genderResponse => {
+                    return getPhoneNumber(form)
+                        .then(phoneNumberResponse => {
+                            return getNickname(form)
+                                .then(nicknameResponse => {
+                                    return getAlumni(form)
+                                        .then(alumniResponse => {
+                                            if(nicknameResponse == null) {
+                                                return ormSt.createStudent({
+                                                    personId : person.person_id,
+                                                    gender : genderResponse,
+                                                    pronouns : pronounsResponse,
+                                                    phoneNumber : phoneNumberResponse,
+                                                    nickname : nicknameResponse,
+                                                    alumni : alumniResponse
+                                                }).then(() => Promise.resolve({}));
+                                            } else {
+                                                return ormSt.createStudent({
+                                                    personId : person.person_id,
+                                                    gender : genderResponse,
+                                                    pronouns : pronounsResponse,
+                                                    phoneNumber : phoneNumberResponse,
+                                                    alumni : alumniResponse
+                                                }).then(() => Promise.resolve({}));
+                                            }
+                                        });
+                                });
+                        });
+                });
+        });
+}
 
 /**
  *  Attempts to parse the answers in the form into a job application entity.

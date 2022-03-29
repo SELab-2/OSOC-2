@@ -400,10 +400,6 @@ export interface FormResponse<T> {
    *  The data.
    */
   data: T | null;
-  /**
-   *  The error reason.
-   */
-  error: boolean;
 }
 }
 
