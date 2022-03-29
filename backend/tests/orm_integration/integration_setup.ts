@@ -191,6 +191,20 @@ beforeAll(async () => {
             },
         ],
     }); 
+
+    // create languages
+    await prisma.language.createMany({
+        data: [
+            {   
+                name: "Dutch",
+
+            },
+            {
+                name: "French"
+            },
+        ],
+    });
+
 });
 
 afterAll(async () => {

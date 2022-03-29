@@ -50,12 +50,12 @@ it('should update role based upon role id', async () => {
     expect(updated_role).toHaveProperty("name", role2.name);
 });
 
-it('should delete the project based upon role id', async () => {
+it('should delete the role based upon role id', async () => {
     const deleted_role = await deleteRole(role2.roleId);
     expect(deleted_role).toHaveProperty("name", role2.name);
 });
 
-it('should delete the project based upon role name', async () => {
+it('should delete the role based upon role name', async () => {
     const deleted_role = await deleteRoleByName("Marketeer");
     expect(deleted_role).toHaveProperty("name", "Marketeer");
 });
