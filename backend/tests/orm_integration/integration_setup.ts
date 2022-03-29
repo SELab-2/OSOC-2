@@ -93,7 +93,7 @@ beforeAll(async () => {
         ]
     })
     const students = await prisma.student.findMany();
-    // create evaluations
+    // create job applications
     await prisma.job_application.createMany({
        data : [
            {
@@ -150,6 +150,19 @@ beforeAll(async () => {
             }
         ]
     })
+
+    // create roles
+    await prisma.role.createMany({
+        data: [
+            {   
+                name: "Developer",
+
+            },
+            {
+                name: "Marketeer"
+            },
+        ],
+    });
 });
 
 afterAll(async () => {
