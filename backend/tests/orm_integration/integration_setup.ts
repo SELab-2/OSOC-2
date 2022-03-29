@@ -93,7 +93,8 @@ beforeAll(async () => {
         ]
     })
     const students = await prisma.student.findMany();
-    // create evaluations
+
+    // create job applications
     await prisma.job_application.createMany({
        data : [
            {
@@ -109,7 +110,7 @@ beforeAll(async () => {
                edu_institute: "Ugent",
                edu_year: 2022,
                email_status: email_status_enum.DRAFT,
-               created_at: new Date(),
+               created_at: new Date("December 17, 2021 14:24:00"),
            },
            {
                student_id: students[0].student_id,
@@ -124,7 +125,7 @@ beforeAll(async () => {
                edu_institute: "Ugent",
                edu_year: 2023,
                email_status: email_status_enum.SENT,
-               created_at: new Date(),
+               created_at: new Date("December 20, 2021 03:24:00"),
            }
        ]
     });
@@ -143,9 +144,9 @@ beforeAll(async () => {
             },
             {
                 login_user_id: login_users[0].login_user_id,
-                job_application_id: job_applications[1].job_application_id,
+                job_application_id: job_applications[0].job_application_id,
                 decision: decision_enum.YES,
-                motivation: "awesome job applicaton",
+                motivation: "awesome job application",
                 is_final: true
             }
         ]
