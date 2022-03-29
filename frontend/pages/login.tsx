@@ -92,8 +92,8 @@ const Login: NextPage = () => {
                     return {success: false};
                 });
 
+            // The user is succesfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
-                console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
                     await router.push("/")
@@ -155,8 +155,7 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
-            console.log(encryptedPassword);
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
                 method: 'POST',
                 body: JSON.stringify({
                     firstName: registerFirstName,
@@ -180,23 +179,9 @@ const Login: NextPage = () => {
                     setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
                     return Promise.resolve({success: false});
                 });
-            // TODO -- Handle response
-            if(res.success){
-                // TODO
-                //signIn('credentials', {
-                //    email: registerEmail,
-                //    password: registerPassword,
-                //    redirect: false
-                //}).then(res => {
-                //    console.log(res)
-                //    if (res !== undefined) {
-                //        const signInRes = res as SignInResult
-                //        // The user is succesfully logged in => redirect to /students
-                //        if (signInRes.error === null && signInRes.ok && signInRes.status === 200) {
-                //            router.push("/students").then()
-                //        }
-                //    }
-                //});
+
+            if (response.success) {
+                await router.push("/pending")
             }
         }
     }
