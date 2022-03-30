@@ -97,6 +97,7 @@ model login_user {
   person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
   contract       contract[]
   evaluation     evaluation[]
+  password_reset password_reset?
   project_user   project_user[]
   session_keys   session_keys[]
 }
@@ -175,6 +176,14 @@ model session_keys {
   login_user_id  Int        @default(autoincrement())
   session_key    String     @unique @db.VarChar(128)
   login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model password_reset {
+  password_reset_id Int        @id @default(autoincrement())
+  login_user_id     Int        @unique @default(autoincrement())
+  reset_id          String     @unique @db.VarChar(128)
+  valid_until       DateTime   @db.Timestamptz(6)
+  login_user        login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 enum decision_enum {

@@ -60,6 +60,13 @@ CREATE TABLE IF NOT EXISTS session_keys(
    session_key        VARCHAR(128)   NOT NULL UNIQUE
  );
 
+CREATE TABLE IF NOT EXISTS password_reset(
+    password_reset_id   SERIAL                      PRIMARY KEY, /* unique id for this table */
+    login_user_id       SERIAL                      UNIQUE NOT NULL REFERENCES  login_user(login_user_id),
+    reset_id            VARCHAR(128)                UNIQUE NOT NULL, /* random id generated to use in the link for password reset */
+    valid_until         TIMESTAMP WITH TIME ZONE    NOT NULL
+);
+
 
 CREATE TABLE IF NOT EXISTS osoc(
    osoc_id    SERIAL      PRIMARY KEY,
