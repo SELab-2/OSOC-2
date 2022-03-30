@@ -273,7 +273,7 @@ export interface CreateJobApplication {
     /**
      * a fun fact about the student
      */
-    funFact?: string | null,
+    funFact: string,
     /**
      * string that has info if the student is available to work, and if he wants to work as volunteer for free or not
      */
@@ -289,23 +289,23 @@ export interface CreateJobApplication {
     /**
      * information about the educations of the student
      */
-    edus?: string[],
+    edus: string[],
     /**
      * information about the education level of the student
      */
-    eduLevel?: string | null,
+    eduLevel: string,
     /**
      * how long this student has been studying for
      */
-    eduDuration?: number | null,
+    eduDuration: number,
     /**
      * expected graduation year
      */
-    eduYear?: number | null,
+    eduYear: number,
     /**
      * institute the student is studying at
      */
-    eduInstitute?: string | null,
+    eduInstitute: string,
     /**
      * information about a confirmation email for the evaluation
      */
