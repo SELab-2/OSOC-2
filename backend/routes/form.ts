@@ -2,7 +2,6 @@ import express from 'express';
 
 import * as ormP from '../orm_functions/person';
 import * as ormSt from '../orm_functions/student';
-import * as rq from '../request';
 import {Requests, Responses} from '../types';
 import * as util from "../utility";
 import {errors} from "../utility";
@@ -125,7 +124,7 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
 }
 
 /* parse form to student
-***********************/
+************************/
 
 /**
  *  Parse the form to the pronouns of this student.
@@ -133,7 +132,7 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPronouns(form: Requests.Form) : Promise<string[]> {
+function getPronouns(form: Requests.Form) : Promise<string[] | null> {
     const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
     const questionPreferedPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
     const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w8ZBq5");
@@ -143,7 +142,7 @@ function getPronouns(form: Requests.Form) : Promise<string[]> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    let pronouns: string[] = [];
+    let pronouns: string[] | null = null;
 
     const wordInAnswer :  Responses.FormResponse<boolean> = checkWordInAnswer(questionPronouns.data, "yes");
 
@@ -181,16 +180,13 @@ function getGender(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    let gender;
     const chosenGender : Responses.FormResponse<Requests.Option> = filterChosenOption(questionGender.data);
 
     if(chosenGender.data == null || chosenGender.data.id.length === 0) {
         return Promise.reject(errors.cookArgumentError());
-    } else {
-        gender = chosenGender.data.text;
     }
 
-    return Promise.resolve(gender);
+    return Promise.resolve(chosenGender.data.text);
 }
 
 /**
@@ -254,9 +250,9 @@ function getAlumni(form: Requests.Form) : Promise<boolean> {
 
     if(wordInAnswer == null) {
         return Promise.reject(errors.cookArgumentError());
-    } else {
-        return Promise.resolve(wordInAnswer);
     }
+
+    return Promise.resolve(wordInAnswer);
 }
 
 /**
@@ -276,24 +272,14 @@ async function jsonToStudent(form: Requests.Form, person: Responses.Person): Pro
                                 .then(nicknameResponse => {
                                     return getAlumni(form)
                                         .then(alumniResponse => {
-                                            if(nicknameResponse == null) {
-                                                return ormSt.createStudent({
-                                                    personId : person.person_id,
-                                                    gender : genderResponse,
-                                                    pronouns : pronounsResponse,
-                                                    phoneNumber : phoneNumberResponse,
-                                                    nickname : nicknameResponse,
-                                                    alumni : alumniResponse
-                                                }).then(() => Promise.resolve({}));
-                                            } else {
-                                                return ormSt.createStudent({
-                                                    personId : person.person_id,
-                                                    gender : genderResponse,
-                                                    pronouns : pronounsResponse,
-                                                    phoneNumber : phoneNumberResponse,
-                                                    alumni : alumniResponse
-                                                }).then(() => Promise.resolve({}));
-                                            }
+                                            return ormSt.createStudent({
+                                                personId : person.person_id,
+                                                gender : genderResponse,
+                                                pronouns : pronounsResponse != null ? pronounsResponse : undefined,
+                                                phoneNumber : phoneNumberResponse,
+                                                nickname : nicknameResponse != null ? nicknameResponse : undefined,
+                                                alumni : alumniResponse
+                                            }).then(() => Promise.resolve({}));
                                         });
                                 });
                         });
@@ -301,51 +287,198 @@ async function jsonToStudent(form: Requests.Form, person: Responses.Person): Pro
         });
 }
 
+/* parse form to job application
+********************************/
+
+/**
+ *  Parse the form to the volunteer info of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getVolunteerInfo(form: Requests.Form) : Promise<string> {
+    const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wvPZM0");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckVolunteerInfo]);
+
+    if(!questionsExist || questionCheckVolunteerInfo.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const chosenVolunteerInfo : Responses.FormResponse<Requests.Option> = filterChosenOption(questionCheckVolunteerInfo.data);
+
+    if(chosenVolunteerInfo.data == null || chosenVolunteerInfo.data.id.length === 0) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(chosenVolunteerInfo.data.text);
+}
+
+/**
+ *  Parse the form to the responsibilities of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getResponsibilities(form: Requests.Form) : Promise<string | null> {
+    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wLPr9v");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckResponsibilities]);
+
+    if(!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(questionCheckResponsibilities.data?.value == undefined ? null : questionCheckResponsibilities.data.value);
+}
+
+/**
+ *  Parse the form to the fun fact of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getFunFact(form: Requests.Form) : Promise<string> {
+    const questionFunFact: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxpV");
+
+    const questionsExist : boolean = checkQuestionsExist([questionFunFact]);
+
+    if(!questionsExist || questionFunFact.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(questionFunFact.data.value);
+}
+
+/**
+ *  Parse the form to the choice of being a student coach.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function isStudentCoach(form: Requests.Form) : Promise<boolean> {
+    const questionStudentCoach: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxD5");
+
+    const questionsExist : boolean = checkQuestionsExist([questionStudentCoach]);
+
+    if(!questionsExist || questionStudentCoach.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const wordInAnswer : boolean | null = checkWordInAnswer(questionStudentCoach.data, "yes").data;
+
+    if(wordInAnswer == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(wordInAnswer);
+}
+
+/**
+ *  Parse the form to the educations of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEducations(form: Requests.Form) : Promise<string[]> {
+    const questionCheckEducations: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3ExRK4");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckEducations]);
+
+    if(!questionsExist || questionCheckEducations.data?.value == null ||
+        questionCheckEducations.data.value.length === 0 || questionCheckEducations.data.value.length > 2) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const educations : string[] = [];
+
+    for(let i = 0; i < questionCheckEducations.data.value.length; i++) {
+        if(questionCheckEducations.data.options != undefined) {
+            const filteredOption = questionCheckEducations.data.options.filter(option => option.id === questionCheckEducations.data?.value[i]);
+            if(filteredOption.length !== 1) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+            if(filteredOption[0].text.includes("Other")) {
+                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nro45N");
+                const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
+
+                if(!questionsExistOther || questionCheckOther.data?.value == null) {
+                    return Promise.reject(errors.cookArgumentError());
+                }
+
+                educations.push(questionCheckOther.data.value);
+            } else {
+                educations.push(filteredOption[0].text);
+            }
+        }
+    }
+
+    return Promise.resolve(educations);
+}
+
+/**
+ *  Parse the form to the duration of the education of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEducationDuration(form: Requests.Form) : Promise<number> {
+    const questionEducationDuration: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w2KWBj");
+
+    const questionsExist : boolean = checkQuestionsExist([questionEducationDuration]);
+
+    if(!questionsExist || questionEducationDuration.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(Number(questionEducationDuration.data.value));
+}
+
+/**
+ *  Parse the form to the current year of the education of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEducationYear(form: Requests.Form) : Promise<number> {
+    const questionEducationYear: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3xJqjr");
+
+    const questionsExist : boolean = checkQuestionsExist([questionEducationYear]);
+
+    if(!questionsExist || questionEducationYear.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(Number(questionEducationYear.data.value));
+}
+
+/**
+ *  Parse the form to the university of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEducationUniversity(form: Requests.Form) : Promise<string> {
+    const questionEducationUniversity: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mRDNdd");
+
+    const questionsExist : boolean = checkQuestionsExist([questionEducationUniversity]);
+
+    if(!questionsExist || questionEducationUniversity.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(questionEducationUniversity.data.value);
+}
+
+// TODO parse education level, email status and created_at
+
 /**
  *  Attempts to parse the answers in the form into a job application entity.
  *  @param form The form with the answers.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-/*function jsonToJobApplication(form: Requests.Form, student:
-Responses.Student): Promise<Responses.Empty> {
-    // The volunteer info of the student
-    const questionVolunteerInfo: Requests.Question =
-        filterQuestion(form, "question_wvPZM0");
-
-    let volunteerInfo : string = "";
-
-    if(questionVolunteerInfo.options !== undefined) {
-        volunteerInfo = questionVolunteerInfo.options?.filter(option =>
-option.id === questionVolunteerInfo.value)[0].text;
-    }
-
-    // The responsibilities of the student
-    const responsibilities: string | null =
-        filterQuestion(form, "question_wLPr9v").value;
-
-    // A fun fact of this student
-    const funFact : string | null = filterQuestion(form, "question_nPzxpV").value;
-
-    // Does this student want to be a student-coach
-    const questionStudentCoach: Requests.Question =
-        filterQuestion(form, "question_nPzxD5");
-
-    let studentCoach : Boolean = false;
-
-    if(questionStudentCoach.options !== undefined && questionStudentCoach.value !== null && questionStudentCoach.value === "2055442c-a9a6-429d-9ada-045078295f86") {
-        studentCoach = true;
-    }
-
-    // The educations of the student
-    const questionStudentCoach: Requests.Question =
-        filterQuestion(form, "question_nPzxD5");
-
-    let studentCoach : Boolean = false;
-
-    if(questionStudentCoach.options !== undefined && questionStudentCoach.value !== null && questionStudentCoach.value === "2055442c-a9a6-429d-9ada-045078295f86") {
-        studentCoach = true;
-    }
+/*function jsonToJobApplication(form: Requests.Form, student: Responses.Student): Promise<Responses.Empty> {
 }*/
 
 
