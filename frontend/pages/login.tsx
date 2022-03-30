@@ -68,12 +68,13 @@ const Login: NextPage = () => {
         // Fields are not empty
         if (!error) {
             // We encrypt the password before sending it to the backend api
-            const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
+            //TODO enable encryption
+            //const encryptedPassword = crypto.createHash('sha256').update(loginPassword).digest('hex');
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
                 //body: JSON.stringify({pass: loginPassword, name: loginEmail}),
-                body: JSON.stringify({pass: encryptedPassword, name: loginEmail}),
+                body: JSON.stringify({pass: loginPassword, name: loginEmail}),
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
