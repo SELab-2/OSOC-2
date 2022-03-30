@@ -3,13 +3,13 @@ import styles from "./User.module.css";
 export const User: React.FC = () => {
     //boilerplate for the admin/coaches route (pass admin/coach as string)
     const getAlluser = async (route: string) => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route, {
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all")
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
             method: 'GET',
-            //body: JSON.stringify({pass: loginPassword, name: loginEmail}),
-            body: JSON.stringify({sessionKey: "TODO"}),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'sessionKey': 'TODO'
             }
         })
             .then(response => response.json()).then(json => {
@@ -27,7 +27,7 @@ export const User: React.FC = () => {
         console.log(response)
     }
 
-    console.log(getAlluser("admin"))
+    getAlluser("admin")
     return (<div className={styles.container}>
         <h1>Users</h1>
     </div>)
