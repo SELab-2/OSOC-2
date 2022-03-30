@@ -15,53 +15,50 @@ import {errors} from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudents(req: express.Request):
-    Promise<Responses.StudentList> {
+async function listStudents(req: express.Request): Promise<Responses.StudentList> {
   return rq.parseStudentAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(parsed => {
-        const studentList: InternalTypes.Student[] = [];
-        ormSt.getAllStudents().then(
-            students => {students.forEach(
-                student => {
-                    ormJo.getLatestJobApplicationOfStudent(student.student_id)
-                        .then(jobApplication => {
-                          if (jobApplication !== null) {
-                            ormJo.getStudentEvaluationsTotal(student.student_id)
-                                .then(evaluations => {
-                                  const languages: string[] = [];
-                                  jobApplication.job_application_skill.forEach(
-                                      skill => {
-                                          ormLa.getLanguage(skill.language_id)
-                                              .then(language => {
-                                                if (language !== null) {
-                                                  languages.push(language.name);
-                                                } else {
-                                                  return Promise.reject(
-                                                      errors.cookInvalidID);
-                                                }
-                                              })});
-                                  studentList.push({
-                                    firstname : student.person.firstname,
-                                    lastname : student.person.lastname,
-                                    email : student.person.email,
-                                    gender : student.gender,
-                                    pronouns : student.pronouns,
-                                    phoneNumber : student.phone_number,
-                                    nickname : student.nickname,
-                                    alumni : student.alumni,
-                                    languages : languages,
-                                    jobApplication : jobApplication,
-                                    evaluations : evaluations
-                                  })
-                                })
-                          } else {
-                            return Promise.reject(errors.cookInvalidID);
-                          }
-                        })})});
-
-        return Promise.resolve(
-            {data : studentList, sessionkey : parsed.data.sessionkey});
+          const studentList: InternalTypes.Student[] = [];
+          return ormSt.getAllStudents().then(
+              students => {students.forEach(
+                  student => {
+                      ormJo.getLatestJobApplicationOfStudent(student.student_id)
+                          .then(jobApplication => {
+                              if (jobApplication !== null) {
+                                  ormJo.getStudentEvaluationsTotal(student.student_id)
+                                      .then(evaluations => {
+                                          const languages: string[] = [];
+                                          jobApplication.job_application_skill.forEach(
+                                              skill => {
+                                                  ormLa.getLanguage(skill.language_id)
+                                                      .then(language => {
+                                                          if (language !== null) {
+                                                              languages.push(language.name);
+                                                          } else {
+                                                              return Promise.reject(
+                                                                  errors.cookInvalidID);
+                                                          }
+                                                      })});
+                                          studentList.push({
+                                              firstname : student.person.firstname,
+                                              lastname : student.person.lastname,
+                                              email : student.person.email,
+                                              gender : student.gender,
+                                              pronouns : student.pronouns,
+                                              phoneNumber : student.phone_number,
+                                              nickname : student.nickname,
+                                              alumni : student.alumni,
+                                              languages : languages,
+                                              jobApplication : jobApplication,
+                                              evaluations : evaluations
+                                          })
+                                      })
+                              } else {
+                                  return Promise.reject(errors.cookInvalidID);
+                              }
+                          })})})
+              .then(() => Promise.resolve({data : studentList, sessionkey : parsed.data.sessionkey}));
       });
 }
 

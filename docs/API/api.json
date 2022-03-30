@@ -61,7 +61,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\"."
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
           }
         }
       },
@@ -850,6 +853,20 @@
         "name": "Sessionkey"
       }
     },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "is_admin": {
+          "type": "boolean"
+        },
+        "is_coach": {
+          "type": "boolean"
+        }
+      }
+    },
     "NameId": {
       "type": "object",
       "properties": {
@@ -890,15 +907,200 @@
     "AllStudents": {
       "type": "object",
       "properties": {
-        "data": {
-          "$ref": "#/definitions/NameIdList"
-        },
-        "sessionkey": {
+        "firstname": {
           "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "pronouns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "alumni": {
+          "type": "boolean"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jobApplication": {
+          "type": "object",
+          "properties": {
+            "job_application_id": {
+              "type": "number"
+            },
+            "edus": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "Informatics"
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "example": "2022-03-14 23:10:00+01"
+            },
+            "edu_duration": {
+              "type": "number",
+              "default": 5
+            },
+            "edu_institute": {
+              "type": "string",
+              "default": "Ghent university"
+            },
+            "edu_level": {
+              "type": "string",
+              "default": "Third bachelors degree"
+            },
+            "edu_year": {
+              "type": "number",
+              "default": 3
+            },
+            "email_status": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "SENT",
+                "FAILED",
+                "NONE",
+                "DRAFT"
+              ],
+              "default": "NONE"
+            },
+            "fun_fact": {
+              "type": "string",
+              "default": "I like basketball."
+            },
+            "osoc_id": {
+              "type": "number"
+            },
+            "responsibilities": {
+              "type": "string",
+              "default": "I play basketball from 5pm until 7pm."
+            },
+            "student_coach": {
+              "type": "boolean"
+            },
+            "student_id": {
+              "type": "number"
+            },
+            "student_volunteer_info": {
+              "type": "string",
+              "default": "Yes, I can work with a student employment agreement in Belgium."
+            },
+            "attachment": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attachment"
+              }
+            },
+            "job_application_skill": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/JobApplicationSkill"
+              }
+            },
+            "applied_role": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AppliedRole"
+              }
+            }
+          }
         }
       },
       "xml": {
         "name": "AllStudents"
+      }
+    },
+    "Attachment": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "attachment_id": {
+          "type": "number"
+        },
+        "data": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "CV_URL",
+            "PORTFOLIO_URL",
+            "FILE_URL",
+            "MOTIVATION_STRING",
+            "MOTIVATION_URL"
+          ]
+        }
+      },
+      "xml": {
+        "name": "Attachment"
+      }
+    },
+    "JobApplicationSkill": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "job_application_skill_id": {
+          "type": "number"
+        },
+        "skill": {
+          "type": "string"
+        },
+        "is_best": {
+          "type": "boolean"
+        },
+        "language_id": {
+          "type": "number"
+        },
+        "is_preferred": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "JobApplicationSkill"
+      }
+    },
+    "AppliedRole": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "applied_role_id": {
+          "type": "number"
+        },
+        "role_id": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "JobApplicationSkill"
       }
     },
     "Student_Id_contract": {
