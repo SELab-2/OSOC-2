@@ -1,16 +1,13 @@
-/**
- * Users overview page
- * TODO
- */
 import {NextPage} from "next";
-import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
 import {Header} from "../components/Header/Header";
+import {User} from "../components/User/User";
 
 const Users: NextPage = () => {
     return (
         <>
             <Header/>
-            <UnderConstruction/>
+            <User>
+            </User>
         </>
     )
 }
