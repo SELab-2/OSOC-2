@@ -205,6 +205,22 @@ beforeAll(async () => {
         ],
     });
 
+    // create attachments
+    await prisma.attachment.createMany({
+        data : [
+            {
+                job_application_id: job_applications[1].job_application_id,
+                data: "test-cv-link.com",
+                type: "CV_URL"
+            },
+            {
+                job_application_id: job_applications[1].job_application_id,
+                data: "test-portfolio-link.com",
+                type: "PORTFOLIO_URL"
+            }
+        ]
+    })
+
 });
 
 afterAll(async () => {
