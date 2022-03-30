@@ -104,7 +104,7 @@ async function ghSignupOrLogin(login: Requests.GHLogin):
         if ('is_not_existent' in error && error.is_not_existent) {
           return ormP
               .createPerson(
-                  {email : login.login, firstname : login.name, lastname : ''})
+                  {github : login.login, firstname : login.name, lastname : ''})
               .then(person => ormLU.createLoginUser({
                 personId : person.person_id,
                 isAdmin : false,
