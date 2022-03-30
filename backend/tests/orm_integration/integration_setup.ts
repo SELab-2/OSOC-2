@@ -221,11 +221,35 @@ beforeAll(async () => {
         ]
     })
 
+    const languages = await prisma.language.findMany();
+    // create job application skills
+    await prisma.job_application_skill.createMany({
+        data: [
+            {   
+                job_application_id: job_applications[1].job_application_id,
+                skill: "SQL",
+                language_id: languages[0].language_id,
+                level: 5,
+                is_preferred: false,
+                is_best: true
+
+            },
+            {
+                job_application_id: job_applications[0].job_application_id,
+                skill: "Python",
+                language_id: languages[1].language_id,
+                level: 4,
+                is_preferred: false,
+                is_best: false
+            },
+        ],
+    });
+
 });
 
 afterAll(async () => {
-    const deleteLanguageDetails = prisma.language.deleteMany();
     const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
+    const deleteLanguageDetails = prisma.language.deleteMany();
     const deleteAttachmentDetails = prisma.attachment.deleteMany();
     const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
     const deleteEvaluationDetails = prisma.evaluation.deleteMany();
