@@ -267,6 +267,15 @@ export interface Key {
 }
 
 /**
+ *  A login response contains of a key and a boolean determining whether a user
+ * is an admin.
+ */
+export interface Login extends Key {
+  is_admin: boolean;
+  is_coach: boolean;
+}
+
+/**
  *  A partial student response is the keyed combination of their id and name.
  */
 export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
