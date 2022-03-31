@@ -409,6 +409,13 @@ export async function parseFormRequest(req: express.Request):
       });
 }
 
+export async function parseRequestResetRequest(req: express.Request):
+    Promise<Requests.ReqReset> {
+  return hasFields(req, [ "email" ], types.neither).then(() => Promise.resolve({
+    email : req.body.email
+  }));
+}
+
 /**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.

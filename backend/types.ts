@@ -488,6 +488,10 @@ export interface Question {
 export interface Option {
   id: string, text: string
 }
+
+export interface ReqReset {
+  email: string;
+}
 }
 
 /**

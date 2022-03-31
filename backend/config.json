@@ -33,6 +33,10 @@
         "serverError": {
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
+        },
+        "inavlidEmailReset": {
+            "http": 400,
+            "reason": "No such email is present. Please check your email."
         }
     },
 
