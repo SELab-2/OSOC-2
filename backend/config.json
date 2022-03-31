@@ -20,15 +20,15 @@
         },
         "nonExistent": {
             "http": 404,
-            "reason": "The endpoint requested ($url) does not exist."
+            "reason": "The endpoint requested (~url) does not exist."
         },
         "invalidVerb": {
             "http": 405,
-            "reason": "This HTTP verb ($verb) is not supported for this endpoint ($url)"
+            "reason": "This HTTP verb (~verb) is not supported for this endpoint (~url)"
         },
         "nonJSONRequest": {
             "http": 406,
-            "reason": "All endpoints only support JSON ($mime requested)."
+            "reason": "All endpoints only support JSON (~mime requested)."
         },
         "serverError": {
             "http": 500,
