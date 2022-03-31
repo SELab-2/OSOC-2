@@ -75,7 +75,10 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
               return ormSK.addSessionKey(user.login_user_id,
                                          util.generateKey());
             })
-            .then(key => Promise.resolve({sessionkey : key.session_key}));
+            .then(async key => {
+              return ormPR.deleteResetWithResetId(code.reset_id)
+                  .then(() => Promise.resolve({sessionkey : key.session_key}));
+            });
       }));
 }
 
