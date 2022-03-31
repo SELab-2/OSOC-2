@@ -27,6 +27,10 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
       });
 }
 
+async function checkCode() {
+  //
+}
+
 async function resetPassword() {
   //
 }
@@ -36,6 +40,7 @@ export function getRouter(): express.Router {
 
   router.post('/',
               (req, res) => util.respOrErrorNoReinject(res, requestReset(req)));
+  util.route(router, 'get', '/:id', checkCode);
   util.route(router, "post", "/:id", resetPassword);
 
   util.addAllInvalidVerbs(router, [ "/", "/:id" ]);
