@@ -48,6 +48,7 @@
     },
 
     "email": {
-        "from": "'OSOC2 Test Account' <test@osoc2.com>"
+        "from": "'OSOC2 Test Account' <test@osoc2.com>",
+        "header": "OSOC2 Recovery Code"
     }
 }

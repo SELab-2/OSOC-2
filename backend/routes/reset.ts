@@ -1,4 +1,5 @@
 import express from 'express';
+import * as nodemailer from 'nodemailer';
 
 import * as config from '../config.json';
 import mailer from '../email';
@@ -24,11 +25,15 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
                 .then(async (code) => {
                   return mailer({
                            to : parsed.email,
-                           subject : 'OSOC2 Recovery Code',
+                           subject : config.email.header,
                            html : '<p>' + code.reset_id + '</p>'
                          })
-                      .then(() => Promise.resolve({}));
-                })
+                      .then(data => {
+                        console.log(data);
+                        console.log(nodemailer.getTestMessageUrl(data));
+                        return Promise.resolve({});
+                      });
+                });
           }));
 }
 
@@ -45,8 +50,8 @@ export function getRouter(): express.Router {
 
   router.post('/',
               (req, res) => util.respOrErrorNoReinject(res, requestReset(req)));
-  //util.route(router, 'get', '/:id', checkCode);
-  //util.route(router, "post", "/:id", resetPassword);
+  // util.route(router, 'get', '/:id', checkCode);
+  // util.route(router, "post", "/:id", resetPassword);
 
   util.addAllInvalidVerbs(router, [ "/", "/:id" ]);
 
