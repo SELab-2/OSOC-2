@@ -519,3 +519,9 @@ export type RouteCallback<T extends Responses.ApiResponse> =
 export interface Anything {
   [key: string]: unknown;
 }
+
+export interface Email {
+  to: string;
+  subject: string;
+  html: string;
+}

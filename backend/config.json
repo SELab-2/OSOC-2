@@ -45,5 +45,9 @@
             "", "/api-osoc"
         ],
         "preferred": "/api-osoc"
+    },
+
+    "email": {
+        "from": "'OSOC2 Test Account' <test@osoc2.com>"
     }
 }
