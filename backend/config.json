@@ -44,7 +44,6 @@
                 "reason": "GitHub authentication endpoints are meant for GitHub authentication only. Thank you very much."
             },
             "other": {
-                "http": 422,
                 "reason": "GitHub data requests failed. Please try again later."
             }
         }

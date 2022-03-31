@@ -84,7 +84,9 @@ async function ghExchangeAccessToken(req: express.Request,
                                              "&is_coach=" + result.is_coach))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
-        return Promise.reject(config.apiErrors.github.other);
+        util.redirect(res, config.global.frontend + "/login?loginError=" +
+                               config.apiErrors.github.other.reason);
+        return Promise.resolve();
       });
 }
 
