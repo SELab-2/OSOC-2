@@ -210,7 +210,7 @@ const Index: NextPage = () => {
      */
     const githubLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
-        window.location.href = "http://localhost:4096/api-osoc/github"
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/github`
         // TODO -- How are we supposed to send the data to the backend?
     }
 
