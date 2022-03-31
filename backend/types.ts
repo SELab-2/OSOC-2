@@ -492,6 +492,10 @@ export interface Option {
 export interface ReqReset {
   email: string;
 }
+
+export interface ResetCheckCode {
+  code: string;
+}
 }
 
 /**

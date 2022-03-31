@@ -37,10 +37,18 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
           }));
 }
 
-// async function checkCode() {
-//   //
-// }
-//
+async function checkCode(req: express.Request): Promise<Responses.Empty> {
+  return rq.parseCheckResetCodeRequest(req)
+      .then(parsed => ormPR.findResetByCode(parsed.code))
+      .then(res => {
+        if (res == null || res.valid_until < new Date(Date.now()))
+          return Promise.reject();
+
+        return Promise.resolve({});
+      })
+      .catch(() => Promise.reject(util.errors.cookArgumentError()));
+}
+
 // async function resetPassword() {
 //   //
 // }
@@ -50,7 +58,8 @@ export function getRouter(): express.Router {
 
   router.post('/',
               (req, res) => util.respOrErrorNoReinject(res, requestReset(req)));
-  // util.route(router, 'get', '/:id', checkCode);
+  router.get('/:id',
+             (req, res) => util.respOrErrorNoReinject(res, checkCode(req)));
   // util.route(router, "post", "/:id", resetPassword);
 
   util.addAllInvalidVerbs(router, [ "/", "/:id" ]);

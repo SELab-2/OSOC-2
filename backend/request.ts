@@ -416,6 +416,13 @@ export async function parseRequestResetRequest(req: express.Request):
   }));
 }
 
+export async function parseCheckResetCodeRequest(req: express.Request):
+    Promise<Requests.ResetCheckCode> {
+  if (!("id" in req.params))
+    return Promise.reject(errors.cookArgumentError());
+  return Promise.resolve({code : req.params.id});
+}
+
 /**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
