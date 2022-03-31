@@ -2,7 +2,7 @@ import type {NextPage} from 'next'
 import styles from '../../styles/login.module.css'
 import Image from "next/image"
 import GitHubLogo from "../../public/images/github-logo.svg"
-import {SyntheticEvent, useContext, useState} from "react";
+import {SyntheticEvent, useContext, useEffect, useState} from "react";
 import {Modal} from "../../components/Modal/Modal";
 import {useRouter} from "next/router";
 import {Header} from "../../components/Header/Header";
@@ -12,9 +12,19 @@ import SessionContext from "../../contexts/sessionProvider";
 
 const Index: NextPage = () => {
 
-    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
-
     const router = useRouter()
+
+    // Sets an error message when the `loginError` query paramater is present
+    useEffect(() => {
+        const { loginError } = router.query
+        if (loginError != undefined) {
+            if (typeof loginError === 'string') {
+                setLoginBackendError(loginError)
+            }
+        }
+    }, [router.query])
+
+    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
