@@ -1,6 +1,6 @@
 import {UpdateLanguage} from "../../orm_functions/orm_types";
 import {createLanguage, getAllLanguages, getLanguage,
-    getLanguageByName, updateLanguage} from "../../orm_functions/language";
+    getLanguageByName, updateLanguage, deleteLanguage, deleteLanguageByName} from "../../orm_functions/language";
 
 const language1: UpdateLanguage = {
     languageId: 0,
@@ -40,14 +40,12 @@ it('should update language based upon language id', async () => {
     expect(updated_language).toHaveProperty("name", language2.name);
 });
 
-//TODO: you can only remove languages that are NOT used in jobApplicationSkill otherwise everything will go wrong :/
+it('should delete the language based upon language id', async () => {
+    const deleted_language = await deleteLanguage(language2.languageId);
+    expect(deleted_language).toHaveProperty("name", language2.name);
+});
 
-// it('should delete the language based upon language id', async () => {
-//     const deleted_language = await deleteLanguage(language2.languageId);
-//     expect(deleted_language).toHaveProperty("name", language2.name);
-// });
-//
-// it('should delete the language based upon language name', async () => {
-//     const deleted_language = await deleteLanguageByName("French");
-//     expect(deleted_language).toHaveProperty("name", "French");
-// });
+it('should delete the language based upon language name', async () => {
+    const deleted_language = await deleteLanguageByName("French");
+    expect(deleted_language).toHaveProperty("name", "French");
+});

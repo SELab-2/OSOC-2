@@ -207,23 +207,23 @@ beforeAll(async () => {
             },
         ],
     });
-    //
-    // // create attachments
-    // await prisma.attachment.createMany({
-    //     data : [
-    //         {
-    //             job_application_id: job_applications[1].job_application_id,
-    //             data: "test-cv-link.com",
-    //             type: "CV_URL"
-    //         },
-    //         {
-    //             job_application_id: job_applications[1].job_application_id,
-    //             data: "test-portfolio-link.com",
-    //             type: "PORTFOLIO_URL"
-    //         }
-    //     ]
-    // })
-    //
+    
+    // create attachments
+    await prisma.attachment.createMany({
+        data : [
+            {
+                job_application_id: job_applications[1].job_application_id,
+                data: "test-cv-link.com",
+                type: "CV_URL"
+            },
+            {
+                job_application_id: job_applications[1].job_application_id,
+                data: "test-portfolio-link.com",
+                type: "PORTFOLIO_URL"
+            }
+        ]
+    })
+    
     const languages = await prisma.language.findMany();
     // create job application skills
     await prisma.job_application_skill.createMany({
@@ -240,7 +240,7 @@ beforeAll(async () => {
             {
                 job_application_id: job_applications[0].job_application_id,
                 skill: "Python",
-                language_id: languages[1].language_id,
+                language_id: languages[0].language_id,
                 level: 4,
                 is_preferred: false,
                 is_best: false

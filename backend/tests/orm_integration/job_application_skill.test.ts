@@ -67,16 +67,16 @@ it('should find all the job_applications skills in the db, 3 in total', async ()
 
 it('should find all the job_applications skills linked to the job application', async () => {
     const searched_job_application_skills = await getAllJobApplicationSkillByJobApplication(jobApplicationSkill1.JobApplicationId);
-    expect(searched_job_application_skills[0]).toHaveProperty("job_application_id", jobApplicationSkill1.JobApplicationId);
-    expect(searched_job_application_skills[0]).toHaveProperty("skill", jobApplicationSkill1.skill);
-    expect(searched_job_application_skills[0]).toHaveProperty("language_id", jobApplicationSkill1.languageId);
-    expect(searched_job_application_skills[0]).toHaveProperty("level", jobApplicationSkill1.level);
-    expect(searched_job_application_skills[0]).toHaveProperty("is_preferred", jobApplicationSkill1.isPreferred);
-    expect(searched_job_application_skills[0]).toHaveProperty("is_best", jobApplicationSkill1.is_best);
+    expect(searched_job_application_skills[1]).toHaveProperty("job_application_id", jobApplicationSkill1.JobApplicationId);
+    expect(searched_job_application_skills[1]).toHaveProperty("skill", jobApplicationSkill1.skill);
+    expect(searched_job_application_skills[1]).toHaveProperty("language_id", jobApplicationSkill1.languageId);
+    expect(searched_job_application_skills[1]).toHaveProperty("level", jobApplicationSkill1.level);
+    expect(searched_job_application_skills[1]).toHaveProperty("is_preferred", jobApplicationSkill1.isPreferred);
+    expect(searched_job_application_skills[1]).toHaveProperty("is_best", jobApplicationSkill1.is_best);
 });
 
 it('should find the job_applications skill by its id', async () => {
-    const searched_job_application_skill = await getJobApplicationSkill(jobApplicationSkill1.JobApplicationId);
+    const searched_job_application_skill = await getJobApplicationSkill(jobApplicationSkill1.JobApplicationSkillId);
     expect(searched_job_application_skill).toHaveProperty("job_application_id", jobApplicationSkill1.JobApplicationId);
     expect(searched_job_application_skill).toHaveProperty("skill", jobApplicationSkill1.skill);
     expect(searched_job_application_skill).toHaveProperty("language_id", jobApplicationSkill1.languageId);
