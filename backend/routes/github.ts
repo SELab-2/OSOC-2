@@ -98,7 +98,7 @@ function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
 
 async function ghSignupOrLogin(login: Requests.GHLogin):
     Promise<Responses.Login> {
-  return ormP.getPasswordPersonByEmail(login.login)
+  return ormP.getPasswordPersonByGithub(login.login)
       .then(person => {
         if (person == null || person.login_user == null)
           return Promise.reject({is_not_existent : true});
