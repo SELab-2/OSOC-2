@@ -54,6 +54,7 @@
         "homes": [
             "", "/api-osoc"
         ],
-        "preferred": "/api-osoc"
+        "preferred": "/api-osoc",
+        "frontend": "http://localhost:3000"
     }
 }

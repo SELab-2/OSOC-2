@@ -51,8 +51,8 @@ function ghIdentity(resp: express.Response): void {
   util.redirect(resp, url);
 }
 
-async function ghExchangeAccessToken(req: express.Request):
-    Promise<Responses.Key> {
+async function ghExchangeAccessToken(req: express.Request,
+                                     res: express.Response): Promise<void> {
   if (!("code" in req.query)) {
     return Promise.reject(config.apiErrors.github.argumentMissing);
   }
@@ -78,6 +78,10 @@ async function ghExchangeAccessToken(req: express.Request):
       }))
       .then(ares => parseGHLogin(ares.data))
       .then(login => ghSignupOrLogin(login))
+      .then(result => util.redirect(res, config.global.frontend + "/login/" +
+                                             result.sessionkey +
+                                             "?is_admin=" + result.is_admin +
+                                             "&is_coach=" + result.is_coach))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
         return Promise.reject(config.apiErrors.github.other);
@@ -93,7 +97,7 @@ function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
 }
 
 async function ghSignupOrLogin(login: Requests.GHLogin):
-    Promise<Responses.Key> {
+    Promise<Responses.Login> {
   return ormP.getPasswordPersonByEmail(login.login)
       .then(person => {
         if (person == null || person.login_user == null)
@@ -114,7 +118,9 @@ async function ghSignupOrLogin(login: Requests.GHLogin):
               .then(res => Promise.resolve({
                 password : res.password,
                 login_user_id : res.login_user_id,
-                account_status : res.account_status
+                account_status : res.account_status,
+                is_admin : false,
+                is_coach : true
               }));
         } else {
           return Promise.reject(error); // pass on
@@ -122,16 +128,19 @@ async function ghSignupOrLogin(login: Requests.GHLogin):
       })
       .then(async loginuser =>
                 ormSK.addSessionKey(loginuser.login_user_id, util.generateKey())
-                    .then(newkey => Promise.resolve(
-                              {sessionkey : newkey.session_key})));
+                    .then(newkey => Promise.resolve({
+                      sessionkey : newkey.session_key,
+                      is_admin : loginuser.is_admin,
+                      is_coach : loginuser.is_coach
+                    })));
 }
 
 export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
   router.get('/', (_, rs) => ghIdentity(rs));
-  router.get('/challenge', (req, res) => util.respOrErrorNoReinject(
-                               res, ghExchangeAccessToken(req)));
+  router.get('/challenge',
+             async (req, res) => await ghExchangeAccessToken(req, res));
 
   return router;
 }
