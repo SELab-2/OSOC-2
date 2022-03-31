@@ -26,23 +26,25 @@ const project2: UpdateProject = {
 
 it('should create 1 new project where osoc is 2022', async () => {
     const osoc = await getOsocByYear(2022);
-    project1.osocId = osoc!.osoc_id;
-    const project0: CreateProject = {
-        name: "test-project",
-        osocId: osoc!.osoc_id,
-        partner: "test-partner",
-        startDate: new Date("2022-07-13"),
-        endDate: new Date("2022-07-15"),
-        positions: 7
-    }
+    if (osoc){
+        project1.osocId = osoc.osoc_id;
+        const project0: CreateProject = {
+            name: "test-project",
+            osocId: osoc.osoc_id,
+            partner: "test-partner",
+            startDate: new Date("2022-07-13"),
+            endDate: new Date("2022-07-15"),
+            positions: 7
+        }
 
-    const created_project = await createProject(project0);
-    expect(created_project).toHaveProperty("name", project0.name);
-    expect(created_project).toHaveProperty("osoc_id", project0.osocId);
-    expect(created_project).toHaveProperty("partner", project0.partner);
-    expect(created_project).toHaveProperty("start_date", project0.startDate);
-    expect(created_project).toHaveProperty("end_date", project0.endDate);
-    expect(created_project).toHaveProperty("positions", project0.positions);
+        const created_project = await createProject(project0);
+        expect(created_project).toHaveProperty("name", project0.name);
+        expect(created_project).toHaveProperty("osoc_id", project0.osocId);
+        expect(created_project).toHaveProperty("partner", project0.partner);
+        expect(created_project).toHaveProperty("start_date", project0.startDate);
+        expect(created_project).toHaveProperty("end_date", project0.endDate);
+        expect(created_project).toHaveProperty("positions", project0.positions);
+    }
 });
 
 it('should find all the projects in the db, 3 in total', async () => {
@@ -68,13 +70,15 @@ it('should return the project, by searching for its name', async () => {
 
 it('should return the project, by searching for its osoc edition', async () => {
     const osoc = await getOsocByYear(2022);
-    const searched_project = await getProjectsByOsocEdition(osoc!.osoc_id);
-    expect(searched_project[1]).toHaveProperty("name", project1.name);
-    expect(searched_project[1]).toHaveProperty("osoc_id", project1.osocId);
-    expect(searched_project[1]).toHaveProperty("partner", project1.partner);
-    expect(searched_project[1]).toHaveProperty("start_date", project1.startDate);
-    expect(searched_project[1]).toHaveProperty("end_date", project1.endDate);
-    expect(searched_project[1]).toHaveProperty("positions", project1.positions);
+    if (osoc){
+        const searched_project = await getProjectsByOsocEdition(osoc.osoc_id);
+        expect(searched_project[1]).toHaveProperty("name", project1.name);
+        expect(searched_project[1]).toHaveProperty("osoc_id", project1.osocId);
+        expect(searched_project[1]).toHaveProperty("partner", project1.partner);
+        expect(searched_project[1]).toHaveProperty("start_date", project1.startDate);
+        expect(searched_project[1]).toHaveProperty("end_date", project1.endDate);
+        expect(searched_project[1]).toHaveProperty("positions", project1.positions);
+    }
 });
 
 it('should return the projects, by searching for its partner name', async () => {
@@ -207,6 +211,8 @@ it('should delete the project based upon project partner', async () => {
 
 it('should delete the project based upon osoc id', async () => {
     const osoc = await getOsocByYear(2023);
-    const deleted_project = await deleteProjectByOsocEdition(osoc!.osoc_id);
-    expect(deleted_project).toHaveProperty("count", 1);
+    if (osoc){
+        const deleted_project = await deleteProjectByOsocEdition(osoc.osoc_id);
+        expect(deleted_project).toHaveProperty("count", 1);
+    }
 });

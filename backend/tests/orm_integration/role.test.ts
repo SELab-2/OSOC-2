@@ -40,8 +40,8 @@ it('should return the role, by searching for its role name', async () => {
 });
 
 it('should return the project role, by searching for its role name and project id', async () => {
-    const project = await prisma_project.project.findFirst()
-    const searched_role = await getProjectRoleWithRoleName("Developer", project!.project_id);
+    const project = await prisma_project.project.findMany();
+    const searched_role = await getProjectRoleWithRoleName("Developer", project[0].project_id);
     expect(searched_role).toHaveProperty("positions", 3);
 });
 

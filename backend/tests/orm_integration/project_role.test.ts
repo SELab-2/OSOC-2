@@ -21,22 +21,25 @@ const projectRole2: UpdateProjectRole = {
 it('should create 1 new project role with role developer', async () => {
     const projects = await getAllProjects();
     const role = await getRolesByName("Developer");
-    const projectRole: CreateProjectRole = {
-        projectId: projects[0].project_id,
-        roleId: role!.role_id,
-        positions: 2
-    }
-    projectRole1.projectId = projects[0].project_id;
-    projectRole1.roleId = role!.role_id;
-    projectRole2.projectId = projects[0].project_id;
-    projectRole2.roleId = role!.role_id;
 
-    const created_project_role = await createProjectRole(projectRole);
-    projectRole1.projectRoleId = created_project_role.project_role_id;
-    projectRole2.projectRoleId = created_project_role.project_role_id;
-    expect(created_project_role).toHaveProperty("project_id", projectRole1.projectId);
-    expect(created_project_role).toHaveProperty("role_id", projectRole1.roleId);
-    expect(created_project_role).toHaveProperty("positions", projectRole1.positions);
+    if (role){
+        const projectRole: CreateProjectRole = {
+            projectId: projects[0].project_id,
+            roleId: role.role_id,
+            positions: 2
+        }
+        projectRole1.projectId = projects[0].project_id;
+        projectRole1.roleId = role.role_id;
+        projectRole2.projectId = projects[0].project_id;
+        projectRole2.roleId = role.role_id;
+    
+        const created_project_role = await createProjectRole(projectRole);
+        projectRole1.projectRoleId = created_project_role.project_role_id;
+        projectRole2.projectRoleId = created_project_role.project_role_id;
+        expect(created_project_role).toHaveProperty("project_id", projectRole1.projectId);
+        expect(created_project_role).toHaveProperty("role_id", projectRole1.roleId);
+        expect(created_project_role).toHaveProperty("positions", projectRole1.positions);
+    }
 });
 
 it('should return the project role, by searching for its project', async () => {

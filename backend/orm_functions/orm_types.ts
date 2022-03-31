@@ -57,7 +57,7 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
     /**
      * the person_id of the person the login user will be associated with
      */
-    personId?: number,
+    personId: number,
     /**
      * the password hash of the login user if email is used
      */
