@@ -97,7 +97,14 @@ beforeAll(async () => {
                 pronouns: ["He", "Him"],
                 phone_number: "112",
                 alumni: false,
-            }
+            },
+            {
+                person_id: persons[1].person_id,
+                gender: "Female",
+                pronouns: ["She", "Her"],
+                phone_number: "107",
+                alumni: true,
+            }   
         ]
     })
     const students = await prisma.student.findMany();
