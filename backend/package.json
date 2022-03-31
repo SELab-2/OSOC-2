@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.ts",
-    "migrate:postgres": "npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init",
+    "migrate:postgres": "npx dotenv -e prisma/.env.test -- npx prisma db push",
     "dockerIntegration:up": "docker-compose -f docker-compose.integrationtest.yml up -d --build",
     "docker:down": "docker-compose down",
     "integrationTests": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i",

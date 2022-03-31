@@ -175,27 +175,30 @@ beforeAll(async () => {
 
     const projects = await prisma.project.findFirst();
     const role = await prisma.role.findFirst();
-    // create roles
-    await prisma.project_role.createMany({
-        data: [
-            {   
-                project_id: projects!.project_id,
-                role_id: role!.role_id,
-                positions: 3
+    if (projects && role) {
+        // create roles
+        await prisma.project_role.createMany({
+            data: [
+                {
+                    project_id: projects.project_id,
+                    role_id: role.role_id,
+                    positions: 3
 
-            },
-            {
-                project_id: projects!.project_id,
-                role_id: role!.role_id,
-                positions: 1
-            },
-        ],
-    }); 
+                },
+                {
+                    project_id: projects.project_id,
+                    role_id: role.role_id,
+                    positions: 1
+                },
+            ],
+        });
+    }
+
 
     // create languages
     await prisma.language.createMany({
         data: [
-            {   
+            {
                 name: "Dutch",
 
             },
@@ -204,28 +207,28 @@ beforeAll(async () => {
             },
         ],
     });
-
-    // create attachments
-    await prisma.attachment.createMany({
-        data : [
-            {
-                job_application_id: job_applications[1].job_application_id,
-                data: "test-cv-link.com",
-                type: "CV_URL"
-            },
-            {
-                job_application_id: job_applications[1].job_application_id,
-                data: "test-portfolio-link.com",
-                type: "PORTFOLIO_URL"
-            }
-        ]
-    })
-
+    //
+    // // create attachments
+    // await prisma.attachment.createMany({
+    //     data : [
+    //         {
+    //             job_application_id: job_applications[1].job_application_id,
+    //             data: "test-cv-link.com",
+    //             type: "CV_URL"
+    //         },
+    //         {
+    //             job_application_id: job_applications[1].job_application_id,
+    //             data: "test-portfolio-link.com",
+    //             type: "PORTFOLIO_URL"
+    //         }
+    //     ]
+    // })
+    //
     const languages = await prisma.language.findMany();
     // create job application skills
     await prisma.job_application_skill.createMany({
         data: [
-            {   
+            {
                 job_application_id: job_applications[1].job_application_id,
                 skill: "SQL",
                 language_id: languages[0].language_id,
@@ -248,41 +251,60 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
-    const deleteLanguageDetails = prisma.language.deleteMany();
-    const deleteAttachmentDetails = prisma.attachment.deleteMany();
-    const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
-    const deleteEvaluationDetails = prisma.evaluation.deleteMany();
-    const deleteApplicationDetails = prisma.job_application.deleteMany();
-    const deleteSessionKeysDetails = prisma.session_keys.deleteMany();
-    const deleteProjectUserDetails = prisma.project_user.deleteMany();
-    const deleteContractDetails = prisma.contract.deleteMany();
-    const deleteProjectRoleDetails = prisma.project_role.deleteMany();
-    const deleteProjectDetails = prisma.project.deleteMany();
-    const deleteOsocDetails = prisma.osoc.deleteMany();
-    const deleteStudentDetails = prisma.student.deleteMany();
-    const deleteLoginUserDetails = prisma.login_user.deleteMany();
-    const deleteRoleDetails = prisma.role.deleteMany();
-    const deletePersonDetails = prisma.person.deleteMany();
+    // TODO: probeer deze gecommente code te hergebruiken ipv alles in losse awaits te doen, maar los werkt voorlopig
 
-    await prisma.$transaction([
-        deleteLanguageDetails,
-        deleteJobApplicationSkillDetails,
-        deleteAttachmentDetails,
-        deleteAppliedRoleDetails,
-        deleteEvaluationDetails,
-        deleteApplicationDetails,
-        deleteSessionKeysDetails,
-        deleteProjectUserDetails,
-        deleteContractDetails,
-        deleteProjectRoleDetails,
-        deleteProjectDetails,
-        deleteOsocDetails,
-        deleteStudentDetails,
-        deleteLoginUserDetails,
-        deleteRoleDetails,
-        deletePersonDetails,
-    ]);
+    // const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
+    // const deleteLanguageDetails = prisma.language.deleteMany();
+    // const deleteAttachmentDetails = prisma.attachment.deleteMany();
+    // const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
+    // const deleteEvaluationDetails = prisma.evaluation.deleteMany();
+    // const deleteApplicationDetails = prisma.job_application.deleteMany();
+    // const deleteSessionKeysDetails = prisma.session_keys.deleteMany();
+    // const deleteProjectUserDetails = prisma.project_user.deleteMany();
+    // const deleteContractDetails = prisma.contract.deleteMany();
+    // const deleteProjectRoleDetails = prisma.project_role.deleteMany();
+    // const deleteProjectDetails = prisma.project.deleteMany();
+    // const deleteOsocDetails = prisma.osoc.deleteMany();
+    // const deleteStudentDetails = prisma.student.deleteMany();
+    // const deleteLoginUserDetails = prisma.login_user.deleteMany();
+    // const deleteRoleDetails = prisma.role.deleteMany();
+    // const deletePersonDetails = prisma.person.deleteMany();
+    //
+    // await prisma.$transaction([
+    //     deleteLanguageDetails,
+    //     deleteJobApplicationSkillDetails,
+    //     deleteAttachmentDetails,
+    //     deleteAppliedRoleDetails,
+    //     deleteEvaluationDetails,
+    //     deleteApplicationDetails,
+    //     deleteSessionKeysDetails,
+    //     deleteProjectUserDetails,
+    //     deleteContractDetails,
+    //     deleteProjectRoleDetails,
+    //     deleteProjectDetails,
+    //     deleteOsocDetails,
+    //     deleteStudentDetails,
+    //     deleteLoginUserDetails,
+    //     deleteRoleDetails,
+    //     deletePersonDetails,
+    // ]);
+
+    await prisma.job_application_skill.deleteMany();
+    await prisma.language.deleteMany();
+    await prisma.attachment.deleteMany();
+    await prisma.applied_role.deleteMany();
+    await prisma.evaluation.deleteMany();
+    await prisma.job_application.deleteMany();
+    await prisma.session_keys.deleteMany();
+    await prisma.project_user.deleteMany();
+    await prisma.contract.deleteMany();
+    await prisma.project_role.deleteMany();
+    await prisma.project.deleteMany();
+    await prisma.osoc.deleteMany();
+    await prisma.student.deleteMany();
+    await prisma.login_user.deleteMany();
+    await prisma.role.deleteMany();
+    await prisma.person.deleteMany();
 
     await prisma.$disconnect()
 });
