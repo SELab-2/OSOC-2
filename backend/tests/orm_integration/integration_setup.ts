@@ -251,60 +251,42 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    // TODO: probeer deze gecommente code te hergebruiken ipv alles in losse awaits te doen, maar los werkt voorlopig
 
-    // const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
-    // const deleteLanguageDetails = prisma.language.deleteMany();
-    // const deleteAttachmentDetails = prisma.attachment.deleteMany();
-    // const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
-    // const deleteEvaluationDetails = prisma.evaluation.deleteMany();
-    // const deleteApplicationDetails = prisma.job_application.deleteMany();
-    // const deleteSessionKeysDetails = prisma.session_keys.deleteMany();
-    // const deleteProjectUserDetails = prisma.project_user.deleteMany();
-    // const deleteContractDetails = prisma.contract.deleteMany();
-    // const deleteProjectRoleDetails = prisma.project_role.deleteMany();
-    // const deleteProjectDetails = prisma.project.deleteMany();
-    // const deleteOsocDetails = prisma.osoc.deleteMany();
-    // const deleteStudentDetails = prisma.student.deleteMany();
-    // const deleteLoginUserDetails = prisma.login_user.deleteMany();
-    // const deleteRoleDetails = prisma.role.deleteMany();
-    // const deletePersonDetails = prisma.person.deleteMany();
-    //
-    // await prisma.$transaction([
-    //     deleteLanguageDetails,
-    //     deleteJobApplicationSkillDetails,
-    //     deleteAttachmentDetails,
-    //     deleteAppliedRoleDetails,
-    //     deleteEvaluationDetails,
-    //     deleteApplicationDetails,
-    //     deleteSessionKeysDetails,
-    //     deleteProjectUserDetails,
-    //     deleteContractDetails,
-    //     deleteProjectRoleDetails,
-    //     deleteProjectDetails,
-    //     deleteOsocDetails,
-    //     deleteStudentDetails,
-    //     deleteLoginUserDetails,
-    //     deleteRoleDetails,
-    //     deletePersonDetails,
-    // ]);
-
-    await prisma.job_application_skill.deleteMany();
-    await prisma.language.deleteMany();
-    await prisma.attachment.deleteMany();
-    await prisma.applied_role.deleteMany();
-    await prisma.evaluation.deleteMany();
-    await prisma.job_application.deleteMany();
-    await prisma.session_keys.deleteMany();
-    await prisma.project_user.deleteMany();
-    await prisma.contract.deleteMany();
-    await prisma.project_role.deleteMany();
-    await prisma.project.deleteMany();
-    await prisma.osoc.deleteMany();
-    await prisma.student.deleteMany();
-    await prisma.login_user.deleteMany();
-    await prisma.role.deleteMany();
-    await prisma.person.deleteMany();
+    const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
+    const deleteLanguageDetails = prisma.language.deleteMany();
+    const deleteAttachmentDetails = prisma.attachment.deleteMany();
+    const deleteAppliedRoleDetails = prisma.applied_role.deleteMany();
+    const deleteEvaluationDetails = prisma.evaluation.deleteMany();
+    const deleteApplicationDetails = prisma.job_application.deleteMany();
+    const deleteSessionKeysDetails = prisma.session_keys.deleteMany();
+    const deleteProjectUserDetails = prisma.project_user.deleteMany();
+    const deleteContractDetails = prisma.contract.deleteMany();
+    const deleteProjectRoleDetails = prisma.project_role.deleteMany();
+    const deleteProjectDetails = prisma.project.deleteMany();
+    const deleteOsocDetails = prisma.osoc.deleteMany();
+    const deleteStudentDetails = prisma.student.deleteMany();
+    const deleteLoginUserDetails = prisma.login_user.deleteMany();
+    const deleteRoleDetails = prisma.role.deleteMany();
+    const deletePersonDetails = prisma.person.deleteMany();
+    
+    await prisma.$transaction([
+        deleteJobApplicationSkillDetails,
+        deleteLanguageDetails,
+        deleteAttachmentDetails,
+        deleteAppliedRoleDetails,
+        deleteEvaluationDetails,
+        deleteApplicationDetails,
+        deleteSessionKeysDetails,
+        deleteProjectUserDetails,
+        deleteContractDetails,
+        deleteProjectRoleDetails,
+        deleteProjectDetails,
+        deleteRoleDetails,
+        deleteOsocDetails,        
+        deleteStudentDetails,
+        deleteLoginUserDetails,
+        deletePersonDetails,
+    ]);
 
     await prisma.$disconnect()
 });
