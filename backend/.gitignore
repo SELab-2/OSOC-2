@@ -3,4 +3,4 @@ node_modules
 .env
 
 # keep my actual GitHub secret hidden
-backend/github.json
+github.json
