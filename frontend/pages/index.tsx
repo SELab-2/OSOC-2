@@ -1,23 +1,26 @@
 import type {NextPage} from 'next'
+import {useContext, useEffect} from "react";
+import SessionContext from "../contexts/sessionProvider";
 import {useRouter} from "next/router";
-import { useSession } from "next-auth/react"
-import {useEffect} from "react";
 
+/**
+ * Checks if a user is logged in and redirects to the corresponding page
+ * Coaches have restricted acces to some pages / features
+ * @constructor
+ */
 const Home: NextPage = () => {
 
+    const {sessionKey} = useContext(SessionContext)
     const router = useRouter()
-    const session = useSession()
 
     useEffect(() => {
-        console.log(session)
-        // The user is logged in
-        if (session !== null && session.status === "authenticated") {
-            router.push("/students").then()
-        } else {
-            // The user is not logged in and will be redirected to /login
+        // No user is logged in
+        if (sessionKey === "") {
             router.push("/login").then()
+        } else {
+            router.push("/students").then()
         }
-    })
+    }, [router, sessionKey])
 
     return (<></>)
 }
