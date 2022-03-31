@@ -496,6 +496,11 @@ export interface ReqReset {
 export interface ResetCheckCode {
   code: string;
 }
+
+export interface ResetPassword {
+  code: string;
+  password: string;
+}
 }
 
 /**
