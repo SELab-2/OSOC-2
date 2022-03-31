@@ -48,6 +48,29 @@ export async function getPasswordPersonByEmail(email: string) {
 
 /**
  *
+ * @param github: this is the GitHub username of the person we are looking up in
+ *     the database
+ * @returns: password of the login user matching with the person
+ */
+export async function getPasswordPersonByGithub(github: string) {
+  return await prisma.person.findUnique({
+    where : {github : github},
+    select : {
+      login_user : {
+        select : {
+          password : true,
+          login_user_id : true,
+          account_status : true,
+          is_admin : true,
+          is_coach : true
+        }
+      }
+    }
+  });
+}
+
+/**
+ *
  * @param name: This is the name of the person we are looking, can be firstname
  *     as lastname
  * @returns: a list of all the person objects in the database that match
