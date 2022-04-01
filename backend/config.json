@@ -33,6 +33,19 @@
         "serverError": {
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
+        },
+        "github": {
+            "argumentMissing": {
+                "http": 409,
+                "reason": "Something whent wrong while authenticating with GitHub."
+            },
+            "illegalState": {
+                "http": 409,
+                "reason": "GitHub authentication endpoints are meant for GitHub authentication only. Thank you very much."
+            },
+            "other": {
+                "reason": "GitHub data requests failed. Please try again later."
+            }
         }
     },
 
@@ -40,6 +53,7 @@
         "homes": [
             "", "/api-osoc"
         ],
-        "preferred": "/api-osoc"
+        "preferred": "/api-osoc",
+        "frontend": "http://localhost:3000"
     }
 }

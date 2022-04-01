@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
-   github       TEXT               UNIQUE,   
+   github       TEXT               UNIQUE,
    firstname    TEXT      NOT NULL,
    lastname     TEXT      NOT NULL,
    CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
@@ -22,20 +22,20 @@ CREATE TABLE IF NOT EXISTS student(
 
 /* function used in login user to retrieve if email is used in person */
 CREATE FUNCTION get_email_used(personId integer, given_password text)
-RETURNS BOOLEAN 
+RETURNS BOOLEAN
 LANGUAGE plpgsql
 AS
 $$
-declare 
+declare
     email_used text;
 begin
     select email into email_used from person where person_id = personId;
 
-    if (email_used IS NOT NULL) and (given_password is null) then 
-        return false; 
+    if (email_used IS NOT NULL) and (given_password is null) then
+        return false;
     end if;
 
-    return true; 
+    return true;
 END;
 $$;
 
@@ -45,7 +45,7 @@ CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UN
 CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
-    "password"         TEXT     NULL, 
+    "password"         TEXT     NULL,
     is_admin         BOOLEAN NOT NULL,
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,
@@ -59,6 +59,13 @@ CREATE TABLE IF NOT EXISTS session_keys(
    login_user_id      SERIAL         NOT NULL REFERENCES login_user(login_user_id),
    session_key        VARCHAR(128)   NOT NULL UNIQUE
  );
+
+CREATE TABLE IF NOT EXISTS password_reset(
+    password_reset_id   SERIAL                      PRIMARY KEY, /* unique id for this table */
+    login_user_id       SERIAL                      UNIQUE NOT NULL REFERENCES  login_user(login_user_id),
+    reset_id            VARCHAR(128)                UNIQUE NOT NULL, /* random id generated to use in the link for password reset */
+    valid_until         TIMESTAMP WITH TIME ZONE    NOT NULL
+);
 
 
 CREATE TABLE IF NOT EXISTS osoc(
@@ -76,14 +83,14 @@ CREATE TABLE IF NOT EXISTS job_application (
     student_id                SERIAL               NOT NULL REFERENCES student(student_id),
     student_volunteer_info    TEXT                 NOT NULL,
     responsibilities          TEXT,
-    fun_fact                  TEXT,
+    fun_fact                  TEXT                 NOT NULL,
     student_coach             BOOLEAN              NOT NULL,
     osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
-    edus                      TEXT [],
-    edu_level                 TEXT,
-    edu_duration              INT,
-    edu_year                  INT,
-    edu_institute             TEXT,
+    edus                      TEXT []              NOT NULL,
+    edu_level                 TEXT                 NOT NULL,
+    edu_duration              INT                  NOT NULL,
+    edu_year                  INT                  NOT NULL,
+    edu_institute             TEXT                 NOT NULL,
     email_status              email_status_enum    NOT NULL,
     created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
@@ -116,7 +123,7 @@ CREATE TABLE IF NOT EXISTS project (
    description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL, 
+   positions     SMALLINT         NOT NULL,
    CONSTRAINT dates CHECK (start_date <= end_date),
    CONSTRAINT valid_positions CHECK (positions > 0)
 );
