@@ -19,6 +19,11 @@ beforeAll(async () => {
                 email: 'testmail2@mail.com',
                 firstname: "first",
                 lastname: "last"
+            },
+            {
+                email: 'studentmail@mail.com',
+                firstname: 'student',
+                lastname: 'student'
             }
         ],
     });
@@ -104,7 +109,14 @@ beforeAll(async () => {
                 pronouns: ["She", "Her"],
                 phone_number: "107",
                 alumni: true,
-            }   
+            },
+            {
+                person_id: persons[3].person_id,
+                gender: "Female",
+                pronouns: ["She", "Her"],
+                phone_number: "111",
+                alumni: false
+            }
         ]
     })
     const students = await prisma.student.findMany();
@@ -123,7 +135,7 @@ beforeAll(async () => {
                edu_level: "higher education",
                edu_duration: 5,
                edu_institute: "Ugent",
-               edu_year: 2022,
+               edu_year: 4,
                email_status: email_status_enum.DRAFT,
                created_at: new Date("December 17, 2021 14:24:00"),
            },
@@ -138,9 +150,39 @@ beforeAll(async () => {
                edu_level: "MaNaMa",
                edu_duration: 8,
                edu_institute: "Ugent",
-               edu_year: 2023,
+               edu_year: 7,
                email_status: email_status_enum.SENT,
                created_at: new Date("December 20, 2021 03:24:00"),
+           },
+           {
+               student_id: students[2].student_id,
+               student_volunteer_info: "no volunteer",
+               responsibilities: "no responsibilities",
+               fun_fact: "this is a fun fact",
+               student_coach: false,
+               osoc_id: osocs[0].osoc_id,
+               edus: ["something something"],
+               edu_level: "higher education",
+               edu_duration: 5,
+               edu_institute: "Ugent",
+               edu_year: 3,
+               email_status: email_status_enum.DRAFT,
+               created_at: new Date("December 25, 2021 14:24:00"),
+           },
+           {
+               student_id: students[2].student_id,
+               student_volunteer_info: "I'd like to volunteer",
+               responsibilities: "no responsibilities2",
+               fun_fact: "this is a fun fact too",
+               student_coach: true,
+               osoc_id: osocs[1].osoc_id,
+               edus: ["higher education"],
+               edu_level: "MaNaMa",
+               edu_duration: 8,
+               edu_institute: "Ugent",
+               edu_year: 3,
+               email_status: email_status_enum.SENT,
+               created_at: new Date("December 31, 2021 03:24:00")
            }
        ]
     });
@@ -177,6 +219,12 @@ beforeAll(async () => {
             {
                 name: "Marketeer"
             },
+            {
+                name: "Frontend"
+            },
+            {
+                name: "Backend"
+            }
         ],
     });
 
@@ -200,6 +248,23 @@ beforeAll(async () => {
             ],
         });
     }
+    const roles = await prisma.role.findMany();
+    await prisma.applied_role.createMany({
+        data: [
+            {
+                job_application_id: job_applications[0].job_application_id,
+                role_id: roles[2].role_id
+            },
+            {
+                job_application_id: job_applications[1].job_application_id,
+                role_id: roles[2].role_id
+            },
+            {
+                job_application_id: job_applications[1].job_application_id,
+                role_id: roles[3].role_id
+            }
+        ]
+    })
 
 
     // create languages

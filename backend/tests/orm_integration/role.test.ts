@@ -24,8 +24,8 @@ it('should create 1 new role where', async () => {
 
 it('should find all the roles in the db, 3 in total', async () => {
     const searched_roles = await getAllRoles();
-    expect(searched_roles.length).toEqual(3);
-    expect(searched_roles[2]).toHaveProperty("name", role1.name);
+    expect(searched_roles.length).toEqual(5);
+    expect(searched_roles[4]).toHaveProperty("name", role1.name);
 });
 
 

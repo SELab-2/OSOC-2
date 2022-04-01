@@ -47,13 +47,13 @@ it('should create 1 new student', async () => {
 
 it('should find all the students in the db, 3 in total', async () => {
     const searched_students = await getAllStudents();
-    expect(searched_students.length).toEqual(3);
-    expect(searched_students[2]).toHaveProperty("student_id", student1.studentId);
-    expect(searched_students[2]).toHaveProperty("gender", student1.gender);
-    expect(searched_students[2]).toHaveProperty("pronouns", student1.pronouns);
-    expect(searched_students[2]).toHaveProperty("phone_number", student1.phoneNumber);
-    expect(searched_students[2]).toHaveProperty("nickname", student1.nickname);
-    expect(searched_students[2]).toHaveProperty("alumni", student1.alumni);
+    expect(searched_students.length).toEqual(4);
+    expect(searched_students[3]).toHaveProperty("student_id", student1.studentId);
+    expect(searched_students[3]).toHaveProperty("gender", student1.gender);
+    expect(searched_students[3]).toHaveProperty("pronouns", student1.pronouns);
+    expect(searched_students[3]).toHaveProperty("phone_number", student1.phoneNumber);
+    expect(searched_students[3]).toHaveProperty("nickname", student1.nickname);
+    expect(searched_students[3]).toHaveProperty("alumni", student1.alumni);
 });
 
 it('should return the student, by searching for its id', async () => {

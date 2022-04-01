@@ -313,7 +313,7 @@ export interface CreateJobApplication {
     /**
      * keeps track of when we received this application (used to pick the latest one)
      */
-    created_at: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
+    createdAt: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
 /**

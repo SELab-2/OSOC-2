@@ -180,14 +180,14 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
             edu_year: jobApplication.eduYear,
             edu_institute: jobApplication.eduInstitute,
             email_status: jobApplication.emailStatus,
-            created_at: jobApplication.created_at
+            created_at: new Date(jobApplication.createdAt)
         }
     });
 }
 
 /**
  * 
- * @param studentId: the student who's job applications we are looking for
+ * @param studentId: the student whose job applications we are looking for
  * @returns the found job applications of the given student
  */
 export async function getLatestJobApplicationOfStudent(studentId: number) {
