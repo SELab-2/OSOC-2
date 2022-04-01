@@ -387,6 +387,14 @@ export interface Login {
   pass: string;
 }
 
+/**
+ *  To log in with GitHub, we require your GitHub login and username/alias.
+ */
+export interface GHLogin {
+  login: string;
+  name: string;
+}
+
 export interface KeyRequest {
   sessionkey: InternalTypes.SessionKey;
 }
