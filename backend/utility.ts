@@ -31,22 +31,22 @@ export const errors: Errors = {
   cookNonExistent(url: string) {
     return {
       http : config.apiErrors.nonExistent.http,
-      reason : config.apiErrors.nonExistent.reason.replace(/$url/, url)
+      reason : config.apiErrors.nonExistent.reason.replace(/~url/, url)
     };
   },
 
   cookInvalidVerb(req: express.Request) {
     return {
       http : config.apiErrors.invalidVerb.http,
-      reason : config.apiErrors.invalidVerb.reason.replace(/$verb/, req.method)
-                   .replace(/$url/, req.url)
+      reason : config.apiErrors.invalidVerb.reason.replace(/~verb/, req.method)
+                   .replace(/~url/, req.url)
     };
   },
 
   cookNonJSON(mime: string) {
     return {
       http : config.apiErrors.nonJSONRequest.http,
-      reason : config.apiErrors.nonJSONRequest.reason.replace(/$mime/, mime)
+      reason : config.apiErrors.nonJSONRequest.reason.replace(/~mime/, mime)
     };
   },
 

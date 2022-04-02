@@ -76,6 +76,18 @@ You should replace the values with these (see the screenshot below):
 
 ![How to get the values](./gh-oauth-get-values.png)
 
+### Account recovery emails
+To send a "password forgotten" email, we use GMail. However setting this up isn't exactly easy. Please follow along these [steps on medium.com](https://alexb72.medium.com/how-to-send-emails-using-a-nodemailer-gmail-and-oauth2-fe19d66451f9) until you have acquired all 4 codes (client ID, client secret, refresh token and access token). Once you have them, create a file called `email.json` in the `/backend/` folder with this structure:
+```json
+{
+    "google-client-id": "CLIENT-ID",
+    "google-client-secret": "CLIENT-SECRET",
+    "google-refresh-token": "REFRESH-TOKEN",
+    "google-access-token": "ACCESS-TOKEN"
+}
+```
+After that, everything should work out-of-the-box.
+
 ## How to deploy
 
 ### Preparation
