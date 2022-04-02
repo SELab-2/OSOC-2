@@ -320,6 +320,19 @@ beforeAll(async () => {
         ],
     });
 
+    await prisma.session_keys.createMany({
+        data: [
+            {
+                login_user_id: login_users[0].login_user_id,
+                session_key: "key"
+            },
+            {
+                login_user_id: login_users[0].login_user_id,
+                session_key: "key2"
+            }
+        ]
+
+    });
 });
 
 afterAll(async () => {
