@@ -501,6 +501,11 @@ export interface Form {
   eventId: string, eventType: string, createdAt: string, data: DataForm
 }
 
+export interface Role extends KeyRequest {
+  name: string
+}
+
+
 export interface DataForm {
   fields: Array<Question>
 }

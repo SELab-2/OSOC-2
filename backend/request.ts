@@ -410,6 +410,21 @@ export async function parseFormRequest(req: express.Request):
 }
 
 /**
+ *  Parses a request to `POST /student/role`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseStudentRoleRequest(req: express.Request):
+    Promise<Requests.Role> {
+  return hasFields(req, [ "name" ], types.neither)
+      .then(() => Promise.resolve({
+        sessionkey : req.body.sessionkey,
+        name : req.body.name
+      }));
+}
+
+/**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
  */
@@ -419,6 +434,11 @@ export const parseLogoutRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseStudentAllRequest = parseKeyRequest;
+/**
+ *  A request to `GET /roles/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+ export const parseRolesAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /coach/all` only requires a session key
  * {@link parseKeyRequest}.
