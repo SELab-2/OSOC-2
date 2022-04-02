@@ -308,7 +308,7 @@ async function searchStudents(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
  async function createStudentRole(req: express.Request):
- Promise<Responses.Key> {
+ Promise<Responses.Keyed<InternalTypes.IdName>> {
  return rq.parseStudentRoleRequest(req)
      .then(parsed => util.checkSessionKey(parsed))
      .then(async parsed => {
@@ -317,7 +317,7 @@ async function searchStudents(req: express.Request):
             .then(role => {return Promise.resolve({
                 data : {
                   name: role.name,
-                  role_id: role.role_id
+                  id: role.role_id
                 },
                 sessionkey : parsed.data.sessionkey
               })});     
