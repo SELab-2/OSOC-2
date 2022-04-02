@@ -3,7 +3,7 @@ import express from 'express';
 
 import * as config from './config.json';
 import {Anything, InternalTypes, Requests} from './types';
-import {errors} from './utility';
+import {errors, getSessionKey} from './utility';
 
 /**
  *  We use 3 types of requests: those requiring no special values, those
@@ -88,22 +88,6 @@ function hasFields(req: express.Request, fields: string[],
   if (reqType == types.id && !("id" in req.params))
     return rejector();
   return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
-}
-
-/**
- *  Extracts the session key from the request headers.
- *  @param req The request to extract the session key from.
- *  @throws Error if there is no session key.
- *  @returns The extracted session key.
- *  @see hasFields.
- */
-function getSessionKey(req: express.Request): string {
-  const authHeader = req.headers.authorization;
-  if (authHeader == undefined ||
-      !authHeader.startsWith(config.global.authScheme)) {
-    throw Error('No session key - you should check for the session key first.');
-  }
-  return authHeader.replace(config.global.authScheme + " ", "");
 }
 
 /**
