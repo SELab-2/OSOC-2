@@ -78,13 +78,13 @@ async function ghExchangeAccessToken(req: express.Request,
       }))
       .then(ares => parseGHLogin(ares.data))
       .then(login => ghSignupOrLogin(login))
-      .then(result => util.redirect(res, config.global.frontend + "/login/" +
+      .then(result => util.redirect(res, github.frontend + "/login/" +
                                              result.sessionkey +
                                              "?is_admin=" + result.is_admin +
                                              "&is_coach=" + result.is_coach))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
-        util.redirect(res, config.global.frontend + "/login?loginError=" +
+        util.redirect(res, github.frontend + "/login?loginError=" +
                                config.apiErrors.github.other.reason);
         return Promise.resolve();
       });
