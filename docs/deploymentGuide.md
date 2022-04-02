@@ -67,6 +67,18 @@ This secret can be generated in the github OAuth application by pressing `Genera
 If you want to run the application locally make another OAuth application and use as homepageUrl `http://localhost:3000`.  
 Repeat the same steps once more to change the `GITHUB_ID` and `GITHUB_SECRET` but now in the `/frontend/.env.development`.
 
+### Account recovery emails
+To send a "password forgotten" email, we use GMail. However setting this up isn't exactly easy. Please follow along these [steps on medium.com](https://alexb72.medium.com/how-to-send-emails-using-a-nodemailer-gmail-and-oauth2-fe19d66451f9) until you have acquired all 4 codes (client ID, client secret, refresh token and access token). Once you have them, create a file called `email.json` in the `/backend/` folder with this structure:
+```json
+{
+    "google-client-id": "CLIENT-ID",
+    "google-client-secret": "CLIENT-SECRET",
+    "google-refresh-token": "REFRESH-TOKEN",
+    "google-access-token": "ACCESS-TOKEN"
+}
+```
+After that, everything should work out-of-the-box.
+
 ## How to deploy
 
 ### Preparation
@@ -97,4 +109,3 @@ Listing all the images can be done with `docker images`, then you can delete the
 - `docker rmi "imageId"`
 
 Now you can deploy the new version as described in [Deployment](#deployment)
-
