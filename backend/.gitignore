@@ -3,3 +3,5 @@ node_modules
 .env
 # Keep email/google oauth secrets out of VC
 email.json
+# keep my actual GitHub secret hidden
+github.json

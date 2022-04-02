@@ -4,6 +4,7 @@ import * as config from './config.json';
 import * as admin from './routes/admin';
 import * as coach from './routes/coach';
 import * as form from './routes/form';
+import * as github from './routes/github';
 import * as login from './routes/login';
 import * as project from './routes/project';
 import * as reset from './routes/reset';
@@ -23,6 +24,7 @@ export function attach(app: express.Application): void {
     app.use(home + '/project', project.getRouter());
     app.use(home + '/form', form.getRouter);
     app.use(home + '/reset', reset.getRouter());
+    app.use(home + '/github', github.getRouter());
   });
 
   app.use((req: express.Request, res: express.Response): Promise<void> =>

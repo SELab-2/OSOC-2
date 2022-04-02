@@ -34,9 +34,23 @@
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
         },
+
         "inavlidEmailReset": {
             "http": 400,
             "reason": "No such email is present. Please check your email."
+        },
+        "github": {
+            "argumentMissing": {
+                "http": 409,
+                "reason": "Something whent wrong while authenticating with GitHub."
+            },
+            "illegalState": {
+                "http": 409,
+                "reason": "GitHub authentication endpoints are meant for GitHub authentication only. Thank you very much."
+            },
+            "other": {
+                "reason": "GitHub data requests failed. Please try again later."
+            }
         }
     },
 

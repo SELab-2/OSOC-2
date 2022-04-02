@@ -1,22 +1,32 @@
 import type {NextPage} from 'next'
-import styles from '../styles/login.module.css'
+import styles from '../../styles/login.module.css'
 import Image from "next/image"
-import GitHubLogo from "../public/images/github-logo.svg"
-import {SyntheticEvent, useContext, useState} from "react";
-import {Modal} from "../components/Modal/Modal";
+import GitHubLogo from "../../public/images/github-logo.svg"
+import {SyntheticEvent, useContext, useEffect, useState} from "react";
+import {Modal} from "../../components/Modal/Modal";
 import {useRouter} from "next/router";
-import {Header} from "../components/Header/Header";
+import {Header} from "../../components/Header/Header";
 
 import * as crypto from 'crypto';
-import SessionContext from "../contexts/sessionProvider";
+import SessionContext from "../../contexts/sessionProvider";
 
-const Login: NextPage = () => {
-
-    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
+const Index: NextPage = () => {
 
     const router = useRouter()
 
-    // Login field values with corresponding error messages
+    // Sets an error message when the `loginError` query paramater is present
+    useEffect(() => {
+        const { loginError } = router.query
+        if (loginError != undefined) {
+            if (typeof loginError === 'string') {
+                setLoginBackendError(loginError)
+            }
+        }
+    }, [router.query])
+
+    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
+
+    // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
     const [loginEmailError, setLoginEmailError] = useState<string>("");
     const [loginPassword, setLoginPassword] = useState<string>("");
@@ -200,6 +210,7 @@ const Login: NextPage = () => {
      */
     const githubLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
+        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/github`
         // TODO -- How are we supposed to send the data to the backend?
     }
 
@@ -340,7 +351,7 @@ const Login: NextPage = () => {
         </div>)
 }
 
-export default Login;
+export default Index;
 
 
 export type SignInResult = {
