@@ -35,7 +35,7 @@
             "reason": "Something went wrong while trying to execute your request."
         },
 
-        "inavlidEmailReset": {
+        "invalidEmailReset": {
             "http": 400,
             "reason": "No such email is present. Please check your email."
         },

@@ -52,7 +52,7 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
       (parsed) =>
           ormP.getPasswordPersonByEmail(parsed.email).then(async (person) => {
             if (person == null || person.login_user == null) {
-              return Promise.reject(config.apiErrors.inavlidEmailReset);
+              return Promise.reject(config.apiErrors.invalidEmailReset);
             }
             const date: Date = new Date(Date.now());
             date.setHours(date.getHours() + 24);
