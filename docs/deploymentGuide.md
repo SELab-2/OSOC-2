@@ -65,7 +65,8 @@ In the `/backend/` folder, edit the `github.json` configuration file. There are 
 {
     "client_id": "YOUR_CLIENT_ID",
     "secret": "YOUR_CLIENT_SECRET",
-    "auth_callback_url": "YOUR_AUTH_CALLBACK"
+    "auth_callback_url": "YOUR_AUTH_CALLBACK",
+    "frontend": "YOUR_SERVER_URL"
 }
 ```
 
@@ -73,6 +74,7 @@ You should replace the values with these (see the screenshot below):
  - `YOUR_CLIENT_ID` should be the value given as `Client ID` (the first red box in the screenshot).
  - `YOUR_CLIENT_SECRET` should be the value given below `Client secrets` (the second red box in the screenshot). You can copy this value by clicking the button right next to it.
  - `YOUR_AUTH_CALLBACK` should be the value you filled in for `Authorization callback URL` (from the previous step).
+ - `YOUR_SERVER_URL` is not a value from the secrets, but it should hold the URL of the server on which the frontend runs. 
 
 ![How to get the values](./gh-oauth-get-values.png)
 
