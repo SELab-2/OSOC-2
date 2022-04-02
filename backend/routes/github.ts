@@ -91,9 +91,11 @@ async function ghExchangeAccessToken(req: express.Request,
 }
 
 function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
-  if ('login' in data && 'name' in data) {
-    return Promise.resolve(
-        {login : data.login as string, name : data.name as string});
+  if ('login' in data && 'name' in data && 'login' in data) {
+    return Promise.resolve({
+      login : data.login as string,
+      name : data.name == null ? (data.login as string) : (data.name as string)
+    });
   }
   return Promise.reject();
 }
