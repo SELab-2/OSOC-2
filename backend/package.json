@@ -10,7 +10,7 @@
     "docker:down": "docker-compose down",
     "integrationTests": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i",
     "test": "jest",
-    "coverage": "jest --coverage",
+    "coverage": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i --coverage",
     "codecov": "jest --ci --coverage --outputFile=coverage.json --json"
   },
   "author": "",

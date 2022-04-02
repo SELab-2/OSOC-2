@@ -249,11 +249,15 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
        });
      });
 
-// test respOrError<T> has to wait -> ORM connection has to be mocked
+function setSessionKey(req: express.Request, key: string): void {
+  req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 test("utility.respOrError sends responses with updated keys", async () => {
   const {res, statSpy, sendSpy} = obtainResponse();
   const req = getMockReq();
-  req.body.sessionkey = "key";
+  // req.body.sessionkey = "key";
+  setSessionKey(req, "key");
 
   session_keyMock.changeSessionKey.mockReset();
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
