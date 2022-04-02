@@ -62,7 +62,7 @@ test("utility.errors.cook* work as expected", () => {
         url : url,
         err : {
           http : config.apiErrors.nonExistent.http,
-          reason : config.apiErrors.nonExistent.reason.replace(/$url/, url)
+          reason : config.apiErrors.nonExistent.reason.replace(/~url/, url)
         }
       }));
   nonexistExpect.forEach(
@@ -80,8 +80,8 @@ test("utility.errors.cook* work as expected", () => {
     const req: express.Request = getMockReq();
     req.method = v.verb;
     req.url = v.url;
-    const msg = config.apiErrors.invalidVerb.reason.replace(/$url/, v.url)
-                    .replace(/$verb/, v.verb);
+    const msg = config.apiErrors.invalidVerb.reason.replace(/~url/, v.url)
+                    .replace(/~verb/, v.verb);
     return {
       err : {http : config.apiErrors.invalidVerb.http, reason : msg},
       req : req
@@ -98,7 +98,7 @@ test("utility.errors.cook* work as expected", () => {
         mime : mime,
         err : {
           http : config.apiErrors.nonJSONRequest.http,
-          reason : config.apiErrors.nonJSONRequest.reason.replace(/$mime/, mime)
+          reason : config.apiErrors.nonJSONRequest.reason.replace(/~mime/, mime)
         }
       }));
   mimeExpect.forEach(
