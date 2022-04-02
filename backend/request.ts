@@ -76,7 +76,7 @@ function anyHasFields(obj: Anything, fields: string[]): boolean {
 function hasFields(req: express.Request, fields: string[],
                    reqType: RequestType): Promise<void> {
   if (reqType == types.key || reqType == types.id) {
-    const authHeader = req.get('authorization');
+    const authHeader = req.headers.authorization;
     if (authHeader == undefined ||
         !authHeader.startsWith(config.global.authScheme)) {
       return Promise.reject(errors.cookUnauthenticated());
@@ -98,7 +98,7 @@ function hasFields(req: express.Request, fields: string[],
  *  @see hasFields.
  */
 function getSessionKey(req: express.Request): string {
-  const authHeader = req.get('authorization');
+  const authHeader = req.headers.authorization;
   if (authHeader == undefined ||
       !authHeader.startsWith(config.global.authScheme)) {
     throw Error('No session key - you should check for the session key first.');
