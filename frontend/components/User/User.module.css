@@ -1,0 +1,37 @@
+.column {
+    float: left;
+    width: 33.33%;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media screen and (max-width: 600px) {
+    .column {
+        width: 100%;
+    }
+}
+
+.button {
+    padding: 5px 5px;
+    text-align: left;
+    display: inline-block;
+    font-size: 10px;
+    background-color: transparent;
+
+}
+
+.buttonImage {
+    border-radius: 4px;
+    width: 2px;
+    height: 15px;
+    display: none;
+}
+
+
+.displayNone {
+    display: none !important;
+}
