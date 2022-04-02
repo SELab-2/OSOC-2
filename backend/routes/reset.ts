@@ -1,15 +1,51 @@
 import express from 'express';
+import * as gapi from 'googleapis';
 import * as nodemailer from 'nodemailer';
 
 import * as config from '../config.json';
-import mailer from '../email';
+import * as google from '../email.json';
 import * as ormLU from '../orm_functions/login_user';
 import * as ormPR from '../orm_functions/password_reset';
 import * as ormP from '../orm_functions/person';
 import * as ormSK from '../orm_functions/session_key';
 import * as rq from '../request';
-import {Responses} from '../types';
+import {Email, Responses} from '../types';
 import * as util from '../utility';
+
+export async function sendMail(mail: Email) {
+  const oauthclient = new gapi.Auth.OAuth2Client(
+      google['google-client-id'], google['google-client-secret']);
+  oauthclient.setCredentials({refresh_token : google['google-refresh-token']});
+  const accesstoken =
+      await oauthclient.getAccessToken().then(token => token.token!);
+  const transp = nodemailer.createTransport({
+    service : 'gmail',
+    auth : {
+      type : 'OAUTH2',
+      user : 'osoc2.be@gmail.com',
+      clientId : google['google-client-id'],
+      clientSecret : google['google-client-secret'],
+      refreshToken : google['google-refresh-token'],
+      accessToken : accesstoken
+    }
+  });
+
+  return transp
+      .sendMail({
+        from : config.email.from,
+        to : mail.to,
+        subject : mail.subject,
+        html : mail.html
+      })
+      .then(res => {
+        transp.close();
+        return Promise.resolve(res);
+      })
+      .catch(e => {
+        console.log('Email error: ' + JSON.stringify(e));
+        return Promise.reject(e);
+      });
+}
 
 async function requestReset(req: express.Request): Promise<Responses.Empty> {
   return rq.parseRequestResetRequest(req).then(
@@ -24,7 +60,7 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
                 .createOrUpdateReset(person.login_user.login_user_id,
                                      util.generateKey(), date)
                 .then(async (code) => {
-                  return mailer({
+                  return sendMail({
                            to : parsed.email,
                            subject : config.email.header,
                            html : '<p>' + code.reset_id + '</p>'
