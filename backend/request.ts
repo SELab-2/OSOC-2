@@ -1,6 +1,7 @@
 import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
+import * as config from './config.json';
 import {Anything, InternalTypes, Requests} from './types';
 import {errors} from './utility';
 
@@ -59,26 +60,50 @@ function anyHasFields(obj: Anything, fields: string[]): boolean {
 
 /**
  *  Checks if a request has the required fields. If the request is a Key request
- * or and ID request, the `req.body.sessionkey` field is also checked for
- * existence. If the request is an ID request, the `req.params.id` field is also
- * checked for existence.
+ * or and ID request, the `Authorization` header is also checked for existence
+ * and semantics; it has to start with the correct value (as defined in the
+ * `config.json`). If the request is an ID request, the `req.params.id` field
+ * is also checked for existence.
  *  @param req The request to check.
  *  @param fields The fields that should be present.
  *  @param reqType The type of request.
  *  @returns A Promise which will resolve to nothing if all of the fields are
  * present, or reject with an Argument Error if any of the fields is not
  * present. If the request is expected to be a key or ID request, but it doesn't
- * hold a `req.body.sessionkey`, a promise rejecting with an Unauthenticated
+ * hold a `getSessionKey(req)`, a promise rejecting with an Unauthenticated
  * Error is returned instead.
  */
 function hasFields(req: express.Request, fields: string[],
                    reqType: RequestType): Promise<void> {
-  if ((reqType == types.key || reqType == types.id) &&
-      (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
-    return Promise.reject(errors.cookUnauthenticated());
+  if (reqType == types.key || reqType == types.id) {
+    const authHeader = req.get('authorization');
+    if (authHeader == undefined ||
+        !authHeader.startsWith(config.global.authScheme)) {
+      return Promise.reject(errors.cookUnauthenticated());
+    }
+  }
+  // if ((reqType == types.key || reqType == types.id) &&
+  //     (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
+  //   return Promise.reject(errors.cookUnauthenticated());
   if (reqType == types.id && !("id" in req.params))
     return rejector();
   return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
+}
+
+/**
+ *  Extracts the session key from the request headers.
+ *  @param req The request to extract the session key from.
+ *  @throws Error if there is no session key.
+ *  @returns The extracted session key.
+ *  @see hasFields.
+ */
+function getSessionKey(req: express.Request): string {
+  const authHeader = req.get('authorization');
+  if (authHeader == undefined ||
+      !authHeader.startsWith(config.global.authScheme)) {
+    throw Error('No session key - you should check for the session key first.');
+  }
+  return authHeader.replace(config.global.authScheme + " ", "");
 }
 
 /**
@@ -111,7 +136,7 @@ function maybe<T>(obj: Anything, key: string): T|undefined {
 async function parseKeyRequest(req: express.Request):
     Promise<Requests.KeyRequest> {
   return hasFields(req, [], types.key).then(() => Promise.resolve({
-    sessionkey : req.body.sessionkey
+    sessionkey : getSessionKey(req)
   }));
 }
 
@@ -124,7 +149,7 @@ async function parseKeyRequest(req: express.Request):
 async function parseKeyIdRequest(req: express.Request):
     Promise<Requests.IdRequest> {
   return hasFields(req, [], types.id).then(() => Promise.resolve({
-    sessionkey : req.body.sessionkey,
+    sessionkey : getSessionKey(req),
     id : Number(req.params.id)
   }));
 }
@@ -140,7 +165,7 @@ async function parseUpdateLoginUser(req: express.Request):
   return hasFields(req, [ "isAdmin", "isCoach", "accountStatus" ], types.id)
       .then(() => {
         return Promise.resolve({
-          sessionkey : req.body.sessionkey,
+          sessionkey : getSessionKey(req),
           id : Number(req.params.id),
           isAdmin : maybe(req.body, "isAdmin") as boolean,
           isCoach : maybe(req.body, "isCoach") as boolean,
@@ -182,7 +207,7 @@ export async function parseUpdateStudentRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       emailOrGithub : maybe(req.body, "emailOrGithub"),
       firstName : maybe(req.body, "firstName"),
@@ -212,7 +237,7 @@ export async function parseSuggestStudentRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       suggestion : sug as InternalTypes.Suggestion,
       reason : maybe(req.body, "reason"),
@@ -237,7 +262,7 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
     }
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       reply : maybe(req.body, "reply")
     });
@@ -273,7 +298,7 @@ export async function parseNewProjectRequest(req: express.Request):
   return hasFields(req, [ "name", "partner", "start", "end", "positions" ],
                    types.key)
       .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
+        sessionkey : getSessionKey(req),
         name : req.body.name,
         partner : req.body.partner,
         start : req.body.start,
@@ -297,7 +322,7 @@ export async function parseUpdateProjectRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       name : maybe(req.body, "name"),
       partner : maybe(req.body, "partner"),
@@ -318,7 +343,7 @@ export async function parseDraftStudentRequest(req: express.Request):
     Promise<Requests.Draft> {
   return hasFields(req, [ "studentId", "roles" ], types.id)
       .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
+        sessionkey : getSessionKey(req),
         id : Number(req.params.id),
         studentId : req.body.studentId,
         roles : req.body.roles
@@ -339,7 +364,7 @@ export async function parseSetFollowupStudentRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       type : type
     });
@@ -356,7 +381,7 @@ export async function parseNewTemplateRequest(req: express.Request):
     Promise<Requests.Template> {
   return hasFields(req, [ "name", "content" ], types.key)
       .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
+        sessionkey : getSessionKey(req),
         name : req.body.name,
         subject : maybe(req.body, "subject"),
         desc : maybe(req.body, "desc"),
@@ -378,7 +403,7 @@ export async function parseUpdateTemplateRequest(req: express.Request):
       return rejector();
 
     return Promise.resolve({
-      sessionkey : req.body.sessionkey,
+      sessionkey : getSessionKey(req),
       id : Number(req.params.id),
       name : maybe(req.body, "name"),
       desc : maybe(req.body, "desc"),

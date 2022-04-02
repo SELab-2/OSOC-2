@@ -58,7 +58,8 @@
         "homes": [
             "", "/api-osoc"
         ],
-        "preferred": "/api-osoc"
+        "preferred": "/api-osoc",
+        "authScheme": "auth/osoc2"
     },
 
     "email": {
