@@ -32,21 +32,13 @@ const SessionContext = createContext<ISessionContext>(defaultState);
 export const SessionProvider: React.FC = ({ children }) => {
 
     /**
-     *
+     * Everytime the page is reloaded we need to get the session from local storage
      */
     useEffect(() => {
-        const allCookies = document.cookie.split(';').reduce((res, cookie) => {
-            const [key, value] = cookie.trim().split('=')
-            try {
-                return Object.assign(res, { [key]: JSON.parse(value) })
-            } catch (e) {
-                return Object.assign(res, {[key]: value})
-            }
-        }, {});
-        const cookies = allCookies as {sessionKey: string, isAdmin: boolean, isCoach: boolean}
-        setSessionKeyState(cookies.sessionKey)
-        setIsAdminState(cookies.isAdmin)
-        setIsCoachState(cookies.isCoach)
+        const sessionKey = localStorage.getItem('sessionKey')
+        setSessionKeyState(sessionKey !== null ? sessionKey : "")
+        setIsAdminState(localStorage.getItem('isAdmin') === 'true')
+        setIsCoachState(localStorage.getItem('isCoach') === 'true')
     }, [])
 
     const [sessionKey, setSessionKeyState] = useState<string>("");
@@ -55,20 +47,20 @@ export const SessionProvider: React.FC = ({ children }) => {
 
     const setSessionKey = (sessionKey: string) => {
         setSessionKeyState(sessionKey)
-        // Set a new cookie for the session key with max age of 1 day
-        document.cookie = `sessionKey=${sessionKey};samesite=strict;max-age=86400`
+        // Update localStorage
+        localStorage.setItem('sessionKey', sessionKey)
     }
 
     const setIsCoach = (isCoach: boolean) => {
         setIsCoachState(isCoach)
-        // Set a new cookie for the coach state with max age of 1 day
-        document.cookie = `isCoach=${isCoach};samesite=strict;max-age=86400`
+        // Update localStorage
+        localStorage.setItem('isCoach', String(isCoach))
     }
 
     const setIsAdmin = (isAdmin: boolean) => {
         setIsAdminState(isAdmin)
-        // Set a new cookie for the admin state with max age of 1 day
-        document.cookie = `isAdmin=${isAdmin};samesite=strict;max-age=86400`
+        // Update localStorage
+        localStorage.setItem('isAdmin', String(isAdmin))
     }
 
     return (
