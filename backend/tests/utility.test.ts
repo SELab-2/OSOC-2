@@ -62,7 +62,7 @@ test("utility.errors.cook* work as expected", () => {
         url : url,
         err : {
           http : config.apiErrors.nonExistent.http,
-          reason : config.apiErrors.nonExistent.reason.replace(/$url/, url)
+          reason : config.apiErrors.nonExistent.reason.replace(/~url/, url)
         }
       }));
   nonexistExpect.forEach(
@@ -80,8 +80,8 @@ test("utility.errors.cook* work as expected", () => {
     const req: express.Request = getMockReq();
     req.method = v.verb;
     req.url = v.url;
-    const msg = config.apiErrors.invalidVerb.reason.replace(/$url/, v.url)
-                    .replace(/$verb/, v.verb);
+    const msg = config.apiErrors.invalidVerb.reason.replace(/~url/, v.url)
+                    .replace(/~verb/, v.verb);
     return {
       err : {http : config.apiErrors.invalidVerb.http, reason : msg},
       req : req
@@ -98,7 +98,7 @@ test("utility.errors.cook* work as expected", () => {
         mime : mime,
         err : {
           http : config.apiErrors.nonJSONRequest.http,
-          reason : config.apiErrors.nonJSONRequest.reason.replace(/$mime/, mime)
+          reason : config.apiErrors.nonJSONRequest.reason.replace(/~mime/, mime)
         }
       }));
   mimeExpect.forEach(
@@ -249,11 +249,15 @@ test("utility.respOrErrorNoReinject sends generic errors as server errors",
        });
      });
 
-// test respOrError<T> has to wait -> ORM connection has to be mocked
+function setSessionKey(req: express.Request, key: string): void {
+  req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 test("utility.respOrError sends responses with updated keys", async () => {
   const {res, statSpy, sendSpy} = obtainResponse();
   const req = getMockReq();
-  req.body.sessionkey = "key";
+  // req.body.sessionkey = "key";
+  setSessionKey(req, "key");
 
   session_keyMock.changeSessionKey.mockReset();
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
@@ -364,6 +368,20 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
        expect(login_userMock.searchAllAdminLoginUsers).toHaveBeenCalledTimes(2);
      });
 
+test("utility.isAdmin can catch errors from the DB", async () => {
+  session_keyMock.checkSessionKey.mockReset();
+  session_keyMock.checkSessionKey.mockImplementation(
+      () => Promise.resolve({login_user_id : 1}));
+
+  login_userMock.searchAllAdminLoginUsers.mockReset();
+  login_userMock.searchAllAdminLoginUsers.mockImplementation(
+      () => Promise.reject({}));
+
+  expect(util.isAdmin({
+    sessionkey : "key"
+  })).rejects.toStrictEqual(util.errors.cookInsufficientRights());
+});
+
 test("utility.refreshKey removes a key and replaces it", async () => {
   session_keyMock.changeSessionKey.mockReset();
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
@@ -413,4 +431,18 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
       .resolves.toStrictEqual(result);
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd');
+});
+
+test("utility.getSessionKey fetches session key or crashes", () => {
+  const r = getMockReq();
+  const err = 'No session key - you should check for the session key first.';
+  setSessionKey(r, 'some_key');
+  expect(util.getSessionKey(r)).toBe("some_key");
+
+  const f1 = getMockReq();
+  f1.headers.authorization = "some_key";
+  expect(() => util.getSessionKey(f1)).toThrow(err);
+
+  const f2 = getMockReq();
+  expect(() => util.getSessionKey(f2)).toThrow(err);
 });

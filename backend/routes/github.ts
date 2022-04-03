@@ -78,22 +78,24 @@ async function ghExchangeAccessToken(req: express.Request,
       }))
       .then(ares => parseGHLogin(ares.data))
       .then(login => ghSignupOrLogin(login))
-      .then(result => util.redirect(res, config.global.frontend + "/login/" +
+      .then(result => util.redirect(res, github.frontend + "/login/" +
                                              result.sessionkey +
                                              "?is_admin=" + result.is_admin +
                                              "&is_coach=" + result.is_coach))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
-        util.redirect(res, config.global.frontend + "/login?loginError=" +
+        util.redirect(res, github.frontend + "/login?loginError=" +
                                config.apiErrors.github.other.reason);
         return Promise.resolve();
       });
 }
 
 function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
-  if ('login' in data && 'name' in data) {
-    return Promise.resolve(
-        {login : data.login as string, name : data.name as string});
+  if ('login' in data && 'name' in data && 'login' in data) {
+    return Promise.resolve({
+      login : data.login as string,
+      name : data.name == null ? (data.login as string) : (data.name as string)
+    });
   }
   return Promise.reject();
 }
