@@ -65,7 +65,8 @@ In the `/backend/` folder, edit the `github.json` configuration file. There are 
 {
     "client_id": "YOUR_CLIENT_ID",
     "secret": "YOUR_CLIENT_SECRET",
-    "auth_callback_url": "YOUR_AUTH_CALLBACK"
+    "auth_callback_url": "YOUR_AUTH_CALLBACK",
+    "frontend": "YOUR_SERVER_URL"
 }
 ```
 
@@ -73,8 +74,21 @@ You should replace the values with these (see the screenshot below):
  - `YOUR_CLIENT_ID` should be the value given as `Client ID` (the first red box in the screenshot).
  - `YOUR_CLIENT_SECRET` should be the value given below `Client secrets` (the second red box in the screenshot). You can copy this value by clicking the button right next to it.
  - `YOUR_AUTH_CALLBACK` should be the value you filled in for `Authorization callback URL` (from the previous step).
+ - `YOUR_SERVER_URL` is not a value from the secrets, but it should hold the URL of the server on which the frontend runs. 
 
 ![How to get the values](./gh-oauth-get-values.png)
+
+### Account recovery emails
+To send a "password forgotten" email, we use GMail. However setting this up isn't exactly easy. Please follow along these [steps on medium.com](https://alexb72.medium.com/how-to-send-emails-using-a-nodemailer-gmail-and-oauth2-fe19d66451f9) until you have acquired all 4 codes (client ID, client secret, refresh token and access token). Once you have them, create a file called `email.json` in the `/backend/` folder with this structure:
+```json
+{
+    "google-client-id": "CLIENT-ID",
+    "google-client-secret": "CLIENT-SECRET",
+    "google-refresh-token": "REFRESH-TOKEN",
+    "google-access-token": "ACCESS-TOKEN"
+}
+```
+After that, everything should work out-of-the-box.
 
 ## How to deploy
 

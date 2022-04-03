@@ -20,19 +20,24 @@
         },
         "nonExistent": {
             "http": 404,
-            "reason": "The endpoint requested ($url) does not exist."
+            "reason": "The endpoint requested (~url) does not exist."
         },
         "invalidVerb": {
             "http": 405,
-            "reason": "This HTTP verb ($verb) is not supported for this endpoint ($url)"
+            "reason": "This HTTP verb (~verb) is not supported for this endpoint (~url)"
         },
         "nonJSONRequest": {
             "http": 406,
-            "reason": "All endpoints only support JSON ($mime requested)."
+            "reason": "All endpoints only support JSON (~mime requested)."
         },
         "serverError": {
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
+        },
+
+        "invalidEmailReset": {
+            "http": 400,
+            "reason": "No such email is present. Please check your email."
         },
         "github": {
             "argumentMissing": {
@@ -54,6 +59,11 @@
             "", "/api-osoc"
         ],
         "preferred": "/api-osoc",
-        "frontend": "http://localhost:3000"
+        "authScheme": "auth/osoc2"
+    },
+
+    "email": {
+        "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
+        "header": "OSOC2 Recovery Code"
     }
 }

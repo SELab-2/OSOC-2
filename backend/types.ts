@@ -496,6 +496,19 @@ export interface Question {
 export interface Option {
   id: string, text: string
 }
+
+export interface ReqReset {
+  email: string;
+}
+
+export interface ResetCheckCode {
+  code: string;
+}
+
+export interface ResetPassword {
+  code: string;
+  password: string;
+}
 }
 
 /**
@@ -522,4 +535,10 @@ export type RouteCallback<T extends Responses.ApiResponse> =
  */
 export interface Anything {
   [key: string]: unknown;
+}
+
+export interface Email {
+  to: string;
+  subject: string;
+  html: string;
 }
