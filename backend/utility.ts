@@ -54,6 +54,24 @@ export const errors: Errors = {
 }
 
 /**
+ *  Extracts the session key from the request headers.
+ *  @param req The request to extract the session key from.
+ *  @throws Error if there is no session key.
+ *  @returns The extracted session key.
+ *  @see hasFields.
+ */
+export function getSessionKey(req: express.Request):
+    string {
+      const authHeader = req.headers.authorization;
+      if (authHeader == undefined ||
+          !authHeader.startsWith(config.global.authScheme)) {
+        throw Error(
+            'No session key - you should check for the session key first.');
+      }
+      return authHeader.replace(config.global.authScheme + " ", "");
+    }
+
+/**
  *  Promise-based debugging function. Logs the data, then passes it through
  * (using `Promise.resolve`).
  *
@@ -189,7 +207,7 @@ export async function respOrError<T>(
     req: express.Request, res: express.Response,
     prom: Promise<Responses.ApiResponse&Responses.Keyed<T>>): Promise<void> {
   return respOrErrorNoReinject(
-      res, prom.then((res) => refreshAndInjectKey(req.body.sessionkey, res)));
+      res, prom.then((res) => refreshAndInjectKey(getSessionKey(req), res)));
 }
 
 /**
