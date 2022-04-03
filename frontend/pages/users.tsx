@@ -13,7 +13,8 @@ const Users: NextPage = () => {
 
     const {sessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
-
+    const userSet = new Set<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>()
+    const test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
 
     // Load all users upon page load
     useEffect(() => {
@@ -47,8 +48,20 @@ const Users: NextPage = () => {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey)
             }
-            setUsers(response.data)
+            test.concat(response.data);
+            test.forEach(userSet.add, userSet);
+        }).then(() => {
+            getAllUsers("coach").then(response => {
+                console.log(response)
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey)
+                }
+                test.concat(response.data);
+                test.forEach(userSet.add, userSet);
+            }).then(() => setUsers(Array.from(userSet)));
         })
+        //TODO The code above doesn't work now because the sessionkey doesn't update for some reason. Await doesn't work.
+
         // We need to disable this warning. We of course do not want do reload the page when the data is changed
         // because that is exactly what this function does.
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -6,8 +6,9 @@ import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import GreenCheckMark from "../../public/images/green_check_mark.png"
-import React, {SyntheticEvent, useState} from "react";
+import React, {SyntheticEvent, useContext, useState} from "react";
 import Image from "next/image";
+import SessionContext from "../../contexts/sessionProvider";
 
 
 export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: boolean, userIsCoach: boolean, userStatus: string }> = ({
@@ -25,35 +26,78 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
     const [isAdmin, setIsAdmin] = useState<boolean>(userIsAdmin)
     const [isCoach, setIsCoach] = useState<boolean>(userIsCoach)
     const [status, setStatus] = useState<string>(userStatus)
+    const {sessionKey, setSessionKey} = useContext(SessionContext)
+
+
+    const reverseRole = (changed_val: string) => {
+        if (changed_val === "admin") {
+            setIsAdmin(!isAdmin);
+        } else if (changed_val === "coach") {
+            setIsCoach(!isCoach);
+
+        } else if (changed_val === "activated") {
+            if (status === "ACTIVATED") {
+                setStatus('DISABLED');
+            } else {
+                setStatus('ACTIVATED');
+            }
+        }
+    }
+
+    const setUserRole = async (route: string, user_id: string, changed_val: string) => {
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + user_id)
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + user_id, {
+            method: 'POST',
+            body: JSON.stringify({coach: isCoach, admin: isAdmin}),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${sessionKey}`
+            }
+        })
+            .then(response => response.json()).then(json => {
+                if (!json.success) {
+                    reverseRole(changed_val);
+                    return {success: false};
+                } else {
+                    if (setSessionKey) {
+                        setSessionKey(json.sessionKey)
+                    }
+                    return json;
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                reverseRole(changed_val);
+                return {success: false};
+            })
+    }
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
-        e.preventDefault()
-        setIsAdmin(!isAdmin)
-        // TODO -- Send the isAdmin value to the backend
-        //      -- If error revert to old value
+        e.preventDefault();
+        setIsAdmin(!isAdmin);
+        await setUserRole("admin", "TODO", "admin");
     }
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
-        e.preventDefault()
-        setIsCoach(!isCoach)
-        // TODO -- Send the isCoach value to the backend
-        //      -- If error revert to old value
+        e.preventDefault();
+        setIsCoach(!isCoach);
+        await setUserRole("coach", "TODO", "coach");
     }
 
     const toggleStatus = async (e: SyntheticEvent) => {
-        e.preventDefault()
+        e.preventDefault();
         if (status == 'ACTIVATED') {
-            setStatus('DISABLED')
+            setStatus('DISABLED');
         } else {
-            setStatus('ACTIVATED')
+            setStatus('ACTIVATED');
         }
-        // TODO -- Send the status value to the backend
-        //      -- If error revert to old value
+        await setUserRole("coach", "TODO", "activated");
     }
 
     const activateUser = async (e: SyntheticEvent) => {
-        e.preventDefault()
-        setStatus('ACTIVATED')
+        e.preventDefault();
+        setStatus('ACTIVATED');
         // TODO -- Send the status value to the backend
         //      -- If error revert to old value
     }
