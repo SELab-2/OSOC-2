@@ -48,17 +48,22 @@ const Users: NextPage = () => {
             }
             setUsers(response.data)
         })
+        // We need to disable this warning. We of course do not want do reload the page when the data is changed
+        // because that is exactly what this function does.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
 
     return (
         <div>
-            <Header>
-                {users !== undefined ? users.map((value, index) => {
-                    return <User name={value.person_data.name} email="TODO" is_admin={value.admin}
-                                 is_coach={value.coach} key={index}/>
-                }) : null}
-            </Header>
+            <Header />
+             <div>
+                 {users !== undefined ? users.map((value, index) => {
+                     return <User name={value.person_data.name} email="TODO" is_admin={value.admin}
+                                  is_coach={value.coach} key={index}/>
+                 }) : null}
+             </div>
+
         </div>
     )
 }
