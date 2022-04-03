@@ -9,20 +9,26 @@ import {UserButton} from "../UserButton/UserButton";
 import React from "react";
 
 
-export const User: React.FC = () => {
+export const User: React.FC<{ name: string, email: string, is_coach: boolean, is_admin: boolean }> = ({
+                                                                                                          name,
+                                                                                                          email,
+                                                                                                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                                          is_coach,
+                                                                                                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                                          is_admin
+                                                                                                      }) => {
     return (
         <div className={styles.row}>
             <div className={styles.column}>
-                <p>name <b>[Status pending]</b></p>
+                <p>{name}</p>
             </div>
             <div className={styles.column}>
-                <p>email</p>
+                <p>{email}</p>
             </div>
             <div className={styles.column}>
                 {UserButton(AdminIcon, AdminIconColor, "admin")}
                 {UserButton(CoachIcon, CoachIconColor, "coach")}
                 {UserButton(ForbiddenIcon, ForbiddenIconColor, "admin")}
-
             </div>
         </div>)
 }

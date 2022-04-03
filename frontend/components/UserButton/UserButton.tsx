@@ -1,9 +1,9 @@
-import React, { useState} from "react";
+import React, {useState} from "react";
 import Image, {StaticImageData} from "next/image";
 import styles from "../UserButton/UserButton.module.css";
 
 
-export const UserButton: (image1: StaticImageData, image2: StaticImageData, usage: string) => JSX.Element = (image1: StaticImageData, image2: StaticImageData, usage: string) => {
+export const UserButton: (image_bw: StaticImageData, image_color: StaticImageData, usage: string) => JSX.Element = (image1: StaticImageData, image2: StaticImageData, usage: string) => {
 
 
     //TODO logica voor elke button implementeren
@@ -30,14 +30,10 @@ export const UserButton: (image1: StaticImageData, image2: StaticImageData, usag
                         setA(a + 1);
                         console.log(a);
                     }}>
-            <span> {usage}
-                <span>
-                   {image}
-
-                </span>
-            </span>
+        <div> {usage}
+            <div>
+                {image}
+            </div>
+        </div>
     </button>)
 }
-
-
-
