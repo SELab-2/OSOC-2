@@ -74,7 +74,8 @@ const Users: NextPage = () => {
             {users !== undefined ? users.map((value, index) => {
                 return <User userName={value.person_data.name} userEmail="mauricevanwassenhove@gmail.com TODO"
                              userIsAdmin={value.admin}
-                             userIsCoach={value.coach} userStatus={value.activated} key={index}/>
+                             userIsCoach={value.coach} userStatus={value.activated} key={index}
+                             userId={value.person_data.id}/>
             }) : null}
         </div>
     </>)

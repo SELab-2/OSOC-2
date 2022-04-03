@@ -11,15 +11,16 @@ import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 
 
-export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: boolean, userIsCoach: boolean, userStatus: string }> = ({
-                                                                                                                                            userName,
-                                                                                                                                            userEmail,
-                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                                                                                            userIsAdmin,
-                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                                                                                            userIsCoach,
-                                                                                                                                            userStatus
-                                                                                                                                        }) => {
+export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: boolean, userIsCoach: boolean, userStatus: string, userId: number }> = ({
+                                                                                                                                                            userName,
+                                                                                                                                                            userEmail,
+                                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                                                                                            userIsAdmin,
+                                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                                                                                                                                            userIsCoach,
+                                                                                                                                                            userStatus,
+                                                                                                                                                            userId
+                                                                                                                                                        }) => {
 
     const [name] = useState<string>(userName)
     const [email] = useState<string>(userEmail)
@@ -31,11 +32,11 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
 
     const reverseRole = (changed_val: string) => {
         if (changed_val === "admin") {
-            setIsAdmin(!isAdmin);
+            setIsAdmin(admin => !admin);
         } else if (changed_val === "coach") {
-            setIsCoach(!isCoach);
-
+            setIsCoach(isCoach => !isCoach);
         } else if (changed_val === "activated") {
+            //TODO This doesn't work because setStatus is an async function(need to find a way to revert it).
             if (status === "ACTIVATED") {
                 setStatus('DISABLED');
             } else {
@@ -44,9 +45,9 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
         }
     }
 
-    const setUserRole = async (route: string, user_id: string, changed_val: string) => {
-        console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + user_id)
-        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + user_id, {
+    const setUserRole = async (route: string, changed_val: string) => {
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString(), {
             method: 'POST',
             body: JSON.stringify({coach: isCoach, admin: isAdmin}),
             headers: {
@@ -76,13 +77,13 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
         setIsAdmin(!isAdmin);
-        await setUserRole("admin", "TODO", "admin");
+        await setUserRole("admin", "admin");
     }
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
         setIsCoach(!isCoach);
-        await setUserRole("coach", "TODO", "coach");
+        await setUserRole("coach", "coach");
     }
 
     const toggleStatus = async (e: SyntheticEvent) => {
@@ -92,7 +93,7 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
         } else {
             setStatus('ACTIVATED');
         }
-        await setUserRole("coach", "TODO", "activated");
+        await setUserRole("coach", "activated");
     }
 
     const activateUser = async (e: SyntheticEvent) => {
