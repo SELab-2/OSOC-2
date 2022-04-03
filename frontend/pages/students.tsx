@@ -11,20 +11,17 @@ const Students: NextPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            //console.log(sessionKey);
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                 method: 'GET',
-                body: JSON.stringify({sessionkey: sessionKey}), //TODO Autherize the user
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    'Authorization': `auth/osoc2 ${sessionKey}`
                 }
             });
-            console.log(response)
+            console.log(response);
         }
 
         fetchData();
-    });
+    }, []);
     
     return (
         <>
