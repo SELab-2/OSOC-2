@@ -3,6 +3,7 @@ import {Header} from "../components/Header/Header";
 import React, {useContext, useEffect, useState} from "react";
 import SessionContext from "../contexts/sessionProvider";
 import {User} from "../components/User/User";
+import styles from "../styles/users.module.css"
 
 /**
  * The `manage users` page, only accessible for admins
@@ -54,18 +55,16 @@ const Users: NextPage = () => {
     }, [])
 
 
-    return (
-        <div>
-            <Header />
-             <div>
-                 {users !== undefined ? users.map((value, index) => {
-                     return <User name={value.person_data.name} email="TODO" is_admin={value.admin}
-                                  is_coach={value.coach} key={index}/>
-                 }) : null}
-             </div>
-
+    return (<>
+        <Header/>
+        <div className={styles.body}>
+            {users !== undefined ? users.map((value, index) => {
+                return <User userName={value.person_data.name} userEmail="mauricevanwassenhove@gmail.com TODO"
+                             userIsAdmin={value.admin}
+                             userIsCoach={value.coach} userStatus={value.activated} key={index}/>
+            }) : null}
         </div>
-    )
+    </>)
 }
 
 export default Users;

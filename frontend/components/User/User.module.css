@@ -1,16 +1,41 @@
-.column {
-    float: left;
-    width: 33.33%;
+.row {
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: 1.5fr 1.5fr 0.5fr;
+    align-items: center;
+    padding: 0.5rem;
+    width: 100%;
+    border-bottom: solid var(--neutral-200) 0.15rem;
 }
 
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
+.row * {
+    margin-block: 0;
 }
 
-@media screen and (max-width: 600px) {
-    .column {
-        width: 100%;
-    }
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.buttonContainer {
+    transition: 0.2s;
+}
+
+.buttonContainer p {
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 0;
+}
+
+
+
+.buttonContainer:hover {
+    scale: 1.1;
+    cursor: pointer;
+}
+
+.button {
+    margin-block: 0.2rem;
+    margin-inline: 0.5rem;
 }
