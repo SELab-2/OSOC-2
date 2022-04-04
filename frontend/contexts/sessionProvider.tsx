@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 
 /**
  * Interface for the context, stores the user session application wide
@@ -23,11 +23,45 @@ const defaultState = {
 
 const SessionContext = createContext<ISessionContext>(defaultState);
 
+/**
+ * The sesssion provider is responsible for storing the user session both at runtime and in local storage
+ * The session prodiver also reads the session from local storage if present
+ * @param children
+ * @constructor
+ */
 export const SessionProvider: React.FC = ({ children }) => {
-    const [sessionKey, setSessionKey] = useState<string>("");
-    const [isCoach, setIsCoach] = useState<boolean>(false);
-    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+    /**
+     * Everytime the page is reloaded we need to get the session from local storage
+     */
+    useEffect(() => {
+        const sessionKey = localStorage.getItem('sessionKey')
+        setSessionKeyState(sessionKey !== null ? sessionKey : "")
+        setIsAdminState(localStorage.getItem('isAdmin') === 'true')
+        setIsCoachState(localStorage.getItem('isCoach') === 'true')
+    }, [])
+
+    const [sessionKey, setSessionKeyState] = useState<string>("");
+    const [isCoach, setIsCoachState] = useState<boolean>(false);
+    const [isAdmin, setIsAdminState] = useState<boolean>(false);
+
+    const setSessionKey = (sessionKey: string) => {
+        setSessionKeyState(sessionKey)
+        // Update localStorage
+        localStorage.setItem('sessionKey', sessionKey)
+    }
+
+    const setIsCoach = (isCoach: boolean) => {
+        setIsCoachState(isCoach)
+        // Update localStorage
+        localStorage.setItem('isCoach', String(isCoach))
+    }
+
+    const setIsAdmin = (isAdmin: boolean) => {
+        setIsAdminState(isAdmin)
+        // Update localStorage
+        localStorage.setItem('isAdmin', String(isAdmin))
+    }
 
     return (
         <SessionContext.Provider value={{sessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
