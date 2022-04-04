@@ -47,6 +47,15 @@ export async function sendMail(mail: Email) {
       });
 }
 
+/**
+ * Returns the html body for the email with the reset code applied.
+ * @param resetID
+ */
+function createEmail(resetID: string) {
+    return '<p>' + resetID + '</p>'
+}
+
+
 async function requestReset(req: express.Request): Promise<Responses.Empty> {
   return rq.parseRequestResetRequest(req).then(
       (parsed) =>
@@ -63,7 +72,7 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
                   return sendMail({
                            to : parsed.email,
                            subject : config.email.header,
-                           html : '<p>' + code.reset_id + '</p>'
+                           html : createEmail(code.reset_id)
                          })
                       .then(data => {
                         console.log(data);

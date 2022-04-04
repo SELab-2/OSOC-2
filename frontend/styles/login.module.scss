@@ -108,6 +108,7 @@
 }
 
 .orContainer p {
+    color: var(--primary-110);
     margin-inline: 0.5rem;
     line-height: 0;
 }
@@ -116,9 +117,10 @@
     display: flex;
     background-color: black;
     padding-inline: 1rem;
-    padding-block: 0.25rem;
+    padding-block: 1rem;
     transition: all .2s ease-in-out;
     margin-inline: -0.2rem;
+    align-items: center;
 }
 
 .githubContainer:hover {
@@ -133,6 +135,10 @@
 
 .githublogo {
     display: flex;
+}
+
+.github {
+    vertical-align: center;
 }
 
 .textFieldError {
