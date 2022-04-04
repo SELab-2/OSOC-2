@@ -465,6 +465,11 @@ export const parseLogoutRequest = parseKeyRequest;
  */
 export const parseStudentAllRequest = parseKeyRequest;
 /**
+ *  A request to `GET /roles/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseRolesAllRequest = parseKeyRequest;
+/**
  *  A request to `GET /coach/all` only requires a session key
  * {@link parseKeyRequest}.
  */
