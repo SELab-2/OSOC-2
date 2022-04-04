@@ -9,17 +9,17 @@ const Students: NextPage = () => {
     const {sessionKey} = useContext(SessionContext);
     //const [students, setStudents] = useState<Array<InternalTypes.Student>>([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `auth/osoc2 ${sessionKey}`
-                }
-            });
-            console.log(response);
-        }
+    const fetchData = async () => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `auth/osoc2 ${sessionKey}`
+            }
+        });
+        console.log(response);
+    }
 
+    useEffect(() => {
         fetchData();
     }, []);
     
