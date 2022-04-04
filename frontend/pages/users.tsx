@@ -14,19 +14,19 @@ const Users: NextPage = () => {
     const {sessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
     const userSet = new Set<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>()
-    const test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
+    let test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
 
     // Load all users upon page load
     useEffect(() => {
         // boilerplate for the admin/coaches route (pass admin/coach as string)
-        const getAllUsers = async (route: string) => {
+        const getAllUsers = async (route: string,sessionkey:string) => {
             console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all")
             return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'Authorization': `auth/osoc2 ${sessionKey}`
+                    'Authorization': `auth/osoc2 ${sessionkey}`
                 }
             })
                 .then(response => response.json()).then(json => {
@@ -43,21 +43,23 @@ const Users: NextPage = () => {
                 })
         }
 
-        getAllUsers("admin").then(response => {
+        let tempSes = "";
+        getAllUsers("admin",sessionKey).then(response => {
             console.log(response)
-            if (setSessionKey) {
-                setSessionKey(response.sessionkey)
-            }
-            test.concat(response.data);
+            tempSes = response.sessionkey
+            console.log(test)
+            test = [ ...test, ...response.data];
+            console.log(test)
             test.forEach(userSet.add, userSet);
         }).then(() => {
-            getAllUsers("coach").then(response => {
+            getAllUsers("coach",tempSes).then(response => {
                 console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
                 }
                 test.concat(response.data);
                 test.forEach(userSet.add, userSet);
+                console.log(userSet)
             }).then(() => setUsers(Array.from(userSet)));
         })
         //TODO The code above doesn't work now because the sessionkey doesn't update for some reason. Await doesn't work.

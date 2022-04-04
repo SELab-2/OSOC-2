@@ -37,14 +37,16 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
             setIsCoach(isCoach => !isCoach);
         } else if (changed_val === "activated") {
             //TODO This doesn't work because setStatus is an async function(need to find a way to revert it).
-            if (status === "ACTIVATED") {
-                setStatus('DISABLED');
-            } else {
-                setStatus('ACTIVATED');
-            }
+            setStatus(revertStatus())
         }
     }
-
+    const revertStatus = () => {
+        if (status === "ACTIVATED") {
+            return 'DISABLED';
+        } else {
+            return 'ACTIVATED';
+        }
+    }
     const setUserRole = async (route: string, changed_val: string) => {
         console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString(), {
