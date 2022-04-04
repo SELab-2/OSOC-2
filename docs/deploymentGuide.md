@@ -48,24 +48,47 @@ openssl rand -base64 32
 - The github id's and secrets are explained [later](#githubOAuth) in this document
 
 ### GitHub login
-To make github login work it is needed that you make a github OAuth application.  
-You can create a new github OAuth app [here](https://github.com/settings/developers)
+GitHub login relies on two configurations:
+ - One part is on GitHub's servers.
+ - The other part relies on a config file in the `/backend/` folder.
 
-U can recreate these settings:  
-![img.png](githubOath.png)
+#### GitHub part
+To enable GitHub login, we need a GitHub application. These are made by going to [GitHub's Developer Applications page](https://github.com/settings/developers). From there, you can click the `New OAuth App` button to create a new application.
 
-the `Application name` can freely be chosen.
-in the `Homepage URL` field you should put the used domain name.
-in the `Authorization callback URL`you should replace the first part with your domain name. **Leave the second part of the url untouched (`/api/auth/callback/github`)!**  
-<br>
-<a name="githubOAuth"></a>
-Finally, we only need to update the client id and client secret in the `/frontend/.env.production` file.  
-Here you should paste the client ID of the GitHub OAuth application you just made in `GITHUB_ID`.  
-In this same file you also need to replace the value of `GITHUB_SECRET`.  
-This secret can be generated in the github OAuth application by pressing `Generate a new client secret`.
+![Default settings](./gh-oauth-new-app.png)
 
-If you want to run the application locally make another OAuth application and use as homepageUrl `http://localhost:3000`.  
-Repeat the same steps once more to change the `GITHUB_ID` and `GITHUB_SECRET` but now in the `/frontend/.env.development`.
+You can change the `Application name` to anything you'd like. Be sure to confirm that the `Homepage URL` is correct for your server. The `Application description` can be anything you like. The `Authorization callback URL` should be the `Homepage URL` with `/api-osoc/github/` behind it.
+
+#### Configuration part
+In the `/backend/` folder, edit the `github.json` configuration file. There are three fields used, and most can be copied straight from the GitHub application you just created:
+```json
+{
+    "client_id": "YOUR_CLIENT_ID",
+    "secret": "YOUR_CLIENT_SECRET",
+    "auth_callback_url": "YOUR_AUTH_CALLBACK",
+    "frontend": "YOUR_SERVER_URL"
+}
+```
+
+You should replace the values with these (see the screenshot below):
+ - `YOUR_CLIENT_ID` should be the value given as `Client ID` (the first red box in the screenshot).
+ - `YOUR_CLIENT_SECRET` should be the value given below `Client secrets` (the second red box in the screenshot). You can copy this value by clicking the button right next to it.
+ - `YOUR_AUTH_CALLBACK` should be the value you filled in for `Authorization callback URL` (from the previous step).
+ - `YOUR_SERVER_URL` is not a value from the secrets, but it should hold the URL of the server on which the frontend runs. 
+
+![How to get the values](./gh-oauth-get-values.png)
+
+### Account recovery emails
+To send a "password forgotten" email, we use GMail. However setting this up isn't exactly easy. Please follow along these [steps on medium.com](https://alexb72.medium.com/how-to-send-emails-using-a-nodemailer-gmail-and-oauth2-fe19d66451f9) until you have acquired all 4 codes (client ID, client secret, refresh token and access token). Once you have them, create a file called `email.json` in the `/backend/` folder with this structure:
+```json
+{
+    "google-client-id": "CLIENT-ID",
+    "google-client-secret": "CLIENT-SECRET",
+    "google-refresh-token": "REFRESH-TOKEN",
+    "google-access-token": "ACCESS-TOKEN"
+}
+```
+After that, everything should work out-of-the-box.
 
 ## How to deploy
 
@@ -97,4 +120,3 @@ Listing all the images can be done with `docker images`, then you can delete the
 - `docker rmi "imageId"`
 
 Now you can deploy the new version as described in [Deployment](#deployment)
-
