@@ -279,14 +279,14 @@ export async function parseRequestCoachRequest(req: express.Request):
  */
 export async function parseNewProjectRequest(req: express.Request):
     Promise<Requests.Project> {
-  return hasFields(req, [ "name", "partner", "start", "end", "positions" ],
-                   types.key)
+  return hasFields(req, [ "name", "partner", "start", "end", "positions", "osocId" ], types.key)
       .then(() => Promise.resolve({
-        sessionkey : getSessionKey(req),
+        sessionkey : req.body.sessionkey,
         name : req.body.name,
         partner : req.body.partner,
         start : req.body.start,
         end : req.body.end,
+        osocId: req.body.osocId,
         positions : req.body.positions
       }));
 }
@@ -437,6 +437,21 @@ export async function parseResetPasswordRequest(req: express.Request):
   if (!("id" in req.params) || !("password" in req.body))
     return Promise.reject(errors.cookArgumentError());
   return Promise.resolve({code : req.params.id, password : req.body.password});
+}
+
+/**
+ *  Parses a request to `POST /student/role`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseStudentRoleRequest(req: express.Request):
+    Promise<Requests.Role> {
+  return hasFields(req, [ "name" ], types.neither)
+      .then(() => Promise.resolve({
+        sessionkey : req.body.sessionkey,
+        name : req.body.name
+      }));
 }
 
 /**
