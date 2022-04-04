@@ -1,6 +1,6 @@
 import {prismaMock} from "./singleton";
 import { UpdateRole } from "../../orm_functions/orm_types";
-import {getProjectRoleWithRoleName, createProjectRole, getAllRoles,
+import {getProjectRoleWithRoleName, createRole, getAllRoles,
     getRole, getRolesByName, updateRole, deleteRole, deleteRoleByName} 
     from "../../orm_functions/role";
 
@@ -11,7 +11,7 @@ const returnValue = {
 
 test("should create a role in the db with the given name, returns the new record", async () => {
      prismaMock.role.create.mockResolvedValue(returnValue)
-     await expect(createProjectRole("Developer")).resolves.toEqual(returnValue);
+     await expect(createRole("Developer")).resolves.toEqual(returnValue);
  });
 
 

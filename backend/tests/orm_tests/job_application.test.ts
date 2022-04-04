@@ -69,7 +69,7 @@ test("should delete job application", async () => {
 test("should create a job application", async () => {
 
     const jobApplicaton: CreateJobApplication = {
-        created_at: "",
+        createdAt: "",
         eduDuration: 5,
         eduInstitute: "ugent",
         eduLevel: "good",
