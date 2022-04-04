@@ -24,8 +24,8 @@ const defaultState = {
 const SessionContext = createContext<ISessionContext>(defaultState);
 
 /**
- * The sesssion provider is responsible for storing the user session both at runtime and in cookies
- * The session prodiver also reads all cookies upon reload
+ * The sesssion provider is responsible for storing the user session both at runtime and in local storage
+ * The session prodiver also reads the session from local storage if present
  * @param children
  * @constructor
  */
