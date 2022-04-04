@@ -32,24 +32,21 @@ const Users: NextPage = () => {
                 .then(response => response.json()).then(json => {
                     if (!json.success) {
 
-                        //TODO logica van niet gelukt
+                        //TODO Popup of zoiets
                         return {success: false};
                     } else return json;
                 })
                 .catch(err => {
                     console.log(err)
-                    //TODO logica van niet gelukt
+                    //TODO Popup of zoiets
                     return {success: false};
                 })
         }
 
         let tempSes = "";
         getAllUsers("admin",sessionKey).then(response => {
-            console.log(response)
             tempSes = response.sessionkey
-            console.log(test)
             test = [ ...test, ...response.data];
-            console.log(test)
             test.forEach(userSet.add, userSet);
         }).then(() => {
             getAllUsers("coach",tempSes).then(response => {
@@ -62,7 +59,6 @@ const Users: NextPage = () => {
                 console.log(userSet)
             }).then(() => setUsers(Array.from(userSet)));
         })
-        //TODO The code above doesn't work now because the sessionkey doesn't update for some reason. Await doesn't work.
 
         // We need to disable this warning. We of course do not want do reload the page when the data is changed
         // because that is exactly what this function does.

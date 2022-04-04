@@ -51,20 +51,22 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
         console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString(), {
             method: 'POST',
-            body: JSON.stringify({coach: isCoach, admin: isAdmin}),
+            body: JSON.stringify({isCoach: isCoach, isAdmin: isAdmin, accountStatus: status}),
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         })
-            .then(response => response.json()).then(json => {
+            .then(response => response.json()).then(async json => {
                 if (!json.success) {
                     reverseRole(changed_val);
                     return {success: false};
                 } else {
+                    console.log(json)
                     if (setSessionKey) {
-                        setSessionKey(json.sessionKey)
+                        await setSessionKey(json.sessionkey)
+
                     }
                     return json;
                 }
