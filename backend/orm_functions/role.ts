@@ -5,7 +5,7 @@ import {UpdateRole} from './orm_types';
  * 
  * @param name: the name of the role we want to add to the database
  */
- export async function createProjectRole(name: string){
+ export async function createRole(name: string){
     const result = await prisma.role.create({
         data: {
             name: name

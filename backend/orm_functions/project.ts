@@ -233,7 +233,7 @@ export async function updateProject(project: UpdateProject){
 /**
  * 
  * @param projectId the project that we are deleting from the project-table
- * @returns TODO what does this return?
+ * @returns return deleted project, with all its fields
  */
 export async function deleteProject(projectId: number){
     const result = await prisma.project.delete({
@@ -247,7 +247,7 @@ export async function deleteProject(projectId: number){
 /**
  * 
  * @param osocId the osoc id of all the projects we want to delete
- * @returns TODO what does this return?
+ * @returns returns batchpayload object, with holds count of number of deleted objects
  */
 export async function deleteProjectByOsocEdition(osocId: number){
     const result = await prisma.project.deleteMany({
@@ -261,7 +261,7 @@ export async function deleteProjectByOsocEdition(osocId: number){
 /**
  * 
  * @param partner the partner of who we want to delete all the projects
- * @returns TODO what does this return?
+ * @returns returns batchpayload object, with holds count of number of deleted objects
  */
 export async function deleteProjectByPartner(partner: string){
     const result = await prisma.project.deleteMany({

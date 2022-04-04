@@ -62,6 +62,7 @@ export async function updateStudent(student: UpdateStudent) {
             phone_number: student.phoneNumber,
             nickname: student.nickname,
             alumni: student.alumni,
+            gender: student.gender
         },
         include: {
             person: true,

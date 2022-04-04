@@ -13,18 +13,23 @@ import SessionContext from "../../contexts/sessionProvider";
 const Index: NextPage = () => {
 
     const router = useRouter()
+    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
+        // The user is already logged in, redirect the user
+        if (sessionKey != "") {
+            router.push("/students").then()
+            return
+        }
+        
         const { loginError } = router.query
         if (loginError != undefined) {
             if (typeof loginError === 'string') {
                 setLoginBackendError(loginError)
             }
         }
-    }, [router.query])
-
-    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
+    }, [router, router.query, sessionKey])
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
@@ -112,7 +117,7 @@ const Index: NextPage = () => {
                 if (setIsCoach) {
                     setIsCoach(response.is_coach)
                 }
-                router.push("/").then()
+                router.push("/students").then()
             }
         }
     }
@@ -211,7 +216,6 @@ const Index: NextPage = () => {
     const githubLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/github`
-        // TODO -- How are we supposed to send the data to the backend?
     }
 
     /**
@@ -254,7 +258,6 @@ const Index: NextPage = () => {
     return (
         <div>
             <Header/>
-            <p>{sessionKey}</p>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>
