@@ -22,8 +22,8 @@ const Index: NextPage = () => {
             router.push("/students").then()
             return
         }
-        
-        const { loginError } = router.query
+
+        const {loginError} = router.query
         if (loginError != undefined) {
             if (typeof loginError === 'string') {
                 setLoginBackendError(loginError)
@@ -247,7 +247,14 @@ const Index: NextPage = () => {
                 }
             }).catch()
             console.log(response)
-            setShowPasswordReset(false)
+            if (response !== undefined) {
+                if (response.ok) {
+                    setShowPasswordReset(false)
+                    // TODO -- Notification
+                } else {
+                    setPasswordResetMailError(response.statusText)
+                }
+            }
         }
 
     }
@@ -289,8 +296,8 @@ const Index: NextPage = () => {
                             </label>
                             <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
                             <a className={styles.resetPassword} onClick={showModal}>Forgot password?</a>
-                            <Modal handleClose={closeModal} visible={showPasswordReset}>
-                                <p>Please enter your email below and we will send you a link to reset your password.</p>
+                            <Modal handleClose={closeModal} visible={showPasswordReset}
+                                   title="Please enter your email below and we will send you a link to reset your password.">
                                 <label className={styles.label}>
                                     <input type="text" name="loginEmail"
                                            value={passwordResetMail === "" ? loginEmail : passwordResetMail}
