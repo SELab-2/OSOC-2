@@ -237,7 +237,6 @@ const Index: NextPage = () => {
 
         // Field is not empty
         if (!error) {
-            console.log("RESETTING PASSWORD")
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reset`, {
                 method: 'POST',
                 body: JSON.stringify({email: passwordResetMail}),

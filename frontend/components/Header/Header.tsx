@@ -12,10 +12,11 @@ export const Header: React.FC = () => {
 
     const router = useRouter()
 
-    /**
-     * Resets the session state and redirects to the login page
-     * @param e
-     */
+    const logIn = (e: SyntheticEvent) => {
+        e.preventDefault()
+        router.push("/login").then()
+    }
+
     const logOut = (e: SyntheticEvent) => {
         e.preventDefault()
         if (setSessionKey) {
@@ -42,12 +43,14 @@ export const Header: React.FC = () => {
                 </div>
                 <h1>Selections</h1>
             </div>
-            <div className={`${styles.links} ${router.pathname !== "/login" ? "" : styles.displayNone}`}>
-                {sessionKey !== "" ? <Link href={"/students"}>Students</Link> : null}
-                {sessionKey !== "" ? <Link href={"/projects"}>Projects</Link> : null}
-                {isAdmin ? <Link href={"/users"}>Manage Users</Link> : null}
-                <button onClick={logOut}>Log out
-                </button>
+            <div className={`${styles.links} ${router.pathname !== "/login" && router.pathname ? "" : styles.displayNone}`}>
+                {sessionKey !== "" && router.pathname !== "/reset" ? <Link href={"/students"}>Students</Link> : null}
+                {sessionKey !== "" && router.pathname !== "/reset" ? <Link href={"/projects"}>Projects</Link> : null}
+                {isAdmin && router.pathname !== "/reset" ? <Link href={"/users"}>Manage Users</Link> : null}
+                {router.pathname !== "/login" && router.pathname !== "/reset" ?
+                    <button onClick={logOut}>Log out</button> : router.pathname === "/reset" ?
+                        <button onClick={logIn}>Log in</button> : null
+                }
             </div>
         </header>
     )

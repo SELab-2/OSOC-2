@@ -11,6 +11,7 @@ import * as ormSK from '../orm_functions/session_key';
 import * as rq from '../request';
 import {Email, Responses} from '../types';
 import * as util from '../utility';
+import github from "../github.json"
 
 export async function sendMail(mail: Email) {
   const oauthclient = new gapi.Auth.OAuth2Client(
@@ -52,7 +53,7 @@ export async function sendMail(mail: Email) {
  * @param resetID
  */
 function createEmail(resetID: string) {
-    return '<p>' + resetID + '</p>'
+    return `<a>${github.frontend}/reset/${resetID}</a>`
 }
 
 
