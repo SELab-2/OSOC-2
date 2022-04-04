@@ -41,13 +41,13 @@ it('should create 1 new login user', async () => {
     }
 });
 
-it('should find all the login users in the db, 3 in total', async () => {
+it('should find all the login users in the db, 4 in total', async () => {
     const searched_login_users = await getAllLoginUsers();
-    expect(searched_login_users.length).toEqual(3);
-    expect(searched_login_users[2]).toHaveProperty("password", login_user.password);
-    expect(searched_login_users[2]).toHaveProperty("is_admin", login_user.isAdmin);
-    expect(searched_login_users[2]).toHaveProperty("is_coach", login_user.isCoach);
-    expect(searched_login_users[2]).toHaveProperty("account_status", login_user.accountStatus);
+    expect(searched_login_users.length).toEqual(4);
+    expect(searched_login_users[3]).toHaveProperty("password", login_user.password);
+    expect(searched_login_users[3]).toHaveProperty("is_admin", login_user.isAdmin);
+    expect(searched_login_users[3]).toHaveProperty("is_coach", login_user.isCoach);
+    expect(searched_login_users[3]).toHaveProperty("account_status", login_user.accountStatus);
 });
 
 it('should return the password, by searching for its person id', async () => {
@@ -68,8 +68,17 @@ it('should return the login user, by searching for its person id', async () => {
     expect(searched_login_user).toHaveProperty("account_status", login_user.accountStatus);
 });
 
-it('should find all the login users in the db that are admin, 3 in total', async () => {
+it('should find all the login users in the db that are admin, 4 in total', async () => {
     const searched_login_users = await searchAllAdminLoginUsers(true);
+    expect(searched_login_users.length).toEqual(4);
+    expect(searched_login_users[3]).toHaveProperty("password", login_user.password);
+    expect(searched_login_users[3]).toHaveProperty("is_admin", login_user.isAdmin);
+    expect(searched_login_users[3]).toHaveProperty("is_coach", login_user.isCoach);
+    expect(searched_login_users[3]).toHaveProperty("account_status", login_user.accountStatus);
+});
+
+it('should find all the login users in the db that are coach, 3 in total', async () => {
+    const searched_login_users = await searchAllCoachLoginUsers(true);
     expect(searched_login_users.length).toEqual(3);
     expect(searched_login_users[2]).toHaveProperty("password", login_user.password);
     expect(searched_login_users[2]).toHaveProperty("is_admin", login_user.isAdmin);
@@ -77,22 +86,13 @@ it('should find all the login users in the db that are admin, 3 in total', async
     expect(searched_login_users[2]).toHaveProperty("account_status", login_user.accountStatus);
 });
 
-it('should find all the login users in the db that are coach, 2 in total', async () => {
-    const searched_login_users = await searchAllCoachLoginUsers(true);
-    expect(searched_login_users.length).toEqual(2);
-    expect(searched_login_users[1]).toHaveProperty("password", login_user.password);
-    expect(searched_login_users[1]).toHaveProperty("is_admin", login_user.isAdmin);
-    expect(searched_login_users[1]).toHaveProperty("is_coach", login_user.isCoach);
-    expect(searched_login_users[1]).toHaveProperty("account_status", login_user.accountStatus);
-});
-
 it('should find all the login users in the db that are admin or coach, 3 in total', async () => {
     const searched_login_users = await searchAllAdminAndCoachLoginUsers(true);
-    expect(searched_login_users.length).toEqual(2);
-    expect(searched_login_users[1]).toHaveProperty("password", login_user.password);
-    expect(searched_login_users[1]).toHaveProperty("is_admin", login_user.isAdmin);
-    expect(searched_login_users[1]).toHaveProperty("is_coach", login_user.isCoach);
-    expect(searched_login_users[1]).toHaveProperty("account_status", login_user.accountStatus);
+    expect(searched_login_users.length).toEqual(3);
+    expect(searched_login_users[2]).toHaveProperty("password", login_user.password);
+    expect(searched_login_users[2]).toHaveProperty("is_admin", login_user.isAdmin);
+    expect(searched_login_users[2]).toHaveProperty("is_coach", login_user.isCoach);
+    expect(searched_login_users[2]).toHaveProperty("account_status", login_user.accountStatus);
 });
 
 it('should update login user based upon login user id', async () => {

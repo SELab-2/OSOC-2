@@ -45,15 +45,15 @@ it('should create 1 new person where email is null', async () => {
 
 it('should find all the persons in the db, 2 in total', async () => {
     const searched_persons = await getAllPersons();
-    expect(searched_persons[4]).toHaveProperty("github", null);
-    expect(searched_persons[4]).toHaveProperty("firstname", person4.firstname);
-    expect(searched_persons[4]).toHaveProperty("lastname", person4.lastname);
-    expect(searched_persons[4]).toHaveProperty("email", person4.email);
+    expect(searched_persons[5]).toHaveProperty("github", null);
+    expect(searched_persons[5]).toHaveProperty("firstname", person4.firstname);
+    expect(searched_persons[5]).toHaveProperty("lastname", person4.lastname);
+    expect(searched_persons[5]).toHaveProperty("email", person4.email);
 
-    expect(searched_persons[5]).toHaveProperty("github", person5.github);
-    expect(searched_persons[5]).toHaveProperty("firstname", person5.firstname);
-    expect(searched_persons[5]).toHaveProperty("lastname", person5.lastname);
-    expect(searched_persons[5]).toHaveProperty("email", null);
+    expect(searched_persons[6]).toHaveProperty("github", person5.github);
+    expect(searched_persons[6]).toHaveProperty("firstname", person5.firstname);
+    expect(searched_persons[6]).toHaveProperty("lastname", person5.lastname);
+    expect(searched_persons[6]).toHaveProperty("email", null);
 });
 
 // Can only be tested with a login user, should therefore be tested in the login user tests?

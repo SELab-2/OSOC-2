@@ -24,6 +24,11 @@ beforeAll(async () => {
                 email: 'studentmail@mail.com',
                 firstname: 'student',
                 lastname: 'student'
+            },
+            {
+                email: 'coachmail@mail.com',
+                firstname: 'coach',
+                lastname: 'testcoach'
             }
         ],
     });
@@ -45,6 +50,13 @@ beforeAll(async () => {
                 is_admin: true,
                 is_coach: false,
                 account_status: "PENDING"
+            },
+            {   
+                person_id: persons[4].person_id,
+                password: "Mypassword",
+                is_admin: true,
+                is_coach: true,
+                account_status: "ACTIVATED"
             },
         ],
     });
@@ -320,6 +332,7 @@ beforeAll(async () => {
         ],
     });
 
+    // create session keys
     await prisma.session_keys.createMany({
         data: [
             {
@@ -333,10 +346,22 @@ beforeAll(async () => {
         ]
 
     });
+
+    // create password reset
+    await prisma.password_reset.createMany({
+        data: [
+            {
+                login_user_id: login_users[2].login_user_id,
+                reset_id: "5444024611562312170969914212450321",
+                valid_until: new Date("2022-07-13")
+            }
+        ]
+
+    });
 });
 
 afterAll(async () => {
-
+    const deletePasswordReset = prisma.password_reset.deleteMany();
     const deleteJobApplicationSkillDetails = prisma.job_application_skill.deleteMany();
     const deleteLanguageDetails = prisma.language.deleteMany();
     const deleteAttachmentDetails = prisma.attachment.deleteMany();
@@ -355,6 +380,7 @@ afterAll(async () => {
     const deletePersonDetails = prisma.person.deleteMany();
     
     await prisma.$transaction([
+        deletePasswordReset,
         deleteJobApplicationSkillDetails,
         deleteLanguageDetails,
         deleteAttachmentDetails,
