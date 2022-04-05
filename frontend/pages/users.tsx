@@ -4,6 +4,7 @@ import React, {useContext, useEffect, useState} from "react";
 import SessionContext from "../contexts/sessionProvider";
 import {User} from "../components/User/User";
 import styles from "../styles/users.module.css"
+import {UserFilter} from "../components/UserFilter/UserFilter";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -45,6 +46,7 @@ const Users: NextPage = () => {
 
         let tempSes = "";
         getAllUsers("admin",sessionKey).then(response => {
+            console.log(response)
             tempSes = response.sessionkey
             test = [ ...test, ...response.data];
             test.forEach(userSet.add, userSet);
@@ -68,6 +70,7 @@ const Users: NextPage = () => {
 
     return (<>
         <Header/>
+        <UserFilter/>
         <div className={styles.body}>
             {users !== undefined ? users.map((value, index) => {
                 return <User userName={value.person_data.name} userEmail="mauricevanwassenhove@gmail.com TODO"
