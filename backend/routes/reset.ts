@@ -182,9 +182,9 @@ function createEmail(resetID: string) {
             <table style="width:100%;border-collapse:collapse;border:0;border-spacing:0;background:#ffffff;">
                 <tr style="box-shadow: 0 0 4px 6px rgba(0, 0, 0, 0.1);height: 50px;padding: 20px 15px;">
                     <td>
-                        <img src="../public/img/logo-osoc-color.png" alt="" width="70" height="" style="border:0;height:auto;display:block;"/>
+                        <img src="https://sel2-2.ugent.be/img/logo-osoc-color.png" alt="" width="70" height="" style="width: 70px; border:0;height:auto;display:block;"/>
+                        <p style="text-align: left;padding: 8px;font-weight: bold; font-size: 24px;font-family: 'Montserrat', sans-serif;color: #0A0839;">Selections</p>
                     </td>
-                    <td style="padding: 8px;font-weight: bold; font-size: 24px;font-family: 'Montserrat', sans-serif;color: #0A0839;">Selections</td>
                 </tr>
                 <tr>
                     <td style="padding: 8px;font-family: 'Montserrat', sans-serif;color: #0A0839;">You have requested a password reset for your OSOC Selections account. 
