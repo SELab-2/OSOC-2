@@ -57,7 +57,9 @@ CREATE TABLE IF NOT EXISTS login_user(
 CREATE TABLE IF NOT EXISTS session_keys(
    session_key_id     SERIAL         PRIMARY KEY,
    login_user_id      SERIAL         NOT NULL REFERENCES login_user(login_user_id),
-   session_key        VARCHAR(128)   NOT NULL UNIQUE
+   valid_until        DATE           NOT NULL,
+   session_key        VARCHAR(128)   NOT NULL UNIQUE,
+   CONSTRAINT valid_date CHECK (valid_until >= CURRENT_DATE)
  );
 
 CREATE TABLE IF NOT EXISTS password_reset(
