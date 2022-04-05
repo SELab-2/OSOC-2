@@ -7,11 +7,12 @@ import prisma from '../prisma/prisma';
  * @param key the new session key
  * @returns the new record in the database in a promise
  */
-export async function addSessionKey(loginUserId: number, key: string) {
+export async function addSessionKey(loginUserId: number, key: string, date: Date) {
     return await prisma.session_keys.create({
         data: {
             login_user_id: loginUserId,
-            session_key: key
+            session_key: key,
+            valid_until: date
         }
     });
 }
@@ -25,7 +26,8 @@ export async function addSessionKey(loginUserId: number, key: string) {
 export async function checkSessionKey(key: string) {
     return await prisma.session_keys.findUnique({
         where: {
-            session_key: key
+            session_key: key,
+            valid_until: { gte: new Date() }
         },
         select: {
             login_user_id: true
@@ -40,10 +42,11 @@ export async function checkSessionKey(key: string) {
  * @param newkey: the key that we use to replace the old key
  * @returns the updated record in a promise
  */
-export async function changeSessionKey(key: string, newkey: string) {
+export async function changeSessionKey(key: string, newkey: string, date: Date) {
     return await prisma.session_keys.update({
         where: {
-            session_key: key
+            session_key: key,
+            valid_until: date
         },
         data: {
             session_key: newkey

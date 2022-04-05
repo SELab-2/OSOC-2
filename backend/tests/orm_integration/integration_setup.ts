@@ -337,11 +337,13 @@ beforeAll(async () => {
         data: [
             {
                 login_user_id: login_users[0].login_user_id,
-                session_key: "key"
+                session_key: "key",
+                valid_until: new Date()
             },
             {
                 login_user_id: login_users[0].login_user_id,
-                session_key: "key2"
+                session_key: "key2",
+                valid_until: new Date()
             }
         ]
 

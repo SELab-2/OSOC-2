@@ -5,11 +5,13 @@ it("should create a new session key for the given login user", async () =>{
     const loginUsers = await prisma.login_user.findMany();
 
     const newKey = "newKey";
+    const date = new Date();
 
-    const created = await addSessionKey(loginUsers[0].login_user_id, newKey);
+    const created = await addSessionKey(loginUsers[0].login_user_id, newKey, date);
 
     expect(created).toHaveProperty("login_user_id", loginUsers[0].login_user_id);
     expect(created).toHaveProperty("session_key", newKey);
+    expect(created).toHaveProperty("valid_until", date);
 });
 
 it("should return the loginUser associated with the key", async () => {
@@ -33,9 +35,11 @@ it("should overwrite the old key with the new key", async () => {
     const existing_keys = await prisma.session_keys.findMany();
 
     const newkey = "newkey"
-    const updated = await changeSessionKey(existing_keys[0].session_key, newkey);
+    const newDate = new Date();
+    const updated = await changeSessionKey(existing_keys[0].session_key, newkey, newDate);
     expect(updated).toHaveProperty("login_user_id", existing_keys[0].login_user_id);
     expect(updated).toHaveProperty("session_key", newkey);
+    expect(updated).toHaveProperty("valid_until", newDate);
 
     const updated_keys = await prisma.session_keys.findMany({
         where: {
@@ -65,7 +69,8 @@ it("should delete all session keys of the user with given key", async () => {
     await prisma.session_keys.create({
         data : {
             login_user_id: login_users[1].login_user_id,
-            session_key: "key_user1"
+            session_key: "key_user1",
+            valid_until: new Date()
         }
     });
 
@@ -78,6 +83,3 @@ it("should delete all session keys of the user with given key", async () => {
 
     await removeAllKeysForUser("key_user1");
 });
-
-
-
