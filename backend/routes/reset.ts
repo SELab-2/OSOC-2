@@ -184,29 +184,29 @@ function createEmail(resetID: string) {
                     <td>
                         <img src="../public/img/logo-osoc-color.png" alt="" width="70" height="" style="border:0;height:auto;display:block;"/>
                     </td>
-                    <td style="padding: 12px;font-weight: bold; font-size: 24px;font-family: 'Montserrat', sans-serif;color: #0A0839;">Selections</td>
+                    <td style="padding: 8px;font-weight: bold; font-size: 24px;font-family: 'Montserrat', sans-serif;color: #0A0839;">Selections</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px;font-family: 'Montserrat', sans-serif;color: #0A0839;">You have requested a password reset for your OSOC Selections account. 
+                    <td style="padding: 8px;font-family: 'Montserrat', sans-serif;color: #0A0839;">You have requested a password reset for your OSOC Selections account. 
                         Please click the link below to reset your password.</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px;font-family: 'Montserrat', sans-serif;color: #0A0839;"><strong>Note:</strong> This link is only valid for 24 hours.</td>
+                    <td style="padding: 8px;font-family: 'Montserrat', sans-serif;color: #0A0839;"><strong>Note:</strong> This link is only valid for 24 hours.</td>
                 </tr>
                 <tr>
-                    <td> <a href=${github.frontend}/reset/${resetID} style="
+                    <td style="padding: 12px 8px;"> <a href=${github.frontend}/reset/${resetID} style="
                     font-family: 'Montserrat', sans-serif;
                     color: #0A0839;
                     border: none;
                     border-radius: 0;
+                    padding: 8px;
                     font-weight: bold;
-                    font-size: 12px;
-                    padding: 12px;
+                    font-size: 16px;
                     background-color: #1DE1AE;
                     text-decoration: none;">Reset Password</a> </td>
                 </tr>
                 <tr style="opacity: 50%;">
-                    <td style="padding: 12px;font-family: 'Montserrat', sans-serif;color: #0A0839;">If you believe that the password reset was not requested by you, please contact us as soon as possibe at <a
+                    <td style="padding: 12px 8px;font-family: 'Montserrat', sans-serif;color: #0A0839;">If you believe that the password reset was not requested by you, please contact us as soon as possibe at <a
                             href="mailto:osoc2.be@gmail.com">osoc2.be@gmail.com</a></td>
                 </tr>
             </table>

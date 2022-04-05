@@ -86,7 +86,7 @@ const Pid: NextPage = () => {
 
     return <>
         <Header/>
-        <div className={styles.body}>
+        <div style={{width: "clamp(18rem, 80vw, 30rem)", marginInline: "auto"}}>
             <h2>Reset Password</h2>
             <form className={styles.form}>
                 <label className={styles.label}>

@@ -58,6 +58,10 @@
     background-color: var(--neutral-200);
 }
 
+.links button {
+    margin-left: auto;
+}
+
 .displayNone {
     display: none !important;
 }
