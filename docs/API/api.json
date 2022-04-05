@@ -629,26 +629,25 @@
             "in": "header",
             "name": "name",
             "description": "The name of the project.",
-            "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "coach",
+            "name": "isCoach",
             "description": "Shows the user is a coach.",
             "required": true,
             "type": "number"
           },
           {
             "in": "header",
-            "name": "admin",
+            "name": "isAdmin",
             "description": "Shows if the user is a coach.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "status",
+            "name": "accountStatus",
             "description": "Shows the status of the account.",
             "required": true,
             "type": "string"
@@ -764,27 +763,26 @@
             "in": "header",
             "name": "name",
             "description": "The name of the project.",
-            "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "coach",
+            "name": "isCoach",
             "description": "Shows the user is a coach.",
             "required": true,
             "type": "number"
           },
           {
             "in": "header",
-            "name": "admin",
+            "name": "isAdmin",
             "description": "Shows if the user is a coach.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "activated",
-            "description": "Shows if the account is activated",
+            "name": "accountStatus",
+            "description": "Shows the status of the account",
             "required": true,
             "type": "string"
           }
