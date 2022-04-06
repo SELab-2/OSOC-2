@@ -1,3 +1,5 @@
+@import '~bulma/bulma.sass';
+
 /**
  * Global variables, use with var(--variable)
  */
@@ -20,12 +22,17 @@ html,
 body {
   padding: 0;
   margin: 0;
+  width: 100vw;
   font-family: Montserrat, sans-serif;
 }
 
 * {
   box-sizing: border-box;
   color: var(--primary-100);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
 }
 
 h2 {
@@ -61,6 +68,7 @@ button:hover {
 a {
   text-decoration: none;
   font-weight: bold;
+  color: var(--primary-100);
 }
 
 a:hover {
