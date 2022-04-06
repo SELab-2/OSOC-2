@@ -17,6 +17,7 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
         .then(parsed => util.checkSessionKey(parsed))
         .then(
             async parsed =>
+            // todo andere functie gebruiken
                 ormL.searchAllCoachLoginUsers(true)
                     .then(obj => obj.map(val => ({
                         person_data : {
