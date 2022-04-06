@@ -12,13 +12,19 @@ import {UserFilter} from "../components/UserFilter/UserFilter";
  */
 const Users: NextPage = () => {
 
-    const {sessionKey, setSessionKey} = useContext(SessionContext)
+    const {getSessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
     const userSet = new Set<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>()
     let test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
 
     // Load all users upon page load
     useEffect(() => {
+        const getTempSession = () => {
+            if (getSessionKey) {
+                return getSessionKey()
+            }
+            return ""
+        }
         // boilerplate for the admin/coaches route (pass admin/coach as string)
         const getAllUsers = async (route: string, sessionkey: string) => {
             console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all")
@@ -44,22 +50,19 @@ const Users: NextPage = () => {
                 })
         }
 
-        let tempSes = "";
-        console.log(sessionKey)
-        getAllUsers("admin", sessionKey).then(response => {
-            console.log(response)
+        let tempSes = getTempSession()
+
+        getAllUsers("admin", tempSes).then(response => {
             tempSes = response.sessionkey
             test = [...test, ...response.data];
             test.forEach(userSet.add, userSet);
         }).then(() => {
             getAllUsers("coach", tempSes).then(response => {
-                console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
                 }
                 test.concat(response.data);
                 test.forEach(userSet.add, userSet);
-                console.log(userSet)
             }).then(() => setUsers(Array.from(userSet)));
         })
 
