@@ -20,7 +20,7 @@ const Users: NextPage = () => {
     // Load all users upon page load
     useEffect(() => {
         // boilerplate for the admin/coaches route (pass admin/coach as string)
-        const getAllUsers = async (route: string,sessionkey:string) => {
+        const getAllUsers = async (route: string, sessionkey: string) => {
             console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all")
             return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
                 method: 'GET',
@@ -45,13 +45,14 @@ const Users: NextPage = () => {
         }
 
         let tempSes = "";
-        getAllUsers("admin",sessionKey).then(response => {
+        console.log(sessionKey)
+        getAllUsers("admin", sessionKey).then(response => {
             console.log(response)
             tempSes = response.sessionkey
-            test = [ ...test, ...response.data];
+            test = [...test, ...response.data];
             test.forEach(userSet.add, userSet);
         }).then(() => {
-            getAllUsers("coach",tempSes).then(response => {
+            getAllUsers("coach", tempSes).then(response => {
                 console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
