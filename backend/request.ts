@@ -279,14 +279,16 @@ export async function parseRequestCoachRequest(req: express.Request):
  */
 export async function parseNewProjectRequest(req: express.Request):
     Promise<Requests.Project> {
-  return hasFields(req, [ "name", "partner", "start", "end", "positions", "osocId" ], types.key)
+  return hasFields(req,
+                   [ "name", "partner", "start", "end", "positions", "osocId" ],
+                   types.key)
       .then(() => Promise.resolve({
         sessionkey : req.body.sessionkey,
         name : req.body.name,
         partner : req.body.partner,
         start : req.body.start,
         end : req.body.end,
-        osocId: req.body.osocId,
+        osocId : req.body.osocId,
         positions : req.body.positions
       }));
 }
@@ -447,11 +449,19 @@ export async function parseResetPasswordRequest(req: express.Request):
  */
 export async function parseStudentRoleRequest(req: express.Request):
     Promise<Requests.Role> {
-  return hasFields(req, [ "name" ], types.neither)
-      .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
-        name : req.body.name
-      }));
+  return hasFields(req, [ "name" ], types.neither).then(() => Promise.resolve({
+    sessionkey : req.body.sessionkey,
+    name : req.body.name
+  }));
+}
+
+export async function parseRemoveDraftStudentRequest(req: express.Request):
+    Promise<Requests.RmDraftStudent> {
+  return hasFields(req, [ "student" ], types.id).then(() => Promise.resolve({
+    sessionkey : getSessionKey(req),
+    studentId : req.body.student,
+    id : Number(req.params.id)
+  }));
 }
 
 /**

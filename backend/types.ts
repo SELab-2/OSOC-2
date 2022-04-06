@@ -391,11 +391,11 @@ export interface ProjectDraftedStudents extends
 export interface ModProjectStudent extends
     Keyed<InternalTypes.ModProjectStudent> {}
 
-  /**
-   *  A studentList response is the keyed version of a list of students and their
-   * associated data.
-   */
-  export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+/**
+ *  A studentList response is the keyed version of a list of students and their
+ * associated data.
+ */
+export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -415,7 +415,7 @@ export interface FormResponse<T> {
   /**
    *  The data.
    */
-  data: T | null;
+  data: T|null;
 }
 }
 
@@ -529,7 +529,6 @@ export interface Role extends KeyRequest {
   name: string
 }
 
-
 export interface DataForm {
   fields: Array<Question>
 }
@@ -553,6 +552,10 @@ export interface ResetCheckCode {
 export interface ResetPassword {
   code: string;
   password: string;
+}
+
+export interface RmDraftStudent extends IdRequest {
+  studentId: number;
 }
 }
 
