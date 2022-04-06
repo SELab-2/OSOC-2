@@ -485,6 +485,11 @@ export const parseGetAllCoachRequestsRequest = parseKeyRequest;
  */
 export const parseAdminAllRequest = parseKeyRequest;
 /**
+ *  A request to `GET /user/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseUserAllRequest = parseKeyRequest;
+/**
  *  A request to `GET /project/all` only requires a session key
  * {@link parseKeyRequest}.
  */
