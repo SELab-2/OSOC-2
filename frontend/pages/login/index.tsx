@@ -1,5 +1,5 @@
 import type {NextPage} from 'next'
-import styles from '../../styles/login.module.css'
+import styles from '../../styles/login.module.scss'
 import Image from "next/image"
 import GitHubLogo from "../../public/images/github-logo.svg"
 import {SyntheticEvent, useContext, useEffect, useState} from "react";
@@ -13,18 +13,23 @@ import SessionContext from "../../contexts/sessionProvider";
 const Index: NextPage = () => {
 
     const router = useRouter()
+    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
-        const { loginError } = router.query
+        // The user is already logged in, redirect the user
+        if (sessionKey != "") {
+            router.push("/students").then()
+            return
+        }
+
+        const {loginError} = router.query
         if (loginError != undefined) {
             if (typeof loginError === 'string') {
                 setLoginBackendError(loginError)
             }
         }
-    }, [router.query])
-
-    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
+    }, [router, router.query, sessionKey])
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
@@ -112,7 +117,7 @@ const Index: NextPage = () => {
                 if (setIsCoach) {
                     setIsCoach(response.is_coach)
                 }
-                router.push("/").then()
+                router.push("/students").then()
             }
         }
     }
@@ -211,7 +216,6 @@ const Index: NextPage = () => {
     const githubLogin = async (e: SyntheticEvent) => {
         e.preventDefault();
         window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/github`
-        // TODO -- How are we supposed to send the data to the backend?
     }
 
     /**
@@ -219,7 +223,7 @@ const Index: NextPage = () => {
      *
      * @param e - The event triggering this function call
      */
-    const resetPassword = (e: SyntheticEvent) => {
+    const resetPassword = async (e: SyntheticEvent) => {
         e.preventDefault()
 
         let error = false
@@ -233,8 +237,23 @@ const Index: NextPage = () => {
 
         // Field is not empty
         if (!error) {
-            console.log("RESETTING PASSWORD")
-            setShowPasswordReset(false)
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reset`, {
+                method: 'POST',
+                body: JSON.stringify({email: passwordResetMail}),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            }).catch()
+            console.log(response)
+            if (response !== undefined) {
+                if (response.ok) {
+                    setShowPasswordReset(false)
+                    // TODO -- Notification
+                } else {
+                    setPasswordResetMailError(response.statusText)
+                }
+            }
         }
 
     }
@@ -254,15 +273,14 @@ const Index: NextPage = () => {
     return (
         <div>
             <Header/>
-            <p>{sessionKey}</p>
             <div className={styles.body}>
                 <h3>Welcome to OSOC Selections!</h3>
                 <h3 className="subtext">Please login, or register to proceed</h3>
                 <div className={styles.formContainer}>
                     <div className={styles.loginContainer}>
                         <h2>Login</h2>
-                        <form className={styles.form} onSubmit={e => {
-                            submitLogin(e)
+                        <form className={styles.form} onSubmit={async e => {
+                            await submitLogin(e)
                         }}>
                             <label className={styles.label}>
                                 Email
@@ -277,11 +295,11 @@ const Index: NextPage = () => {
                             </label>
                             <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
                             <a className={styles.resetPassword} onClick={showModal}>Forgot password?</a>
-                            <Modal handleClose={closeModal} visible={showPasswordReset}>
-                                <p>Please enter your email below and we will send you a link to reset your password.</p>
+                            <Modal handleClose={closeModal} visible={showPasswordReset}
+                                   title="Please enter your email below and we will send you a link to reset your password.">
                                 <label className={styles.label}>
                                     <input type="text" name="loginEmail"
-                                           value={passwordResetMail === "" ? loginEmail : passwordResetMail}
+                                           value={passwordResetMail}
                                            onChange={e => setPasswordResetMail(e.target.value)}/>
                                 </label>
                                 <p className={`${styles.textFieldError} ${passwordResetMailError !== "" ? styles.anim : ""}`}>{passwordResetMailError}</p>
@@ -309,8 +327,8 @@ const Index: NextPage = () => {
 
                     <div className={styles.registerContainer}>
                         <h2>Register</h2>
-                        <form className={styles.form} onSubmit={e => {
-                            submitRegister(e)
+                        <form className={styles.form} onSubmit={async e => {
+                            await submitRegister(e)
                         }}>
                             <label className={styles.label}>
                                 First Name

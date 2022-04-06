@@ -51,37 +51,44 @@ it("should return all osoc editions after 2022", async () => {
 });
 
 it("should update the selected osoc", async () => {
-   const osoc = await getOsocByYear(2024);
+    const osoc = await getOsocByYear(2024);
 
-   const updatedOsoc = await updateOsoc({osocId: osoc!.osoc_id, year: 2025});
-   expect(updatedOsoc).toHaveProperty("year", 2025);
+    if (osoc){
+        const updatedOsoc = await updateOsoc({osocId: osoc.osoc_id, year: 2025});
+    expect(updatedOsoc).toHaveProperty("year", 2025);
 
-   const osocUpdatedFound = await prisma.osoc.findUnique({
-       where: {
-           osoc_id: osoc!.osoc_id
-       }
-   });
-   expect(osocUpdatedFound).toHaveProperty("year", 2025);
+    const osocUpdatedFound = await prisma.osoc.findUnique({
+        where: {
+            osoc_id: osoc.osoc_id
+        }
+    });
+    expect(osocUpdatedFound).toHaveProperty("year", 2025);
+    }
 });
 
 it("should delete the osoc", async () => {
     const osoc = await getOsocByYear(2025);
 
-    const removedOsoc = await deleteOsoc(osoc!.osoc_id);
-    expect(removedOsoc).toHaveProperty("year", osoc!.year);
-    expect(removedOsoc).toHaveProperty("osoc_id", osoc!.osoc_id);
+    if (osoc){
+        const removedOsoc = await deleteOsoc(osoc.osoc_id);
+        expect(removedOsoc).toHaveProperty("year", osoc.year);
+        expect(removedOsoc).toHaveProperty("osoc_id", osoc.osoc_id);
 
-    const searchDeleted = await getOsocByYear(osoc!.year);
-    expect(searchDeleted).toBeNull();
+        const searchDeleted = await getOsocByYear(osoc.year);
+        expect(searchDeleted).toBeNull();
+    }
 });
 
 it("should delete the osoc by year", async () => {
     const year = 2024;
     const osoc = await createOsoc(year);
-    const removedOsoc = await deleteOsocByYear(year);
-    expect(removedOsoc).toHaveProperty("osoc_id", osoc!.osoc_id);
-    expect(removedOsoc).toHaveProperty("year", osoc!.year);
+
+    if (osoc){
+        const removedOsoc = await deleteOsocByYear(year);
+    expect(removedOsoc).toHaveProperty("osoc_id", osoc.osoc_id);
+    expect(removedOsoc).toHaveProperty("year", osoc.year);
 
     const searchDeleted = await getOsocByYear(year);
     expect(searchDeleted).toBeNull();
+    }
 });

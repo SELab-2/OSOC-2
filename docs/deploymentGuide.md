@@ -57,7 +57,7 @@ To enable GitHub login, we need a GitHub application. These are made by going to
 
 ![Default settings](./gh-oauth-new-app.png)
 
-You can change the `Application name` to anything you'd like. Be sure to confirm that the `Homepage URL` is correct for your server. The `Application description` can be anything you like. The `Authorization callback URL` should be the `Homepage URL` with `/api-osoc/github/` behind it.
+You can change the `Application name` to anything you'd like. Be sure to confirm that the `Homepage URL` is correct for your server. The `Application description` can be anything you like. The `Authorization callback URL` should be the `Homepage URL`.
 
 #### Configuration part
 In the `/backend/` folder, edit the `github.json` configuration file. There are three fields used, and most can be copied straight from the GitHub application you just created:

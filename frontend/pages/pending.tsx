@@ -1,6 +1,6 @@
 import {NextPage} from "next";
 import {Header} from "../components/Header/Header";
-import styles from "../styles/pending.module.css"
+import styles from "../styles/pending.module.scss"
 
 /**
  * Will be shown to every user that is not yet accepted by an admin
