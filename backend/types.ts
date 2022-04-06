@@ -158,6 +158,11 @@ export interface Person {
 export interface Student {}
 
 /**
+ *  Represents a user, with all associated data.
+ */
+export interface User {}
+
+/**
  *  Represents a coach, with all associated data.
  */
 export interface Coach {
@@ -300,6 +305,11 @@ export interface Student extends Keyed<InternalTypes.Student> {}
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
+ *
+ */
+export interface UserList extends Keyed<InternalTypes.User[]> {}
+
+/**
  *  A student list response is the keyed version of an array of partial
  * students.
  */
@@ -380,6 +390,12 @@ export interface ProjectDraftedStudents extends
  */
 export interface ModProjectStudent extends
     Keyed<InternalTypes.ModProjectStudent> {}
+
+  /**
+   *  A studentList response is the keyed version of a list of students and their
+   * associated data.
+   */
+  export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
