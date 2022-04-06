@@ -17,8 +17,14 @@ export async function sendMail(mail: Email) {
     const oauthclient = new gapi.Auth.OAuth2Client(
         google['google-client-id'], google['google-client-secret']);
     oauthclient.setCredentials({refresh_token: google['google-refresh-token']});
-    const accesstoken =
-        await oauthclient.getAccessToken().then(token => token.token!);
+    const accesstoken = await oauthclient.getAccessToken().then(token => {
+        if (token != null && token.token != null) {
+            return token.token
+        } else {
+            return Promise.reject(new Error("Received token from Google OAuth was null"));
+        }
+    }).catch(e => console.log('Email error:' + JSON.stringify(e)));
+
     const transp = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -27,7 +33,7 @@ export async function sendMail(mail: Email) {
             clientId: google['google-client-id'],
             clientSecret: google['google-client-secret'],
             refreshToken: google['google-refresh-token'],
-            accessToken: accesstoken
+            accessToken: accesstoken as string
         }
     });
 
