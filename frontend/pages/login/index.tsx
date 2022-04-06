@@ -13,10 +13,14 @@ import SessionContext from "../../contexts/sessionProvider";
 const Index: NextPage = () => {
 
     const router = useRouter()
-    const {sessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
+    const {getSessionKey, setSessionKey, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
+        let sessionKey = ""
+        if (getSessionKey) {
+            sessionKey = getSessionKey()
+        }
         // The user is already logged in, redirect the user
         if (sessionKey != "") {
             router.push("/students").then()
@@ -29,7 +33,7 @@ const Index: NextPage = () => {
                 setLoginBackendError(loginError)
             }
         }
-    }, [router, router.query, sessionKey])
+    }, [getSessionKey, router, router.query])
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
