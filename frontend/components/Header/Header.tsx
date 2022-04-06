@@ -46,7 +46,7 @@ export const Header: React.FC = () => {
             <div className={`${styles.links} ${router.pathname !== "/login" ? "" : styles.displayNone}`}>
                 {sessionKey !== "" && !router.pathname.startsWith("/reset") ? <Link href={"/students"}>Students</Link> : null}
                 {sessionKey !== "" && !router.pathname.startsWith("/reset") ? <Link href={"/projects"}>Projects</Link> : null}
-                {isAdmin && router.pathname !== "/reset" ? <Link href={"/users"}>Manage Users</Link> : null}
+                {sessionKey !== "" && isAdmin && !router.pathname.startsWith("/reset") ? <Link href={"/users"}>Manage Users</Link> : null}
                 {router.pathname !== "/login" && !router.pathname.startsWith("/reset") ?
                     <button onClick={logOut}>Log out</button> : router.pathname.startsWith("/reset") ?
                         <button onClick={logIn}>Log in</button> : null
