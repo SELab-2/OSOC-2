@@ -90,7 +90,6 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
                                       firstname : student.person.firstname,
                                       lastname : student.person.lastname,
                                       email : student.person.email,
-                                      // gender : student.gender,
                                       pronouns : student.pronouns,
                                       phoneNumber : student.phone_number,
                                       nickname : student.nickname,

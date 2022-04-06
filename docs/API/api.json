@@ -905,37 +905,45 @@
     "AllStudents": {
       "type": "object",
       "properties": {
-        "firstname": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "gender": {
-          "type": "string"
-        },
-        "pronouns": {
-          "type": "array",
-          "items": {
-            "type": "string"
+        "student": {
+          "type": "object",
+          "properties": {
+            "person": {
+              "$ref": "#/definitions/Person"
+            },
+            "student_id": {
+              "type": "number"
+            },
+            "gender": {
+              "type": "string"
+            },
+            "pronouns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "phone_number": {
+              "type": "string"
+            },
+            "nickname": {
+              "type": "string"
+            },
+            "alumni": {
+              "type": "boolean"
+            }
           }
-        },
-        "phoneNumber": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "alumni": {
-          "type": "boolean"
         },
         "languages": {
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AllStudentEvaluations"
           }
         },
         "jobApplication": {
@@ -1026,6 +1034,71 @@
       },
       "xml": {
         "name": "AllStudents"
+      }
+    },
+    "AllStudentEvaluations": {
+      "type": "object",
+      "properties": {
+        "evaluation": {
+          "items": {
+            "$ref": "#/definitions/Evaluation"
+          }
+        },
+        "osoc": {
+          "items": {
+            "$ref": "#/definitions/Osoc"
+          }
+        }
+      }
+    },
+    "Evaluation": {
+      "type": "object",
+      "properties": {
+        "evaluation_id": {
+          "type": "number"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "YES",
+            "MAYBE",
+            "NO"
+          ]
+        },
+        "motivation": {
+          "type": "string"
+        },
+        "is_final": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Osoc": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "number"
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "number"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "github": {
+          "type": "string"
+        }
       }
     },
     "Attachment": {
