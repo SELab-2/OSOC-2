@@ -228,7 +228,7 @@
           },
           {
             "in": "header",
-            "name": "motivation",
+            "name": "reason",
             "description": "The motivation for the suggestion.",
             "type": "string"
           },
@@ -1357,8 +1357,20 @@
         "data": {
           "type": "object",
           "properties": {
-            "id": {
+            "pronouns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "phone_number": {
               "type": "string"
+            },
+            "nickname": {
+              "type": "string"
+            },
+            "alumni": {
+              "type": "boolean"
             }
           }
         },
