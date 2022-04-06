@@ -52,8 +52,8 @@ export const UserFilter: React.FC = () => {
         e.preventDefault();
         const nameText = (document.getElementById("nameText") as HTMLInputElement).value;
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
-        const query = "name=" + nameText + "&email=" + emailText + "&admin=" + adminFilter +
-            "&coach=" + coachFilter + "&pending=" + pendingFilter
+        const query = "name=" + nameText + "&sort=" + nameSort + "&email=" + emailText + "&sort=" + nameSort
+            + "&admin=" + adminFilter + "&coach=" + coachFilter + "&pending=" + pendingFilter
         console.log(query)
         //TODO hier moet de call naar de backend gebeuren en dan de data naar user brengen
     }
