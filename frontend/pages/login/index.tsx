@@ -229,10 +229,6 @@ const Index: NextPage = () => {
         let error = false
 
         if (passwordResetMail === "") {
-            setPasswordResetMail(loginEmail)
-        }
-
-        if (passwordResetMail === "") {
             setPasswordResetMailError("Email cannot be empty")
             error = true
         } else {
@@ -289,7 +285,10 @@ const Index: NextPage = () => {
                             <label className={styles.label}>
                                 Email
                                 <input type="text" name="loginEmail" value={loginEmail}
-                                       onChange={e => setLoginEmail(e.target.value)}/>
+                                       onChange={e => {
+                                           setLoginEmail(e.target.value)
+                                           setPasswordResetMail(e.target.value)
+                                       }}/>
                             </label>
                             <p className={`${styles.textFieldError} ${loginEmailError !== "" ? styles.anim : ""}`}>{loginEmailError}</p>
                             <label className={styles.label}>
