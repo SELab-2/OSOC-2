@@ -160,8 +160,6 @@ const Index: NextPage = () => {
             setRegisterLastNameError("")
         }
 
-        console.log(registerPassword)
-        console.log(isStrongPassword(registerPassword))
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
