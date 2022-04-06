@@ -48,6 +48,16 @@ export const UserFilter: React.FC = () => {
         setPendingFilter(bool => !bool);
     }
 
+    const search = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        const nameText = (document.getElementById("nameText") as HTMLInputElement).value;
+        const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
+        const query = "name=" + nameText + "&email=" + emailText + "&admin=" + adminFilter +
+            "&coach=" + coachFilter + "&pending=" + pendingFilter
+        console.log(query)
+        //TODO hier moet de call naar de backend gebeuren en dan de data naar user brengen
+    }
+
     return (
         <div className={styles.filter}>
             <text>Names
@@ -57,14 +67,14 @@ export const UserFilter: React.FC = () => {
 
                        onClick={toggleNameSort}/>
             </text>
-            <input type="text" placeholder="Will smith"/>
+            <input id="nameText" type="text" placeholder="Will smith"/>
             <text>Email
                 <Image className={styles.buttonImage}
                        src={emailSort ? ArrowUp : ArrowDown}
                        width={15} height={15} alt={"Disabled"}
                        onClick={toggleEmailSort}/>
             </text>
-            <input type="text" placeholder="Search.."/>
+            <input id="emailText" type="text" placeholder="Search.."/>
             <text>Account Status</text>
 
             <div className={styles.dropdown}>
@@ -86,6 +96,9 @@ export const UserFilter: React.FC = () => {
                            width={30} height={30} alt={"Disabled"}
                            onClick={togglePendingFilter}/>
                 </div>
+                <button onClick={search}>
+                    search
+                </button>
             </div>
 
         </div>)
