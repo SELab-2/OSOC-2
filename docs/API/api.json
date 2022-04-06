@@ -1211,29 +1211,126 @@
     "Student_Id_data": {
       "type": "object",
       "properties": {
-        "id": {
+        "firstname": {
           "type": "string"
         },
-        "name": {
+        "lastname": {
           "type": "string"
         },
         "email": {
           "type": "string"
         },
-        "gender": {
-          "type": "string"
-        },
-        "labels": {
+        "pronouns": {
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "motivation": {
+        "phoneNumber": {
           "type": "string"
         },
-        "project": {
-          "$ref": "#/definitions/Student_Id_project"
+        "nickname": {
+          "type": "string"
+        },
+        "alumni": {
+          "type": "boolean"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evaluations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AllStudentEvaluations"
+          }
+        },
+        "jobApplication": {
+          "type": "object",
+          "properties": {
+            "job_application_id": {
+              "type": "number"
+            },
+            "edus": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "default": "Informatics"
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "example": "2022-03-14 23:10:00+01"
+            },
+            "edu_duration": {
+              "type": "number",
+              "default": 5
+            },
+            "edu_institute": {
+              "type": "string",
+              "default": "Ghent university"
+            },
+            "edu_level": {
+              "type": "string",
+              "default": "Third bachelors degree"
+            },
+            "edu_year": {
+              "type": "number",
+              "default": 3
+            },
+            "email_status": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "SENT",
+                "FAILED",
+                "NONE",
+                "DRAFT"
+              ],
+              "default": "NONE"
+            },
+            "fun_fact": {
+              "type": "string",
+              "default": "I like basketball."
+            },
+            "osoc_id": {
+              "type": "number"
+            },
+            "responsibilities": {
+              "type": "string",
+              "default": "I play basketball from 5pm until 7pm."
+            },
+            "student_coach": {
+              "type": "boolean"
+            },
+            "student_id": {
+              "type": "number"
+            },
+            "student_volunteer_info": {
+              "type": "string",
+              "default": "Yes, I can work with a student employment agreement in Belgium."
+            },
+            "attachment": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attachment"
+              }
+            },
+            "job_application_skill": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/JobApplicationSkill"
+              }
+            },
+            "applied_role": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AppliedRole"
+              }
+            }
+          }
         }
       },
       "xml": {
