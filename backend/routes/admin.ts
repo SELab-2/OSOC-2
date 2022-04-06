@@ -18,7 +18,7 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
         .then(
             async parsed =>
             // todo andere functie gebruiken
-                ormL.searchAllCoachLoginUsers(true)
+                ormL.searchAllAdminLoginUsers(true)
                     .then(obj => obj.map(val => ({
                         person_data : {
                             id : val.person.person_id,
@@ -58,7 +58,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                 .then(res => Promise.resolve({
                     sessionkey : parsed.data.sessionkey,
                     data : {
-                        id : res.person_id,
+                        id: res.login_user_id,
                         name : res.person.firstname + " " + res.person.lastname
                     }
                 }));
