@@ -450,7 +450,7 @@ export async function parseResetPasswordRequest(req: express.Request):
 export async function parseStudentRoleRequest(req: express.Request):
     Promise<Requests.Role> {
   return hasFields(req, [ "name" ], types.neither).then(() => Promise.resolve({
-    sessionkey : req.body.sessionkey,
+    sessionkey : getSessionKey(req),
     name : req.body.name
   }));
 }
