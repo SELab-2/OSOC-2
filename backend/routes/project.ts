@@ -1,9 +1,9 @@
 import express from 'express';
 
+import * as ormPr from '../orm_functions/project';
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
-import * as ormPr from '../orm_functions/project';
 import {errors} from "../utility";
 
 /**
@@ -12,30 +12,32 @@ import {errors} from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createProject(req: express.Request):
-    Promise<Responses.Project> {
-    return rq.parseNewProjectRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(async parsed => {
-            return ormPr.createProject({
-                name: parsed.data.name,
-                partner: parsed.data.partner,
-                startDate: parsed.data.start,
-                endDate: parsed.data.end,
-                positions: parsed.data.positions,
-                osocId: parsed.data.osocId
+async function createProject(req: express.Request): Promise<Responses.Project> {
+  return rq.parseNewProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(async parsed => {
+        return ormPr
+            .createProject({
+              name : parsed.data.name,
+              partner : parsed.data.partner,
+              startDate : parsed.data.start,
+              endDate : parsed.data.end,
+              positions : parsed.data.positions,
+              osocId : parsed.data.osocId
             })
-                .then(project => Promise.resolve({sessionkey : parsed.data.sessionkey,
-                    data: {
-                        id: project.project_id,
-                        name: project.name,
-                        partner: project.partner,
-                        start_date: project.start_date.toString(),
-                        end_date: project.end_date.toString(),
-                        positions: project.positions,
-                        osoc_id: project.osoc_id
-                    }}));
-        });
+            .then(project => Promise.resolve({
+              sessionkey : parsed.data.sessionkey,
+              data : {
+                id : project.project_id,
+                name : project.name,
+                partner : project.partner,
+                start_date : project.start_date.toString(),
+                end_date : project.end_date.toString(),
+                positions : project.positions,
+                osoc_id : project.osoc_id
+              }
+            }));
+      });
 }
 
 /**
@@ -44,22 +46,25 @@ async function createProject(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listProjects(req: express.Request): Promise<Responses.ProjectList> {
-    return rq.parseProjectAllRequest(req)
+async function listProjects(req: express.Request):
+    Promise<Responses.ProjectList> {
+  return rq.parseProjectAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(async parsed =>
-          ormPr.getAllProjects()
-              .then(obj =>
-                        obj.map(val => ({
-                            id: Number(val.project_id),
-                            name: val.name,
-                            partner: val.partner,
-                            start_date: val.start_date.toString(),
-                            end_date: val.end_date.toString(),
-                            positions: val.positions,
-                            osoc_id: val.osoc_id
-                        })))
-              .then(obj => Promise.resolve({sessionkey:parsed.data.sessionkey, data: obj})));
+      .then(
+          async parsed =>
+              ormPr.getAllProjects()
+                  .then(obj => obj.map(val => ({
+                                         id : Number(val.project_id),
+                                         name : val.name,
+                                         partner : val.partner,
+                                         start_date : val.start_date.toString(),
+                                         end_date : val.end_date.toString(),
+                                         positions : val.positions,
+                                         osoc_id : val.osoc_id
+                                       })))
+                  .then(
+                      obj => Promise.resolve(
+                          {sessionkey : parsed.data.sessionkey, data : obj})));
 }
 
 /**
@@ -71,52 +76,54 @@ async function listProjects(req: express.Request): Promise<Responses.ProjectList
 async function getProject(req: express.Request): Promise<Responses.Project> {
   return rq.parseSingleProjectRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(async parsed =>
-          ormPr.getProjectById(parsed.data.id)
-              .then(obj => {
-                  if (obj !== null) {
-                      return Promise.resolve({
-                          sessionkey: parsed.data.sessionkey, data: {
-                              id: Number(obj.project_id),
-                              name: obj.name,
-                              partner: obj.partner,
-                              start_date: obj.start_date.toString(),
-                              end_date: obj.end_date.toString(),
-                              positions: obj.positions,
-                              osoc_id: obj.osoc_id
-                          }
-                      });
-                  } else {
-                      return Promise.reject(errors.cookInvalidID());
-                  }
-              })
-      );
+      .then(async parsed => ormPr.getProjectById(parsed.data.id).then(obj => {
+        if (obj !== null) {
+          return Promise.resolve({
+            sessionkey : parsed.data.sessionkey,
+            data : {
+              id : Number(obj.project_id),
+              name : obj.name,
+              partner : obj.partner,
+              start_date : obj.start_date.toString(),
+              end_date : obj.end_date.toString(),
+              positions : obj.positions,
+              osoc_id : obj.osoc_id
+            }
+          });
+        } else {
+          return Promise.reject(errors.cookInvalidID());
+        }
+      }));
 }
 
-async function modProject(req: express.Request):
-    Promise<Responses.Project> {
-    return rq.parseUpdateProjectRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(async parsed => {
+async function modProject(req: express.Request): Promise<Responses.Project> {
+  return rq.parseUpdateProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(async parsed => {
         // UPDATING LOGIC
-            return ormPr.updateProject({
-                projectId: parsed.data.id,
-                name: parsed.data.name,
-                partner: parsed.data.partner,
-                startDate: parsed.data.start,
-                endDate: parsed.data.end,
-                positions: parsed.data.positions,
-                osocId: parsed.data.osocId
-            }).then(project => Promise.resolve({sessionkey : parsed.data.sessionkey, data : {
-                    id: project.project_id,
-                    name: project.name,
-                    partner: project.partner,
-                    start_date: project.start_date.toString(),
-                    end_date: project.end_date.toString(),
-                    positions: project.positions,
-                    osoc_id: project.osoc_id
-            }}));
-        });
+        return ormPr
+            .updateProject({
+              projectId : parsed.data.id,
+              name : parsed.data.name,
+              partner : parsed.data.partner,
+              startDate : parsed.data.start,
+              endDate : parsed.data.end,
+              positions : parsed.data.positions,
+              osocId : parsed.data.osocId
+            })
+            .then(project => Promise.resolve({
+              sessionkey : parsed.data.sessionkey,
+              data : {
+                id : project.project_id,
+                name : project.name,
+                partner : project.partner,
+                start_date : project.start_date.toString(),
+                end_date : project.end_date.toString(),
+                positions : project.positions,
+                osoc_id : project.osoc_id
+              }
+            }));
+      });
 }
 
 /**
@@ -126,12 +133,13 @@ async function modProject(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function deleteProject(req: express.Request): Promise<Responses.Key> {
-    return rq.parseDeleteProjectRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(parsed => {
-            return ormPr.deleteProject(parsed.data.id)
-                .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}));
-        });
+  return rq.parseDeleteProjectRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(parsed => {
+        return ormPr.deleteProject(parsed.data.id).then(() => Promise.resolve({
+          sessionkey : parsed.data.sessionkey
+        }));
+      });
 }
 
 /**
@@ -143,15 +151,15 @@ async function deleteProject(req: express.Request): Promise<Responses.Key> {
 async function getDraftedStudents(req: express.Request):
     Promise<Responses.ProjectDraftedStudents> {
 
-    return rq.parseGetDraftedStudentsRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(parsed => {
+  return rq.parseGetDraftedStudentsRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => {
         // INSERTION LOGIC
-            return Promise.resolve({
-                data : {id : 0, name : '', students : []},
-                sessionkey : parsed.data.sessionkey
-            });
+        return Promise.resolve({
+          data : {id : 0, name : '', students : []},
+          sessionkey : parsed.data.sessionkey
         });
+      });
 }
 
 async function modProjectStudent(req: express.Request):
@@ -192,16 +200,16 @@ export function getRouter(): express.Router {
 
   util.setupRedirect(router, '/project');
   util.route(router, "get", "/all", listProjects);
-  router.post('/:id', (req, res) => util.respOrErrorNoReinject(
-        res, createProject(req)));
+
   util.route(router, "get", "/:id", getProject);
+  util.route(router, "post", "/:id", createProject);
 
   util.route(router, "post", "/:id", modProject);
-  router.delete('/:id', (req, res) => util.respOrErrorNoReinject(
-                            res, deleteProject(req)));
+  util.routeKeyOnly(router, "delete", "/:id", deleteProject);
 
   util.route(router, "get", "/:id/draft", getDraftedStudents);
   util.route(router, "post", "/:id/draft", modProjectStudent);
+
   // TODO project conflicts
   // util.route(router, "get", "/conflicts", getProjectConflicts);
 
