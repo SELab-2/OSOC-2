@@ -327,6 +327,24 @@ export function route<T extends Responses.ApiResponse>(
 }
 
 /**
+ *  Contains all boilerplate to install a route with a path and HTTP verb for a
+ * route that returns only an updated session key.
+ *  @param router The router to install to.
+ *  @param verb The HTTP verb.
+ *  @param path The (relative) route path.
+ *  @param callback The function which will respond.
+ */
+export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
+                             callback: RouteCallback<Responses.Key>) {
+  router[verb](
+      path,
+      (req: express.Request, res: express.Response) => respOrErrorNoReinject(
+          res, callback(req)
+                   .then(toupd => refreshKey(toupd.sessionkey))
+                   .then(upd => Promise.resolve({sessionkey : upd}))));
+}
+
+/**
  *  Checks whether the object contains a valid ID.
  */
 export async function isValidID<T extends Requests.IdRequest>(
