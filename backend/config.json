@@ -34,11 +34,6 @@
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
         },
-
-        "invalidEmailReset": {
-            "http": 400,
-            "reason": "No such email is present. Please check your email."
-        },
         "github": {
             "argumentMissing": {
                 "http": 409,
@@ -50,6 +45,24 @@
             },
             "other": {
                 "reason": "GitHub data requests failed. Please try again later."
+            }
+        },
+        "reset": {
+            "sendEmail": {
+                "http": 503,
+                "reason": "Failed to send the e-mail. If you're certain that your e-mailaddress is correct, then please contact the admin."
+            },
+            "invalidEmail": {
+                "http": 400,
+                "reason": "No such email is present. Please check your email."
+            },
+            "generateFailed": {
+                "http": 500,
+                "reason": "Failed to generate a reset key. Please try again later."
+            },
+            "resetFailed": {
+                "http": 400,
+                "reason": "Failed to update your password. Perhaps you used an invalid key?"
             }
         }
     },
