@@ -69,7 +69,7 @@ async function modCoach(req: express.Request):
                 .then(res => Promise.resolve({
                     sessionkey : parsed.data.sessionkey,
                     data : {
-                        id : res.person_id,
+                        id : res.login_user_id,
                         name : res.person.firstname + " " + res.person.lastname
                     }
                 }));
