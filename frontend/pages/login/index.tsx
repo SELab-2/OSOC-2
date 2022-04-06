@@ -9,6 +9,7 @@ import {Header} from "../../components/Header/Header";
 
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
+import isStrongPassword from "validator/lib/isStrongPassword";
 
 const Index: NextPage = () => {
 
@@ -159,9 +160,14 @@ const Index: NextPage = () => {
             setRegisterLastNameError("")
         }
 
+        console.log(registerPassword)
+        console.log(isStrongPassword(registerPassword))
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
+        } else if (!isStrongPassword(registerPassword)) {
+            error = true
+            setRegisterPasswordError("Please provide a secure password");
         } else {
             setRegisterPasswordError("");
         }
