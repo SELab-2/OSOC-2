@@ -283,7 +283,7 @@ export async function parseNewProjectRequest(req: express.Request):
                    [ "name", "partner", "start", "end", "positions", "osocId" ],
                    types.key)
       .then(() => Promise.resolve({
-        sessionkey : req.body.sessionkey,
+        sessionkey : getSessionKey(req),
         name : req.body.name,
         partner : req.body.partner,
         start : req.body.start,
@@ -450,7 +450,7 @@ export async function parseResetPasswordRequest(req: express.Request):
 export async function parseStudentRoleRequest(req: express.Request):
     Promise<Requests.Role> {
   return hasFields(req, [ "name" ], types.neither).then(() => Promise.resolve({
-    sessionkey : req.body.sessionkey,
+    sessionkey : getSessionKey(req),
     name : req.body.name
   }));
 }

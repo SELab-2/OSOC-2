@@ -209,13 +209,12 @@ export function getRouter(): express.Router {
 
   util.setupRedirect(router, '/project');
   util.route(router, "get", "/all", listProjects);
-  router.post('/:id', (req, res) =>
-                          util.respOrErrorNoReinject(res, createProject(req)));
+
   util.route(router, "get", "/:id", getProject);
+  util.route(router, "post", "/:id", createProject);
 
   util.route(router, "post", "/:id", modProject);
-  router.delete('/:id', (req, res) => util.respOrErrorNoReinject(
-                            res, deleteProject(req)));
+  util.routeKeyOnly(router, "delete", "/:id", deleteProject);
 
   util.route(router, "get", "/:id/draft", getDraftedStudents);
   util.route(router, "post", "/:id/draft", modProjectStudent);
