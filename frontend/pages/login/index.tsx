@@ -229,6 +229,10 @@ const Index: NextPage = () => {
         let error = false
 
         if (passwordResetMail === "") {
+            setPasswordResetMail(loginEmail)
+        }
+
+        if (passwordResetMail === "") {
             setPasswordResetMailError("Email cannot be empty")
             error = true
         } else {
