@@ -129,8 +129,7 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
   return rq.parseUpdateStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed.data, 'student'))
-      .then(async parsed => {// UPDATE LOGIC
-                             return ormSt
+      .then(async parsed => {return ormSt
                                  .updateStudent({
                                    studentId : parsed.id,
                                    gender : parsed.gender,
@@ -173,35 +172,33 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
  */
 async function createStudentSuggestion(req: express.Request):
     Promise<Responses.Key> {
-  return rq.parseSuggestStudentRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(async parsed => {
-                return ormSt.getStudent(parsed.data.id).then(async student => {
-                  if (student !== null) {
-                    return ormJo
-                        .getLatestJobApplicationOfStudent(student.student_id)
-                        .then(async jobApplication => {
-                          if (jobApplication !== null) {
-                            return ormEv
-                                .createEvaluationForStudent({
-                                  loginUserId : parsed.userId,
-                                  jobApplicationId :
-                                      jobApplication.job_application_id,
-                                  decision : parsed.data.suggestion,
-                                  motivation : parsed.data.reason,
-                                  isFinal : true
-                                })
-                                .then(
-                                    () => {return Promise.resolve(
-                                        {sessionkey : parsed.data.sessionkey})})
-                          } else {
-                            return Promise.reject(errors.cookInvalidID());
-                          }
-                        })
-                  } else {
-                    return Promise.reject(errors.cookInvalidID());
-                  }
-                })});
+  const parsedRequest = await rq.parseSuggestStudentRequest(req);
+  const checkedSessionKey =
+      await util.checkSessionKey(parsedRequest).catch(res => res);
+  if (checkedSessionKey.data == undefined) {
+    return Promise.reject(errors.cookInvalidID);
+  }
+
+  const student = await ormSt.getStudent(checkedSessionKey.data.id);
+  if (student == null) {
+    return Promise.reject(errors.cookInvalidID);
+  }
+
+  const jobApplication =
+      await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+  if (jobApplication == null) {
+    return Promise.reject(errors.cookInvalidID);
+  }
+
+  await ormEv.createEvaluationForStudent({
+    loginUserId : checkedSessionKey.userId,
+    jobApplicationId : jobApplication.job_application_id,
+    decision : checkedSessionKey.data.suggestion,
+    motivation : checkedSessionKey.data.reason,
+    isFinal : true
+  });
+
+  return Promise.resolve({sessionkey : checkedSessionKey.data.sessionkey});
 }
 
 /**
