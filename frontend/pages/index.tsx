@@ -10,17 +10,21 @@ import {useRouter} from "next/router";
  */
 const Home: NextPage = () => {
 
-    const {sessionKey} = useContext(SessionContext)
+    const {getSessionKey} = useContext(SessionContext)
     const router = useRouter()
 
     useEffect(() => {
+        let sessionKey = ""
+        if (getSessionKey) {
+            sessionKey = getSessionKey()
+        }
         // No user is logged in
         if (sessionKey === "") {
             router.push("/login").then()
         } else {
             router.push("/students").then()
         }
-    }, [router, sessionKey])
+    }, [getSessionKey, router])
 
     return (<></>)
 }

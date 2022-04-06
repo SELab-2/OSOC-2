@@ -57,7 +57,7 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
     /**
      * the person_id of the person the login user will be associated with
      */
-    personId?: number,
+    personId: number,
     /**
      * the password hash of the login user if email is used
      */
@@ -313,7 +313,7 @@ export interface CreateJobApplication {
     /**
      * keeps track of when we received this application (used to pick the latest one)
      */
-    created_at: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
+    createdAt: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
 /**

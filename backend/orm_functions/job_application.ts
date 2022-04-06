@@ -23,6 +23,7 @@ import {CreateJobApplication} from "./orm_types";
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
+                    is_final: true
                 }
             }
         }
@@ -115,7 +116,7 @@ export async function getLatestApplicationRolesForStudent(studentId: number) {
 /**
  * removes all job applications from a given student
  * 
- * @param studentId: the student who's applications will be deleted
+ * @param studentId: the student whose applications will be deleted
  * @returns the number of deleted job applications {count: number}
  */
  export async function deleteJobApplicationsFromStudent(studentId: number) {
@@ -129,7 +130,7 @@ export async function getLatestApplicationRolesForStudent(studentId: number) {
 /**
  * change the email status of a given job application
  * 
- * @param jobApplicationId: the application who's email status we want to change
+ * @param jobApplicationId: the application whose email status we want to change
  * @param emailStatus: the new email status
  * @returns: the updated database record
  */
@@ -179,14 +180,14 @@ export async function createJobApplication(jobApplication: CreateJobApplication)
             edu_year: jobApplication.eduYear,
             edu_institute: jobApplication.eduInstitute,
             email_status: jobApplication.emailStatus,
-            created_at: jobApplication.created_at
+            created_at: new Date(jobApplication.createdAt)
         }
     });
 }
 
 /**
  * 
- * @param studentId: the student who's job applications we are looking for
+ * @param studentId: the student whose job applications we are looking for
  * @returns the found job applications of the given student
  */
 export async function getLatestJobApplicationOfStudent(studentId: number) {

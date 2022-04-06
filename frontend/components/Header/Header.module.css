@@ -5,6 +5,7 @@
     padding-inline: min(8rem, 16vw);
     display: flex;
     justify-content: space-between;
+    margin-bottom: clamp(1rem, 2vw, 2.5rem);
 }
 
 @media (max-width: 70rem) {
@@ -55,6 +56,10 @@
 
 .links a:active {
     background-color: var(--neutral-200);
+}
+
+.links button {
+    margin-left: auto;
 }
 
 .displayNone {

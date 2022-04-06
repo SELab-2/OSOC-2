@@ -46,7 +46,7 @@ jobs:
 
     # push the db scheme to the db container
     - name: Push schema to docker file
-      run: npx dotenv -e prisma/.env.test -- npx prisma migrate dev --name postgres-init
+      run: npx dotenv -e prisma/.env.test -- npx prisma db push
       working-directory: backend
 
     - name: Coverage Report
