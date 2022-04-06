@@ -285,10 +285,7 @@ const Index: NextPage = () => {
                             <label className={styles.label}>
                                 Email
                                 <input type="text" name="loginEmail" value={loginEmail}
-                                       onChange={e => {
-                                           setLoginEmail(e.target.value)
-                                           setPasswordResetMail(e.target.value)
-                                       }}/>
+                                       onChange={e => setLoginEmail(e.target.value)}/>
                             </label>
                             <p className={`${styles.textFieldError} ${loginEmailError !== "" ? styles.anim : ""}`}>{loginEmailError}</p>
                             <label className={styles.label}>
@@ -302,7 +299,7 @@ const Index: NextPage = () => {
                                    title="Please enter your email below and we will send you a link to reset your password.">
                                 <label className={styles.label}>
                                     <input type="text" name="loginEmail"
-                                           value={passwordResetMail === "" ? loginEmail : passwordResetMail}
+                                           value={passwordResetMail}
                                            onChange={e => setPasswordResetMail(e.target.value)}/>
                                 </label>
                                 <p className={`${styles.textFieldError} ${passwordResetMailError !== "" ? styles.anim : ""}`}>{passwordResetMailError}</p>
