@@ -1,6 +1,5 @@
 import {NextPage} from "next";
-import {Header} from "../components/Header/Header";
-import {StudentCard} from "../components/StudentCard/StudentCard";
+import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
 import SessionContext from "../contexts/sessionProvider";
 import {useContext, useEffect} from "react";
 
@@ -22,11 +21,10 @@ const Students: NextPage = () => {
     useEffect(() => {
         fetchData();
     }, []);
-    
+
     return (
         <>
-            <Header/>
-            <StudentCard></StudentCard>
+            <UnderConstruction/>
         </>
     )
 }

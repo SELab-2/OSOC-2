@@ -1,6 +1,5 @@
 import {NextPage} from "next";
 import {useRouter} from "next/router";
-import {Header} from "../../components/Header/Header";
 import styles from "../../styles/login.module.scss";
 import {SyntheticEvent, useEffect, useState} from "react";
 import crypto from "crypto";
@@ -19,7 +18,7 @@ const Pid: NextPage = () => {
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [confirmNewPassword, setConfirmNewPassword] = useState<string>("");
     const [confirmNewPasswordError, setConfirmNewPasswordError] = useState<string>("");
-    const [backendError] = useState<string>("");
+    const [backendError, setBackendError] = useState<string>("");
 
 
     /**
@@ -46,7 +45,7 @@ const Pid: NextPage = () => {
      * Handles all the logic for resetting the password
      * @param e
      */
-    const resetPassword = (e: SyntheticEvent) => {
+    const resetPassword = async (e: SyntheticEvent) => {
         e.preventDefault()
         let error = false
         if (newPassword === "") {
@@ -69,23 +68,25 @@ const Pid: NextPage = () => {
         if (!error) {
             // We encrypt the password before sending it to the backend api
             const encryptedPassword = crypto.createHash('sha256').update(newPassword).digest('hex');
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/reset/${pid}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/reset/${pid}`, {
                 method: 'POST',
                 body: JSON.stringify({password: encryptedPassword}),
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                 }
-            }).then(response => {
-                if (response.ok) {
-                    router.push("/login").then()
-                }
-            }).catch(error => console.log(error))
+            }).then(response => response.json()).catch(error => console.log(error))
+            if (response.success) {
+                setBackendError("")
+                // TODO -- Notification
+                router.push("/login").then()
+            } else {
+                setBackendError(response.reason)
+            }
         }
     }
 
-    return <>
-        <Header/>
+    return (
         <div style={{width: "clamp(18rem, 80vw, 30rem)", marginInline: "auto"}}>
             <h2>Reset Password</h2>
             <form className={styles.form}>
@@ -105,7 +106,7 @@ const Pid: NextPage = () => {
                 <p className={`${styles.textFieldError} ${backendError !== "" ? styles.anim : ""}`}>{backendError}</p>
             </form>
         </div>
-    </>
+    )
 }
 
 export default Pid;
