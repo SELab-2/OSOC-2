@@ -250,6 +250,7 @@ const Index: NextPage = () => {
                 }
             }).then(res => res.json()).catch(error => console.log(error))
             if (response.success) {
+                setPasswordResetMailError("")
                 setShowPasswordReset(false)
                 // TODO -- Notification
             } else {

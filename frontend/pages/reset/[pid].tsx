@@ -78,6 +78,7 @@ const Pid: NextPage = () => {
                 }
             }).then(response => response.json()).catch(error => console.log(error))
             if (response.success) {
+                setBackendError("")
                 // TODO -- Notification
                 router.push("/login").then()
             } else {
