@@ -1,30 +1,38 @@
 import {NextPage} from "next";
-import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
 import SessionContext from "../contexts/sessionProvider";
 import {useContext, useEffect} from "react";
+import {StudentCard} from "../components/StudentCard/StudentCard";
 
 
 const Students: NextPage = () => {
-    const {sessionKey} = useContext(SessionContext);
+    const { getSessionKey, setSessionKey } = useContext(SessionContext);
     //const [students, setStudents] = useState<Array<InternalTypes.Student>>([]);
 
-    const fetchData = async () => {
+    const fetchStudents = async () => {
+        const sessionKey = getSessionKey != undefined ? getSessionKey() : ""
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
             method: 'GET',
             headers: {
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
-        });
+        }).then(response => response.json()).catch(error => console.log(error));
         console.log(response);
+        if (response.success) {
+            if (setSessionKey) {
+                setSessionKey(response.sessionkey)
+            }
+        }
     }
 
     useEffect(() => {
-        fetchData();
+        fetchStudents().then();
+        // We do not want to reload the data when the data changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
-            <UnderConstruction/>
+            <StudentCard/>
         </>
     )
 }
