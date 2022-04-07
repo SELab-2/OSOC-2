@@ -564,9 +564,7 @@ export type Verb = "get"|"post"|"delete";
 
 export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
 
-export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
-    "job_application"|"job_application_skill"|"language"|"login_user"|"osoc"|
-    "person"|"project_role"|"project_user"|"role"|"student";
+export type Table = "project"|"student";
 
 /**
  *  A route callback is a function taking an Express js request and returning a

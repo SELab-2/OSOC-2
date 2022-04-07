@@ -76,10 +76,11 @@ async function listProjects(req: express.Request):
 async function getProject(req: express.Request): Promise<Responses.Project> {
   return rq.parseSingleProjectRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => ormPr.getProjectById(parsed.data.id).then(obj => {
+      .then(parsed => util.isValidID(parsed.data, "project"))
+      .then(async parsed => ormPr.getProjectById(parsed.id).then(obj => {
         if (obj !== null) {
           return Promise.resolve({
-            sessionkey : parsed.data.sessionkey,
+            sessionkey : parsed.sessionkey,
             data : {
               id : Number(obj.project_id),
               name : obj.name,
@@ -99,20 +100,21 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
 async function modProject(req: express.Request): Promise<Responses.Project> {
   return rq.parseUpdateProjectRequest(req)
       .then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isValidID(parsed.data, "project"))
       .then(async parsed => {
         // UPDATING LOGIC
         return ormPr
             .updateProject({
-              projectId : parsed.data.id,
-              name : parsed.data.name,
-              partner : parsed.data.partner,
-              startDate : parsed.data.start,
-              endDate : parsed.data.end,
-              positions : parsed.data.positions,
-              osocId : parsed.data.osocId
+              projectId : parsed.id,
+              name : parsed.name,
+              partner : parsed.partner,
+              startDate : parsed.start,
+              endDate : parsed.end,
+              positions : parsed.positions,
+              osocId : parsed.osocId
             })
             .then(project => Promise.resolve({
-              sessionkey : parsed.data.sessionkey,
+              sessionkey : parsed.sessionkey,
               data : {
                 id : project.project_id,
                 name : project.name,
@@ -135,9 +137,10 @@ async function modProject(req: express.Request): Promise<Responses.Project> {
 async function deleteProject(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteProjectRequest(req)
       .then(parsed => util.isAdmin(parsed))
+      .then(parsed => util.isValidID(parsed.data, "project"))
       .then(parsed => {
-        return ormPr.deleteProject(parsed.data.id).then(() => Promise.resolve({
-          sessionkey : parsed.data.sessionkey
+        return ormPr.deleteProject(parsed.id).then(() => Promise.resolve({
+          sessionkey : parsed.sessionkey
         }));
       });
 }
