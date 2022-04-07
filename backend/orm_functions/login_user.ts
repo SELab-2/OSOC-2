@@ -201,7 +201,7 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param loginUserId: the id of the loginUser whose field we are updating
  * @param isCoach: the new value of the is_coach field for the loginUser
- * @return a promise with the updated entry
+ * @return a promise with the updated entry, the person object is also included
  */
 export async function setCoach(loginUserId: number, isCoach: boolean) {
     return await prisma.login_user.update({
@@ -222,7 +222,7 @@ export async function setCoach(loginUserId: number, isCoach: boolean) {
  *
  * @param loginUserId the id of the loginUser whose field we are updating
  * @param isAdmin the new value of is_admin
- * @returns a promise with the updated entry
+ * @returns a promise with the updated entry, the person object is also included
  */
 export async function setAdmin(loginUserId: number, isAdmin: boolean) {
     return await prisma.login_user.update({
