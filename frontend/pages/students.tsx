@@ -32,7 +32,7 @@ const Students: NextPage = () => {
 
     return (
         <>
-            <StudentCard/>
+            <StudentCard student={undefined}/>
         </>
     )
 }
