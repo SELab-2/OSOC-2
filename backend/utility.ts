@@ -350,14 +350,11 @@ export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
  *  Checks whether the object contains a valid ID.
  */
 export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Table): Promise<T> {
-    // TODO validate ID (obj.id) using database from table table
     const returnObj : {[key in Table]: boolean} =
         {"student": await ormSt.getStudent(obj.id) != null,
          "project": await ormPr.getProjectById(obj.id) != null};
 
-    const result = table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
-
-    return result;
+    return table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
 }
 
 /**
