@@ -13,26 +13,24 @@ import {errors} from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listUsers(req: express.Request): Promise<Responses.UserList> {
-  const parsedRequest = await rq.parseUserAllRequest(req);
-  const checkedSessionKey =
-      await util.checkSessionKey(parsedRequest).catch(res => res);
-  if (checkedSessionKey.data == undefined) {
-    return Promise.reject(errors.cookInvalidID);
-  }
-  const loginUsers = await ormL.getAllLoginUsers();
+    const parsedRequest = await rq.parseUserAllRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+    const loginUsers = await ormL.getAllLoginUsers();
 
-  loginUsers.map(val => ({
-                   person_data : {
-                     id : val.person.person_id,
-                     name : val.person.firstname + " " + val.person.lastname
-                   },
-                   coach : val.is_coach,
-                   admin : val.is_admin,
-                   activated : val.account_status as string
-                 }))
+    loginUsers.map(val => ({
+        person_data : {
+            id : val.person.person_id,
+            name : val.person.firstname + " " + val.person.lastname
+        },
+        coach : val.is_coach,
+        admin : val.is_admin,
+        activated : val.account_status as string
+    }))
 
-  return Promise.resolve(
-      {data : loginUsers, sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({data : loginUsers, sessionkey : checkedSessionKey.data.sessionkey});
 }
 
 /**
@@ -41,12 +39,12 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  const router: express.Router = express.Router();
+    const router: express.Router = express.Router();
 
-  util.setupRedirect(router, '/student');
-  util.route(router, "get", "/all", listUsers);
+    util.setupRedirect(router, '/student');
+    util.route(router, "get", "/all", listUsers);
 
-  util.addAllInvalidVerbs(router, [ "/", "/all" ]);
+    util.addAllInvalidVerbs(router, [ "/", "/all" ]);
 
-  return router;
+    return router;
 }

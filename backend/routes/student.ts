@@ -16,49 +16,41 @@ import {errors} from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudents(req: express.Request):
-    Promise<Responses.StudentList> {
-  const parsedRequest = await rq.parseStudentAllRequest(req);
-  const checkedSessionKey =
-      await util.checkSessionKey(parsedRequest).catch(res => res);
-  if (checkedSessionKey.data == undefined) {
-    return Promise.reject(errors.cookInvalidID);
-  }
-  const studentList: object[] = [];
-  const students = await ormSt.getAllStudents();
-  for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        students[studentIndex].student_id);
-    if (jobApplication != null) {
-      const evaluations = await ormJo.getStudentEvaluationsTotal(
-          students[studentIndex].student_id);
-
-      const languages: string[] = [];
-      for (let skillIndex = 0;
-           skillIndex < jobApplication.job_application_skill.length;
-           skillIndex++) {
-        const language = await ormLa.getLanguage(
-            jobApplication.job_application_skill[skillIndex].language_id);
-        if (language != null) {
-          languages.push(language.name);
-        } else {
-          return Promise.reject(errors.cookInvalidID);
-        }
-      }
-
-      studentList.push({
-        student : students[studentIndex],
-        jobApplication : jobApplication,
-        evaluations : evaluations,
-        languages : languages
-      })
-    } else {
-      return Promise.reject(errors.cookInvalidID);
+async function listStudents(req: express.Request): Promise<Responses.StudentList> {
+    const parsedRequest = await rq.parseStudentAllRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
     }
-  }
+    const studentList: object[] = [];
+    const students = await ormSt.getAllStudents();
+    for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(students[studentIndex].student_id);
+        if (jobApplication != null) {
+            const evaluations = await ormJo.getStudentEvaluationsTotal(students[studentIndex].student_id);
 
-  return Promise.resolve(
-      {data : studentList, sessionkey : checkedSessionKey.data.sessionkey});
+            const languages: string[] = [];
+            for (let skillIndex = 0; skillIndex < jobApplication.job_application_skill.length; skillIndex++) {
+                const language = await ormLa.getLanguage(jobApplication.job_application_skill[skillIndex].language_id);
+                if (language != null) {
+                    languages.push(language.name);
+                } else {
+                    return Promise.reject(errors.cookInvalidID);
+                }
+            }
+
+            studentList.push({
+                student : students[studentIndex],
+                jobApplication : jobApplication,
+                evaluations : evaluations,
+                languages : languages
+            })
+        } else {
+            return Promise.reject(errors.cookInvalidID);
+        }
+    }
+
+    return Promise.resolve({data : studentList, sessionkey : checkedSessionKey.data.sessionkey});
 }
 
 /**
