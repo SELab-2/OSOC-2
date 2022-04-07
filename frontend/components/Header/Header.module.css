@@ -18,16 +18,22 @@
     .links {
         width: 100%;
         align-self: center;
+        justify-content: space-around;
+        gap: 0.2rem !important;
     }
 
-    .links {
-        justify-content: space-around;
+    .links a {
+        padding: 0.75rem 0.5rem !important;
     }
 }
 
 .header div {
     display: flex;
     align-items: center;
+}
+
+.links {
+    gap: 1rem;
 }
 
 .header div h1 {

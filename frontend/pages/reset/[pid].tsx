@@ -1,6 +1,5 @@
 import {NextPage} from "next";
 import {useRouter} from "next/router";
-import {Header} from "../../components/Header/Header";
 import styles from "../../styles/login.module.scss";
 import {SyntheticEvent, useEffect, useState} from "react";
 import crypto from "crypto";
@@ -84,8 +83,7 @@ const Pid: NextPage = () => {
         }
     }
 
-    return <>
-        <Header/>
+    return (
         <div style={{width: "clamp(18rem, 80vw, 30rem)", marginInline: "auto"}}>
             <h2>Reset Password</h2>
             <form className={styles.form}>
@@ -105,7 +103,7 @@ const Pid: NextPage = () => {
                 <p className={`${styles.textFieldError} ${backendError !== "" ? styles.anim : ""}`}>{backendError}</p>
             </form>
         </div>
-    </>
+    )
 }
 
 export default Pid;

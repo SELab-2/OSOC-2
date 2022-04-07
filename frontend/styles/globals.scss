@@ -26,6 +26,19 @@ body {
   font-family: Montserrat, sans-serif;
 }
 
+/* Makes the app full height */
+html,
+body,
+body > div:first-child,
+div#__next {
+  height: 100%;
+}
+
+div#__next {
+  display: flex;
+  flex-direction: column;
+}
+
 * {
   box-sizing: border-box;
   color: var(--primary-100);
