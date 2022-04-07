@@ -2,10 +2,11 @@ import {NextPage} from "next";
 import SessionContext from "../contexts/sessionProvider";
 import {useContext, useEffect} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
+import {StudentFilter} from "../components/StudentFilter/StudentFilter";
 
 
 const Students: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const {getSessionKey, setSessionKey} = useContext(SessionContext);
     //const [students, setStudents] = useState<Array<InternalTypes.Student>>([]);
 
     const fetchStudents = async () => {
@@ -32,6 +33,7 @@ const Students: NextPage = () => {
 
     return (
         <>
+            <StudentFilter/>
             <StudentCard student={undefined}/>
         </>
     )
