@@ -50,7 +50,7 @@
         "reset": {
             "sendEmail": {
                 "http": 503,
-                "reason": "Failed to send the e-mail. If you're certain that your email address is correct, then please contact the admin."
+                "reason": "Failed to send the email. If you're certain that your email address is correct, then please contact the admin."
             },
             "invalidEmail": {
                 "http": 400,
