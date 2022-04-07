@@ -283,7 +283,7 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  return skey.changeSessionKey(key, generateKey())
+  return skey.changeSessionKey(key, generateKey(), new Date())
       .then(upd => Promise.resolve(upd.session_key));
 }
 
