@@ -248,15 +248,13 @@ const Index: NextPage = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
-            }).catch()
+            }).then(res => res.json()).catch(error => console.log(error))
             console.log(response)
-            if (response !== undefined) {
-                if (response.ok) {
-                    setShowPasswordReset(false)
-                    // TODO -- Notification
-                } else {
-                    setPasswordResetMailError(response.statusText)
-                }
+            if (response.success) {
+                setShowPasswordReset(false)
+                // TODO -- Notification
+            } else {
+                setPasswordResetMailError(response.reason)
             }
         }
 
