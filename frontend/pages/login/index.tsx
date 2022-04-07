@@ -249,7 +249,6 @@ const Index: NextPage = () => {
                     'Accept': 'application/json'
                 }
             }).then(res => res.json()).catch(error => console.log(error))
-            console.log(response)
             if (response.success) {
                 setShowPasswordReset(false)
                 // TODO -- Notification
