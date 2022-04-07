@@ -1,5 +1,4 @@
 import {NextPage} from "next";
-import {Header} from "../components/Header/Header";
 import React, {useContext, useEffect, useState} from "react";
 import SessionContext from "../contexts/sessionProvider";
 import {User} from "../components/User/User";
@@ -15,7 +14,6 @@ const Users: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
     const userSet = new Set<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>()
-    let test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
 
     // Load all users upon page load
     useEffect(() => {
@@ -27,7 +25,6 @@ const Users: NextPage = () => {
         }
         // boilerplate for the admin/coaches route (pass admin/coach as string)
         const getAllUsers = async (route: string, sessionkey: string) => {
-            console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all")
             return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
                 method: 'GET',
                 headers: {
@@ -52,9 +49,10 @@ const Users: NextPage = () => {
 
         let tempSes = getTempSession()
 
+        let test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
         getAllUsers("admin", tempSes).then(response => {
             tempSes = response.sessionkey
-            test = [...test, ...response.data];
+            test = [...response.data]
             test.forEach(userSet.add, userSet);
         }).then(() => {
             getAllUsers("coach", tempSes).then(response => {
@@ -62,7 +60,6 @@ const Users: NextPage = () => {
                     setSessionKey(response.sessionkey)
                 }
                 test.concat(response.data);
-                test.forEach(userSet.add, userSet);
             }).then(() => setUsers(Array.from(userSet)));
         })
 
@@ -72,18 +69,17 @@ const Users: NextPage = () => {
     }, [])
 
 
-    return (<>
-        <Header/>
+    return (<div className={styles.body}>
         <UserFilter/>
-        <div className={styles.body}>
+        <div>
             {users !== undefined ? users.map((value, index) => {
-                return <User userName={value.person_data.name} userEmail="mauricevanwassenhove@gmail.com TODO"
+                return <User userName={value.person_data.name} userEmail="TODO"
                              userIsAdmin={value.admin}
                              userIsCoach={value.coach} userStatus={value.activated} key={index}
                              userId={value.person_data.id}/>
             }) : null}
         </div>
-    </>)
+    </div>)
 }
 
 export default Users;
