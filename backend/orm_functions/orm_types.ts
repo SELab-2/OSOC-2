@@ -577,3 +577,14 @@ export interface AddStudentToProject {
      */
     roleId: number,
 }
+
+/**
+ * type to use in a filter query for sorting
+ */
+export type FilterSort = "asc" | "desc" | undefined;
+
+/**
+ * type to use in a filter query for strings
+ */
+export type FilterString = string | undefined;
+
