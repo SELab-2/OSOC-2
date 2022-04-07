@@ -5,7 +5,6 @@ import GitHubLogo from "../../public/images/github-logo.svg"
 import {SyntheticEvent, useContext, useEffect, useState} from "react";
 import {Modal} from "../../components/Modal/Modal";
 import {useRouter} from "next/router";
-import {Header} from "../../components/Header/Header";
 
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
@@ -273,99 +272,96 @@ const Index: NextPage = () => {
     }
 
     return (
-        <div>
-            <Header/>
-            <div className={styles.body}>
-                <h3>Welcome to OSOC Selections!</h3>
-                <h3 className="subtext">Please login, or register to proceed</h3>
-                <div className={styles.formContainer}>
-                    <div className={styles.loginContainer}>
-                        <h2>Login</h2>
-                        <form className={styles.form} onSubmit={async e => {
-                            await submitLogin(e)
-                        }}>
+        <div className={styles.body}>
+            <h3>Welcome to OSOC Selections!</h3>
+            <h3 className="subtext">Please login, or register to proceed</h3>
+            <div className={styles.formContainer}>
+                <div className={styles.loginContainer}>
+                    <h2>Login</h2>
+                    <form className={styles.form} onSubmit={async e => {
+                        await submitLogin(e)
+                    }}>
+                        <label className={styles.label}>
+                            Email
+                            <input type="text" name="loginEmail" value={loginEmail}
+                                   onChange={e => setLoginEmail(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${loginEmailError !== "" ? styles.anim : ""}`}>{loginEmailError}</p>
+                        <label className={styles.label}>
+                            Password
+                            <input type="password" name="loginPassword" value={loginPassword}
+                                   onChange={e => setLoginPassword(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
+                        <a className={styles.resetPassword} onClick={showModal}>Forgot password?</a>
+                        <Modal handleClose={closeModal} visible={showPasswordReset}
+                               title="Please enter your email below and we will send you a link to reset your password.">
                             <label className={styles.label}>
-                                Email
-                                <input type="text" name="loginEmail" value={loginEmail}
-                                       onChange={e => setLoginEmail(e.target.value)}/>
+                                <input type="text" name="loginEmail"
+                                       value={passwordResetMail}
+                                       onChange={e => setPasswordResetMail(e.target.value)}/>
                             </label>
-                            <p className={`${styles.textFieldError} ${loginEmailError !== "" ? styles.anim : ""}`}>{loginEmailError}</p>
-                            <label className={styles.label}>
-                                Password
-                                <input type="password" name="loginPassword" value={loginPassword}
-                                       onChange={e => setLoginPassword(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${loginPasswordError !== "" ? styles.anim : ""}`}>{loginPasswordError}</p>
-                            <a className={styles.resetPassword} onClick={showModal}>Forgot password?</a>
-                            <Modal handleClose={closeModal} visible={showPasswordReset}
-                                   title="Please enter your email below and we will send you a link to reset your password.">
-                                <label className={styles.label}>
-                                    <input type="text" name="loginEmail"
-                                           value={passwordResetMail}
-                                           onChange={e => setPasswordResetMail(e.target.value)}/>
-                                </label>
-                                <p className={`${styles.textFieldError} ${passwordResetMailError !== "" ? styles.anim : ""}`}>{passwordResetMailError}</p>
-                                <button onClick={resetPassword}>CONFIRM</button>
-                            </Modal>
-                            <button onClick={e => submitLogin(e)}>LOG IN</button>
-                            <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
-                            <div className={styles.orContainer}>
-                                <div/>
-                                <p>or</p>
-                                <div/>
+                            <p className={`${styles.textFieldError} ${passwordResetMailError !== "" ? styles.anim : ""}`}>{passwordResetMailError}</p>
+                            <button onClick={resetPassword}>CONFIRM</button>
+                        </Modal>
+                        <button onClick={e => submitLogin(e)}>LOG IN</button>
+                        <p className={`${styles.textFieldError} ${loginBackendError !== "" ? styles.anim : ""}`}>{loginBackendError}</p>
+                        <div className={styles.orContainer}>
+                            <div/>
+                            <p>or</p>
+                            <div/>
+                        </div>
+                        <div className={styles.githubContainer} onClick={e => githubLogin(e)}>
+                            <div className={styles.githublogo}>
+                                <Image
+                                    src={GitHubLogo}
+                                    layout="intrinsic"
+                                    alt="GitHub Logo"
+                                />
                             </div>
-                            <div className={styles.githubContainer} onClick={e => githubLogin(e)}>
-                                <div className={styles.githublogo}>
-                                    <Image
-                                        src={GitHubLogo}
-                                        layout="intrinsic"
-                                        alt="GitHub Logo"
-                                    />
-                                </div>
-                                <p className={styles.github}>Continue with GitHub</p>
-                            </div>
-                        </form>
-                    </div>
+                            <p className={styles.github}>Continue with GitHub</p>
+                        </div>
+                    </form>
+                </div>
 
-                    <div className={styles.registerContainer}>
-                        <h2>Register</h2>
-                        <form className={styles.form} onSubmit={async e => {
-                            await submitRegister(e)
-                        }}>
-                            <label className={styles.label}>
-                                First Name
-                                <input type="text" name="registerFirstName" value={registerFirstName}
-                                       onChange={e => setRegisterFirstName(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${registerFirstNameError !== "" ? styles.anim : ""}`}>{registerFirstNameError}</p>
-                            <label className={styles.label}>
-                                Last Name
-                                <input type="text" name="registerLastName" value={registerLastName}
-                                       onChange={e => setRegisterLastName(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${registerLastNameError !== "" ? styles.anim : ""}`}>{registerLastNameError}</p>
-                            <label className={styles.label}>
-                                Email
-                                <input type="text" name="registerEmail" value={registerEmail}
-                                       onChange={e => setRegisterEmail(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${registerEmailError !== "" ? styles.anim : ""}`}>{registerEmailError}</p>
-                            <label className={styles.label}>
-                                Password
-                                <input type="password" name="registerPassword" value={registerPassword}
-                                       onChange={e => setRegisterPassword(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
-                            <label className={styles.label}>
-                                Confirm Password
-                                <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
-                                       onChange={e => setRegisterConfirmPassword(e.target.value)}/>
-                            </label>
-                            <p className={`${styles.textFieldError} ${registerConfirmPasswordError !== "" ? styles.anim : ""}`}>{registerConfirmPasswordError}</p>
-                            <button onClick={e => submitRegister(e)}>REGISTER</button>
-                            <p className={`${styles.textFieldError} ${registerBackendError !== "" ? styles.anim : ""}`}>{registerBackendError}</p>
-                        </form>
-                    </div>
+                <div className={styles.registerContainer}>
+                    <h2>Register</h2>
+                    <form className={styles.form} onSubmit={async e => {
+                        await submitRegister(e)
+                    }}>
+                        <label className={styles.label}>
+                            First Name
+                            <input type="text" name="registerFirstName" value={registerFirstName}
+                                   onChange={e => setRegisterFirstName(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${registerFirstNameError !== "" ? styles.anim : ""}`}>{registerFirstNameError}</p>
+                        <label className={styles.label}>
+                            Last Name
+                            <input type="text" name="registerLastName" value={registerLastName}
+                                   onChange={e => setRegisterLastName(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${registerLastNameError !== "" ? styles.anim : ""}`}>{registerLastNameError}</p>
+                        <label className={styles.label}>
+                            Email
+                            <input type="text" name="registerEmail" value={registerEmail}
+                                   onChange={e => setRegisterEmail(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${registerEmailError !== "" ? styles.anim : ""}`}>{registerEmailError}</p>
+                        <label className={styles.label}>
+                            Password
+                            <input type="password" name="registerPassword" value={registerPassword}
+                                   onChange={e => setRegisterPassword(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
+                        <label className={styles.label}>
+                            Confirm Password
+                            <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
+                                   onChange={e => setRegisterConfirmPassword(e.target.value)}/>
+                        </label>
+                        <p className={`${styles.textFieldError} ${registerConfirmPasswordError !== "" ? styles.anim : ""}`}>{registerConfirmPasswordError}</p>
+                        <button onClick={e => submitRegister(e)}>REGISTER</button>
+                        <p className={`${styles.textFieldError} ${registerBackendError !== "" ? styles.anim : ""}`}>{registerBackendError}</p>
+                    </form>
                 </div>
             </div>
         </div>)

@@ -1,9 +1,12 @@
 import {CreateLoginUser, UpdateLoginUser, CreatePerson} from "../../orm_functions/orm_types";
 import {createPerson} from "../../orm_functions/person";
-import {createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson, 
+import {
+    createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson,
     getPasswordLoginUser, searchLoginUserByPerson, searchAllAdminLoginUsers,
     searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers,
-    updateLoginUser, deleteLoginUserById, deleteLoginUserByPersonId} from "../../orm_functions/login_user";
+    updateLoginUser, deleteLoginUserById, deleteLoginUserByPersonId, setCoach, setAdmin
+} from "../../orm_functions/login_user";
+import prisma from "../../prisma/prisma";
 
 const login_user: CreateLoginUser = {
     personId: 0,
@@ -93,6 +96,40 @@ it('should find all the login users in the db that are admin or coach, 3 in tota
     expect(searched_login_users[2]).toHaveProperty("is_admin", login_user.isAdmin);
     expect(searched_login_users[2]).toHaveProperty("is_coach", login_user.isCoach);
     expect(searched_login_users[2]).toHaveProperty("account_status", login_user.accountStatus);
+});
+
+it("should update the isCoach field and return the updated entry", async () => {
+    const login_users = await prisma.login_user.findMany({
+        include : {
+            person: true
+        }
+    });
+    const user = login_users[0];
+    const updated = await setCoach(user.login_user_id, !user.is_coach);
+    expect(updated).toHaveProperty("login_user_id", user.login_user_id);
+    expect(updated).toHaveProperty("is_coach", !user.is_coach);
+    expect(updated).toHaveProperty("is_admin", user.is_admin);
+    expect(updated).toHaveProperty("account_status", user.account_status);
+    expect(updated).toHaveProperty("person", user.person);
+    // undo the operation (for further tests)
+    await setCoach(user.login_user_id, user.is_coach);
+});
+
+it("should update the isAdmin field and return the updated entry", async () => {
+    const login_users = await prisma.login_user.findMany({
+        include : {
+            person: true
+        }
+    });
+    const user = login_users[0];
+    const updated = await setAdmin(user.login_user_id, !user.is_admin);
+    expect(updated).toHaveProperty("login_user_id", user.login_user_id);
+    expect(updated).toHaveProperty("is_coach", user.is_coach);
+    expect(updated).toHaveProperty("is_admin", !user.is_admin);
+    expect(updated).toHaveProperty("account_status", user.account_status);
+    expect(updated).toHaveProperty("person", user.person);
+    // undo the operation (for further tests)
+    await setAdmin(user.login_user_id, user.is_admin);
 });
 
 it('should update login user based upon login user id', async () => {
