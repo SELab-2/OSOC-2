@@ -5,6 +5,8 @@ import {v1} from 'uuid';
 import * as config from './config.json';
 import {searchAllAdminLoginUsers} from './orm_functions/login_user';
 import * as skey from './orm_functions/session_key';
+import * as ormSt from './orm_functions/student';
+import * as ormPr from './orm_functions/project';
 import {
   Anything,
   ApiError,
@@ -347,12 +349,15 @@ export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
 /**
  *  Checks whether the object contains a valid ID.
  */
-export async function isValidID<T extends Requests.IdRequest>(
-    obj: T, table: Table): Promise<T> {
-  // TODO validate ID (obj.id) using database from table table
-  // upon failure: return Promise.reject(errors.cookInvalidID());
-  return Promise.resolve(obj).catch(() => Promise.reject(table));
-  // the catch is just to "fix" the unused variable
+export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Table): Promise<T> {
+    // TODO validate ID (obj.id) using database from table table
+    const returnObj : {[key in Table]: boolean} =
+        {"student": await ormSt.getStudent(obj.id) != null,
+         "project": await ormPr.getProjectById(obj.id) != null};
+
+    const result = table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
+
+    return result;
 }
 
 /**
