@@ -55,6 +55,7 @@ const Index: NextPage = () => {
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
     const [registerBackendError, setRegisterBackendError] = useState<string>("");
+    const [registerPasswordScore, setRegisterPasswordScore] = useState<number>(0);
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -160,11 +161,28 @@ const Index: NextPage = () => {
             setRegisterLastNameError("")
         }
 
+        const score = isStrongPassword(registerPassword, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+            returnScore: true,
+            pointsPerUnique: 1,
+            pointsPerRepeat: 0.5,
+            pointsForContainingLower: 10,
+            pointsForContainingUpper: 10,
+            pointsForContainingNumber: 10,
+            pointsForContainingSymbol: 10
+        }) as unknown as number
+        //TODO the scoring can be adjusted
+        setRegisterPasswordScore(score)
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
-        } else if (!isStrongPassword(registerPassword)) {
+        } else if (!score) {
             error = true
+
             setRegisterPasswordError("Please provide a secure password");
         } else {
             setRegisterPasswordError("");
@@ -362,6 +380,7 @@ const Index: NextPage = () => {
                                        onChange={e => setRegisterPassword(e.target.value)}/>
                             </label>
                             <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
+                            <p className={`${styles.textFieldError} ${registerPasswordScore.toString() !== "0" ? styles.anim : ""}`}>{registerPasswordScore}</p>
                             <label className={styles.label}>
                                 Confirm Password
                                 <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
