@@ -20,6 +20,7 @@ export const StudentFilter: React.FC = () => {
     const [filterNo, setFilterNo] = useState<boolean>(false)
     const [alumni, setAlumni] = useState<boolean>(false)
     const [studentCoach, setstudentCoach] = useState<boolean>(false)
+    const [selectedRoles, setSelectedRoles] = useState<Array<string>>([])
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -53,6 +54,7 @@ export const StudentFilter: React.FC = () => {
     const getRoles = async () => {
         console.log(alumni)
         console.log(studentCoach)
+        console.log(selectedRoles)
     }
 
 
@@ -63,7 +65,11 @@ export const StudentFilter: React.FC = () => {
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc"
         const emailOrder = emailSort ? "Desc" : "Asc"
-        const query = "name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder
+        const roles = ["Backend dev", "Frontend dev"]
+        setSelectedRoles(roles)
+        const query = "name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
+            "&Yes=" + filterYes + "&maybe=" + filterMaybe + "&no=" + filterNo + "&studentCoach=" + studentCoach +
+            "&alumni=" + alumni + "&roles=" + roles
         console.log(query)
         //TODO hier moet de call naar de backend gebeuren en dan de data naar Students brengen
     }
