@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start_dev": "cross-env NODE_ENV=development nodemon --legacy-watch --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register index.ts'",
-    "start_prod": "cross-env NODE_ENV=production nodemon index.ts",
+    "dev": "cross-env NODE_ENV=development nodemon --legacy-watch --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register index.ts'",
+    "prod": "cross-env NODE_ENV=production nodemon index.ts",
     "migrate:postgres": "npx dotenv -e prisma/.env.test -- npx prisma db push",
     "dockerIntegration:up": "docker-compose -f docker-compose.integrationtest.yml up -d --build",
     "docker:down": "docker-compose down",
