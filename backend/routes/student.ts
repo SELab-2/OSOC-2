@@ -7,7 +7,7 @@ import * as ormRo from '../orm_functions/role';
 import * as ormSt from '../orm_functions/student';
 //import * as ormLoUs from '../orm_functions/login_user';
 import * as rq from '../request';
-import {InternalTypes, Responses} from '../types';
+import {Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
 
@@ -238,17 +238,32 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentConfirmation(req: express.Request): Promise<Responses.Keyed<InternalTypes.Suggestion>> {
-    return rq.parseFinalizeDecisionRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(parsed => util.isValidID(parsed.data, 'student'))
-        .then(parsed => {
-            // UPDATING LOGIC
-            /*return ormEv.createEvaluationForStudent({
-            loginUserId: parsed.
-            })*/
-            return Promise.resolve({data : 'YES', sessionkey : parsed.sessionkey});
-        });
+async function createStudentConfirmation(req: express.Request): Promise<Responses.Key> {
+    const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const student = await ormSt.getStudent(checkedSessionKey.data.id);
+    if (student == null) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    if (jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    await ormEv.createEvaluationForStudent({
+        loginUserId : checkedSessionKey.userId,
+        jobApplicationId : jobApplication.job_application_id,
+        decision : checkedSessionKey.data.reply,
+        motivation : checkedSessionKey.data.reason,
+        isFinal : true
+    });
+
+    return Promise.resolve({sessionkey : checkedSessionKey.data.sessionkey});
 }
 
 /**
@@ -280,7 +295,7 @@ export function getRouter(): express.Router {
 
     util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
-    util.route(router, "post", "/:id/confirm", createStudentConfirmation);
+    util.routeKeyOnly(router, "post", "/:id/confirm", createStudentConfirmation);
 
     util.route(router, "get", "/search", searchStudents);
 

@@ -248,6 +248,7 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
     return Promise.resolve({
       sessionkey : getSessionKey(req),
       id : Number(req.params.id),
+      reason : maybe(req.body, "reason"),
       reply : maybe(req.body, "reply")
     });
   });
