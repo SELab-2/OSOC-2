@@ -1,43 +1,49 @@
 /* We can create triangles using some magic CSS! */
 .triangleContainer {
     position: relative;
-    transform: translate(0, 50%);
     height: 100%;
     width: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .triangle {
+    margin: auto;
     position: relative;
     background-color: var(--primary-100);
     transition-duration: 0.2s;
 }
+
 .triangle:before,
 .triangle:after {
     content: '';
     position: absolute;
     background-color: inherit;
 }
+
 .triangle,
 .triangle:before,
 .triangle:after {
-    width:  0.5em;
+    width: 0.5em;
     height: 0.5em;
     border-top-right-radius: 30%;
 }
 
 .triangle.up {
-    transform: rotate(60deg) skewX(-30deg) scale(1,.866) translate(0, -33%);
+    transform: rotate(60deg) skewX(-30deg) scale(1, .866) translate(33%, -33%);
 }
 
 .triangle {
-    transform: skewX(-30deg) scale(1,.866) translate(0, -75%);
+    transform: skewX(-30deg) scale(1, .866) translate(33%, -33%);
 }
 
 .triangle:before {
-    transform: rotate(-135deg) skewX(-45deg) scale(1.414,.707) translate(0,-50%);
+    transform: rotate(-135deg) skewX(-45deg) scale(1.414, .707) translate(0, -50%);
 }
+
 .triangle:after {
-    transform: rotate(135deg) skewY(-45deg) scale(.707,1.414) translate(50%);
+    transform: rotate(135deg) skewY(-45deg) scale(.707, 1.414) translate(50%);
 }
 
 .line {
@@ -45,19 +51,50 @@
     height: 0.15em;
     background-color: var(--primary-100);
     transition-duration: 0.5s;
+    transform: translate(0, 100%);
 }
 
+.filter {
+    background-color: var(--neutral-200);
+    padding: 0.5rem 0.2rem;
+    border-radius: 0.5rem;
+    margin-inline: -0.2rem
+}
+/* The form containing the name and email filters */
 .form {
-    display: flex;
-    gap: 3rem;
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: 1.5fr 1.5fr 0.75fr;
+    align-items: center;
+    padding: 0.5rem;
 }
 
-.form .label {
+/* The query and the label for the query */
+.form .query, .query div {
     display: flex;
     align-items: center;
-    gap: 20%;
 }
 
-.form input {
-    margin-block: auto;
+.form .query {
+    gap: 5%;
+}
+
+.query div {
+    user-select: none; /* We want the user to be able to click on the label to sort without selecting the text */
+}
+
+.query div:hover {
+    cursor: pointer;
+}
+
+/* The filter text input fields */
+.input {
+    border: none;
+    background-color: var(--neutral-150);
+    height: 2.5rem;
+    border-radius: 1rem;
+}
+
+.input:focus {
+    background-color: var(--neutral-100);
 }

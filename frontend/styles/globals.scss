@@ -88,3 +88,8 @@ a:hover {
   text-decoration: underline;
   color: var(--error-100);
 }
+
+/* We have our own way of showing which input field is active */
+input {
+  box-shadow: none !important;
+}

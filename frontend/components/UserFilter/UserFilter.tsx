@@ -68,26 +68,30 @@ export const UserFilter: React.FC = () => {
     return (
         <div className={styles.filter}>
             <form className={styles.form}>
-                <div className={styles.label} onClick={toggleNameSort}>
-                    Names
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${nameSort === Sort.Ascending ? styles.up : ""} ${nameSort === Sort.None ? styles.line : styles.triangle}`}
-                        />
+                <div className={styles.query}>
+                    <div onClick={toggleNameSort}>
+                        Names
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${nameSort === Sort.Ascending ? styles.up : ""} ${nameSort === Sort.None ? styles.line : styles.triangle}`}
+                            />
+                        </div>
                     </div>
-                </div>
-                <input type="text" placeholder="Search.." onChange={e => setNameFilter(e.target.value)}/>
 
-                <div className={styles.label} onClick={toggleEmailSort}>
+                    <input className={`input ${styles.input}`} type="text" placeholder="Search.." onChange={e => setNameFilter(e.target.value)}/>
+                    <button onClick={search}>Search</button>
+                </div>
+
+                <div className={styles.query} onClick={toggleEmailSort}>
                     Email
                     <div className={styles.triangleContainer}>
                         <div
                             className={`${emailSort === Sort.Ascending ? styles.up : ""} ${emailSort === Sort.None ? styles.line : styles.triangle}`}
                         />
                     </div>
-
+                    <input type="text" placeholder="Search.." onChange={e => setEmailFilter(e.target.value)}/>
+                    <button onClick={search}>Search</button>
                 </div>
-                <input type="text" placeholder="Search.." onChange={e => setEmailFilter(e.target.value)}/>
 
                 <div className={styles.dropdownContent}>
                     <Image className={styles.buttonImage}
@@ -105,7 +109,7 @@ export const UserFilter: React.FC = () => {
                            onClick={togglePendingFilter}/>
                 </div>
 
-                <button onClick={search}>Search</button>
+
             </form>
         </div>)
 }
