@@ -3,6 +3,7 @@ import {useRouter} from "next/router";
 import styles from "../../styles/login.module.scss";
 import {SyntheticEvent, useEffect, useState} from "react";
 import crypto from "crypto";
+import isStrongPassword from "validator/lib/isStrongPassword";
 
 /**
  * Landing page for when you click the reset password link from your email
@@ -18,6 +19,7 @@ const Pid: NextPage = () => {
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [confirmNewPassword, setConfirmNewPassword] = useState<string>("");
     const [confirmNewPasswordError, setConfirmNewPasswordError] = useState<string>("");
+    const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [backendError, setBackendError] = useState<string>("");
 
 
@@ -41,6 +43,43 @@ const Pid: NextPage = () => {
         }
     }, [pid, router])
 
+    const updateNewPassword = (password: string) => {
+        const score = isStrongPassword(password, {returnScore: true}) as unknown as number
+        setNewPasswordScore(score)
+        setNewPasswordError("")
+        setNewPassword(password)
+    }
+
+    /**
+     * Converts the register password strength score to a textual representation
+     */
+    const scoreToText = () => {
+        if (newPasswordScore < 20) {
+            return "Weak"
+        }
+
+        if (newPasswordScore < 40) {
+            return "Moderate"
+        }
+
+        return "Strong"
+    }
+
+    /**
+     * Returns a style for the current password strength
+     */
+    const scoreToStyle = () => {
+        if (newPasswordScore < 20) {
+            return styles.weak
+        }
+
+        if (newPasswordScore < 40) {
+            return styles.moderate
+        }
+
+        return styles.strong
+    }
+
     /**
      * Handles all the logic for resetting the password
      * @param e
@@ -51,6 +90,8 @@ const Pid: NextPage = () => {
         if (newPassword === "") {
             setNewPasswordError("Password cannot be empty")
             error = true
+        } else if (newPasswordScore < 20) {
+            setNewPasswordError("Please provide a secure enough password")
         } else {
             setNewPasswordError("")
         }
@@ -93,9 +134,16 @@ const Pid: NextPage = () => {
                 <label className={styles.label}>
                     New Password
                     <input type="password" name="newPassword" value={newPassword}
-                           onChange={e => setNewPassword(e.target.value)}/>
+                           onChange={e => updateNewPassword(e.target.value)}/>
                 </label>
-                <p className={`${styles.textFieldError} ${newPasswordError !== "" ? styles.anim : ""}`}>{newPasswordError}</p>
+                {newPasswordError === "" && newPassword !== "" ?
+                    <div className={styles.anim} style={{justifyContent: "space-between", display: "inherit"}}>
+                        <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password strength:</p>
+                        <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{scoreToText()}</p>
+                    </div>
+                    :
+                    <p className={`${styles.textFieldError} ${newPasswordError !== "" ? styles.anim : ""}`}>{newPasswordError}</p>
+                }
                 <label className={styles.label}>
                     Confirm New Password
                     <input type="password" name="confirmNewPassword" value={confirmNewPassword}

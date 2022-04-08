@@ -400,15 +400,14 @@ const Index: NextPage = () => {
                             <input type="password" name="registerPassword" value={registerPassword}
                                    onChange={e => updateRegisterPassword(e.target.value)}/>
                         </label>
-                        <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
-                        <div className={styles.anim}
-                             style={{display: `${registerPasswordError === "" && registerPassword !== "" ? "inherit" : "none"}`,
-                                        justifyContent: "space-between"}}>
-                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password
-                                strength:</p>
-                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{scoreToText()}</p>
-                        </div>
-
+                        {registerPasswordError === "" && registerPassword !== "" ?
+                            <div className={styles.anim} style={{display: "inherit", justifyContent: "space-between"}}>
+                                <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password strength:</p>
+                                <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{scoreToText()}</p>
+                            </div>
+                            :
+                            <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
+                        }
                         <label className={styles.label}>
                             Confirm Password
                             <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
