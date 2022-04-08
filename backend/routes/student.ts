@@ -189,7 +189,7 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
         jobApplicationId : jobApplication.job_application_id,
         decision : checkedSessionKey.data.suggestion,
         motivation : checkedSessionKey.data.reason,
-        isFinal : true
+        isFinal : false
     });
 
     return Promise.resolve({sessionkey : checkedSessionKey.data.sessionkey});
