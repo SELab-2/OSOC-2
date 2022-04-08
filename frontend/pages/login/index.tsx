@@ -55,7 +55,6 @@ const Index: NextPage = () => {
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
     const [registerBackendError, setRegisterBackendError] = useState<string>("");
     const [registerPasswordScore, setRegisterPasswordScore] = useState<number>(0);
-    const [registerPasswordStrength, setRegisterPasswordStrength] = useState<string>("Weak")
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -137,7 +136,6 @@ const Index: NextPage = () => {
             returnScore: true
         }) as unknown as number
         setRegisterPasswordScore(score)
-        setRegisterPasswordStrength(scoreToText)
         setRegisterPasswordError("")
         setRegisterPassword(password)
     }
@@ -408,7 +406,7 @@ const Index: NextPage = () => {
                                         justifyContent: "space-between"}}>
                             <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password
                                 strength:</p>
-                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{registerPasswordStrength}</p>
+                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{scoreToText()}</p>
                         </div>
 
                         <label className={styles.label}>
