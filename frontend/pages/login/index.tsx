@@ -8,6 +8,7 @@ import {useRouter} from "next/router";
 
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
+import isStrongPassword from "validator/lib/isStrongPassword";
 
 /**
  * The main login and registration page
@@ -57,6 +58,7 @@ const Index: NextPage = () => {
     const [registerConfirmPassword, setRegisterConfirmPassword] = useState<string>("");
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
     const [registerBackendError, setRegisterBackendError] = useState<string>("");
+    const [registerPasswordScore, setRegisterPasswordScore] = useState<number>(0);
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -130,6 +132,49 @@ const Index: NextPage = () => {
     }
 
     /**
+     * Checks the password strength using `isStrongPassword` from validator
+     * @param password
+     */
+    const updateRegisterPassword = (password: string) => {
+        const score = isStrongPassword(password, {
+            returnScore: true
+        }) as unknown as number
+        setRegisterPasswordScore(score)
+        setRegisterPasswordError("")
+        setRegisterPassword(password)
+    }
+
+    /**
+     * Converts the register password strength score to a textual representation
+     */
+    const scoreToText = () => {
+        if (registerPasswordScore < 20) {
+            return "Weak"
+        }
+
+        if (registerPasswordScore < 40) {
+            return "Moderate"
+        }
+
+        return "Strong"
+    }
+
+    /**
+     * Returns a style for the current password strength
+     */
+    const scoreToStyle = () => {
+        if (registerPasswordScore < 20) {
+            return styles.weak
+        }
+
+        if (registerPasswordScore < 40) {
+            return styles.moderate
+        }
+
+        return styles.strong
+    }
+
+    /**
      * Executed upon trying to register
      * Checks that inputfields are not empty and sends a request to the backend
      * Redirects to the home page if succesfull else returns an error message
@@ -165,6 +210,9 @@ const Index: NextPage = () => {
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
+        } else if (registerPasswordScore < 20) {
+            error = true
+            setRegisterPasswordError("Please provide a secure enough password");
         } else {
             setRegisterPasswordError("");
         }
@@ -354,9 +402,16 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Password
                             <input type="password" name="registerPassword" value={registerPassword}
-                                   onChange={e => setRegisterPassword(e.target.value)}/>
+                                   onChange={e => updateRegisterPassword(e.target.value)}/>
                         </label>
-                        <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
+                        {registerPasswordError === "" && registerPassword !== "" ?
+                            <div className={styles.anim} style={{display: "inherit", justifyContent: "space-between"}}>
+                                <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password strength:</p>
+                                <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{scoreToText()}</p>
+                            </div>
+                            :
+                            <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
+                        }
                         <label className={styles.label}>
                             Confirm Password
                             <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
