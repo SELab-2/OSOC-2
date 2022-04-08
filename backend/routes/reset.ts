@@ -18,7 +18,17 @@ export async function sendMail(mail: Email) {
       google['google-client-id'], google['google-client-secret']);
   oauthclient.setCredentials({refresh_token : google['google-refresh-token']});
   const accesstoken =
-      await oauthclient.getAccessToken().then(token => token.token!);
+      await oauthclient.getAccessToken()
+          .then(token => {
+            if (token != null && token.token != null) {
+              return token.token
+            } else {
+              return Promise.reject(
+                  new Error("Received token from Google OAuth was null"));
+            }
+          })
+          .catch(e => console.log('Email error:' + JSON.stringify(e)));
+
   const transp = nodemailer.createTransport({
     service : 'gmail',
     auth : {
@@ -27,7 +37,7 @@ export async function sendMail(mail: Email) {
       clientId : google['google-client-id'],
       clientSecret : google['google-client-secret'],
       refreshToken : google['google-refresh-token'],
-      accessToken : accesstoken
+      accessToken : accesstoken as string
     }
   });
 
@@ -44,7 +54,7 @@ export async function sendMail(mail: Email) {
       })
       .catch(e => {
         console.log('Email error: ' + JSON.stringify(e));
-        return Promise.reject(e);
+        return Promise.reject(config.apiErrors.reset.sendEmail)
       });
 }
 
@@ -59,13 +69,17 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
       (parsed) =>
           ormP.getPasswordPersonByEmail(parsed.email).then(async (person) => {
             if (person == null || person.login_user == null) {
-              return Promise.reject(config.apiErrors.invalidEmailReset);
+              return Promise.reject(config.apiErrors.reset.invalidEmail);
             }
             const date: Date = new Date(Date.now());
             date.setHours(date.getHours() + 24);
             return ormPR
                 .createOrUpdateReset(person.login_user.login_user_id,
                                      util.generateKey(), date)
+                .catch((e) => {
+                  console.log(e);
+                  return Promise.reject()
+                })
                 .then(async (code) => {
                   return sendMail({
                            to : parsed.email,
@@ -95,7 +109,7 @@ async function checkCode(req: express.Request): Promise<Responses.Empty> {
 
         return Promise.resolve({});
       })
-      .catch(() => Promise.reject(util.errors.cookArgumentError()));
+      .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
 }
 
 /**
@@ -132,7 +146,8 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
             .then(async key => {
               return ormPR.deleteResetWithResetId(code.reset_id)
                   .then(() => Promise.resolve({sessionkey : key.session_key}));
-            });
+            })
+      .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
       }));
 }
 
