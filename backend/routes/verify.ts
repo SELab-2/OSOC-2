@@ -17,7 +17,7 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     if (checkedSessionKey.data == undefined) {
         // Return false instead of promise reject
         // return Promise.reject(errors.cookInvalidID);
-        return Promise.resolve({data : false, sessionkey : checkedSessionKey.data.sessionkey});
+        return Promise.resolve({data : false, sessionkey : ""});
     }
     return Promise.resolve({data : true, sessionkey : checkedSessionKey.data.sessionkey});
 }
