@@ -135,20 +135,6 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 }
 
 /**
- *  Attempts to update a student.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function modStudent(req: express.Request): Promise<Responses.Student> {
-    return rq.parseUpdateStudentRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(() => {
-            return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
-        });
-}
-
-/**
  *  Attempts to delete a student from the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -296,10 +282,9 @@ export function getRouter(): express.Router {
     util.setupRedirect(router, '/student');
     util.route(router, "get", "/all", listStudents);
     util.route(router, "get", "/:id", getStudent);
-    util.route(router, "post", "/:id", modStudent);
     util.routeKeyOnly(router, 'delete', '/:id', deleteStudent);
 
-    util.routeKeyOnly(router, 'post', '/:id', createStudentSuggestion);
+    util.routeKeyOnly(router, 'post', '/:id/suggest', createStudentSuggestion);
 
     util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
