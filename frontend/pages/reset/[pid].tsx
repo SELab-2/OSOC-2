@@ -92,6 +92,7 @@ const Pid: NextPage = () => {
             error = true
         } else if (newPasswordScore < 20) {
             setNewPasswordError("Please provide a secure enough password")
+            error = true
         } else {
             setNewPasswordError("")
         }
