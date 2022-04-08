@@ -148,7 +148,7 @@ const Index: NextPage = () => {
             return "Weak"
         }
 
-        if (registerPasswordScore < 35) {
+        if (registerPasswordScore < 40) {
             return "Moderate"
         }
 
@@ -163,7 +163,7 @@ const Index: NextPage = () => {
             return styles.weak
         }
 
-        if (registerPasswordScore < 35) {
+        if (registerPasswordScore < 40) {
             return styles.moderate
         }
 
