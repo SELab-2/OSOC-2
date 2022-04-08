@@ -142,26 +142,10 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
  */
 async function modStudent(req: express.Request): Promise<Responses.Student> {
     return rq.parseUpdateStudentRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(parsed => util.isValidID(parsed.data, 'student'))
-        .then(async parsed => {return ormSt
-            .updateStudent({
-                studentId : parsed.id,
-                gender : parsed.gender,
-                pronouns : parsed.pronouns,
-                phoneNumber : parsed.phone,
-                nickname : parsed.nickname,
-                alumni : parsed.alumni
-            })
-            .then(student => {return Promise.resolve({
-                data : {
-                    pronouns : student.pronouns,
-                    phone_number : student.phone_number,
-                    nickname : student.nickname,
-                    alumni : student.alumni,
-                },
-                sessionkey : parsed.sessionkey
-            })})});
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(() => {
+            return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
+        });
 }
 
 /**
