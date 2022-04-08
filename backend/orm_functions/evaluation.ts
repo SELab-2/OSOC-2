@@ -23,7 +23,7 @@ export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
 /**
  * 
  * @param evaluation: this has an object that contains all the information for a new evaluation.
- *  however if the evaluation is final AND there is already another evaluation, then we modify this earlier "final" decision
+ * however, if the evaluation is final AND there is already another evaluation, then we modify this earlier "final" decision
  * @returns a promise with the created evaluation
  */
 export async function createEvaluationForStudent(evaluation: CreateEvaluationForStudent) {
