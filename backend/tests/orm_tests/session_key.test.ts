@@ -31,11 +31,11 @@ test("should remove all keys from the user with the given key", async () => {
     // needed for the check session key
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 15);
-    const valid = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}
-    prismaMock.session_keys.findUnique.mockResolvedValue(valid);
+    const valid = [{session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}]
+    prismaMock.session_keys.findMany.mockResolvedValue(valid);
 
     // for the removal
-    const count = {count: 2}
+    const count = {count: 2};
     prismaMock.session_keys.deleteMany.mockResolvedValue(count);
     await expect(removeAllKeysForUser("key")).resolves.toEqual(count);
 });
