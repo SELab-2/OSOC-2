@@ -12,7 +12,11 @@ import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketDat
 const app: express.Application = express();
 const port: number = config.port;
 const httpServer = createServer(app);
-const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, { /* options */ });
+const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, {
+    cors: {
+        origin: "http://localhost:3000"
+    }
+});
 
 app.use(body.urlencoded({extended: true}));
 app.use(express.json());
@@ -22,7 +26,7 @@ ep.attach(app);
 config.global.homes.forEach(home => util.addInvalidVerbs(app, home + "/"));
 
 io.on("connection", (socket) => {
-    console.log("websocket connection achieved " + JSON.stringify(socket));
+    console.log("websocket connection achieved " + socket.id);
 });
 httpServer.listen(port, () => {
     console.log(`TypeScript with Express
