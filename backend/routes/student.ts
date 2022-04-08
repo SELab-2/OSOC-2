@@ -74,55 +74,64 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getStudent(req: express.Request): Promise<Responses.Student> {
-    return rq.parseSingleStudentRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(parsed => util.isValidID(parsed.data, "student"))
-        .then(async parsed => {
-            return ormSt.getStudent(parsed.id).then(async student => {
-                if (student !== null) {
-                    return ormJo
-                        .getLatestJobApplicationOfStudent(student.student_id)
-                        .then(async jobApplication => {
-                            if (jobApplication !== null) {
-                                return ormJo
-                                    .getStudentEvaluationsTotal(student.student_id)
-                                    .then(evaluations => {
-                                        const languages: string[] = [];
-                                        jobApplication.job_application_skill.forEach(
-                                            skill => {
-                                                ormLa
-                                                    .getLanguage(skill.language_id)
-                                                    .then(language => {
-                                                        if (language !== null) {
-                                                            languages.push(language.name);
-                                                        } else {
-                                                            return Promise.reject(errors.cookInvalidID);
-                                                        }
-                                                    })});
-                                        return Promise.resolve({
-                                            data : {
-                                                firstname : student.person.firstname,
-                                                lastname : student.person.lastname,
-                                                email : student.person.email,
-                                                pronouns : student.pronouns,
-                                                phoneNumber : student.phone_number,
-                                                nickname : student.nickname,
-                                                alumni : student.alumni,
-                                                languages : languages,
-                                                jobApplication : jobApplication,
-                                                evaluations : evaluations,
-                                            },
-                                            sessionkey : parsed.sessionkey
-                                        })
-                                    })
-                            } else {
-                                return Promise.reject(errors.cookInvalidID);
-                            }
-                        })
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            })});
+    const parsedRequest = await rq.parseSingleStudentRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const student = await ormSt.getStudent(checkedSessionKey.data.id);
+    if(student == null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if(student.pronouns.length > 0 && student.pronouns[0] == "None") {
+        student.pronouns = [];
+    }
+
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    if(jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const roles = [];
+    for(const applied_role of jobApplication.applied_role) {
+        const role = await ormRo.getRole(applied_role.role_id);
+        if(role != null) {
+            roles.push(role.name);
+        } else {
+            return Promise.reject(errors.cookInvalidID);
+        }
+    }
+
+    const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
+
+    const languages : string[] = [];
+    for(const job_application_skill of jobApplication.job_application_skill) {
+        const language = await ormLa.getLanguage(job_application_skill.language_id);
+        if(language == null) {
+            return Promise.reject(errors.cookInvalidID);
+        }
+        languages.push(language.name);
+    }
+
+    return Promise.resolve({
+        data : {
+            firstname : student.person.firstname,
+            lastname : student.person.lastname,
+            email : student.person.email,
+            github: student.person.github,
+            pronouns : student.pronouns,
+            phoneNumber : student.phone_number,
+            nickname : student.nickname,
+            alumni : student.alumni,
+            languages : languages,
+            jobApplication : jobApplication,
+            evaluations : evaluations,
+            roles: roles
+        },
+        sessionkey : checkedSessionKey.data.sessionkey
+    });
 }
 
 /**
