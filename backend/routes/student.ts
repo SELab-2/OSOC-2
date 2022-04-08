@@ -157,9 +157,8 @@ async function modStudent(req: express.Request): Promise<Responses.Student> {
 async function deleteStudent(req: express.Request): Promise<Responses.Key> {
     return rq.parseDeleteStudentRequest(req)
         .then(parsed => util.isAdmin(parsed))
-        .then(parsed => util.isValidID(parsed.data, 'student'))
-        .then(async parsed => {return ormSt.deleteStudent(parsed.id).then(
-            () => {return Promise.resolve({sessionkey : parsed.sessionkey})})});
+        .then(async parsed => {return ormSt.deleteStudent(parsed.data.id).then(
+            () => {return Promise.resolve({sessionkey : parsed.data.sessionkey})})});
 }
 
 /**
