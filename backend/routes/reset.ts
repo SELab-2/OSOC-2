@@ -147,7 +147,7 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
               return ormPR.deleteResetWithResetId(code.reset_id)
                   .then(() => Promise.resolve({sessionkey : key.session_key}));
             })
-            .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
+      .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
       }));
 }
 
@@ -158,8 +158,7 @@ export function getRouter(): express.Router {
               (req, res) => util.respOrErrorNoReinject(res, requestReset(req)));
   router.get('/:id',
              (req, res) => util.respOrErrorNoReinject(res, checkCode(req)));
-  router.post("/:id", (req, res) =>
-                          util.respOrErrorNoReinject(res, resetPassword(req)));
+  util.routeKeyOnly(router, 'post', '/:id', resetPassword);
 
   util.addAllInvalidVerbs(router, [ "/", "/:id" ]);
 
