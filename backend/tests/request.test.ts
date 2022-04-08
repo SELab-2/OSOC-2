@@ -401,7 +401,8 @@ test("Can parse new project request", () => {
     partner : "Simic Combine",
     start : Date.now(),
     end : Date.now(),
-    positions : 69
+    positions : 69,
+    osocId : 17
   };
   const d2: T.Anything = {};
   const d3: T.Anything = {

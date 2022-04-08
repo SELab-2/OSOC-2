@@ -9,6 +9,8 @@ import * as login from './routes/login';
 import * as project from './routes/project';
 import * as reset from './routes/reset';
 import * as student from './routes/student';
+import * as user from './routes/user';
+import * as role from './routes/role';
 import * as util from './utility';
 
 /**
@@ -25,6 +27,8 @@ export function attach(app: express.Application): void {
     app.use(home + '/form', form.getRouter);
     app.use(home + '/reset', reset.getRouter());
     app.use(home + '/github', github.getRouter());
+    app.use(home + '/user', user.getRouter());
+    app.use(home + '/role', role.getRouter());
   });
 
   app.use((req: express.Request, res: express.Response): Promise<void> =>

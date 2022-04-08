@@ -8,6 +8,7 @@ import cors from 'cors';
 import { createServer } from "http";
 import { Server } from "socket.io";
 import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./types";
+import path from "path";
 
 const app: express.Application = express();
 const port: number = config.port;
@@ -17,6 +18,10 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEve
         origin: "http://localhost:3000"
     }
 });
+
+// require makes it A LOT easier to use this. Import gives some weird behaviour that is not easy to work around
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config({ path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`)});
 
 app.use(body.urlencoded({extended: true}));
 app.use(express.json());
@@ -30,5 +35,6 @@ io.on("connection", (socket) => {
 });
 httpServer.listen(port, () => {
     console.log(`TypeScript with Express
+<<<<<<< HEAD
           http://localhost:${port}/`);
 });
