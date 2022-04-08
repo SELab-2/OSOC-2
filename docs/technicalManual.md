@@ -171,6 +171,12 @@ To insert a record (row) into a table, execute following command:
 VALUES (value1, value2, …);
 ```
 
+### Cron jobs
+We use pg_cron to run automated jobs on certain timestamps.
+The cron extesion is added in the create_db.sql script aswell as the jobs.
+For example every night at midnight we check if all session keys in the database are still valid, unvalid keys are removed.
+A postgresql vacuum job also runs every night, this physically removes all deleted entries and cleans up the database.
+
 ## Frontend guide <a name="frontend"></a>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
