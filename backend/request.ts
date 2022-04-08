@@ -217,7 +217,7 @@ export async function parseSuggestStudentRequest(req: express.Request):
   return hasFields(req, [ "suggestion", "senderId" ], types.id).then(() => {
     const sug: unknown = req.body.suggestion;
     if (sug != "YES" && sug != "MAYBE" && sug != "NO" &&
-        req.body.senderId !== null)
+        req.body.senderId != null)
       return rejector();
 
     return Promise.resolve({
