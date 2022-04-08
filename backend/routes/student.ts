@@ -5,6 +5,7 @@ import * as ormJo from '../orm_functions/job_application';
 import * as ormLa from '../orm_functions/language';
 import * as ormRo from '../orm_functions/role';
 import * as ormSt from '../orm_functions/student';
+//import * as ormLoUs from '../orm_functions/login_user';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
@@ -188,46 +189,37 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getStudentSuggestions(req: express.Request): Promise<Responses.SuggestionInfo> {
+    /*const parsedRequest = await rq.parseStudentGetSuggestsRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const student = await ormSt.getStudent(checkedSessionKey.data.id);
+    if (student == null) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    if (jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+
+    const currentYear = new Date().getFullYear();
+    let suggestionsTotal = (await ormJo.getStudentEvaluationsTotal(student.student_id))
+        .filter(suggestion => suggestion.osoc.year === currentYear);
+
+    const suggestionsInfo = [];
+    for(const suggestion of suggestionsTotal) {
+        for(const evaluation of suggestion.evaluation) {
+        }
+    }*/
+
+
     return rq.parseStudentGetSuggestsRequest(req)
         .then(parsed => util.checkSessionKey(parsed))
         .then(parsed => util.isValidID(parsed.data, 'student'))
         .then(parsed => {
-        /*let suggestionsList : InternalTypes.SuggestionInfo[] = [];
-        ormSt.getStudent(parsed.id)
-            .then(student => {
-                if (student !== null) {
-                    ormJo.getLatestJobApplicationOfStudent(student.student_id)
-                        .then(jobApplication => {
-                            if (jobApplication !== null) {
-                                ormJo.getStudentEvaluationsTemp(student.student_id)
-                                    .then(suggestions => {
-                                        suggestions.forEach(suggestion =>
-                                            suggestion.evaluation.forEach(sug
-        => { ormEv.getLoginUserByEvaluationId(sug.evaluation_id) .then(loginUser
-        => { if(loginUser !== null) { suggestionsList.push({ suggestion:
-        sug.decision, sender: { name: loginUser.login_user.person.firstname +
-        loginUser.login_user.person.lastname, id: loginUser.login_user_id
-                                                                },
-                                                                reason:
-        sug.motivation
-                                                            }))
-                                                    }
-                                            })
-                                        )
-                                        suggestions.forEach(suggestion =>
-                                            suggestion.evaluation.forEach()
-                                            ormEv.getLoginUserByEvaluationId()
-                                        )
-                                    })
-
-                            } else {
-                                return Promise.reject(errors.cookInvalidID());
-                            }
-                        })
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            })*/
 
             return Promise.resolve({
                 data : [ {
