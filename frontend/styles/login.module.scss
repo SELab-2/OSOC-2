@@ -174,3 +174,17 @@
     90% { transform: translate(1px, 0)}
     100% { transform: translate(1px, 0)}
 }
+
+
+/* Colors to indicate password strength */
+.weak {
+    color: var(--error-100);
+}
+
+.moderate {
+    color: var(--warning-100);
+}
+
+.strong {
+    color: var(--succes-100)
+}

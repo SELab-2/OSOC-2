@@ -65,3 +65,6 @@ backend/.idea
 .env
 frontend/.env.development
 frontend/.env.production
+backend/prisma/.env
+backend/.env.development
+backend/.env.production

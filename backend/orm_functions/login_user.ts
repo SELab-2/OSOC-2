@@ -242,3 +242,45 @@ export async function filterLoginUsers(nameFilter: FilterString,
 
     });
 }
+
+/**
+ * Sets the is_coach field of the loginUser to isCoach
+ *
+ * @param loginUserId: the id of the loginUser whose field we are updating
+ * @param isCoach: the new value of the is_coach field for the loginUser
+ * @return a promise with the updated entry, the person object is also included
+ */
+export async function setCoach(loginUserId: number, isCoach: boolean) {
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_coach: isCoach,
+        },
+        include: {
+            person: true,
+        }
+    });
+}
+
+/**
+ * Sets the is_admin field of the loginuser to IsAdmin
+ *
+ * @param loginUserId the id of the loginUser whose field we are updating
+ * @param isAdmin the new value of is_admin
+ * @returns a promise with the updated entry, the person object is also included
+ */
+export async function setAdmin(loginUserId: number, isAdmin: boolean) {
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_admin: isAdmin,
+        },
+        include: {
+            person: true,
+        }
+    });
+}
