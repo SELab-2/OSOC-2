@@ -7,11 +7,12 @@ import * as util from './utility';
 import cors from 'cors';
 import { createServer } from "http";
 import { Server } from "socket.io";
+import {ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData} from "./types";
 
 const app: express.Application = express();
 const port: number = config.port;
 const httpServer = createServer(app);
-const io = new Server(httpServer, { /* options */ });
+const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>(httpServer, { /* options */ });
 
 app.use(body.urlencoded({extended: true}));
 app.use(express.json());
