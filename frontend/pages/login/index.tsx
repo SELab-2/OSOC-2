@@ -55,6 +55,7 @@ const Index: NextPage = () => {
     const [registerConfirmPasswordError, setRegisterConfirmPasswordError] = useState<string>("");
     const [registerBackendError, setRegisterBackendError] = useState<string>("");
     const [registerPasswordScore, setRegisterPasswordScore] = useState<number>(0);
+    const [registerPasswordStrength, setRegisterPasswordStrength] = useState<string>("Weak")
 
     // Password reset field values with corresponding error messages
     const [passwordResetMail, setPasswordResetMail] = useState<string>("");
@@ -133,21 +134,42 @@ const Index: NextPage = () => {
      */
     const updateRegisterPassword = (password: string) => {
         const score = isStrongPassword(password, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1,
-            returnScore: true,
-            pointsPerUnique: 1,
-            pointsPerRepeat: 0.5,
-            pointsForContainingLower: 10,
-            pointsForContainingUpper: 10,
-            pointsForContainingNumber: 10,
-            pointsForContainingSymbol: 10
+            returnScore: true
         }) as unknown as number
         setRegisterPasswordScore(score)
+        setRegisterPasswordStrength(scoreToText)
+        setRegisterPasswordError("")
         setRegisterPassword(password)
+    }
+
+    /**
+     * Converts the register password strength score to a textual representation
+     */
+    const scoreToText = () => {
+        if (registerPasswordScore < 20) {
+            return "Weak"
+        }
+
+        if (registerPasswordScore < 35) {
+            return "Moderate"
+        }
+
+        return "Strong"
+    }
+
+    /**
+     * Returns a style for the current password strength
+     */
+    const scoreToStyle = () => {
+        if (registerPasswordScore < 20) {
+            return styles.weak
+        }
+
+        if (registerPasswordScore < 35) {
+            return styles.moderate
+        }
+
+        return styles.strong
     }
 
     /**
@@ -186,9 +208,9 @@ const Index: NextPage = () => {
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
-        } else if (!registerPasswordScore) {
+        } else if (registerPasswordScore < 20) {
             error = true
-            setRegisterPasswordError("Please provide a secure password");
+            setRegisterPasswordError("Please provide a secure enough password");
         } else {
             setRegisterPasswordError("");
         }
@@ -381,7 +403,14 @@ const Index: NextPage = () => {
                                    onChange={e => updateRegisterPassword(e.target.value)}/>
                         </label>
                         <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
-                            <p className={`${styles.textFieldError} ${registerPasswordScore.toString() !== "0" ? styles.anim : ""}`}>{registerPasswordScore}</p>
+                        <div className={styles.anim}
+                             style={{display: `${registerPasswordError === "" && registerPassword !== "" ? "inherit" : "none"}`,
+                                        justifyContent: "space-between"}}>
+                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>Password
+                                strength:</p>
+                            <p className={`${styles.textFieldError} ${scoreToStyle()}`}>{registerPasswordStrength}</p>
+                        </div>
+
                         <label className={styles.label}>
                             Confirm Password
                             <input type="password" name="registerConfirmPassword" value={registerConfirmPassword}
@@ -397,27 +426,3 @@ const Index: NextPage = () => {
 }
 
 export default Index;
-
-
-export type SignInResult = {
-    /**
-     * Will be different error codes,
-     * depending on the type of error.
-     */
-    error: string | undefined
-    /**
-     * HTTP status code,
-     * hints the kind of error that happened.
-     */
-    status: number
-    /**
-     * `true` if the signin was successful
-     */
-    ok: boolean
-    /**
-     * `null` if there was an error,
-     * otherwise the url the user
-     * should have been redirected to.
-     */
-    url: string | null
-}
