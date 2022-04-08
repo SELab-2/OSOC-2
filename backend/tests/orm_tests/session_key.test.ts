@@ -1,32 +1,37 @@
 import {prismaMock} from "./singleton";
 import {addSessionKey, changeSessionKey, checkSessionKey, removeAllKeysForUser} from "../../orm_functions/session_key";
 
-test("should create a new session key for the user", async () => {
+const futureDate = new Date();
+futureDate.setDate(futureDate.getDate() + 15);
 
-    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: new Date()}
+test("should create a new session key for the user", async () => {
+    
+    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}
 
     prismaMock.session_keys.create.mockResolvedValue(response);
     await expect(addSessionKey(0, "key", new Date())).resolves.toEqual(response);
 });
 
 test("should return the found record", async () => {
-    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: new Date()}
+    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}
 
-    prismaMock.session_keys.findUnique.mockResolvedValue(response);
-    await expect(checkSessionKey("key")).resolves.toEqual(response);
+    prismaMock.session_keys.findMany.mockResolvedValue([response]);
+    await expect(checkSessionKey("key")).resolves.toEqual([response]);
 });
 
 test("should update to the new sesion key", async () => {
-    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: new Date()}
+    const response = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}
 
     prismaMock.session_keys.update.mockResolvedValue(response);
-    await expect(changeSessionKey("oldkey", "newkey", new Date())).resolves.toEqual(response);
+    await expect(changeSessionKey("oldkey", "newkey", futureDate)).resolves.toEqual(response);
 });
 
 test("should remove all keys from the user with the given key", async () => {
 
     // needed for the check session key
-    const valid = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: new Date()}
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 15);
+    const valid = {session_key_id: 1, login_user_id: 0, session_key: "key", valid_until: futureDate}
     prismaMock.session_keys.findUnique.mockResolvedValue(valid);
 
     // for the removal

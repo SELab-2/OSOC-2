@@ -24,14 +24,16 @@ export async function addSessionKey(loginUserId: number, key: string, date: Date
  * @returns the loginUser associated with the key in a promise if the keys is valid otherwise an error in a promise
  */
 export async function checkSessionKey(key: string) {
-    return await prisma.session_keys.findUnique({
+    return await prisma.session_keys.findMany({
         where: {
-            session_key: key
+            AND: [
+                {session_key: key},
+                {valid_until: {gte: new Date()}}
+            ]
         },
         select: {
             login_user_id: true
-        },
-        rejectOnNotFound: true
+        }
     });
 }
 
@@ -63,7 +65,7 @@ export async function removeAllKeysForUser(key: string) {
     return await checkSessionKey(key).then(
         uid => prisma.session_keys.deleteMany({
             where: {
-                login_user_id: uid.login_user_id
+                login_user_id: uid[0].login_user_id
             }
         })
     );

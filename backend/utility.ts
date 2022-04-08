@@ -236,7 +236,7 @@ export async function redirect(res: express.Response,
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
   return skey.checkSessionKey(obj.sessionkey)
-      .then((uid) => Promise.resolve({data : obj, userId : uid.login_user_id}))
+      .then(([uid]) => Promise.resolve({data : obj, userId : uid.login_user_id}))
       .catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
