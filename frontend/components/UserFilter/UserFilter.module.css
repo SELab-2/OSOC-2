@@ -1,52 +1,37 @@
-.dropbtn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-
-}
-
-.dropdown {
+/* We can create triangles using some magic CSS! */
+.triangle {
     position: relative;
-    display: inline-block;
+    background-color: var(--primary-100);
+    text-align: left;
+    transition-duration: 0.5s;
 }
-
-.dropdown-content {
-    display: none;
+.triangle:before,
+.triangle:after {
+    content: '';
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px
-    0px rgba(0, 0, 0, 0.2);
-    z-index: 1;
+    background-color: inherit;
+}
+.triangle,
+.triangle:before,
+.triangle:after {
+    width:  0.75em;
+    height: 0.75em;
+    border-top-right-radius: 30%;
 }
 
-.dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
+.triangleUp {
+    transform: rotate(-60deg) skewX(-30deg) scale(1,.866);
+}
+.triangle:before {
+    transform: rotate(-135deg) skewX(-45deg) scale(1.414,.707) translate(0,-50%);
+}
+.triangle:after {
+    transform: rotate(135deg) skewY(-45deg) scale(.707,1.414) translate(50%);
 }
 
-.dropdown-content a:hover {
-    background-color: #f1f1f1
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.dropdown:hover .dropbtn {
-    background-color: #3e8e41;
-}
-
-.button {
-    background: transparent;
-    font-size: 16px;
-    padding: 5px;
-}
-.button :hover {
-    background: transparent;
+.line {
+    width: 1em;
+    height: 0.25em;
+    background-color: var(--primary-100);
+    transition-duration: 0.5s;
 }
