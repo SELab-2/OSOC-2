@@ -22,4 +22,4 @@ RUN npx prisma generate
 
 EXPOSE 4096
 
-CMD ["nodemon", "--legacy-watch", "index.ts"]
+CMD ["npm", "run", "start_prod"]

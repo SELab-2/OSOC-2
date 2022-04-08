@@ -8,7 +8,7 @@ services:
       - '9229:9229' # debugging port
     depends_on:
       - db
-    command:  ["nodemon", "--legacy-watch", "--exec", "node --inspect=0.0.0.0:9229 --require ts-node/register index.ts"] # there is a bug in nodemon that using the --inspect flag directly is broken, use this manual command instead
+    command:  ["npm", "run", "start_dev"] # there is a bug in nodemon that using the --inspect flag directly is broken, use this manual command instead
   frontend:
     build: ./frontend
     ports:
