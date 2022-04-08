@@ -1,9 +1,15 @@
 /* We can create triangles using some magic CSS! */
+.triangleContainer {
+    position: relative;
+    transform: translate(0, 50%);
+    height: 100%;
+    width: 2em;
+}
+
 .triangle {
     position: relative;
     background-color: var(--primary-100);
-    text-align: left;
-    transition-duration: 0.5s;
+    transition-duration: 0.2s;
 }
 .triangle:before,
 .triangle:after {
@@ -14,14 +20,19 @@
 .triangle,
 .triangle:before,
 .triangle:after {
-    width:  0.75em;
-    height: 0.75em;
+    width:  0.5em;
+    height: 0.5em;
     border-top-right-radius: 30%;
 }
 
-.triangleUp {
-    transform: rotate(-60deg) skewX(-30deg) scale(1,.866);
+.triangle.up {
+    transform: rotate(60deg) skewX(-30deg) scale(1,.866) translate(0, -33%);
 }
+
+.triangle {
+    transform: skewX(-30deg) scale(1,.866) translate(0, -75%);
+}
+
 .triangle:before {
     transform: rotate(-135deg) skewX(-45deg) scale(1.414,.707) translate(0,-50%);
 }
@@ -30,8 +41,23 @@
 }
 
 .line {
-    width: 1em;
-    height: 0.25em;
+    width: 0.75em;
+    height: 0.15em;
     background-color: var(--primary-100);
     transition-duration: 0.5s;
+}
+
+.form {
+    display: flex;
+    gap: 3rem;
+}
+
+.form .label {
+    display: flex;
+    align-items: center;
+    gap: 20%;
+}
+
+.form input {
+    margin-block: auto;
 }

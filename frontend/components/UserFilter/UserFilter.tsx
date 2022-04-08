@@ -67,17 +67,27 @@ export const UserFilter: React.FC = () => {
 
     return (
         <div className={styles.filter}>
-            <form>
-                <label>
+            <form className={styles.form}>
+                <div className={styles.label} onClick={toggleNameSort}>
                     Names
-                    <input type="text" placeholder="Search.." onChange={e => setNameFilter(e.target.value)}/>
-                    <div className={`${nameSort === Sort.None ? styles.line : styles.triangle}`} onClick={toggleNameSort}/>
-                </label>
+                    <div className={styles.triangleContainer}>
+                        <div
+                            className={`${nameSort === Sort.Ascending ? styles.up : ""} ${nameSort === Sort.None ? styles.line : styles.triangle}`}
+                        />
+                    </div>
+                </div>
+                <input type="text" placeholder="Search.." onChange={e => setNameFilter(e.target.value)}/>
 
-                <label>
+                <div className={styles.label} onClick={toggleEmailSort}>
                     Email
-                    <input type="text" placeholder="Search.." onChange={e => setEmailFilter(e.target.value)}/>
-                </label>
+                    <div className={styles.triangleContainer}>
+                        <div
+                            className={`${emailSort === Sort.Ascending ? styles.up : ""} ${emailSort === Sort.None ? styles.line : styles.triangle}`}
+                        />
+                    </div>
+
+                </div>
+                <input type="text" placeholder="Search.." onChange={e => setEmailFilter(e.target.value)}/>
 
                 <div className={styles.dropdownContent}>
                     <Image className={styles.buttonImage}
