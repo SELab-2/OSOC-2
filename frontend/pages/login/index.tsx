@@ -129,6 +129,29 @@ const Index: NextPage = () => {
     }
 
     /**
+     * Checks the password strength using `isStrongPassword` from validator
+     * @param password
+     */
+    const updateRegisterPassword = (password: string) => {
+        const score = isStrongPassword(password, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+            returnScore: true,
+            pointsPerUnique: 1,
+            pointsPerRepeat: 0.5,
+            pointsForContainingLower: 10,
+            pointsForContainingUpper: 10,
+            pointsForContainingNumber: 10,
+            pointsForContainingSymbol: 10
+        }) as unknown as number
+        setRegisterPasswordScore(score)
+        setRegisterPassword(password)
+    }
+
+    /**
      * Executed upon trying to register
      * Checks that inputfields are not empty and sends a request to the backend
      * Redirects to the home page if succesfull else returns an error message
@@ -161,28 +184,11 @@ const Index: NextPage = () => {
             setRegisterLastNameError("")
         }
 
-        const score = isStrongPassword(registerPassword, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1,
-            returnScore: true,
-            pointsPerUnique: 1,
-            pointsPerRepeat: 0.5,
-            pointsForContainingLower: 10,
-            pointsForContainingUpper: 10,
-            pointsForContainingNumber: 10,
-            pointsForContainingSymbol: 10
-        }) as unknown as number
-        //TODO the scoring can be adjusted
-        setRegisterPasswordScore(score)
         if (registerPassword === "") {
             setRegisterPasswordError("Password cannot be empty");
             error = true
-        } else if (!score) {
+        } else if (!registerPasswordScore) {
             error = true
-
             setRegisterPasswordError("Please provide a secure password");
         } else {
             setRegisterPasswordError("");
@@ -377,7 +383,7 @@ const Index: NextPage = () => {
                             <label className={styles.label}>
                                 Password
                                 <input type="password" name="registerPassword" value={registerPassword}
-                                       onChange={e => setRegisterPassword(e.target.value)}/>
+                                       onChange={e => updateRegisterPassword(e.target.value)}/>
                             </label>
                             <p className={`${styles.textFieldError} ${registerPasswordError !== "" ? styles.anim : ""}`}>{registerPasswordError}</p>
                             <p className={`${styles.textFieldError} ${registerPasswordScore.toString() !== "0" ? styles.anim : ""}`}>{registerPasswordScore}</p>
