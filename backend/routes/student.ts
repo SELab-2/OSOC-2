@@ -25,8 +25,21 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
     const studentList: object[] = [];
     const students = await ormSt.getAllStudents();
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
+        if(students[studentIndex].pronouns.length > 0 && students[studentIndex].pronouns[0] == "None") {
+            students[studentIndex].pronouns = [];
+        }
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(students[studentIndex].student_id);
         if (jobApplication != null) {
+            const roles = [];
+            for(const applied_role of jobApplication.applied_role) {
+                const role = await ormRo.getRole(applied_role.role_id);
+                if(role != null) {
+                    roles.push(role.name);
+                } else {
+                    return Promise.reject(errors.cookInvalidID);
+                }
+            }
+
             const evaluations = await ormJo.getStudentEvaluationsTotal(students[studentIndex].student_id);
 
             const languages: string[] = [];
@@ -43,7 +56,8 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
                 student : students[studentIndex],
                 jobApplication : jobApplication,
                 evaluations : evaluations,
-                languages : languages
+                languages : languages,
+                roles: roles
             })
         } else {
             return Promise.reject(errors.cookInvalidID);
