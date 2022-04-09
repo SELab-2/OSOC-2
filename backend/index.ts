@@ -5,9 +5,14 @@ import * as config from './config.json';
 import * as ep from './endpoints'
 import * as util from './utility';
 import cors from 'cors';
+import path from "path";
 
 const app: express.Application = express();
 const port: number = config.port;
+
+// require makes it A LOT easier to use this. Import gives some weird behaviour that is not easy to work around
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config({ path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`)});
 
 app.use(body.urlencoded({extended: true}));
 app.use(express.json());

@@ -4,8 +4,7 @@ import {createProject, getAllProjects, getProjectByName, getProjectsByOsocEditio
     getProjectsByPartner, getProjectsByStartDate, getProjectsByEndDate, getProjectsStartedBeforeDate, getProjectsStartedAfterDate, getProjectsEndedBeforeDate, getProjectsByNumberPositions, updateProject, deleteProject, deleteProjectByOsocEdition, deleteProjectByPartner, getProjectsLessPositions, getProjectsMorePositions} from "../../orm_functions/project";
 
 
-const project1: UpdateProject = {
-    projectId: 1,
+const project1: CreateProject = {
     name: "test-project",
     osocId: 0,
     partner: "test-partner",
