@@ -5,6 +5,9 @@
   box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
   border-radius: 0.5rem;
   margin-inline: auto;
+}
+
+.body {
   padding-inline: 2rem;
   padding-top: 1rem
 }
@@ -21,7 +24,7 @@
 
 .column {
   border-right: 0.1rem solid var(--neutral-200);
-  margin-left: clamp(1rem, 5vw, 2rem);
+  margin-left: clamp(1rem, 3vw, 2.5rem);
 }
 .column:first-child {
   margin-left: 0;
@@ -41,3 +44,42 @@
   gap: 0.3rem;
   margin-inline: -0.5rem;
 }
+
+/* The suggestions progressbar */
+.progressbar {
+  height: 1rem;
+  display: flex;
+}
+
+/* The progressbar exists of 3 progressbars, yes maybe and no */
+.no {
+  background-color: var(--error-100);
+  border-bottom-left-radius: 0.5rem;
+}
+.maybe {
+  background-color: var(--warning-100);
+}
+.yes {
+  background-color: var(--succes-100);
+  border-bottom-right-radius: 0.5rem;
+}
+
+.none {
+  display: none
+}
+
+/* The numbers showing the amount of each suggestion type */
+.progressbar div p {
+  text-align: center;
+  transform: translate(0, -1.4rem);
+}
+.no p {
+  color: var(--error-100);
+}
+.maybe p {
+  color: var(--warning-100);
+}
+.yes p {
+  color: var(--succes-100);
+}
+
