@@ -77,40 +77,7 @@ export type SessionKey = string;
  */
 export type Suggestion = "YES"|"MAYBE"|"NO";
 
-/**
- *  Represents a partial type response. Usually these will only contain a
- * suggestion type, the name and id of the sender and the reason why this
- * suggestion exists.
- */
-export interface SuggestionInfo {
-  /**
-   *  The suggestion.
-   */
-  suggestion: Suggestion;
-  /**
-   *  The sender of the suggestion.
-   */
-  sender: IdName;
-  /**
-   *  The reason why this suggestion exists.
-   */
-  reason: string;
-}
-
-/**
- *  Represents a partial type response. Usually these will only contain a
- * suggestion type and a number of occurrences.
- */
-export interface SuggestionCount {
-  /**
-   *  The suggestion.
-   */
-  suggestion: Suggestion;
-  /**
-   *  The number of occurrences for this kind of suggestion.
-   */
-  occurrences: number;
-}
+export interface SuggestionInfo {}
 
 /**
  *  Represents a response that only contains an ID.
@@ -357,12 +324,6 @@ export interface IdNameList extends Keyed<InternalTypes.IdName[]> {}
  *  A student response is the keyed version of the student and their associated
  * data.
  */
-export interface Suggestion extends Keyed<InternalTypes.SuggestionCount[]> {}
-
-/**
- *  A student response is the keyed version of the student and their associated
- * data.
- */
 export interface SuggestionInfo extends Keyed<InternalTypes.SuggestionInfo[]> {}
 
 /**
@@ -483,6 +444,12 @@ export interface KeyRequest {
 export interface IdRequest extends KeyRequest {
   id: number;
 }
+
+export interface YearId extends IdRequest {
+  year?: number;
+}
+
+export interface StudentFilter extends KeyRequest {}
 
 export interface UpdateStudent extends IdRequest {
   emailOrGithub?: string;

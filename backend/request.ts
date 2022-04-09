@@ -4,6 +4,7 @@ import express from 'express';
 import * as config from './config.json';
 import {Anything, InternalTypes, Requests} from './types';
 import {errors, getSessionKey} from './utility';
+import * as validator from 'validator';
 
 /**
  *  We use 3 types of requests: those requiring no special values, those
@@ -207,7 +208,7 @@ export async function parseUpdateStudentRequest(req: express.Request):
 }
 
 /**
- *  Parses a request to `POST /student/<id>/sugest`.
+ *  Parses a request to `POST /student/<id>/suggest`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
@@ -227,6 +228,71 @@ export async function parseSuggestStudentRequest(req: express.Request):
       reason : maybe(req.body, "reason"),
       senderId : Number(req.body.senderId)
     });
+  });
+}
+
+/**
+ *  Parses a request to `GET /student/<id>/suggest`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseGetSuggestionsStudentRequest(req: express.Request): Promise<Requests.YearId> {
+  return hasFields(req, [], types.id).then(() => {
+    if("year" in req.body) {
+      return Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id),
+        year : Number(req.body.year)
+      });
+    } else {
+      return Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id)
+      });
+    }
+
+  });
+}
+
+/**
+ *  Parses a request to `POST /student/<id>/suggest`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterStudentsRequest(req: express.Request): Promise<Requests.StudentFilter> {
+  if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
+          req.body.statusFilter !== "NO")) {
+    return rejector();
+  } else {
+    if("emailFilter" in req.body) {
+      req.body.emailFilter = validator.default.normalizeEmail(req.body.emailFilter).toString();
+    }
+  }
+
+  for(const filter of [maybe(req.body, "firstNameSort"), maybe(req.body, "lastNameSort"),
+    maybe(req.body, "emailSort"), maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
+    if(filter != undefined && filter !== "asc" && filter !== "desc") {
+      return rejector();
+    }
+  }
+
+  return Promise.resolve({
+    sessionkey : getSessionKey(req),
+    firstNameFilter : maybe(req.body, "firstNameFilter"),
+    lastNameFilter : maybe(req.body, "lastNameFilter"),
+    emailFilter : maybe(req.body, "emailFilter"),
+    roleFilter : maybe(req.body, "roleFilter"),
+    alumniFilter : maybe(req.body, "alumniFilter"),
+    coachFilter : maybe(req.body, "coachFilter"),
+    statusFilter : maybe(req.body, "statusFilter"),
+    firstNameSort : maybe(req.body, "firstNameSort"),
+    lastNameSort : maybe(req.body, "lastNameSort"),
+    emailSort : maybe(req.body, "emailSort"),
+    roleSort : maybe(req.body, "roleSort"),
+    alumniSort : maybe(req.body, "alumniSort"),
   });
 }
 
@@ -541,7 +607,7 @@ export const parseDeleteStudentRequest = parseKeyIdRequest;
  * ID
  * {@link parseKeyIdRequest}.
  */
-export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
+//export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
 /**
  *  A request to `GET /coach/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.

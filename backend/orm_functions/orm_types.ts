@@ -592,3 +592,8 @@ export type FilterSort = "asc" | "desc" | undefined;
  */
 export type FilterString = string | undefined;
 
+/**
+ * type to use in a filter query for booleans
+ */
+ export type FilterBoolean = boolean | undefined;
+
