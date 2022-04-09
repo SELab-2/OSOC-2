@@ -416,6 +416,8 @@ export interface YearId extends IdRequest {
   year?: number;
 }
 
+export interface StudentFilter extends KeyRequest {}
+
 export interface UpdateStudent extends IdRequest {
   emailOrGithub?: string;
   firstName?: string;
