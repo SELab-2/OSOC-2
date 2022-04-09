@@ -189,7 +189,7 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getStudentSuggestions(req: express.Request): Promise<Responses.SuggestionInfo> {
-    /*const parsedRequest = await rq.parseStudentGetSuggestsRequest(req);
+    const parsedRequest = await rq.parseStudentGetSuggestsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID);
@@ -206,14 +206,19 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
     }
 
     const currentYear = new Date().getFullYear();
-    let suggestionsTotal = (await ormJo.getStudentEvaluationsTotal(student.student_id))
+    const suggestionsTotal = (await ormJo.getStudentEvaluationsTotal(student.student_id))
         .filter(suggestion => suggestion.osoc.year === currentYear);
 
     const suggestionsInfo = [];
     for(const suggestion of suggestionsTotal) {
         for(const evaluation of suggestion.evaluation) {
+            suggestionsInfo.push({
+                senderFirstname: evaluation.login_user.person.firstname,
+                senderLastname: evaluation.login_user.person.lastname,
+
+            })
         }
-    }*/
+    }
 
 
     return rq.parseStudentGetSuggestsRequest(req)
