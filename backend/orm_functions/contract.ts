@@ -46,7 +46,7 @@ export async function updateContract(contract: UpdateContract) {
 /**
  * remove all the contracts associated with studentId
  *
- * @param studentId: the id of the student who's contracts we are removing
+ * @param studentId: the id of the student whose contracts we are removing
  * @returns the number of removed contracts {count: number}
  */
 export async function removeContractsFromStudent(studentId: number) {

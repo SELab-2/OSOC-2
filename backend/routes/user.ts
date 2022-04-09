@@ -23,7 +23,8 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
     loginUsers.map(val => ({
         person_data : {
             id : val.person.person_id,
-            name : val.person.firstname + " " + val.person.lastname
+            name : val.person.firstname,
+            email: val.person.email
         },
         coach : val.is_coach,
         admin : val.is_admin,

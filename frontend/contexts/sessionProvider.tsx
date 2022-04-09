@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState} from 'react';
+import React, {createContext, ReactNode, useEffect, useState} from 'react';
 
 /**
  * Interface for the context, stores the user session application wide
@@ -30,7 +30,7 @@ const SessionContext = createContext<ISessionContext>(defaultState);
  * @param children
  * @constructor
  */
-export const SessionProvider: React.FC = ({ children }) => {
+export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     /**
      * Everytime the page is reloaded we need to get the session from local storage

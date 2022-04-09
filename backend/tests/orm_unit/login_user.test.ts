@@ -5,10 +5,9 @@ import {
     createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson,
     getPasswordLoginUser, searchLoginUserByPerson, searchAllAdminLoginUsers,
     searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser,
-    deleteLoginUserById, deleteLoginUserByPersonId, getLoginUserById
+    deleteLoginUserById, deleteLoginUserByPersonId, getLoginUserById, setCoach, setAdmin, filterLoginUsers
 }
     from "../../orm_functions/login_user";
-
 
 const response = {
     session_id: "50",
@@ -105,4 +104,31 @@ test("should delete the login user with the given person id and return the delet
 test("should return the login_user with given id", async () => {
     prismaMock.login_user.findUnique.mockResolvedValue(response);
     await expect(getLoginUserById(0)).resolves.toEqual(response);
-})
+});
+
+test("should return the filtered list of users", async () => {
+   prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
+   await expect(filterLoginUsers(undefined, undefined, undefined, undefined, undefined))
+       .resolves.toEqual([returnValue]);
+});
+
+test("should reject and throw an error because only sorting on 1 field is allowed", async () => {
+    try {
+        await filterLoginUsers(undefined, undefined, 'asc', 'desc', undefined);
+        // this should never get executed because filterLoginUser should reject
+        expect(true).toBeFalsy()
+    } catch(e) {
+        // This should get executed!
+        expect(true).toBeTruthy();
+    }
+});
+
+test("should return the updated login_user", async () => {
+    prismaMock.login_user.update.mockResolvedValue(response);
+    await expect(setCoach(0, true)).resolves.toEqual(response);
+});
+
+test("should return the updated login_user", async () => {
+    prismaMock.login_user.update.mockResolvedValue(response);
+    await expect(setAdmin(0, true)).resolves.toEqual(response);
+});

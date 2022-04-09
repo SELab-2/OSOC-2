@@ -163,6 +163,11 @@ export interface Student {}
 export interface User {}
 
 /**
+ *  Represents a check of the key, holds the key aswell as boolean value.
+ */
+ export interface CheckKey {}
+
+/**
  *  Represents a coach, with all associated data.
  */
 export interface Coach {
@@ -308,6 +313,11 @@ export interface StudentList extends Keyed<InternalTypes.Student[]> {}
  *
  */
 export interface UserList extends Keyed<InternalTypes.User[]> {}
+
+/**
+ *
+ */
+ export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
 
 /**
  *  A student list response is the keyed version of an array of partial
@@ -567,9 +577,7 @@ export type Verb = "get"|"post"|"delete";
 
 export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
 
-export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
-    "job_application"|"job_application_skill"|"language"|"login_user"|"osoc"|
-    "person"|"project_role"|"project_user"|"role"|"student";
+export type Table = "project"|"student";
 
 /**
  *  A route callback is a function taking an Express js request and returning a

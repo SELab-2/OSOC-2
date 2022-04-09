@@ -17,7 +17,7 @@ export async function createAppliedRole(appliedRole: CreateAppliedRole){
 
 /**
  * 
- * @param jobApplicationId: this is the jobapplication of the appliedroles we are looking up in the database
+ * @param jobApplicationId: this is the job application of the applied roles we are looking for in the database
  * @returns: all the applied roles
  */
  export async function getAppliedRolesByJobApplication(jobApplicationId: number) {
