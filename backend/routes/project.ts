@@ -154,7 +154,6 @@ async function deleteProject(req: express.Request): Promise<Responses.Key> {
  */
 async function getDraftedStudents(req: express.Request):
     Promise<Responses.ProjectDraftedStudents> {
-
   return rq.parseGetDraftedStudentsRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(async parsed => {

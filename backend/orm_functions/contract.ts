@@ -85,7 +85,17 @@ export async function contractsByProject(projectId: number) {
   return await prisma.contract.findMany({
     where : {project_role : {project_id : projectId}},
     select : {
-      student : true,
+      student : {
+        select : {
+          student_id : true,
+          gender : true,
+          pronouns : true,
+          phone_number : true,
+          nickname : true,
+          alumni : true,
+          person : true
+        }
+      },
       project_role : {select : {project : true}},
       contract_status : true
     }
