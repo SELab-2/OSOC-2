@@ -4,7 +4,7 @@ import {CreateJobApplication} from "./orm_types";
 
 /**
  * 
- * @param studentId: the student who's evaluations we are looking for (final and temporary evaluations)
+ * @param studentId: the student whose evaluations we are looking for (final and temporary evaluations)
  * @returns al the evaluations associated with this student together with the osoc year
  */
  export async function getStudentEvaluationsTotal(studentId: number) {
@@ -23,7 +23,21 @@ import {CreateJobApplication} from "./orm_types";
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
-                    is_final: true
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -32,7 +46,7 @@ import {CreateJobApplication} from "./orm_types";
 
 /**
  * 
- * @param studentId: the student who's evaluations we are looking for, but only final decisions
+ * @param studentId: the student whose evaluations we are looking for, but only final decisions
  * @returns al the evaluations associated with this student together with the osoc year
  */
 export async function getStudentEvaluationsFinal(studentId: number) {
@@ -54,6 +68,21 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -62,7 +91,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
 
 /**
  * 
- * @param studentId: the student who's evaluations we are looking for, but only temporary decisions
+ * @param studentId: the student whose evaluations we are looking for, but only temporary decisions
  * @returns al the evaluations associated with this student together with the osoc year
  */
 export async function getStudentEvaluationsTemp(studentId: number) {
@@ -84,6 +113,21 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -92,7 +136,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
 
 /**
  *
- * @param studentId: the id of the student who's selected roles we are searching from his most recent job application
+ * @param studentId: the id of the student whose selected roles we are searching from his most recent job application
  * @return the list of selected roles in the application (if it exists)
  */
 export async function getLatestApplicationRolesForStudent(studentId: number) {

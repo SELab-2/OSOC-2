@@ -371,27 +371,27 @@ export interface UpdateProject {
     /**
      * undefined if unchanged or new project name
      */
-    name: string,
+    name?: string,
     /**
      * undefined if unchanged or the new osoc id
      */
-    osocId: number,
+    osocId?: number,
     /**
      * undefined if unchanged or the new partner of the project
      */
-    partner: string,
+    partner?: string,
     /**
      * undefined if unchanged or the new start date of the project
      */
-    startDate: Date
+    startDate?: Date
     /**
      * undefined if unchanged or the new end date of the project
      */
-    endDate: Date,
+    endDate?: Date,
     /**
      * undefined if unchanged or the new number of positions of the project
      */
-    positions: number
+    positions?: number
 }
 
 /**
@@ -577,3 +577,14 @@ export interface AddStudentToProject {
      */
     roleId: number,
 }
+
+/**
+ * type to use in a filter query for sorting
+ */
+export type FilterSort = "asc" | "desc" | undefined;
+
+/**
+ * type to use in a filter query for strings
+ */
+export type FilterString = string | undefined;
+
