@@ -9,6 +9,7 @@ import * as ormP from '../orm_functions/person';
 import * as ormSK from '../orm_functions/session_key';
 import {Anything, Requests, Responses} from '../types';
 import * as util from '../utility';
+import * as session_key from './session_key.json'
 
 let states: string[] = [];
 
@@ -130,13 +131,17 @@ async function ghSignupOrLogin(login: Requests.GHLogin):
           return Promise.reject(error); // pass on
         }
       })
-      .then(async loginuser =>
-                ormSK.addSessionKey(loginuser.login_user_id, util.generateKey())
-                    .then(newkey => Promise.resolve({
-                      sessionkey : newkey.session_key,
-                      is_admin : loginuser.is_admin,
-                      is_coach : loginuser.is_coach
-                    })));
+      .then(async (loginuser) =>{
+          const key: string = util.generateKey();
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+          return ormSK.addSessionKey(loginuser.login_user_id, key,futureDate)
+              .then(newkey => Promise.resolve({
+                  sessionkey : newkey.session_key,
+                  is_admin : loginuser.is_admin,
+                  is_coach : loginuser.is_coach
+              }))
+      });
 }
 
 export function getRouter(): express.Router {

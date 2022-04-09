@@ -13,11 +13,11 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
-  return rq.parseAdminAllRequest(req)
+    return rq.parseAdminAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(
           async parsed =>
-              ormL.searchAllCoachLoginUsers(true)
+              ormL.searchAllAdminLoginUsers(true)
                   .then(obj =>
                             obj.map(val => ({
                                       person_data : {

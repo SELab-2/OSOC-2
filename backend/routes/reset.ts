@@ -11,13 +11,19 @@ import * as ormSK from '../orm_functions/session_key';
 import * as rq from '../request';
 import {Email, Responses} from '../types';
 import * as util from '../utility';
+import * as session_key from "./session_key.json";
 
 export async function sendMail(mail: Email) {
   const oauthclient = new gapi.Auth.OAuth2Client(
       google['google-client-id'], google['google-client-secret']);
   oauthclient.setCredentials({refresh_token : google['google-refresh-token']});
   const accesstoken =
-      await oauthclient.getAccessToken().then(token => token.token!);
+      await oauthclient.getAccessToken().then(token => {
+          if (token === null ||token.token === null|| token.token === undefined){
+              return "";
+          }
+          return token.token
+      });
   const transp = nodemailer.createTransport({
     service : 'gmail',
     auth : {
@@ -108,8 +114,11 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
             })
             .then(user => {
               console.log(JSON.stringify(user));
+                const key: string = util.generateKey();
+                const futureDate = new Date();
+                futureDate.setDate(futureDate.getDate() + session_key.valid_period);
               return ormSK.addSessionKey(user.login_user_id,
-                                         util.generateKey());
+                                         key,futureDate);
             })
             .then(async key => {
               return ormPR.deleteResetWithResetId(code.reset_id)

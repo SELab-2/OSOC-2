@@ -36,7 +36,7 @@ async function login(req: express.Request): Promise<Responses.Login> {
         const key: string = util.generateKey();
         const futureDate = new Date();
         futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-        return addSessionKey(pass.login_user.login_user_id, key, new Date())
+        return addSessionKey(pass.login_user.login_user_id, key, futureDate)
             .then(ins => ({
                     sessionkey : ins.session_key,
                     is_admin : orDefault(pass?.login_user?.is_admin, false),

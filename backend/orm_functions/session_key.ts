@@ -5,6 +5,7 @@ import prisma from '../prisma/prisma';
  *
  * @param loginUserId the id of the loginUser for whom we are adding a session key
  * @param key the new session key
+ * @param date
  * @returns the new record in the database in a promise
  */
 export async function addSessionKey(loginUserId: number, key: string, date: Date) {
@@ -41,6 +42,7 @@ export async function checkSessionKey(key: string) {
  *
  * @param key: the old key we want to overwrite
  * @param newkey: the key that we use to replace the old key
+ * @param date
  * @returns the updated record in a promise
  */
 export async function changeSessionKey(key: string, newkey: string, date: Date) {
