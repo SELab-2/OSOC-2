@@ -265,8 +265,10 @@ export async function parseFilterStudentsRequest(req: express.Request): Promise<
   if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
       ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
           req.body.statusFilter !== "NO")) {
+    console.log("test1");
     return rejector();
   } else {
+    console.log("test2");
     if("emailFilter" in req.body) {
       req.body.emailFilter = validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
