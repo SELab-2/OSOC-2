@@ -75,3 +75,8 @@ export interface Student {
         }]
     };
 }
+
+export interface Role {
+    role_id: number;
+    name: string;
+}
