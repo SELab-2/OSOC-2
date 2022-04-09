@@ -170,8 +170,14 @@ async function parseUpdateLoginUser(req: express.Request):
 export async function parseLoginRequest(req: express.Request):
     Promise<Requests.Login> {
   return hasFields(req, [ "name", "pass" ], types.neither)
-      .then(() =>
-                Promise.resolve({name : req.body.name, pass : req.body.pass}));
+      .then(() => {
+        if(!validator.default.isEmail(req.body.name)) {
+          return rejector();
+        } else {
+          const email = validator.default.normalizeEmail(req.body.name).toString();
+          return Promise.resolve({name : email, pass : req.body.pass});
+        }
+      });
 }
 
 /**
