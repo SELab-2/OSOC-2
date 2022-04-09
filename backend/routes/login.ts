@@ -11,7 +11,7 @@ import {Responses} from '../types';
 import * as util from '../utility';
 
 function orDefault<T>(v: T|undefined, def: T): T {
-  return (v == undefined || v == null) ? def : v;
+  return (v == undefined || false) ? def : v;
 }
 
 /**
