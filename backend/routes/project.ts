@@ -2,11 +2,12 @@ import express from 'express';
 
 import * as ormCtr from '../orm_functions/contract';
 import * as ormEv from '../orm_functions/evaluation';
+import * as ormOsoc from '../orm_functions/osoc';
 import * as ormPr from '../orm_functions/project';
 import * as ormPrRole from '../orm_functions/project_role';
 import * as ormRole from '../orm_functions/role';
 import * as rq from '../request';
-import {Responses} from '../types';
+import {InternalTypes, Responses, StringDict} from '../types';
 import * as util from '../utility';
 import {errors} from "../utility";
 
@@ -317,20 +318,48 @@ async function unAssignStudent(req: express.Request): Promise<Responses.Key> {
       });
 }
 
-// TODO project conflicts
-/*async function getProjectConflicts(req: express.Request):
-    Promise<Responses.ModProjectStudent> {
-    return util.checkSessionKey(req).then(async (_) => {
-        // check valid id
-        // if invalid: return Promise.reject(util.cookInvalidID());
-        // if valid: modify a student of this project
-        let roles : string[] = [];
-        return Promise.resolve({
-            data : {drafted : true, roles : roles},
-            sessionkey : ''
-        });
-    });
-}*/
+async function getProjectConflicts(req: express.Request):
+    Promise<Responses.ConflictList> {
+  return rq.parseProjectConflictsRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(async checked => {
+        return ormOsoc.getNewestOsoc()
+            .then(osoc => util.getOrReject(osoc))
+            .then(osoc => ormCtr.sortedContractsByOsocEdition(osoc.osoc_id))
+            .then(contracts => {
+              if (contracts.length == 0 || contracts.length == 1)
+                return Promise.resolve([]);
+              const res: StringDict<typeof contracts> = {};
+              let latestid = contracts[0].student_id;
+              for (let i = 1; i < contracts.length; i++) {
+                if (contracts[i].student_id == latestid) {
+                  const idStr: string = contracts[i].student_id.toString();
+                  if (!(idStr in res)) {
+                    res[idStr] = [ contracts[i - 1], contracts[i] ];
+                  } else {
+                    res[idStr].push(contracts[i]);
+                  }
+                }
+                latestid = contracts[i].student_id;
+              }
+
+              const arr: InternalTypes.Conflict[] = [];
+              for (const idStr in res) {
+                arr.push({
+                  student : Number(idStr),
+                  projects :
+                      res[idStr].map(p => ({
+                                       id : p.project_role.project.project_id,
+                                       name : p.project_role.project.name
+                                     }))
+                })
+              }
+              return Promise.resolve(arr);
+            })
+            .then(arr => Promise.resolve(
+                      {sessionkey : checked.data.sessionkey, data : arr}));
+      });
+}
 
 /**
  *  Gets the router for all `/coaches/` related endpoints.
@@ -354,8 +383,7 @@ export function getRouter(): express.Router {
 
   util.routeKeyOnly(router, 'delete', '/:id/assignee', unAssignStudent);
 
-  // TODO project conflicts
-  // util.route(router, "get", "/conflicts", getProjectConflicts);
+  util.route(router, "get", "/conflicts", getProjectConflicts);
 
   // TODO add project conflicts
   util.addAllInvalidVerbs(

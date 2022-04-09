@@ -103,3 +103,11 @@ export async function contractsByProject(projectId: number) {
     }
   })
 }
+
+export async function sortedContractsByOsocEdition(osocId: number) {
+  return await prisma.contract.findMany({
+    where : {project_role : {project : {osoc_id : osocId}}},
+    orderBy : {student_id : 'asc'},
+    select : {project_role : {select : {project : true}}, student_id : true}
+  });
+}

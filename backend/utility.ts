@@ -52,7 +52,8 @@ export const errors: Errors = {
     };
   },
 
-  cookServerError() { return config.apiErrors.serverError;}
+  cookServerError() { return config.apiErrors.serverError;},
+  cookNoDataError() { return config.apiErrors.noDataError;}
 }
 
 /**
@@ -382,4 +383,18 @@ export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
   if (vl == null || vl == undefined)
     return def;
   return vl;
+}
+
+/**
+ *  Resolves with the given value if not null, otherwise rejects with a valid
+ * API error.
+ *  @template T the type of the value.
+ *  @param vl The value (or null)
+ *  @returns A Promise which will resolve to the given value if it's non-null,
+ * or reject otherwise.
+ */
+export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
+  if (vl == null || vl == undefined)
+    return Promise.reject(errors.cookNoDataError());
+  return Promise.resolve(vl);
 }

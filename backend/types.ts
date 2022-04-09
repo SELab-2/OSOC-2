@@ -56,6 +56,10 @@ export interface Errors {
    *  Cooks up an Internal Server Error response.
    */
   cookServerError: () => ApiError;
+  /**
+   *  Cooks up a No Data Error response.
+   */
+  cookNoDataError: () => ApiError;
 }
 
 /**
@@ -247,6 +251,30 @@ export interface ModProjectStudent {
   role: string;
 }
 
+/**
+ *  Represents a conflict. These contain the student and a list of projects they
+ * are in.
+ */
+export interface Conflict {
+  /**
+   *  The student's ID.
+   */
+  student: number;
+  /**
+   *  The projects the student is in.
+   */
+  projects: {
+    /**
+     * The project's ID.
+     */
+    id: number;
+    /**
+     * The project's name.
+     */
+    name : string
+  }[];
+}
+
 }
 
 export interface WithUserID<T> {
@@ -408,6 +436,11 @@ export interface ModProjectStudent extends
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
+ *  A conflictList response is the keyed version of a list of conflicts.
+ */
+export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
+
+/**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
  * rejecting with API error or resolving with data ({@link Promise}).
  */
@@ -416,7 +449,7 @@ export type OrError<T> = ApiError|T;
 /**
  *  An API response is one of the previous response types.
  */
-export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
+export type ApiResponse = Empty|Key|PartialStudent|IdNameList|ConflictList;
 
 /**
  *  Either an error while parsing the form or a data value.
@@ -591,6 +624,10 @@ export type RouteCallback<T extends Responses.ApiResponse> =
  */
 export interface Anything {
   [key: string]: unknown;
+}
+
+export interface StringDict<T2> {
+  [key: string]: T2;
 }
 
 export interface Email {

@@ -25,7 +25,8 @@ test("Can parse Key-only requests", () => {
     Rq.parseLogoutRequest, Rq.parseStudentAllRequest, Rq.parseCoachAllRequest,
     Rq.parseGetAllCoachRequestsRequest, Rq.parseAdminAllRequest,
     Rq.parseProjectAllRequest, Rq.parseConflictAllRequest,
-    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest
+    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest,
+    Rq.parseProjectConflictsRequest
   ];
 
   const successes =

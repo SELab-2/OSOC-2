@@ -520,6 +520,11 @@ export const parseFollowupAllRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseTemplateListRequest = parseKeyRequest;
+/**
+ *  A request to `GET /project/conflicts` only requires a session key
+ *  {@link parseKeyRequest}
+ */
+export const parseProjectConflictsRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID
