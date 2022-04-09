@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {NextPage} from "next";
 import SessionContext from "../contexts/sessionProvider";
-import {useContext, useEffect} from "react";
+import {useContext, useEffect, useState} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
 
 
 const Students: NextPage = () => {
     const { getSessionKey, setSessionKey } = useContext(SessionContext);
-    //const [students, setStudents] = useState<Array<InternalTypes.Student>>([]);
+    const [students, setStudents] = useState([]);
 
     const fetchStudents = async () => {
         const sessionKey = getSessionKey != undefined ? getSessionKey() : ""
@@ -16,11 +17,12 @@ const Students: NextPage = () => {
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).catch(error => console.log(error));
-        console.log(response);
         if (response.success) {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey)
             }
+            console.log(response.data);
+            setStudents(response.data)
         }
     }
 
@@ -31,9 +33,13 @@ const Students: NextPage = () => {
     }, []);
 
     return (
-        <>
-            <StudentCard student={undefined}/>
-        </>
+        <ul>
+            {students.map(student => (
+                <li key={student}>
+                    <p>hallo</p>
+                </li>
+            ))}
+        </ul>
     )
 }
 
