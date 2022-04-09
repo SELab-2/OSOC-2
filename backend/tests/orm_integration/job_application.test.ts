@@ -86,8 +86,15 @@ it("should return all student evaluations for the student with given id", async 
             const evals = evaluations[i];
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
-            expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id")
-            expect(found_eval.evaluation[i]).toHaveProperty("is_final", evals.is_final)
+            expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            expect(found_eval.evaluation[i]).toHaveProperty("is_final", evals.is_final);
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
     });
 });
@@ -112,6 +119,13 @@ it("should return all final student evaluations for the student with given id", 
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
             expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
 
     });
@@ -137,6 +151,13 @@ it("should return all suggestion evaluations for the student with given id", asy
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
             expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
 
     });
