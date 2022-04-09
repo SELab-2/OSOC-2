@@ -207,7 +207,7 @@ export async function parseUpdateStudentRequest(req: express.Request):
 }
 
 /**
- *  Parses a request to `POST /student/<id>/sugest`.
+ *  Parses a request to `POST /student/<id>/suggest`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
@@ -227,6 +227,30 @@ export async function parseSuggestStudentRequest(req: express.Request):
       reason : maybe(req.body, "reason"),
       senderId : Number(req.body.senderId)
     });
+  });
+}
+
+/**
+ *  Parses a request to `GET /student/<id>/suggest`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseGetSuggestionsStudentRequest(req: express.Request): Promise<Requests.YearId> {
+  return hasFields(req, [], types.id).then(() => {
+    if("year" in req.body) {
+      return Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id),
+        year : Number(req.body.year)
+      });
+    } else {
+      return Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id)
+      });
+    }
+
   });
 }
 
@@ -527,7 +551,7 @@ export const parseDeleteStudentRequest = parseKeyIdRequest;
  * ID
  * {@link parseKeyIdRequest}.
  */
-export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
+//export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
 /**
  *  A request to `GET /coach/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.

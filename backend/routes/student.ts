@@ -5,7 +5,7 @@ import * as ormJo from '../orm_functions/job_application';
 import * as ormLa from '../orm_functions/language';
 import * as ormRo from '../orm_functions/role';
 import * as ormSt from '../orm_functions/student';
-//import * as ormLoUs from '../orm_functions/login_user';
+import * as ormOs from '../orm_functions/osoc';
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -189,7 +189,7 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getStudentSuggestions(req: express.Request): Promise<Responses.SuggestionInfo> {
-    const parsedRequest = await rq.parseStudentGetSuggestsRequest(req);
+    const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID);
@@ -205,9 +205,12 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
         return Promise.reject(errors.cookInvalidID);
     }
 
-    const currentYear = new Date().getFullYear();
+    const year = checkedSessionKey.data.year == undefined ? await ormOs.getLatestOsoc() : checkedSessionKey.data.year;
+    if(year == null) {
+        return Promise.resolve({data: [], sessionkey : checkedSessionKey.data.sessionkey});
+    }
     const suggestionsTotal = (await ormJo.getStudentEvaluationsTotal(student.student_id))
-        .filter(suggestion => suggestion.osoc.year === currentYear);
+        .filter(suggestion => suggestion.osoc.year === year);
 
     const suggestionsInfo = [];
     for(const suggestion of suggestionsTotal) {
@@ -215,26 +218,14 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
             suggestionsInfo.push({
                 senderFirstname: evaluation.login_user.person.firstname,
                 senderLastname: evaluation.login_user.person.lastname,
-
+                reason: evaluation.motivation,
+                decision: evaluation.decision,
+                isFinal: evaluation.is_final
             })
         }
     }
 
-
-    return rq.parseStudentGetSuggestsRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(parsed => util.isValidID(parsed.data, 'student'))
-        .then(parsed => {
-
-            return Promise.resolve({
-                data : [ {
-                    suggestion : "YES",
-                    sender : {id : 0, name : "Darth Vader"},
-                    reason : "no reason"
-                } ],
-                sessionkey : parsed.sessionkey
-            });
-        });
+    return Promise.resolve({data: suggestionsInfo, sessionkey : checkedSessionKey.data.sessionkey});
 }
 
 /**
