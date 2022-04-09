@@ -119,10 +119,10 @@ export async function searchStudentByGender(gender: string){
  * @param alumniSort asc or desc if we are sorting on alumnistatus, undefined if we are not sorting on alumnistatus
  * @param coachSort asc or desc if we are sorting on coachstaus, undefined if we are not sorting on coachstaus
  * @param statusSort asc or desc if we are sorting on coachstaus, undefined if we are not sorting on coachstaus
- * @returns the filtered loginUsers with their person data in a promise
+ * @returns the filtered students with their person data and other filter fields in a promise
  */
 // , coachSort: FilterSort, statusSort: FilterSort
- export async function filterLoginUsers(firstNameFilter: FilterString, lastNameFilter: FilterString,
+ export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
     emailFilter: FilterString, roleFilter: FilterString, alumniFilter: FilterBoolean, 
     coachFilter: FilterBoolean, statusFilter: decision_enum | undefined,
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
