@@ -23,6 +23,18 @@ export async function getAllOsoc() {
 
 /**
  * 
+ * @returns the latest the osoc edition in the database
+ */
+ export async function getLatestOsoc() {
+    return prisma.osoc.findFirst({
+        orderBy: {
+            year: "desc"
+        }
+    });
+}
+
+/**
+ * 
  * @param year: this is the year of the osoc we are looking up in the database
  * @returns: osoc object
  */
