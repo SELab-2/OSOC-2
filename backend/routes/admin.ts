@@ -13,25 +13,21 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
-  return rq.parseAdminAllRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(
-          async parsed =>
-              ormL.searchAllCoachLoginUsers(true)
-                  .then(obj =>
-                            obj.map(val => ({
-                                      person_data : {
-                                        id : val.person.person_id,
-                                        name : val.person.firstname + " " +
-                                                   val.person.lastname
-                                      },
-                                      coach : val.is_coach,
-                                      admin : val.is_admin,
-                                      activated : val.account_status as string
-                                    })))
-                  .then(
-                      obj => Promise.resolve(
-                          {sessionkey : parsed.data.sessionkey, data : obj})));
+    return rq.parseAdminAllRequest(req)
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(async parsed =>
+            ormL.searchAllAdminLoginUsers(true)
+                .then(obj => obj.map(val => ({
+                    person_data : {
+                        id : val.person.person_id,
+                        name : val.person.firstname + " " + val.person.lastname,
+                        email: val.person.email
+                    },
+                    coach : val.is_coach,
+                    admin : val.is_admin,
+                    activated : val.account_status as string
+                })))
+                .then(obj => Promise.resolve({sessionkey : parsed.data.sessionkey, data : obj})));
 }
 
 /**
@@ -62,7 +58,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
             .then(res => Promise.resolve({
               sessionkey : parsed.data.sessionkey,
               data : {
-                id : res.person_id,
+                id : res.login_user_id,
                 name : res.person.firstname + " " + res.person.lastname
               }
             }));
@@ -97,8 +93,7 @@ export function getRouter(): express.Router {
   util.route(router, "get", "/:id", getAdmin);
 
   util.route(router, "post", "/:id", modAdmin);
-  router.delete('/:id', (req, res) =>
-                            util.respOrErrorNoReinject(res, deleteAdmin(req)));
+  util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
 
   util.addAllInvalidVerbs(router, [ "/", "/all", "/:id" ]);
 

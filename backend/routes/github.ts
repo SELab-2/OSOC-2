@@ -3,7 +3,6 @@ import * as crypto from 'crypto';
 import express from 'express';
 
 import * as config from '../config.json';
-import * as github from '../github.json';
 import * as ormLU from '../orm_functions/login_user';
 import * as ormP from '../orm_functions/person';
 import * as ormSK from '../orm_functions/session_key';
@@ -13,7 +12,7 @@ import * as util from '../utility';
 let states: string[] = [];
 
 function getHome(): string {
-  const root = github.auth_callback_url;
+    const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
   // check if dev or production
   console.log("Home is: " + root);
   return root;
@@ -40,7 +39,7 @@ function checkState(state: string) {
 
 function ghIdentity(resp: express.Response): void {
   let url = "https://github.com/login/oauth/authorize?";
-  url += "client_id=" + github.client_id; // add client id
+  url += "client_id=" + process.env.GITHUB_CLIENT_ID; // add client id
   url += "&allow_signup=true"; // allow users to sign up to github itself
   url +=                       // set redirect
       "&redirect_uri=" +
@@ -67,8 +66,8 @@ async function ghExchangeAccessToken(req: express.Request,
 
   return axios
       .post("https://github.com/login/oauth/access_token", {
-        client_id : github.client_id,
-        client_secret : github.secret,
+        client_id : process.env.GITHUB_CLIENT_ID,
+        client_secret : process.env.GITHUB_SECRET,
         code : req.query.code as string,
         redirect_uri : getHome() + config.global.preferred + "/github/login"
       },
@@ -78,13 +77,13 @@ async function ghExchangeAccessToken(req: express.Request,
       }))
       .then(ares => parseGHLogin(ares.data))
       .then(login => ghSignupOrLogin(login))
-      .then(result => util.redirect(res, github.frontend + "/login/" +
+      .then(result => util.redirect(res, process.env.FRONTEND + "/login/" +
                                              result.sessionkey +
                                              "?is_admin=" + result.is_admin +
                                              "&is_coach=" + result.is_coach))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
-        util.redirect(res, github.frontend + "/login?loginError=" +
+        util.redirect(res, process.env.FRONTEND + "/login?loginError=" +
                                config.apiErrors.github.other.reason);
         return Promise.resolve();
       });
