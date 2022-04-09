@@ -3,6 +3,8 @@ import express from 'express';
 import * as ormCtr from '../orm_functions/contract';
 import * as ormEv from '../orm_functions/evaluation';
 import * as ormPr from '../orm_functions/project';
+import * as ormPrRole from '../orm_functions/project_role';
+import * as ormRole from '../orm_functions/role';
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -174,16 +176,98 @@ async function getDraftedStudents(req: express.Request):
       });
 }
 
+async function getFreeSpotsFor(role: string, project: number):
+    Promise<{count : number, role : number}> {
+  return ormPrRole.getProjectRolesByProject(project)
+      .then(roles => Promise.all(roles.map(
+                async r =>
+                    ormRole.getRole(r.role_id).then(upd => Promise.resolve({
+                      project_role_id : r.project_role_id,
+                      role_id : r.role_id,
+                      block : upd
+                    })))))
+      .then(roles => roles.filter(r => r.block?.name == role))
+      .then(async rest => {
+        console.log("Resulting roles: " + JSON.stringify(rest));
+        if (rest.length != 1)
+          return Promise.reject();
+        return ormPrRole.getNumberOfFreePositions(rest[0].project_role_id)
+            .then(n => {
+              if (n == null)
+                return Promise.reject();
+              return Promise.resolve(
+                  {count : n, role : rest[0].project_role_id});
+            });
+      });
+}
+
+async function createProjectRoleFor(project: number, role: string):
+    Promise<{count : number, role : number}> {
+  return ormRole.getRolesByName(role)
+      .then(r => {
+        if (r == null)
+          return Promise.reject(
+              {http : 409, reason : "That role doesn't exist."});
+        return ormPrRole.createProjectRole(
+            {projectId : project, roleId : r.role_id, positions : 1});
+      })
+      .then(res => Promise.resolve(
+                {count : res.positions, role : res.project_role_id}));
+}
+
 async function modProjectStudent(req: express.Request):
     Promise<Responses.ModProjectStudent> {
   return rq.parseDraftStudentRequest(req)
       .then(parsed => util.isAdmin(parsed))
-      .then(parsed => {
-        // INSERTION LOGIC
-        return Promise.resolve({
-          data : {drafted : false, roles : []},
-          sessionkey : parsed.data.sessionkey
-        });
+      .then(async parsed => {
+        console.log("Attempting to modify project " + parsed.data.id +
+                    " by moving student " + parsed.data.studentId +
+                    " to role `" + parsed.data.role + "`");
+        return ormCtr.contractsByProject(parsed.data.id)
+            .then(arr => arr.filter(v => v.student.student_id ==
+                                         parsed.data.studentId))
+            .then(arr => {
+              if (arr.length == 0) {
+                return Promise.reject({
+                  http : 204,
+                  reason :
+                      "The selected student is not assigned to this project."
+                });
+              }
+
+              if (arr.length > 1) {
+                return Promise.reject(
+                    {http : 409, reason : "The request is ambiguous."});
+              }
+
+              return Promise.resolve(arr[0]);
+            })
+            .then(async ctr => {
+              return getFreeSpotsFor(parsed.data.role, parsed.data.id)
+                  .catch(() => createProjectRoleFor(parsed.data.id,
+                                                    parsed.data.role))
+                  .then(remaining => {
+                    if (remaining.count <= 0) {
+                      return Promise.reject({
+                        http : 409,
+                        reason :
+                            "Can't add this role to the student. There are no more vacant spots."
+                      });
+                    }
+
+                    return ormCtr.updateContract({
+                      contractId : ctr.contract_id,
+                      loginUserId : parsed.userId,
+                      projectRoleId : remaining.role
+                    })
+                  });
+            })
+            .then(res => ormPrRole.getProjectRoleById(res.project_role_id))
+            .then(res => Promise.resolve({
+              sessionkey : parsed.data.sessionkey,
+              data :
+                  {drafted : true, role : util.getOrDefault(res?.role.name, "")}
+            }));
       });
 }
 

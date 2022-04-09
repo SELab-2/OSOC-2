@@ -38,7 +38,8 @@ export async function updateContract(contract: UpdateContract) {
     data : {
       created_by_login_user_id : contract.loginUserId,
       contract_status : contract.contractStatus,
-      information : contract.information
+      information : contract.information,
+      project_role_id : contract.projectRoleId
     }
   });
 }
@@ -96,8 +97,9 @@ export async function contractsByProject(projectId: number) {
           person : true
         }
       },
-      project_role : {select : {project : true}},
-      contract_status : true
+      project_role : true,
+      contract_status : true,
+      contract_id : true
     }
   })
 }

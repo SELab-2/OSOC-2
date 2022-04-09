@@ -174,8 +174,9 @@ export function logRequest(req: express.Request, next: express.NextFunction):
 export async function respOrErrorNoReinject(
     res: express.Response, prom: Promise<Responses.ApiResponse>):
     Promise<void> {
-      const isError = (err: Anything):
-          boolean => { return 'http' in err && 'reason' in err };
+      const isError = (err: Anything): boolean => {
+        return err != undefined && 'http' in err && 'reason' in err
+      };
 
       return prom
           .then(data => {

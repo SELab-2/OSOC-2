@@ -328,12 +328,12 @@ export async function parseUpdateProjectRequest(req: express.Request):
  */
 export async function parseDraftStudentRequest(req: express.Request):
     Promise<Requests.Draft> {
-  return hasFields(req, [ "studentId", "roles" ], types.id)
+  return hasFields(req, [ "studentId", "role" ], types.id)
       .then(() => Promise.resolve({
         sessionkey : getSessionKey(req),
         id : Number(req.params.id),
         studentId : req.body.studentId,
-        roles : req.body.roles
+        role : req.body.role
       }));
 }
 

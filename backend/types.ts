@@ -165,7 +165,7 @@ export interface User {}
 /**
  *  Represents a check of the key, holds the key aswell as boolean value.
  */
- export interface CheckKey {}
+export interface CheckKey {}
 
 /**
  *  Represents a coach, with all associated data.
@@ -244,7 +244,7 @@ export interface ModProjectStudent {
   /**
    *  The roles of the student.
    */
-  roles: string[];
+  role: string;
 }
 
 }
@@ -317,7 +317,7 @@ export interface UserList extends Keyed<InternalTypes.User[]> {}
 /**
  *
  */
- export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
+export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
 
 /**
  *  A student list response is the keyed version of an array of partial
@@ -508,7 +508,7 @@ export interface ModProject extends IdRequest {
 
 export interface Draft extends IdRequest {
   studentId: number;
-  roles: string[];
+  role: string;
 }
 
 export interface Followup extends IdRequest {
