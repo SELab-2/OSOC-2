@@ -179,12 +179,11 @@ async function modProjectStudent(req: express.Request):
       });
 }
 
-export async function unAssignStudent(req: express.Request):
-    Promise<Responses.Key> {
+async function unAssignStudent(req: express.Request): Promise<Responses.Key> {
   return rq.parseRemoveAssigneeRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(async checked => {
-        return ormCtr.contractsForStudent(checked.data.studentId)
+        return ormCtr.contractsForStudent(Number(checked.data.studentId))
             .then(ctrs => ctrs.filter(contr => contr.project_role.project_id ==
                                                checked.data.id))
             .then(async found => {
@@ -260,6 +259,8 @@ export function getRouter(): express.Router {
 
   util.route(router, "get", "/:id/draft", getDraftedStudents);
   util.route(router, "post", "/:id/draft", modProjectStudent);
+
+  util.routeKeyOnly(router, 'delete', '/:id/assignee', unAssignStudent);
 
   // TODO project conflicts
   // util.route(router, "get", "/conflicts", getProjectConflicts);
