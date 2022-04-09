@@ -363,3 +363,16 @@ export function setupRedirect(router: express.Router, ep: string): void {
   router.get('/',
              (_, res) => redirect(res, config.global.preferred + ep + "/all"));
 }
+
+/**
+ *  Returns the given value if not null, otherwise, return the defualt value.
+ *  @template T The type of the value
+ *  @param vl The value (or null)
+ *  @param def The default value
+ *  @returns The default if the value is null, otherwise the value itself.
+ */
+export function getOrDefault<T>(vl: T|null, def: T): T {
+  if (vl == null)
+    return def;
+  return vl;
+}

@@ -1,6 +1,7 @@
 import express from 'express';
 
-// import * as ormEv from '../orm_functions/evaluation';
+import * as ormCtr from '../orm_functions/contract';
+import * as ormEv from '../orm_functions/evaluation';
 import * as ormPr from '../orm_functions/project';
 import * as rq from '../request';
 import {Responses} from '../types';
@@ -176,12 +177,51 @@ async function modProjectStudent(req: express.Request):
       });
 }
 
-export async function unRecommendStudent(req: express.Request):
+export async function unAssignStudent(req: express.Request):
     Promise<Responses.Key> {
-  return rq.parseRemoveDraftStudentRequest(req).then(parsed => {
-    ormPr.getProjectById(parsed.id).then();
-    return Promise.resolve({sessionkey : parsed.sessionkey});
-  })
+  return rq.parseRemoveAssigneeRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(async checked => {
+        return ormCtr.contractsForStudent(checked.data.studentId)
+            .then(ctrs => ctrs.filter(contr => contr.project_role.project_id ==
+                                               checked.data.id))
+            .then(async found => {
+              if (found.length == 0) {
+                return Promise.reject({
+                  http : 400,
+                  reason : "The student with ID " +
+                               checked.data.studentId.toString() +
+                               " is not assigned to project " + checked.data.id
+                });
+              }
+
+              for (const contr of found) {
+                await ormEv
+                    .getEvaluationByPartiesFor(
+                        checked.userId, contr.student.student_id,
+                        contr.project_role.project.osoc_id)
+                    .then(evl => {
+                      if (evl.length != 1) {
+                        return Promise.reject({
+                          http : 400,
+                          reason : "Multiple evaluations match."
+                        });
+                      }
+
+                      return ormEv.updateEvaluationForStudent({
+                        evaluation_id : evl[0].evaluation_id,
+                        loginUserId : checked.userId,
+                        motivation : util.getOrDefault(evl[0].motivation, "") +
+                                         " [Removed assignee from project " +
+                                         checked.data.id + "]"
+                      });
+                    })
+                    .then(() => ormCtr.removeContract(contr.contract_id));
+              }
+
+              return Promise.resolve({sessionkey : checked.data.sessionkey});
+            });
+      });
 }
 
 // TODO project conflicts

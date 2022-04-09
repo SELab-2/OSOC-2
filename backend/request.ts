@@ -455,7 +455,7 @@ export async function parseStudentRoleRequest(req: express.Request):
   }));
 }
 
-export async function parseRemoveDraftStudentRequest(req: express.Request):
+export async function parseRemoveAssigneeRequest(req: express.Request):
     Promise<Requests.RmDraftStudent> {
   return hasFields(req, [ "student" ], types.id).then(() => Promise.resolve({
     sessionkey : getSessionKey(req),
