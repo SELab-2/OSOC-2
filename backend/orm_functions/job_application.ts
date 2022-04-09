@@ -23,7 +23,21 @@ import {CreateJobApplication} from "./orm_types";
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
-                    is_final: true
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -54,6 +68,21 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -84,6 +113,21 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                     decision: true,
                     motivation: true,
                     evaluation_id: true,
+                    is_final: true,
+                    login_user : {
+                        select : {
+                            login_user_id: true,
+                            person : {
+                                select: {
+                                    person_id: true,
+                                    firstname: true,
+                                    lastname: true,
+                                    email: true,
+                                    github: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
