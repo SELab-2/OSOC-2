@@ -22,6 +22,7 @@
   margin-bottom: 2.5rem;
 }
 
+/* Columns */
 .column {
   border-right: 0.1rem solid var(--neutral-200);
   margin-left: clamp(1rem, 3vw, 2.5rem);
@@ -32,6 +33,10 @@
 .column:last-child {
   border-right: none;
 }
+
+/* ----------- */
+
+/* Categories */
 .categoryTitle {
   font-weight: lighter;
   font-size: smaller;

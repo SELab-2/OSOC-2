@@ -8,6 +8,8 @@ import {Study} from "../Labels/Studies";
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
     console.log(student)
 
+    // TODO -- Github
+
     // Count evaluations
     const evaluations = student.evaluations[0].evaluation
     let yesAmount = 0
