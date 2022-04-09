@@ -103,20 +103,24 @@ const Index: NextPage = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
-            })
-                .then(response => response.json()).then(json => {
-                    if (!json.success) {
-                        setLoginBackendError(`Failed to login. ${json.reason}`);
-                        return {success: false};
-                    } else return json;
-                })
-                .catch(err => {
-                    setLoginBackendError(`Failed to login. ${err.reason}`);
-                    return {success: false};
-                });
+            }).then(response => response.json()).catch(error => {
+                console.log(error)
+                setLoginBackendError("Failed to login. An unexpected error occured.")
+            });
+
+            if (response === undefined) {
+                return
+            }
+
+            if (!response.success) {
+                setLoginBackendError(`Failed to login. ${response.reason}`);
+                return;
+            }
+
 
             // The user is succesfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
+                console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
                 }
@@ -242,17 +246,19 @@ const Index: NextPage = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
+            }).then(response => response.json()).catch(error => {
+                console.log(error)
+                setRegisterBackendError('Failed to register. An unexpected error occured.');
             })
-                .then(response => response.json()).then(json => {
-                    if (!json.success) {
-                        setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
-                        return Promise.resolve({success: false});
-                    } else return json;
-                })
-                .catch(json => {
-                    setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
-                    return Promise.resolve({success: false});
-                });
+
+            if (response === undefined) {
+                return
+            }
+
+            if (!response.success) {
+                setRegisterBackendError('Failed to register. Please check all fields. ' + response.reason);
+                return
+            }
 
             if (response.success) {
                 await router.push("/pending")
