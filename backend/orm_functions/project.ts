@@ -30,6 +30,20 @@ export async function getAllProjects() {
 
 /**
  * 
+ * @param projectId: this is the id of the project we are looking up in the database
+ * @returns: object with all the info about this project
+ */
+ export async function getProjectById(projectId: number) {
+    const result = prisma.project.findUnique({
+        where: { 
+            project_id: projectId
+        },
+    });
+    return result;
+}
+
+/**
+ * 
  * @param projectName: this is the name of the project we are looking up in the database
  * @returns: object with all the info about this project
  */
