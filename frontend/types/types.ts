@@ -3,7 +3,9 @@
  */
 
 export enum Decision {
-    "YES", "MAYBE", "NO"
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO"
 }
 
 export interface Student {

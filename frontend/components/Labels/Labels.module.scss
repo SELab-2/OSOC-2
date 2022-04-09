@@ -1,0 +1,33 @@
+/* Label style */
+.label {
+  padding-inline: 1rem;
+  border: 0.1rem solid;
+  border-radius: 1rem;
+  font-size: 1.5rem;
+}
+
+/* All label colors */
+.blue {
+  color: #00BBCC;
+  background: rgba(17, 221, 238, 0.2);
+}
+
+.green {
+  color: #00B383;
+  background: rgba(29, 225, 174, 0.2);
+}
+
+.yellow {
+  color: #E6A400;
+  background: rgba(252, 183, 15, 0.2);
+}
+
+.red {
+  color: #F14A3B;
+  background: rgba(241, 74, 59, 0.2);
+}
+
+.other {
+  color: rgba(10, 8, 57, 0.7);
+  background: rgba(219, 219, 221, 0.2);
+}

@@ -1,0 +1,5 @@
+/* The style for the list of students */
+.students {
+  width: clamp(18rem, 80vw, 80rem);
+  margin-inline: auto;
+}

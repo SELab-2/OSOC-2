@@ -1,0 +1,43 @@
+/* The actual card as a container */
+.card {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  margin-inline: auto;
+  padding-inline: 2rem;
+  padding-top: 1rem
+}
+
+.card h2 {
+  font-size: x-large;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1.5fr 1fr;
+  margin-bottom: 2.5rem;
+}
+
+.column {
+  border-right: 0.1rem solid var(--neutral-200);
+  margin-left: clamp(1rem, 5vw, 2rem);
+}
+.column:first-child {
+  margin-left: 0;
+}
+.column:last-child {
+  border-right: none;
+}
+.categoryTitle {
+  font-weight: lighter;
+  font-size: smaller;
+  padding-block: 0.5rem;
+}
+
+.category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-inline: -0.5rem;
+}

@@ -3,10 +3,11 @@ import SessionContext from "../contexts/sessionProvider";
 import {useContext, useEffect, useState} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
 import {Student} from "../types/types"
+import styles from "../styles/students.module.scss"
 
 
 const Students: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const {getSessionKey, setSessionKey} = useContext(SessionContext);
     const [students, setStudents] = useState<(Student)[]>([]);
 
     const fetchStudents = async () => {
@@ -17,7 +18,7 @@ const Students: NextPage = () => {
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).catch(error => console.log(error));
-        if (response.success) {
+        if (response !== undefined && response.success) {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey)
             }
@@ -32,13 +33,9 @@ const Students: NextPage = () => {
     }, []);
 
     return (
-        <ul>
-            {students.map(student => (
-                <li key={student.student.student_id}>
-                    <StudentCard student={student}/>
-                </li>
-            ))}
-        </ul>
+        <div className={styles.students}>
+            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+        </div>
     )
 }
 
