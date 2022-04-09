@@ -80,3 +80,10 @@ export async function contractsForStudent(studentId: number) {
     }
   });
 }
+
+export async function contractsByProject(projectId: number) {
+  return await prisma.contract.findMany({
+    where : {project_role : {project_id : projectId}},
+    select : {student : true, project_role : {select : {project : true}}}
+  })
+}

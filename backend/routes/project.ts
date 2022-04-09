@@ -157,12 +157,19 @@ async function getDraftedStudents(req: express.Request):
 
   return rq.parseGetDraftedStudentsRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
-      .then(parsed => {
-        // INSERTION LOGIC
-        return Promise.resolve({
-          data : {id : 0, name : '', students : []},
-          sessionkey : parsed.data.sessionkey
-        });
+      .then(async parsed => {
+        const prName =
+            await ormPr.getProjectById(parsed.data.id).then(pr => pr?.name);
+
+        return ormCtr.contractsByProject(parsed.data.id)
+            .then(async arr => Promise.resolve({
+              sessionkey : parsed.data.sessionkey,
+              data : {
+                id : parsed.data.id,
+                name : util.getOrDefault(prName, "(unnamed project)"),
+                students : arr.map(obj => obj.student)
+              }
+            }));
       });
 }
 

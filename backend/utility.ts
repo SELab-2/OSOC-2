@@ -4,9 +4,9 @@ import {v1} from 'uuid';
 
 import * as config from './config.json';
 import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
-import * as ormPr from './orm_functions/project';
 import {
   Anything,
   ApiError,
@@ -349,12 +349,16 @@ export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
 /**
  *  Checks whether the object contains a valid ID.
  */
-export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Table): Promise<T> {
-    const returnObj : {[key in Table]: boolean} =
-        {"student": await ormSt.getStudent(obj.id) != null,
-         "project": await ormPr.getProjectById(obj.id) != null};
+export async function isValidID<T extends Requests.IdRequest>(
+    obj: T, table: Table): Promise<T> {
+  const returnObj: {[key in Table]: boolean} = {
+    "student" : await ormSt.getStudent(obj.id) != null,
+    "project" : await ormPr.getProjectById(obj.id) != null
+  };
 
-    return table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
+  return table in returnObj && returnObj[table] != null
+             ? Promise.resolve(obj)
+             : Promise.reject(errors.cookInvalidID());
 }
 
 /**
@@ -373,8 +377,8 @@ export function setupRedirect(router: express.Router, ep: string): void {
  *  @param def The default value
  *  @returns The default if the value is null, otherwise the value itself.
  */
-export function getOrDefault<T>(vl: T|null, def: T): T {
-  if (vl == null)
+export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
+  if (vl == null || vl == undefined)
     return def;
   return vl;
 }
