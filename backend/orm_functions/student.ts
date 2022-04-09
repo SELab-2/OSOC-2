@@ -121,26 +121,33 @@ export async function searchStudentByGender(gender: string){
  * @param statusSort asc or desc if we are sorting on coachstaus, undefined if we are not sorting on coachstaus
  * @returns the filtered loginUsers with their person data in a promise
  */
+// , coachSort: FilterSort, statusSort: FilterSort
  export async function filterLoginUsers(firstNameFilter: FilterString, lastNameFilter: FilterString,
     emailFilter: FilterString, roleFilter: FilterString, alumniFilter: FilterBoolean, 
     coachFilter: FilterBoolean, statusFilter: decision_enum | undefined,
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
-    alumniSort: FilterSort, coachSort: FilterSort, statusSort: FilterSort) {
+    alumniSort: FilterSort) {
 
     return await prisma.student.findMany({
         where: {
             job_application: {
-                student_coach: coachFilter,
-                applied_role: {
-                    role:{
-                        name: roleFilter
-                    }
-                },
-                evaluation: {
-                    decision: statusFilter
+                some: {
+                    student_coach: coachFilter,
+                    applied_role: {
+                        some: {
+                            role:{
+                                name: roleFilter
+                            }
+                        }
+                    },
+                    evaluation: {
+                        some: {
+                            decision: statusFilter
+                        }
+                    }              
                 }
             },
-            person : {
+            person: {
                 firstname: {
                     contains: firstNameFilter,
                     mode: 'insensitive'
@@ -162,30 +169,27 @@ export async function searchStudentByGender(gender: string){
                 lastname: lastNameSort,
                 email: emailSort,
             },
-            job_application: {
-                student_coach: coachSort,
-                applied_role: {
-                    role: {
-                        name: roleSort
-                    }
-                },
-                evalutation: {
-                    decision: statusSort
-                }
-            },
             alumni: alumniSort
         },
         include : {
             person: true,
             job_application: {
-                student_coach: true,
-                applied_role: {
-                    role: {
-                        name: true
-                    }
-                },
-                evaluation: {
-                    decision: true
+                select : {
+                    student_coach: true,
+                    applied_role: {
+                        include : {
+                            role: {
+                                select : {
+                                    name: true
+                                }
+                            }
+                        }
+                    },
+                    evaluation: {
+                        select : {
+                            decision: true
+                        }
+                    }  
                 }
             }
         }
