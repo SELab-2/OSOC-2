@@ -31,9 +31,9 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
     util.setupRedirect(router, '/verify');
-    util.route(router, "post", "/all", verifyKey);
+    util.route(router, "post", "/", verifyKey);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all" ]);
+    util.addAllInvalidVerbs(router, [ "/" ]);
 
     return router;
 }
