@@ -217,7 +217,7 @@ export async function parseSuggestStudentRequest(req: express.Request):
   return hasFields(req, [ "suggestion", "senderId" ], types.id).then(() => {
     const sug: unknown = req.body.suggestion;
     if (sug != "YES" && sug != "MAYBE" && sug != "NO" &&
-        req.body.senderId !== null)
+        req.body.senderId != null)
       return rejector();
 
     return Promise.resolve({
@@ -279,7 +279,8 @@ export async function parseRequestCoachRequest(req: express.Request):
  */
 export async function parseNewProjectRequest(req: express.Request):
     Promise<Requests.Project> {
-  return hasFields(req, [ "name", "partner", "start", "end", "positions" ],
+  return hasFields(req,
+                   [ "name", "partner", "start", "end", "positions", "osocId" ],
                    types.key)
       .then(() => Promise.resolve({
         sessionkey : getSessionKey(req),
@@ -287,6 +288,7 @@ export async function parseNewProjectRequest(req: express.Request):
         partner : req.body.partner,
         start : req.body.start,
         end : req.body.end,
+        osocId : req.body.osocId,
         positions : req.body.positions
       }));
 }
@@ -440,6 +442,20 @@ export async function parseResetPasswordRequest(req: express.Request):
 }
 
 /**
+ *  Parses a request to `POST /student/role`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseStudentRoleRequest(req: express.Request):
+    Promise<Requests.Role> {
+  return hasFields(req, [ "name" ], types.neither).then(() => Promise.resolve({
+    sessionkey : getSessionKey(req),
+    name : req.body.name
+  }));
+}
+
+/**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
  */
@@ -449,6 +465,11 @@ export const parseLogoutRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseStudentAllRequest = parseKeyRequest;
+/**
+ *  A request to `GET /roles/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseRolesAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /coach/all` only requires a session key
  * {@link parseKeyRequest}.
@@ -464,6 +485,11 @@ export const parseGetAllCoachRequestsRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseAdminAllRequest = parseKeyRequest;
+/**
+ *  A request to `GET /user/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseUserAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /project/all` only requires a session key
  * {@link parseKeyRequest}.

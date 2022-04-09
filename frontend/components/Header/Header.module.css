@@ -5,6 +5,7 @@
     padding-inline: min(8rem, 16vw);
     display: flex;
     justify-content: space-between;
+    margin-bottom: clamp(1rem, 2vw, 2.5rem);
 }
 
 @media (max-width: 70rem) {
@@ -17,16 +18,22 @@
     .links {
         width: 100%;
         align-self: center;
+        justify-content: space-around;
+        gap: 0.2rem !important;
     }
 
-    .links {
-        justify-content: space-around;
+    .links a {
+        padding: 0.75rem 0.5rem !important;
     }
 }
 
 .header div {
     display: flex;
     align-items: center;
+}
+
+.links {
+    gap: 1rem;
 }
 
 .header div h1 {
@@ -55,6 +62,10 @@
 
 .links a:active {
     background-color: var(--neutral-200);
+}
+
+.links button {
+    margin-left: auto;
 }
 
 .displayNone {

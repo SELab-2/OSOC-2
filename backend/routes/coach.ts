@@ -14,25 +14,23 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
-  return rq.parseCoachAllRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(
-          async parsed =>
-              ormLU.searchAllCoachLoginUsers(true)
-                  .then(obj =>
-                            obj.map(val => ({
-                                      person_data : {
-                                        id : val.person.person_id,
-                                        name : val.person.firstname + " " +
-                                                   val.person.lastname
-                                      },
-                                      coach : val.is_coach,
-                                      admin : val.is_admin,
-                                      activated : val.account_status as string
-                                    })))
-                  .then(
-                      obj => Promise.resolve(
-                          {sessionkey : parsed.data.sessionkey, data : obj})));
+    return rq.parseCoachAllRequest(req)
+        .then(parsed => util.checkSessionKey(parsed))
+        .then(
+            async parsed =>
+                ormLU.searchAllCoachLoginUsers(true)
+                    .then(obj =>
+                        obj.map(val => ({
+                            person_data : {
+                                id : val.person.person_id,
+                                name : val.person.firstname + " " + val.person.lastname,
+                                email: val.person.email
+                            },
+                            coach : val.is_coach,
+                            admin : val.is_admin,
+                            activated : val.account_status as string
+                        })))
+                    .then(obj => Promise.resolve({sessionkey : parsed.data.sessionkey, data : obj})));
 }
 
 /**
@@ -71,7 +69,7 @@ async function modCoach(req: express.Request):
             .then(res => Promise.resolve({
               sessionkey : parsed.data.sessionkey,
               data : {
-                id : res.person_id,
+                id : res.login_user_id,
                 name : res.person.firstname + " " + res.person.lastname
               }
             }));
@@ -238,14 +236,12 @@ export function getRouter(): express.Router {
   util.route(router, "get", "/request/:id", getCoachRequest);
 
   util.route(router, "post", "/request/:id", createCoachAcceptance);
-  router.delete('/request/:id', (req, res) => util.respOrErrorNoReinject(
-                                    res, deleteCoachRequest(req)));
+  util.routeKeyOnly(router, "delete", "/request/:id", deleteCoachRequest);
 
   util.route(router, "get", "/:id", getCoach);
 
   util.route(router, "post", "/:id", modCoach);
-  router.delete('/:id', (req, res) =>
-                            util.respOrErrorNoReinject(res, deleteCoach(req)));
+  util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
 
   util.addAllInvalidVerbs(router,
                           [ "/", "/all", "/:id", "/request", "/request/:id" ]);

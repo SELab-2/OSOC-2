@@ -1,5 +1,5 @@
-import React, {SyntheticEvent} from "react";
-import styles from './Modal.module.css'
+import React, {ReactNode, SyntheticEvent} from "react";
+import styles from './Modal.module.scss'
 
 /**
  * A popup modal
@@ -7,17 +7,21 @@ import styles from './Modal.module.css'
  * @param children - The children to be shown inside the modal
  * @param visible - Set the modal to be visible or not
  * @param handleClose - The callback to close the modal
+ * @param title - The title for the modal
  */
-// eslint-disable-next-line no-unused-vars
-export const Modal: React.FC<{ visible: boolean, handleClose: (e :SyntheticEvent) => void }> = ({
-                                                                                                        children,
-                                                                                                        visible,
-                                                                                                        handleClose
-                                                                                                    }) => {
+export const Modal: React.FC<{ children: ReactNode, title: string, visible: boolean, handleClose: (e: SyntheticEvent) => void }> = ({
+                                                                                                                   children,
+                                                                                                                   visible,
+                                                                                                                   handleClose,
+                                                                                                                   title
+                                                                                                               }) => {
     return (
         <div className={`${styles.modal} ${visible ? styles.displayBlock : styles.displayNone}`}>
             <div className={styles.modalMain}>
-                <button className={styles.modalButton} type="button" onClick={handleClose}>Close</button>
+                <div className={styles.header}>
+                    <p>{title}</p>
+                    <button className={styles.modalButton} type="button" onClick={handleClose}>Close</button>
+                </div>
                 {children}
             </div>
         </div>

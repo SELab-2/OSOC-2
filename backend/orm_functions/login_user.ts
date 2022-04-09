@@ -1,6 +1,7 @@
 import prisma from '../prisma/prisma'
 
-import {CreateLoginUser, UpdateLoginUser} from './orm_types';
+import {CreateLoginUser, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
+import {account_status_enum} from "@prisma/client";
 
 /**
  *
@@ -194,4 +195,92 @@ export async function getLoginUserById(loginUserId: number) {
     },
     include : {person : true}
   });
+}
+
+/**
+ *
+ * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
+ * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
+ * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
+ * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
+ * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
+ * @returns the filtered loginUsers with their person data in a promise
+ */
+export async function filterLoginUsers(nameFilter: FilterString,
+                                       emailFilter: FilterString,
+                                       nameSort: FilterSort,
+                                       emailSort: FilterSort,
+                                       statusFilter: account_status_enum | undefined) {
+
+    if (nameSort !== undefined && emailSort !== undefined) {
+        return Promise.reject("Sorting is only allowed on 1 field");
+    }
+
+    return await prisma.login_user.findMany({
+        where: {
+            person : {
+                firstname: {
+                    contains: nameFilter,
+                    mode: 'insensitive'
+                },
+                email: {
+                    contains: emailFilter,
+                    mode: 'insensitive'
+                },
+            },
+            account_status: statusFilter,
+        },
+        orderBy : {
+            person :  {
+                firstname: nameSort,
+                email: emailSort,
+            },
+        },
+        include : {
+            person: true
+        }
+
+    });
+}
+
+/**
+ * Sets the is_coach field of the loginUser to isCoach
+ *
+ * @param loginUserId: the id of the loginUser whose field we are updating
+ * @param isCoach: the new value of the is_coach field for the loginUser
+ * @return a promise with the updated entry, the person object is also included
+ */
+export async function setCoach(loginUserId: number, isCoach: boolean) {
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_coach: isCoach,
+        },
+        include: {
+            person: true,
+        }
+    });
+}
+
+/**
+ * Sets the is_admin field of the loginuser to IsAdmin
+ *
+ * @param loginUserId the id of the loginUser whose field we are updating
+ * @param isAdmin the new value of is_admin
+ * @returns a promise with the updated entry, the person object is also included
+ */
+export async function setAdmin(loginUserId: number, isAdmin: boolean) {
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_admin: isAdmin,
+        },
+        include: {
+            person: true,
+        }
+    });
 }

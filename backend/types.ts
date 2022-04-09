@@ -158,6 +158,11 @@ export interface Person {
 export interface Student {}
 
 /**
+ *  Represents a user, with all associated data.
+ */
+export interface User {}
+
+/**
  *  Represents a coach, with all associated data.
  */
 export interface Coach {
@@ -194,7 +199,14 @@ export interface Admin {}
 /**
  *  Represents a project, with all associated data.
  */
-export interface Project {}
+export interface Project {
+  id: number;
+  name: string;
+  partner: string;
+  start_date: string;
+  end_date: string;
+  positions: number;
+}
 
 /**
  *  Represents the drafted students of a project. Usually these will only
@@ -293,6 +305,11 @@ export interface Student extends Keyed<InternalTypes.Student> {}
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
+ *
+ */
+export interface UserList extends Keyed<InternalTypes.User[]> {}
+
+/**
  *  A student list response is the keyed version of an array of partial
  * students.
  */
@@ -351,6 +368,11 @@ export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
 export interface Project extends Keyed<InternalTypes.Project> {}
 
 /**
+ *  A project list response is the keyed version of a list of projects
+ */
+export interface ProjectList extends Keyed<InternalTypes.Project[]> {}
+
+/**
  *  An admin list response is the keyed version of the list of admins.
  */
 export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
@@ -369,6 +391,12 @@ export interface ProjectDraftedStudents extends
 export interface ModProjectStudent extends
     Keyed<InternalTypes.ModProjectStudent> {}
 
+  /**
+   *  A studentList response is the keyed version of a list of students and their
+   * associated data.
+   */
+  export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
  * rejecting with API error or resolving with data ({@link Promise}).
@@ -379,6 +407,16 @@ export type OrError<T> = ApiError|T;
  *  An API response is one of the previous response types.
  */
 export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
+
+/**
+ *  Either an error while parsing the form or a data value.
+ */
+export interface FormResponse<T> {
+  /**
+   *  The data.
+   */
+  data: T | null;
+}
 }
 
 export namespace Requests {
@@ -441,6 +479,7 @@ export interface CoachRequest {
 }
 
 export interface Project extends KeyRequest {
+  osocId: number;
   name: string;
   partner: string;
   start: Date;
@@ -454,6 +493,7 @@ export interface ModProject extends IdRequest {
   start?: Date;
   end?: Date;
   positions?: number;
+  osocId?: number;
 }
 
 export interface Draft extends IdRequest {
@@ -484,6 +524,11 @@ export interface ModTemplate extends IdRequest {
 export interface Form {
   eventId: string, eventType: string, createdAt: string, data: DataForm
 }
+
+export interface Role extends KeyRequest {
+  name: string
+}
+
 
 export interface DataForm {
   fields: Array<Question>
@@ -519,9 +564,7 @@ export type Verb = "get"|"post"|"delete";
 
 export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
 
-export type Table = "applied_role"|"attachment"|"contract"|"evaluation"|
-    "job_application"|"job_application_skill"|"language"|"login_user"|"osoc"|
-    "person"|"project_role"|"project_user"|"role"|"student";
+export type Table = "project"|"student";
 
 /**
  *  A route callback is a function taking an Express js request and returning a

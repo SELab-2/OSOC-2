@@ -93,7 +93,7 @@ export async function getProjectRoleWithRoleName(name: string, projectId: number
 /**
  * 
  * @param roleId the role we are deleting from the role-table
- * @returns TODO: what does this return
+ * @returns a promise with the deleted record inside
  */
  export async function deleteRole(roleId: number) {
     return await prisma.role.delete({
@@ -106,7 +106,7 @@ export async function getProjectRoleWithRoleName(name: string, projectId: number
 /**
  * 
  * @param name the name of the role we are deleting from the role-table
- * @returns TODO: what does this return
+ * @returns a promise with the deleted record inside
  */
  export async function deleteRoleByName(name: string) {
     return await prisma.role.delete({

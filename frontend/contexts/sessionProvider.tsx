@@ -1,10 +1,11 @@
-import React, {createContext, useEffect, useState} from 'react';
+import React, {createContext, ReactNode, useEffect, useState} from 'react';
 
 /**
  * Interface for the context, stores the user session application wide
  */
 interface ISessionContext {
-    sessionKey: string;
+    sessionKey: string
+    getSessionKey?: () => string;
     setSessionKey?: (key: string) => void;
 
     isCoach: boolean;
@@ -29,7 +30,7 @@ const SessionContext = createContext<ISessionContext>(defaultState);
  * @param children
  * @constructor
  */
-export const SessionProvider: React.FC = ({ children }) => {
+export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
     /**
      * Everytime the page is reloaded we need to get the session from local storage
@@ -44,6 +45,19 @@ export const SessionProvider: React.FC = ({ children }) => {
     const [sessionKey, setSessionKeyState] = useState<string>("");
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
+
+    /**
+     * The useEffect is not always called before other page's use effect
+     * Therefore we can use this function to get the sessionkey in the useEffect functions
+     */
+    const getSessionKey = () => {
+        if (sessionKey != undefined && sessionKey != "") {
+            return sessionKey
+        }
+
+        const key = localStorage.getItem('sessionKey')
+        return key !== null ? key : ""
+    }
 
     const setSessionKey = (sessionKey: string) => {
         setSessionKeyState(sessionKey)
@@ -64,7 +78,7 @@ export const SessionProvider: React.FC = ({ children }) => {
     }
 
     return (
-        <SessionContext.Provider value={{sessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
+        <SessionContext.Provider value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
             {children}
         </SessionContext.Provider>
     );
