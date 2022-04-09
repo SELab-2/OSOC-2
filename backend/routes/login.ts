@@ -1,4 +1,5 @@
 import express from 'express';
+import * as session_key from './session_key.json'
 
 import {getPasswordPersonByEmail} from '../orm_functions/person';
 import {
@@ -33,7 +34,9 @@ async function login(req: express.Request): Promise<Responses.Login> {
               {http : 409, reason : 'Account isn\'t activated yet.'});
         }
         const key: string = util.generateKey();
-        return addSessionKey(pass.login_user.login_user_id, key)
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+        return addSessionKey(pass.login_user.login_user_id, key, new Date())
             .then(ins => ({
                     sessionkey : ins.session_key,
                     is_admin : orDefault(pass?.login_user?.is_admin, false),
