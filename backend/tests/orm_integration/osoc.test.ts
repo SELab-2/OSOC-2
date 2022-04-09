@@ -4,7 +4,7 @@ import {
     getOsocAfterYear,
     getOsocBeforeYear,
     getOsocByYear,
-    updateOsoc
+    updateOsoc, getLatestOsoc
 } from "../../orm_functions/osoc";
 import prisma from "../../prisma/prisma";
 
@@ -21,6 +21,12 @@ it("should return all osoc editions", async () => {
         expect(osocs[index]).toHaveProperty("year", year);
         expect(osocs[index]).toHaveProperty("osoc_id");
     });
+});
+
+it("should return the latest osoc edition", async () => {
+    const osoc = await getLatestOsoc();
+    expect(osoc).toHaveProperty("year", 2024);
+    expect(osoc).toHaveProperty("osoc_id");
 });
 
 it("should return the osoc edition by year", async () => {
