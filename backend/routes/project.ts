@@ -167,7 +167,9 @@ async function getDraftedStudents(req: express.Request):
               data : {
                 id : parsed.data.id,
                 name : util.getOrDefault(prName, "(unnamed project)"),
-                students : arr.map(obj => obj.student)
+                students : arr.map(
+                    obj =>
+                        ({student : obj.student, status : obj.contract_status}))
               }
             }));
       });
