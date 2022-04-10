@@ -1,10 +1,10 @@
 import {account_status_enum} from '@prisma/client';
 import express from 'express';
+import * as validator from 'validator';
 
 import * as config from './config.json';
 import {Anything, InternalTypes, Requests} from './types';
 import {errors, getSessionKey} from './utility';
-import * as validator from 'validator';
 
 /**
  *  We use 3 types of requests: those requiring no special values, those
@@ -169,9 +169,14 @@ async function parseUpdateLoginUser(req: express.Request):
  */
 export async function parseLoginRequest(req: express.Request):
     Promise<Requests.Login> {
-  return hasFields(req, [ "name", "pass" ], types.neither)
-      .then(() =>
-                Promise.resolve({name : req.body.name, pass : req.body.pass}));
+  return hasFields(req, [ "name", "pass" ], types.neither).then(() => {
+    if (!validator.default.isEmail(req.body.name)) {
+      return rejector();
+    } else {
+      const email = validator.default.normalizeEmail(req.body.name).toString();
+      return Promise.resolve({name : email, pass : req.body.pass});
+    }
+  });
 }
 
 /**
@@ -237,21 +242,19 @@ export async function parseSuggestStudentRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseGetSuggestionsStudentRequest(req: express.Request): Promise<Requests.YearId> {
+export async function parseGetSuggestionsStudentRequest(req: express.Request):
+    Promise<Requests.YearId> {
   return hasFields(req, [], types.id).then(() => {
-    if("year" in req.body) {
+    if ("year" in req.body) {
       return Promise.resolve({
         sessionkey : getSessionKey(req),
         id : Number(req.params.id),
         year : Number(req.body.year)
       });
     } else {
-      return Promise.resolve({
-        sessionkey : getSessionKey(req),
-        id : Number(req.params.id)
-      });
+      return Promise.resolve(
+          {sessionkey : getSessionKey(req), id : Number(req.params.id)});
     }
-
   });
 }
 
@@ -262,15 +265,18 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request): P
  * Argument or Unauthenticated error.
  */
 export async function parseFilterStudentsRequest(req: express.Request): Promise<Requests.StudentFilter> {
+  let mail = undefined;
   if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
       ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
           req.body.statusFilter !== "NO")) {
     return rejector();
   } else {
     if("emailFilter" in req.body) {
-      req.body.emailFilter = validator.default.normalizeEmail(req.body.emailFilter).toString();
+      mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
   }
+
+  console.log(mail);
 
   for(const filter of [maybe(req.body, "firstNameSort"), maybe(req.body, "lastNameSort"),
     maybe(req.body, "emailSort"), maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
@@ -283,7 +289,7 @@ export async function parseFilterStudentsRequest(req: express.Request): Promise<
     sessionkey : getSessionKey(req),
     firstNameFilter : maybe(req.body, "firstNameFilter"),
     lastNameFilter : maybe(req.body, "lastNameFilter"),
-    emailFilter : maybe(req.body, "emailFilter"),
+    emailFilter : mail,
     roleFilter : maybe(req.body, "roleFilter"),
     alumniFilter : maybe(req.body, "alumniFilter"),
     coachFilter : maybe(req.body, "coachFilter"),
@@ -326,15 +332,15 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseRequestCoachRequest(req: express.Request):
-    Promise<Requests.CoachRequest> {
-  return hasFields(req, [ "firstName", "lastName", "emailOrGithub" ],
+export async function parseRequestUserRequest(req: express.Request):
+    Promise<Requests.UserRequest> {
+  return hasFields(req, [ "firstName", "lastName", "email", "pass" ],
                    types.neither)
       .then(() => Promise.resolve({
         firstName : req.body.firstName,
         lastName : req.body.lastName,
-        emailOrGithub : req.body.emailOrGithub,
-        pass : maybe(req.body, "pass")
+        email : req.body.email,
+        pass : req.body.pass
       }));
 }
 
@@ -532,6 +538,22 @@ export async function parseRemoveAssigneeRequest(req: express.Request):
 }
 
 /**
+ *  Parses a request requiring both a key and an ID.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseAcceptNewUserRequest(req: express.Request):
+    Promise<Requests.AccountAcceptance> {
+  return hasFields(req, ["is_admin", "is_coach"], types.id).then(() => Promise.resolve({
+    sessionkey : getSessionKey(req),
+    id : Number(req.params.id),
+    is_admin: req.body.is_admin,
+    is_coach: req.body.is_coach
+  }));
+}
+
+/**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
  */
@@ -603,12 +625,6 @@ export const parseSingleStudentRequest = parseKeyIdRequest;
  */
 export const parseDeleteStudentRequest = parseKeyIdRequest;
 /**
- *  A request to `GET /student/<id>/suggest` only requires a session key and an
- * ID
- * {@link parseKeyIdRequest}.
- */
-//export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
-/**
  *  A request to `GET /coach/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.
  */
@@ -623,11 +639,6 @@ export const parseDeleteCoachRequest = parseKeyIdRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseGetCoachRequestRequest = parseKeyIdRequest;
-/**
- *  A request to `POST /coach/request/<id>` only requires a session key and an
- * ID {@link parseKeyIdRequest}.
- */
-export const parseAcceptNewCoachRequest = parseKeyIdRequest;
 /**
  *  A request to `DELETE /coach/request/<id>` only requires a session key and an
  * ID

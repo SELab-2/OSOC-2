@@ -109,16 +109,16 @@ export async function searchStudentByGender(gender: string){
  * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
  * @param roleFilter role that we are filtering on (or undefined if not filtering on role)
- * @param alumniFilter alumnistaus that we are filtering on (or undefined if not filtering on alumnistatus)
- * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coachstatus)
+ * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
+ * @param coachFilter coach status that we are filtering on (or undefined if not filtering on coach status)
  * @param statusFilter status that we are filtering on (or undefined if not filtering on status)
  * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
  * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param roleSort asc or desc if we are sorting on role, undefined if we are not sorting on role
- * @param alumniSort asc or desc if we are sorting on alumnistatus, undefined if we are not sorting on alumnistatus
- * @param coachSort asc or desc if we are sorting on coachstaus, undefined if we are not sorting on coachstaus
- * @param statusSort asc or desc if we are sorting on coachstaus, undefined if we are not sorting on coachstaus
+ * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
+ * @param coachSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
+ * @param statusSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 // , coachSort: FilterSort, statusSort: FilterSort
