@@ -24,7 +24,7 @@ function job_application_check(expected: {
                                    student_coach: boolean;
                                    osoc_id: number;
                                    edus: string[];
-                                   edu_level: string | null;
+                                   edu_level: string[] | null;
                                    edu_duration: number | null;
                                    edu_institute: string | null;
                                    edu_year: number | null;
@@ -40,7 +40,7 @@ function job_application_check(expected: {
                                    student_coach: boolean;
                                    osoc_id: number;
                                    edus: string[];
-                                   edu_level: string | null;
+                                   edu_level: string[] | null;
                                    edu_duration: number | null;
                                    edu_institute: string | null;
                                    edu_year: number | null;
@@ -233,7 +233,7 @@ it("should update the email status of the job application", async () => {
         student_coach: false,
         osoc_id: osocs[0].osoc_id,
         edus: ["something something"],
-        edu_level: "higher education",
+        edu_level: ["higher education"],
         edu_duration: 5,
         edu_institute: "Ugent",
         edu_year: 3,
@@ -258,7 +258,7 @@ it("should delete the job application", async () => {
         student_coach: false,
         osoc_id: osocs[0].osoc_id,
         edus: ["something something"],
-        edu_level: "higher education",
+        edu_level: ["higher education"],
         edu_duration: 5,
         edu_institute: "Ugent",
         edu_year: 3,
@@ -285,7 +285,7 @@ it("should create a new job_application", async () => {
         student_coach: true,
         osoc_id: osocs[0].osoc_id,
         edus: ["something edu"],
-        edu_level: "higher education",
+        edu_level: ["higher education"],
         edu_duration: 3,
         edu_institute: "Hogent",
         edu_year: 2,
@@ -301,7 +301,7 @@ it("should create a new job_application", async () => {
         studentCoach: true,
         osocId: osocs[0].osoc_id,
         edus: ["something edu"],
-        eduLevel: "higher education",
+        eduLevel: ["higher education"],
         eduDuration: 3,
         eduInstitute: "Hogent",
         eduYear: 2,
@@ -351,7 +351,7 @@ it("should return the most recent job application of a student", async () => {
         student_coach: true,
         osoc_id: osocs[0].osoc_id,
         edus: ["higher education"],
-        edu_level: "MaNaMa",
+        edu_level: ["MaNaMa"],
         edu_duration: 8,
         edu_institute: "Ugent",
         edu_year: 7,

@@ -55,7 +55,7 @@ model job_application {
   student_coach          Boolean
   osoc_id                Int
   edus                   String[]
-  edu_level              String
+  edu_level              String[]
   edu_duration           Int
   edu_year               Int
   edu_institute          String

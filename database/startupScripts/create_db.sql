@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS job_application (
     student_coach             BOOLEAN              NOT NULL,
     osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
     edus                      TEXT []              NOT NULL,
-    edu_level                 TEXT                 NOT NULL,
+    edu_level                 TEXT []              NOT NULL,
     edu_duration              INT                  NOT NULL,
     edu_year                  INT                  NOT NULL,
     edu_institute             TEXT                 NOT NULL,
