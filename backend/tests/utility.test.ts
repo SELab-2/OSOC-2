@@ -384,9 +384,10 @@ test("utility.isAdmin can catch errors from the DB", async () => {
 
 test("utility.refreshKey removes a key and replaces it", async () => {
   session_keyMock.changeSessionKey.mockReset();
-  session_keyMock.changeSessionKey.mockImplementation((_, nw, nd) => {
+  const date = new Date()
+  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
     return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: nd});
+        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: date});
   });
 
   cryptoMock.createHash.mockReset();
@@ -399,14 +400,15 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
   await expect(util.refreshKey('ab')).resolves.toBe('abcd');
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', new Date());
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', date);
 });
 
 test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   session_keyMock.changeSessionKey.mockReset();
-  session_keyMock.changeSessionKey.mockImplementation((_, nw, nd) => {
+  const date = new Date()
+  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
     return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: nd});
+        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: date});
   });
 
   cryptoMock.createHash.mockReset();
@@ -430,7 +432,7 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   expect(util.refreshAndInjectKey('ab', initial))
       .resolves.toStrictEqual(result);
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', new Date());
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', date);
 });
 
 test("utility.getSessionKey fetches session key or crashes", () => {
