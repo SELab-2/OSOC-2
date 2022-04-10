@@ -217,8 +217,8 @@ export interface ModProjectStudent {
 export interface FollowupStatus {
   student: number;
   status: email_status_enum;
+  application: number;
 }
-
 }
 
 export interface WithUserID<T> {
@@ -373,6 +373,7 @@ export interface ModProjectStudent extends
  */
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
+export interface SingleFollowup extends Keyed<InternalTypes.FollowupStatus> {}
 export interface FollowupList extends Keyed<InternalTypes.FollowupStatus[]> {}
 
 /**
