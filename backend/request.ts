@@ -3,7 +3,7 @@ import express from 'express';
 import * as validator from 'validator';
 
 import * as config from './config.json';
-import {Anything, InternalTypes, Requests} from './types';
+import {Anything, FollowupType, InternalTypes, Requests} from './types';
 import {errors, getSessionKey} from './utility';
 
 /**
@@ -422,14 +422,15 @@ export async function parseDraftStudentRequest(req: express.Request):
 export async function parseSetFollowupStudentRequest(req: express.Request):
     Promise<Requests.Followup> {
   return hasFields(req, [ "type" ], types.id).then(() => {
-    const type = req.body.type;
-    if (type != "hold-tight" && type != "confirmed" && type != "cancelled")
+    const type: string = req.body.type;
+    if (type != "SCHEDULED" && type != "SENT" && type != "FAILED" &&
+        type != "NONE" && type != "DRAFT")
       return rejector();
 
     return Promise.resolve({
       sessionkey : getSessionKey(req),
       id : Number(req.params.id),
-      type : type
+      type : type as FollowupType
     });
   });
 }
@@ -548,12 +549,13 @@ export async function parseRemoveAssigneeRequest(req: express.Request):
  */
 export async function parseAcceptNewUserRequest(req: express.Request):
     Promise<Requests.AccountAcceptance> {
-  return hasFields(req, ["is_admin", "is_coach"], types.id).then(() => Promise.resolve({
-    sessionkey : getSessionKey(req),
-    id : Number(req.params.id),
-    is_admin: req.body.is_admin,
-    is_coach: req.body.is_coach
-  }));
+  return hasFields(req, [ "is_admin", "is_coach" ], types.id)
+      .then(() => Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id),
+        is_admin : req.body.is_admin,
+        is_coach : req.body.is_coach
+      }));
 }
 
 /**
