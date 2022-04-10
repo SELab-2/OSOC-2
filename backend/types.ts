@@ -294,6 +294,13 @@ export interface Key {
 }
 
 /**
+ *  A response consisting of only an id.
+ */
+export interface Id {
+  id: number;
+}
+
+/**
  *  A login response contains of a key and a boolean determining whether a user
  * is an admin.
  */

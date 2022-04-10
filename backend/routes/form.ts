@@ -3,6 +3,8 @@ import express from 'express';
 
 import * as ormP from '../orm_functions/person';
 import * as ormSt from '../orm_functions/student';
+import * as ormOs from '../orm_functions/osoc';
+import * as ormJo from '../orm_functions/job_application';
 import {Requests, Responses} from '../types';
 import * as util from "../utility";
 import {errors} from "../utility";
@@ -102,19 +104,14 @@ function getEmail(form: Requests.Form) : Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
+async function jsonToPerson(form: Requests.Form): Promise<Responses.Id> {
     const birthName = await getBirthName(form);
     const lastName = await getLastName(form);
     const email = await getEmail(form);
 
     const person = await ormP.createPerson({firstname : birthName, lastname : lastName, email : email});
 
-    return Promise.resolve({
-        person_id : person.person_id,
-        firstname : person.firstname,
-        lastname : person.lastname,
-        email : email
-    });
+    return Promise.resolve({id: person.person_id});
 }
 
 /* parse form to student
@@ -252,37 +249,71 @@ function getAlumni(form: Requests.Form) : Promise<boolean> {
 /**
  *  Attempts to parse the answers in the form into a student entity.
  *  @param form The form with the answers.
+ *  @param personId The id of a person.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToStudent(form: Requests.Form, person: Responses.Person): Promise<Responses.Empty> {
-    return getPronouns(form)
-        .then(pronounsResponse => {
-            return getGender(form)
-                .then(genderResponse => {
-                    return getPhoneNumber(form)
-                        .then(phoneNumberResponse => {
-                            return getNickname(form)
-                                .then(nicknameResponse => {
-                                    return getAlumni(form)
-                                        .then(alumniResponse => {
-                                            return ormSt.createStudent({
-                                                personId : person.person_id,
-                                                gender : genderResponse,
-                                                pronouns : pronounsResponse != null ? pronounsResponse : undefined,
-                                                phoneNumber : phoneNumberResponse,
-                                                nickname : nicknameResponse != null ? nicknameResponse : undefined,
-                                                alumni : alumniResponse
-                                            }).then(() => Promise.resolve({}));
-                                        });
-                                });
-                        });
-                });
-        });
+async function jsonToStudent(form: Requests.Form, personId: Responses.Id): Promise<Responses.Id> {
+    const pronouns = await getPronouns(form);
+    const gender = await getGender(form);
+    const phoneNumber = await getPhoneNumber(form);
+    const nickname = await getNickname(form);
+    const alumni = await getAlumni(form);
+
+    const student = await ormSt.createStudent({
+        personId : personId.id,
+        gender : gender,
+        pronouns : pronouns != null ? pronouns : undefined,
+        phoneNumber : phoneNumber,
+        nickname : nickname != null ? nickname : undefined,
+        alumni : alumni
+    });
+
+    return Promise.resolve({id: student.student_id});
 }
 
 /* parse form to job application
 ********************************/
+
+/**
+ *  Parse the form to the responsibilities of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getResponsibilities(form: Requests.Form) : Promise<string | null> {
+    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wLPr9v");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckResponsibilities]);
+
+    if(!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionCheckResponsibilities.data?.value == undefined) {
+        return Promise.resolve(null);
+    }
+
+    return Promise.resolve(questionCheckResponsibilities.data?.value);
+}
+
+/**
+ *  Parse the form to the fun fact of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getFunFact(form: Requests.Form) : Promise<string> {
+    const questionFunFact: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxpV");
+
+    const questionsExist : boolean = checkQuestionsExist([questionFunFact]);
+
+    if(!questionsExist || questionFunFact.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(questionFunFact.data.value);
+}
 
 /**
  *  Parse the form to the volunteer info of this student.
@@ -306,42 +337,6 @@ function getVolunteerInfo(form: Requests.Form) : Promise<string> {
     }
 
     return Promise.resolve(chosenVolunteerInfo.data.text);
-}
-
-/**
- *  Parse the form to the responsibilities of this student.
- *  @param form The form with the answers.
- *  @returns See the API documentation. Successes are passed using
- *  `Promise.resolve`, failures using `Promise.reject`.
- */
-function getResponsibilities(form: Requests.Form) : Promise<string | null> {
-    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wLPr9v");
-
-    const questionsExist : boolean = checkQuestionsExist([questionCheckResponsibilities]);
-
-    if(!questionsExist) {
-        return Promise.reject(errors.cookArgumentError());
-    }
-
-    return Promise.resolve(questionCheckResponsibilities.data?.value == undefined ? null : questionCheckResponsibilities.data.value);
-}
-
-/**
- *  Parse the form to the fun fact of this student.
- *  @param form The form with the answers.
- *  @returns See the API documentation. Successes are passed using
- *  `Promise.resolve`, failures using `Promise.reject`.
- */
-function getFunFact(form: Requests.Form) : Promise<string> {
-    const questionFunFact: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxpV");
-
-    const questionsExist : boolean = checkQuestionsExist([questionFunFact]);
-
-    if(!questionsExist || questionFunFact.data?.value == null) {
-        return Promise.reject(errors.cookArgumentError());
-    }
-
-    return Promise.resolve(questionFunFact.data.value);
 }
 
 /**
@@ -411,6 +406,48 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
 }
 
 /**
+ *  Parse the form to the education levels of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEducationLevel(form: Requests.Form) : Promise<string[]> {
+    const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w4K6BX");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCheckEducationLevel]);
+
+    if(!questionsExist || questionCheckEducationLevel.data?.value == null ||
+        questionCheckEducationLevel.data.value.length === 0 || questionCheckEducationLevel.data.value.length > 2) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const educationLevels : string[] = [];
+
+    for(let i = 0; i < questionCheckEducationLevel.data.value.length; i++) {
+        if(questionCheckEducationLevel.data.options != undefined) {
+            const filteredOption = questionCheckEducationLevel.data.options.filter(option => option.id === questionCheckEducationLevel.data?.value[i]);
+            if(filteredOption.length !== 1) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+            if(filteredOption[0].text.includes("Other")) {
+                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3jlRba");
+                const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
+
+                if(!questionsExistOther || questionCheckOther.data?.value == null) {
+                    return Promise.reject(errors.cookArgumentError());
+                }
+
+                educationLevels.push(questionCheckOther.data.value);
+            } else {
+                educationLevels.push(filteredOption[0].text);
+            }
+        }
+    }
+
+    return Promise.resolve(educationLevels);
+}
+
+/**
  *  Parse the form to the duration of the education of this student.
  *  @param form The form with the answers.
  *  @returns See the API documentation. Successes are passed using
@@ -464,16 +501,55 @@ function getEducationUniversity(form: Requests.Form) : Promise<string> {
     return Promise.resolve(questionEducationUniversity.data.value);
 }
 
-// TODO parse education level, email status and created_at
+// TODO parse email status and created_at
 
 /**
  *  Attempts to parse the answers in the form into a job application entity.
  *  @param form The form with the answers.
+ *  @param studentId The student id.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-/*function jsonToJobApplication(form: Requests.Form, student: Responses.Student): Promise<Responses.Empty> {
-}*/
+async function jsonToJobApplication(form: Requests.Form, student_id: Responses.Id): Promise<Responses.Empty> {
+    const studentId = student_id.id;
+    const responsibilities = await getResponsibilities(form);
+    const funFact = await getFunFact(form);
+    const volunteerInfo = await getVolunteerInfo(form);
+    const studentCoach = await isStudentCoach(form);
+    const latestOsoc = await ormOs.getLatestOsoc();
+    if(latestOsoc == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+    const osocId = latestOsoc.osoc_id;
+    const educations = await getEducations(form);
+    const educationLevel = await getEducationLevel(form);
+    const educationDuration = await getEducationDuration(form);
+    const educationYear = await getEducationYear(form);
+    const educationInstitute = await getEducationUniversity(form);
+    const emailStatus = "NONE";
+    let createdAt = new Date(Date.now()).toString();
+    if(form.createdAt != undefined) {
+        createdAt = form.createdAt;
+    }
+
+    const student = await ormJo.createJobApplication({
+        studentId : studentId,
+        responsibilities : responsibilities,
+        funFact : funFact,
+        studentVolunteerInfo : volunteerInfo,
+        studentCoach : studentCoach,
+        osocId : osocId,
+        edus : educations,
+        eduLevel : educationLevel,
+        eduDuration : educationDuration,
+        eduYear : educationYear,
+        eduInstitute : educationInstitute,
+        emailStatus : emailStatus,
+        createdAt : createdAt
+    });
+
+    return Promise.resolve({id: student.student_id});
+}
 
 
 /**
