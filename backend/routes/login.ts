@@ -22,7 +22,6 @@ function orDefault<T>(v: T|undefined, def: T): T {
 async function login(req: express.Request): Promise<Responses.Login> {
   console.log("Calling login endpoint " + JSON.stringify(req.body));
   return parseLoginRequest(req).then(
-      // TODO normalize email
       parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
         if (pass == null || pass.login_user == null ||
             pass?.login_user?.password != parsed.pass) {
