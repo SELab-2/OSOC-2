@@ -56,6 +56,10 @@ export interface Errors {
    *  Cooks up an Internal Server Error response.
    */
   cookServerError: () => ApiError;
+  /**
+   *  Cooks up a No Data Error response.
+   */
+  cookNoDataError: () => ApiError;
 }
 
 /**
@@ -211,7 +215,31 @@ export interface ModProjectStudent {
   /**
    *  The roles of the student.
    */
-  roles: string[];
+  role: string;
+}
+
+/**
+ *  Represents a conflict. These contain the student and a list of projects they
+ * are in.
+ */
+export interface Conflict {
+  /**
+   *  The student's ID.
+   */
+  student: number;
+  /**
+   *  The projects the student is in.
+   */
+  projects: {
+    /**
+     * The project's ID.
+     */
+    id: number;
+    /**
+     * The project's name.
+     */
+    name : string
+  }[];
 }
 
 export interface FollowupStatus {
@@ -372,6 +400,10 @@ export interface ModProjectStudent extends
  * associated data.
  */
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+/**
+ *  A conflictList response is the keyed version of a list of conflicts.
+ */
+export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
 
 export interface SingleFollowup extends Keyed<InternalTypes.FollowupStatus> {}
 export interface FollowupList extends Keyed<InternalTypes.FollowupStatus[]> {}
@@ -385,7 +417,7 @@ export type OrError<T> = ApiError|T;
 /**
  *  An API response is one of the previous response types.
  */
-export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
+export type ApiResponse = Empty|Key|PartialStudent|IdNameList|ConflictList;
 
 /**
  *  Either an error while parsing the form or a data value.
@@ -488,7 +520,7 @@ export interface ModProject extends IdRequest {
 
 export interface Draft extends IdRequest {
   studentId: number;
-  roles: string[];
+  role: string;
 }
 
 export interface Followup extends IdRequest {
@@ -543,6 +575,10 @@ export interface ResetPassword {
   code: string;
   password: string;
 }
+
+export interface RmDraftStudent extends IdRequest {
+  studentId: number;
+}
 }
 
 /**
@@ -567,6 +603,10 @@ export type RouteCallback<T extends Responses.ApiResponse> =
  */
 export interface Anything {
   [key: string]: unknown;
+}
+
+export interface StringDict<T2> {
+  [key: string]: T2;
 }
 
 export interface Email {

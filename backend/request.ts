@@ -404,12 +404,12 @@ export async function parseUpdateProjectRequest(req: express.Request):
  */
 export async function parseDraftStudentRequest(req: express.Request):
     Promise<Requests.Draft> {
-  return hasFields(req, [ "studentId", "roles" ], types.id)
+  return hasFields(req, [ "studentId", "role" ], types.id)
       .then(() => Promise.resolve({
         sessionkey : getSessionKey(req),
         id : Number(req.params.id),
         studentId : req.body.studentId,
-        roles : req.body.roles
+        role : req.body.role
       }));
 }
 
@@ -533,6 +533,15 @@ export async function parseStudentRoleRequest(req: express.Request):
   }));
 }
 
+export async function parseRemoveAssigneeRequest(req: express.Request):
+    Promise<Requests.RmDraftStudent> {
+  return hasFields(req, [ "student" ], types.id).then(() => Promise.resolve({
+    sessionkey : getSessionKey(req),
+    studentId : req.body.student,
+    id : Number(req.params.id)
+  }));
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
@@ -605,6 +614,11 @@ export const parseFollowupAllRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseTemplateListRequest = parseKeyRequest;
+/**
+ *  A request to `GET /project/conflicts` only requires a session key
+ *  {@link parseKeyRequest}
+ */
+export const parseProjectConflictsRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID

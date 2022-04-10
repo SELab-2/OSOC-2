@@ -25,7 +25,8 @@ test("Can parse Key-only requests", () => {
     Rq.parseLogoutRequest, Rq.parseStudentAllRequest, Rq.parseCoachAllRequest,
     Rq.parseGetAllCoachRequestsRequest, Rq.parseAdminAllRequest,
     Rq.parseProjectAllRequest, Rq.parseConflictAllRequest,
-    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest
+    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest,
+    Rq.parseProjectConflictsRequest
   ];
 
   const successes =
@@ -516,15 +517,9 @@ test("Can parse draft student request", () => {
   const key = "keyyyyy";
   const id = 89846;
 
-  const d1: T.Anything = {
-    studentId : "im-a-student",
-    roles : [ "the", "one", "that", "does", "nothing" ]
-  };
+  const d1: T.Anything = {studentId : "im-a-student", role : "the useless one"};
   const d2: T.Anything = {studentId : "im-a-student"};
-  const d3: T.Anything = {
-    studentId : "im-a-student",
-    roles : [ "the", "one", "that", "does", "nothing" ]
-  };
+  const d3: T.Anything = {studentId : "im-a-student", role : "the lazy one"};
 
   const r1: express.Request = getMockReq();
   const r2: express.Request = getMockReq();
