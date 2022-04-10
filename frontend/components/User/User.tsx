@@ -92,17 +92,17 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (status == 'ACTIVATED') {
-            setStatus('DISABLED');
-        } else {
-            setStatus('ACTIVATED');
+        if (status === AccountStatus.ACTIVATED) {
+            setStatus(AccountStatus.DISABLED);
+        } else if (status === AccountStatus.DISABLED) {
+            setStatus(AccountStatus.ACTIVATED);
         }
         await setUserRole("coach", "activated");
     }
 
     const activateUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setStatus('ACTIVATED');
+        setStatus(AccountStatus.ACTIVATED);
         // TODO -- Send the status value to the backend
         //      -- If error revert to old value
     }
@@ -111,7 +111,7 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
         <div className={styles.row}>
             <div className={styles.name}>
                 <p>{name}</p>
-                {status === AccountStatus.DISABLED ? <button className={styles.pending} onClick={activateUser}>ACTIVATE</button> : null}
+                {status === AccountStatus.PENDING ? <button className={styles.pending} onClick={activateUser}>ACTIVATE</button> : null}
             </div>
 
             <p>{email}</p>
