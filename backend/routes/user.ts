@@ -76,23 +76,25 @@ async function createUserRequest(req: express.Request):
 }
 
 async function setAccountStatus(person_id: number, stat: account_status_enum,
-                                key: string):
+                                key: string, is_admin: boolean, is_coach: boolean):
     Promise<Responses.Keyed<InternalTypes.IdName>> {
     return ormLU.searchLoginUserByPerson(person_id)
         .then(obj => obj == null ? Promise.reject(util.errors.cookInvalidID())
             : ormLU.updateLoginUser({
                 loginUserId : obj.login_user_id,
-                isAdmin : obj.is_admin,
-                isCoach : obj.is_coach,
+                isAdmin : is_admin,
+                isCoach : is_coach,
                 accountStatus : stat
             }))
-        .then(res => Promise.resolve({
+        .then(res => {
+            console.log(res.person.firstname);
+            return Promise.resolve({
             sessionkey : key,
             data : {
                 id : res.person_id,
                 name : res.person.firstname + " " + res.person.lastname
             }
-        }));
+        })});
 }
 
 /**
@@ -106,7 +108,7 @@ async function createUserAcceptance(req: express.Request):
     return rq.parseAcceptNewUserRequest(req)
         .then(parsed => util.isAdmin(parsed))
         .then(async parsed => setAccountStatus(parsed.data.id, 'ACTIVATED',
-            parsed.data.sessionkey));
+            parsed.data.sessionkey, Boolean(parsed.data.is_admin), Boolean(parsed.data.is_coach)));
 }
 
 /**
@@ -120,7 +122,7 @@ async function deleteUserRequest(req: express.Request):
     return rq.parseAcceptNewUserRequest(req)
         .then(parsed => util.isAdmin(parsed))
         .then(async parsed => setAccountStatus(parsed.data.id, 'DISABLED',
-            parsed.data.sessionkey));
+            parsed.data.sessionkey, Boolean(parsed.data.is_admin), Boolean(parsed.data.is_coach)));
 }
 
 /**

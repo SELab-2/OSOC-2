@@ -529,6 +529,22 @@ export async function parseStudentRoleRequest(req: express.Request):
 }
 
 /**
+ *  Parses a request requiring both a key and an ID.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseAcceptNewUserRequest(req: express.Request):
+    Promise<Requests.AccountAcceptance> {
+  return hasFields(req, ["is_admin", "is_coach"], types.id).then(() => Promise.resolve({
+    sessionkey : getSessionKey(req),
+    id : Number(req.params.id),
+    is_admin: req.body.is_admin,
+    is_coach: req.body.is_coach
+  }));
+}
+
+/**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
  */
@@ -595,12 +611,6 @@ export const parseSingleStudentRequest = parseKeyIdRequest;
  */
 export const parseDeleteStudentRequest = parseKeyIdRequest;
 /**
- *  A request to `GET /student/<id>/suggest` only requires a session key and an
- * ID
- * {@link parseKeyIdRequest}.
- */
-// export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
-/**
  *  A request to `GET /coach/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.
  */
@@ -615,11 +625,6 @@ export const parseDeleteCoachRequest = parseKeyIdRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseGetCoachRequestRequest = parseKeyIdRequest;
-/**
- *  A request to `POST /coach/request/<id>` only requires a session key and an
- * ID {@link parseKeyIdRequest}.
- */
-export const parseAcceptNewCoachRequest = parseKeyIdRequest;
 /**
  *  A request to `DELETE /coach/request/<id>` only requires a session key and an
  * ID
