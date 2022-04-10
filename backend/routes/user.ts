@@ -29,7 +29,8 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
         person_data : {
             id : val.person.person_id,
             name : val.person.firstname,
-            email: val.person.email
+            email: val.person.email,
+            github: val.person.github
         },
         coach : val.is_coach,
         admin : val.is_admin,

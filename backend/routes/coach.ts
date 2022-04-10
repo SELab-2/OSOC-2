@@ -22,10 +22,10 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                   .then(obj =>
                             obj.map(val => ({
                                       person_data : {
-                                        id : val.person.person_id,
-                                        name : val.person.firstname + " " +
-                                                   val.person.lastname,
-                                        email : val.person.email
+                                          id : val.person.person_id,
+                                          name : val.person.firstname + " " + val.person.lastname,
+                                          email : val.person.email,
+                                          github : val.person.github
                                       },
                                       coach : val.is_coach,
                                       admin : val.is_admin,
