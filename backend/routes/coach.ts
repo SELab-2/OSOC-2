@@ -14,23 +14,26 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
-    return rq.parseCoachAllRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(
-            async parsed =>
-                ormLU.searchAllCoachLoginUsers(true)
-                    .then(obj =>
-                        obj.map(val => ({
-                            person_data : {
-                                id : val.person.person_id,
-                                name : val.person.firstname + " " + val.person.lastname,
-                                email: val.person.email
-                            },
-                            coach : val.is_coach,
-                            admin : val.is_admin,
-                            activated : val.account_status as string
-                        })))
-                    .then(obj => Promise.resolve({sessionkey : parsed.data.sessionkey, data : obj})));
+  return rq.parseCoachAllRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(
+          async parsed =>
+              ormLU.searchAllCoachLoginUsers(true)
+                  .then(obj =>
+                            obj.map(val => ({
+                                      person_data : {
+                                        id : val.person.person_id,
+                                        name : val.person.firstname + " " +
+                                                   val.person.lastname,
+                                        email : val.person.email
+                                      },
+                                      coach : val.is_coach,
+                                      admin : val.is_admin,
+                                      activated : val.account_status as string
+                                    })))
+                  .then(
+                      obj => Promise.resolve(
+                          {sessionkey : parsed.data.sessionkey, data : obj})));
 }
 
 /**
@@ -138,7 +141,7 @@ async function createCoachRequest(req: express.Request):
         .createPerson({
           firstname : parsed.firstName,
           lastname : parsed.lastName,
-          email : parsed.emailOrGithub
+          email : parsed.email
         })
         .then(person => {
           console.log("Created a person: " + person);
