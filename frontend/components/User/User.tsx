@@ -5,10 +5,10 @@ import CoachIconColor from "../../public/images/coach_icon_color.png"
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
-import GreenCheckMark from "../../public/images/green_check_mark.png"
 import React, {SyntheticEvent, useContext, useState} from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
+import {AccountStatus} from "../../types/types";
 
 
 export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: boolean, userIsCoach: boolean, userStatus: string, userId: number }> = ({
@@ -109,7 +109,11 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
 
     return (
         <div className={styles.row}>
-            <p>{name}</p>
+            <div className={styles.name}>
+                <p>{name}</p>
+                {status === AccountStatus.DISABLED ? <button className={styles.pending} onClick={activateUser}>ACTIVATE</button> : null}
+            </div>
+
             <p>{email}</p>
             <div className={styles.buttons}>
                 <div className={styles.buttonContainer} onClick={toggleIsAdmin}>
@@ -118,7 +122,6 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
                                src={isAdmin ? AdminIconColor : AdminIcon}
                                alt={"Admin"}/>
                     </div>
-                    <p>Admin</p>
                 </div>
                 <div className={styles.buttonContainer} onClick={toggleIsCoach}>
                     <div className={styles.button}>
@@ -126,26 +129,14 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
                                height={30}
                                alt={"Coach"}/>
                     </div>
-                    <p>Coach</p>
                 </div>
-                {status === 'PENDING' ?
-                    <div className={styles.buttonContainer} onClick={activateUser}>
-                        <div className={styles.button}>
-                            <Image className={styles.buttonImage}
-                                   src={GreenCheckMark}
-                                   width={30} height={30} alt={"Disabled"}/>
-                        </div>
-                        <p style={{fontWeight: 'bold'}}>Pending</p>
+                <div className={styles.buttonContainer} onClick={toggleStatus}>
+                    <div className={styles.button}>
+                        <Image className={styles.buttonImage}
+                               src={status === AccountStatus.DISABLED ? ForbiddenIconColor : ForbiddenIcon}
+                               width={30} height={30} alt={"Disabled"}/>
                     </div>
-                    :
-                    <div className={styles.buttonContainer} onClick={toggleStatus}>
-                        <div className={styles.button}>
-                            <Image className={styles.buttonImage}
-                                   src={status === 'DISABLED' ? ForbiddenIconColor : ForbiddenIcon}
-                                   width={30} height={30} alt={"Disabled"}/>
-                        </div>
-                        <p>Disabled</p>
-                    </div>}
+                </div>
             </div>
         </div>)
 }

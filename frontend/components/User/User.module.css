@@ -3,7 +3,8 @@
     grid-gap: 2rem;
     grid-template-columns: 1.5fr 1.5fr 0.75fr;
     align-items: center;
-    padding: 0.5rem;
+    padding-inline: 0.5rem;
+    padding-block: 0.75rem;
     width: 100%;
     border-bottom: solid var(--neutral-200) 0.15rem;
 }
@@ -13,12 +14,13 @@
 }
 
 .buttons {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     align-items: center;
 }
 
 .buttonContainer {
+    margin-inline: auto;
     transition: 0.2s;
 }
 
@@ -28,8 +30,6 @@
     margin-top: 0;
 }
 
-
-
 .buttonContainer:hover {
     scale: 1.1;
     cursor: pointer;
@@ -38,4 +38,11 @@
 .button {
     margin-block: 0.2rem;
     margin-inline: 0.5rem;
+}
+
+/* The name column should facilitate a [ PENDING ] text */
+.name {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    align-items: center;
 }

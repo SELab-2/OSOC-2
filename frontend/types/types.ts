@@ -3,23 +3,31 @@
  */
 
 export enum Sort {
-    Ascending = "asc",
-    Descending = "desc",
-    None = ""
+    ASCENDING = "asc",
+    DESCENDING = "desc",
+    NONE = ""
 }
 
+/**
+ * An enum for an user account status
+ */
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    DISABLED = "DISABLED"
+}
 /**
  * A function that helps cycling through sorting methods
  * @param sort
  */
 export const getNextSort = (sort: Sort) => {
-    if (sort == Sort.Ascending) {
-        return Sort.Descending
+    if (sort == Sort.ASCENDING) {
+        return Sort.DESCENDING
     }
 
-    if (sort == Sort.Descending) {
-        return Sort.None
+    if (sort == Sort.DESCENDING) {
+        return Sort.NONE
     }
 
-    return Sort.Ascending
+    return Sort.ASCENDING
 }
