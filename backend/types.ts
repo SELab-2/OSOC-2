@@ -1,4 +1,4 @@
-import {account_status_enum} from "@prisma/client";
+import {account_status_enum, email_status_enum} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -242,6 +242,11 @@ export interface Conflict {
   }[];
 }
 
+export interface FollowupStatus {
+  student: number;
+  status: email_status_enum;
+  application: number;
+}
 }
 
 export interface WithUserID<T> {
@@ -399,6 +404,9 @@ export interface StudentList extends Keyed<InternalTypes.Student[]> {}
  *  A conflictList response is the keyed version of a list of conflicts.
  */
 export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
+
+export interface SingleFollowup extends Keyed<InternalTypes.FollowupStatus> {}
+export interface FollowupList extends Keyed<InternalTypes.FollowupStatus[]> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -579,7 +587,7 @@ export interface RmDraftStudent extends IdRequest {
  */
 export type Verb = "get"|"post"|"delete";
 
-export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
+export type FollowupType = email_status_enum;
 
 export type Table = "project"|"student";
 

@@ -3,7 +3,7 @@ import express from 'express';
 import * as validator from 'validator';
 
 import * as config from './config.json';
-import {Anything, InternalTypes, Requests} from './types';
+import {Anything, FollowupType, InternalTypes, Requests} from './types';
 import {errors, getSessionKey} from './utility';
 
 /**
@@ -264,23 +264,27 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseFilterStudentsRequest(req: express.Request): Promise<Requests.StudentFilter> {
+export async function parseFilterStudentsRequest(req: express.Request):
+    Promise<Requests.StudentFilter> {
   let mail = undefined;
-  if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
-      ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
-          req.body.statusFilter !== "NO")) {
+  if (("emailFilter" in req.body &&
+       !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
+       req.body.statusFilter !== "MAYBE" && req.body.statusFilter !== "NO")) {
     return rejector();
   } else {
-    if("emailFilter" in req.body) {
+    if ("emailFilter" in req.body) {
       mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
   }
 
   console.log(mail);
 
-  for(const filter of [maybe(req.body, "firstNameSort"), maybe(req.body, "lastNameSort"),
-    maybe(req.body, "emailSort"), maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
-    if(filter != undefined && filter !== "asc" && filter !== "desc") {
+  for (const filter
+           of [maybe(req.body, "firstNameSort"),
+               maybe(req.body, "lastNameSort"), maybe(req.body, "emailSort"),
+               maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
+    if (filter != undefined && filter !== "asc" && filter !== "desc") {
       return rejector();
     }
   }
@@ -418,14 +422,15 @@ export async function parseDraftStudentRequest(req: express.Request):
 export async function parseSetFollowupStudentRequest(req: express.Request):
     Promise<Requests.Followup> {
   return hasFields(req, [ "type" ], types.id).then(() => {
-    const type = req.body.type;
-    if (type != "hold-tight" && type != "confirmed" && type != "cancelled")
+    const type: string = req.body.type;
+    if (type != "SCHEDULED" && type != "SENT" && type != "FAILED" &&
+        type != "NONE" && type != "DRAFT")
       return rejector();
 
     return Promise.resolve({
       sessionkey : getSessionKey(req),
       id : Number(req.params.id),
-      type : type
+      type : type as FollowupType
     });
   });
 }
@@ -545,12 +550,13 @@ export async function parseRemoveAssigneeRequest(req: express.Request):
  */
 export async function parseAcceptNewUserRequest(req: express.Request):
     Promise<Requests.AccountAcceptance> {
-  return hasFields(req, ["is_admin", "is_coach"], types.id).then(() => Promise.resolve({
-    sessionkey : getSessionKey(req),
-    id : Number(req.params.id),
-    is_admin: req.body.is_admin,
-    is_coach: req.body.is_coach
-  }));
+  return hasFields(req, [ "is_admin", "is_coach" ], types.id)
+      .then(() => Promise.resolve({
+        sessionkey : getSessionKey(req),
+        id : Number(req.params.id),
+        is_admin : req.body.is_admin,
+        is_coach : req.body.is_coach
+      }));
 }
 
 /**
