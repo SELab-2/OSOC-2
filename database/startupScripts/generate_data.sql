@@ -1,7 +1,7 @@
 /* Insert data into person table */
 INSERT INTO person(email, firstname, lastname)
 VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
-('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
+('bob.admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
 ('osoc2@mail.com', 'Osoc', 'TeamTwo');
 
 /* Insert data into student table */
@@ -72,3 +72,7 @@ INSERT INTO attachment(job_application_id, data, type)VALUES
 INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'),
 'I really need the money', 'MOTIVATION_STRING');
+
+/* Insert data into template table */
+INSERT INTO template_email(owner_id, name, content)VALUES
+((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Template', '<p>I am a template</p>');
