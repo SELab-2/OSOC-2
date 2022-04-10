@@ -448,7 +448,6 @@ export async function parseNewTemplateRequest(req: express.Request):
         sessionkey : getSessionKey(req),
         name : req.body.name,
         subject : maybe(req.body, "subject"),
-        desc : maybe(req.body, "desc"),
         cc : maybe(req.body, "cc"),
         content : req.body.content
       }));

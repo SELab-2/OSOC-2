@@ -612,11 +612,7 @@ test("Can parse new template request", () => {
   const key = "yet-another-session-key";
 
   const ok1: T.Anything = {name : "my-template", content : "hello-there"};
-  const ok2: T.Anything = {
-    name : "my-template",
-    content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
-  };
+  const ok2: T.Anything = {name : "my-template", content : "hello-there"};
   const ok3: T.Anything = {
     name : "my-template",
     content : "hello-there",
@@ -625,31 +621,20 @@ test("Can parse new template request", () => {
   const ok4: T.Anything = {
     name : "my-template",
     content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
   const ok5: T.Anything = {
     name : "my-template",
     content : "hello-there",
     subject : "I like C++",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
 
-  const f1: T.Anything = {
-    content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
-    cc : "cc@gmail.com"
-  };
-  const f2: T.Anything = {
-    name : "my-template",
-    desc : "a description did you know that orcas have culture?",
-    cc : "cc@gmail.com"
-  };
+  const f1: T.Anything = {content : "hello-there", cc : "cc@gmail.com"};
+  const f2: T.Anything = {name : "my-template", cc : "cc@gmail.com"};
   const f3: T.Anything = {
     name : "my-template",
     content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
 
@@ -657,7 +642,7 @@ test("Can parse new template request", () => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
-    ["desc", "cc", "subject"].forEach(v => {
+    ["cc", "subject"].forEach(v => {
       if (!(v in x))
         x[v] = undefined;
     });

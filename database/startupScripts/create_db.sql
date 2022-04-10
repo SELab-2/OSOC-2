@@ -191,3 +191,13 @@ CREATE TABLE IF NOT EXISTS attachment(
    data                  TEXT         NOT NULL,
    type                  type_enum    NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS template_email(
+   template_email_id      SERIAL      PRIMARY KEY,
+   owner_id               SERIAL      NOT NULL REFERENCES login_user(login_user_id),
+   name                   TEXT        NOT NULL,
+   content                TEXT        NOT NULL,
+   subject                TEXT,
+   cc                     TEXT,
+   UNIQUE(owner_id, name)
+);

@@ -242,6 +242,16 @@ export interface Conflict {
   }[];
 }
 
+export interface ShortTemplate {
+  id: number;
+  owner: number;
+  name: string;
+}
+
+export interface Template extends ShortTemplate {
+  content: string;
+}
+
 export interface FollowupStatus {
   student: number;
   status: email_status_enum;
@@ -405,6 +415,8 @@ export interface StudentList extends Keyed<InternalTypes.Student[]> {}
  */
 export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
 
+export interface TemplateList extends Keyed<InternalTypes.ShortTemplate[]> {}
+export interface Template extends Keyed<InternalTypes.Template> {}
 export interface SingleFollowup extends Keyed<InternalTypes.FollowupStatus> {}
 export interface FollowupList extends Keyed<InternalTypes.FollowupStatus[]> {}
 
@@ -529,17 +541,16 @@ export interface Followup extends IdRequest {
 
 export interface Template extends KeyRequest {
   name: string;
-  desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content: string;
 }
 
 export interface ModTemplate extends IdRequest {
   name?: string;
   desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content?: string;
 }
 

@@ -14,6 +14,8 @@ import * as student from './routes/student';
 import * as user from './routes/user';
 import * as util from './utility';
 
+import * as template from './routes/template';
+
 /**
  *  Attaches all endpoints to the application.
  *  @param app The Express.js application to attach to.
@@ -30,6 +32,7 @@ export function attach(app: express.Application): void {
     app.use(home + '/github', github.getRouter());
     app.use(home + '/user', user.getRouter());
     app.use(home + '/role', role.getRouter());
+    app.use(home + '/template', template.getRouter());
     app.use(home + '/followup', followup.getRouter());
   });
 
