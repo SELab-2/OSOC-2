@@ -65,8 +65,7 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
                 } else {
                     console.log(json)
                     if (setSessionKey) {
-                        await setSessionKey(json.sessionkey)
-
+                        setSessionKey(json.sessionkey)
                     }
                     return json;
                 }

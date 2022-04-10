@@ -13,7 +13,7 @@ const Users: NextPage = () => {
 
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
-    const userSet = new Set<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>()
+    const userSet = new Set<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }>()
 
     // Load all users upon page load
     useEffect(() => {
@@ -72,11 +72,12 @@ const Users: NextPage = () => {
     return (<div className={styles.body}>
         <UserFilter/>
         <div>
-            {users !== undefined ? users.map((value, index) => {
-                return <User userName={value.person_data.name} userEmail="TODO"
-                             userIsAdmin={value.admin}
-                             userIsCoach={value.coach} userStatus={value.activated} key={index}
-                             userId={value.person_data.id}/>
+            {users !== undefined ? users.map((user, index) => {
+                console.log(user)
+                return <User userName={user.person_data.name} userEmail={user.person_data.email}
+                             userIsAdmin={user.admin}
+                             userIsCoach={user.coach} userStatus={user.activated} key={index}
+                             userId={user.person_data.id}/>
             }) : null}
         </div>
     </div>)
