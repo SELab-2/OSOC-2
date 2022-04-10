@@ -5,6 +5,7 @@ import * as ormLU from '../orm_functions/login_user';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
+import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -89,7 +90,10 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
         return ormLU.deleteLoginUserByPersonId(parsed.data.id)
-            .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}));
+            .then(() => {
+                return ormP.deletePersonById(parsed.data.id)
+                    .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}))
+            });
       });
 }
 
