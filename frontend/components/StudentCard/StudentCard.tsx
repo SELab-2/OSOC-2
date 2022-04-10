@@ -5,17 +5,16 @@ import {Language} from "../Labels/Language";
 import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
 import {Label} from "../Labels/Label";
+import Image from "next/image";
+import GitHubLogo from "../../public/images/github-logo.svg";
 
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
-    console.log(student)
-
-    // TODO -- Github
 
     // Count evaluations
     const evaluations = student.evaluations[0].evaluation
-    let yesAmount = 0
-    let maybeAmount = 0
-    let noAmount = 0
+    let yesAmount = 2
+    let maybeAmount = 4
+    let noAmount = 5
     for (const evaluation of evaluations) {
         if (evaluation.decision === Decision.YES) {
             yesAmount++
@@ -83,6 +82,18 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                         <a href={`mailto:${student.student.person.email}`}>{student.student.person.email}</a>
                         <h6 className={styles.categoryTitle}>PHONE NUMBER</h6>
                         <a href={`tel:${student.student.phone_number}`}>{student.student.phone_number}</a>
+                        {student.student.person.github !== null ?
+                            <a className={styles.githubContainer} href={`https://github.com/${student.student.person.github}`}>
+                                <div className={styles.githublogo}>
+                                    <Image
+                                        src={GitHubLogo}
+                                        layout="intrinsic"
+                                        alt="GitHub Logo"
+                                    />
+                                </div>
+                                <p className={styles.github}>{student.student.person.github}</p>
+                            </a>
+                            : null}
                     </div>
                 </div>
             </div>

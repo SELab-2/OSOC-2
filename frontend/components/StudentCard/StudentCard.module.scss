@@ -22,7 +22,9 @@
   margin-bottom: 2.5rem;
 }
 
+/*---------*/
 /* Columns */
+/*---------*/
 .column {
   border-right: 0.1rem solid var(--neutral-200);
   margin-left: clamp(1rem, 3vw, 2.5rem);
@@ -34,9 +36,9 @@
   border-right: none;
 }
 
-/* ----------- */
-
+/*------------*/
 /* Categories */
+/*------------*/
 .categoryTitle {
   font-weight: lighter;
   font-size: smaller;
@@ -77,6 +79,7 @@
 .progressbar div p {
   text-align: center;
   transform: translate(0, -1.4rem);
+  font-weight: bold;
 }
 .no p {
   color: var(--error-100);
@@ -88,3 +91,36 @@
   color: var(--succes-100);
 }
 
+/*--------*/
+/* GITHUB */
+/*--------*/
+.githubContainer {
+  display: flex;
+  background-color: black;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  transition: all .2s ease-in-out;
+  margin-top: 0.5rem;
+  margin-inline: -0.2rem;
+  align-items: center;
+}
+
+.githubContainer:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.githublogo {
+  width: 1.5rem;
+}
+
+.githublogo {
+  display: flex;
+}
+
+.github {
+  vertical-align: center;
+  margin-left: 1rem;
+  color: white;
+}
