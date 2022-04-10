@@ -76,3 +76,5 @@ INSERT INTO attachment(job_application_id, data, type)VALUES
 /* Insert data into template table */
 INSERT INTO template_email(owner_id, name, content)VALUES
 ((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Template', '<p>I am a template</p>');
+INSERT INTO template_email(owner_id, name, content, cc, subject)VALUES
+((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Advanced Template', '<p>I am an advanced template</p>', 'nobody@me.com', 'A non-suspicious email!');

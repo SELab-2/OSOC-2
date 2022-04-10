@@ -2,9 +2,16 @@ import express from 'express';
 
 import * as ormT from '../orm_functions/template';
 import * as rq from '../request';
+import {ApiError, Responses} from '../types';
 import * as util from '../utility';
 
-async function getAllTemplates(req: express.Request) {
+const notOwnerError: ApiError = {
+  http : util.errors.cookInsufficientRights().http,
+  reason : "You can only modify/delete templates you own."
+};
+
+async function getAllTemplates(req: express.Request):
+    Promise<Responses.TemplateList> {
   return rq.parseTemplateListRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(checked => ormT.getAllTemplates()
@@ -19,12 +26,121 @@ async function getAllTemplates(req: express.Request) {
                            })));
 }
 
-export function getRouter() {
+async function getSingleTemplate(req: express.Request):
+    Promise<Responses.Template> {
+  return rq.parseGetTemplateRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(checked => ormT.getTemplateById(checked.data.id)
+                           .then(res => {
+                             // TODO: replace with correct util call
+                             if (res == null)
+                               return Promise.reject();
+                             return Promise.resolve(res);
+                           })
+                           .then(res => Promise.resolve({
+                             sessionkey : checked.data.sessionkey,
+                             data : {
+                               id : res.template_email_id,
+                               owner : res.owner_id,
+                               name : res.name,
+                               content : res.content
+                             }
+                           })));
+}
+
+async function createTemplate(req: express.Request):
+    Promise<Responses.Template> {
+  return rq.parseNewTemplateRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(checked => ormT.createTemplate({
+                             ownerId : checked.userId,
+                             name : checked.data.name,
+                             content : checked.data.content,
+                             cc : checked.data.cc,
+                             subject : checked.data.subject
+                           })
+                           .then(res => Promise.resolve({
+                             sessionkey : checked.data.sessionkey,
+                             data : {
+                               id : res.template_email_id,
+                               name : res.name,
+                               content : res.content,
+                               cc : res.cc,
+                               owner : res.owner_id,
+                               subject : res.subject
+                             }
+                           })));
+}
+
+async function updateTemplate(req: express.Request):
+    Promise<Responses.Template> {
+  return rq.parseUpdateTemplateRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(async checked => {
+        return ormT.getTemplateById(checked.data.id)
+            .then(templ => {
+              // todo: replace by correct util check
+              if (templ == null) {
+                return Promise.reject({});
+              } else if (templ.owner_id != checked.userId) {
+                return Promise.reject(notOwnerError);
+              }
+
+              return templ;
+            })
+            .then(templ => ormT.updateTemplate({
+              templateId : templ.template_email_id,
+              name : checked.data.name,
+              content : checked.data.content,
+              cc : checked.data.cc,
+              subject : checked.data.subject
+            }))
+            .then(res => Promise.resolve({
+              sessionkey : checked.data.sessionkey,
+              data : {
+                content : res.content,
+                id : res.template_email_id,
+                owner : res.owner_id,
+                name : res.name,
+                cc : res.cc,
+                subject : res.subject
+              }
+            }));
+      });
+}
+
+async function deleteTemplate(req: express.Request): Promise<Responses.Key> {
+  return rq.parseDeleteTemplateRequest(req)
+      .then(parsed => util.checkSessionKey(parsed))
+      .then(async checked => {
+        return ormT.getTemplateById(checked.data.id)
+            .then(async templ => {
+              if (templ == null)
+                return Promise.reject({});
+              else if (templ.owner_id != checked.userId) {
+                return util.isAdmin(checked.data)
+                    .catch(() => Promise.reject(notOwnerError))
+                    .then(() => templ);
+              }
+              return Promise.resolve(templ);
+            })
+            .then(templ => ormT.deleteTemplate(templ.template_email_id))
+            .then(() =>
+                      Promise.resolve({sessionkey : checked.data.sessionkey}));
+      });
+}
+
+export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/template');
+  util.route(router, 'post', '/', createTemplate);
 
   util.route(router, 'get', '/all', getAllTemplates);
+
+  util.route(router, 'get', '/:id', getSingleTemplate);
+  util.route(router, 'post', '/:id', updateTemplate);
+  util.routeKeyOnly(router, 'delete', '/:id', deleteTemplate);
 
   return router;
 }

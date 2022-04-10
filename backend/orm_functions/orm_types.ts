@@ -578,6 +578,23 @@ export interface AddStudentToProject {
     roleId: number,
 }
 
+export interface CreateTemplate {
+    ownerId: number,
+    name: string,
+    content: string,
+    subject?: string,
+    cc?: string
+}
+
+export interface UpdateTemplate {
+    templateId: number,
+    ownerId?: number,
+    name?: string,
+    content?: string,
+    subject?: string,
+    cc?: string,
+}
+
 /**
  * type to use in a filter query for sorting
  */

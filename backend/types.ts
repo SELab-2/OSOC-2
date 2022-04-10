@@ -214,6 +214,16 @@ export interface ModProjectStudent {
   roles: string[];
 }
 
+export interface ShortTemplate {
+  id: number;
+  owner: number;
+  name: string;
+}
+
+export interface Template extends ShortTemplate {
+  content: string;
+}
+
 }
 
 export interface WithUserID<T> {
@@ -368,6 +378,9 @@ export interface ModProjectStudent extends
  */
 export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
+export interface TemplateList extends Keyed<InternalTypes.ShortTemplate[]> {}
+export interface Template extends Keyed<InternalTypes.Template> {}
+
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
  * rejecting with API error or resolving with data ({@link Promise}).
@@ -484,17 +497,16 @@ export interface Followup extends IdRequest {
 
 export interface Template extends KeyRequest {
   name: string;
-  desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content: string;
 }
 
 export interface ModTemplate extends IdRequest {
   name?: string;
   desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content?: string;
 }
 

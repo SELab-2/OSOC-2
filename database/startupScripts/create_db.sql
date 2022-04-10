@@ -197,5 +197,7 @@ CREATE TABLE IF NOT EXISTS template_email(
    owner_id               SERIAL      NOT NULL REFERENCES login_user(login_user_id),
    name                   TEXT        NOT NULL,
    content                TEXT        NOT NULL,
+   subject                TEXT,
+   cc                     TEXT,
    UNIQUE(owner_id, name)
 );
