@@ -8,6 +8,9 @@ import {errors} from '../utility';
 import * as ormP from "../orm_functions/person";
 import * as ormLU from "../orm_functions/login_user";
 
+import * as validator from 'validator';
+import {account_status_enum} from "@prisma/client";
+
 /**
  *  Attempts to list all students in the system.
  *  @param req The Express.js request to extract all required data from.
@@ -26,7 +29,8 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
         person_data : {
             id : val.person.person_id,
             name : val.person.firstname,
-            email: val.person.email
+            email: val.person.email,
+            github: val.person.github
         },
         coach : val.is_coach,
         admin : val.is_admin,
@@ -53,7 +57,7 @@ async function createUserRequest(req: express.Request):
             .createPerson({
                 firstname : parsed.firstName,
                 lastname : parsed.lastName,
-                email : parsed.email
+                email : validator.default.normalizeEmail(parsed.email).toString()
             })
             .then(person => {
                 console.log("Created a person: " + person);
@@ -72,6 +76,56 @@ async function createUserRequest(req: express.Request):
     });
 }
 
+async function setAccountStatus(person_id: number, stat: account_status_enum,
+                                key: string, is_admin: boolean, is_coach: boolean):
+    Promise<Responses.Keyed<InternalTypes.IdName>> {
+    return ormLU.searchLoginUserByPerson(person_id)
+        .then(obj => obj == null ? Promise.reject(util.errors.cookInvalidID())
+            : ormLU.updateLoginUser({
+                loginUserId : obj.login_user_id,
+                isAdmin : is_admin,
+                isCoach : is_coach,
+                accountStatus : stat
+            }))
+        .then(res => {
+            console.log(res.person.firstname);
+            return Promise.resolve({
+            sessionkey : key,
+            data : {
+                id : res.person_id,
+                name : res.person.firstname + " " + res.person.lastname
+            }
+        })});
+}
+
+/**
+ *  Attempts to accept a request for becoming a login_user.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createUserAcceptance(req: express.Request):
+    Promise<Responses.Keyed<InternalTypes.IdName>> {
+    return rq.parseAcceptNewUserRequest(req)
+        .then(parsed => util.isAdmin(parsed))
+        .then(async parsed => setAccountStatus(parsed.data.id, 'ACTIVATED',
+            parsed.data.sessionkey, Boolean(parsed.data.is_admin), Boolean(parsed.data.is_coach)));
+}
+
+/**
+ *  Attempts to deny a request for becoming a coach.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function deleteUserRequest(req: express.Request):
+    Promise<Responses.Key> {
+    return rq.parseAcceptNewUserRequest(req)
+        .then(parsed => util.isAdmin(parsed))
+        .then(async parsed => setAccountStatus(parsed.data.id, 'DISABLED',
+            parsed.data.sessionkey, Boolean(parsed.data.is_admin), Boolean(parsed.data.is_coach)));
+}
+
 /**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
@@ -86,7 +140,10 @@ export function getRouter(): express.Router {
     router.post('/request', (req, res) => util.respOrErrorNoReinject(
         res, createUserRequest(req)));
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/request" ]);
+    util.route(router, "post", "/request/:id", createUserAcceptance);
+    util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
+
+    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id" ]);
 
     return router;
 }

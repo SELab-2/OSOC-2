@@ -429,6 +429,11 @@ export interface YearId extends IdRequest {
   year?: number;
 }
 
+export interface AccountAcceptance extends IdRequest {
+  is_admin: boolean;
+  is_coach: boolean;
+}
+
 export interface StudentFilter extends KeyRequest {}
 
 export interface UpdateStudent extends IdRequest {
