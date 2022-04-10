@@ -506,7 +506,7 @@ function getEducationUniversity(form: Requests.Form) : Promise<string> {
 /**
  *  Attempts to parse the answers in the form into a job application entity.
  *  @param form The form with the answers.
- *  @param studentId The student id.
+ *  @param student_id The student id object.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
@@ -532,7 +532,7 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
         createdAt = form.createdAt;
     }
 
-    const student = await ormJo.createJobApplication({
+    await ormJo.createJobApplication({
         studentId : studentId,
         responsibilities : responsibilities,
         funFact : funFact,
@@ -548,9 +548,122 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
         createdAt : createdAt
     });
 
-    return Promise.resolve({id: student.student_id});
+    return Promise.resolve({});
 }
 
+/* parse form to job application skills
+***************************************/
+
+/**
+ *  Parse the form to the most fluent language of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
+    const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_n0e9dy");
+
+    const questionsExist : boolean = checkQuestionsExist([questionMostFluentLanguage]);
+
+    if(!questionsExist || questionMostFluentLanguage.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const chosenLanguage : Responses.FormResponse<Requests.Option> = filterChosenOption(questionMostFluentLanguage.data);
+
+    if(chosenLanguage.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    let language = "";
+
+    if(chosenLanguage.data.text.includes("Other")) {
+        const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wz79jR");
+        const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
+
+        if(!questionsExistOther || questionCheckOther.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        language = questionCheckOther.data.value;
+    } else {
+        language = chosenLanguage.data.text;
+    }
+
+    return Promise.resolve(language);
+}
+
+/**
+ *  Parse the form to the english level of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+function getEnglishLevel(form: Requests.Form) : Promise<number> {
+    const questionEnglishLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w5Z7bo");
+
+    const questionsExist : boolean = checkQuestionsExist([questionEnglishLevel]);
+
+    if(!questionsExist || questionEnglishLevel.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const chosenLanguage : Responses.FormResponse<Requests.Option> = filterChosenOption(questionEnglishLevel.data);
+
+    if(chosenLanguage.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(chosenLanguage.data.text.toLowerCase().includes("★★★★★")) {
+        return Promise.resolve(5);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★★★")) {
+        return Promise.resolve(4);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★★")) {
+        return Promise.resolve(3);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★")) {
+        return Promise.resolve(2);
+    }
+    return Promise.resolve(1);
+}
+
+/* parse form to attachments
+****************************/
+
+/**
+ *  Parse the form to the cv of this student.
+ *  @param form The form with the answers.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+/*function getCV(form: Requests.Form) : Promise<number> {
+    const questionCVUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mD78BR");
+    const questionCVLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3l6GBk");
+
+    const questionsExist : boolean = checkQuestionsExist([questionCVUpload, questionCVLink]);
+
+    if(!questionsExist || (questionCVUpload.data?.value == null && questionCVLink.data?.value == null)) {
+        return Promise.reject(errors.cookArgumentError());
+    } else if(questionCVUpload.data?.value == null || questionCVUpload.data?.value.length === 0) {
+
+    }
+
+    const chosenLanguage : Responses.FormResponse<Requests.Option> = filterChosenOption(questionEnglishLevel.data);
+
+    if(chosenLanguage.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(chosenLanguage.data.text.toLowerCase().includes("★★★★★")) {
+        return Promise.resolve(5);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★★★")) {
+        return Promise.resolve(4);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★★")) {
+        return Promise.resolve(3);
+    } else if(chosenLanguage.data.text.toLowerCase().includes("★★")) {
+        return Promise.resolve(2);
+    }
+    return Promise.resolve(1);
+}*/
 
 /**
  *  Attempts to create a new form in the system.
