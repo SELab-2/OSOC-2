@@ -12,9 +12,9 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
     // Count evaluations
     const evaluations = student.evaluations[0].evaluation
-    let yesAmount = 2
-    let maybeAmount = 4
-    let noAmount = 5
+    let yesAmount = 0
+    let maybeAmount = 0
+    let noAmount = 0
     for (const evaluation of evaluations) {
         if (evaluation.decision === Decision.YES) {
             yesAmount++
