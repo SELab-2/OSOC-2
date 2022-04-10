@@ -1,5 +1,6 @@
 import {getMockReq} from '@jest-mock/express';
 import express from 'express';
+import * as validator from 'validator';
 
 import * as config from '../config.json';
 import * as Rq from '../request'
@@ -57,13 +58,13 @@ test("Can parse Key-ID requests", () => {
 
   const calls = [
     Rq.parseSingleStudentRequest, Rq.parseDeleteStudentRequest,
-    Rq.parseStudentGetSuggestsRequest, Rq.parseSingleCoachRequest,
-    Rq.parseDeleteCoachRequest, Rq.parseGetCoachRequestRequest,
-    Rq.parseAcceptNewCoachRequest, Rq.parseDenyNewCoachRequest,
-    Rq.parseSingleAdminRequest, Rq.parseDeleteAdminRequest,
-    Rq.parseSingleProjectRequest, Rq.parseDeleteProjectRequest,
-    Rq.parseGetDraftedStudentsRequest, Rq.parseGetFollowupStudentRequest,
-    Rq.parseGetTemplateRequest, Rq.parseDeleteTemplateRequest
+    Rq.parseSingleCoachRequest, Rq.parseDeleteCoachRequest,
+    Rq.parseGetCoachRequestRequest, Rq.parseAcceptNewCoachRequest,
+    Rq.parseDenyNewCoachRequest, Rq.parseSingleAdminRequest,
+    Rq.parseDeleteAdminRequest, Rq.parseSingleProjectRequest,
+    Rq.parseDeleteProjectRequest, Rq.parseGetDraftedStudentsRequest,
+    Rq.parseGetFollowupStudentRequest, Rq.parseGetTemplateRequest,
+    Rq.parseDeleteTemplateRequest
   ];
 
   const successes =
@@ -161,14 +162,16 @@ test("Can parse login request", () => {
   const noname: express.Request = getMockReq();
   const nopass: express.Request = getMockReq();
 
-  valid.body.name = "Name #1";
+  valid.body.name = "Name.1@email.be";
   valid.body.pass = "Pass #1";
   noname.body.pass = "Pass #2";
-  nopass.body.name = "Name #2";
+  nopass.body.name = "Name.2@email.be";
 
   return Promise.all([
-    expect(Rq.parseLoginRequest(valid))
-        .resolves.toStrictEqual({name : "Name #1", pass : "Pass #1"}),
+    expect(Rq.parseLoginRequest(valid)).resolves.toStrictEqual({
+      name : validator.default.normalizeEmail("Name.1@email.be").toString(),
+      pass : "Pass #1"
+    }),
     expect(Rq.parseLoginRequest(noname))
         .rejects.toBe(errors.cookArgumentError()),
     expect(Rq.parseLoginRequest(nopass))
@@ -334,6 +337,8 @@ test("Can parse final decision request", () => {
     x.sessionkey = key;
     if (!("reply" in x))
       x.reply = undefined;
+    if (!("reason" in x))
+      x.reason = undefined;
 
     return expect(Rq.parseFinalizeDecisionRequest(r)).resolves.toStrictEqual(x);
   });
@@ -554,14 +559,15 @@ test("Can parse mark as followed up request", () => {
   const key = "my-key-arrived-but";
   const id = 78945312;
 
-  const ht: T.Anything = {type : "hold-tight"};
-  const cf: T.Anything = {type : "confirmed"};
-  const cd: T.Anything = {type : "cancelled"};
-  const i1: T.Anything = {type : "invalid"};
-  const i2: T.Anything = {type : "hold-tight"};
+  const sc: T.Anything = {type : 'SCHEDULED'};
+  const st: T.Anything = {type : 'SENT'};
+  const fl: T.Anything = {type : 'FAILED'};
+  const no: T.Anything = {type : 'NONE'};
+  const dr: T.Anything = {type : 'DRAFT'};
+  const i1: T.Anything = {type : 'invalid'};
   const i3: T.Anything = {};
 
-  const okays = [ ht, cf, cd ].map(x => {
+  const okays = [ sc, st, fl, no, dr ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
@@ -582,7 +588,7 @@ test("Can parse mark as followed up request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  const fails2 = [ ht ].map(x => {
+  const fails2 = [ fl ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
@@ -590,7 +596,7 @@ test("Can parse mark as followed up request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  const fails3 = [ i2 ].map(x => {
+  const fails3 = [ no ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     r.params.id = id.toString();
