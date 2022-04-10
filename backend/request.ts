@@ -332,8 +332,8 @@ export async function parseFinalizeDecisionRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseRequestCoachRequest(req: express.Request):
-    Promise<Requests.CoachRequest> {
+export async function parseRequestUserRequest(req: express.Request):
+    Promise<Requests.UserRequest> {
   return hasFields(req, [ "firstName", "lastName", "email", "pass" ],
                    types.neither)
       .then(() => Promise.resolve({

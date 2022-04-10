@@ -2,9 +2,11 @@ import express from 'express';
 
 import * as ormL from "../orm_functions/login_user";
 import * as rq from '../request';
-import {Responses} from '../types';
+import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
 import {errors} from '../utility';
+import * as ormP from "../orm_functions/person";
+import * as ormLU from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all students in the system.
@@ -35,6 +37,42 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
 }
 
 /**
+ *  Attempts to create a new user in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createUserRequest(req: express.Request):
+    Promise<InternalTypes.IdOnly> {
+    return rq.parseRequestUserRequest(req).then(async parsed => {
+        if (parsed.pass == undefined) {
+            console.log(" -> WARNING user request without password");
+            return Promise.reject(util.errors.cookArgumentError());
+        }
+        return ormP
+            .createPerson({
+                firstname : parsed.firstName,
+                lastname : parsed.lastName,
+                email : parsed.email
+            })
+            .then(person => {
+                console.log("Created a person: " + person);
+                return ormLU.createLoginUser({
+                    personId : person.person_id,
+                    password : parsed.pass,
+                    isAdmin : false,
+                    isCoach : true,
+                    accountStatus : 'PENDING'
+                })
+            })
+            .then(user => {
+                console.log("Attached a login user: " + user);
+                return Promise.resolve({id : user.login_user_id});
+            });
+    });
+}
+
+/**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
  * endpoints.
@@ -42,10 +80,13 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    util.setupRedirect(router, '/student');
+    util.setupRedirect(router, '/user');
     util.route(router, "get", "/all", listUsers);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all" ]);
+    router.post('/request', (req, res) => util.respOrErrorNoReinject(
+        res, createUserRequest(req)));
+
+    util.addAllInvalidVerbs(router, [ "/", "/all", "/request" ]);
 
     return router;
 }

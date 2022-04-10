@@ -226,7 +226,7 @@ const Index: NextPage = () => {
         // Fields are not empty
         if (!error) {
             const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/request`, {
                 method: 'POST',
                 body: JSON.stringify({
                     firstName: registerFirstName,

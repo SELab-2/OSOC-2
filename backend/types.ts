@@ -448,7 +448,7 @@ export interface UpdateLoginUser extends IdRequest {
   accountStatus: account_status_enum;
 }
 
-export interface CoachRequest {
+export interface UserRequest {
   firstName: string;
   lastName: string;
   email: string;

@@ -2,7 +2,6 @@ import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
 import * as ormLU from '../orm_functions/login_user';
-import * as ormP from '../orm_functions/person';
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
@@ -124,43 +123,6 @@ async function getCoachRequests(req: express.Request):
 }
 
 /**
- *  Attempts to create a new user in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function createCoachRequest(req: express.Request):
-    Promise<InternalTypes.IdOnly> {
-  return rq.parseRequestCoachRequest(req).then(async parsed => {
-    if (parsed.pass == undefined) {
-      console.log(" -> WARNING coach request without password - " +
-                  "currently only accepting email-based applications.");
-      return Promise.reject(util.errors.cookArgumentError());
-    }
-    return ormP
-        .createPerson({
-          firstname : parsed.firstName,
-          lastname : parsed.lastName,
-          email : parsed.email
-        })
-        .then(person => {
-          console.log("Created a person: " + person);
-          return ormLU.createLoginUser({
-            personId : person.person_id,
-            password : parsed.pass,
-            isAdmin : false,
-            isCoach : true,
-            accountStatus : 'PENDING'
-          })
-        })
-        .then(user => {
-          console.log("Attached a login user: " + user);
-          return Promise.resolve({id : user.login_user_id});
-        });
-  });
-}
-
-/**
  *  Attempts to get the details of a coach request in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -234,8 +196,6 @@ export function getRouter(): express.Router {
   util.route(router, "get", "/all", listCoaches);
 
   util.route(router, "get", "/request", getCoachRequests);
-  router.post('/request', (req, res) => util.respOrErrorNoReinject(
-                              res, createCoachRequest(req)));
   util.route(router, "get", "/request/:id", getCoachRequest);
 
   util.route(router, "post", "/request/:id", createCoachAcceptance);
