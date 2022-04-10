@@ -1,11 +1,10 @@
 import {getMockReq} from '@jest-mock/express';
 import express from 'express';
-import * as validator from 'validator';
 
 import * as config from '../config.json';
 import * as Rq from '../request'
 import * as T from '../types';
-import {errors} from '../utility';
+import {errors} from '../utility'
 
 function setSessionKey(req: express.Request, key: string): void {
   req.headers.authorization = config.global.authScheme + " " + key;
@@ -59,12 +58,11 @@ test("Can parse Key-ID requests", () => {
   const calls = [
     Rq.parseSingleStudentRequest, Rq.parseDeleteStudentRequest,
     Rq.parseSingleCoachRequest, Rq.parseDeleteCoachRequest,
-    Rq.parseGetCoachRequestRequest, Rq.parseAcceptNewCoachRequest,
-    Rq.parseDenyNewCoachRequest, Rq.parseSingleAdminRequest,
-    Rq.parseDeleteAdminRequest, Rq.parseSingleProjectRequest,
-    Rq.parseDeleteProjectRequest, Rq.parseGetDraftedStudentsRequest,
-    Rq.parseGetFollowupStudentRequest, Rq.parseGetTemplateRequest,
-    Rq.parseDeleteTemplateRequest
+    Rq.parseGetCoachRequestRequest, Rq.parseDenyNewCoachRequest,
+    Rq.parseSingleAdminRequest, Rq.parseDeleteAdminRequest,
+    Rq.parseSingleProjectRequest, Rq.parseDeleteProjectRequest,
+    Rq.parseGetDraftedStudentsRequest, Rq.parseGetFollowupStudentRequest,
+    Rq.parseGetTemplateRequest, Rq.parseDeleteTemplateRequest
   ];
 
   const successes =
@@ -162,14 +160,15 @@ test("Can parse login request", () => {
   const noname: express.Request = getMockReq();
   const nopass: express.Request = getMockReq();
 
-  valid.body.name = "Name.1@email.be";
+  valid.body.name = "Alice.STUDENT@hotmail.be";
   valid.body.pass = "Pass #1";
   noname.body.pass = "Pass #2";
   nopass.body.name = "Name.2@email.be";
 
+  // TODO
   return Promise.all([
     expect(Rq.parseLoginRequest(valid)).resolves.toStrictEqual({
-      name : validator.default.normalizeEmail("Name.1@email.be").toString(),
+      name : "alice.student@hotmail.be",
       pass : "Pass #1"
     }),
     expect(Rq.parseLoginRequest(noname))
@@ -317,6 +316,9 @@ test("Can parse suggest student request", () => {
   return Promise.all([ okays, fails ].flat());
 });
 
+// TODO test Rq.parseAcceptNewUserRequest
+// TODO test Rq.parseGetSuggestionsStudentRequest
+
 test("Can parse final decision request", () => {
   const key = "key";
   const id = 6969420420;
@@ -369,31 +371,34 @@ test("Can parse coach access request", () => {
   const r1: T.Anything = {
     firstName : "Jeff",
     lastName : "Georgette",
-    emailOrGithub : "idonthavegithub@git.hub",
+    email : "idonthavegithub@git.hub",
     pass : "thisismypassword"
   };
 
   const r2: T.Anything = {
     firstName : "Jeff",
     lastName : "Georgette",
-    emailOrGithub : "idonthavegithub@git.hub"
+    email : "idonthavegithub@git.hub"
   };
 
   const req1: express.Request = getMockReq();
   req1.body = {...r1};
 
   const req2: express.Request = getMockReq();
-  req2.body = {...r2};
   r2.pass = undefined;
+  req2.body = {...r2};
 
   const req3: express.Request = getMockReq();
   req3.body = {};
 
+  console.log(Rq.parseRequestUserRequest(req1));
+  console.log(r1);
+
   const prom1: Promise<void> =
-      expect(Rq.parseRequestCoachRequest(req1)).resolves.toStrictEqual(r1);
+      expect(Rq.parseRequestUserRequest(req1)).resolves.toStrictEqual(r1);
   const prom2: Promise<void> =
-      expect(Rq.parseRequestCoachRequest(req2)).resolves.toStrictEqual(r2);
-  const prom3: Promise<void> = expect(Rq.parseRequestCoachRequest(req3))
+      expect(Rq.parseRequestUserRequest(req2)).resolves.toStrictEqual(r2);
+  const prom3: Promise<void> = expect(Rq.parseRequestUserRequest(req3))
                                    .rejects.toBe(errors.cookArgumentError());
 
   return Promise.all([ prom1, prom2, prom3 ]);

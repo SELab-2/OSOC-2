@@ -424,6 +424,11 @@ export interface YearId extends IdRequest {
   year?: number;
 }
 
+export interface AccountAcceptance extends IdRequest {
+  is_admin: boolean;
+  is_coach: boolean;
+}
+
 export interface StudentFilter extends KeyRequest {}
 
 export interface UpdateStudent extends IdRequest {
@@ -456,11 +461,11 @@ export interface UpdateLoginUser extends IdRequest {
   accountStatus: account_status_enum;
 }
 
-export interface CoachRequest {
+export interface UserRequest {
   firstName: string;
   lastName: string;
-  emailOrGithub: string;
-  pass?: string;
+  email: string;
+  pass: string;
 }
 
 export interface Project extends KeyRequest {
