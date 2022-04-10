@@ -4,6 +4,7 @@ import styles from "./StudentCard.module.scss"
 import {Language} from "../Labels/Language";
 import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
+import {Label} from "../Labels/Label";
 
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
     console.log(student)
@@ -69,8 +70,8 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>SKILLS</h6>
                         <div className={styles.category}>
-                            {student.jobApplication.job_application_skill.map((skill, index) => <p
-                                key={index}>{skill.skill}</p>)}
+                            {student.jobApplication.job_application_skill.map((skill, index) => <Label key={index}
+                                                                                                       label={skill.skill}/>)}
                         </div>
                         <h6 className={styles.categoryTitle}>ROLES</h6>
                         <div className={styles.category}>
