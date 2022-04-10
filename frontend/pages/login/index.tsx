@@ -231,7 +231,7 @@ const Index: NextPage = () => {
                 body: JSON.stringify({
                     firstName: registerFirstName,
                     lastName: registerLastName,
-                    emailOrGithub: registerEmail,
+                    email: registerEmail,
                     pass: encryptedPassword
                 }),
                 headers: {

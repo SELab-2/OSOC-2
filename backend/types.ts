@@ -132,7 +132,7 @@ export interface User {}
 /**
  *  Represents a check of the key, holds the key aswell as boolean value.
  */
- export interface CheckKey {}
+export interface CheckKey {}
 
 /**
  *  Represents a coach, with all associated data.
@@ -362,11 +362,11 @@ export interface ProjectDraftedStudents extends
 export interface ModProjectStudent extends
     Keyed<InternalTypes.ModProjectStudent> {}
 
-  /**
-   *  A studentList response is the keyed version of a list of students and their
-   * associated data.
-   */
-  export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+/**
+ *  A studentList response is the keyed version of a list of students and their
+ * associated data.
+ */
+export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -386,7 +386,7 @@ export interface FormResponse<T> {
   /**
    *  The data.
    */
-  data: T | null;
+  data: T|null;
 }
 }
 
@@ -451,8 +451,8 @@ export interface UpdateLoginUser extends IdRequest {
 export interface CoachRequest {
   firstName: string;
   lastName: string;
-  emailOrGithub: string;
-  pass?: string;
+  email: string;
+  pass: string;
 }
 
 export interface Project extends KeyRequest {
@@ -505,7 +505,6 @@ export interface Form {
 export interface Role extends KeyRequest {
   name: string
 }
-
 
 export interface DataForm {
   fields: Array<Question>
