@@ -264,27 +264,23 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseFilterStudentsRequest(req: express.Request):
-    Promise<Requests.StudentFilter> {
-  if (("emailFilter" in req.body &&
-       !validator.default.isEmail(req.body.emailFilter)) ||
-      ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
-       req.body.statusFilter !== "MAYBE" && req.body.statusFilter !== "NO")) {
-    console.log("test1");
+export async function parseFilterStudentsRequest(req: express.Request): Promise<Requests.StudentFilter> {
+  let mail = undefined;
+  if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
+          req.body.statusFilter !== "NO")) {
     return rejector();
   } else {
-    console.log("test2");
-    if ("emailFilter" in req.body) {
-      req.body.emailFilter =
-          validator.default.normalizeEmail(req.body.emailFilter).toString();
+    if("emailFilter" in req.body) {
+      mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
   }
 
-  for (const filter
-           of [maybe(req.body, "firstNameSort"),
-               maybe(req.body, "lastNameSort"), maybe(req.body, "emailSort"),
-               maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
-    if (filter != undefined && filter !== "asc" && filter !== "desc") {
+  console.log(mail);
+
+  for(const filter of [maybe(req.body, "firstNameSort"), maybe(req.body, "lastNameSort"),
+    maybe(req.body, "emailSort"), maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
+    if(filter != undefined && filter !== "asc" && filter !== "desc") {
       return rejector();
     }
   }
@@ -293,7 +289,7 @@ export async function parseFilterStudentsRequest(req: express.Request):
     sessionkey : getSessionKey(req),
     firstNameFilter : maybe(req.body, "firstNameFilter"),
     lastNameFilter : maybe(req.body, "lastNameFilter"),
-    emailFilter : maybe(req.body, "emailFilter"),
+    emailFilter : mail,
     roleFilter : maybe(req.body, "roleFilter"),
     alumniFilter : maybe(req.body, "alumniFilter"),
     coachFilter : maybe(req.body, "coachFilter"),
