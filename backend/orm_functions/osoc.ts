@@ -117,3 +117,15 @@ export async function deleteOsocByYear(year: number){
         }
     });
 }
+
+
+/**
+ * @returns the newest Osoc edition
+ */
+export async function getNewestOsoc() {
+    return await prisma.osoc.findFirst({
+        orderBy: {
+            year: 'desc'
+        }
+    });
+}

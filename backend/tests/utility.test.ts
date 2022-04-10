@@ -446,3 +446,9 @@ test("utility.getSessionKey fetches session key or crashes", () => {
   const f2 = getMockReq();
   expect(() => util.getSessionKey(f2)).toThrow(err);
 });
+
+test("utility.getOrDefault returns the correct values", () => {
+  expect(util.getOrDefault(null, 1)).toBe(1);
+  expect(util.getOrDefault(undefined, "hello")).toBe("hello");
+  expect(util.getOrDefault(27, 59)).toBe(27);
+})
