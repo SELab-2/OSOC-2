@@ -255,7 +255,11 @@ export interface UpdateContract {
     /**
      * status of the contract (draft, approved, cancelled,...)
      */
-    contractStatus?: contract_status_enum
+    contractStatus?: contract_status_enum,
+    /**
+     * updated role (id) for the student
+     */
+    projectRoleId?: number
 }
 
 /**
