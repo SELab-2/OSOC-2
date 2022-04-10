@@ -137,54 +137,6 @@ async function getCoachRequest(req: express.Request):
       });
 }
 
-async function setAccountStatus(lu_id: number, stat: account_status_enum,
-                                key: string):
-    Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return ormLU.searchLoginUserByPerson(lu_id)
-      .then(obj => obj == null ? Promise.reject(util.errors.cookInvalidID())
-                               : ormLU.updateLoginUser({
-                                   loginUserId : obj.login_user_id,
-                                   isAdmin : obj.is_admin,
-                                   isCoach : obj.is_coach,
-                                   accountStatus : stat
-                                 }))
-      .then(res => Promise.resolve({
-        sessionkey : key,
-        data : {
-          id : res.person_id,
-          name : res.person.firstname + " " + res.person.lastname
-        }
-      }));
-}
-
-/**
- *  Attempts to accept a request for becoming a coach.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function createCoachAcceptance(req: express.Request):
-    Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return rq.parseAcceptNewCoachRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => setAccountStatus(parsed.data.id, 'ACTIVATED',
-                                             parsed.data.sessionkey));
-}
-
-/**
- *  Attempts to deny a request for becoming a coach.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function deleteCoachRequest(req: express.Request):
-    Promise<Responses.Key> {
-  return rq.parseAcceptNewCoachRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => setAccountStatus(parsed.data.id, 'DISABLED',
-                                             parsed.data.sessionkey));
-}
-
 /**
  *  Gets the router for all `/coaches/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/coaches/`
@@ -197,9 +149,6 @@ export function getRouter(): express.Router {
 
   util.route(router, "get", "/request", getCoachRequests);
   util.route(router, "get", "/request/:id", getCoachRequest);
-
-  util.route(router, "post", "/request/:id", createCoachAcceptance);
-  util.routeKeyOnly(router, "delete", "/request/:id", deleteCoachRequest);
 
   util.route(router, "get", "/:id", getCoach);
 
