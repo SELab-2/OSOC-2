@@ -8,6 +8,8 @@ import {errors} from '../utility';
 import * as ormP from "../orm_functions/person";
 import * as ormLU from "../orm_functions/login_user";
 
+import * as validator from 'validator';
+
 /**
  *  Attempts to list all students in the system.
  *  @param req The Express.js request to extract all required data from.
@@ -53,7 +55,7 @@ async function createUserRequest(req: express.Request):
             .createPerson({
                 firstname : parsed.firstName,
                 lastname : parsed.lastName,
-                email : parsed.email
+                email : validator.default.normalizeEmail(parsed.email).toString()
             })
             .then(person => {
                 console.log("Created a person: " + person);

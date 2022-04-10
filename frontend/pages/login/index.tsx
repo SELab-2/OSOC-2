@@ -10,6 +10,8 @@ import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
+import * as validator from 'validator';
+
 const Index: NextPage = () => {
 
     const router = useRouter()
@@ -185,6 +187,8 @@ const Index: NextPage = () => {
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
             error = true
+        } else if(!validator.default.isEmail(registerEmail)) {
+            setRegisterEmailError("No valid email address");
         } else {
             setRegisterEmailError("");
         }
