@@ -46,12 +46,35 @@ async function getFollowup(req: express.Request):
                            })));
 }
 
+async function updateFollowup(req: express.Request):
+    Promise<Responses.SingleFollowup> {
+  return rq.parseSetFollowupStudentRequest(req)
+      .then(parsed => util.isAdmin(parsed))
+      .then(checked => ormJA.getLatestJobApplicationOfStudent(checked.data.id)
+                           .then(ja => {
+                             if (ja == null)
+                               return Promise.reject();
+                             return Promise.resolve(ja);
+                           })
+                           .then(ja => ormJA.changeEmailStatusOfJobApplication(
+                                     ja.job_application_id, checked.data.type))
+                           .then(res => Promise.resolve({
+                             sessionkey : checked.data.sessionkey,
+                             data : {
+                               student : res.student_id,
+                               application : res.job_application_id,
+                               status : res.email_status
+                             }
+                           })));
+}
+
 export function getRouter() {
   const router: express.Router = express.Router();
 
   util.setupRedirect(router, '/followup');
   util.route(router, 'get', '/all', listFollowups);
   util.route(router, 'get', '/:id', getFollowup);
+  util.route(router, 'post', '/:id', updateFollowup);
 
   util.addAllInvalidVerbs(router, [ '/', '/all' ]);
 

@@ -546,7 +546,7 @@ export interface ResetPassword {
  */
 export type Verb = "get"|"post"|"delete";
 
-export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
+export type FollowupType = email_status_enum;
 
 export type Table = "project"|"student";
 

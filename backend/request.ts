@@ -1,10 +1,10 @@
 import {account_status_enum} from '@prisma/client';
 import express from 'express';
+import * as validator from 'validator';
 
 import * as config from './config.json';
-import {Anything, InternalTypes, Requests} from './types';
+import {Anything, FollowupType, InternalTypes, Requests} from './types';
 import {errors, getSessionKey} from './utility';
-import * as validator from 'validator';
 
 /**
  *  We use 3 types of requests: those requiring no special values, those
@@ -237,21 +237,19 @@ export async function parseSuggestStudentRequest(req: express.Request):
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseGetSuggestionsStudentRequest(req: express.Request): Promise<Requests.YearId> {
+export async function parseGetSuggestionsStudentRequest(req: express.Request):
+    Promise<Requests.YearId> {
   return hasFields(req, [], types.id).then(() => {
-    if("year" in req.body) {
+    if ("year" in req.body) {
       return Promise.resolve({
         sessionkey : getSessionKey(req),
         id : Number(req.params.id),
         year : Number(req.body.year)
       });
     } else {
-      return Promise.resolve({
-        sessionkey : getSessionKey(req),
-        id : Number(req.params.id)
-      });
+      return Promise.resolve(
+          {sessionkey : getSessionKey(req), id : Number(req.params.id)});
     }
-
   });
 }
 
@@ -261,20 +259,25 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request): P
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseFilterStudentsRequest(req: express.Request): Promise<Requests.StudentFilter> {
-  if(("emailFilter" in req.body && !validator.default.isEmail(req.body.emailFilter)) ||
-      ("statusFilter" in req.body && req.body.statusFilter !== "YES" && req.body.statusFilter !== "MAYBE" &&
-          req.body.statusFilter !== "NO")) {
+export async function parseFilterStudentsRequest(req: express.Request):
+    Promise<Requests.StudentFilter> {
+  if (("emailFilter" in req.body &&
+       !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
+       req.body.statusFilter !== "MAYBE" && req.body.statusFilter !== "NO")) {
     return rejector();
   } else {
-    if("emailFilter" in req.body) {
-      req.body.emailFilter = validator.default.normalizeEmail(req.body.emailFilter).toString();
+    if ("emailFilter" in req.body) {
+      req.body.emailFilter =
+          validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
   }
 
-  for(const filter of [maybe(req.body, "firstNameSort"), maybe(req.body, "lastNameSort"),
-    maybe(req.body, "emailSort"), maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
-    if(filter != undefined && filter !== "asc" && filter !== "desc") {
+  for (const filter
+           of [maybe(req.body, "firstNameSort"),
+               maybe(req.body, "lastNameSort"), maybe(req.body, "emailSort"),
+               maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
+    if (filter != undefined && filter !== "asc" && filter !== "desc") {
       return rejector();
     }
   }
@@ -412,14 +415,15 @@ export async function parseDraftStudentRequest(req: express.Request):
 export async function parseSetFollowupStudentRequest(req: express.Request):
     Promise<Requests.Followup> {
   return hasFields(req, [ "type" ], types.id).then(() => {
-    const type = req.body.type;
-    if (type != "hold-tight" && type != "confirmed" && type != "cancelled")
+    const type: string = req.body.type;
+    if (type != "SCHEDULED" && type != "SENT" && type != "FAILED" &&
+        type != "NONE" && type != "DRAFT")
       return rejector();
 
     return Promise.resolve({
       sessionkey : getSessionKey(req),
       id : Number(req.params.id),
-      type : type
+      type : type as FollowupType
     });
   });
 }
@@ -593,7 +597,7 @@ export const parseDeleteStudentRequest = parseKeyIdRequest;
  * ID
  * {@link parseKeyIdRequest}.
  */
-//export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
+// export const parseStudentGetSuggestsRequest = parseKeyIdRequest;
 /**
  *  A request to `GET /coach/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.
