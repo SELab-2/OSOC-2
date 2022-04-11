@@ -2,7 +2,7 @@ import {NextPage} from "next";
 import SessionContext from "../contexts/sessionProvider";
 import {useContext, useEffect, useState} from "react";
 import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
-import {AccountStatus, Loginuser} from "../types/types";
+import {AccountStatus, LoginUser} from "../types/types";
 import {SettingsComponent} from "../components/Settings/SettingsComponent";
 
 
@@ -25,7 +25,7 @@ const Settings: NextPage = () => {
         }
     };
 
-    const [user, setUser] = useState<Loginuser>(defaultUser);
+    const [user, setUser] = useState<LoginUser>(defaultUser);
 
     const fetchUser = async () => {
         const sessionKey = getSessionKey != undefined ? getSessionKey() : ""

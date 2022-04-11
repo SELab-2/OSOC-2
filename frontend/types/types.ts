@@ -11,7 +11,7 @@ export enum Decision {
 export enum AccountStatus {
     ACTIVATED = "ACTIVATED",
     PENDING = "PENDING",
-    NO = "NO"
+    DISABLED = "DISABLED"
 }
 
 export interface Student {
@@ -85,7 +85,7 @@ export interface Student {
     };
 }
 
-export interface Loginuser {
+export interface LoginUser {
     login_user: {
         person: {
             person_id: number,

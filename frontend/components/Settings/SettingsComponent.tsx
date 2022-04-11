@@ -1,8 +1,8 @@
 import React from "react";
 import styles from "./Settings.module.scss"
-import {Loginuser} from "../../types/types";
+import {LoginUser} from "../../types/types";
 
-export const SettingsComponent: React.FC<{person:Loginuser }> = ({person}) => {
+export const SettingsComponent: React.FC<{person:LoginUser }> = ({person}) => {
 
 
     return (
