@@ -174,11 +174,11 @@ CREATE TABLE IF NOT EXISTS language (
 CREATE TABLE IF NOT EXISTS job_application_skill (
     job_application_skill_id    SERIAL         PRIMARY KEY,
     job_application_id          SERIAL         NOT NULL REFERENCES job_application(job_application_id),
-    skill                       TEXT           NOT NULL,
+    skill                       TEXT,
     language_id                 SERIAL         NOT NULL REFERENCES language(language_id),
     level                       SMALLINT       NULL CHECK(level >= 0 AND level <= 5),
-    is_preferred                BOOLEAN,
-    is_best                     BOOLEAN
+    is_preferred                BOOLEAN        NOT NULL,
+    is_best                     BOOLEAN        NOT NULL
 );
 
 
@@ -188,7 +188,7 @@ CREATE TYPE type_enum AS ENUM ('CV_URL', 'PORTFOLIO_URL', 'FILE_URL', 'MOTIVATIO
 CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
    job_application_id    SERIAL       NOT NULL REFERENCES job_application (job_application_id),
-   data                  TEXT         NOT NULL,
+   data                  TEXT[]       NOT NULL,
    type                  type_enum    NOT NULL
 );
 

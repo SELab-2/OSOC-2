@@ -6,14 +6,14 @@ import { type_enum } from "@prisma/client";
 const attachment1 = {
     attachmentId: 0,
     jobApplicationID: 0,
-    data: "mycvlink.com",
+    data: ["mycvlink.com"],
     type: "CV_URL"
 }
 
 const attachment2 = {
     attachmentId: 0,
     jobApplicationID: 0,
-    data: "myportfoliolink.com",
+    data: ["myportfoliolink.com"],
     type: "PORTFOLIO_URL"
 }
 

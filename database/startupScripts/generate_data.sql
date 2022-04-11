@@ -67,11 +67,11 @@ INSERT INTO job_application_skill(job_application_id, skill, language_id, level,
 /* Insert data into attachment table */
 INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'), 
-'https://github.com/SELab-2/OSOC-2', 'CV_URL');
+'{https://github.com/SELab-2/OSOC-2}', 'CV_URL');
 
 INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'),
-'I really need the money', 'MOTIVATION_STRING');
+'{I really need the money}', 'MOTIVATION_STRING');
 
 /* Insert data into template table */
 INSERT INTO template_email(owner_id, name, content)VALUES
