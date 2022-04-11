@@ -11,6 +11,7 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png"
 import ExclamationIcon from "../../public/images/exclamation_mark.png"
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png"
 import {Role} from "../../types/types";
+import {Roles} from "../Roles/Roles";
 
 export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
     const [nameSort, setNameSort] = useState<boolean>(false);
@@ -66,10 +67,33 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
         //TODO hier moet de call naar de backend gebeuren en dan de data naar Students brengen
     }
 
+
     console.log(alumni);
     console.log(studentCoach);
     console.log(selectedRoles);
-    console.log(roles);
+
+    const changeSelectedRolesProp = (changeRole: string) => {
+        const roles = selectedRoles
+        console.log(roles)
+        const index = selectedRoles.indexOf(changeRole, 0);
+        if (index > -1) {
+            roles.splice(index, 1);
+
+        } else {
+            roles.push(changeRole)
+        }
+        setSelectedRoles(roles);
+    }
+    const getRolesHTML = () => {
+        const m = [];
+        for (let i = 0; i < roles.length; i++) {
+            m.push(<Roles role={roles[i]} setSelected={changeSelectedRolesProp}/>);
+
+        }
+        console.log(m)
+        return m;
+
+    }
     return (
         <div className={styles.filter}>
             <text>Name
@@ -93,6 +117,10 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
             <button onClick={toggleStudentCoach}>
                 StudentCoach
             </button>
+            <div>
+                roles
+                {getRolesHTML()}
+            </div>
             <div className={styles.dropdown}>
                 <Image src={Filter} width={30} height={30} className={styles.dropbtn} alt={"Disabled"}>
                 </Image>
