@@ -8,6 +8,12 @@ export enum Decision {
     NO = "NO"
 }
 
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    NO = "NO"
+}
+
 export interface Student {
     evaluations: [{
         evaluation: [{
@@ -55,7 +61,7 @@ export interface Student {
         responsibilities: string;
         student_coach: boolean;
         student_id: number;
-        student_volunteer_info: string;   
+        student_volunteer_info: string;
     };
 
     languages: [string];
@@ -77,4 +83,21 @@ export interface Student {
         pronouns: [string];
         student_id: number;
     };
+}
+
+export interface Loginuser {
+    login_user: {
+        person: {
+            person_id: number,
+            email: string,
+            firstname: string;
+            lastname: string;
+            github: string
+        };
+        login_user_id: number,
+        person_id: number,
+        is_admin: boolean,
+        is_coach: boolean,
+        account_status: AccountStatus
+    }
 }
