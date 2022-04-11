@@ -515,7 +515,7 @@ export interface UpdateJobApplicationSkill {
     /**
      * undefined if unchanged or the new language of the job application skill
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * undefined if unchanged or the new level
      */
