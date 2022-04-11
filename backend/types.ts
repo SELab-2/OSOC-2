@@ -327,7 +327,7 @@ export interface UserList extends Keyed<InternalTypes.User[]> {}
 /**
  *
  */
-export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
+export interface VerifyKey extends InternalTypes.CheckKey {}
 
 /**
  *  A student list response is the keyed version of an array of partial

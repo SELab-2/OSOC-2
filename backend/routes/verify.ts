@@ -17,9 +17,9 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     if (checkedSessionKey.data == undefined) {
         // Return false instead of promise reject
         // return Promise.reject(errors.cookInvalidID);
-        return Promise.resolve({data : false, sessionkey : ""});
+        return Promise.resolve({success : false});
     }
-    return Promise.resolve({data : true, sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({success : true});
 }
 
 /**
@@ -31,7 +31,8 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
     util.setupRedirect(router, '/verify');
-    util.route(router, "post", "/", verifyKey);
+    router.post('/',
+        (req, res) => util.respOrErrorNoReinject(res, verifyKey(req)));
 
     util.addAllInvalidVerbs(router, [ "/" ]);
 
