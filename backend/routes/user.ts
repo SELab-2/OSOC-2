@@ -135,13 +135,17 @@ async function getCurrentUser(req: express.Request): Promise<Responses.User> {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const login_user = await ormLoUs.getLoginUserById(checkedSessionKey.userId);
+    const login_user = await ormLoUs.getLoginUserById(checkedSessionKey.userId).then(obj => util.getOrReject(obj));
+    login_user.password = null;
 
     return Promise.resolve({
         data : {
             login_user : login_user
         },
         sessionkey : checkedSessionKey.data.sessionkey
+    }).then(obj => {
+        console.log(JSON.stringify(obj));
+        return Promise.resolve(obj);
     });
 }
 
@@ -170,7 +174,7 @@ export function getRouter(): express.Router {
     util.setupRedirect(router, '/user');
     util.route(router, "get", "/all", listUsers);
 
-    util.routeKeyOnly(router, 'get', '/current', getCurrentUser);
+    util.route(router, 'get', '/current', getCurrentUser);
 
     router.post('/request', (req, res) => util.respOrErrorNoReinject(
         res, createUserRequest(req)));
