@@ -72,6 +72,7 @@ function getBirthName(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionBirthName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
+    console.log("end of getBirthname");
     return Promise.resolve(questionBirthName.data.value as string);
 }
 
@@ -87,6 +88,8 @@ function getLastName(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionLastName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
+    console.log("end of getLastName");
+
     return Promise.resolve(questionLastName.data.value as string);
 }
 
@@ -102,6 +105,8 @@ function getEmail(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionEmail.data?.value == null || !validator.default.isEmail(questionEmail.data.value as string)) {
         return Promise.reject(errors.cookArgumentError());
     }
+    console.log("end of getEmail");
+
     return Promise.resolve(validator.default.normalizeEmail(questionEmail.data.value as string).toString());
 }
 
@@ -117,6 +122,7 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Id> {
     const email = await getEmail(form);
 
     const person = await ormP.createPerson({firstname : birthName, lastname : lastName, email : email});
+    console.log("end of jsonToPerson");
 
     return Promise.resolve({id: person.person_id});
 }
@@ -162,6 +168,7 @@ function getPronouns(form: Requests.Form) : Promise<string[] | null> {
             pronouns = value.split("/");
         }
     }
+    console.log("end of getPronouns");
 
     return Promise.resolve(pronouns);
 }
@@ -184,6 +191,7 @@ function getGender(form: Requests.Form) : Promise<string> {
     if(chosenGender.data == null || chosenGender.data.id.length === 0) {
         return Promise.reject(errors.cookArgumentError());
     }
+    console.log("end of getGender");
 
     return Promise.resolve(chosenGender.data.text);
 }
@@ -200,6 +208,9 @@ function getPhoneNumber(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionPhoneNumber.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
+
+    console.log("end of getPhoneNumber");
+
     return Promise.resolve(questionPhoneNumber.data.value as string);
 }
 
@@ -227,6 +238,8 @@ function getNickname(form: Requests.Form) : Promise<string | null> {
         nickname = questionEnterNickname.data.value as string;
     }
 
+    console.log("end of getNickname");
+
     return Promise.resolve(nickname);
 }
 
@@ -251,6 +264,8 @@ function getAlumni(form: Requests.Form) : Promise<boolean> {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    console.log("end of getAlumni");
+
     return Promise.resolve(wordInAnswer);
 }
 
@@ -261,7 +276,7 @@ function getAlumni(form: Requests.Form) : Promise<boolean> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToStudent(form: Requests.Form, personId: Responses.Id): Promise<Responses.Id> {
+async function jsonToStudent(form: Requests.Form, personId: Responses.Id): Promise<Responses.Id_alumni> {
     const pronouns = await getPronouns(form);
     const gender = await getGender(form);
     const phoneNumber = await getPhoneNumber(form);
@@ -277,7 +292,9 @@ async function jsonToStudent(form: Requests.Form, personId: Responses.Id): Promi
         alumni : alumni
     });
 
-    return Promise.resolve({id: student.student_id});
+    console.log("end of jsonToStudent");
+
+    return Promise.resolve({id: student.student_id, hasAlreadyTakenPart: alumni});
 }
 
 /* parse form to job application
@@ -302,6 +319,9 @@ function getResponsibilities(form: Requests.Form) : Promise<string | null> {
         return Promise.resolve(null);
     }
 
+    console.log("end of getResponsibilities");
+
+
     return Promise.resolve(questionCheckResponsibilities.data?.value as string);
 }
 
@@ -319,6 +339,9 @@ function getFunFact(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionFunFact.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
+
+
+    console.log("end of getFunFact");
 
     return Promise.resolve(questionFunFact.data.value as string);
 }
@@ -344,31 +367,40 @@ function getVolunteerInfo(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    console.log("end of getVolunteerInfo");
+
+
     return Promise.resolve(chosenVolunteerInfo.data.text);
 }
 
 /**
  *  Parse the form to the choice of being a student coach.
  *  @param form The form with the answers.
+ *  @param hasAlreadyParticipated true if the student from the job application has already taken part in osoc previous years
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function isStudentCoach(form: Requests.Form) : Promise<boolean> {
-    const questionStudentCoach: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxD5");
+function isStudentCoach(form: Requests.Form, hasAlreadyParticipated: boolean) : Promise<boolean | null> {
+    if (hasAlreadyParticipated) {
+        const questionStudentCoach: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxD5");
 
-    const questionsExist : boolean = checkQuestionsExist([questionStudentCoach]);
+        const questionsExist : boolean = checkQuestionsExist([questionStudentCoach]);
 
-    if(!questionsExist || questionStudentCoach.data?.value == null) {
-        return Promise.reject(errors.cookArgumentError());
+        if(!questionsExist || questionStudentCoach.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        const wordInAnswer : boolean | null = checkWordInAnswer(questionStudentCoach.data, "yes").data;
+
+        if(wordInAnswer == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        console.log("end of isStudentCoach");
+
+        return Promise.resolve(wordInAnswer);
     }
-
-    const wordInAnswer : boolean | null = checkWordInAnswer(questionStudentCoach.data, "yes").data;
-
-    if(wordInAnswer == null) {
-        return Promise.reject(errors.cookArgumentError());
-    }
-
-    return Promise.resolve(wordInAnswer);
+    return Promise.resolve(null);
 }
 
 /**
@@ -409,6 +441,9 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
             }
         }
     }
+
+    console.log("end of getEducations");
+
 
     return Promise.resolve(educations);
 }
@@ -452,6 +487,9 @@ function getEducationLevel(form: Requests.Form) : Promise<string[]> {
         }
     }
 
+    console.log("end of getEducationLevel");
+
+
     return Promise.resolve(educationLevels);
 }
 
@@ -469,6 +507,9 @@ function getEducationDuration(form: Requests.Form) : Promise<number> {
     if(!questionsExist || questionEducationDuration.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
+
+    console.log("end of getEducationDuration");
+
 
     return Promise.resolve(Number(questionEducationDuration.data.value));
 }
@@ -506,6 +547,9 @@ function getEducationUniversity(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    console.log("end of getEducationUniversity");
+
+
     return Promise.resolve(questionEducationUniversity.data.value as string);
 }
 
@@ -513,15 +557,16 @@ function getEducationUniversity(form: Requests.Form) : Promise<string> {
  *  Attempts to parse the answers in the form into a job application entity.
  *  @param form The form with the answers.
  *  @param student_id The student id object.
+ *  @param hasAlreadyTakenPart true if the student has already taken part in osoc in a prev edition
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToJobApplication(form: Requests.Form, student_id: Responses.Id): Promise<Responses.Id> {
+async function jsonToJobApplication(form: Requests.Form, student_id: Responses.Id, hasAlreadyTakenPart: boolean): Promise<Responses.Id> {
     const studentId = student_id.id;
     const responsibilities = await getResponsibilities(form);
     const funFact = await getFunFact(form);
     const volunteerInfo = await getVolunteerInfo(form);
-    const studentCoach = await isStudentCoach(form);
+    const studentCoach = await isStudentCoach(form, hasAlreadyTakenPart);
     const latestOsoc = await ormOs.getLatestOsoc();
     if(latestOsoc == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -543,7 +588,7 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
         responsibilities : responsibilities,
         funFact : funFact,
         studentVolunteerInfo : volunteerInfo,
-        studentCoach : studentCoach,
+        studentCoach : studentCoach == null? false : studentCoach,
         osocId : osocId,
         edus : educations,
         eduLevel : educationLevel,
@@ -553,6 +598,9 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
         emailStatus : emailStatus,
         createdAt : createdAt
     });
+
+    console.log("end of jsontojobapplication");
+
 
     return Promise.resolve({id: jobApplication.job_application_id});
 }
@@ -596,6 +644,9 @@ function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
         language = chosenLanguage.data.text;
     }
 
+    console.log("end of getmostfluentlanguages");
+
+
     return Promise.resolve(language);
 }
 
@@ -629,6 +680,9 @@ function getEnglishLevel(form: Requests.Form) : Promise<number> {
     } else if(chosenLanguage.data.text.toLowerCase().includes("★★")) {
         return Promise.resolve(2);
     }
+
+    console.log("end of getEnglishlevel");
+
     return Promise.resolve(1);
 }
 
@@ -647,6 +701,9 @@ function getBestSkill(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    console.log("end of getBestSkill");
+
+
     return Promise.resolve(questionBestSkill.data.value as string);
 }
 
@@ -662,7 +719,7 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
     const most_fluent_language = await getMostFluentLanguage(form);
     const english_level = await getEnglishLevel(form);
     const best_skill = await getBestSkill(form);
-
+    console.log(most_fluent_language);
     const most_fl_la = await ormLa.createLanguage(most_fluent_language);
 
     await ormJoSk.createJobApplicationSkill({
@@ -694,6 +751,9 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
         isPreferred : false,
         isBest : true
     });
+
+    console.log("end of jsonToSkills");
+
 
     return Promise.resolve({});
 }
@@ -736,6 +796,9 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
         }
     }
 
+    console.log("end of getCV");
+
+
     return Promise.resolve({data : links, types : types});
 }
 
@@ -772,6 +835,9 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
             types.push("PORTFOLIO_URL");
         }
     }
+
+    console.log("end of getPortfolio");
+
 
     return Promise.resolve({data : links, types : types});
 }
@@ -817,6 +883,9 @@ function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentRe
         types.push("MOTIVATION_URL");
     }
 
+    console.log("end of getMotivation");
+
+
     return Promise.resolve({data : data, types : types});
 }
 
@@ -836,6 +905,9 @@ async function jsonToAttachments(form: Requests.Form, job_applicationId: Respons
     await ormAtt.createAttachment(job_application_id, cv_links.data, cv_links.types);
     await ormAtt.createAttachment(job_application_id, portfolio_links.data, portfolio_links.types);
     await ormAtt.createAttachment(job_application_id, motivations.data, motivations.types);
+
+    console.log("end of jsonToAttachment");
+
 
     return Promise.resolve({});
 }
@@ -882,6 +954,9 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
         }
     }
 
+
+    console.log("end of getAppliedRole");
+
     return Promise.resolve(appliedRoles);
 }
 
@@ -906,6 +981,9 @@ async function jsonToRoles(form: Requests.Form, job_applicationId: Responses.Id)
         }
     }
 
+    console.log("end of jsonToRoles");
+
+
     return Promise.resolve({});
 }
 
@@ -916,6 +994,7 @@ async function jsonToRoles(form: Requests.Form, job_applicationId: Responses.Id)
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
+    console.log(req.body);
     const parsedRequest = await rq.parseFormRequest(req);
     if (parsedRequest.data == null || parsedRequest.eventId == null
         || parsedRequest.eventType == null || parsedRequest.createdAt == null) {
@@ -936,11 +1015,14 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
     if(wordInAnswerInBelgium && wordInAnswerCanWorkEnough) {
         const person = await jsonToPerson(parsedRequest);
         const student = await jsonToStudent(parsedRequest, {id : person.id});
-        const jobApplication = await jsonToJobApplication(parsedRequest, {id : student.id});
+        const jobApplication = await jsonToJobApplication(parsedRequest, {id : student.id}, student.hasAlreadyTakenPart);
         await jsonToSkills(parsedRequest, {id : jobApplication.id});
         await jsonToAttachments(parsedRequest, {id : jobApplication.id});
         await jsonToRoles(parsedRequest, {id : jobApplication.id});
+        return Promise.resolve({});
     }
+
+
 
     return Promise.reject(errors.cookArgumentError());
 }
@@ -953,10 +1035,10 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
 export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
-  router.post('/form',
+  router.post('/',
               (req, res) => util.respOrErrorNoReinject(res, createForm(req)));
 
-  util.addAllInvalidVerbs(router, [ "/form" ]);
+  util.addAllInvalidVerbs(router, [ "/" ]);
 
   return router;
 }
