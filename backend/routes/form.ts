@@ -16,6 +16,7 @@ import {errors} from "../utility";
 import {type_enum} from "@prisma/client";
 import * as validator from 'validator';
 import * as rq from '../request';
+import {getLanguageByName} from "../orm_functions/language";
 
 /**
  *  This function searches a question with a given key in the form.
@@ -121,10 +122,29 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Id> {
     const lastName = await getLastName(form);
     const email = await getEmail(form);
 
-    const person = await ormP.createPerson({firstname : birthName, lastname : lastName, email : email});
+    const allPersons = await ormP.getAllPersons();
+
+    const checkIfEmailInDb = allPersons.filter(person => person.email === email);
+
+    let personId;
+
+    if(checkIfEmailInDb.length > 0) {
+        await ormP.updatePerson({
+            personId : checkIfEmailInDb[0].person_id,
+            firstname : birthName,
+            lastname : lastName,
+            github : null,
+            email : email
+        });
+        personId = checkIfEmailInDb[0].person_id;
+    } else {
+        const person = await ormP.createPerson({firstname : birthName, lastname : lastName, email : email});
+        personId = person.person_id;
+    }
+
     console.log("end of jsonToPerson");
 
-    return Promise.resolve({id: person.person_id});
+    return Promise.resolve({id: personId});
 }
 
 /* parse form to student
@@ -283,18 +303,37 @@ async function jsonToStudent(form: Requests.Form, personId: Responses.Id): Promi
     const nickname = await getNickname(form);
     const alumni = await getAlumni(form);
 
-    const student = await ormSt.createStudent({
-        personId : personId.id,
-        gender : gender,
-        pronouns : pronouns != null ? pronouns : undefined,
-        phoneNumber : phoneNumber,
-        nickname : nickname != null ? nickname : undefined,
-        alumni : alumni
-    });
+    const allStudents = await ormSt.getAllStudents();
+
+    const checkIfIdInDb = allStudents.filter(student => student.person_id === personId.id);
+
+    let studentId;
+
+    if(checkIfIdInDb.length > 0) {
+        await ormSt.updateStudent({
+            studentId : checkIfIdInDb[0].student_id,
+            gender : gender,
+            pronouns : pronouns == null ? [] : pronouns,
+            phoneNumber : phoneNumber,
+            nickname : nickname,
+            alumni : alumni
+        })
+        studentId = checkIfIdInDb[0].student_id;
+    } else {
+        const student = await ormSt.createStudent({
+            personId : personId.id,
+            gender : gender,
+            pronouns : pronouns != null ? pronouns : undefined,
+            phoneNumber : phoneNumber,
+            nickname : nickname != null ? nickname : undefined,
+            alumni : alumni
+        });
+        studentId = student.student_id;
+    }
 
     console.log("end of jsonToStudent");
 
-    return Promise.resolve({id: student.student_id, hasAlreadyTakenPart: alumni});
+    return Promise.resolve({id: studentId, hasAlreadyTakenPart: alumni});
 }
 
 /* parse form to job application
@@ -588,7 +627,7 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
         responsibilities : responsibilities,
         funFact : funFact,
         studentVolunteerInfo : volunteerInfo,
-        studentCoach : studentCoach == null? false : studentCoach,
+        studentCoach : studentCoach == null ? false : studentCoach,
         osocId : osocId,
         edus : educations,
         eduLevel : educationLevel,
@@ -600,7 +639,6 @@ async function jsonToJobApplication(form: Requests.Form, student_id: Responses.I
     });
 
     console.log("end of jsontojobapplication");
-
 
     return Promise.resolve({id: jobApplication.job_application_id});
 }
@@ -720,28 +758,42 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
     const english_level = await getEnglishLevel(form);
     const best_skill = await getBestSkill(form);
     console.log(most_fluent_language);
-    const most_fl_la = await ormLa.createLanguage(most_fluent_language);
+
+    let most_fl_la_id;
+    const getMostFluentLanguageInDb = await getLanguageByName(most_fluent_language);
+    if(getMostFluentLanguageInDb == null) {
+        const most_fl_la = await ormLa.createLanguage(most_fluent_language);
+        most_fl_la_id = most_fl_la.language_id;
+    } else {
+        most_fl_la_id = getMostFluentLanguageInDb.language_id;
+    }
 
     await ormJoSk.createJobApplicationSkill({
         jobApplicationId : job_application_id,
         skill : null,
-        languageId : most_fl_la.language_id,
+        languageId : most_fl_la_id,
         level : null,
         isPreferred : true,
         isBest : false
     });
 
-    const english = await ormLa.createLanguage("English");
+    let english_id;
+    const getEnglishLanguage = await getLanguageByName("English");
+    if(getEnglishLanguage == null) {
+        const english_language = await ormLa.createLanguage("English");
+        english_id = english_language.language_id;
+    } else {
+        english_id = getEnglishLanguage.language_id;
+    }
 
     await ormJoSk.createJobApplicationSkill({
         jobApplicationId : job_application_id,
         skill : null,
-        languageId : english.language_id,
+        languageId : english_id,
         level : english_level,
         isPreferred : false,
         isBest : false
     });
-
 
     await ormJoSk.createJobApplicationSkill({
         jobApplicationId : job_application_id,
