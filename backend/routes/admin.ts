@@ -13,7 +13,7 @@ import * as util from '../utility';
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
+export async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
     return rq.parseAdminAllRequest(req)
         .then(parsed => util.checkSessionKey(parsed))
         .then(async parsed =>
@@ -38,16 +38,16 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getAdmin(req: express.Request): Promise<Responses.Admin> {
+export async function getAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseSingleAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(() =>
                 Promise.reject({http : 410, reason : 'Deprecated endpoint.'}));
 }
 
-async function modAdmin(req: express.Request): Promise<Responses.Admin> {
+export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
   return rq.parseUpdateAdminRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
         return ormL
             .updateLoginUser({
@@ -73,7 +73,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
+export async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
   return rq.parseDeleteAdminRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
