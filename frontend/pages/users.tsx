@@ -67,11 +67,10 @@ const Users: NextPage = () => {
         <div>
 
             {users !== undefined ? users.map((user) => {
-                console.log(user)
-                const z = user.login_user
+                const z = user
                 console.log(z)
                 console.log("agieioa")
-                return <User user={user} key={user.login_user.login_user_id}/>
+                return <User user={user} key={user.login_user_id}/>
             }) : null}
         </div>
     </div>)

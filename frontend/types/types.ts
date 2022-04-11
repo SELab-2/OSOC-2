@@ -16,6 +16,7 @@ export enum AccountStatus {
     PENDING = "PENDING",
     DISABLED = "DISABLED"
 }
+
 /**
  * A function that helps cycling through sorting methods
  * @param sort
@@ -110,19 +111,18 @@ export interface Student {
 }
 
 export interface LoginUser {
-    login_user: {
-        person: {
-            person_id: number,
-            email: string,
-            firstname: string;
-            lastname: string;
-            github: string
-        };
-        login_user_id: number,
+    person: {
         person_id: number,
-        is_admin: boolean,
-        is_coach: boolean,
-        password: string,
-        account_status: AccountStatus
-    }
+        email: string,
+        firstname: string;
+        lastname: string;
+        github: string
+    };
+    login_user_id: number,
+    person_id: number,
+    is_admin: boolean,
+    is_coach: boolean,
+    password: string,
+    account_status: AccountStatus
+
 }

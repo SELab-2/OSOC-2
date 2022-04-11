@@ -13,13 +13,13 @@ import {AccountStatus, LoginUser} from "../../types/types";
 
 export const User: React.FC<{ user: LoginUser }> = ({user}) => {
 
-    const [name] = useState<string>(user.login_user.person.firstname);
-    const [email] = useState<string>(user.login_user.person.email);
-    const [isAdmin, setIsAdmin] = useState<boolean>(user.login_user.is_admin);
-    const [isCoach, setIsCoach] = useState<boolean>(user.login_user.is_coach);
-    const [status, setStatus] = useState<string>(user.login_user.account_status);
+    const [name] = useState<string>(user.person.firstname);
+    const [email] = useState<string>(user.person.email);
+    const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
+    const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
+    const [status, setStatus] = useState<string>(user.account_status);
     const {sessionKey, setSessionKey} = useContext(SessionContext);
-    const userId = user.login_user.login_user_id;
+    const userId = user.login_user_id;
 
     const reverseRole = (changed_val: string) => {
         if (changed_val === "admin") {
