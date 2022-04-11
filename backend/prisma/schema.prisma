@@ -175,7 +175,7 @@ model student {
 model session_keys {
   session_key_id Int        @id @default(autoincrement())
   login_user_id  Int        @default(autoincrement())
-  valid_until    DateTime   @db.Timestamp(6)
+  valid_until    DateTime   @db.Timestamptz(6)
   session_key    String     @unique @db.VarChar(128)
   login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
