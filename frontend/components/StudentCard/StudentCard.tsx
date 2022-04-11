@@ -8,7 +8,8 @@ import {Label} from "../Labels/Label";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 
-export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
+export const StudentCard: React.FC<{ student: Student,
+     clickHandler: (event: React.MouseEvent<HTMLDivElement>) => void}> = ({student, clickHandler}) => {
 
     // Count evaluations
     const evaluations = student.evaluations[0].evaluation
@@ -52,7 +53,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
     }
 
     return (
-        <div className={styles.card}>
+        <div className={styles.card} onClick={clickHandler}>
             <div className={styles.body}>
                 <h2>{`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
                 <div className={styles.grid}>

@@ -4,11 +4,13 @@ import {useContext, useEffect, useState} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
 import {Student} from "../types/types"
 import styles from "../styles/students.module.scss"
+import {useRouter} from "next/router";
 
 
 const Students: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
     const [students, setStudents] = useState<(Student)[]>([]);
+    const router = useRouter()
 
     const fetchStudents = async () => {
         const sessionKey = getSessionKey != undefined ? getSessionKey() : ""
@@ -26,6 +28,12 @@ const Students: NextPage = () => {
         }
     }
 
+    const divClickedHandler = (event: React.MouseEvent<HTMLDivElement>) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const div = event.currentTarget;
+        router.push("/student/overview").then()
+      };
+
     useEffect(() => {
         fetchStudents().then();
         // We do not want to reload the data when the data changes
@@ -33,8 +41,8 @@ const Students: NextPage = () => {
     }, []);
 
     return (
-        <div className={styles.students}>
-            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+        <div className={styles.students} >
+            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student} clickHandler={divClickedHandler}/>)}
         </div>
     )
 }
