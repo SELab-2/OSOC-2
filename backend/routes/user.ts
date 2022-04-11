@@ -10,6 +10,7 @@ import * as ormLU from "../orm_functions/login_user";
 
 import * as validator from 'validator';
 import {account_status_enum} from "@prisma/client";
+import * as ormLoUs from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all students in the system.
@@ -122,6 +123,29 @@ async function createUserAcceptance(req: express.Request):
 }
 
 /**
+ *  Attempts to get all data for a certain student in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function getCurrentUser(req: express.Request): Promise<Responses.User> {
+    const parsedRequest = await rq.parseCurrentUserRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const login_user = await ormLoUs.getLoginUserById(checkedSessionKey.userId);
+
+    return Promise.resolve({
+        data : {
+            login_user : login_user
+        },
+        sessionkey : checkedSessionKey.data.sessionkey
+    });
+}
+
+/**
  *  Attempts to deny a request for becoming a coach.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -145,6 +169,8 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, '/user');
     util.route(router, "get", "/all", listUsers);
+
+    util.routeKeyOnly(router, 'get', '/current', getCurrentUser);
 
     router.post('/request', (req, res) => util.respOrErrorNoReinject(
         res, createUserRequest(req)));

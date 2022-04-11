@@ -314,6 +314,12 @@ export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
 export interface Student extends Keyed<InternalTypes.Student> {}
 
 /**
+ *  A user response is the keyed version of the user and their associated
+ * data.
+ */
+export interface User extends Keyed<InternalTypes.User> {}
+
+/**
  *  A studentList response is the keyed version of a list of students and their
  * associated data.
  */

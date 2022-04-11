@@ -618,6 +618,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /user/current` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseCurrentUserRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID
