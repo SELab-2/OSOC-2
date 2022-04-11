@@ -108,3 +108,21 @@ export interface Student {
         student_id: number;
     };
 }
+
+export interface LoginUser {
+    login_user: {
+        person: {
+            person_id: number,
+            email: string,
+            firstname: string;
+            lastname: string;
+            github: string
+        };
+        login_user_id: number,
+        person_id: number,
+        is_admin: boolean,
+        is_coach: boolean,
+        password: string,
+        account_status: AccountStatus
+    }
+}

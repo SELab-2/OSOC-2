@@ -4,6 +4,7 @@ import SessionContext from "../contexts/sessionProvider";
 import {User} from "../components/User/User";
 import styles from "../styles/users.module.css"
 import {UserFilter} from "../components/UserFilter/UserFilter";
+import {LoginUser} from "../types/types";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -12,8 +13,7 @@ import {UserFilter} from "../components/UserFilter/UserFilter";
 const Users: NextPage = () => {
 
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
-    const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }>>()
-    const userSet = new Set<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }>()
+    const [users, setUsers] = useState<Array<LoginUser>>()
 
     // Load all users upon page load
     useEffect(() => {
@@ -23,7 +23,7 @@ const Users: NextPage = () => {
             }
             return ""
         }
-        // boilerplate for the admin/coaches route (pass admin/coach as string)
+
         const getAllUsers = async (route: string, sessionkey: string) => {
             return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
                 method: 'GET',
@@ -47,20 +47,13 @@ const Users: NextPage = () => {
                 })
         }
 
-        let tempSes = getTempSession()
 
-        let test: Array<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }> = [];
-        getAllUsers("admin", tempSes).then(response => {
-            tempSes = response.sessionkey
-            test = [...response.data]
-            test.forEach(userSet.add, userSet);
-        }).then(() => {
-            getAllUsers("coach", tempSes).then(response => {
-                if (setSessionKey) {
-                    setSessionKey(response.sessionkey)
-                }
-                test.concat(response.data);
-            }).then(() => setUsers(Array.from(userSet)));
+        getAllUsers("user", getTempSession()).then(response => {
+            if (setSessionKey) {
+                setSessionKey(response.sessionkey)
+            }
+            setUsers(response.data)
+            console.log(response.data)
         })
 
         // We need to disable this warning. We of course do not want do reload the page when the data is changed
@@ -72,12 +65,13 @@ const Users: NextPage = () => {
     return (<div className={styles.body}>
         <UserFilter/>
         <div>
-            {users !== undefined ? users.map((user, index) => {
+
+            {users !== undefined ? users.map((user) => {
                 console.log(user)
-                return <User userName={user.person_data.name} userEmail={user.person_data.email}
-                             userIsAdmin={user.admin}
-                             userIsCoach={user.coach} userStatus={user.activated} key={index}
-                             userId={user.person_data.id}/>
+                const z = user.login_user
+                console.log(z)
+                console.log("agieioa")
+                return <User user={user} key={user.login_user.login_user_id}/>
             }) : null}
         </div>
     </div>)

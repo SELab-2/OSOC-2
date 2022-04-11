@@ -8,27 +8,18 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import React, {SyntheticEvent, useContext, useState} from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import {AccountStatus} from "../../types/types";
+import {AccountStatus, LoginUser} from "../../types/types";
 
 
-export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: boolean, userIsCoach: boolean, userStatus: string, userId: number }> = ({
-                                                                                                                                                            userName,
-                                                                                                                                                            userEmail,
-                                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                                                                                                            userIsAdmin,
-                                                                                                                                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                                                                                                                                            userIsCoach,
-                                                                                                                                                            userStatus,
-                                                                                                                                                            userId
-                                                                                                                                                        }) => {
+export const User: React.FC<{ user: LoginUser }> = ({user}) => {
 
-    const [name] = useState<string>(userName)
-    const [email] = useState<string>(userEmail)
-    const [isAdmin, setIsAdmin] = useState<boolean>(userIsAdmin)
-    const [isCoach, setIsCoach] = useState<boolean>(userIsCoach)
-    const [status, setStatus] = useState<string>(userStatus)
-    const {sessionKey, setSessionKey} = useContext(SessionContext)
-
+    const [name] = useState<string>(user.login_user.person.firstname);
+    const [email] = useState<string>(user.login_user.person.email);
+    const [isAdmin, setIsAdmin] = useState<boolean>(user.login_user.is_admin);
+    const [isCoach, setIsCoach] = useState<boolean>(user.login_user.is_coach);
+    const [status, setStatus] = useState<string>(user.login_user.account_status);
+    const {sessionKey, setSessionKey} = useContext(SessionContext);
+    const userId = user.login_user.login_user_id;
 
     const reverseRole = (changed_val: string) => {
         if (changed_val === "admin") {
@@ -80,7 +71,9 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
         setIsAdmin(!isAdmin);
-        await setUserRole("admin", "admin");
+        const z = await setUserRole("admin", "admin");
+        console.log(z)
+        console.log("aeihgaoih")
     }
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
@@ -110,7 +103,8 @@ export const User: React.FC<{ userName: string, userEmail: string, userIsAdmin: 
         <div className={styles.row}>
             <div className={styles.name}>
                 <p>{name}</p>
-                {status === AccountStatus.PENDING ? <button className={styles.pending} onClick={activateUser}>ACTIVATE</button> : null}
+                {status === AccountStatus.PENDING ?
+                    <button className={styles.pending} onClick={activateUser}>ACTIVATE</button> : null}
             </div>
 
             <p>{email}</p>
