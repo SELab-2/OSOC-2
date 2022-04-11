@@ -19,6 +19,7 @@ const Students: NextPage = () => {
                         'Authorization': `auth/osoc2 ${sessionKey}`
                     }
                 }).then(response => response.json()).catch(error => console.log(error));
+                console.log(response)
                 if (response !== undefined && response.success) {
                     if (setSessionKey) {
                         setSessionKey(response.sessionkey)

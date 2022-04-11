@@ -96,8 +96,10 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${key}`
             }
         }).then(response => response.json()).then(response => {
+            console.log(response)
             if (!response.success) {
                 router.push("/login")
+                return ""
             }
             return key
         }).catch(error => {
