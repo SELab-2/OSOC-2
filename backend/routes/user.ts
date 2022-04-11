@@ -72,6 +72,15 @@ async function createUserRequest(req: express.Request):
             .then(user => {
                 console.log("Attached a login user: " + user);
                 return Promise.resolve({id : user.login_user_id});
+            })
+            .catch(e => {
+                if('code' in e && e.code == 'P2002') {
+                    return Promise.reject({
+                        http: 400,
+                        reason: "Can't register the same email address twice."
+                    });
+                }
+                return Promise.reject(e);
             });
     });
 }
