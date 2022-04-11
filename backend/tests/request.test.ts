@@ -1,5 +1,6 @@
 import {getMockReq} from '@jest-mock/express';
 import express from 'express';
+import validator from 'validator';
 
 import * as config from '../config.json';
 import * as Rq from '../request'
@@ -316,9 +317,6 @@ test("Can parse suggest student request", () => {
 
   return Promise.all([ okays, fails ].flat());
 });
-
-// TODO test Rq.parseAcceptNewUserRequest
-// TODO test Rq.parseGetSuggestionsStudentRequest
 
 test("Can parse final decision request", () => {
   const key = "key";
@@ -752,4 +750,483 @@ test("Can parse update template request", () => {
   });
 
   return Promise.all([ okays, fails1, fails2, fails3 ].flat());
+});
+
+test("Can parse accept new user request", () => {
+  const key = 'abcde';
+  const id = 7;
+
+  const valid: T.Anything = {is_admin : false, is_coach : true};
+  const miss1: T.Anything = {is_admin : false};
+  const miss2: T.Anything = {is_coach : true};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+    r.params.id = id.toString();
+
+    x.sessionkey = key;
+    x.id = id;
+
+    expect(Rq.parseAcceptNewUserRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i1 = [ miss1, miss2 ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+    r.params.id = id.toString();
+
+    expect(Rq.parseAcceptNewUserRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i2 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+    expect(Rq.parseAcceptNewUserRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i3 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+    expect(Rq.parseAcceptNewUserRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ ok, i1, i2, i3 ].flat());
+})
+
+test("Can parse remove assignee request", () => {
+  const key = 'abcde';
+  const id = 7;
+
+  const valid: T.Anything = {student : 8};
+  const validRes: T.Anything = {studentId : 8, sessionkey : key, id : id};
+  const miss: T.Anything = {};
+
+  const ok = [ [ valid, validRes ] ].map(x => {
+    const r = getMockReq();
+    r.body = {...x[0]};
+    setSessionKey(r, key);
+    r.params.id = id.toString();
+
+    expect(Rq.parseRemoveAssigneeRequest(r)).resolves.toStrictEqual(x[1]);
+  });
+
+  const i1 = [ miss ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+    r.params.id = id.toString();
+
+    expect(Rq.parseRemoveAssigneeRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i2 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+    expect(Rq.parseRemoveAssigneeRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i3 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+    expect(Rq.parseRemoveAssigneeRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ ok, i1, i2, i3 ].flat());
+})
+
+test("Can parse student role request", () => {
+  const key = 'abcde';
+
+  const valid: T.Anything = {name : 'Bobs personal assistant'};
+  const miss: T.Anything = {};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+
+    x.sessionkey = key;
+    expect(Rq.parseStudentRoleRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i1 = [ miss ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    setSessionKey(r, key);
+
+    expect(Rq.parseStudentRoleRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i3 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    expect(Rq.parseStudentRoleRequest(r))
+        .rejects.toBe(errors.cookUnauthenticated());
+  });
+
+  return Promise.all([ ok, i1, i3 ].flat());
+});
+
+test("Can parse reset password request", () => {
+  const id = '5';
+
+  const valid: T.Anything = {password : 'jeffrey'};
+  const miss: T.Anything = {};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+
+    x.code = id;
+    expect(Rq.parseResetPasswordRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i1 = [ miss ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+
+    expect(Rq.parseResetPasswordRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  const i2 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    expect(Rq.parseResetPasswordRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ ok, i1, i2 ].flat());
+});
+
+test("Can parse requests to check the validity of reset codes", () => {
+  const id = '5';
+
+  const valid: T.Anything = {};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    r.params.id = id.toString();
+
+    x.code = id;
+    expect(Rq.parseCheckResetCodeRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i2 = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    expect(Rq.parseCheckResetCodeRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ ok, i2 ].flat());
+});
+
+test("Can parse request reset password code request", () => {
+  const valid: T.Anything = {email : 'jan@jeff.rey'};
+  const miss: T.Anything = {};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+
+    expect(Rq.parseRequestResetRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i1 = [ miss ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+
+    expect(Rq.parseRequestResetRequest(r))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ ok, i1 ].flat());
+});
+
+test("Can parse form request", () => {
+  const evId = '6498468';
+  const evT = 'some_event_idk';
+  const created: Date = new Date(Date.now());
+  const data = {};
+
+  const valid: T.Anything =
+      {eventId : evId, eventType : evT, createdAt : created, data : data};
+  const miss1: T.Anything = {eventType : evT, createdAt : created, data : data};
+  const miss2: T.Anything = {eventId : evId, createdAt : created, data : data};
+  const miss3: T.Anything = {eventId : evId, eventType : evT, data : data};
+  const miss4:
+      T.Anything = {eventId : evId, eventType : evT, createdAt : created};
+  const miss5: T.Anything = {};
+
+  const ok = [ valid ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+    expect(Rq.parseFormRequest(r)).resolves.toStrictEqual(x);
+  });
+
+  const i1 = [ miss1, miss2, miss3, miss4, miss5 ].map(x => {
+    const r = getMockReq();
+    r.body = {...x};
+
+    expect(Rq.parseFormRequest(r)).rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ ok, i1 ].flat());
+})
+
+test("Can parse filter student requests (session key)", () => {
+  const rq1 = getMockReq();
+  const rq2 = getMockReq();
+  setSessionKey(rq1, 'abcd');
+
+  const exp = {
+    sessionkey : 'abcd',
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : undefined,
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : undefined,
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  return Promise.all([
+    expect(Rq.parseFilterStudentsRequest(rq1)).resolves.toStrictEqual(exp),
+    expect(Rq.parseFilterStudentsRequest(rq2))
+        .rejects.toBe(errors.cookUnauthenticated())
+  ]);
+})
+
+test("Can parse filter student requests (email validity)", () => {
+  const key = 'filterkey';
+
+  const exp: T.Anything = {
+    sessionkey : key,
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : undefined,
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : undefined,
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  const valid: T.Anything = {emailFilter : 'jeff@rey.com'};
+  const no_at: T.Anything = {emailFilter : 'jeffrey.com'};
+  const no_final_dot: T.Anything = {emailFilter : 'jeff@reycom'};
+
+  const ok = [ valid ].map(x => {
+    const req = getMockReq();
+    req.body = {...x};
+    setSessionKey(req, key);
+    const res: T.Anything = {...exp};
+    res.emailFilter = x.emailFilter;
+
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .resolves.toStrictEqual(res);
+  });
+
+  const fail = [ no_at, no_final_dot ].map(x => {
+    const req = getMockReq();
+    req.body = {...x};
+    setSessionKey(req, key);
+
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+
+  return Promise.all([ ok, fail ].flat());
+});
+
+test("Can parse filter student requests (email normalization)", () => {
+  const key = 'key1';
+  const exp = {
+    sessionkey : key,
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : '',
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : undefined,
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  const emails = [
+    // normal, re-lowercase, remove gmail dots
+    "jeffrey@hotmail.com", "JEFFREY@hotmail.com", "je.ff.re.y@gmail.com",
+    // remove gmail subdomain, googlemail = gmail, remove outlook subdomain
+    "jeff+rey@gmail.com", "jeffrey@googlemail.com", "jeff+rey@outlook.com",
+    // remove yahoo subdomain, remove icloud subdomain
+    "jeff-rey@yahoo.com", "jeff+rey@icloud.com"
+  ];
+
+  return Promise.all(emails.map(x => {
+    const req = getMockReq();
+    setSessionKey(req, key);
+    req.body.emailFilter = x;
+    if (!validator.normalizeEmail(x)) {
+      throw Error('Invalid email address!');
+    }
+    const res = {...exp};
+    res.emailFilter = validator.normalizeEmail(x) as string;
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .resolves.toStrictEqual(res);
+  }));
+});
+
+test("Can parse filter student requests (statusFilter)", () => {
+  const key = 'im-a-funny-key';
+  const exp = {
+    sessionkey : key,
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : undefined,
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : '',
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  const okay = [ 'YES', 'MAYBE', 'NO' ].map(x => {
+    const req = getMockReq();
+    req.body.statusFilter = x;
+    setSessionKey(req, key);
+    const res = {...exp};
+    res.statusFilter = x;
+
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .resolves.toStrictEqual(res);
+  });
+
+  const fail = [ 'yes', 'SOMETHING' ].map(x => {
+    const req = getMockReq();
+    req.body.statusFilter = x;
+    setSessionKey(req, key);
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .rejects.toBe(errors.cookArgumentError());
+  });
+  return Promise.all([ okay, fail ].flat());
+})
+
+test("Can parse filter student requests (misc filters)", () => {
+  const key = 'im-a-funny-key';
+  const exp = {
+    sessionkey : key,
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : undefined,
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : undefined,
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  const filters = [
+    "firstNameFilter", "lastNameFilter", 'roleFilter', 'alumniFilter',
+    'coachFilter'
+  ];
+
+  return Promise.all(filters.map(x => {
+    const req = getMockReq();
+    req.body[x] = "im-a-filter";
+    setSessionKey(req, key);
+    const res: T.Anything = {...exp};
+    res[x] = "im-a-filter";
+    return expect(Rq.parseFilterStudentsRequest(req))
+        .resolves.toStrictEqual(res);
+  }));
+});
+
+test("Can parse filter student requests (sorting filters)", () => {
+  const key = 'im-a-funny-key';
+  const exp = {
+    sessionkey : key,
+    firstNameFilter : undefined,
+    lastNameFilter : undefined,
+    emailFilter : undefined,
+    roleFilter : undefined,
+    alumniFilter : undefined,
+    coachFilter : undefined,
+    statusFilter : undefined,
+    firstNameSort : undefined,
+    lastNameSort : undefined,
+    emailSort : undefined,
+    roleSort : undefined,
+    alumniSort : undefined,
+  };
+
+  const filters = [
+    'firstNameSort', 'lastNameSort', 'emailSort', 'roleSort', 'alumniSort'
+  ];
+
+  const okays = [ 'asc', 'desc' ];
+  const fails = [ 'ASC', 'something' ];
+
+  return Promise.all(filters
+                         .map(x => {
+                           const pass = okays.map(y => {
+                             const req = getMockReq();
+                             req.body[x] = y;
+                             setSessionKey(req, key);
+
+                             const res: T.Anything = {...exp};
+                             res[x] = y;
+                             return expect(Rq.parseFilterStudentsRequest(req))
+                                 .resolves.toStrictEqual(res);
+                           });
+                           const rejc = fails.map(y => {
+                             const req = getMockReq();
+                             req.body[x] = y;
+                             setSessionKey(req, key);
+
+                             return expect(Rq.parseFilterStudentsRequest(req))
+                                 .rejects.toBe(errors.cookArgumentError());
+                           });
+
+                           return [ pass, rejc ].flat();
+                         })
+                         .flat());
 });

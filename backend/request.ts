@@ -266,6 +266,13 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
  */
 export async function parseFilterStudentsRequest(req: express.Request):
     Promise<Requests.StudentFilter> {
+
+  try {
+    await hasFields(req, [], types.key);
+  } catch (e) {
+    return Promise.reject(errors.cookUnauthenticated());
+  }
+
   let mail = undefined;
   if (("emailFilter" in req.body &&
        !validator.default.isEmail(req.body.emailFilter)) ||
@@ -526,7 +533,7 @@ export async function parseResetPasswordRequest(req: express.Request):
  */
 export async function parseStudentRoleRequest(req: express.Request):
     Promise<Requests.Role> {
-  return hasFields(req, [ "name" ], types.neither).then(() => Promise.resolve({
+  return hasFields(req, [ "name" ], types.key).then(() => Promise.resolve({
     sessionkey : getSessionKey(req),
     name : req.body.name
   }));
