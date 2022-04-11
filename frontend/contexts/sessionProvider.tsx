@@ -87,6 +87,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
             return key
         }
 
+        verified = true
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
             method: 'POST',
             headers: {
@@ -95,10 +96,14 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${key}`
             }
         }).then(response => response.json()).then(response => {
-            console.log(response)
-            verified = true
-            return response
-        }).catch(error => console.log(error))
+            if (!response.success) {
+                router.push("/login")
+            }
+            return key
+        }).catch(error => {
+            console.log(error)
+            return ""
+        })
     }
 
     const setSessionKey = (sessionKey: string) => {
