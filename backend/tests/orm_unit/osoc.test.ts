@@ -5,7 +5,7 @@ import {
     getOsocAfterYear,
     getOsocBeforeYear,
     getOsocByYear,
-    updateOsoc
+    updateOsoc, getLatestOsoc
 } from "../../orm_functions/osoc";
 import {UpdateOsoc} from "../../orm_functions/orm_types";
 
@@ -27,6 +27,16 @@ test("should return all osoc editions", async () => {
 
     prismaMock.osoc.findMany.mockResolvedValue(returnValue);
     await expect(getAllOsoc()).resolves.toEqual(returnValue);
+});
+
+test("should return the latest osoc editions", async () => {
+    const returnValue = {
+        osoc_id: 0,
+        year: 2022
+    };
+
+    prismaMock.osoc.findFirst.mockResolvedValue(returnValue);
+    await expect(getLatestOsoc()).resolves.toEqual(returnValue);
 });
 
 test("should return the osoc edition of the given year", async () => {

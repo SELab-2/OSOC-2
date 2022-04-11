@@ -288,5 +288,3 @@ export async function getJobApplication(jobApplicationId: number) {
         }
     });
 }
-
-

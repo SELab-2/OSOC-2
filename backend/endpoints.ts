@@ -3,15 +3,18 @@ import express from 'express';
 import * as config from './config.json';
 import * as admin from './routes/admin';
 import * as coach from './routes/coach';
+import * as followup from './routes/followup';
 import * as form from './routes/form';
 import * as github from './routes/github';
 import * as login from './routes/login';
 import * as project from './routes/project';
 import * as reset from './routes/reset';
+import * as role from './routes/role';
 import * as student from './routes/student';
 import * as user from './routes/user';
-import * as role from './routes/role';
 import * as util from './utility';
+
+import * as template from './routes/template';
 
 /**
  *  Attaches all endpoints to the application.
@@ -29,6 +32,8 @@ export function attach(app: express.Application): void {
     app.use(home + '/github', github.getRouter());
     app.use(home + '/user', user.getRouter());
     app.use(home + '/role', role.getRouter());
+    app.use(home + '/template', template.getRouter());
+    app.use(home + '/followup', followup.getRouter());
   });
 
   app.use((req: express.Request, res: express.Response): Promise<void> =>

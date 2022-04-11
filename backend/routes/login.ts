@@ -22,7 +22,6 @@ function orDefault<T>(v: T|undefined, def: T): T {
 async function login(req: express.Request): Promise<Responses.Login> {
   console.log("Calling login endpoint " + JSON.stringify(req.body));
   return parseLoginRequest(req).then(
-      // TODO normalize email
       parsed => getPasswordPersonByEmail(parsed.name).then(async pass => {
         if (pass == null || pass.login_user == null ||
             pass?.login_user?.password != parsed.pass) {
@@ -66,7 +65,7 @@ async function logout(req: express.Request): Promise<Responses.Empty> {
 export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
-  util.routeKeyOnly(router, 'post', '/', login);
+  router.post('/', (req, res) => util.respOrErrorNoReinject(res, login(req)));
   router.delete('/',
                 (req, res) => util.respOrErrorNoReinject(res, logout(req)));
   util.addInvalidVerbs(router, '/');

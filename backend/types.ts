@@ -1,4 +1,4 @@
-import {account_status_enum} from "@prisma/client";
+import {account_status_enum, email_status_enum} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -56,6 +56,10 @@ export interface Errors {
    *  Cooks up an Internal Server Error response.
    */
   cookServerError: () => ApiError;
+  /**
+   *  Cooks up a No Data Error response.
+   */
+  cookNoDataError: () => ApiError;
 }
 
 /**
@@ -73,40 +77,7 @@ export type SessionKey = string;
  */
 export type Suggestion = "YES"|"MAYBE"|"NO";
 
-/**
- *  Represents a partial type response. Usually these will only contain a
- * suggestion type, the name and id of the sender and the reason why this
- * suggestion exists.
- */
-export interface SuggestionInfo {
-  /**
-   *  The suggestion.
-   */
-  suggestion: Suggestion;
-  /**
-   *  The sender of the suggestion.
-   */
-  sender: IdName;
-  /**
-   *  The reason why this suggestion exists.
-   */
-  reason: string;
-}
-
-/**
- *  Represents a partial type response. Usually these will only contain a
- * suggestion type and a number of occurrences.
- */
-export interface SuggestionCount {
-  /**
-   *  The suggestion.
-   */
-  suggestion: Suggestion;
-  /**
-   *  The number of occurrences for this kind of suggestion.
-   */
-  occurrences: number;
-}
+export interface SuggestionInfo {}
 
 /**
  *  Represents a response that only contains an ID.
@@ -161,6 +132,11 @@ export interface Student {}
  *  Represents a user, with all associated data.
  */
 export interface User {}
+
+/**
+ *  Represents a check of the key, holds the key aswell as boolean value.
+ */
+export interface CheckKey {}
 
 /**
  *  Represents a coach, with all associated data.
@@ -239,9 +215,48 @@ export interface ModProjectStudent {
   /**
    *  The roles of the student.
    */
-  roles: string[];
+  role: string;
 }
 
+/**
+ *  Represents a conflict. These contain the student and a list of projects they
+ * are in.
+ */
+export interface Conflict {
+  /**
+   *  The student's ID.
+   */
+  student: number;
+  /**
+   *  The projects the student is in.
+   */
+  projects: {
+    /**
+     * The project's ID.
+     */
+    id: number;
+    /**
+     * The project's name.
+     */
+    name : string
+  }[];
+}
+
+export interface ShortTemplate {
+  id: number;
+  owner: number;
+  name: string;
+}
+
+export interface Template extends ShortTemplate {
+  content: string;
+}
+
+export interface FollowupStatus {
+  student: number;
+  status: email_status_enum;
+  application: number;
+}
 }
 
 export interface WithUserID<T> {
@@ -310,16 +325,15 @@ export interface StudentList extends Keyed<InternalTypes.Student[]> {}
 export interface UserList extends Keyed<InternalTypes.User[]> {}
 
 /**
+ *
+ */
+export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
+
+/**
  *  A student list response is the keyed version of an array of partial
  * students.
  */
 export interface IdNameList extends Keyed<InternalTypes.IdName[]> {}
-
-/**
- *  A student response is the keyed version of the student and their associated
- * data.
- */
-export interface Suggestion extends Keyed<InternalTypes.SuggestionCount[]> {}
 
 /**
  *  A student response is the keyed version of the student and their associated
@@ -391,11 +405,20 @@ export interface ProjectDraftedStudents extends
 export interface ModProjectStudent extends
     Keyed<InternalTypes.ModProjectStudent> {}
 
-  /**
-   *  A studentList response is the keyed version of a list of students and their
-   * associated data.
-   */
-  export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+/**
+ *  A studentList response is the keyed version of a list of students and their
+ * associated data.
+ */
+export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+/**
+ *  A conflictList response is the keyed version of a list of conflicts.
+ */
+export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
+
+export interface TemplateList extends Keyed<InternalTypes.ShortTemplate[]> {}
+export interface Template extends Keyed<InternalTypes.Template> {}
+export interface SingleFollowup extends Keyed<InternalTypes.FollowupStatus> {}
+export interface FollowupList extends Keyed<InternalTypes.FollowupStatus[]> {}
 
 /**
  *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -406,7 +429,7 @@ export type OrError<T> = ApiError|T;
 /**
  *  An API response is one of the previous response types.
  */
-export type ApiResponse = Empty|Key|PartialStudent|IdNameList;
+export type ApiResponse = Empty|Key|PartialStudent|IdNameList|ConflictList;
 
 /**
  *  Either an error while parsing the form or a data value.
@@ -415,7 +438,7 @@ export interface FormResponse<T> {
   /**
    *  The data.
    */
-  data: T | null;
+  data: T|null;
 }
 }
 
@@ -440,6 +463,17 @@ export interface KeyRequest {
 export interface IdRequest extends KeyRequest {
   id: number;
 }
+
+export interface YearId extends IdRequest {
+  year?: number;
+}
+
+export interface AccountAcceptance extends IdRequest {
+  is_admin: boolean;
+  is_coach: boolean;
+}
+
+export interface StudentFilter extends KeyRequest {}
 
 export interface UpdateStudent extends IdRequest {
   emailOrGithub?: string;
@@ -471,11 +505,11 @@ export interface UpdateLoginUser extends IdRequest {
   accountStatus: account_status_enum;
 }
 
-export interface CoachRequest {
+export interface UserRequest {
   firstName: string;
   lastName: string;
-  emailOrGithub: string;
-  pass?: string;
+  email: string;
+  pass: string;
 }
 
 export interface Project extends KeyRequest {
@@ -498,7 +532,7 @@ export interface ModProject extends IdRequest {
 
 export interface Draft extends IdRequest {
   studentId: number;
-  roles: string[];
+  role: string;
 }
 
 export interface Followup extends IdRequest {
@@ -507,17 +541,16 @@ export interface Followup extends IdRequest {
 
 export interface Template extends KeyRequest {
   name: string;
-  desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content: string;
 }
 
 export interface ModTemplate extends IdRequest {
   name?: string;
   desc?: string;
-  subect?: string;
-  cc?: string[];
+  subject?: string;
+  cc?: string;
   content?: string;
 }
 
@@ -528,7 +561,6 @@ export interface Form {
 export interface Role extends KeyRequest {
   name: string
 }
-
 
 export interface DataForm {
   fields: Array<Question>
@@ -554,6 +586,10 @@ export interface ResetPassword {
   code: string;
   password: string;
 }
+
+export interface RmDraftStudent extends IdRequest {
+  studentId: number;
+}
 }
 
 /**
@@ -562,7 +598,7 @@ export interface ResetPassword {
  */
 export type Verb = "get"|"post"|"delete";
 
-export type FollowupType = "hold-tight"|"confirmed"|"cancelled";
+export type FollowupType = email_status_enum;
 
 export type Table = "project"|"student";
 
@@ -578,6 +614,10 @@ export type RouteCallback<T extends Responses.ApiResponse> =
  */
 export interface Anything {
   [key: string]: unknown;
+}
+
+export interface StringDict<T2> {
+  [key: string]: T2;
 }
 
 export interface Email {

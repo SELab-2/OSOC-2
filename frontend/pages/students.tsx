@@ -4,11 +4,13 @@ import {useContext, useEffect, useState} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
 import {StudentFilter} from "../components/StudentFilter/StudentFilter";
 import {Role} from "../types/types";
+import {Student} from "../types/types"
+import styles from "../styles/students.module.scss"
 
 
 const Students: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
-    //const [students, setStudents] = useState<Array<InternalTypes.Student>>([]);
+    const [students, setStudents] = useState<(Student)[]>([]);
     const [roles, setRoles] = useState<Array<Role>>([]);
 
 
@@ -23,6 +25,7 @@ const Students: NextPage = () => {
         console.log(responseStudents);
         if (responseStudents.success) {
             sessionKey = responseStudents.sessionkey
+            setStudents(responseStudents.data)
         }
         const responseRoles = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/role/all`, {
             method: 'GET',
@@ -54,10 +57,10 @@ const Students: NextPage = () => {
     }, []);
 
     return (
-        <>
+        <div className={styles.students}>
             <StudentFilter roles={roles}/>
-            <StudentCard student={undefined}/>
-        </>
+            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+        </div>
     )
 }
 

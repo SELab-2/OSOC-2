@@ -1,5 +1,6 @@
+import { decision_enum } from '@prisma/client';
 import prisma from '../prisma/prisma'
-import {CreateStudent, UpdateStudent} from './orm_types';
+import {CreateStudent, FilterSort, FilterString, FilterBoolean, UpdateStudent} from './orm_types';
 
 // TODO: how do we make sure there is no student for this person_id yet?
 /**
@@ -98,6 +99,99 @@ export async function searchStudentByGender(gender: string){
         },
         include: {
             person: true,
+        }
+    });
+}
+
+/**
+ *
+ * @param firstNameFilter firstname that we are filtering on (or undefined if not filtering on name)
+ * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
+ * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
+ * @param roleFilter role that we are filtering on (or undefined if not filtering on role)
+ * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
+ * @param coachFilter coach status that we are filtering on (or undefined if not filtering on coach status)
+ * @param statusFilter status that we are filtering on (or undefined if not filtering on status)
+ * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
+ * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
+ * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
+ * @param roleSort asc or desc if we are sorting on role, undefined if we are not sorting on role
+ * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
+ * @param coachSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
+ * @param statusSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
+ * @returns the filtered students with their person data and other filter fields in a promise
+ */
+// , coachSort: FilterSort, statusSort: FilterSort
+ export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
+    emailFilter: FilterString, roleFilter: FilterString, alumniFilter: FilterBoolean, 
+    coachFilter: FilterBoolean, statusFilter: decision_enum | undefined,
+    firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
+    alumniSort: FilterSort) {
+
+    return await prisma.student.findMany({
+        where: {
+            job_application: {
+                some: {
+                    student_coach: coachFilter,
+                    applied_role: {
+                        some: {
+                            role:{
+                                name: roleFilter
+                            }
+                        }
+                    },
+                    evaluation: {
+                        some: {
+                            decision: statusFilter
+                        }
+                    }              
+                }
+            },
+            person: {
+                firstname: {
+                    contains: firstNameFilter,
+                    mode: 'insensitive'
+                },
+                lastname: {
+                    contains: lastNameFilter,
+                    mode: 'insensitive'
+                },
+                email: {
+                    contains: emailFilter,
+                    mode: 'insensitive'
+                },
+            },            
+            alumni: alumniFilter,
+        },
+        orderBy : {
+            person :  {
+                firstname: firstNameSort,
+                lastname: lastNameSort,
+                email: emailSort,
+            },
+            alumni: alumniSort
+        },
+        include : {
+            person: true,
+            job_application: {
+                select : {
+                    student_coach: true,
+                    applied_role: {
+                        include : {
+                            role: {
+                                select : {
+                                    name: true
+                                }
+                            }
+                        }
+                    },
+                    evaluation: {
+                        select : {
+                            decision: true
+                        }
+                    }  
+                }
+            }
         }
     });
 }

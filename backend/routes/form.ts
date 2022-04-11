@@ -11,6 +11,7 @@ import * as validator from 'validator';
 /**
  *  This function searches a question with a given key in the form.
  *  @param form The form with the answers.
+ *  @param key The key of the question.
  *  @returns The question that corresponds with the given key.
  */
 function filterQuestion(form: Requests.Form, key: string): Responses.FormResponse<Requests.Question> {
@@ -34,6 +35,7 @@ function filterChosenOption(question: Requests.Question): Responses.FormResponse
 /**
  *  This function checks if the answer on a certain question contains a word.
  *  @param question The question.
+ *  @param word the word we are searching for in the answer.
  *  @returns True if the question options contain the word, else false.
  */
 function checkWordInAnswer(question: Requests.Question, word : string): Responses.FormResponse<boolean> {
@@ -101,27 +103,18 @@ function getEmail(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToPerson(form: Requests.Form): Promise<Responses.Person> {
-    return getBirthName(form)
-        .then(birthNameResponse => {
-            return getLastName(form)
-                .then(lastNameResponse => {
-                    return getEmail(form)
-                        .then(emailResponse => {
-                            return ormP
-                                .createPerson({
-                                    firstname : birthNameResponse,
-                                    lastname : lastNameResponse,
-                                    email : emailResponse
-                                })
-                                .then(person => Promise.resolve({
-                                    person_id : person.person_id,
-                                    firstname : person.firstname,
-                                    lastname : person.lastname,
-                                    email : emailResponse
-                                }));
-                        })
-                })
-        })
+    const birthName = await getBirthName(form);
+    const lastName = await getLastName(form);
+    const email = await getEmail(form);
+
+    const person = await ormP.createPerson({firstname : birthName, lastname : lastName, email : email});
+
+    return Promise.resolve({
+        person_id : person.person_id,
+        firstname : person.firstname,
+        lastname : person.lastname,
+        email : email
+    });
 }
 
 /* parse form to student
