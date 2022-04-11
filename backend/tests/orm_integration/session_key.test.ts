@@ -18,7 +18,7 @@ it("should create a new session key for the given login user", async () =>{
 it("should return the loginUser associated with the key", async () => {
     const loginUsers = await prisma.login_user.findMany();
     const found_users = await checkSessionKey("newKey");
-    expect(found_users[0]).toHaveProperty("login_user_id", loginUsers[0].login_user_id);
+    expect(found_users).toHaveProperty("login_user_id", loginUsers[0].login_user_id);
 });
 
 it("should return an error because the key doesn't exist", async () => {
@@ -76,10 +76,10 @@ it("should delete all session keys of the user with given key", async () => {
             valid_until: futureDate
         }
     });
-
+    
+    
     const deleted = await removeAllKeysForUser("newkey");
     expect(deleted).toHaveProperty("count", 3);
-
     const remaining_keys = await prisma.session_keys.findMany();
     expect(remaining_keys.length).toEqual(1);
     expect(remaining_keys[0]).toHaveProperty("login_user_id", login_users[1].login_user_id);

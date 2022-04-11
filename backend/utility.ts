@@ -239,9 +239,14 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey)
-      .then(([uid]) => Promise.resolve({data : obj, userId : uid.login_user_id}))
-      .catch(() => Promise.reject(errors.cookUnauthenticated()));
+  return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+    if (uid) {
+      return Promise.resolve({data : obj, userId : uid.login_user_id});
+    }
+    else{
+      return Promise.reject(errors.cookNonExistent);
+    }
+  }).catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
 /**
