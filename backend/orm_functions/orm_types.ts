@@ -481,11 +481,11 @@ export interface UpdateProjectRole {
     /**
      * the language id to which this skill is linked
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * the level of the skill of the applicant
      */
-    level: number,
+    level: number | null,
     /**
      * true if this skill is the preffered skill of the applicant
      */

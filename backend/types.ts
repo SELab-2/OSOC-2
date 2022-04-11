@@ -562,19 +562,32 @@ export interface ModTemplate extends IdRequest {
 }
 
 export interface Form {
-  eventId: string, eventType: string, createdAt: string, data: DataForm
+  eventId: string;
+  eventType: string;
+  createdAt: string;
+  data: DataForm;
 }
 
 export interface Role extends KeyRequest {
-  name: string
+  name: string;
 }
 
 export interface DataForm {
-  fields: Array<Question>
+  fields: Array<Question>;
 }
 
 export interface Question {
-  key: string, value: string, options?: Array<Option>
+  key: string;
+  value: string | FormValues[];
+  options?: Array<Option>;
+}
+
+export interface FormValues {
+  "id": string;
+  "name": string;
+  "url": string;
+  "mimeType": string;
+  "size": number;
 }
 
 export interface Option {
