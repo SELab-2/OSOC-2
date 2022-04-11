@@ -55,7 +55,7 @@ export interface Student {
         responsibilities: string;
         student_coach: boolean;
         student_id: number;
-        student_volunteer_info: string;   
+        student_volunteer_info: string;
     };
 
     languages: [string];
@@ -77,4 +77,15 @@ export interface Student {
         pronouns: [string];
         student_id: number;
     };
+}
+
+export interface Project {
+    project: {
+        end_date: Date;
+        id: number;
+        name: string;
+        partner: string;
+        positions: number;
+        start_date: Date;
+    }
 }
