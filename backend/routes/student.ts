@@ -46,11 +46,13 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
 
             const languages: string[] = [];
             for (let skillIndex = 0; skillIndex < jobApplication.job_application_skill.length; skillIndex++) {
-                const language = await ormLa.getLanguage(jobApplication.job_application_skill[skillIndex].language_id);
-                if (language != null) {
-                    languages.push(language.name);
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
+                if(jobApplication.job_application_skill[skillIndex].language_id != null) {
+                    const language = await ormLa.getLanguage(Number(jobApplication.job_application_skill[skillIndex].language_id));
+                    if (language != null) {
+                        languages.push(language.name);
+                    } else {
+                        return Promise.reject(errors.cookInvalidID());
+                    }
                 }
             }
 
@@ -110,11 +112,13 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     const languages : string[] = [];
     for(const job_application_skill of jobApplication.job_application_skill) {
-        const language = await ormLa.getLanguage(job_application_skill.language_id);
-        if(language == null) {
-            return Promise.reject(errors.cookInvalidID());
+        if(job_application_skill.language_id != null) {
+            const language = await ormLa.getLanguage(job_application_skill.language_id);
+            if(language == null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+            languages.push(language.name);
         }
-        languages.push(language.name);
     }
 
     return Promise.resolve({
@@ -311,11 +315,13 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
 
         const languages : string[] = [];
         for(const job_application_skill of jobApplication.job_application_skill) {
-            const language = await ormLa.getLanguage(job_application_skill.language_id);
-            if(language == null) {
-                return Promise.reject(errors.cookInvalidID());
+            if(job_application_skill.language_id != null) {
+                const language = await ormLa.getLanguage(job_application_skill.language_id);
+                if(language == null) {
+                    return Promise.reject(errors.cookInvalidID());
+                }
+                languages.push(language.name);
             }
-            languages.push(language.name);
         }
 
         studentlist.push({

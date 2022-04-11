@@ -7,11 +7,15 @@ import * as ormOs from '../orm_functions/osoc';
 import * as ormJo from '../orm_functions/job_application';
 import * as ormJoSk from '../orm_functions/job_application_skill';
 import * as ormLa from '../orm_functions/language';
+import * as ormAtt from '../orm_functions/attachment';
 import * as ormRo from '../orm_functions/role';
+import * as ormAppRo from '../orm_functions/applied_role';
 import {Requests, Responses} from '../types';
 import * as util from "../utility";
 import {errors} from "../utility";
+import {type_enum} from "@prisma/client";
 import * as validator from 'validator';
+import * as rq from '../request';
 
 /**
  *  This function searches a question with a given key in the form.
@@ -647,7 +651,7 @@ function getBestSkill(form: Requests.Form) : Promise<string> {
 }
 
 /**
- *  Attempts to parse the answers in the form into a job application entity.
+ *  Attempts to parse the answers in the form into job application skills entities.
  *  @param form The form with the answers.
  *  @param job_applicationId The job_application id object.
  *  @returns See the API documentation. Successes are passed using
@@ -684,11 +688,11 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
 
     await ormJoSk.createJobApplicationSkill({
         jobApplicationId : job_application_id,
-        skill : null,
-        languageId : english.language_id,
-        level : english_level,
+        skill : best_skill,
+        languageId : null,
+        level : null,
         isPreferred : false,
-        isBest : false
+        isBest : true
     });
 
     return Promise.resolve({});
@@ -703,13 +707,14 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getCV(form: Requests.Form) : Promise<string[]> {
+function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
     const questionCVUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mD78BR");
     const questionCVLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3l6GBk");
 
     const questionsExist : boolean = checkQuestionsExist([questionCVUpload, questionCVLink]);
 
-    const links = [];
+    const links : string[] = [];
+    const types : type_enum[] = [];
 
     if(!questionsExist || (questionCVUpload.data?.value == null && questionCVLink.data?.value == null)) {
         return Promise.reject(errors.cookArgumentError());
@@ -717,6 +722,7 @@ function getCV(form: Requests.Form) : Promise<string[]> {
 
     if(questionCVLink.data?.value != null) {
         links.push(questionCVLink.data?.value as string);
+        types.push("CV_URL");
     }
 
     if(questionCVUpload.data?.value != null) {
@@ -724,11 +730,13 @@ function getCV(form: Requests.Form) : Promise<string[]> {
             if((questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url == undefined) {
                 return Promise.reject(errors.cookArgumentError());
             }
+
             links.push((questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url);
+            types.push("CV_URL");
         }
     }
 
-    return Promise.resolve(links);
+    return Promise.resolve({data : links, types : types});
 }
 
 /**
@@ -737,13 +745,14 @@ function getCV(form: Requests.Form) : Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPortfolio(form: Requests.Form) : Promise<string[]> {
+function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
     const questionPortfolioUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mRDNx9");
     const questionPortfolioLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wo2PEP");
 
     const questionsExist : boolean = checkQuestionsExist([questionPortfolioUpload, questionPortfolioLink]);
 
-    const links = [];
+    const links : string[] = [];
+    const types : type_enum[] = [];
 
     if(!questionsExist || (questionPortfolioUpload.data?.value == null && questionPortfolioLink.data?.value == null)) {
         return Promise.reject(errors.cookArgumentError());
@@ -751,6 +760,7 @@ function getPortfolio(form: Requests.Form) : Promise<string[]> {
 
     if(questionPortfolioLink.data?.value != null) {
         links.push(questionPortfolioLink.data?.value as string);
+        types.push("PORTFOLIO_URL");
     }
 
     if(questionPortfolioUpload.data?.value != null) {
@@ -759,10 +769,11 @@ function getPortfolio(form: Requests.Form) : Promise<string[]> {
                 return Promise.reject(errors.cookArgumentError());
             }
             links.push((questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues).url);
+            types.push("PORTFOLIO_URL");
         }
     }
 
-    return Promise.resolve(links);
+    return Promise.resolve({data : links, types : types});
 }
 
 /**
@@ -771,14 +782,15 @@ function getPortfolio(form: Requests.Form) : Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getMotivation(form: Requests.Form) : Promise<object[]> {
+function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
     const questionMotivationUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nGRG6Z");
     const questionMotivationLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mO72aR");
     const questionMotivationString: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mVzeGg");
 
     const questionsExist : boolean = checkQuestionsExist([questionMotivationUpload, questionMotivationLink, questionMotivationString]);
 
-    const content : {type : string, data : string}[] = [];
+    const data : string[] = [];
+    const types : type_enum[] = [];
 
     if(!questionsExist || (questionMotivationUpload.data?.value == null
         && questionMotivationLink.data?.value == null && questionMotivationString.data?.value == null)) {
@@ -786,7 +798,8 @@ function getMotivation(form: Requests.Form) : Promise<object[]> {
     }
 
     if(questionMotivationLink.data?.value != null) {
-        content.push({type : "MOTIVATION_URL", data : questionMotivationLink.data?.value as string});
+        data.push(questionMotivationLink.data?.value as string);
+        types.push("MOTIVATION_URL");
     }
 
     if(questionMotivationUpload.data?.value != null) {
@@ -794,15 +807,37 @@ function getMotivation(form: Requests.Form) : Promise<object[]> {
             if((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url == undefined) {
                 return Promise.reject(errors.cookArgumentError());
             }
-            content.push({type : "MOTIVATION_URL", data : (questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url});
+            data.push((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url);
+            types.push("MOTIVATION_URL");
         }
     }
 
     if(questionMotivationString.data?.value != null) {
-        content.push({type : "MOTIVATION_STRING", data : questionMotivationString.data?.value as string});
+        data.push(questionMotivationString.data?.value as string);
+        types.push("MOTIVATION_URL");
     }
 
-    return Promise.resolve(content);
+    return Promise.resolve({data : data, types : types});
+}
+
+/**
+ *  Attempts to parse the answers in the form into attachment entities.
+ *  @param form The form with the answers.
+ *  @param job_applicationId The job_application id object.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function jsonToAttachments(form: Requests.Form, job_applicationId: Responses.Id): Promise<Responses.Empty> {
+    const job_application_id = job_applicationId.id;
+    const cv_links = await getCV(form);
+    const portfolio_links = await getPortfolio(form);
+    const motivations = await getMotivation(form);
+
+    await ormAtt.createAttachment(job_application_id, cv_links.data, cv_links.types);
+    await ormAtt.createAttachment(job_application_id, portfolio_links.data, portfolio_links.types);
+    await ormAtt.createAttachment(job_application_id, motivations.data, motivations.types);
+
+    return Promise.resolve({});
 }
 
 /* parse form to applied roles
@@ -851,25 +886,64 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
 }
 
 /**
+ *  Attempts to parse the answers in the form into role entities.
+ *  @param form The form with the answers.
+ *  @param job_applicationId The job_application id object.
+ *  @returns See the API documentation. Successes are passed using
+ *  `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function jsonToRoles(form: Requests.Form, job_applicationId: Responses.Id): Promise<Responses.Empty> {
+    const job_application_id = job_applicationId.id;
+    const roles = await getAppliedRoles(form);
+
+    for(let role_index = 0; role_index < roles.length; role_index++) {
+        const role_exists = await ormRo.getRolesByName(roles[role_index]);
+        if(role_exists == null) {
+            const created_role = await ormRo.createRole(roles[role_index]);
+            await ormAppRo.createAppliedRole({jobApplicationId : job_application_id, roleId : created_role.role_id});
+        } else {
+            await ormAppRo.createAppliedRole({jobApplicationId : job_application_id, roleId : role_exists.role_id});
+        }
+    }
+
+    return Promise.resolve({});
+}
+
+/**
  *  Attempts to create a new form in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-/*async function createForm(req: express.Request): Promise<Responses.Empty> {
-  return rq.parseFormRequest(req).then(async form => {
-    // Checks if the student will be in Belgium in July and if the student can
-    // work enough in July.
-    if (!checkWordInAnswer(filterQuestion(form, "question_wkNolR")) ||
-        !checkWordInAnswer(filterQuestion(form, "question_mKVEz8"))) {
-      return Promise.reject(util.errors.cookNonJSON("Invalid json"));
+async function createForm(req: express.Request): Promise<Responses.Empty> {
+    const parsedRequest = await rq.parseFormRequest(req);
+    if (parsedRequest.data == null || parsedRequest.eventId == null
+        || parsedRequest.eventType == null || parsedRequest.createdAt == null) {
+        return Promise.reject(errors.cookInvalidID());
     }
 
-    return jsonToPerson(form)
-        .then(person => { return jsonToStudent(form, person); })
-        .then(() => { return Promise.resolve({}); });
-  });
-}*/
+    const questionInBelgium: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, "question_wkNolR");
+    const questionCanWorkEnough: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, "question_mKVEz8");
+
+    const questionsExist : boolean = checkQuestionsExist([questionInBelgium, questionCanWorkEnough]);
+    if(!questionsExist || questionInBelgium.data?.value == null || questionCanWorkEnough.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    const wordInAnswerInBelgium :  Responses.FormResponse<boolean> = checkWordInAnswer(questionInBelgium.data, "yes");
+    const wordInAnswerCanWorkEnough :  Responses.FormResponse<boolean> = checkWordInAnswer(questionCanWorkEnough.data, "yes");
+
+    if(wordInAnswerInBelgium && wordInAnswerCanWorkEnough) {
+        const person = await jsonToPerson(parsedRequest);
+        const student = await jsonToStudent(parsedRequest, {id : person.id});
+        const jobApplication = await jsonToJobApplication(parsedRequest, {id : student.id});
+        await jsonToSkills(parsedRequest, {id : jobApplication.id});
+        await jsonToAttachments(parsedRequest, {id : jobApplication.id});
+        await jsonToRoles(parsedRequest, {id : jobApplication.id});
+    }
+
+    return Promise.reject(errors.cookArgumentError());
+}
 
 /**
  *  Gets the router for all `/form/` related endpoints.
@@ -879,10 +953,10 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
 export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
-  /*router.post('/',
-              (req, res) => util.respOrErrorNoReinject(res, createForm(req)));*/
+  router.post('/form',
+              (req, res) => util.respOrErrorNoReinject(res, createForm(req)));
 
-  util.addAllInvalidVerbs(router, [ "/" ]);
+  util.addAllInvalidVerbs(router, [ "/form" ]);
 
   return router;
 }

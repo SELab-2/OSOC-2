@@ -1,4 +1,4 @@
-import {account_status_enum, email_status_enum} from "@prisma/client";
+import {account_status_enum, email_status_enum, type_enum} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -330,6 +330,14 @@ export interface StudentList extends Keyed<InternalTypes.Student[]> {}
  *
  */
 export interface UserList extends Keyed<InternalTypes.User[]> {}
+
+/**
+ *
+ */
+export interface FormAttachmentResponse {
+  data : string[];
+  types : type_enum[];
+}
 
 /**
  *
