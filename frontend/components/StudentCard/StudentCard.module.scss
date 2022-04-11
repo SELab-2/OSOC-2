@@ -1,0 +1,139 @@
+/* The actual card as a container */
+.card {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  margin-inline: auto;
+}
+
+.body {
+  padding-inline: 2rem;
+  padding-top: 1rem
+}
+
+.card h2 {
+  font-size: large;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1.5fr 1fr;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 620px) {
+  .grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .column {
+    margin-left: 0 !important;
+    border-right: none !important;
+  }
+}
+
+/*---------*/
+/* Columns */
+/*---------*/
+.column {
+  border-right: 0.1rem solid var(--neutral-200);
+  margin-left: clamp(1rem, 3vw, 2.5rem);
+}
+.column:first-child {
+  margin-left: 0;
+}
+.column:last-child {
+  border-right: none;
+}
+
+/*------------*/
+/* Categories */
+/*------------*/
+.categoryTitle {
+  font-weight: lighter;
+  font-size: x-small;
+  padding-block: 0.5rem;
+}
+
+.category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-inline: -0.5rem;
+}
+
+/* The suggestions progressbar */
+.progressbar {
+  height: 0.8rem;
+  display: flex;
+}
+
+/* The progressbar exists of 3 progressbars, yes maybe and no */
+.no {
+  background-color: var(--error-100);
+  border-bottom-left-radius: 0.5rem;
+}
+.maybe {
+  background-color: var(--warning-100);
+}
+.yes {
+  background-color: var(--succes-100);
+  border-bottom-right-radius: 0.5rem;
+}
+
+.none {
+  display: none
+}
+
+/* The numbers showing the amount of each suggestion type */
+.progressbar div p {
+  text-align: center;
+  transform: translate(0, -1.4rem);
+  font-weight: bold;
+  font-size: small;
+}
+.no p {
+  color: var(--error-100);
+}
+.maybe p {
+  color: var(--warning-100);
+}
+.yes p {
+  color: var(--succes-100);
+}
+
+/*--------*/
+/* GITHUB */
+/*--------*/
+.githubContainer {
+  display: flex;
+  background-color: black;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  transition: all .2s ease-in-out;
+  margin-top: 0.5rem;
+  margin-inline: -0.2rem;
+  align-items: center;
+}
+
+.githubContainer:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.githublogo {
+  width: 1.5rem;
+}
+
+.githublogo {
+  display: flex;
+}
+
+.github {
+  vertical-align: center;
+  margin-left: 1rem;
+  color: white;
+}

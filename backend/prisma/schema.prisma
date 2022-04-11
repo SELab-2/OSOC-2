@@ -100,6 +100,7 @@ model login_user {
   password_reset password_reset?
   project_user   project_user[]
   session_keys   session_keys[]
+  template_email template_email[]
 }
 
 model osoc {
@@ -185,6 +186,18 @@ model password_reset {
   reset_id          String     @unique @db.VarChar(128)
   valid_until       DateTime   @db.Timestamptz(6)
   login_user        login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model template_email {
+  template_email_id Int        @id @default(autoincrement())
+  owner_id          Int        @default(autoincrement())
+  name              String
+  content           String
+  subject           String?
+  cc                String?
+  login_user        login_user @relation(fields: [owner_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([owner_id, name])
 }
 
 enum decision_enum {

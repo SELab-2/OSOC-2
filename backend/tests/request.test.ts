@@ -4,7 +4,7 @@ import express from 'express';
 import * as config from '../config.json';
 import * as Rq from '../request'
 import * as T from '../types';
-import {errors} from '../utility';
+import {errors} from '../utility'
 
 function setSessionKey(req: express.Request, key: string): void {
   req.headers.authorization = config.global.authScheme + " " + key;
@@ -25,7 +25,8 @@ test("Can parse Key-only requests", () => {
     Rq.parseLogoutRequest, Rq.parseStudentAllRequest, Rq.parseCoachAllRequest,
     Rq.parseGetAllCoachRequestsRequest, Rq.parseAdminAllRequest,
     Rq.parseProjectAllRequest, Rq.parseConflictAllRequest,
-    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest
+    Rq.parseFollowupAllRequest, Rq.parseTemplateListRequest,
+    Rq.parseProjectConflictsRequest
   ];
 
   const successes =
@@ -57,9 +58,8 @@ test("Can parse Key-ID requests", () => {
 
   const calls = [
     Rq.parseSingleStudentRequest, Rq.parseDeleteStudentRequest,
-    Rq.parseStudentGetSuggestsRequest, Rq.parseSingleCoachRequest,
-    Rq.parseDeleteCoachRequest, Rq.parseGetCoachRequestRequest,
-    Rq.parseAcceptNewCoachRequest, Rq.parseDenyNewCoachRequest,
+    Rq.parseSingleCoachRequest, Rq.parseDeleteCoachRequest,
+    Rq.parseGetCoachRequestRequest, Rq.parseDenyNewCoachRequest,
     Rq.parseSingleAdminRequest, Rq.parseDeleteAdminRequest,
     Rq.parseSingleProjectRequest, Rq.parseDeleteProjectRequest,
     Rq.parseGetDraftedStudentsRequest, Rq.parseGetFollowupStudentRequest,
@@ -161,14 +161,17 @@ test("Can parse login request", () => {
   const noname: express.Request = getMockReq();
   const nopass: express.Request = getMockReq();
 
-  valid.body.name = "Name #1";
+  valid.body.name = "Alice.STUDENT@hotmail.be";
   valid.body.pass = "Pass #1";
   noname.body.pass = "Pass #2";
-  nopass.body.name = "Name #2";
+  nopass.body.name = "Name.2@email.be";
 
+  // TODO
   return Promise.all([
-    expect(Rq.parseLoginRequest(valid))
-        .resolves.toStrictEqual({name : "Name #1", pass : "Pass #1"}),
+    expect(Rq.parseLoginRequest(valid)).resolves.toStrictEqual({
+      name : "alice.student@hotmail.be",
+      pass : "Pass #1"
+    }),
     expect(Rq.parseLoginRequest(noname))
         .rejects.toBe(errors.cookArgumentError()),
     expect(Rq.parseLoginRequest(nopass))
@@ -314,6 +317,9 @@ test("Can parse suggest student request", () => {
   return Promise.all([ okays, fails ].flat());
 });
 
+// TODO test Rq.parseAcceptNewUserRequest
+// TODO test Rq.parseGetSuggestionsStudentRequest
+
 test("Can parse final decision request", () => {
   const key = "key";
   const id = 6969420420;
@@ -334,6 +340,8 @@ test("Can parse final decision request", () => {
     x.sessionkey = key;
     if (!("reply" in x))
       x.reply = undefined;
+    if (!("reason" in x))
+      x.reason = undefined;
 
     return expect(Rq.parseFinalizeDecisionRequest(r)).resolves.toStrictEqual(x);
   });
@@ -364,31 +372,34 @@ test("Can parse coach access request", () => {
   const r1: T.Anything = {
     firstName : "Jeff",
     lastName : "Georgette",
-    emailOrGithub : "idonthavegithub@git.hub",
+    email : "idonthavegithub@git.hub",
     pass : "thisismypassword"
   };
 
   const r2: T.Anything = {
     firstName : "Jeff",
     lastName : "Georgette",
-    emailOrGithub : "idonthavegithub@git.hub"
+    email : "idonthavegithub@git.hub"
   };
 
   const req1: express.Request = getMockReq();
   req1.body = {...r1};
 
   const req2: express.Request = getMockReq();
-  req2.body = {...r2};
   r2.pass = undefined;
+  req2.body = {...r2};
 
   const req3: express.Request = getMockReq();
   req3.body = {};
 
+  console.log(Rq.parseRequestUserRequest(req1));
+  console.log(r1);
+
   const prom1: Promise<void> =
-      expect(Rq.parseRequestCoachRequest(req1)).resolves.toStrictEqual(r1);
+      expect(Rq.parseRequestUserRequest(req1)).resolves.toStrictEqual(r1);
   const prom2: Promise<void> =
-      expect(Rq.parseRequestCoachRequest(req2)).resolves.toStrictEqual(r2);
-  const prom3: Promise<void> = expect(Rq.parseRequestCoachRequest(req3))
+      expect(Rq.parseRequestUserRequest(req2)).resolves.toStrictEqual(r2);
+  const prom3: Promise<void> = expect(Rq.parseRequestUserRequest(req3))
                                    .rejects.toBe(errors.cookArgumentError());
 
   return Promise.all([ prom1, prom2, prom3 ]);
@@ -506,15 +517,9 @@ test("Can parse draft student request", () => {
   const key = "keyyyyy";
   const id = 89846;
 
-  const d1: T.Anything = {
-    studentId : "im-a-student",
-    roles : [ "the", "one", "that", "does", "nothing" ]
-  };
+  const d1: T.Anything = {studentId : "im-a-student", role : "the useless one"};
   const d2: T.Anything = {studentId : "im-a-student"};
-  const d3: T.Anything = {
-    studentId : "im-a-student",
-    roles : [ "the", "one", "that", "does", "nothing" ]
-  };
+  const d3: T.Anything = {studentId : "im-a-student", role : "the lazy one"};
 
   const r1: express.Request = getMockReq();
   const r2: express.Request = getMockReq();
@@ -554,14 +559,15 @@ test("Can parse mark as followed up request", () => {
   const key = "my-key-arrived-but";
   const id = 78945312;
 
-  const ht: T.Anything = {type : "hold-tight"};
-  const cf: T.Anything = {type : "confirmed"};
-  const cd: T.Anything = {type : "cancelled"};
-  const i1: T.Anything = {type : "invalid"};
-  const i2: T.Anything = {type : "hold-tight"};
+  const sc: T.Anything = {type : 'SCHEDULED'};
+  const st: T.Anything = {type : 'SENT'};
+  const fl: T.Anything = {type : 'FAILED'};
+  const no: T.Anything = {type : 'NONE'};
+  const dr: T.Anything = {type : 'DRAFT'};
+  const i1: T.Anything = {type : 'invalid'};
   const i3: T.Anything = {};
 
-  const okays = [ ht, cf, cd ].map(x => {
+  const okays = [ sc, st, fl, no, dr ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
@@ -582,7 +588,7 @@ test("Can parse mark as followed up request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  const fails2 = [ ht ].map(x => {
+  const fails2 = [ fl ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
@@ -590,7 +596,7 @@ test("Can parse mark as followed up request", () => {
         .rejects.toBe(errors.cookArgumentError());
   });
 
-  const fails3 = [ i2 ].map(x => {
+  const fails3 = [ no ].map(x => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     r.params.id = id.toString();
@@ -606,11 +612,7 @@ test("Can parse new template request", () => {
   const key = "yet-another-session-key";
 
   const ok1: T.Anything = {name : "my-template", content : "hello-there"};
-  const ok2: T.Anything = {
-    name : "my-template",
-    content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
-  };
+  const ok2: T.Anything = {name : "my-template", content : "hello-there"};
   const ok3: T.Anything = {
     name : "my-template",
     content : "hello-there",
@@ -619,31 +621,20 @@ test("Can parse new template request", () => {
   const ok4: T.Anything = {
     name : "my-template",
     content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
   const ok5: T.Anything = {
     name : "my-template",
     content : "hello-there",
     subject : "I like C++",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
 
-  const f1: T.Anything = {
-    content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
-    cc : "cc@gmail.com"
-  };
-  const f2: T.Anything = {
-    name : "my-template",
-    desc : "a description did you know that orcas have culture?",
-    cc : "cc@gmail.com"
-  };
+  const f1: T.Anything = {content : "hello-there", cc : "cc@gmail.com"};
+  const f2: T.Anything = {name : "my-template", cc : "cc@gmail.com"};
   const f3: T.Anything = {
     name : "my-template",
     content : "hello-there",
-    desc : "a description did you know that orcas have culture?",
     cc : "cc@gmail.com"
   };
 
@@ -651,7 +642,7 @@ test("Can parse new template request", () => {
     const r: express.Request = getMockReq();
     r.body = {...x};
     setSessionKey(r, key);
-    ["desc", "cc", "subject"].forEach(v => {
+    ["cc", "subject"].forEach(v => {
       if (!(v in x))
         x[v] = undefined;
     });
