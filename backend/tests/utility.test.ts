@@ -295,7 +295,7 @@ test("utility.redirect sends an HTTP 303", () => {
 test("utility.checkSessionKey works on valid session key", async () => {
   session_keyMock.checkSessionKey.mockReset();
   session_keyMock.checkSessionKey.mockResolvedValue(
-      [{login_user_id : 123456789}]);
+      {login_user_id : 123456789});
   const obj = {sessionkey : "key"};
   const res = {data : {sessionkey : "key"}, userId : 123456789};
 
@@ -322,9 +322,9 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
        session_keyMock.checkSessionKey.mockReset();
        session_keyMock.checkSessionKey.mockImplementation((key: string) => {
          if (key == "key_1")
-           return Promise.resolve([{login_user_id : 1}]);
+           return Promise.resolve({login_user_id : 1});
          if (key == "key_2")
-           return Promise.resolve([{login_user_id : 2}]);
+           return Promise.resolve({login_user_id : 2});
          return Promise.reject(new Error());
        });
 
@@ -371,7 +371,7 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
 test("utility.isAdmin can catch errors from the DB", async () => {
   session_keyMock.checkSessionKey.mockReset();
   session_keyMock.checkSessionKey.mockImplementation(
-      () => Promise.resolve([{login_user_id : 1}]));
+      () => Promise.resolve({login_user_id : 1}));
 
   login_userMock.searchAllAdminLoginUsers.mockReset();
   login_userMock.searchAllAdminLoginUsers.mockImplementation(
