@@ -300,6 +300,14 @@ export interface Id {
   id: number;
 }
 
+  /**
+   *  A response consisting of and id and boolean.
+   */
+  export interface Id_alumni {
+    id: number;
+    hasAlreadyTakenPart: boolean
+  }
+
 /**
  *  A login response contains of a key and a boolean determining whether a user
  * is an admin.
