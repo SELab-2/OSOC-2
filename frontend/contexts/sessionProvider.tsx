@@ -49,7 +49,6 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
      */
     useEffect(() => {
         getSessionKey().then(sessionKey => {
-            console.log(sessionKey)
             if (sessionKey !== undefined) {
                 setSessionKeyState(sessionKey)
                 setIsAdminState(localStorage.getItem('isAdmin') === 'true')
@@ -104,6 +103,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
             return key
         }).catch(error => {
             console.log(error)
+            router.push("/login")
             return ""
         })
     }
