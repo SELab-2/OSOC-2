@@ -481,7 +481,7 @@ export interface UpdateProjectRole {
     /**
      * the language id to which this skill is linked
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * the level of the skill of the applicant
      */
@@ -515,7 +515,7 @@ export interface UpdateJobApplicationSkill {
     /**
      * undefined if unchanged or the new language of the job application skill
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * undefined if unchanged or the new level
      */
