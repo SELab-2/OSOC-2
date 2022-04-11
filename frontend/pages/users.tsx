@@ -12,7 +12,7 @@ import {UserFilter} from "../components/UserFilter/UserFilter";
 const Users: NextPage = () => {
 
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
-    const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }>>()
+    const [users, setUsers] = useState<Array<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }>>()
     const userSet = new Set<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }>()
 
     // Load all users upon page load
@@ -49,7 +49,7 @@ const Users: NextPage = () => {
 
         let tempSes = getTempSession()
 
-        let test: Array<{ person_data: { id: number, name: string }, coach: boolean, admin: boolean, activated: string }> = [];
+        let test: Array<{ person_data: { id: number, name: string, email: string }, coach: boolean, admin: boolean, activated: string }> = [];
         getAllUsers("admin", tempSes).then(response => {
             tempSes = response.sessionkey
             test = [...response.data]
