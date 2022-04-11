@@ -2,6 +2,7 @@ import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
 import * as ormL from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
@@ -21,7 +22,8 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
                     person_data : {
                         id : val.person.person_id,
                         name : val.person.firstname + " " + val.person.lastname,
-                        email: val.person.email
+                        email: val.person.email,
+                        github: val.person.github
                     },
                     coach : val.is_coach,
                     admin : val.is_admin,
@@ -76,7 +78,10 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
         return ormL.deleteLoginUserByPersonId(parsed.data.id)
-            .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}));
+            .then(() => {
+                return ormP.deletePersonById(parsed.data.id)
+                    .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}))
+            });
       });
 }
 

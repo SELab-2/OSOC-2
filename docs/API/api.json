@@ -872,6 +872,46 @@
           }
         }
       }
+    },
+    "/verify": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "description": "Redirects towards GET /verify/all.",
+        "operationId": "verify",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /verify/all"
+          }
+        }
+      }
+    },
+    "/verify/all": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "description": "Attempts to verify if the session key is valid",
+        "operationId": "all_verify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllVerify"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1541,6 +1581,17 @@
       },
       "xml": {
         "name": "AllLoginUser"
+      }
+    },
+    "AllVerify": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "boolean"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
       }
     },
     "Suggestion": {

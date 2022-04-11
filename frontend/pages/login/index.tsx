@@ -9,6 +9,7 @@ import {useRouter} from "next/router";
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
+import * as validator from 'validator';
 
 /**
  * The main login and registration page
@@ -193,6 +194,8 @@ const Index: NextPage = () => {
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
             error = true
+        } else if(!validator.default.isEmail(registerEmail)) {
+            setRegisterEmailError("No valid email address");
         } else {
             setRegisterEmailError("");
         }
@@ -234,12 +237,12 @@ const Index: NextPage = () => {
         // Fields are not empty
         if (!error) {
             const encryptedPassword = crypto.createHash('sha256').update(registerPassword).digest('hex');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coach/request`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/request`, {
                 method: 'POST',
                 body: JSON.stringify({
                     firstName: registerFirstName,
                     lastName: registerLastName,
-                    emailOrGithub: registerEmail,
+                    email: registerEmail,
                     pass: encryptedPassword
                 }),
                 headers: {
