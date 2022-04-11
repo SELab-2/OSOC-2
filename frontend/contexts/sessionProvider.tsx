@@ -1,11 +1,12 @@
 import React, {createContext, ReactNode, useEffect, useState} from 'react';
+import {useRouter} from "next/router";
 
 /**
  * Interface for the context, stores the user session application wide
  */
 interface ISessionContext {
     sessionKey: string
-    getSessionKey?: () => string;
+    getSessionKey?: () => Promise<string>;
     setSessionKey?: (key: string) => void;
 
     isCoach: boolean;
@@ -30,33 +31,74 @@ const SessionContext = createContext<ISessionContext>(defaultState);
  * @param children
  * @constructor
  */
-export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
-    /**
-     * Everytime the page is reloaded we need to get the session from local storage
-     */
-    useEffect(() => {
-        const sessionKey = localStorage.getItem('sessionKey')
-        setSessionKeyState(sessionKey !== null ? sessionKey : "")
-        setIsAdminState(localStorage.getItem('isAdmin') === 'true')
-        setIsCoachState(localStorage.getItem('isCoach') === 'true')
-    }, [])
+    const router = useRouter()
 
     const [sessionKey, setSessionKeyState] = useState<string>("");
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
 
+    // Because useEffects can have a different order we need to check if the session id has already been verified
+    // const [verified, setVerified] = useState<boolean>(false);
+
+    let verified = false
+
+    /**
+     * Everytime the page is reloaded we need to get the session from local storage
+     */
+    useEffect(() => {
+        getSessionKey().then(sessionKey => {
+            console.log(sessionKey)
+            if (sessionKey !== undefined) {
+                setSessionKeyState(sessionKey)
+                setIsAdminState(localStorage.getItem('isAdmin') === 'true')
+                setIsCoachState(localStorage.getItem('isCoach') === 'true')
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     /**
      * The useEffect is not always called before other page's use effect
      * Therefore we can use this function to get the sessionkey in the useEffect functions
+     * Performs a backend call to verify the session id
      */
-    const getSessionKey = () => {
+    const getSessionKey = async () => {
+        // We already have the latest session key
+        let key = ""
         if (sessionKey != undefined && sessionKey != "") {
-            return sessionKey
+            key = sessionKey
+        } else {
+            const fromStorage = localStorage.getItem('sessionKey')
+            key = fromStorage ? fromStorage : ""
         }
 
-        const key = localStorage.getItem('sessionKey')
-        return key !== null ? key : ""
+        if (key === "") {
+            if (!router.pathname.startsWith("/login")) {
+                router.push("/login").then()
+            }
+            return ""
+        }
+
+        // Avoid calling /verify twice
+        // verified gets set to false every page reload
+        if (verified) {
+            return key
+        }
+
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${key}`
+            }
+        }).then(response => response.json()).then(response => {
+            console.log(response)
+            verified = true
+            return response
+        }).catch(error => console.log(error))
     }
 
     const setSessionKey = (sessionKey: string) => {
@@ -78,7 +120,8 @@ export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) =
     }
 
     return (
-        <SessionContext.Provider value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
+        <SessionContext.Provider
+            value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
             {children}
         </SessionContext.Provider>
     );

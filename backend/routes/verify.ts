@@ -14,7 +14,7 @@ import * as util from '../utility';
 async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
-    if (checkedSessionKey.data == undefined) {
+    if (checkedSessionKey.data === undefined) {
         // Return false instead of promise reject
         // return Promise.reject(errors.cookInvalidID);
         return Promise.resolve({data : false, sessionkey : ""});
