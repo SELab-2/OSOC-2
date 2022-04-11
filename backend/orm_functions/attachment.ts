@@ -9,7 +9,7 @@ import prisma from "../prisma/prisma";
  * @param type: the type of the attachment (CV, PORTFOLIO, FILE)
  * @returns the created attachment
  */
- export async function createAttachment(jobApplicationId: number, data: string[], type: type_enum) {
+ export async function createAttachment(jobApplicationId: number, data: string[], type: type_enum[]) {
     return await prisma.attachment.create({
         data: {
             job_application_id: jobApplicationId,

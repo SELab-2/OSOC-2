@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS job_application (
     edus                      TEXT []              NOT NULL,
     edu_level                 TEXT []              NOT NULL,
     edu_duration              INT                  NOT NULL,
-    edu_year                  INT                  NOT NULL,
+    edu_year                  TEXT                 NOT NULL, /* in the tally form the year is a free field that can have any text... */
     edu_institute             TEXT                 NOT NULL,
     email_status              email_status_enum    NOT NULL,
     created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
    job_application_id    SERIAL       NOT NULL REFERENCES job_application (job_application_id),
    data                  TEXT[]       NOT NULL,
-   type                  type_enum    NOT NULL
+   type                  type_enum[]  NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS template_email(

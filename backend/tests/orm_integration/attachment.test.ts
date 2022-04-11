@@ -7,21 +7,21 @@ const attachment1 = {
     attachmentId: 0,
     jobApplicationID: 0,
     data: ["mycvlink.com"],
-    type: "CV_URL"
+    type: ["CV_URL"]
 }
 
 const attachment2 = {
     attachmentId: 0,
     jobApplicationID: 0,
     data: ["myportfoliolink.com"],
-    type: "PORTFOLIO_URL"
+    type: ["PORTFOLIO_URL"]
 }
 
 
 it('should create 1 new attachment linked to a job application', async () => {
     const job_application = await prisma.job_application.findFirst();
     if (job_application){
-        const created_attachment = await createAttachment(job_application.job_application_id, attachment1.data, (attachment1.type as type_enum));
+        const created_attachment = await createAttachment(job_application.job_application_id, attachment1.data, (attachment1.type as type_enum[]));
         attachment1.jobApplicationID = created_attachment.job_application_id;
         attachment1.attachmentId = created_attachment.attachment_id;
         expect(created_attachment).toHaveProperty("data", attachment1.data);
@@ -32,7 +32,7 @@ it('should create 1 new attachment linked to a job application', async () => {
 it('should create 1 new attachment linked to a job application', async () => {
     const job_application = await prisma.job_application.findFirst();
     if (job_application){
-        const created_attachment = await createAttachment(job_application.job_application_id, attachment2.data, (attachment2.type as type_enum));
+        const created_attachment = await createAttachment(job_application.job_application_id, attachment2.data, (attachment2.type as type_enum[]));
         attachment2.jobApplicationID = created_attachment.job_application_id;
         attachment2.attachmentId = created_attachment.attachment_id;
         expect(created_attachment).toHaveProperty("data", attachment2.data);
