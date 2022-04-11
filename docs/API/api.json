@@ -272,6 +272,65 @@
         }
       }
     },
+    "/role/all": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Get all the roles a student can be in OSOC",
+        "operationId": "Get_all_roles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AllRoles"
+            }
+          }
+        }
+      }
+    },
+    "/role/create": {
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "Creates a role in ",
+        "operationId": "Create_role",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "role name",
+            "description": "The name of your role",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
     "/project": {
       "post": {
         "tags": [
@@ -809,6 +868,46 @@
             "description": "Returns a sessionkey for the next action.",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/verify": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "description": "Redirects towards GET /verify/all.",
+        "operationId": "verify",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /verify/all"
+          }
+        }
+      }
+    },
+    "/verify/all": {
+      "get": {
+        "tags": [
+          "verify"
+        ],
+        "description": "Attempts to verify if the session key is valid",
+        "operationId": "all_verify",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllVerify"
             }
           }
         }
@@ -1484,6 +1583,17 @@
         "name": "AllLoginUser"
       }
     },
+    "AllVerify": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "boolean"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      }
+    },
     "Suggestion": {
       "type": "object",
       "properties": {
@@ -1522,6 +1632,43 @@
       },
       "xml": {
         "name": "confirmation"
+      }
+    },
+    "Role": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "role"
+      }
+    },
+    "RoleList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Role"
+      },
+      "xml": {
+        "name": "RoleList"
+      }
+    },
+    "AllRoles": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/RoleList"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "AllRoles"
       }
     }
   }

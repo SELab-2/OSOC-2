@@ -4,9 +4,9 @@ import {v1} from 'uuid';
 
 import * as config from './config.json';
 import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
-import * as ormPr from './orm_functions/project';
 import {
   Anything,
   ApiError,
@@ -52,7 +52,8 @@ export const errors: Errors = {
     };
   },
 
-  cookServerError() { return config.apiErrors.serverError;}
+  cookServerError() { return config.apiErrors.serverError;},
+  cookNoDataError() { return config.apiErrors.noDataError;}
 }
 
 /**
@@ -174,8 +175,9 @@ export function logRequest(req: express.Request, next: express.NextFunction):
 export async function respOrErrorNoReinject(
     res: express.Response, prom: Promise<Responses.ApiResponse>):
     Promise<void> {
-      const isError = (err: Anything):
-          boolean => { return 'http' in err && 'reason' in err };
+      const isError = (err: Anything): boolean => {
+        return err != undefined && 'http' in err && 'reason' in err
+      };
 
       return prom
           .then(data => {
@@ -354,12 +356,16 @@ export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
 /**
  *  Checks whether the object contains a valid ID.
  */
-export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Table): Promise<T> {
-    const returnObj : {[key in Table]: boolean} =
-        {"student": await ormSt.getStudent(obj.id) != null,
-         "project": await ormPr.getProjectById(obj.id) != null};
+export async function isValidID<T extends Requests.IdRequest>(
+    obj: T, table: Table): Promise<T> {
+  const returnObj: {[key in Table]: boolean} = {
+    "student" : await ormSt.getStudent(obj.id) != null,
+    "project" : await ormPr.getProjectById(obj.id) != null
+  };
 
-    return table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
+  return table in returnObj && returnObj[table] != null
+             ? Promise.resolve(obj)
+             : Promise.reject(errors.cookInvalidID());
 }
 
 /**
@@ -369,4 +375,31 @@ export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Tab
 export function setupRedirect(router: express.Router, ep: string): void {
   router.get('/',
              (_, res) => redirect(res, config.global.preferred + ep + "/all"));
+}
+
+/**
+ *  Returns the given value if not null, otherwise, return the defualt value.
+ *  @template T The type of the value
+ *  @param vl The value (or null)
+ *  @param def The default value
+ *  @returns The default if the value is null, otherwise the value itself.
+ */
+export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
+  if (vl == null || vl == undefined)
+    return def;
+  return vl;
+}
+
+/**
+ *  Resolves with the given value if not null, otherwise rejects with a valid
+ * API error.
+ *  @template T the type of the value.
+ *  @param vl The value (or null)
+ *  @returns A Promise which will resolve to the given value if it's non-null,
+ * or reject otherwise.
+ */
+export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
+  if (vl == null || vl == undefined)
+    return Promise.reject(errors.cookNoDataError());
+  return Promise.resolve(vl);
 }
