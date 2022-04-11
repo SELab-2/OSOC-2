@@ -31,12 +31,7 @@ async function getSingleTemplate(req: express.Request):
   return rq.parseGetTemplateRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(checked => ormT.getTemplateById(checked.data.id)
-                           .then(res => {
-                             // TODO: replace with correct util call
-                             if (res == null)
-                               return Promise.reject();
-                             return Promise.resolve(res);
-                           })
+                           .then(res => util.getOrReject(res))
                            .then(res => Promise.resolve({
                              sessionkey : checked.data.sessionkey,
                              data : {
@@ -78,11 +73,9 @@ async function updateTemplate(req: express.Request):
       .then(parsed => util.checkSessionKey(parsed))
       .then(async checked => {
         return ormT.getTemplateById(checked.data.id)
+            .then(templ => util.getOrReject(templ))
             .then(templ => {
-              // todo: replace by correct util check
-              if (templ == null) {
-                return Promise.reject({});
-              } else if (templ.owner_id != checked.userId) {
+              if (templ.owner_id != checked.userId) {
                 return Promise.reject(notOwnerError);
               }
 
@@ -114,10 +107,9 @@ async function deleteTemplate(req: express.Request): Promise<Responses.Key> {
       .then(parsed => util.checkSessionKey(parsed))
       .then(async checked => {
         return ormT.getTemplateById(checked.data.id)
+            .then(templ => util.getOrReject(templ))
             .then(async templ => {
-              if (templ == null)
-                return Promise.reject({});
-              else if (templ.owner_id != checked.userId) {
+              if (templ.owner_id != checked.userId) {
                 return util.isAdmin(checked.data)
                     .catch(() => Promise.reject(notOwnerError))
                     .then(() => templ);
