@@ -6,7 +6,7 @@ import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
 import {Label} from "../Labels/Label";
 import Image from "next/image";
-import GitHubLogo from "../../public/images/github-logo.svg";
+import GitHubLogo from "../../public/images/github_logo.svg";
 
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 

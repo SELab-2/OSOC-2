@@ -1,7 +1,7 @@
 import type {NextPage} from 'next'
 import styles from '../../styles/login.module.scss'
 import Image from "next/image"
-import GitHubLogo from "../../public/images/github-logo.svg"
+import GitHubLogo from "../../public/images/github_logo.svg"
 import {SyntheticEvent, useContext, useEffect, useState} from "react";
 import {Modal} from "../../components/Modal/Modal";
 import {useRouter} from "next/router";
@@ -9,7 +9,7 @@ import {useRouter} from "next/router";
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
-import * as validator from 'validator';
+import isEmail from 'validator/lib/isEmail';
 
 /**
  * The main login and registration page
@@ -194,7 +194,7 @@ const Index: NextPage = () => {
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
             error = true
-        } else if(!validator.default.isEmail(registerEmail)) {
+        } else if(!isEmail(registerEmail)) {
             setRegisterEmailError("No valid email address");
         } else {
             setRegisterEmailError("");
