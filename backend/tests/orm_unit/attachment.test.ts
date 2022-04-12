@@ -11,8 +11,8 @@ test("should create a new attachment", async () => {
     const attachment = {
         attachment_id: 1,
         job_application_id: 1,
-        data: "www.testurl.com",
-        type: type_enum.FILE_URL
+        data: ["www.testurl.com"],
+        type: [type_enum.FILE_URL]
     }
 
     prismaMock.attachment.create.mockResolvedValue(attachment);
@@ -28,8 +28,8 @@ test("should delete the attachment with the given id", async () => {
     const attachment = {
         attachment_id: 2,
         job_application_id: 1,
-        data: "www.testurl.com",
-        type: type_enum.FILE_URL
+        data: ["www.testurl.com"],
+        type: [type_enum.FILE_URL]
     }
 
     prismaMock.attachment.delete.mockResolvedValue(attachment);
@@ -49,8 +49,8 @@ test("should return the found attachment", async () => {
     const attachment = {
         attachment_id: 2,
         job_application_id: 1,
-        data: "www.testurl.com",
-        type: type_enum.FILE_URL
+        data: ["www.testurl.com"],
+        type: [type_enum.FILE_URL]
     }
 
     prismaMock.attachment.findUnique.mockResolvedValue(attachment);

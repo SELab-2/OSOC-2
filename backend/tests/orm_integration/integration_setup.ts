@@ -111,21 +111,21 @@ beforeAll(async () => {
             {
                 person_id: persons[2].person_id,
                 gender: "Male",
-                pronouns: ["He", "Him"],
+                pronouns: "He/ Him",
                 phone_number: "112",
                 alumni: false,
             },
             {
                 person_id: persons[1].person_id,
                 gender: "Female",
-                pronouns: ["She", "Her"],
+                pronouns: "She/ Her",
                 phone_number: "107",
                 alumni: true,
             },
             {
                 person_id: persons[3].person_id,
                 gender: "Female",
-                pronouns: ["She", "Her"],
+                pronouns: "She/ Her",
                 phone_number: "111",
                 alumni: false
             }
@@ -147,7 +147,7 @@ beforeAll(async () => {
                edu_level: "higher education",
                edu_duration: 5,
                edu_institute: "Ugent",
-               edu_year: 4,
+               edu_year: "4",
                email_status: email_status_enum.DRAFT,
                created_at: new Date("December 17, 2021 14:24:00"),
            },
@@ -162,7 +162,7 @@ beforeAll(async () => {
                edu_level: "MaNaMa",
                edu_duration: 8,
                edu_institute: "Ugent",
-               edu_year: 7,
+               edu_year: "7",
                email_status: email_status_enum.SENT,
                created_at: new Date("December 20, 2021 03:24:00"),
            },
@@ -177,7 +177,7 @@ beforeAll(async () => {
                edu_level: "higher education",
                edu_duration: 5,
                edu_institute: "Ugent",
-               edu_year: 3,
+               edu_year: "3",
                email_status: email_status_enum.DRAFT,
                created_at: new Date("December 25, 2021 14:24:00"),
            },
@@ -192,7 +192,7 @@ beforeAll(async () => {
                edu_level: "MaNaMa",
                edu_duration: 8,
                edu_institute: "Ugent",
-               edu_year: 3,
+               edu_year: "3",
                email_status: email_status_enum.SENT,
                created_at: new Date("December 31, 2021 03:24:00")
            }
@@ -297,13 +297,13 @@ beforeAll(async () => {
         data : [
             {
                 job_application_id: job_applications[1].job_application_id,
-                data: "test-cv-link.com",
-                type: "CV_URL"
+                data: ["test-cv-link.com"],
+                type: ["CV_URL"]
             },
             {
                 job_application_id: job_applications[1].job_application_id,
-                data: "test-portfolio-link.com",
-                type: "PORTFOLIO_URL"
+                data: ["test-portfolio-link.com"],
+                type: ["PORTFOLIO_URL"]
             }
         ]
     })

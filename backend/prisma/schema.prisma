@@ -18,8 +18,8 @@ model applied_role {
 model attachment {
   attachment_id      Int             @id @default(autoincrement())
   job_application_id Int             @default(autoincrement())
-  data               String
-  type               type_enum
+  data               String[]
+  type               type_enum[]
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -55,9 +55,9 @@ model job_application {
   student_coach          Boolean
   osoc_id                Int
   edus                   String[]
-  edu_level              String
-  edu_duration           Int
-  edu_year               Int
+  edu_level              String[]
+  edu_duration           Int?
+  edu_year               String
   edu_institute          String
   email_status           email_status_enum
   created_at             DateTime                @db.Timestamptz(6)
@@ -72,13 +72,13 @@ model job_application {
 model job_application_skill {
   job_application_skill_id Int             @id @default(autoincrement())
   job_application_id       Int             @default(autoincrement())
-  skill                    String
-  language_id              Int             @default(autoincrement())
+  skill                    String?
+  language_id              Int?
   level                    Int?            @db.SmallInt
-  is_preferred             Boolean?
-  is_best                  Boolean?
+  is_preferred             Boolean
+  is_best                  Boolean
   job_application          job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
-  language                 language        @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+  language                 language?       @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model language {
@@ -163,7 +163,7 @@ model student {
   student_id      Int               @id @default(autoincrement())
   person_id       Int               @unique @default(autoincrement())
   gender          String
-  pronouns        String[]
+  pronouns        String?
   phone_number    String
   nickname        String?
   alumni          Boolean
