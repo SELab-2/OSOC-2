@@ -139,8 +139,8 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
             })
             .then(user => {
               console.log(JSON.stringify(user));
-                const futureDate = new Date();
-                futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+              const futureDate = new Date();
+              futureDate.setDate(futureDate.getDate() + session_key.valid_period);
               return ormSK.addSessionKey(user.login_user_id,
                                          util.generateKey(), futureDate);
             })

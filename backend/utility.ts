@@ -7,6 +7,7 @@ import {searchAllAdminLoginUsers} from './orm_functions/login_user';
 import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
+import * as session_key from "./routes/session_key.json";
 import {
   Anything,
   ApiError,
@@ -292,7 +293,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  return skey.changeSessionKey(key, generateKey(), new Date())
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+      return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
