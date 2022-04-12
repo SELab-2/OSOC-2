@@ -41,12 +41,11 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
 
             const evaluations = await ormJo.getStudentEvaluationsTotal(students[studentIndex].student_id);
 
-            const languages: string[] = [];
             for (let skillIndex = 0; skillIndex < jobApplication.job_application_skill.length; skillIndex++) {
                 if(jobApplication.job_application_skill[skillIndex].language_id != null) {
                     const language = await ormLa.getLanguage(Number(jobApplication.job_application_skill[skillIndex].language_id));
                     if (language != null) {
-                        languages.push(language.name);
+                        jobApplication.job_application_skill[skillIndex].skill = language.name;
                     } else {
                         return Promise.reject(errors.cookInvalidID());
                     }
@@ -57,7 +56,6 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
                 student : students[studentIndex],
                 jobApplication : jobApplication,
                 evaluations : evaluations,
-                languages : languages,
                 roles: roles
             })
         } else {
@@ -103,14 +101,13 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
 
-    const languages : string[] = [];
     for(const job_application_skill of jobApplication.job_application_skill) {
         if(job_application_skill.language_id != null) {
             const language = await ormLa.getLanguage(job_application_skill.language_id);
             if(language == null) {
                 return Promise.reject(errors.cookInvalidID());
             }
-            languages.push(language.name);
+            job_application_skill.skill = language.name;
         }
     }
 
@@ -124,8 +121,8 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
             phoneNumber : student.phone_number,
             nickname : student.nickname,
             alumni : student.alumni,
-            languages : languages,
             jobApplication : jobApplication,
+            jobApplicationSkills : jobApplication.job_application_skill,
             evaluations : evaluations,
             roles: roles
         },
@@ -302,14 +299,13 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
 
         const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
 
-        const languages : string[] = [];
         for(const job_application_skill of jobApplication.job_application_skill) {
             if(job_application_skill.language_id != null) {
                 const language = await ormLa.getLanguage(job_application_skill.language_id);
                 if(language == null) {
                     return Promise.reject(errors.cookInvalidID());
                 }
-                languages.push(language.name);
+                job_application_skill.skill = language.name;
             }
         }
 
@@ -322,7 +318,7 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
                 phoneNumber : student.phone_number,
                 nickname : student.nickname,
                 alumni : student.alumni,
-                languages : languages,
+                jobApplicationSkills: jobApplication.job_application_skill,
                 jobApplication : jobApplication,
                 evaluations : evaluations,
                 roles: roles
