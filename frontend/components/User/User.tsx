@@ -11,38 +11,35 @@ import SessionContext from "../../contexts/sessionProvider";
 import {AccountStatus, LoginUser} from "../../types/types";
 
 
-export const User: React.FC<{ user: LoginUser }> = ({user}) => {
+export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => void }> = ({user, removeUser}) => {
 
     const [name] = useState<string>(user.person.firstname);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
-    const [status, setStatus] = useState<string>(user.account_status);
+    const [status, setStatus] = useState<AccountStatus>(user.account_status);
     const {sessionKey, setSessionKey} = useContext(SessionContext);
     const userId = user.login_user_id;
 
-    const reverseRole = (changed_val: string) => {
+    const reverseRole = (changed_val: string, status_enum: AccountStatus) => {
         if (changed_val === "admin") {
             setIsAdmin(admin => !admin);
         } else if (changed_val === "coach") {
             setIsCoach(isCoach => !isCoach);
-        } else if (changed_val === "activated") {
-            //TODO This doesn't work because setStatus is an async function(need to find a way to revert it).
-            setStatus(revertStatus())
+        } else if (changed_val === "enum") {
+            setStatus(status_enum)
         }
     }
-    const revertStatus = () => {
-        if (status === "ACTIVATED") {
-            return 'DISABLED';
-        } else {
-            return 'ACTIVATED';
-        }
-    }
-    const setUserRole = async (route: string, changed_val: string) => {
+
+    const setUserRole = async (route: string, changed_val: string, admin_bool: boolean, coach_bool: boolean, status_enum: AccountStatus
+        , original_status_enum: AccountStatus) => {
         console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
+
+        const json_body = JSON.stringify({isCoach: coach_bool, isAdmin: admin_bool, accountStatus: status_enum})
+        console.log(json_body)
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString(), {
             method: 'POST',
-            body: JSON.stringify({isCoach: isCoach, isAdmin: isAdmin, accountStatus: status}),
+            body: json_body,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -51,10 +48,9 @@ export const User: React.FC<{ user: LoginUser }> = ({user}) => {
         })
             .then(response => response.json()).then(async json => {
                 if (!json.success) {
-                    reverseRole(changed_val);
+                    reverseRole(changed_val, original_status_enum);
                     return {success: false};
                 } else {
-                    console.log(json)
                     if (setSessionKey) {
                         setSessionKey(json.sessionkey)
                     }
@@ -63,7 +59,7 @@ export const User: React.FC<{ user: LoginUser }> = ({user}) => {
             })
             .catch(err => {
                 console.log(err);
-                reverseRole(changed_val);
+                reverseRole(changed_val, original_status_enum);
                 return {success: false};
             })
     }
@@ -71,32 +67,38 @@ export const User: React.FC<{ user: LoginUser }> = ({user}) => {
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
         setIsAdmin(!isAdmin);
-        const z = await setUserRole("admin", "admin");
-        console.log(z)
-        console.log("aeihgaoih")
+        await setUserRole("admin", "admin", !isAdmin, isCoach, status, status);
     }
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
         setIsCoach(!isCoach);
-        await setUserRole("coach", "coach");
+        await setUserRole("coach", "coach", isAdmin, !isCoach, status, status);
     }
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
+        let temp_stat = AccountStatus.ACTIVATED
         if (status === AccountStatus.ACTIVATED) {
             setStatus(AccountStatus.DISABLED);
+            temp_stat = AccountStatus.DISABLED;
         } else if (status === AccountStatus.DISABLED) {
             setStatus(AccountStatus.ACTIVATED);
+            temp_stat = AccountStatus.ACTIVATED
         }
-        await setUserRole("coach", "activated");
+        await setUserRole("coach", "activated", isAdmin, isCoach, temp_stat, status);
     }
 
     const activateUser = async (e: SyntheticEvent) => {
         e.preventDefault();
         setStatus(AccountStatus.ACTIVATED);
-        // TODO -- Send the status value to the backend
-        //      -- If error revert to old value
+        setUserRole("coach", "enum", isAdmin, isCoach, AccountStatus.ACTIVATED, AccountStatus.PENDING)
+    }
+
+    const deleteUser = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        removeUser(user)
+
     }
 
     return (
@@ -130,6 +132,14 @@ export const User: React.FC<{ user: LoginUser }> = ({user}) => {
                                width={30} height={30} alt={"Disabled"}/>
                     </div>
                 </div>
+                <div className={styles.buttonContainer} onClick={deleteUser}>
+                    <div className={styles.button}>
+                        <Image className={styles.buttonImage}
+                               src={ForbiddenIconColor}
+                               width={30} height={30} alt={"Disabled"}/>
+                    </div>
+                </div>
+
             </div>
         </div>)
 }

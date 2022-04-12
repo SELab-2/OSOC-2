@@ -53,7 +53,6 @@ const Users: NextPage = () => {
                 setSessionKey(response.sessionkey)
             }
             setUsers(response.data)
-            console.log(response.data)
         })
 
         // We need to disable this warning. We of course do not want do reload the page when the data is changed
@@ -62,15 +61,23 @@ const Users: NextPage = () => {
     }, [])
 
 
+    const removeUser = (user: LoginUser) => {
+        if (users !== undefined) {
+            const index = users.indexOf(user, 0);
+            console.log(index)
+            console.log(users)
+            if (index > -1) {
+                users.splice(index, 1);
+                setUsers(users)
+            }
+        }
+    }
     return (<div className={styles.body}>
         <UserFilter/>
         <div>
 
             {users !== undefined ? users.map((user) => {
-                const z = user
-                console.log(z)
-                console.log("agieioa")
-                return <User user={user} key={user.login_user_id}/>
+                return <User user={user} key={user.login_user_id} removeUser={removeUser}/>
             }) : null}
         </div>
     </div>)

@@ -50,7 +50,6 @@ CREATE TABLE IF NOT EXISTS login_user(
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
     CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
 
