@@ -3,6 +3,7 @@ import express from 'express';
 import {mockDeep} from 'jest-mock-extended';
 
 import * as session_key from '../orm_functions/session_key';
+import * as sessionKey from "../routes/session_key.json";
 
 jest.mock('../orm_functions/session_key');
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
@@ -384,10 +385,11 @@ test("utility.isAdmin can catch errors from the DB", async () => {
 
 test("utility.refreshKey removes a key and replaces it", async () => {
   session_keyMock.changeSessionKey.mockReset();
-  const date = new Date()
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
     return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: date});
+        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: futureDate});
   });
 
   cryptoMock.createHash.mockReset();
@@ -400,15 +402,16 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
   await expect(util.refreshKey('ab')).resolves.toBe('abcd');
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', date);
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', futureDate);
 });
 
 test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   session_keyMock.changeSessionKey.mockReset();
-  const date = new Date()
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
     return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: date});
+        {session_key_id : 0, login_user_id : 0, session_key : nw, valid_until: futureDate});
   });
 
   cryptoMock.createHash.mockReset();
@@ -432,7 +435,7 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   expect(util.refreshAndInjectKey('ab', initial))
       .resolves.toStrictEqual(result);
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', date);
+  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd', futureDate);
 });
 
 test("utility.getSessionKey fetches session key or crashes", () => {
