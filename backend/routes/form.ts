@@ -74,8 +74,6 @@ function getBirthName(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    console.log("end of getBirthName");
-
     return Promise.resolve(questionBirthName.data.value as string);
 }
 
@@ -91,8 +89,6 @@ function getLastName(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionLastName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getLastName");
 
     return Promise.resolve(questionLastName.data.value as string);
 }
@@ -110,8 +106,6 @@ function getEmail(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    console.log("end of getEmail");
-
     return Promise.resolve(validator.default.normalizeEmail(questionEmail.data.value as string).toString());
 }
 
@@ -125,8 +119,6 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.FormPerson> 
     const birthName = await getBirthName(form);
     const lastName = await getLastName(form);
     const email = await getEmail(form);
-
-    console.log("end of jsonToPerson");
 
     return Promise.resolve({birthName: birthName, lastName: lastName, email: email});
 }
@@ -171,7 +163,6 @@ function getPronouns(form: Requests.Form) : Promise<string | null> {
             pronouns = questionEnterPronouns.data.value as string;
         }
     }
-    console.log("end of getPronouns");
 
     return Promise.resolve(pronouns);
 }
@@ -194,7 +185,6 @@ function getGender(form: Requests.Form) : Promise<string> {
     if(chosenGender.data == null || chosenGender.data.id.length === 0) {
         return Promise.reject(errors.cookArgumentError());
     }
-    console.log("end of getGender");
 
     return Promise.resolve(chosenGender.data.text);
 }
@@ -211,8 +201,6 @@ function getPhoneNumber(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionPhoneNumber.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getPhoneNumber");
 
     return Promise.resolve(questionPhoneNumber.data.value as string);
 }
@@ -234,15 +222,12 @@ function getNickname(form: Requests.Form) : Promise<string | null> {
 
     let nickname = null;
     const addNickName = checkWordInAnswer(questionCheckNickname.data, "yes");
-    console.log(addNickName);
     if (addNickName.data != null && addNickName.data) {
         if(questionEnterNickname.data?.value == null) {
             return Promise.reject(errors.cookArgumentError());
         }
         nickname = questionEnterNickname.data.value as string;
     }
-
-    console.log("end of getNickname");
 
     return Promise.resolve(nickname);
 }
@@ -267,8 +252,6 @@ function getAlumni(form: Requests.Form) : Promise<boolean> {
     if(wordInAnswer == null) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getAlumni");
 
     return Promise.resolve(wordInAnswer);
 }
@@ -311,9 +294,6 @@ function getResponsibilities(form: Requests.Form) : Promise<string | null> {
         return Promise.resolve(null);
     }
 
-    console.log("end of getResponsibilities");
-
-
     return Promise.resolve(questionCheckResponsibilities.data?.value as string);
 }
 
@@ -331,8 +311,6 @@ function getFunFact(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionFunFact.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getFunFact");
 
     return Promise.resolve(questionFunFact.data.value as string);
 }
@@ -357,9 +335,6 @@ function getVolunteerInfo(form: Requests.Form) : Promise<string> {
     if(chosenVolunteerInfo.data == null || chosenVolunteerInfo.data.id.length === 0) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getVolunteerInfo");
-
 
     return Promise.resolve(chosenVolunteerInfo.data.text);
 }
@@ -386,8 +361,6 @@ function isStudentCoach(form: Requests.Form, hasAlreadyParticipated: boolean) : 
         if(wordInAnswer == null) {
             return Promise.reject(errors.cookArgumentError());
         }
-
-        console.log("end of isStudentCoach");
 
         return Promise.resolve(wordInAnswer);
     }
@@ -433,8 +406,6 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
         }
     }
 
-    console.log("end of getEducations");
-
     return Promise.resolve(educations);
 }
 
@@ -477,8 +448,6 @@ function getEducationLevel(form: Requests.Form) : Promise<string[]> {
         }
     }
 
-    console.log("end of getEducationLevel");
-
     return Promise.resolve(educationLevels);
 }
 
@@ -501,8 +470,6 @@ function getEducationDuration(form: Requests.Form) : Promise<number | null> {
         return Promise.resolve(null);
     }
 
-    console.log("end of getEducationDuration");
-
     return Promise.resolve(Number(questionEducationDuration.data?.value));
 }
 
@@ -521,8 +488,6 @@ function getEducationYear(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    console.log("end of getEducationYear");
-
     return Promise.resolve(questionEducationYear.data.value as string);
 }
 
@@ -540,8 +505,6 @@ function getEducationUniversity(form: Requests.Form) : Promise<string> {
     if(!questionsExist || questionEducationUniversity.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
-
-    console.log("end of getEducationUniversity");
 
     return Promise.resolve(questionEducationUniversity.data.value as string);
 }
@@ -573,8 +536,6 @@ async function jsonToJobApplication(form: Requests.Form, hasAlreadyTakenPart: bo
     if(form.createdAt != undefined) {
         createdAt = form.createdAt;
     }
-
-    console.log("end of jsontojobapplication");
 
     return Promise.resolve({responsibilities: responsibilities, funFact: funFact, volunteerInfo : volunteerInfo,
         studentCoach: studentCoach, osocId: osocId, educations: educations, educationLevel: educationLevel,
@@ -622,8 +583,6 @@ function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
         language = chosenLanguage.data.text;
     }
 
-    console.log("end of getMostFluentLanguage");
-
     return Promise.resolve(language);
 }
 
@@ -658,8 +617,6 @@ function getEnglishLevel(form: Requests.Form) : Promise<number> {
         return Promise.resolve(2);
     }
 
-    console.log("end of getEnglishlevel");
-
     return Promise.resolve(1);
 }
 
@@ -678,8 +635,6 @@ function getBestSkill(form: Requests.Form) : Promise<string> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    console.log("end of getBestSkill");
-
     return Promise.resolve(questionBestSkill.data.value as string);
 }
 
@@ -693,8 +648,6 @@ async function jsonToSkills(form: Requests.Form): Promise<Responses.FormJobAppli
     const most_fluent_language = await getMostFluentLanguage(form);
     const english_level = await getEnglishLevel(form);
     const best_skill = await getBestSkill(form);
-
-    console.log("end of jsonToSkills");
 
     return Promise.resolve({most_fluent_language: most_fluent_language, english_level: english_level, best_skill: best_skill});
 }
@@ -744,8 +697,6 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
         }
     }
 
-    console.log("end of getCV");
-
     return Promise.resolve({data : links, types : types});
 }
 
@@ -791,8 +742,6 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
             }
         }
     }
-
-    console.log("end of getPortfolio");
 
     return Promise.resolve({data : links, types : types});
 }
@@ -848,8 +797,6 @@ function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentRe
         }
     }
 
-    console.log("end of getMotivation");
-
     return Promise.resolve({data : data, types : types});
 }
 
@@ -863,8 +810,6 @@ async function jsonToAttachments(form: Requests.Form): Promise<Responses.FormAtt
     const cv_links = await getCV(form);
     const portfolio_links = await getPortfolio(form);
     const motivations = await getMotivation(form);
-
-    console.log("end of jsonToAttachment");
 
     return Promise.resolve({cv_links: cv_links, portfolio_links: portfolio_links, motivations: motivations});
 }
@@ -911,8 +856,6 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
         }
     }
 
-    console.log("end of getAppliedRole");
-
     return Promise.resolve(appliedRoles);
 }
 
@@ -924,8 +867,6 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
  */
 async function jsonToRoles(form: Requests.Form): Promise<Responses.FormRoles> {
     const roles = await getAppliedRoles(form);
-
-    console.log("end of jsonToRoles");
 
     return Promise.resolve({roles: roles});
 }
@@ -956,8 +897,6 @@ async function addPersonToDatabase(formResponse : Responses.FormPerson): Promise
         const person = await ormP.createPerson({firstname : formResponse.birthName, lastname : formResponse.lastName, email : formResponse.email});
         personId = person.person_id;
     }
-
-    console.log("add a person to the database");
 
     return Promise.resolve({id: personId});
 }
@@ -998,8 +937,6 @@ async function addStudentToDatabase(formResponse : Responses.FormStudent, person
         studentId = student.student_id;
     }
 
-    console.log("add a student to the database");
-
     return Promise.resolve({id: studentId, hasAlreadyTakenPart: formResponse.alumni});
 }
 
@@ -1028,8 +965,6 @@ async function addJobApplicationToDatabase(formResponse : Responses.FormJobAppli
         emailStatus : formResponse.emailStatus,
         createdAt : formResponse.createdAt
     });
-
-    console.log("add a job application to the database");
 
     return Promise.resolve({id: jobApplication.job_application_id});
 }
@@ -1089,8 +1024,6 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
         isBest : true
     });
 
-    console.log("add skills to database");
-
     return Promise.resolve({});
 }
 
@@ -1116,8 +1049,6 @@ async function addAttachmentsToDatabase(formResponse: Responses.FormAttachment, 
         await ormAtt.createAttachment(job_application_id, formResponse.motivations.data, formResponse.motivations.types);
     }
 
-    console.log("add attachments to database");
-
     return Promise.resolve({});
 }
 
@@ -1141,8 +1072,6 @@ async function addRolesToDatabase(formResponse: Responses.FormRoles, job_applica
         }
     }
 
-    console.log("add roles to database");
-
     return Promise.resolve({});
 }
 
@@ -1153,7 +1082,6 @@ async function addRolesToDatabase(formResponse: Responses.FormRoles, job_applica
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
-    console.log(req.body);
     const parsedRequest = await rq.parseFormRequest(req);
     if (parsedRequest.data == null || parsedRequest.eventId == null
         || parsedRequest.eventType == null || parsedRequest.createdAt == null) {
