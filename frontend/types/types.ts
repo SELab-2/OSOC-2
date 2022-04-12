@@ -57,8 +57,6 @@ export interface Student {
         student_id: number,
         student_volunteer_info: string,
     },
-
-    languages: [string],
     roles: [string],
 
     student: {

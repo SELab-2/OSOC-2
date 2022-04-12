@@ -29,7 +29,6 @@ const getDiplomaStyle = (diploma: string) => {
  * @constructor
  */
 export const Diploma: React.FC<{diploma: string}> = ({diploma}) => {
-    console.log(diploma)
     const styleAndString = getDiplomaStyle(diploma)
     const betterDipl = styleAndString ? styleAndString[0] : diploma
     const style = styleAndString ? styleAndString[1] : styles.other

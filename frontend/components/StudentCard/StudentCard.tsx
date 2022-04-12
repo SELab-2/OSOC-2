@@ -1,12 +1,12 @@
 import React from "react";
 import {Decision, Student} from "../../types/types";
 import styles from "./StudentCard.module.scss"
-import {Language} from "../Labels/Language";
 import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
 import {Diploma} from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
+import {LanguageAndSkill} from "../Labels/LanguageAndSkill";
 
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
@@ -53,28 +53,31 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
     return (
         <div className={styles.card}>
-            <div className={styles.body}>
-                <h2>{`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
+            <div className={styles.body} style={{paddingBottom: `${totalAmount === 0 ? "0.5rem" : "2rem"}`}}>
+                < h2> {`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
                 <div className={styles.grid}>
                     <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>LANGUAGES</h6>
+                        <h6 className={styles.categoryTitle}>LANGUAGES AND SKILLS</h6>
                         <div className={styles.category}>
-                            {student.languages.map(((language, index) => <Language key={index} language={language}/>))}
+                            {student.jobApplication.job_application_skill.map((language, index) => {
+                                return <LanguageAndSkill key={index} language={language.skill}/>
+                            })}
                         </div>
-                        <h6 className={styles.categoryTitle}>STUDIES</h6>
+                        <h6 className={styles.categoryTitle}>ROLES</h6>
                         <div className={styles.category}>
-                            {student.jobApplication.edus.map((study, index) => <Study key={index} study={study}/>)}
+                            {student.roles.map((role, index) => <Role key={index} role={role}/>)}
                         </div>
+
                     </div>
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>{"DIPLOMA'S"}</h6>
                         <div className={styles.category}>
                             {student.jobApplication.edu_level.map((diploma, index) => <Diploma key={index}
-                                                                                          diploma={diploma}/>)}
+                                                                                               diploma={diploma}/>)}
                         </div>
-                        <h6 className={styles.categoryTitle}>ROLES</h6>
+                        <h6 className={styles.categoryTitle}>STUDIES</h6>
                         <div className={styles.category}>
-                            {student.roles.map((role, index) => <Role key={index} role={role}/>)}
+                            {student.jobApplication.edus.map((study, index) => <Study key={index} study={study}/>)}
                         </div>
                     </div>
                     <div className={styles.column}>
