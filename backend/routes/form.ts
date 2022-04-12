@@ -140,7 +140,7 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.FormPerson> 
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPronouns(form: Requests.Form) : Promise<string[] | null> {
+function getPronouns(form: Requests.Form) : Promise<string | null> {
     const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
     const questionPreferredPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
     const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w8ZBq5");
@@ -150,12 +150,12 @@ function getPronouns(form: Requests.Form) : Promise<string[] | null> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    let pronouns: string[] = [];
+    let pronouns = "";
 
-    const wordInAnswer :  Responses.FormResponse<boolean> = checkWordInAnswer(questionPronouns.data, "yes");
+    const wordInAnswer : Responses.FormResponse<boolean> = checkWordInAnswer(questionPronouns.data, "yes");
 
     if(wordInAnswer.data == null) {
-        return Promise.resolve([]);
+        return Promise.resolve(null);
     }
 
     if(wordInAnswer.data) {
@@ -163,13 +163,12 @@ function getPronouns(form: Requests.Form) : Promise<string[] | null> {
         if(chosenOption.data == null || chosenOption.data?.id.length === 0 || questionPreferredPronouns.data?.value == null || checkWordInAnswer(questionPreferredPronouns.data, "other").data == null) {
             return Promise.reject(util.errors.cookArgumentError());
         } else if(!checkWordInAnswer(questionPreferredPronouns.data, "other").data && chosenOption.data?.text != undefined) {
-            pronouns = chosenOption.data.text.split("/");
+            pronouns = chosenOption.data.text;
         } else {
             if(questionEnterPronouns.data?.value == null) {
-                return Promise.resolve([]);
+                return Promise.resolve(null);
             }
-            const value = questionEnterPronouns.data.value as string;
-            pronouns = value.split("/");
+            pronouns = questionEnterPronouns.data.value as string;
         }
     }
     console.log("end of getPronouns");
@@ -981,7 +980,7 @@ async function addStudentToDatabase(formResponse : Responses.FormStudent, person
         await ormSt.updateStudent({
             studentId : checkIfIdInDb[0].student_id,
             gender : formResponse.gender,
-            pronouns : formResponse.pronouns == null ? [] : formResponse.pronouns,
+            pronouns : formResponse.pronouns == null ? "" : formResponse.pronouns,
             phoneNumber : formResponse.phoneNumber,
             nickname : formResponse.nickname,
             alumni : formResponse.alumni

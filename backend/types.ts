@@ -154,7 +154,7 @@ export interface FormStudent {
   /**
    *  The firstname of this person.
    */
-  pronouns: string[] | null;
+  pronouns: string | null;
   /**
    *  The lastname of this person.
    */
@@ -678,7 +678,7 @@ export interface UpdateStudent extends IdRequest {
   firstName?: string;
   lastName?: string;
   gender?: string;
-  pronouns?: string[];
+  pronouns?: string;
   nickname?: string;
   alumni?: boolean;
   phone?: string;

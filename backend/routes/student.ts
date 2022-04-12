@@ -27,9 +27,6 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
     const studentList: object[] = [];
     const students = await ormSt.getAllStudents();
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-        if(students[studentIndex].pronouns.length > 0 && students[studentIndex].pronouns[0] == "None") {
-            students[studentIndex].pronouns = [];
-        }
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(students[studentIndex].student_id);
         if (jobApplication != null) {
             const roles = [];
@@ -87,10 +84,6 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if(student == null) {
         return Promise.reject(errors.cookInvalidID());
-    }
-
-    if(student.pronouns.length > 0 && student.pronouns[0] == "None") {
-        student.pronouns = [];
     }
 
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
@@ -292,10 +285,6 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
     const studentlist = [];
 
     for (const student of students) {
-        if(student.pronouns.length > 0 && student.pronouns[0] == "None") {
-            student.pronouns = [];
-        }
-
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
         if(jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
