@@ -56,17 +56,13 @@ const Students: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const test = ()=>{
-        console.log("aeihtaei")
-    }
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
-        console.log(filteredStudents)
+        setStudents([...filteredStudents])
     }
 
-    console.log(setFilteredStudents)
     return (
         <div className={styles.students}>
-            <StudentFilter roles={roles} test={test}/>
+            <StudentFilter roles={roles} setFilteredStudents={setFilteredStudents}/>
             {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
         </div>
     )

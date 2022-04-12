@@ -10,11 +10,11 @@ import CheckIcon from "../../public/images/green_check_mark.png"
 import CheckIconColor from "../../public/images/green_check_mark_color.png"
 import ExclamationIcon from "../../public/images/exclamation_mark.png"
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png"
-import {Role} from "../../types/types";
+import {Role, Student} from "../../types/types";
 import {RolesComponent} from "../RoleComponent/RolesComponent";
 import SessionContext from "../../contexts/sessionProvider";
 
-export const StudentFilter: React.FC<{ roles: Array<Role>, test: () => void }> = ({roles}, test) => {
+export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: (user: Array<Student>) => void }> = ({roles,setFilteredStudents}) => {
     const [nameSort, setNameSort] = useState<boolean>(false);
     const [emailSort, setEmailSort] = useState<boolean>(false);
     const [filterYes, setFilterYes] = useState<boolean>(false);
@@ -64,8 +64,8 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, test: () => void }> =
             "&Yes=" + filterYes + "&maybe=" + filterMaybe + "&no=" + filterNo + "&studentCoach=" + studentCoach +
             "&alumni=" + alumni + "&roles=" + roles;
         console.log(query);
-        //TODO hier moet de call naar de backend gebeuren en dan de data naar Students brengen
 
+        //TODO hier moet de query nog verbonden worden
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`, {
             method: 'GET',
             headers: {
@@ -87,15 +87,10 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, test: () => void }> =
         if (setSessionKey) {
             setSessionKey(response.sessionkey);
         }
-        console.log("aeihgaoeh")
-        console.log(response.data)
-        test()
+        setFilteredStudents(response.data)
 
 
     }
-
-
-
 
     const changeSelectedRolesProp = (changeRole: string) => {
         const roles = selectedRoles
