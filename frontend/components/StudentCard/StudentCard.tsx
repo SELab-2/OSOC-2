@@ -4,7 +4,7 @@ import styles from "./StudentCard.module.scss"
 import {Language} from "../Labels/Language";
 import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
-import {Label} from "../Labels/Label";
+import {Diploma} from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 
@@ -67,10 +67,10 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                         </div>
                     </div>
                     <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>SKILLS</h6>
+                        <h6 className={styles.categoryTitle}>{"DIPLOMA'S"}</h6>
                         <div className={styles.category}>
-                            {student.jobApplication.job_application_skill.map((skill, index) => <Label key={index}
-                                                                                                       label={skill.skill}/>)}
+                            {student.jobApplication.edu_level.map((diploma, index) => <Diploma key={index}
+                                                                                          diploma={diploma}/>)}
                         </div>
                         <h6 className={styles.categoryTitle}>ROLES</h6>
                         <div className={styles.category}>
@@ -83,7 +83,8 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                         <h6 className={styles.categoryTitle}>PHONE NUMBER</h6>
                         <a href={`tel:${student.student.phone_number}`}>{student.student.phone_number}</a>
                         {student.student.person.github !== null ?
-                            <a className={styles.githubContainer} href={`https://github.com/${student.student.person.github}`}>
+                            <a className={styles.githubContainer}
+                               href={`https://github.com/${student.student.person.github}`}>
                                 <div className={styles.githublogo}>
                                     <Image
                                         src={GitHubLogo}
