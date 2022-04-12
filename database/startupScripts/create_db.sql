@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
    person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
    gender          TEXT            NOT NULL,
-   pronouns        TEXT [],
+   pronouns        TEXT,
    phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL
@@ -89,9 +89,9 @@ CREATE TABLE IF NOT EXISTS job_application (
     student_coach             BOOLEAN              NOT NULL,
     osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
     edus                      TEXT []              NOT NULL,
-    edu_level                 TEXT                 NOT NULL,
-    edu_duration              INT                  NOT NULL,
-    edu_year                  INT                  NOT NULL,
+    edu_level                 TEXT []              NOT NULL,
+    edu_duration              INT,
+    edu_year                  TEXT                 NOT NULL, /* in the tally form the year is a free field that can have any text... */
     edu_institute             TEXT                 NOT NULL,
     email_status              email_status_enum    NOT NULL,
     created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
@@ -176,11 +176,11 @@ CREATE TABLE IF NOT EXISTS language (
 CREATE TABLE IF NOT EXISTS job_application_skill (
     job_application_skill_id    SERIAL         PRIMARY KEY,
     job_application_id          SERIAL         NOT NULL REFERENCES job_application(job_application_id),
-    skill                       TEXT           NOT NULL,
-    language_id                 SERIAL         NOT NULL REFERENCES language(language_id),
+    skill                       TEXT,
+    language_id                 INT            REFERENCES language(language_id),
     level                       SMALLINT       NULL CHECK(level >= 0 AND level <= 5),
-    is_preferred                BOOLEAN,
-    is_best                     BOOLEAN
+    is_preferred                BOOLEAN        NOT NULL,
+    is_best                     BOOLEAN        NOT NULL
 );
 
 
@@ -190,8 +190,8 @@ CREATE TYPE type_enum AS ENUM ('CV_URL', 'PORTFOLIO_URL', 'FILE_URL', 'MOTIVATIO
 CREATE TABLE IF NOT EXISTS attachment(
    attachment_id         SERIAL       PRIMARY KEY,
    job_application_id    SERIAL       NOT NULL REFERENCES job_application (job_application_id),
-   data                  TEXT         NOT NULL,
-   type                  type_enum    NOT NULL
+   data                  TEXT[]       NOT NULL,
+   type                  type_enum[]  NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS template_email(

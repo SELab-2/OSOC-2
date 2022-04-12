@@ -2,19 +2,19 @@ import React from "react";
 import styles from "./Labels.module.scss"
 
 /**
- * Maps a language to a color
+ * Maps a role to a color and a better string representation
  */
-const roleToStyle = new Map<string, string>()
-roleToStyle.set("Backend Developer", styles.blue)
-roleToStyle.set("Business Modeller", styles.green)
-roleToStyle.set("Storyteller", styles.yellow)
-roleToStyle.set("UX / UI Designer", styles.red)
-roleToStyle.set("Graphic Designer", styles.other)
-roleToStyle.set("Frontend Developer", styles.blue)
-roleToStyle.set("Marketer", styles.green)
-roleToStyle.set("Photographer", styles.yellow)
-roleToStyle.set("Video Editor", styles.red)
-roleToStyle.set("Copywriter", styles.yellow)
+const roleToStyle = new Map<string, [string, string]>()
+roleToStyle.set("Back-end developer", ["Backend Developer", styles.blue])
+roleToStyle.set("Business Modeller", ["Business Modeller", styles.green])
+roleToStyle.set("Storyteller", ["Storyteller", styles.yellow])
+roleToStyle.set("UX / UI designer", ["UX / UI Designer", styles.red])
+roleToStyle.set("Graphic designer", ["Graphic Designer", styles.other])
+roleToStyle.set("Front-end developer", ["Frontend Developer", styles.blue])
+roleToStyle.set("Marketer", ["Marketer", styles.green])
+roleToStyle.set("Photographer", ["Photographer", styles.yellow])
+roleToStyle.set("Video editor", ["Video Editor", styles.red])
+roleToStyle.set("Copywriter", ["Copywriter", styles.yellow])
 
 
 const getRoleStyle = (role: string) => {
@@ -22,7 +22,7 @@ const getRoleStyle = (role: string) => {
         return roleToStyle.get(role)
     }
 
-    return styles.other
+    return [role, styles.other]
 }
 
 /**
@@ -31,5 +31,8 @@ const getRoleStyle = (role: string) => {
  * @constructor
  */
 export const Role: React.FC<{role: string}> = ({role}) => {
-    return <div className={`${styles.label} ${getRoleStyle(role)}`}>{role}</div>
+    const styleAndString = getRoleStyle(role)
+    const betterRole = styleAndString ? styleAndString[0] : role
+    const style = styleAndString ? styleAndString[1] : styles.other
+    return <div className={`${styles.label} ${style}`}>{betterRole}</div>
 }
