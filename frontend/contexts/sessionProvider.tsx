@@ -49,8 +49,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
         getSessionKey().then(sessionKey => {
             if (sessionKey !== undefined) {
                 setSessionKeyState(sessionKey)
-                setIsAdminState(localStorage.getItem('isAdmin') === 'true')
-                setIsCoachState(localStorage.getItem('isCoach') === 'true')
+                setIsAdminState(localStorage.getItem('isAdmin') === 'true' && sessionKey != "")
+                setIsCoachState(localStorage.getItem('isCoach') === 'true' && sessionKey != "")
             }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
