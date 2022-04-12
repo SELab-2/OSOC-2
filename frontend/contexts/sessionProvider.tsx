@@ -88,16 +88,18 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).then(response => {
-            console.log("executed /verify")
-            console.log(response)
-            if (!response.success) {
-                console.log("rerouting")
-                return router.push("/login").then(() => sessionKey)
+            if (!response.valid) {
+                if (!router.pathname.startsWith("/login")) {
+                    router.push("/login")
+                }
+                return ""
             }
             return sessionKey
         }).catch(error => {
             console.log(error)
-            router.push("/login")
+            if (!router.pathname.startsWith("/login")) {
+                router.push("/login")
+            }
             return ""
         })
     }

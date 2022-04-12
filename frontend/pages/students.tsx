@@ -13,7 +13,6 @@ const Students: NextPage = () => {
     const fetchStudents = async () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async sessionKey => {
-                console.log(sessionKey)
                 if (sessionKey != "") {
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                         method: 'GET',
@@ -21,7 +20,6 @@ const Students: NextPage = () => {
                             'Authorization': `auth/osoc2 ${sessionKey}`
                         }
                     }).then(response => response.json()).catch(error => console.log(error));
-                    console.log("executed /student/all")
                     if (response !== undefined && response.success) {
                         if (setSessionKey) {
                             setSessionKey(response.sessionkey)
