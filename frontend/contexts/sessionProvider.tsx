@@ -62,26 +62,21 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
      * Performs a backend call to verify the session id
      */
     const getSessionKey = async () => {
-        // We already have the latest session key
-        let key = ""
-        if (sessionKey != undefined && sessionKey != "") {
-            key = sessionKey
-        } else {
-            const fromStorage = localStorage.getItem('sessionKey')
-            key = fromStorage ? fromStorage : ""
-        }
+        // Get the sessionKey from localStorage
+        const fromStorage = localStorage.getItem('sessionKey')
+        const sessionKey = fromStorage ? fromStorage : ""
 
-        if (key === "") {
+        if (sessionKey === "") {
             if (!router.pathname.startsWith("/login")) {
                 router.push("/login").then()
             }
-            return ""
+            return sessionKey
         }
 
         // Avoid calling /verify twice
         // verified gets set to false every page reload
         if (verified) {
-            return key
+            return sessionKey
         }
 
         verified = true
@@ -90,14 +85,16 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `auth/osoc2 ${key}`
+                'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).then(response => {
+            console.log("executed /verify")
+            console.log(response)
             if (!response.success) {
-                router.push("/login")
-                return ""
+                console.log("rerouting")
+                return router.push("/login").then(() => sessionKey)
             }
-            return key
+            return sessionKey
         }).catch(error => {
             console.log(error)
             router.push("/login")

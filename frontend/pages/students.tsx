@@ -13,18 +13,21 @@ const Students: NextPage = () => {
     const fetchStudents = async () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async sessionKey => {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `auth/osoc2 ${sessionKey}`
+                console.log(sessionKey)
+                if (sessionKey != "") {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `auth/osoc2 ${sessionKey}`
+                        }
+                    }).then(response => response.json()).catch(error => console.log(error));
+                    console.log("executed /student/all")
+                    if (response !== undefined && response.success) {
+                        if (setSessionKey) {
+                            setSessionKey(response.sessionkey)
+                        }
+                        setStudents(response.data)
                     }
-                }).then(response => response.json()).catch(error => console.log(error));
-                console.log(response)
-                if (response !== undefined && response.success) {
-                    if (setSessionKey) {
-                        setSessionKey(response.sessionkey)
-                    }
-                    setStudents(response.data)
                 }
             })
         }
