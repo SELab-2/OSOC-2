@@ -4,6 +4,8 @@ import {mockDeep} from 'jest-mock-extended';
 
 import * as session_key from '../orm_functions/session_key';
 
+import {getMockRouter} from './mocks';
+
 jest.mock('../orm_functions/session_key');
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
 
@@ -52,6 +54,7 @@ test("utility.errors.cook* work as expected", () => {
   expect(util.errors.cookInsufficientRights())
       .toBe(config.apiErrors.insufficientRights);
   expect(util.errors.cookServerError()).toBe(config.apiErrors.serverError);
+  expect(util.errors.cookNoDataError()).toBe(config.apiErrors.noDataError);
 
   // annoying ones
   // non-existent endpoint
@@ -452,3 +455,32 @@ test("utility.getOrDefault returns the correct values", () => {
   expect(util.getOrDefault(undefined, "hello")).toBe("hello");
   expect(util.getOrDefault(27, 59)).toBe(27);
 })
+
+test("utility.getOrReject behaves correctly", () => {
+  return Promise.all([
+    expect(util.getOrReject('hello')).resolves.toBe('hello'),
+    expect(util.getOrReject<string>(null))
+        .rejects.toBe(util.errors.cookNoDataError()),
+    expect(util.getOrReject<string>(undefined))
+        .rejects.toBe(util.errors.cookNoDataError())
+  ]);
+})
+
+test.only("utility.addInvalidVerbs adds callbacks", () => {
+  const router = getMockRouter();
+  util.addInvalidVerbs(router, '/test');
+
+  const prm = [ 'get', 'delete', 'post' ].map(x => {
+    const req = getMockReq();
+    req.method = x;
+    req.path = '/test';
+    const res = getMockRes();
+    router(req, res.res);
+    const err = util.errors.cookInvalidVerb(req);
+    expect(res.res.status).toHaveBeenCalledWith(err.http);
+    expect(res.res.send)
+        .toHaveBeenCalledWith({success : false, reason : err.reason});
+  });
+
+  return Promise.all([ prm ]);
+});
