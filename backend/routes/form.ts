@@ -726,8 +726,10 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
     }
 
     if(questionCVLink.data?.value != null) {
-        links.push(questionCVLink.data?.value as string);
-        types.push("CV_URL");
+        if((questionCVLink.data?.value as string).trim() != "") {
+            links.push(questionCVLink.data?.value as string);
+            types.push("CV_URL");
+        }
     }
 
     if(questionCVUpload.data?.value != null) {
@@ -736,8 +738,10 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
                 return Promise.reject(errors.cookArgumentError());
             }
 
-            links.push((questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url);
-            types.push("CV_URL");
+            if(((questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url).trim() != "") {
+                links.push((questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url);
+                types.push("CV_URL");
+            }
         }
     }
 
@@ -770,8 +774,10 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
     }
 
     if(questionPortfolioLink.data?.value != null) {
-        links.push(questionPortfolioLink.data?.value as string);
-        types.push("PORTFOLIO_URL");
+        if((questionPortfolioLink.data?.value as string).trim() != "") {
+            links.push(questionPortfolioLink.data?.value as string);
+            types.push("PORTFOLIO_URL");
+        }
     }
 
     if(questionPortfolioUpload.data?.value != null) {
@@ -779,8 +785,11 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
             if((questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues).url == undefined) {
                 return Promise.reject(errors.cookArgumentError());
             }
-            links.push((questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues).url);
-            types.push("PORTFOLIO_URL");
+
+            if(((questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues).url).trim() != "") {
+                links.push((questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues).url);
+                types.push("PORTFOLIO_URL");
+            }
         }
     }
 
@@ -814,8 +823,10 @@ function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentRe
     }
 
     if(questionMotivationLink.data?.value != null) {
-        data.push(questionMotivationLink.data?.value as string);
-        types.push("MOTIVATION_URL");
+        if((questionMotivationLink.data?.value as string).trim() != "") {
+            data.push(questionMotivationLink.data?.value as string);
+            types.push("MOTIVATION_URL");
+        }
     }
 
     if(questionMotivationUpload.data?.value != null) {
@@ -823,14 +834,19 @@ function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentRe
             if((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url == undefined) {
                 return Promise.reject(errors.cookArgumentError());
             }
-            data.push((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url);
-            types.push("MOTIVATION_URL");
+
+            if(((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url).trim() != "") {
+                data.push((questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues).url);
+                types.push("MOTIVATION_URL");
+            }
         }
     }
 
     if(questionMotivationString.data?.value != null) {
-        data.push(questionMotivationString.data?.value as string);
-        types.push("MOTIVATION_URL");
+        if((questionMotivationString.data?.value as string).trim() != "") {
+            data.push(questionMotivationString.data?.value as string);
+            types.push("MOTIVATION_URL");
+        }
     }
 
     console.log("end of getMotivation");
