@@ -23,6 +23,7 @@ const Students: NextPage = () => {
                 setSessionKey(response.sessionkey)
             }
             setStudents(response.data)
+            console.log(response.data)
         }
     }
 
@@ -35,7 +36,6 @@ const Students: NextPage = () => {
     return (
         <div className={styles.students}>
             {students.map(student => {
-                console.log(student)
                 return <StudentCard key={student.student.student_id} student={student as Student}/>
             })}
         </div>

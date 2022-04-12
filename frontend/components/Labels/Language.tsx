@@ -24,6 +24,6 @@ const getLanguageStyle = (language: string) => {
  * @param language
  * @constructor
  */
-export const Language: React.FC<{language: string}> = ({diploma}) => {
-    return <div className={`${styles.label} ${getLanguageStyle(diploma)}`}>{diploma}</div>
+export const Language: React.FC<{language: string}> = ({language}) => {
+    return <div className={`${styles.label} ${getLanguageStyle(language)}`}>{language}</div>
 }

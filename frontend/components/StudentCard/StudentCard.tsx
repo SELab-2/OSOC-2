@@ -69,7 +69,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>{"DIPLOMA'S"}</h6>
                         <div className={styles.category}>
-                            {student.jobApplication.edus.map((diploma, index) => <Diploma key={index}
+                            {student.jobApplication.edu_level.map((diploma, index) => <Diploma key={index}
                                                                                           diploma={diploma}/>)}
                         </div>
                         <h6 className={styles.categoryTitle}>ROLES</h6>

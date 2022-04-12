@@ -15,12 +15,12 @@ diplomaToStyle.set("No diploma, I am self taught", ["Self Taught", styles.other]
 
 
 
-const getDiplomaStyle = (language: string) => {
-    if (diplomaToStyle.has(language)) {
-        return diplomaToStyle.get(language)
+const getDiplomaStyle = (diploma: string) => {
+    if (diplomaToStyle.has(diploma)) {
+        return diplomaToStyle.get(diploma)
     }
 
-    return styles.other
+    return [diploma, styles.other]
 }
 
 /**
@@ -29,9 +29,9 @@ const getDiplomaStyle = (language: string) => {
  * @constructor
  */
 export const Diploma: React.FC<{diploma: string}> = ({diploma}) => {
-    const response = getDiplomaStyle(diploma)
-    const styleAndString = response ? response : [diploma, styles.other]
-    const betterDipl = styleAndString[0]
-    const style = styleAndString[1]
+    console.log(diploma)
+    const styleAndString = getDiplomaStyle(diploma)
+    const betterDipl = styleAndString ? styleAndString[0] : diploma
+    const style = styleAndString ? styleAndString[1] : styles.other
     return <div className={`${styles.label} ${style}`}>{betterDipl}</div>
 }
