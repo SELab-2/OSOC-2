@@ -1,6 +1,6 @@
 import prisma from '../prisma/prisma'
 
-import {CreateLoginUser, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
+import {CreateLoginUser, FilterBoolean, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
 import {account_status_enum} from "@prisma/client";
 
 /**
@@ -204,17 +204,31 @@ export async function getLoginUserById(loginUserId: number) {
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
+ * @param isCoach: true or false if we want only coaches resp no coaches or undefined if we don't want to filter on this field
+ * @param isAdmin: true or false if we want only admins resp no admins or undefined if we don't want to filter on this field
  * @returns the filtered loginUsers with their person data in a promise
  */
 export async function filterLoginUsers(nameFilter: FilterString,
                                        emailFilter: FilterString,
                                        nameSort: FilterSort,
                                        emailSort: FilterSort,
-                                       statusFilter: account_status_enum | undefined) {
+                                       statusFilter: account_status_enum[] | undefined,
+                                       isCoach: FilterBoolean,
+                                       isAdmin: FilterBoolean) {
 
     if (nameSort !== undefined && emailSort !== undefined) {
         return Promise.reject("Sorting is only allowed on 1 field");
     }
+
+    // create array of objects for the "OR" that we use to give multiple options for the statusFilter.
+    const account_status_options: { account_status: account_status_enum | undefined; }[] = [];
+    if (statusFilter) {
+        statusFilter.forEach(acc_stat => account_status_options.push({account_status: acc_stat}));
+    } else {
+        account_status_options.push({account_status: undefined});
+    }
+
+
 
     return await prisma.login_user.findMany({
         where: {
@@ -228,7 +242,9 @@ export async function filterLoginUsers(nameFilter: FilterString,
                     mode: 'insensitive'
                 },
             },
-            account_status: statusFilter,
+            OR : account_status_options,
+            is_coach: isCoach,
+            is_admin: isAdmin
         },
         orderBy : {
             person :  {
