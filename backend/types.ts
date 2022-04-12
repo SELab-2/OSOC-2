@@ -208,7 +208,7 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationDuration: number;
+  educationDuration: number | null;
   /**
    *  The email of this person.
    */

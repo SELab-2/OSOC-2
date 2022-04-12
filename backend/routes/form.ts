@@ -562,7 +562,14 @@ async function jsonToJobApplication(form: Requests.Form, hasAlreadyTakenPart: bo
     const osocId = latestOsoc.osoc_id;
     const educations = await getEducations(form);
     const educationLevel = await getEducationLevel(form);
-    const educationDuration = await getEducationDuration(form);
+    const educationLevelQuestion = filterQuestion(form, "question_w4K6BX");
+    let educationDurationCanBeNull = false;
+    for(let educationsLevelIndex = 0; educationsLevelIndex < educationLevel.length; educationsLevelIndex++) {
+        if(educationLevelQuestion.data != null && checkWordInAnswer(educationLevelQuestion.data, "no diploma")) {
+            educationDurationCanBeNull = true;
+        }
+    }
+    const educationDuration = educationDurationCanBeNull ? null : await getEducationDuration(form);
     const educationYear = await getEducationYear(form);
     const educationInstitute = await getEducationUniversity(form);
     const emailStatus = "NONE";
