@@ -56,7 +56,7 @@ model job_application {
   osoc_id                Int
   edus                   String[]
   edu_level              String[]
-  edu_duration           Int
+  edu_duration           Int?
   edu_year               String
   edu_institute          String
   email_status           email_status_enum
