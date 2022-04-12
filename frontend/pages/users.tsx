@@ -68,10 +68,11 @@ const Users: NextPage = () => {
             console.log(users)
             if (index > -1) {
                 users.splice(index, 1);
-                setUsers(users)
+                setUsers([...users])
             }
         }
     }
+
     return (<div className={styles.body}>
         <UserFilter/>
         <div>

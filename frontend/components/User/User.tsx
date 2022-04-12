@@ -97,7 +97,30 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        removeUser(user)
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + "admin/" + userId.toString(), {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${sessionKey}`
+            }
+        })
+            .then(response => response.json()).then(async json => {
+                if (!json.success) {
+                    return {success: false};
+                }
+                if (setSessionKey) {
+                    setSessionKey(json.sessionkey)
+                }
+                console.log(json)
+                removeUser(user)
+                return json;
+
+            })
+            .catch(err => {
+                console.log(err);
+                return {success: false};
+            })
 
     }
 
