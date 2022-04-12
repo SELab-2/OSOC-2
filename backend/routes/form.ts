@@ -158,27 +158,27 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.Id> {
  */
 function getPronouns(form: Requests.Form) : Promise<string[] | null> {
     const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
-    const questionPreferedPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
+    const questionPreferredPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
     const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w8ZBq5");
 
-    const questionsExist : boolean = checkQuestionsExist([questionPronouns, questionPreferedPronouns, questionEnterPronouns]);
+    const questionsExist : boolean = checkQuestionsExist([questionPronouns, questionPreferredPronouns, questionEnterPronouns]);
     if(!questionsExist || questionPronouns.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    let pronouns: string[] | null = null;
+    let pronouns: string[] = [];
 
     const wordInAnswer :  Responses.FormResponse<boolean> = checkWordInAnswer(questionPronouns.data, "yes");
 
     if(wordInAnswer.data == null) {
-        return Promise.reject(errors.cookArgumentError());
+        return Promise.resolve([]);
     }
 
-    if(wordInAnswer) {
-        const chosenOption : Responses.FormResponse<Requests.Option> = filterChosenOption(questionPreferedPronouns.data as Requests.Question);
-        if(chosenOption.data == null || chosenOption.data?.id.length === 0 || questionPreferedPronouns.data?.value == null || checkWordInAnswer(questionPreferedPronouns.data, "other").data == null) {
+    if(wordInAnswer.data) {
+        const chosenOption : Responses.FormResponse<Requests.Option> = filterChosenOption(questionPreferredPronouns.data as Requests.Question);
+        if(chosenOption.data == null || chosenOption.data?.id.length === 0 || questionPreferredPronouns.data?.value == null || checkWordInAnswer(questionPreferredPronouns.data, "other").data == null) {
             return Promise.reject(util.errors.cookArgumentError());
-        } else if(!checkWordInAnswer(questionPreferedPronouns.data, "other").data && chosenOption.data?.text != undefined) {
+        } else if(!checkWordInAnswer(questionPreferredPronouns.data, "other").data && chosenOption.data?.text != undefined) {
             pronouns = chosenOption.data.text.split("/");
         } else {
             if(questionEnterPronouns.data?.value == null) {
@@ -250,8 +250,9 @@ function getNickname(form: Requests.Form) : Promise<string | null> {
     }
 
     let nickname = null;
-
-    if (checkWordInAnswer(questionCheckNickname.data, "yes")) {
+    const addNickName = checkWordInAnswer(questionCheckNickname.data, "yes");
+    console.log(addNickName);
+    if (addNickName.data != null && addNickName.data) {
         if(questionEnterNickname.data?.value == null) {
             return Promise.reject(errors.cookArgumentError());
         }
@@ -757,7 +758,6 @@ async function jsonToSkills(form: Requests.Form, job_applicationId: Responses.Id
     const most_fluent_language = await getMostFluentLanguage(form);
     const english_level = await getEnglishLevel(form);
     const best_skill = await getBestSkill(form);
-    console.log(most_fluent_language);
 
     let most_fl_la_id;
     const getMostFluentLanguageInDb = await getLanguageByName(most_fluent_language);
@@ -828,8 +828,12 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
     const links : string[] = [];
     const types : type_enum[] = [];
 
-    if(!questionsExist || (questionCVUpload.data?.value == null && questionCVLink.data?.value == null)) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+    // TODO: don't put empty arrays in the database (same for portfolio and motivation)
+    if(questionCVUpload.data?.value == null && questionCVLink.data?.value == null) {
+        return Promise.resolve({data: [], types: []});
     }
 
     if(questionCVLink.data?.value != null) {
@@ -869,8 +873,12 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
     const links : string[] = [];
     const types : type_enum[] = [];
 
-    if(!questionsExist || (questionPortfolioUpload.data?.value == null && questionPortfolioLink.data?.value == null)) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionPortfolioUpload.data?.value == null && questionPortfolioLink.data?.value == null) {
+        return Promise.resolve({data: [], types: []});
     }
 
     if(questionPortfolioLink.data?.value != null) {
@@ -910,9 +918,12 @@ function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentRe
     const data : string[] = [];
     const types : type_enum[] = [];
 
-    if(!questionsExist || (questionMotivationUpload.data?.value == null
-        && questionMotivationLink.data?.value == null && questionMotivationString.data?.value == null)) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionMotivationUpload.data?.value == null && questionMotivationLink.data?.value == null && questionMotivationString.data?.value == null) {
+        return Promise.resolve({data: [], types: []});
     }
 
     if(questionMotivationLink.data?.value != null) {
