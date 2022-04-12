@@ -163,7 +163,7 @@ model student {
   student_id      Int               @id @default(autoincrement())
   person_id       Int               @unique @default(autoincrement())
   gender          String
-  pronouns        String[]
+  pronouns        String?
   phone_number    String
   nickname        String?
   alumni          Boolean

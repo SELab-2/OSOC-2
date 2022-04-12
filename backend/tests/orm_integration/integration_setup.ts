@@ -111,21 +111,21 @@ beforeAll(async () => {
             {
                 person_id: persons[2].person_id,
                 gender: "Male",
-                pronouns: ["He", "Him"],
+                pronouns: "He/ Him",
                 phone_number: "112",
                 alumni: false,
             },
             {
                 person_id: persons[1].person_id,
                 gender: "Female",
-                pronouns: ["She", "Her"],
+                pronouns: "She/ Her",
                 phone_number: "107",
                 alumni: true,
             },
             {
                 person_id: persons[3].person_id,
                 gender: "Female",
-                pronouns: ["She", "Her"],
+                pronouns: "She/ Her",
                 phone_number: "111",
                 alumni: false
             }

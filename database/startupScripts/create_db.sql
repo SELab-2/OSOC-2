@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS student(
    student_id      SERIAL          PRIMARY KEY,
    person_id       SERIAL          NOT NULL UNIQUE     REFERENCES person(person_id),
    gender          TEXT            NOT NULL,
-   pronouns        TEXT [],
+   pronouns        TEXT,
    phone_number    TEXT            NOT NULL,
    nickname        TEXT,
    alumni          BOOLEAN         NOT NULL

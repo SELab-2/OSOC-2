@@ -117,7 +117,7 @@ export interface CreateStudent {
     /**
      * the pronouns the student wants to be addressed with
      */
-    pronouns?: string[],
+    pronouns?: string | null,
     /**
      * student's phone number
      */
@@ -147,7 +147,7 @@ export interface UpdateStudent {
     /**
      * undefined if unchanged or new list of pronouns
      */
-    pronouns?: string[],
+    pronouns?: string | null,
     /**
      * undefined if unchanged or the new phone number
      */

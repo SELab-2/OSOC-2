@@ -5,9 +5,9 @@ VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
 ('osoc2@mail.com', 'Osoc', 'TeamTwo');
 
 /* Insert data into student table */
-INSERT INTO student(person_id, gender, pronouns, phone_number, nickname, alumni)
+INSERT INTO student(person_id, gender, phone_number, nickname, alumni)
 VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'), 
-'Female', '{None}', '0032476553498', 'Unicorn', TRUE);
+'Female', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
