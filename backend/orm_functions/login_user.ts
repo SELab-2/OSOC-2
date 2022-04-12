@@ -221,15 +221,13 @@ export async function filterLoginUsers(nameFilter: FilterString,
     }
 
     // create array of objects for the "OR" that we use to give multiple options for the statusFilter.
-    const account_status_options: { account_status: account_status_enum | undefined; }[] = [];
+    let account_status_options = undefined;
     if (statusFilter) {
+        account_status_options = []
         statusFilter.forEach(acc_stat => account_status_options.push({account_status: acc_stat}));
-    } else {
-        account_status_options.push({account_status: undefined});
     }
 
-
-
+    // execute the query
     return await prisma.login_user.findMany({
         where: {
             person : {
