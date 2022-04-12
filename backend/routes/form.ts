@@ -489,18 +489,22 @@ function getEducationLevel(form: Requests.Form) : Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationDuration(form: Requests.Form) : Promise<number> {
+function getEducationDuration(form: Requests.Form) : Promise<number | null> {
     const questionEducationDuration: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w2KWBj");
 
     const questionsExist : boolean = checkQuestionsExist([questionEducationDuration]);
 
-    if(!questionsExist || questionEducationDuration.data?.value == null) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionEducationDuration.data?.value == null) {
+        return Promise.resolve(null);
     }
 
     console.log("end of getEducationDuration");
 
-    return Promise.resolve(Number(questionEducationDuration.data.value));
+    return Promise.resolve(Number(questionEducationDuration.data?.value));
 }
 
 /**
@@ -562,14 +566,7 @@ async function jsonToJobApplication(form: Requests.Form, hasAlreadyTakenPart: bo
     const osocId = latestOsoc.osoc_id;
     const educations = await getEducations(form);
     const educationLevel = await getEducationLevel(form);
-    const educationLevelQuestion = filterQuestion(form, "question_w4K6BX");
-    let educationDurationCanBeNull = false;
-    for(let educationsLevelIndex = 0; educationsLevelIndex < educationLevel.length; educationsLevelIndex++) {
-        if(educationLevelQuestion.data != null && checkWordInAnswer(educationLevelQuestion.data, "no diploma")) {
-            educationDurationCanBeNull = true;
-        }
-    }
-    const educationDuration = educationDurationCanBeNull ? null : await getEducationDuration(form);
+    const educationDuration = await getEducationDuration(form);
     const educationYear = await getEducationYear(form);
     const educationInstitute = await getEducationUniversity(form);
     const emailStatus = "NONE";
