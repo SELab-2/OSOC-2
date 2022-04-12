@@ -28,6 +28,10 @@ class CallbackCollection {
   }
 }
 
+export class RouterInvalidVerbError extends Error {}
+export class RouterInvalidEndpointError extends Error {}
+export class RouterInvalidVerbEndpointError extends Error {}
+
 class MockedRouter extends
     CallableInstance<[ express.Request, express.Response ], void> implements
         express.Router {
@@ -103,26 +107,38 @@ class MockedRouter extends
   constructor() { super('__call__'); }
 
   // simple mocking
-  public __call__(req: express.Request, res: express.Response) {
+  public async __call__(req: express.Request, res: express.Response) {
     const ep = req.path;
     const verb = req.method;
 
     if (!(ep in this.callbacks)) {
-      throw Error('Invalid endpoint ' + ep);
+      throw getInvalidEndpointError(ep);
     }
     if (verb != 'get' && verb != 'post' && verb != 'put' && verb != 'delete' &&
         verb != 'patch') {
-      throw Error('Invalid verb ' + verb);
+      throw getInvalidVerbError(verb);
     }
     const pVerb = verb as 'get' | 'post' | 'put' | 'delete' | 'patch';
     const cb = this.callbacks[ep][pVerb].cb;
 
     if (cb == undefined) {
-      throw Error('Invalid verb/endpoint combination: ' + pVerb + ' ' + ep);
+      throw getInvalidVerbEndpointError(verb, ep);
     } else {
-      cb(req, res, function() { /*do nothing*/ });
+      await Promise.resolve().then(
+          () => cb(req, res, function() { /*do nothing*/ }));
     }
   }
 }
 
 export function getMockRouter(): MockedRouter { return new MockedRouter(); }
+
+export function getInvalidVerbError(verb: string) {
+  return new RouterInvalidEndpointError('Invalid verb ' + verb);
+}
+export function getInvalidEndpointError(ep: string) {
+  return new RouterInvalidEndpointError('Invalid endpoint ' + ep);
+}
+export function getInvalidVerbEndpointError(verb: string, ep: string) {
+  return new RouterInvalidEndpointError(
+      'Invalid verb/endpoint combination: ' + verb + " " + ep);
+}

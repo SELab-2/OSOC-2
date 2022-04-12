@@ -4,7 +4,11 @@ import {mockDeep} from 'jest-mock-extended';
 
 import * as session_key from '../orm_functions/session_key';
 
-import {getMockRouter} from './mocks';
+import {
+  getInvalidEndpointError,
+  getInvalidVerbEndpointError,
+  getMockRouter
+} from './mocks';
 
 jest.mock('../orm_functions/session_key');
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
@@ -12,6 +16,14 @@ const session_keyMock = session_key as jest.Mocked<typeof session_key>;
 import * as login_user from '../orm_functions/login_user';
 jest.mock('../orm_functions/login_user');
 const login_userMock = login_user as jest.Mocked<typeof login_user>;
+
+import * as student from '../orm_functions/student';
+jest.mock('../orm_functions/student');
+const studentMock = student as jest.Mocked<typeof student>;
+
+import * as project from '../orm_functions/project';
+jest.mock('../orm_functions/project');
+const projectMock = project as jest.Mocked<typeof project>;
 
 import * as crypto from 'crypto';
 jest.mock('crypto');
@@ -466,7 +478,7 @@ test("utility.getOrReject behaves correctly", () => {
   ]);
 })
 
-test.only("utility.addInvalidVerbs adds callbacks", () => {
+test("utility.addInvalidVerbs adds callbacks", () => {
   const router = getMockRouter();
   util.addInvalidVerbs(router, '/test');
 
@@ -475,12 +487,202 @@ test.only("utility.addInvalidVerbs adds callbacks", () => {
     req.method = x;
     req.path = '/test';
     const res = getMockRes();
-    router(req, res.res);
-    const err = util.errors.cookInvalidVerb(req);
-    expect(res.res.status).toHaveBeenCalledWith(err.http);
-    expect(res.res.send)
-        .toHaveBeenCalledWith({success : false, reason : err.reason});
+    Promise.resolve().then(() => router(req, res.res)).then(() => {
+      const err = util.errors.cookInvalidVerb(req);
+      expect(res.res.status).toHaveBeenCalledWith(err.http);
+      expect(res.res.send)
+          .toHaveBeenCalledWith({success : false, reason : err.reason});
+    });
   });
 
   return Promise.all([ prm ]);
+});
+
+test("utility.addAllInvalidVerbs adds multiple callbacks", () => {
+  const router = getMockRouter();
+  const eps = [ '/', '/test', '/test2' ];
+  util.addAllInvalidVerbs(router, eps);
+
+  const prm = [ 'get', 'delete', 'post' ]
+                  .map(v => eps.map(e => {
+                    const req = getMockReq();
+                    const res = getMockRes().res;
+                    req.method = v;
+                    req.path = e;
+
+                    const err = util.errors.cookInvalidVerb(req);
+                    Promise.resolve().then(() => router(req, res)).then(() => {
+                      expect(res.status).toHaveBeenCalledWith(err.http);
+                      expect(res.send).toHaveBeenCalledWith(
+                          {success : false, reason : err.reason});
+                    });
+                  }))
+                  .flat();
+  return Promise.all(prm);
+});
+
+test("utility.route installs exactly one route", async () => {
+  const router = getMockRouter();
+  const cb = () => {
+    console.log('RETURNING');
+    return Promise.resolve({sessionkey : 'abcd', data : {}})
+  };
+  const path = '/';
+  const verb = 'get';
+
+  util.route(router, verb, path, cb);
+
+  // correct
+  const req1 = getMockReq();
+  const res1 = getMockRes().res;
+  req1.path = path;
+  req1.method = verb;
+
+  // shouldn't throw
+  await Promise.resolve()
+      .then(() => router(req1, res1))
+      .then(() => { expect(res1.status).toHaveBeenCalledWith(500); })
+
+  // incorrect ep
+  const req2 = getMockReq();
+  const res2 = getMockRes().res;
+  req2.path = '/test';
+  req2.method = 'get';
+  expect(Promise.resolve().then(() => router(req2, res2)))
+      .rejects.toStrictEqual(getInvalidEndpointError('/test'));
+
+  // incorrect verb/ep
+  const req3 = getMockReq();
+  const res3 = getMockRes().res;
+  req3.path = path;
+  req3.method = 'post';
+  expect(Promise.resolve().then(() => router(req3, res3)))
+      .rejects.toStrictEqual(getInvalidVerbEndpointError('post', '/'));
+});
+
+test("utility.routeKeyOnly installs exactly one route", async () => {
+  const router = getMockRouter();
+  const cb = () => {
+    console.log('RETURNING');
+    return Promise.resolve({sessionkey : 'abcd', data : {}})
+  };
+  const path = '/';
+  const verb = 'get';
+
+  util.routeKeyOnly(router, verb, path, cb);
+
+  // correct
+  const req1 = getMockReq();
+  const res1 = getMockRes().res;
+  req1.path = path;
+  req1.method = verb;
+
+  // shouldn't throw
+  await Promise.resolve()
+      .then(() => router(req1, res1))
+      .then(() => { expect(res1.status).toHaveBeenCalledWith(200); })
+
+  // incorrect ep
+  const req2 = getMockReq();
+  const res2 = getMockRes().res;
+  req2.path = '/test';
+  req2.method = 'get';
+  expect(Promise.resolve().then(() => router(req2, res2)))
+      .rejects.toStrictEqual(getInvalidEndpointError('/test'));
+
+  // incorrect verb/ep
+  const req3 = getMockReq();
+  const res3 = getMockRes().res;
+  req3.path = path;
+  req3.method = 'post';
+  expect(Promise.resolve().then(() => router(req3, res3)))
+      .rejects.toStrictEqual(getInvalidVerbEndpointError('post', '/'));
+})
+
+test("utility.isValidID checks IDs", async () => {
+  studentMock.getStudent.mockReset();
+  projectMock.getProjectById.mockReset();
+
+  studentMock.getStudent.mockImplementation((id) => {
+    if (id == 1) {
+      return Promise.resolve({
+        student_id : 1,
+        person_id : 5,
+        gender : 'Apache Attack Helicopter',
+        pronouns : [ 'vroom', 'vroom', 'vroom' ],
+        phone_number : '0469 420 420',
+        nickname : 'jeff',
+        alumni : false,
+        person : {
+          person_id : 5,
+          email : null,
+          github : null,
+          firstname : 'jeffrey',
+          lastname : 'jan'
+        }
+      });
+    }
+    return Promise.resolve(null);
+  });
+
+  projectMock.getProjectById.mockImplementation((id) => {
+    if (id == 1) {
+      return Promise.resolve({
+        project_id : 5,
+        name : 'Jeff\'s Battle Bots',
+        osoc_id : 516645164126546,
+        partner : 'Jeff Himself',
+        description : 'Nothing special and definitely nothing illegal',
+        start_date : new Date(Date.now()),
+        end_date : new Date(Date.now()),
+        positions : 42069
+      });
+    }
+    return Promise.resolve(null);
+  });
+
+  const err = util.errors.cookInvalidID();
+
+  return Promise.all([
+    expect(util.isValidID({id : 1, sessionkey : ''}, 'student'))
+        .resolves.toStrictEqual({id : 1, sessionkey : ''}),
+    expect(util.isValidID({id : 1, sessionkey : ''}, 'project'))
+        .resolves.toStrictEqual({id : 1, sessionkey : ''}),
+    expect(util.isValidID({id : 2, sessionkey : ''}, 'student'))
+        .rejects.toStrictEqual(err),
+    expect(util.isValidID({id : 2, sessionkey : ''}, 'project'))
+        .rejects.toStrictEqual(err)
+  ])
+});
+
+test("utility.setupRedirect sets up a single redirect", () => {
+  const router = getMockRouter();
+  util.setupRedirect(router, '');
+
+  // valid
+  const req1 = getMockReq();
+  const res1 = getMockRes().res;
+  req1.path = '/';
+  req1.method = 'get';
+  Promise.resolve().then(() => router(req1, res1)).then(() => {
+    expect(res1.status).toHaveBeenCalledWith(303);
+    expect(res1.header).toHaveBeenCalledWith({'Location' : '/api-osoc/all'});
+    expect(res1.send).toHaveBeenCalled();
+  });
+
+  // incorrect ep
+  const req2 = getMockReq();
+  const res2 = getMockRes().res;
+  req2.path = '/test';
+  req2.method = 'get';
+  expect(Promise.resolve().then(() => router(req2, res2)))
+      .rejects.toStrictEqual(getInvalidEndpointError('/test'));
+
+  // incorrect verb/ep
+  const req3 = getMockReq();
+  const res3 = getMockRes().res;
+  req3.path = '/';
+  req3.method = 'post';
+  expect(Promise.resolve().then(() => router(req3, res3)))
+      .rejects.toStrictEqual(getInvalidVerbEndpointError('post', '/'));
 });
