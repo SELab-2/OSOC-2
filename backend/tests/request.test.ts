@@ -157,15 +157,18 @@ test("Can parse update login user requests", () => {
   return Promise.all([ s, f, s_, f_, f__ ].flat());
 });
 
-test("Can parse login request", () => {
+test("Can parse login request (parameters)", () => {
   const valid: express.Request = getMockReq();
   const noname: express.Request = getMockReq();
   const nopass: express.Request = getMockReq();
+  const nonmail: express.Request = getMockReq();
 
   valid.body.name = "Alice.STUDENT@hotmail.be";
   valid.body.pass = "Pass #1";
   noname.body.pass = "Pass #2";
   nopass.body.name = "Name.2@email.be";
+  nonmail.body.name = "some name idk";
+  nonmail.body.pass = "some pass idk";
 
   // TODO
   return Promise.all([
@@ -176,8 +179,37 @@ test("Can parse login request", () => {
     expect(Rq.parseLoginRequest(noname))
         .rejects.toBe(errors.cookArgumentError()),
     expect(Rq.parseLoginRequest(nopass))
+        .rejects.toBe(errors.cookArgumentError()),
+    expect(Rq.parseLoginRequest(nonmail))
         .rejects.toBe(errors.cookArgumentError())
   ]);
+});
+
+test("Can parse login request (normalize email)", () => {
+  const key = 'key1';
+  const exp = {name : '', pass : 'jeff'};
+
+  const emails = [
+    // normal, re-lowercase, remove gmail dots
+    "jeffrey@hotmail.com", "JEFFREY@hotmail.com", "je.ff.re.y@gmail.com",
+    // remove gmail subdomain, googlemail = gmail, remove outlook subdomain
+    "jeff+rey@gmail.com", "jeffrey@googlemail.com", "jeff+rey@outlook.com",
+    // remove yahoo subdomain, remove icloud subdomain
+    "jeff-rey@yahoo.com", "jeff+rey@icloud.com"
+  ];
+
+  return Promise.all(emails.map(x => {
+    const req = getMockReq();
+    setSessionKey(req, key);
+    req.body.name = x;
+    req.body.pass = 'jeff';
+    if (!validator.normalizeEmail(x)) {
+      throw Error('Invalid email address!');
+    }
+    const res = {...exp};
+    res.name = validator.normalizeEmail(x) as string;
+    return expect(Rq.parseLoginRequest(req)).resolves.toStrictEqual(res);
+  }));
 });
 
 test("Can parse update student request", () => {
@@ -1229,4 +1261,61 @@ test("Can parse filter student requests (sorting filters)", () => {
                            return [ pass, rejc ].flat();
                          })
                          .flat());
+});
+
+test("Can parse get suggestions for student request (without year)", () => {
+  const key = 'abcd';
+  const id = 7;
+
+  // valid case
+  const reqV = getMockReq();
+  setSessionKey(reqV, key);
+  reqV.params.id = id.toString();
+  const ok = expect(Rq.parseGetSuggestionsStudentRequest(reqV))
+                 .resolves.toStrictEqual({sessionkey : key, id : id});
+
+  // invalid case - no key
+  const reqK = getMockReq();
+  reqK.params.id = id.toString();
+  const i1 = expect(Rq.parseGetSuggestionsStudentRequest(reqK))
+                 .rejects.toBe(errors.cookUnauthenticated());
+
+  // invalid case - no id
+  const reqI = getMockReq();
+  setSessionKey(reqI, key);
+  const i2 = expect(Rq.parseGetSuggestionsStudentRequest(reqI))
+                 .rejects.toBe(errors.cookArgumentError());
+
+  return Promise.all([ ok, i1, i2 ]);
+});
+
+test("Can parse get suggestions for student request (with year)", () => {
+  const key = 'abcd';
+  const id = 7;
+  const year = 2001;
+
+  // valid case
+  const reqV = getMockReq();
+  setSessionKey(reqV, key);
+  reqV.body.year = year;
+  reqV.params.id = id.toString();
+  const ok =
+      expect(Rq.parseGetSuggestionsStudentRequest(reqV))
+          .resolves.toStrictEqual({sessionkey : key, id : id, year : year});
+
+  // invalid case - no key
+  const reqK = getMockReq();
+  reqK.params.id = id.toString();
+  reqK.body.year = year;
+  const i1 = expect(Rq.parseGetSuggestionsStudentRequest(reqK))
+                 .rejects.toBe(errors.cookUnauthenticated());
+
+  // invalid case - no id
+  const reqI = getMockReq();
+  setSessionKey(reqI, key);
+  reqK.body.year = year;
+  const i2 = expect(Rq.parseGetSuggestionsStudentRequest(reqI))
+                 .rejects.toBe(errors.cookArgumentError());
+
+  return Promise.all([ ok, i1, i2 ]);
 });
