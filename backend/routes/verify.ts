@@ -3,7 +3,6 @@ import express from 'express';
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
-//import {errors} from '../utility';
 
 /**
  *  Attempts to verify if the session key is valid.
@@ -13,14 +12,8 @@ import * as util from '../utility';
  */
 async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     const parsedRequest = await rq.parseUserAllRequest(req);
-    console.log("parsedRequest")
-    console.log(parsedRequest)
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
-    console.log("checkedSessionKey")
-    console.log(checkedSessionKey)
     if (checkedSessionKey.data === undefined) {
-        // Return false instead of promise reject
-        // return Promise.reject(errors.cookInvalidID);
         return Promise.resolve({success : false});
     }
     return Promise.resolve({success : true});

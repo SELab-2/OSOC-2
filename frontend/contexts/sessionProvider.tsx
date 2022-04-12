@@ -39,9 +39,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
 
-    // Because useEffects can have a different order we need to check if the session id has already been verified
-    // const [verified, setVerified] = useState<boolean>(false);
-
+    // Because `useEffect` can have a different order we need to check if the session id has already been verified
     let verified = false
 
     /**
@@ -59,7 +57,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
     }, [])
 
     /**
-     * The useEffect is not always called before other page's use effect
+     * The `useEffect` is not always called before other page's use effect
      * Therefore we can use this function to get the sessionkey in the useEffect functions
      * Performs a backend call to verify the session id
      */
@@ -95,7 +93,6 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${key}`
             }
         }).then(response => response.json()).then(response => {
-            console.log(response)
             if (!response.success) {
                 router.push("/login")
                 return ""
