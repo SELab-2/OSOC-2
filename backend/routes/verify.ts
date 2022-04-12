@@ -14,9 +14,11 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data === undefined) {
-        return Promise.resolve({success: false});
+        return Promise.resolve({valid: false});
     }
-    return Promise.resolve({success: true});
+    else{
+        return Promise.resolve({valid: true});
+    }
 }
 
 /**
