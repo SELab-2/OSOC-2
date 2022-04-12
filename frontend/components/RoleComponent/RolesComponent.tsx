@@ -1,8 +1,8 @@
-import styles from "./Roles.module.css";
+import styles from "./RoleComponent.module.css";
 import React, { SyntheticEvent} from "react";
 import {Role} from "../../types/types";
 
-export const Roles: React.FC<{ role: Role, setSelected: (newRoles: string) => void }> = ({
+export const RolesComponent: React.FC<{ role: Role, setSelected: (newRoles: string) => void }> = ({
                                                                                              role,
                                                                                              setSelected
 

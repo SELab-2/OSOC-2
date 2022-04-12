@@ -1,5 +1,5 @@
 import styles from "./StudentFilter.module.css";
-import React, {SyntheticEvent, useState} from "react";
+import React, {SyntheticEvent, useContext, useState} from "react";
 import Image from "next/image";
 import Filter from "../../public/images/filter.png"
 import ArrowUp from "../../public/images/arrowUp.png"
@@ -11,9 +11,10 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png"
 import ExclamationIcon from "../../public/images/exclamation_mark.png"
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png"
 import {Role} from "../../types/types";
-import {Roles} from "../Roles/Roles";
+import {RolesComponent} from "../RoleComponent/RolesComponent";
+import SessionContext from "../../contexts/sessionProvider";
 
-export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
+export const StudentFilter: React.FC<{ roles: Array<Role>, test: () => void }> = ({roles}, test) => {
     const [nameSort, setNameSort] = useState<boolean>(false);
     const [emailSort, setEmailSort] = useState<boolean>(false);
     const [filterYes, setFilterYes] = useState<boolean>(false);
@@ -22,6 +23,7 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
     const [alumni, setAlumni] = useState<boolean>(false);
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
+    const {sessionKey, setSessionKey} = useContext(SessionContext);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -58,19 +60,42 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc";
         const emailOrder = emailSort ? "Desc" : "Asc";
-        const roles = ["Backend dev", "Frontend dev"];
-        setSelectedRoles(roles)
         const query = "name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
             "&Yes=" + filterYes + "&maybe=" + filterMaybe + "&no=" + filterNo + "&studentCoach=" + studentCoach +
             "&alumni=" + alumni + "&roles=" + roles;
         console.log(query);
         //TODO hier moet de call naar de backend gebeuren en dan de data naar Students brengen
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `auth/osoc2 ${sessionKey}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => response.json()).then(json => {
+                console.log(json)
+                if (!json.success) {
+                    return {success: false};
+                } else return json;
+            })
+            .catch(err => {
+                console.log(err)
+                return {success: false};
+            });
+        if (setSessionKey) {
+            setSessionKey(response.sessionkey);
+        }
+        console.log("aeihgaoeh")
+        console.log(response.data)
+        test()
+
+
     }
 
 
-    console.log(alumni);
-    console.log(studentCoach);
-    console.log(selectedRoles);
+
 
     const changeSelectedRolesProp = (changeRole: string) => {
         const roles = selectedRoles
@@ -83,16 +108,6 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
             roles.push(changeRole)
         }
         setSelectedRoles(roles);
-    }
-    const getRolesHTML = () => {
-        const m = [];
-        for (let i = 0; i < roles.length; i++) {
-            m.push(<Roles role={roles[i]} setSelected={changeSelectedRolesProp}/>);
-
-        }
-        console.log(m)
-        return m;
-
     }
     return (
         <div className={styles.filter}>
@@ -119,7 +134,8 @@ export const StudentFilter: React.FC<{ roles: Array<Role> }> = ({roles}) => {
             </button>
             <div>
                 roles
-                {getRolesHTML()}
+                {roles.map(role => <RolesComponent role={role} key={role.role_id}
+                                                   setSelected={changeSelectedRolesProp}/>)}
             </div>
             <div className={styles.dropdown}>
                 <Image src={Filter} width={30} height={30} className={styles.dropbtn} alt={"Disabled"}>
