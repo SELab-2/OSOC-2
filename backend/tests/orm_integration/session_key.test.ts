@@ -1,5 +1,11 @@
 import prisma from "../../prisma/prisma";
-import {addSessionKey, changeSessionKey, checkSessionKey, removeAllKeysForUser} from "../../orm_functions/session_key";
+import {
+    addSessionKey,
+    changeSessionKey,
+    checkSessionKey,
+    removeAllKeysForLoginUserId,
+    removeAllKeysForUser
+} from "../../orm_functions/session_key";
 
 it("should create a new session key for the given login user", async () =>{
     const loginUsers = await prisma.login_user.findMany();
@@ -79,5 +85,28 @@ it("should delete all session keys of the user with given key", async () => {
     await removeAllKeysForUser("key_user1");
 });
 
+
+it("should delete all session keys of the user with given key", async () => {
+    const login_users = await prisma.login_user.findMany()
+    console.log(await prisma.session_keys.findMany());
+    await prisma.session_keys.createMany({
+        data : [
+            {
+            login_user_id: login_users[1].login_user_id,
+            session_key: "key_user1"
+            },
+            {
+                login_user_id: login_users[1].login_user_id,
+                session_key: "key_user2"
+            },
+        ]
+    });
+
+    const deleted = await removeAllKeysForLoginUserId(login_users[1].login_user_id);
+    expect(deleted).toHaveProperty("count", 2);
+
+    const remaining_keys = await prisma.session_keys.findMany();
+    expect(remaining_keys.length).toEqual(0);
+});
 
 

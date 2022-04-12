@@ -66,3 +66,16 @@ export async function removeAllKeysForUser(key: string) {
         })
     );
 }
+
+/**
+ *
+ * @param loginUserId the id of the loginUser whose session keys we want to remove
+ * @returns a promise with the number of deleted records
+ */
+export async function removeAllKeysForLoginUserId(loginUserId: number) {
+    return await prisma.session_keys.deleteMany({
+        where :  {
+            login_user_id: loginUserId
+        }
+    });
+}
