@@ -1075,7 +1075,11 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
     const wordInAnswerInBelgium :  Responses.FormResponse<boolean> = checkWordInAnswer(questionInBelgium.data, "yes");
     const wordInAnswerCanWorkEnough :  Responses.FormResponse<boolean> = checkWordInAnswer(questionCanWorkEnough.data, "yes");
 
-    if(wordInAnswerInBelgium && wordInAnswerCanWorkEnough) {
+    if(wordInAnswerInBelgium.data == null || wordInAnswerCanWorkEnough.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(wordInAnswerInBelgium.data && wordInAnswerCanWorkEnough.data) {
         const person = await jsonToPerson(parsedRequest);
         const student = await jsonToStudent(parsedRequest, {id : person.id});
         const jobApplication = await jsonToJobApplication(parsedRequest, {id : student.id}, student.hasAlreadyTakenPart);
@@ -1085,9 +1089,7 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
         return Promise.resolve({});
     }
 
-
-
-    return Promise.reject(errors.cookArgumentError());
+    return Promise.resolve({});
 }
 
 /**
