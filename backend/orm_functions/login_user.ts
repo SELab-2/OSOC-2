@@ -212,19 +212,12 @@ export async function filterLoginUsers(nameFilter: FilterString,
                                        emailFilter: FilterString,
                                        nameSort: FilterSort,
                                        emailSort: FilterSort,
-                                       statusFilter: account_status_enum[] | undefined,
+                                       statusFilter: account_status_enum | undefined,
                                        isCoach: FilterBoolean,
                                        isAdmin: FilterBoolean) {
 
     if (nameSort !== undefined && emailSort !== undefined) {
         return Promise.reject("Sorting is only allowed on 1 field");
-    }
-
-    // create array of objects for the "OR" that we use to give multiple options for the statusFilter.
-    let account_status_options = undefined;
-    if (statusFilter) {
-        account_status_options = []
-        statusFilter.forEach(acc_stat => account_status_options.push({account_status: acc_stat}));
     }
 
     // execute the query
@@ -240,7 +233,7 @@ export async function filterLoginUsers(nameFilter: FilterString,
                     mode: 'insensitive'
                 },
             },
-            OR : account_status_options,
+            account_status: statusFilter,
             is_coach: isCoach,
             is_admin: isAdmin
         },
