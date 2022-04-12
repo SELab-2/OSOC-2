@@ -142,3 +142,24 @@ export function getInvalidVerbEndpointError(verb: string, ep: string) {
   return new RouterInvalidEndpointError(
       'Invalid verb/endpoint combination: ' + verb + " " + ep);
 }
+
+export type Method = 'get'|'post'|'put'|'patch'|'delete';
+
+export type RouterPrepareCallback = (req: express.Request) => void;
+
+export async function expectRouter(router: MockedRouter, path: string,
+                                   method: Method, req: express.Request,
+                                   res: express.Response) {
+  req.path = path;
+  req.method = method;
+  return Promise.resolve().then(() => router(req, res));
+}
+
+export async function expectRouterThrow<T>(router: MockedRouter, path: string,
+                                           method: Method, req: express.Request,
+                                           res: express.Response, err: T) {
+  req.path = path;
+  req.method = method;
+  return expect(Promise.resolve().then(() => router(req, res)))
+      .rejects.toStrictEqual(err);
+}

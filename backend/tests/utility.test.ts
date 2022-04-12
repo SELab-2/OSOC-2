@@ -5,6 +5,8 @@ import {mockDeep} from 'jest-mock-extended';
 import * as session_key from '../orm_functions/session_key';
 
 import {
+  expectRouter,
+  expectRouterThrow,
   getInvalidEndpointError,
   getInvalidVerbEndpointError,
   getMockRouter
@@ -655,7 +657,7 @@ test("utility.isValidID checks IDs", async () => {
   ])
 });
 
-test("utility.setupRedirect sets up a single redirect", () => {
+test("utility.setupRedirect sets up a single redirect", async () => {
   const router = getMockRouter();
   util.setupRedirect(router, '');
 
@@ -664,7 +666,8 @@ test("utility.setupRedirect sets up a single redirect", () => {
   const res1 = getMockRes().res;
   req1.path = '/';
   req1.method = 'get';
-  Promise.resolve().then(() => router(req1, res1)).then(() => {
+  // Promise.resolve().then(() => router(req1, res1)).then(() => {
+  expectRouter(router, '/', 'get', req1, res1).then(() => {
     expect(res1.status).toHaveBeenCalledWith(303);
     expect(res1.header).toHaveBeenCalledWith({'Location' : '/api-osoc/all'});
     expect(res1.send).toHaveBeenCalled();
@@ -675,14 +678,14 @@ test("utility.setupRedirect sets up a single redirect", () => {
   const res2 = getMockRes().res;
   req2.path = '/test';
   req2.method = 'get';
-  expect(Promise.resolve().then(() => router(req2, res2)))
-      .rejects.toStrictEqual(getInvalidEndpointError('/test'));
+  await expectRouterThrow(router, '/test', 'get', req2, res2,
+                          getInvalidEndpointError('/test'));
 
   // incorrect verb/ep
   const req3 = getMockReq();
   const res3 = getMockRes().res;
   req3.path = '/';
   req3.method = 'post';
-  expect(Promise.resolve().then(() => router(req3, res3)))
-      .rejects.toStrictEqual(getInvalidVerbEndpointError('post', '/'));
+  await expectRouterThrow(router, '/', 'post', req3, res3,
+                          getInvalidVerbEndpointError('post', '/'));
 });
