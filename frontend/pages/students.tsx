@@ -34,7 +34,10 @@ const Students: NextPage = () => {
 
     return (
         <div className={styles.students}>
-            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+            {students.map(student => {
+                console.log(student)
+                return <StudentCard key={student.student.student_id} student={student as Student}/>
+            })}
         </div>
     )
 }
