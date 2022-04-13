@@ -5,7 +5,7 @@ import SessionContext from "../../contexts/sessionProvider";
 
 /**
  * Can be used when redirect from a different site to log in given credentials in the URL
- * Being of form /login/sessionkey?is_admin=boolean&is_coach=boolean
+ * Being of form /login/[sessionkey]
  * @constructor
  */
 const Pid: NextPage = () => {
