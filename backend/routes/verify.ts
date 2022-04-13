@@ -15,14 +15,16 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data === undefined) {
         return Promise.resolve({
-            valid: false,
+            valid: false
+        });
+    }
+    else{
+        return Promise.resolve({
+            valid: true,
             is_coach: checkedSessionKey.is_coach,
             is_admin: checkedSessionKey.is_admin,
             account_status: checkedSessionKey.accountStatus
         });
-    }
-    else{
-        return Promise.resolve({valid: true});
     }
 }
 
