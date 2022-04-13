@@ -104,20 +104,24 @@ function getPair(): {req: express.Request, res: express.Response} {
 
 test("admin.getRouter installs a correct router", async () => {
   // set up admin mock
-  adminMock.listAdmins.mockReset().mockImplementation(() => {
+  adminMock.listAdmins.mockReset();
+  adminMock.listAdmins.mockImplementation(() => {
     console.log('[listAdmins]');
     return Promise.resolve({sessionkey : 'abcd', data : []});
   });
-  adminMock.getAdmin.mockReset().mockImplementation(() => {
+  adminMock.getAdmin.mockReset();
+  adminMock.getAdmin.mockImplementation(() => {
     console.log('[getAdmin]');
     return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
   });
-  adminMock.modAdmin.mockReset().mockImplementation(() => {
+  adminMock.modAdmin.mockReset();
+  adminMock.modAdmin.mockImplementation(() => {
     console.log('[modAdmin]');
     return Promise.resolve(
         {sessionkey : 'abcd', data : {id : 7, name : 'Jeffrey Jan'}});
   });
-  adminMock.deleteAdmin.mockReset().mockImplementation(() => {
+  adminMock.deleteAdmin.mockReset();
+  adminMock.deleteAdmin.mockImplementation(() => {
     console.log('[deleteAdmin]');
     return Promise.resolve({sessionkey : 'abcd'});
   });
