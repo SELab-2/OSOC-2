@@ -4,23 +4,23 @@
   flex-direction: column;
   box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
   border-radius: 0.5rem;
-  margin-inline: auto;
   cursor: pointer;
+  width: 100%;
 }
 
 .body {
-  padding-inline: 2rem;
-  padding-top: 1rem
+  padding: 1rem;
 }
 
 .card h2 {
   font-size: large;
+  padding-block: 0;
+  padding-inline: 0.4rem;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1.25fr 1.5fr 1fr;
-  margin-bottom: 2.5rem;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 @media (max-width: 620px) {
@@ -40,13 +40,16 @@
 /*---------*/
 .column {
   border-right: 0.1rem solid var(--neutral-200);
-  margin-left: clamp(1rem, 3vw, 2.5rem);
+  margin-left: clamp(0.5rem, 2vw, 1.5rem);
 }
 .column:first-child {
   margin-left: 0;
 }
 .column:last-child {
   border-right: none;
+}
+.column a {
+  word-wrap: anywhere;
 }
 
 /*------------*/
@@ -55,14 +58,13 @@
 .categoryTitle {
   font-weight: lighter;
   font-size: x-small;
-  padding-block: 0.5rem;
+  padding: 0.4rem;
 }
 
 .category {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
-  margin-inline: -0.5rem;
 }
 
 /* The suggestions progressbar */
