@@ -1,6 +1,7 @@
 import {getMockReq, getMockRes} from '@jest-mock/express';
 import * as express from 'express';
 
+import * as config from '../../config.json';
 import * as types from '../../types';
 import * as util from '../../utility';
 import * as rMock from '../mocks';
@@ -45,7 +46,7 @@ function mockRoute<T extends types.Responses.ApiResponse>(
           res.send(obj);
         })
         .catch(e => {
-          console.log('route [mocked]: sending HTTP ' + e.http +
+          console.log('route [mocked;error]: sending HTTP ' + e.http +
                       ', obj: ' + JSON.stringify(e));
           res.status(e.http);
           res.send(e);
@@ -80,6 +81,10 @@ beforeEach(() => {
   expressMock.Router.mockImplementation(() => rMock.getMockRouter());
 });
 
+function setSessionKey(req: express.Request, key: string): void {
+  req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 function expectRedirect(res: express.Response, url: string) {
   expect(res.status).toBeCalledWith(303);
   expect(res.header).toBeCalledWith({'Location' : '/api-osoc/' + url + '/all'});
@@ -87,6 +92,8 @@ function expectRedirect(res: express.Response, url: string) {
 
 function expectStatusAndSend<T>(res: express.Response, status: number,
                                 send: T) {
+  console.log('Expecting status ' + status + ' and send ' +
+              JSON.stringify(send));
   expect(res.status).toBeCalledWith(status);
   expect(res.send).toBeCalledWith(send);
 }
@@ -95,37 +102,46 @@ function getPair(): {req: express.Request, res: express.Response} {
   return {req : getMockReq(), res : getMockRes().res};
 }
 
-test("admin.getRouter installs a correct router", () => {
+test("admin.getRouter installs a correct router", async () => {
   // set up admin mock
-  adminMock.listAdmins.mockReset().mockImplementation(
-      () => Promise.resolve({sessionkey : 'abcd', data : []}));
-  adminMock.getAdmin.mockReset().mockImplementation(
-      () => Promise.reject({http : 410, reason : 'Deprecated endpoint.'}));
-  adminMock.modAdmin.mockReset().mockImplementation(
-      () => Promise.resolve(
-          {sessionkey : 'abcd', data : {id : 7, name : 'Jeffrey Jan'}}));
-  adminMock.deleteAdmin.mockReset().mockImplementation(
-      () => Promise.resolve({sessionkey : 'abcd'}));
-  // set up router
-  const router = admin.getRouter() as rMock.MockedRouter;
-  const prm: Promise<void>[] = [];
-  // actual checks
-  {
-    const {req, res} = getPair();
-    prm.push(rMock.expectRouterThrow(router, '/add', 'get', req, res,
-                                     rMock.getInvalidEndpointError('/add')));
-  }
-  {
-    const {req, res} = getPair();
-    prm.push(rMock.expectRouter(router, '/', 'get', req, res)
-                 .then(() => expectRedirect(res, 'admin')));
-  }
-  {
-    const {req, res} = getPair();
-    prm.push(rMock.expectRouter(router, '/all', 'get', req, res)
-                 .then(() => expectStatusAndSend(
-                           res, 200, {sessionkey : 'abcd', data : []})));
-  }
+  adminMock.listAdmins.mockReset().mockImplementation(() => {
+    console.log('[listAdmins]');
+    return Promise.resolve({sessionkey : 'abcd', data : []});
+  });
+  adminMock.getAdmin.mockReset().mockImplementation(() => {
+    console.log('[getAdmin]');
+    return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
+  });
+  adminMock.modAdmin.mockReset().mockImplementation(() => {
+    console.log('[modAdmin]');
+    return Promise.resolve(
+        {sessionkey : 'abcd', data : {id : 7, name : 'Jeffrey Jan'}});
+  });
+  adminMock.deleteAdmin.mockReset().mockImplementation(() => {
+    console.log('[deleteAdmin]');
+    return Promise.resolve({sessionkey : 'abcd'});
+  });
 
-  return Promise.all(prm);
+  // set up router
+  const router = adminMock.getRouter() as rMock.MockedRouter;
+
+  // actual checks
+  await (async () => {
+    const {req, res} = getPair();
+    await rMock.expectRouterThrow(router, '/add', 'get', req, res,
+                                  rMock.getInvalidEndpointError('/add'));
+  })();
+
+  await (async () => {
+    const {req, res} = getPair();
+    await rMock.expectRouter(router, '/', 'get', req, res);
+    expectRedirect(res, 'admin');
+  })();
+
+  await (async () => {
+    const {req, res} = getPair();
+    setSessionKey(req, 'abcd');
+    await rMock.expectRouter(router, '/all', 'get', req, res);
+    expectStatusAndSend(res, 200, {sessionkey : 'abcd', data : []});
+  })();
 });

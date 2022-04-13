@@ -1,12 +1,16 @@
 import CallableInstance from 'callable-instance';
 import express from 'express';
 import core from 'express-serve-static-core';
+import {setTimeout} from 'timers/promises';
+
+type Call = (req: express.Request, res: express.Response,
+             next: express.NextFunction) => Promise<void>;
 
 class Callback {
-  cb: express.RequestHandler|undefined;
+  cb: Call|undefined;
 
   constructor() { this.cb = undefined; }
-  public set(cb: express.RequestHandler) {
+  public set(cb: Call) {
     if (this.cb === undefined)
       this.cb = cb;
   }
@@ -33,8 +37,8 @@ export class RouterInvalidEndpointError extends Error {}
 export class RouterInvalidVerbEndpointError extends Error {}
 
 export class MockedRouter extends
-    CallableInstance<[ express.Request, express.Response ], void> implements
-        express.Router {
+    CallableInstance<[ express.Request, express.Response ], Promise<void>>
+        implements express.Router {
   private verifier(route: string) {
     if (!(route in this.callbacks)) {
       this.callbacks[route] = new CallbackCollection();
@@ -55,27 +59,32 @@ export class MockedRouter extends
 
   get = ((pth: string, rt: express.RequestHandler) => {
           this.verifier(pth);
-          this.callbacks[pth].get.set(rt);
+          this.callbacks[pth].get.set(
+              async (req, res, next) => { await rt(req, res, next); });
         }) as core.IRouterMatcher<this, 'get'>;
 
   post = ((pth: string, rt: express.RequestHandler) => {
            this.verifier(pth);
-           this.callbacks[pth].post.set(rt);
+           this.callbacks[pth].post.set(
+               async (req, res, next) => { await rt(req, res, next); });
          }) as core.IRouterMatcher<this, 'post'>;
 
   put = ((pth: string, rt: express.RequestHandler) => {
           this.verifier(pth);
-          this.callbacks[pth].put.set(rt);
+          this.callbacks[pth].put.set(
+              async (req, res, next) => { await rt(req, res, next); });
         }) as core.IRouterMatcher<this, 'put'>;
 
   delete = ((pth: string, rt: express.RequestHandler) => {
              this.verifier(pth);
-             this.callbacks[pth].delete.set(rt);
+             this.callbacks[pth].delete.set(
+                 async (req, res, next) => { await rt(req, res, next); });
            }) as core.IRouterMatcher<this, 'delete'>;
 
   patch = ((pth: string, rt: express.RequestHandler) => {
             this.verifier(pth);
-            this.callbacks[pth].patch.set(rt);
+            this.callbacks[pth].patch.set(
+                async (req, res, next) => { await rt(req, res, next); });
           }) as core.IRouterMatcher<this, 'patch'>;
 
   options = jest.fn();
@@ -108,25 +117,28 @@ export class MockedRouter extends
 
   // simple mocking
   public async __call__(req: express.Request, res: express.Response) {
-    const ep = req.path;
-    const verb = req.method;
+    return Promise.resolve().then(async () => {
+      const ep = req.path;
+      const verb = req.method;
 
-    if (!(ep in this.callbacks)) {
-      throw getInvalidEndpointError(ep);
-    }
-    if (verb != 'get' && verb != 'post' && verb != 'put' && verb != 'delete' &&
-        verb != 'patch') {
-      throw getInvalidVerbError(verb);
-    }
-    const pVerb = verb as 'get' | 'post' | 'put' | 'delete' | 'patch';
-    const cb = this.callbacks[ep][pVerb].cb;
+      if (!(ep in this.callbacks)) {
+        throw getInvalidEndpointError(ep);
+      }
+      if (verb != 'get' && verb != 'post' && verb != 'put' &&
+          verb != 'delete' && verb != 'patch') {
+        throw getInvalidVerbError(verb);
+      }
+      const pVerb = verb as 'get' | 'post' | 'put' | 'delete' | 'patch';
+      const cb = this.callbacks[ep][pVerb].cb;
 
-    if (cb == undefined) {
-      throw getInvalidVerbEndpointError(verb, ep);
-    } else {
-      await Promise.resolve().then(
-          () => cb(req, res, function() { /*do nothing*/ }));
-    }
+      if (cb == undefined) {
+        throw getInvalidVerbEndpointError(verb, ep);
+      } else {
+        console.log('[mockedRouter]: returning await...');
+        return await Promise.resolve().then(
+            async () => await cb(req, res, function() { /*do nothing*/ }));
+      }
+    });
   }
 }
 
@@ -152,7 +164,8 @@ export async function expectRouter(router: MockedRouter, path: string,
                                    res: express.Response) {
   req.path = path;
   req.method = method;
-  return Promise.resolve().then(() => router(req, res));
+  await router(req, res);
+  await setTimeout(1000);
 }
 
 export async function expectRouterThrow<T>(router: MockedRouter, path: string,
@@ -160,6 +173,6 @@ export async function expectRouterThrow<T>(router: MockedRouter, path: string,
                                            res: express.Response, err: T) {
   req.path = path;
   req.method = method;
-  return expect(Promise.resolve().then(() => router(req, res)))
+  return expect(expectRouter(router, path, method, req, res))
       .rejects.toStrictEqual(err);
 }
