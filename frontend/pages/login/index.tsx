@@ -1,7 +1,7 @@
 import type {NextPage} from 'next'
 import styles from '../../styles/login.module.scss'
 import Image from "next/image"
-import GitHubLogo from "../../public/images/github_logo.svg"
+import GitHubLogo from "../../public/images/github-logo.svg"
 import {SyntheticEvent, useContext, useEffect, useState} from "react";
 import {Modal} from "../../components/Modal/Modal";
 import {useRouter} from "next/router";
@@ -9,12 +9,9 @@ import {useRouter} from "next/router";
 import * as crypto from 'crypto';
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
-import isEmail from 'validator/lib/isEmail';
 
-/**
- * The main login and registration page
- * @constructor
- */
+import * as validator from 'validator';
+
 const Index: NextPage = () => {
 
     const router = useRouter()
@@ -22,14 +19,13 @@ const Index: NextPage = () => {
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
-        let sessionKey = ""
         if (getSessionKey) {
-            sessionKey = getSessionKey()
-        }
-        // The user is already logged in, redirect the user
-        if (sessionKey != "") {
-            router.push("/students").then()
-            return
+            getSessionKey().then(sessionKey => {
+                // The user is already logged in, redirect the user
+                if (sessionKey != "") {
+                    router.push("/students").then()
+                }
+            })
         }
 
         const {loginError} = router.query
@@ -104,24 +100,20 @@ const Index: NextPage = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
-            }).then(response => response.json()).catch(error => {
-                console.log(error)
-                setLoginBackendError("Failed to login. An unexpected error occured.")
-            });
-
-            if (response === undefined) {
-                return
-            }
-
-            if (!response.success) {
-                setLoginBackendError(`Failed to login. ${response.reason}`);
-                return;
-            }
-
+            })
+                .then(response => response.json()).then(json => {
+                    if (!json.success) {
+                        setLoginBackendError(`Failed to login. ${json.reason}`);
+                        return {success: false};
+                    } else return json;
+                })
+                .catch(err => {
+                    setLoginBackendError(`Failed to login. ${err.reason}`);
+                    return {success: false};
+                });
 
             // The user is succesfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
-                console.log(response)
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey)
                 }
@@ -194,7 +186,7 @@ const Index: NextPage = () => {
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
             error = true
-        } else if(!isEmail(registerEmail)) {
+        } else if (!validator.default.isEmail(registerEmail)) {
             setRegisterEmailError("No valid email address");
         } else {
             setRegisterEmailError("");
@@ -249,19 +241,17 @@ const Index: NextPage = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
-            }).then(response => response.json()).catch(error => {
-                console.log(error)
-                setRegisterBackendError('Failed to register. An unexpected error occured.');
             })
-
-            if (response === undefined) {
-                return
-            }
-
-            if (!response.success) {
-                setRegisterBackendError('Failed to register. Please check all fields. ' + response.reason);
-                return
-            }
+                .then(response => response.json()).then(json => {
+                    if (!json.success) {
+                        setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                        return Promise.resolve({success: false});
+                    } else return json;
+                })
+                .catch(json => {
+                    setRegisterBackendError('Failed to register. Please check all fields. ' + json.reason);
+                    return Promise.resolve({success: false});
+                });
 
             if (response.success) {
                 await router.push("/pending")

@@ -14,17 +14,15 @@ const Home: NextPage = () => {
     const router = useRouter()
 
     useEffect(() => {
-        let sessionKey = ""
         if (getSessionKey) {
-            sessionKey = getSessionKey()
+            getSessionKey().then(sessionKey => {
+                if (sessionKey !== "") {
+                    router.push("/students").then()
+                }
+            })
         }
-        // No user is logged in
-        if (sessionKey === "") {
-            router.push("/login").then()
-        } else {
-            router.push("/students").then()
-        }
-    }, [getSessionKey, router])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     return (<></>)
 }

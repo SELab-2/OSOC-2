@@ -16,7 +16,7 @@ const response = {
     gender: 'Male',
     person_id: 0,
     phone_number: "0118 999 881 999 119 725 3",
-    pronouns: ["fire"]
+    pronouns: "fire"
 }
 
 test("should create a student", async () => {
@@ -27,7 +27,7 @@ test("should create a student", async () => {
         personId: 0,
         gender: 'Male',
         phoneNumber: "0118 999 881 999 119 725 3",
-        pronouns: ["fire"]
+        pronouns: "fire"
     }
 
     prismaMock.student.create.mockResolvedValue(response);
@@ -50,7 +50,7 @@ test("should update the student", async () => {
         alumni: false,
         nickname: "Mozz",
         phoneNumber: "0118 999 881 999 119 725 3",
-        pronouns: ["fire"]
+        pronouns: "fire"
     }
 
     prismaMock.student.update.mockResolvedValue(response);

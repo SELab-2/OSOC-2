@@ -7,6 +7,7 @@ import {searchAllAdminLoginUsers} from './orm_functions/login_user';
 import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
+import * as session_key from "./routes/session_key.json";
 import {
   Anything,
   ApiError,
@@ -239,9 +240,14 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey)
-      .then((uid) => Promise.resolve({data : obj, userId : uid.login_user_id}))
-      .catch(() => Promise.reject(errors.cookUnauthenticated()));
+  return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+    if (uid) {
+      return Promise.resolve({data : obj, userId : uid.login_user_id});
+    }
+    else{
+      return Promise.reject(errors.cookNonExistent);
+    }
+  }).catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
 /**
@@ -287,7 +293,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  return skey.changeSessionKey(key, generateKey())
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+      return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
