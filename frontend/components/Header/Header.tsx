@@ -28,7 +28,21 @@ export const Header: React.FC = () => {
         if (setIsCoach) {
             setIsCoach(false)
         }
-        router.push("/login").then()
+        router.push("/login").then(() => {
+            // After being redirected to the login page, let the backend now that the user has logged out.
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `auth/osoc2 ${sessionKey}`
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    console.log(response)
+                }
+            }).catch(error => console.log(error))
+        })
     }
 
     return (
@@ -44,9 +58,12 @@ export const Header: React.FC = () => {
                 <h1>Selections</h1>
             </div>
             <div className={`${styles.links} ${router.pathname !== "/login" ? "" : styles.displayNone}`}>
-                {sessionKey !== "" && !router.pathname.startsWith("/reset") ? <Link href={"/students"}>Students</Link> : null}
-                {sessionKey !== "" && !router.pathname.startsWith("/reset") ? <Link href={"/projects"}>Projects</Link> : null}
-                {sessionKey !== "" && isAdmin && !router.pathname.startsWith("/reset") ? <Link href={"/users"}>Manage Users</Link> : null}
+                {sessionKey !== "" && !router.pathname.startsWith("/reset") ?
+                    <Link href={"/students"}>Students</Link> : null}
+                {sessionKey !== "" && !router.pathname.startsWith("/reset") ?
+                    <Link href={"/projects"}>Projects</Link> : null}
+                {sessionKey !== "" && isAdmin && !router.pathname.startsWith("/reset") ?
+                    <Link href={"/users"}>Manage Users</Link> : null}
                 {sessionKey !== "" && !router.pathname.startsWith("/reset") ? <Link href={"/settings"}>Settings</Link> : null}
                 {router.pathname !== "/login" && !router.pathname.startsWith("/reset") ?
                     <button onClick={logOut}>Log out</button> : router.pathname.startsWith("/reset") ?

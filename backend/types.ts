@@ -1,4 +1,4 @@
-import {account_status_enum, email_status_enum} from "@prisma/client";
+import {account_status_enum, email_status_enum, type_enum} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -67,7 +67,8 @@ export interface Errors {
  * {@link Responses}.
  */
 export namespace InternalTypes {
-/**
+import FormAttachmentResponse = Responses.FormAttachmentResponse;
+  /**
  *  A session key is a string.
  */
 export type SessionKey = string;
@@ -123,10 +124,154 @@ export interface Person {
 }
 
 /**
+ *  Represents a form-person, with all associated data.
+ */
+export interface FormPerson {
+  /**
+   *  The firstname of this person.
+   */
+  birthName: string;
+  /**
+   *  The lastname of this person.
+   */
+  lastName: string;
+  /**
+   *  The email of this person.
+   */
+  email: string;
+}
+
+/**
  *  Represents a student, with all associated data. Does not correspond to a
  * student in the database.
  */
 export interface Student {}
+
+/**
+ *  Represents a form-student, with all associated data.
+ */
+export interface FormStudent {
+  /**
+   *  The firstname of this person.
+   */
+  pronouns: string | null;
+  /**
+   *  The lastname of this person.
+   */
+  gender: string;
+  /**
+   *  The email of this person.
+   */
+  phoneNumber: string;
+  /**
+   *  The email of this person.
+   */
+  nickname: string | null;
+  /**
+   *  The email of this person.
+   */
+  alumni: boolean;
+}
+
+/**
+ *  Represents a form-jobApplication, with all associated data.
+ */
+export interface FormJobApplication {
+  /**
+   *  The responsibilities of this person.
+   */
+  responsibilities: string | null;
+  /**
+   *  The fun fact of this person.
+   */
+  funFact: string;
+  /**
+   *  The volunteer info of this person.
+   */
+  volunteerInfo: string;
+  /**
+   *  The check if this person wants to be a studentCoach
+   */
+  studentCoach: boolean | null;
+  /**
+   *  The email of this person.
+   */
+  osocId: number;
+  /**
+   *  The email of this person.
+   */
+  educations: string[];
+  /**
+   *  The email of this person.
+   */
+  educationLevel: string[];
+  /**
+   *  The email of this person.
+   */
+  educationDuration: number | null;
+  /**
+   *  The email of this person.
+   */
+  educationYear: string;
+  /**
+   *  The email of this person.
+   */
+  educationInstitute: string;
+  /**
+   *  The email of this person.
+   */
+  emailStatus: email_status_enum;
+  /**
+   *  The email of this person.
+   */
+  createdAt: string;
+}
+
+/**
+ *  Represents a form-attachment, with all associated data.
+ */
+export interface FormAttachment {
+  /**
+   *  The responsibilities of this person.
+   */
+  cv_links: FormAttachmentResponse;
+  /**
+   *  The fun fact of this person.
+   */
+  portfolio_links: FormAttachmentResponse;
+  /**
+   *  The volunteer info of this person.
+   */
+  motivations: FormAttachmentResponse;
+}
+
+/**
+ *  Represents a form-jobApplicationSkill, with all associated data.
+ */
+export interface FormJobApplicationSkill {
+  /**
+   *  The responsibilities of this person.
+   */
+  most_fluent_language: string;
+  /**
+   *  The fun fact of this person.
+   */
+  english_level: number;
+  /**
+   *  The volunteer info of this person.
+   */
+  best_skill: string;
+}
+
+/**
+ *  Represents form-roles, with all associated data.
+ */
+export interface FormRoles {
+  /**
+   *  The roles of this person.
+   */
+  roles: string[];
+}
 
 /**
  *  Represents a user, with all associated data.
@@ -294,6 +439,21 @@ export interface Key {
 }
 
 /**
+ *  A response consisting of only an id.
+ */
+export interface Id {
+  id: number;
+}
+
+/**
+ *  A response consisting of and id and boolean.
+ */
+export interface Id_alumni {
+  id: number;
+  hasAlreadyTakenPart: boolean
+}
+
+/**
  *  A login response contains of a key and a boolean determining whether a user
  * is an admin.
  */
@@ -312,6 +472,21 @@ export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
  * data.
  */
 export interface Student extends Keyed<InternalTypes.Student> {}
+
+/**
+ *  A form-student.
+ */
+export interface FormStudent extends InternalTypes.FormStudent {}
+
+/**
+ *  A form-jobApplication.
+ */
+export interface FormJobApplication extends InternalTypes.FormJobApplication {}
+
+/**
+ *  A form-attachment.
+ */
+export interface FormAttachment extends InternalTypes.FormAttachment {}
 
 /**
  *  A user response is the keyed version of the user and their associated
@@ -333,7 +508,15 @@ export interface UserList extends Keyed<InternalTypes.User[]> {}
 /**
  *
  */
-export interface VerifyKey extends Keyed<InternalTypes.CheckKey> {}
+export interface FormAttachmentResponse {
+  data : string[];
+  types : type_enum[];
+}
+
+/**
+ *
+ */
+export interface VerifyKey extends InternalTypes.CheckKey {}
 
 /**
  *  A student list response is the keyed version of an array of partial
@@ -368,6 +551,21 @@ export interface CoachList extends Keyed<InternalTypes.Coach[]> {}
  * data.
  */
 export interface Person extends InternalTypes.Person {}
+
+/**
+ *  A form-person.
+ */
+export interface FormPerson extends InternalTypes.FormPerson {}
+
+/**
+ *  A form-jobApplicationSkill.
+ */
+export interface FormJobApplicationSkill extends InternalTypes.FormJobApplicationSkill {}
+
+/**
+ *  form roles.
+ */
+export interface FormRoles extends InternalTypes.FormRoles {}
 
 /**
  *  An admin response is the keyed version of the admin and their associated
@@ -486,7 +684,7 @@ export interface UpdateStudent extends IdRequest {
   firstName?: string;
   lastName?: string;
   gender?: string;
-  pronouns?: string[];
+  pronouns?: string;
   nickname?: string;
   alumni?: boolean;
   phone?: string;
@@ -561,19 +759,32 @@ export interface ModTemplate extends IdRequest {
 }
 
 export interface Form {
-  eventId: string, eventType: string, createdAt: string, data: DataForm
+  eventId: string;
+  eventType: string;
+  createdAt: string;
+  data: DataForm;
 }
 
 export interface Role extends KeyRequest {
-  name: string
+  name: string;
 }
 
 export interface DataForm {
-  fields: Array<Question>
+  fields: Array<Question>;
 }
 
 export interface Question {
-  key: string, value: string, options?: Array<Option>
+  key: string;
+  value: string | FormValues[];
+  options?: Array<Option>;
+}
+
+export interface FormValues {
+  "id": string;
+  "name": string;
+  "url": string;
+  "mimeType": string;
+  "size": number;
 }
 
 export interface Option {

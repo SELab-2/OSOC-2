@@ -1,6 +1,6 @@
 .footer {
     background-color: var(--neutral-150);
-    height: clamp(4rem, 5vw, 6rem);
+    min-height: clamp(4rem, 10vw, 6rem);
     padding-block: 0.5rem;
     padding-inline: min(8rem, 16vw);
     display: flex;
