@@ -29,9 +29,9 @@ async function login(req: express.Request): Promise<Responses.Login> {
           return Promise.reject(
               {http : 409, reason : 'Invalid e-mail or password.'});
         }
-        if (pass?.login_user?.account_status != 'ACTIVATED') {
+        if (pass?.login_user?.account_status == 'DISABLED') {
           return Promise.reject(
-              {http : 409, reason : 'Account isn\'t activated yet.'});
+              {http : 409, reason : 'Account is disabled.'});
         }
         const key: string = util.generateKey();
         const futureDate = new Date();
