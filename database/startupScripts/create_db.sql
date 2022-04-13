@@ -40,7 +40,7 @@ END;
 $$;
 
 /* enum used in login_user to show the account status */
-CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED', 'UNVERIFIED');
+CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED');
 
 CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
