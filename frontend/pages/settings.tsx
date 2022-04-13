@@ -28,7 +28,8 @@ const Settings: NextPage = () => {
     const [user, setUser] = useState<LoginUser>(defaultUser);
 
     const fetchUser = async () => {
-        const sessionKey = getSessionKey != undefined ? getSessionKey() : ""
+        const sessionKey = getSessionKey != undefined ? await getSessionKey() : ""
+        console.log(sessionKey)
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/current`, {
             method: 'GET',
             headers: {

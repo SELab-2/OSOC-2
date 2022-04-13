@@ -130,6 +130,9 @@ async function createUserAcceptance(req: express.Request):
  */
 async function getCurrentUser(req: express.Request): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
+    console.log(parsedRequest)
+    console.log("llmmmq")
+
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -182,7 +185,7 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/request/:id", createUserAcceptance);
     util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id" ]);
+    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id","/current" ]);
 
     return router;
 }
