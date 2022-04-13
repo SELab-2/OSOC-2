@@ -667,11 +667,11 @@ test("utility.setupRedirect sets up a single redirect", async () => {
   req1.path = '/';
   req1.method = 'get';
   // Promise.resolve().then(() => router(req1, res1)).then(() => {
-  expectRouter(router, '/', 'get', req1, res1).then(() => {
-    expect(res1.status).toHaveBeenCalledWith(303);
-    expect(res1.header).toHaveBeenCalledWith({'Location' : '/api-osoc/all'});
-    expect(res1.send).toHaveBeenCalled();
-  });
+  await expectRouter(router, '/', 'get', req1, res1);
+  expect(res1.status).toHaveBeenCalledWith(303);
+  expect(res1.header).toHaveBeenCalledWith({'Location' : '/api-osoc/all'});
+  expect(res1.send).toHaveBeenCalled();
+  // });
 
   // incorrect ep
   const req2 = getMockReq();
