@@ -244,7 +244,7 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
   return skey.checkSessionKey(obj.sessionkey).then((uid) => {
     if (uid) {
         return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
-            if(login_user != null && login_user.account_status == "PENDING") {
+            if(login_user != null && login_user.account_status != "DISABLED") {
                 return Promise.resolve({data : obj, userId : uid.login_user_id, accountStatus : login_user.account_status,
                     is_admin : login_user.is_admin, is_coach : login_user.is_coach});
             } else {
