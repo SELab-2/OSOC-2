@@ -235,5 +235,4 @@ enum account_status_enum {
   ACTIVATED
   PENDING
   DISABLED
-  UNVERIFIED
 }
