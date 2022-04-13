@@ -130,8 +130,6 @@ async function createUserAcceptance(req: express.Request):
  */
 async function getCurrentUser(req: express.Request): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
-    console.log(parsedRequest)
-    console.log("llmmmq")
 
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
