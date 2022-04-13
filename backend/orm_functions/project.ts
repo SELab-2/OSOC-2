@@ -294,21 +294,28 @@ export async function deleteProjectByPartner(partner: string){
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
  * @param projectNameSort asc or desc if we want to sort on projectname, undefined if we are not sorting on projectname
  * @param clientNameSort asc or desc if we want to sort on clientname, undefined if we are not sorting on clientname
- * @param assignedCoachesSort asc or desc if we are sorting on assigned coaches, undefined if we are not sorting on
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
  * @returns the filtered students with their person data and other filter fields in a promise
  */
-//, fullyAssignedFilter: FilterBoolean , assignedCoachesSort: FilterSort, fullyAssignedSort: FilterSort
+//, fullyAssignedFilter: FilterBoolean , fullyAssignedSort: FilterSort
 export async function filterProjects(projectNameFilter: FilterString, clientNameFilter: FilterString,
     assignedCoachesFilterArray: FilterStringArray,
     projectNameSort: FilterSort, clientNameSort: FilterSort){
+
+    /*const projects = await prisma.project_role.groupBy({
+        by: ['project_id'],
+        _sum: {
+            positions: true
+        }
+    });*/
+    
 
     return await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
             project_user: {
-                every: {
+                some: {
                     login_user: {
                         login_user_id: { in: assignedCoachesFilterArray}
                     }
