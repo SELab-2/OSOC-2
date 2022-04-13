@@ -254,7 +254,7 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
                 }
             })
         } else {
-            return Promise.reject(errors.cookNonExistent("test"));
+            return Promise.reject(errors.cookNonExistent);
         }
     }).catch(arg => {
         console.log(arg);
