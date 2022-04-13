@@ -1,5 +1,5 @@
 import prisma from '../prisma/prisma'
-import {CreateProject, UpdateProject, FilterString, FilterStringArray, FilterSort} from './orm_types';
+import {CreateProject, UpdateProject, FilterString, FilterStringArray, FilterSort, FilterBoolean} from './orm_types';
 
 /**
  * 
@@ -297,20 +297,18 @@ export async function deleteProjectByPartner(partner: string){
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
  * @returns the filtered students with their person data and other filter fields in a promise
  */
-//, fullyAssignedFilter: FilterBoolean , fullyAssignedSort: FilterSort
 export async function filterProjects(projectNameFilter: FilterString, clientNameFilter: FilterString,
-    assignedCoachesFilterArray: FilterStringArray,
+    assignedCoachesFilterArray: FilterStringArray, fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort, clientNameSort: FilterSort){
 
-    /*const projects = await prisma.project_role.groupBy({
+    const projects = await prisma.project_role.groupBy({
         by: ['project_id'],
         _sum: {
             positions: true
         }
-    });*/
+    });
     
-
-    return await prisma.project.findMany({
+    const filtered_projects =  await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
@@ -349,4 +347,10 @@ export async function filterProjects(projectNameFilter: FilterString, clientName
             }
         }
     });
+
+    if (fullyAssignedFilter){
+        return filtered_projects.filter(project => 
+            project.positions == projects[project.project_id]._sum.positions);
+    }
+    return filtered_projects;
 }

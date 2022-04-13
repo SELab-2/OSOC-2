@@ -592,3 +592,8 @@ export type FilterString = string | undefined;
  * type to use in a filter query for array of strings
  */
  export type FilterStringArray = string[] | undefined;
+
+ /**
+ * type to use in a filter query for booleans
+ */
+  export type FilterBoolean = boolean | undefined;
