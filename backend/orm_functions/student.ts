@@ -1,6 +1,6 @@
 import { decision_enum } from '@prisma/client';
 import prisma from '../prisma/prisma'
-import {CreateStudent, FilterSort, FilterString, FilterBoolean, UpdateStudent} from './orm_types';
+import {CreateStudent, FilterSort, FilterString, FilterBoolean, UpdateStudent, FilterStringArray} from './orm_types';
 
 // TODO: how do we make sure there is no student for this person_id yet?
 /**
@@ -108,7 +108,7 @@ export async function searchStudentByGender(gender: string){
  * @param firstNameFilter firstname that we are filtering on (or undefined if not filtering on name)
  * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
- * @param roleFilter role that we are filtering on (or undefined if not filtering on role)
+ * @param roleFilterArray role that we are filtering on (or undefined if not filtering on role)
  * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
  * @param coachFilter coach status that we are filtering on (or undefined if not filtering on coach status)
  * @param statusFilter status that we are filtering on (or undefined if not filtering on status)
@@ -123,7 +123,7 @@ export async function searchStudentByGender(gender: string){
  */
 // , coachSort: FilterSort, statusSort: FilterSort
  export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
-    emailFilter: FilterString, roleFilter: FilterString, alumniFilter: FilterBoolean, 
+    emailFilter: FilterString, roleFilterArray: FilterStringArray, alumniFilter: FilterBoolean, 
     coachFilter: FilterBoolean, statusFilter: decision_enum | undefined,
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
     alumniSort: FilterSort) {
@@ -136,7 +136,7 @@ export async function searchStudentByGender(gender: string){
                     applied_role: {
                         some: {
                             role:{
-                                name: roleFilter
+                                name: { in: roleFilterArray}
                             }
                         }
                     },
