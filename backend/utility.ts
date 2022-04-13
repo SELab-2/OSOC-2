@@ -3,7 +3,7 @@ import express from 'express';
 import {v1} from 'uuid';
 
 import * as config from './config.json';
-import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as ormLoUs from './orm_functions/login_user';
 import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
@@ -30,6 +30,7 @@ export const errors: Errors = {
   cookArgumentError() { return config.apiErrors.argumentError;},
   cookUnauthenticated() { return config.apiErrors.unauthenticated;},
   cookInsufficientRights() { return config.apiErrors.insufficientRights;},
+  cookLockedRequest() { return config.apiErrors.lockedRequest;},
 
   cookNonExistent(url: string) {
     return {
@@ -242,7 +243,14 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
   return skey.checkSessionKey(obj.sessionkey).then((uid) => {
     if (uid) {
-      return Promise.resolve({data : obj, userId : uid.login_user_id});
+        return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
+            if(login_user != null && login_user.account_status == "PENDING") {
+                return Promise.resolve({data : obj, userId : uid.login_user_id, accountStatus : login_user.account_status,
+                    is_admin : login_user.is_admin, is_coach : login_user.is_coach});
+            } else {
+                return Promise.reject(errors.cookLockedRequest());
+            }
+        })
     }
     else{
       return Promise.reject(errors.cookNonExistent);
@@ -267,7 +275,7 @@ export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
       .catch(() => Promise.reject(errors.cookUnauthenticated()))
       .then(
           async id =>
-              searchAllAdminLoginUsers(true)
+              ormLoUs.searchAllAdminLoginUsers(true)
                   .catch(() => Promise.reject(errors.cookInsufficientRights()))
                   .then(admins => admins.some(a => a.login_user_id == id.userId)
                                       ? Promise.resolve(id)
