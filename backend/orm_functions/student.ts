@@ -134,7 +134,7 @@ export async function searchStudentByGender(gender: string){
                 some: {
                     student_coach: coachFilter,
                     applied_role: {
-                        some: {
+                        every: {
                             role:{
                                 name: { in: roleFilterArray}
                             }
