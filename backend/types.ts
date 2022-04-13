@@ -38,6 +38,10 @@ export interface Errors {
    */
   cookInsufficientRights: () => ApiError;
   /**
+   * Cooks up a locked request response.
+   */
+  cookLockedRequest: () => ApiError;
+  /**
    *  Cooks up a Non-existent Endpoint response.
    *  @param url The requested endpoint URL.
    */
@@ -407,6 +411,9 @@ export interface FollowupStatus {
 export interface WithUserID<T> {
   userId: number;
   data: T;
+  accountStatus: account_status_enum;
+  is_admin: boolean;
+  is_coach: boolean;
 }
 
 /**
