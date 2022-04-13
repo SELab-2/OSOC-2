@@ -240,14 +240,15 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey).then((uid) => {
-    if (uid) {
-      return Promise.resolve({data : obj, userId : uid.login_user_id});
-    }
-    else{
-      return Promise.reject(errors.cookNonExistent);
-    }
-  }).catch(() => Promise.reject(errors.cookUnauthenticated()));
+  return skey.checkSessionKey(obj.sessionkey)
+      .then((uid) => {
+        if (uid) {
+          return Promise.resolve({data : obj, userId : uid.login_user_id});
+        } else {
+          return Promise.reject(errors.cookNonExistent);
+        }
+      })
+      .catch(() => Promise.reject(errors.cookUnauthenticated()));
 }
 
 /**
@@ -293,9 +294,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-      return skey.changeSessionKey(key, generateKey(), futureDate)
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+  return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
@@ -405,4 +406,14 @@ export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
   if (vl == null || vl == undefined)
     return Promise.reject(errors.cookNoDataError());
   return Promise.resolve(vl);
+}
+
+export function queryToBody(req: express.Request) {
+  console.log('Original body: ' + JSON.stringify(req.body));
+  console.log('Original query: ' + JSON.stringify(req.query));
+  for (const key in req.query) {
+    req.body[key] = req.query[key];
+  }
+  console.log('Resulting body: ' + JSON.stringify(req.body));
+  return req;
 }
