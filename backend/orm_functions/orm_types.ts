@@ -589,9 +589,9 @@ export type FilterSort = "asc" | "desc" | undefined;
 export type FilterString = string | undefined;
 
 /**
- * type to use in a filter query for array of strings
+ * type to use in a filter query for array of numbers
  */
- export type FilterStringArray = string[] | undefined;
+export type FilterNumberArray = number[] | undefined;
 
  /**
  * type to use in a filter query for booleans

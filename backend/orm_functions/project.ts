@@ -1,5 +1,12 @@
 import prisma from '../prisma/prisma'
-import {CreateProject, UpdateProject, FilterString, FilterStringArray, FilterSort, FilterBoolean} from './orm_types';
+import {
+    CreateProject,
+    UpdateProject,
+    FilterString,
+    FilterSort,
+    FilterBoolean,
+    FilterNumberArray
+} from './orm_types';
 
 /**
  * 
@@ -298,7 +305,7 @@ export async function deleteProjectByPartner(partner: string){
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(projectNameFilter: FilterString, clientNameFilter: FilterString,
-    assignedCoachesFilterArray: FilterStringArray, fullyAssignedFilter: FilterBoolean,
+    assignedCoachesFilterArray: FilterNumberArray, fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort, clientNameSort: FilterSort){
 
     const projects = await prisma.project_role.groupBy({
