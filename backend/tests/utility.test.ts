@@ -54,6 +54,7 @@ test("utility.errors.cook* work as expected", () => {
   expect(util.errors.cookInsufficientRights())
       .toBe(config.apiErrors.insufficientRights);
   expect(util.errors.cookServerError()).toBe(config.apiErrors.serverError);
+  expect(util.errors.cookLockedRequest()).toBe(config.apiErrors.lockedRequest);
 
   // annoying ones
   // non-existent endpoint
