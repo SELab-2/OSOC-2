@@ -293,12 +293,23 @@ test("utility.redirect sends an HTTP 303", () => {
   });
 });
 
-test("utility.checkSessionKey works on valid session key", async () => {
+test.only("utility.checkSessionKey works on valid session key", async () => {
+  login_userMock.createLoginUser.mockReset();
   session_keyMock.checkSessionKey.mockReset();
+  login_userMock.createLoginUser.mockResolvedValue({
+    login_user_id : 123456789,
+    person_id : 987654321,
+    password : "pass",
+    is_admin : true,
+    is_coach : false,
+    account_status : "PENDING"
+  });
   session_keyMock.checkSessionKey.mockResolvedValue(
       {login_user_id : 123456789});
   const obj = {sessionkey : "key"};
-  const res = {data : {sessionkey : "key"}, userId : 123456789};
+  const res = {data : {sessionkey : "key"}, userId : 123456789, accountStatus : "PENDING", is_admin : true, is_coach : false};
+
+  console.log(util.checkSessionKey(obj));
 
   await expect(util.checkSessionKey(obj)).resolves.toStrictEqual(res);
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);

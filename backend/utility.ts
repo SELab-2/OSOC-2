@@ -241,21 +241,26 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey).then((uid) => {
-    if (uid) {
-        return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
-            if(login_user != null && login_user.account_status != "DISABLED") {
-                return Promise.resolve({data : obj, userId : uid.login_user_id, accountStatus : login_user.account_status,
-                    is_admin : login_user.is_admin, is_coach : login_user.is_coach});
-            } else {
-                return Promise.reject(errors.cookLockedRequest());
-            }
-        })
-    }
-    else{
-      return Promise.reject(errors.cookNonExistent);
-    }
-  }).catch(() => Promise.reject(errors.cookUnauthenticated()));
+    return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+        if (uid) {
+            return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
+                if (login_user != null && login_user.account_status != "DISABLED") {
+                    return Promise.resolve({
+                        data: obj, userId: uid.login_user_id, accountStatus: login_user.account_status,
+                        is_admin: login_user.is_admin, is_coach: login_user.is_coach
+                    });
+                } else {
+                    return Promise.reject(errors.cookLockedRequest());
+                }
+            })
+        } else {
+            return Promise.reject(errors.cookNonExistent("test"));
+        }
+    }).catch(arg => {
+        console.log(arg);
+        return Promise.reject(errors.cookUnauthenticated());
+    });
+
 }
 
 /**
