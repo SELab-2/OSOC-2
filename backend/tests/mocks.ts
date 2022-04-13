@@ -32,7 +32,7 @@ export class RouterInvalidVerbError extends Error {}
 export class RouterInvalidEndpointError extends Error {}
 export class RouterInvalidVerbEndpointError extends Error {}
 
-class MockedRouter extends
+export class MockedRouter extends
     CallableInstance<[ express.Request, express.Response ], void> implements
         express.Router {
   private verifier(route: string) {
