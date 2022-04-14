@@ -19,14 +19,13 @@ const Index: NextPage = () => {
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
-        let sessionKey = ""
         if (getSessionKey) {
-            sessionKey = getSessionKey()
-        }
-        // The user is already logged in, redirect the user
-        if (sessionKey != "") {
-            router.push("/students").then()
-            return
+            getSessionKey().then(sessionKey => {
+                // The user is already logged in, redirect the user
+                if (sessionKey != "") {
+                    router.push("/students").then()
+                }
+            })
         }
 
         const {loginError} = router.query
@@ -108,8 +107,8 @@ const Index: NextPage = () => {
                         return {success: false};
                     } else return json;
                 })
-                .catch(err => {
-                    setLoginBackendError(`Failed to login. ${err.reason}`);
+                .catch(() => {
+                    setLoginBackendError(`Something went wrong while trying to login.`);
                     return {success: false};
                 });
 
@@ -187,7 +186,7 @@ const Index: NextPage = () => {
         if (registerEmail === "") {
             setRegisterEmailError("Email cannot be empty");
             error = true
-        } else if(!validator.default.isEmail(registerEmail)) {
+        } else if (!validator.default.isEmail(registerEmail)) {
             setRegisterEmailError("No valid email address");
         } else {
             setRegisterEmailError("");

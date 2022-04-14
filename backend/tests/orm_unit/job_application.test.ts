@@ -28,7 +28,7 @@ const response = {
     edus: ["test"],
     edu_level: "slecht",
     edu_duration : 5,
-    edu_year: 2025,
+    edu_year: "2025",
     edu_institute: "ugent",
     email_status: email_status_enum.FAILED,
     created_at: new Date()
@@ -73,7 +73,7 @@ test("should create a job application", async () => {
         eduDuration: 5,
         eduInstitute: "ugent",
         eduLevel: "good",
-        eduYear: 2025,
+        eduYear: "2025",
         edus: ["good"],
         emailStatus: email_status_enum.DRAFT,
         funFact: "cool",

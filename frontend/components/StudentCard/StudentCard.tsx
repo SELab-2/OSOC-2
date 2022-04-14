@@ -1,12 +1,12 @@
 import React from "react";
 import {Decision, Student} from "../../types/types";
 import styles from "./StudentCard.module.scss"
-import {Language} from "../Labels/Language";
 import {Role} from "../Labels/Roles";
 import {Study} from "../Labels/Studies";
-import {Label} from "../Labels/Label";
+import {Diploma} from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
+import {LanguageAndSkill} from "../Labels/LanguageAndSkill";
 
 export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
@@ -53,28 +53,32 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
     return (
         <div className={styles.card}>
-            <div className={styles.body}>
-                <h2>{`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
+            <div className={styles.body} style={{paddingBottom: `${totalAmount === 0 ? "0.5rem" : "2rem"}`}}>
+                < h2> {`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
                 <div className={styles.grid}>
                     <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>LANGUAGES</h6>
+                        <h6 className={styles.categoryTitle}>SKILLS AND LANGUAGES</h6>
                         <div className={styles.category}>
-                            {student.languages.map(((language, index) => <Language key={index} language={language}/>))}
-                        </div>
-                        <h6 className={styles.categoryTitle}>STUDIES</h6>
-                        <div className={styles.category}>
-                            {student.jobApplication.edus.map((study, index) => <Study key={index} study={study}/>)}
-                        </div>
-                    </div>
-                    <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>SKILLS</h6>
-                        <div className={styles.category}>
-                            {student.jobApplication.job_application_skill.map((skill, index) => <Label key={index}
-                                                                                                       label={skill.skill}/>)}
+                            {student.jobApplication.job_application_skill.map((language, index) => {
+                                return <LanguageAndSkill key={index} language={language.skill}/>
+                            })}
                         </div>
                         <h6 className={styles.categoryTitle}>ROLES</h6>
                         <div className={styles.category}>
                             {student.roles.map((role, index) => <Role key={index} role={role}/>)}
+                        </div>
+
+                    </div>
+                    <div className={styles.column}>
+                        <h6 className={styles.categoryTitle}>{"DIPLOMA"}</h6>
+                        <div className={styles.category}>
+                            <Diploma diploma={student.jobApplication.edu_level}
+                                     edu_duration={student.jobApplication.edu_duration}
+                                     edu_year={student.jobApplication.edu_year}/>
+                        </div>
+                        <h6 className={styles.categoryTitle}>STUDIES</h6>
+                        <div className={styles.category}>
+                            {student.jobApplication.edus.map((study, index) => <Study key={index} study={study}/>)}
                         </div>
                     </div>
                     <div className={styles.column}>
@@ -83,7 +87,8 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                         <h6 className={styles.categoryTitle}>PHONE NUMBER</h6>
                         <a href={`tel:${student.student.phone_number}`}>{student.student.phone_number}</a>
                         {student.student.person.github !== null ?
-                            <a className={styles.githubContainer} href={`https://github.com/${student.student.person.github}`}>
+                            <a className={styles.githubContainer}
+                               href={`https://github.com/${student.student.person.github}`}>
                                 <div className={styles.githublogo}>
                                     <Image
                                         src={GitHubLogo}

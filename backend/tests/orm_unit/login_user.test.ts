@@ -108,13 +108,13 @@ test("should return the login_user with given id", async () => {
 
 test("should return the filtered list of users", async () => {
    prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-   await expect(filterLoginUsers(undefined, undefined, undefined, undefined, undefined))
+   await expect(filterLoginUsers(undefined, undefined, undefined, undefined, undefined, undefined, undefined))
        .resolves.toEqual([returnValue]);
 });
 
 test("should reject and throw an error because only sorting on 1 field is allowed", async () => {
     try {
-        await filterLoginUsers(undefined, undefined, 'asc', 'desc', undefined);
+        await filterLoginUsers(undefined, undefined, 'asc', 'desc', undefined, undefined, undefined);
         // this should never get executed because filterLoginUser should reject
         expect(true).toBeFalsy()
     } catch(e) {

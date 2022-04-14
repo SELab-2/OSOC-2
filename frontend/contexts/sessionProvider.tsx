@@ -1,11 +1,13 @@
 import React, {createContext, ReactNode, useEffect, useState} from 'react';
+import {useRouter} from "next/router";
+import {AccountStatus} from "../types/types";
 
 /**
  * Interface for the context, stores the user session application wide
  */
 interface ISessionContext {
     sessionKey: string
-    getSessionKey?: () => string;
+    getSessionKey?: () => Promise<string>;
     setSessionKey?: (key: string) => void;
 
     isCoach: boolean;
@@ -30,33 +32,88 @@ const SessionContext = createContext<ISessionContext>(defaultState);
  * @param children
  * @constructor
  */
-export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) => {
 
-    /**
-     * Everytime the page is reloaded we need to get the session from local storage
-     */
-    useEffect(() => {
-        const sessionKey = localStorage.getItem('sessionKey')
-        setSessionKeyState(sessionKey !== null ? sessionKey : "")
-        setIsAdminState(localStorage.getItem('isAdmin') === 'true')
-        setIsCoachState(localStorage.getItem('isCoach') === 'true')
-    }, [])
+    const router = useRouter()
 
     const [sessionKey, setSessionKeyState] = useState<string>("");
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
 
+    // Because `useEffect` can have a different order we need to check if the session id has already been verified
+    let verified = false
+
     /**
-     * The useEffect is not always called before other page's use effect
-     * Therefore we can use this function to get the sessionkey in the useEffect functions
+     * Everytime the page is reloaded we need to get the session from local storage
      */
-    const getSessionKey = () => {
-        if (sessionKey != undefined && sessionKey != "") {
+    useEffect(() => {
+        setIsAdmin(localStorage.getItem('isAdmin') === 'true' && sessionKey != "")
+        setIsCoach(localStorage.getItem('isCoach') === 'true' && sessionKey != "")
+        if (!verified) {
+            getSessionKey().then()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    /**
+     * The `useEffect` is not always called before other page's use effect
+     * Therefore we can use this function to get the sessionkey in the useEffect functions
+     * Performs a backend call to verify the session id and also updates the session
+     */
+    const getSessionKey = async () => {
+        // Get the sessionKey from localStorage
+        const fromStorage = localStorage.getItem('sessionKey')
+        const sessionKey = fromStorage ? fromStorage : ""
+
+        if (sessionKey === "") {
+            if (!router.pathname.startsWith("/login")) {
+                router.push("/login").then()
+            }
             return sessionKey
         }
 
-        const key = localStorage.getItem('sessionKey')
-        return key !== null ? key : ""
+        // Avoid calling /verify twice
+        // verified gets set to false every page reload
+        if (verified) {
+            return sessionKey
+        }
+
+        verified = true
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${sessionKey}`
+            }
+        }).then(response => response.json()).then(response => {
+            setIsAdmin(response.is_coach === true)
+            setIsCoach(response.is_admin === true)
+            if (!response.valid || response.account_status === AccountStatus.DISABLED) {
+                if (!router.pathname.startsWith("/login")) {
+                    router.push("/login")
+                }
+                setSessionKey("")
+                return ""
+            }
+            if (response.account_status === AccountStatus.PENDING) {
+                if (!router.pathname.startsWith("/pending")) {
+                    router.push("/pending")
+                }
+                setSessionKey("")
+            }
+            setSessionKey(sessionKey)
+            return sessionKey
+        }).catch(error => {
+            console.log(error)
+            setIsAdmin(false)
+            setIsCoach(false)
+            if (!router.pathname.startsWith("/login")) {
+                router.push("/login")
+            }
+            setSessionKey("")
+            return ""
+        })
     }
 
     const setSessionKey = (sessionKey: string) => {
@@ -78,7 +135,8 @@ export const SessionProvider: React.FC<{children: ReactNode}> = ({ children }) =
     }
 
     return (
-        <SessionContext.Provider value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
+        <SessionContext.Provider
+            value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
             {children}
         </SessionContext.Provider>
     );
