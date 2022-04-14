@@ -100,6 +100,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                     router.push("/pending")
                 }
             }
+            setSessionKey(sessionKey);
             return sessionKey
         }).catch(error => {
             console.log(error)

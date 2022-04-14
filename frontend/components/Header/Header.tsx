@@ -10,6 +10,8 @@ export const Header: React.FC = () => {
 
     const {sessionKey, setSessionKey, isAdmin, setIsAdmin, setIsCoach} = useContext(SessionContext)
 
+    console.log(sessionKey);
+
     const router = useRouter()
 
     const logIn = (e: SyntheticEvent) => {
