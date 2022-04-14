@@ -297,7 +297,7 @@ export interface CreateJobApplication {
     /**
      * information about the education level of the student
      */
-    eduLevel: string[],
+    eduLevel: string,
     /**
      * how long this student has been studying for
      */

@@ -23,7 +23,7 @@ INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, respons
  edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
  'Yes, I can work with a student employment agreement in Belgium', 'Very responsible',  'I am a very funny fact', TRUE, '{"Informatics"}',
- '{Universitarian}', 3, '2022', 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
+ 'Universitarian', 3, '2022', 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES
