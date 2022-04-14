@@ -179,7 +179,7 @@ A postgresql vacuum job also runs every night, this physically removes all delet
 
 ### Database Backup
 The server uses a cron job to run a regular database backup, this runs every night at 0:30.
-The cron job script can be downloaded to the server using scp, specifically: ```scp database_backup.sh selab2@sel2-2.ugent.be:/home/selab2```
+The cron job script can be downloaded to the server using the scp command in the root folder, specifically: ```scp database_backup.sh selab2@sel2-2.ugent.be:/home/selab2```. The ```selab2@sel2-2.ugent.be``` should be replaced by your ssh connection to your own server. The ```/home/selab2``` is the path where you want to place the backup files on your server.
 This copies the script from the root of the project to the folder of the selab2-user on the server.
 In order to setup the cron job, after starting the server run the cron job bash script with ```sudo bash database_backup.sh```
 The cron job creates a database backup file in the /home/backup folder. 
