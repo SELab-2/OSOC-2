@@ -57,7 +57,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                 < h2> {`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
                 <div className={styles.grid}>
                     <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>LANGUAGES AND SKILLS</h6>
+                        <h6 className={styles.categoryTitle}>SKILLS AND LANGUAGES</h6>
                         <div className={styles.category}>
                             {student.jobApplication.job_application_skill.map((language, index) => {
                                 return <LanguageAndSkill key={index} language={language.skill}/>
@@ -70,10 +70,11 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
                     </div>
                     <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>{"DIPLOMA'S"}</h6>
+                        <h6 className={styles.categoryTitle}>{"DIPLOMA"}</h6>
                         <div className={styles.category}>
-                            {student.jobApplication.edu_level.map((diploma, index) => <Diploma key={index}
-                                                                                               diploma={diploma}/>)}
+                            <Diploma diploma={student.jobApplication.edu_level}
+                                     edu_duration={student.jobApplication.edu_duration}
+                                     edu_year={student.jobApplication.edu_year}/>
                         </div>
                         <h6 className={styles.categoryTitle}>STUDIES</h6>
                         <div className={styles.category}>
