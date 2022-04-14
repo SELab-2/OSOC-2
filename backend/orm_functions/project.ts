@@ -275,7 +275,7 @@ export async function deleteProjectByOsocEdition(osocId: number){
 /**
  * 
  * @param partner the partner of who we want to delete all the projects
- * @returns returns batchpayload object, with holds count of number of deleted objects
+ * @returns returns batch payload object, with holds count of number of deleted objects
  */
 export async function deleteProjectByPartner(partner: string){
     const result = await prisma.project.deleteMany({
