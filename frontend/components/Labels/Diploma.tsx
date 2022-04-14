@@ -34,7 +34,15 @@ export const Diploma: React.FC<{ diploma: string, edu_duration: number, edu_year
     const styleAndString = getDiplomaStyle(diploma)
     const betterDipl = styleAndString ? styleAndString[0] : diploma
     const style = styleAndString ? styleAndString[1] : styles.other
+    let duration = ""
+    if (edu_year !== undefined && edu_year !== null) {
+        if (edu_duration !== undefined && edu_duration !== null) {
+            duration = `  ( ${edu_year} / ${edu_duration} yr.)`
+        } else {
+            duration = `  ( ${edu_year} )`
+        }
+    }
     return <div
-        className={`${styles.label} ${style}`}>{`${betterDipl}${edu_duration !== undefined && edu_year !== undefined ?
-        `  (${edu_year} / ${edu_duration}yr.)` : ""}`}</div>
+        className={`${styles.label} ${style}`}>{`${betterDipl}${duration}`}
+    </div>
 }

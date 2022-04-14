@@ -2,6 +2,11 @@
  * This file contains every interface and type that is used across multiple files.
  */
 
+export enum Display {
+    LIMITED,
+    FULL
+}
+
 export enum Decision {
     YES = "YES",
     MAYBE = "MAYBE",

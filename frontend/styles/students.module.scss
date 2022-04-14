@@ -1,11 +1,24 @@
-/* The style for the list of students */
 .students {
   width: clamp(18rem, 92vw, 60rem);
   margin-inline: auto;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);
+}
+
+.students.limited {
+  width: clamp(18rem, 92vw, 100rem);
+  display: flex;
+  gap: 4rem;
+}
+
+/* The style for the list of students */
+.studentCards {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-bottom: clamp(1rem, 2vw, 2.5rem);;
+}
+
+.studentCards.limited {
+  max-width: 20rem;
 }
 
 /* The actual card as a container */
