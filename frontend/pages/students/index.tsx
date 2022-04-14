@@ -13,15 +13,17 @@ const Index: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
     const [students, setStudents] = useState<(Student)[]>([]);
     const router = useRouter()
-    // the id query parameter that shows the selected student
-    let id = -2
     // the index of the selected student if the given id matches with one of the fetched students
     const [selectedStudent, setSelectedStudent] = useState<number>(-1)
 
-    const fetchStudents = async () => {
+    /**
+     * Fetches the student and selects a student if the query parameter is set
+     * @param id
+     */
+    const fetchStudents = async (id: number) => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async sessionKey => {
-                if (sessionKey != "" && id > -1) {
+                if (sessionKey != "" && id > -2) {
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                         method: 'GET',
                         headers: {
@@ -33,10 +35,16 @@ const Index: NextPage = () => {
                             setSessionKey(response.sessionkey)
                         }
                         setStudents(response.data)
-                        for (let i = 0; i < response.data.length; i++) {
-                            if (id === response.data[i].student.student_id) {
-                                setSelectedStudent(i)
+
+                        // A specific student was selected
+                        if (id > -1) {
+                            for (let i = 0; i < response.data.length; i++) {
+                                if (id === response.data[i].student.student_id) {
+                                    setSelectedStudent(i)
+                                }
                             }
+                        } else {
+                            setSelectedStudent(-1)
                         }
                     }
                 }
@@ -48,14 +56,11 @@ const Index: NextPage = () => {
         // We perform some magic here, because on first render the query parameters are always undefined
         // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
         const queryKey = 'id';
-        const queryValue = router.query[queryKey] || router.asPath.match(new RegExp(`[&?]${queryKey}=(.*)(&|$)`))
-        if (queryValue !== undefined) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            id = Number(queryValue)
-        } else {
-            id = 0
+        let queryValue = Number(router.query[queryKey] || router.asPath.match(new RegExp(`[&?]${queryKey}=(.*)(&|$)`)))
+        if (queryValue === undefined) {
+            queryValue = -1
         }
-        fetchStudents().then();
+        fetchStudents(queryValue).then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router]);
@@ -75,8 +80,8 @@ const Index: NextPage = () => {
             window.open(`/students/${student_id}`)
             return
         }
-        router.push(`/students?id=${student_id}`).then()
         setSelectedStudent(index)
+        router.push(`/students?id=${student_id}`).then()
     }
 
     return (
