@@ -113,16 +113,7 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     return Promise.resolve({
         data : {
-            student : {
-                student_id : student.student_id,
-                person : student.person,
-                nickname : student.nickname,
-                person_id : student.person_id,
-                pronouns : student.pronouns,
-                gender : student.gender,
-                phone_number : student.phone_number,
-                alumni : student.alumni
-            },
+            student : student,
             jobApplication : jobApplication,
             evaluations : evaluations,
             roles: roles
