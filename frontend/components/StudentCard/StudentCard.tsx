@@ -6,13 +6,10 @@ import {Study} from "../Labels/Studies";
 import {Diploma} from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
-import {useRouter} from "next/router";
 import {LanguageAndSkill} from "../Labels/LanguageAndSkill";
 
-export const StudentCard: React.FC<{ student: Student}> = ({student}) => {
+export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
 
-    const router = useRouter()
-    
     // Count evaluations
     const evaluations = student.evaluations[0].evaluation
     let yesAmount = 0
@@ -54,21 +51,8 @@ export const StudentCard: React.FC<{ student: Student}> = ({student}) => {
         yesStyle.borderBottomLeftRadius = "0.5rem"
     }
 
-    const clickStopper = (event: React.MouseEvent<HTMLAnchorElement>) => {
-        event.stopPropagation();
-    }
-
-    
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const divClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
-        router.push({
-            pathname: `/students/${student.student.student_id}`,
-        }).then();
-    }
-
     return (
-        <div className={styles.card} onClick={divClickHandler}>
+        <div className={styles.card}>
             <div className={styles.body} style={{paddingBottom: `${totalAmount === 0 ? "0.5rem" : "2rem"}`}}>
                 < h2> {`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
                 <div className={styles.grid}>
@@ -99,14 +83,13 @@ export const StudentCard: React.FC<{ student: Student}> = ({student}) => {
                     </div>
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>EMAIL</h6>
-                        <a href={`mailto:${student.student.person.email}`} onClick={clickStopper}>{student.student.person.email}</a>
+                        <a href={`mailto:${student.student.person.email}`}>{student.student.person.email}</a>
                         <h6 className={styles.categoryTitle}>PHONE NUMBER</h6>
-                        <a href={`tel:${student.student.phone_number}`} onClick={clickStopper}>{student.student.phone_number}</a>
+                        <a href={`tel:${student.student.phone_number}`}>{student.student.phone_number}</a>
                         {student.student.person.github !== null ?
-                            <a 
-                            className={styles.githubContainer} 
-                            href={`https://github.com/${student.student.person.github}`}
-                            onClick={clickStopper}
+                            <a
+                                className={styles.githubContainer}
+                                href={`https://github.com/${student.student.person.github}`}
                             >
                                 <div className={styles.githublogo}>
                                     <Image

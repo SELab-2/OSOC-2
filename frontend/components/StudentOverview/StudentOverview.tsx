@@ -1,12 +1,10 @@
-//import {Student} from "../../types/types";
+import {Student} from "../../types/types";
+import React from "react";
+import {StudentCard} from "../StudentCard/StudentCard";
 
-export const StudentOverview: React.FC = () => {
-    
-
-
-    return (
-        <div>
-            <p>Dit is een student overview</p>
-        </div>
+export const StudentOverview: React.FC<{ student: Student }> = ({student}) => {
+    return (<>
+            <StudentCard student={student}/>
+        </>
     )
 }
