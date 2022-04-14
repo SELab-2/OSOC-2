@@ -1,5 +1,6 @@
 import React, {createContext, ReactNode, useEffect, useState} from 'react';
 import {useRouter} from "next/router";
+import {AccountStatus} from "../types/types";
 
 /**
  * Interface for the context, stores the user session application wide
@@ -46,20 +47,18 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
      * Everytime the page is reloaded we need to get the session from local storage
      */
     useEffect(() => {
-        getSessionKey().then(sessionKey => {
-            if (sessionKey !== undefined) {
-                setSessionKeyState(sessionKey)
-                setIsAdminState(localStorage.getItem('isAdmin') === 'true' && sessionKey != "")
-                setIsCoachState(localStorage.getItem('isCoach') === 'true' && sessionKey != "")
-            }
-        });
+        setIsAdmin(localStorage.getItem('isAdmin') === 'true' && sessionKey != "")
+        setIsCoach(localStorage.getItem('isCoach') === 'true' && sessionKey != "")
+        if (!verified) {
+            getSessionKey().then()
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     /**
      * The `useEffect` is not always called before other page's use effect
      * Therefore we can use this function to get the sessionkey in the useEffect functions
-     * Performs a backend call to verify the session id
+     * Performs a backend call to verify the session id and also updates the session
      */
     const getSessionKey = async () => {
         // Get the sessionKey from localStorage
@@ -88,18 +87,31 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).then(response => {
-            if (!response.valid) {
+            setIsAdmin(response.is_coach === true)
+            setIsCoach(response.is_admin === true)
+            if (!response.valid || response.account_status === AccountStatus.DISABLED) {
                 if (!router.pathname.startsWith("/login")) {
                     router.push("/login")
                 }
+                setSessionKey("")
                 return ""
             }
+            if (response.account_status === AccountStatus.PENDING) {
+                if (!router.pathname.startsWith("/pending")) {
+                    router.push("/pending")
+                }
+                setSessionKey("")
+            }
+            setSessionKey(sessionKey)
             return sessionKey
         }).catch(error => {
             console.log(error)
+            setIsAdmin(false)
+            setIsCoach(false)
             if (!router.pathname.startsWith("/login")) {
                 router.push("/login")
             }
+            setSessionKey("")
             return ""
         })
     }

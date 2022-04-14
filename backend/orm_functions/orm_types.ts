@@ -297,7 +297,7 @@ export interface CreateJobApplication {
     /**
      * information about the education level of the student
      */
-    eduLevel: string[],
+    eduLevel: string,
     /**
      * how long this student has been studying for
      */
@@ -305,11 +305,11 @@ export interface CreateJobApplication {
     /**
      * expected graduation year
      */
-    eduYear: string,
+    eduYear: string | null,
     /**
      * institute the student is studying at
      */
-    eduInstitute: string,
+    eduInstitute: string | null,
     /**
      * information about a confirmation email for the evaluation
      */

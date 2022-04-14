@@ -39,6 +39,12 @@ export enum Decision {
     NO = "NO"
 }
 
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    DISABLED = "DISABLED"
+}
+
 export interface Student {
     evaluations: [{
         evaluation: [{
@@ -65,10 +71,10 @@ export interface Student {
             type: string, // TODO -- possibly an enum
         }],
         created_at: Date,
-        edu_duration: number,
+        edu_duration: string,
         edu_institute: string,
-        edu_level: [string],
-        edu_year: number,
+        edu_level: string,
+        edu_year: string,
         edus: [string],
         email_status: string, // TODO -- make an enum, i don't know the exact values
         fun_fact: string,

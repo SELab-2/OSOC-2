@@ -107,8 +107,8 @@ const Index: NextPage = () => {
                         return {success: false};
                     } else return json;
                 })
-                .catch(err => {
-                    setLoginBackendError(`Failed to login. ${err.reason}`);
+                .catch(() => {
+                    setLoginBackendError(`Something went wrong while trying to login.`);
                     return {success: false};
                 });
 

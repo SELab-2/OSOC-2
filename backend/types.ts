@@ -38,6 +38,10 @@ export interface Errors {
    */
   cookInsufficientRights: () => ApiError;
   /**
+   * Cooks up a locked request response.
+   */
+  cookLockedRequest: () => ApiError;
+  /**
    *  Cooks up a Non-existent Endpoint response.
    *  @param url The requested endpoint URL.
    */
@@ -204,7 +208,7 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationLevel: string[];
+  educationLevel: string;
   /**
    *  The email of this person.
    */
@@ -212,11 +216,11 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationYear: string;
+  educationYear: string | null;
   /**
    *  The email of this person.
    */
-  educationInstitute: string;
+  educationInstitute: string | null;
   /**
    *  The email of this person.
    */
@@ -407,6 +411,9 @@ export interface FollowupStatus {
 export interface WithUserID<T> {
   userId: number;
   data: T;
+  accountStatus: account_status_enum;
+  is_admin: boolean;
+  is_coach: boolean;
 }
 
 /**
@@ -754,7 +761,6 @@ export interface ModTemplate extends IdRequest {
 
 export interface Form {
   eventId: string;
-  eventType: string;
   createdAt: string;
   data: DataForm;
 }
