@@ -13,8 +13,6 @@ diplomaToStyle.set("Doctoral degree", ["Doctoral Degree", styles.other])
 diplomaToStyle.set("No diploma, I am self taught", ["Self Taught", styles.other])
 
 
-
-
 const getDiplomaStyle = (diploma: string) => {
     if (diplomaToStyle.has(diploma)) {
         return diplomaToStyle.get(diploma)
@@ -28,9 +26,15 @@ const getDiplomaStyle = (diploma: string) => {
  * @param language
  * @constructor
  */
-export const Diploma: React.FC<{diploma: string}> = ({diploma}) => {
+export const Diploma: React.FC<{ diploma: string, edu_duration: number, edu_year: number }> = ({
+                                                                                                   diploma,
+                                                                                                   edu_duration,
+                                                                                                   edu_year
+                                                                                               }) => {
     const styleAndString = getDiplomaStyle(diploma)
     const betterDipl = styleAndString ? styleAndString[0] : diploma
     const style = styleAndString ? styleAndString[1] : styles.other
-    return <div className={`${styles.label} ${style}`}>{betterDipl}</div>
+    return <div
+        className={`${styles.label} ${style}`}>{`${betterDipl}${edu_duration !== undefined && edu_year !== undefined ?
+        `  (${edu_year} / ${edu_duration}yr.)` : ""}`}</div>
 }
