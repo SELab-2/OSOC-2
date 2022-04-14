@@ -1,5 +1,5 @@
 import styles from "./UserFilter.module.css";
-import React, {SyntheticEvent, useState} from "react";
+import React, {SyntheticEvent, useContext, useState} from "react";
 import Image from "next/image";
 import AdminIconColor from "../../public/images/admin_icon_color.png";
 import AdminIcon from "../../public/images/admin_icon.png";
@@ -8,6 +8,7 @@ import CoachIcon from "../../public/images/coach_icon.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
 import {AccountStatus, getNextSort, Sort} from "../../types/types";
+import SessionContext from "../../contexts/sessionProvider";
 
 export const UserFilter: React.FC = () => {
 
@@ -18,6 +19,7 @@ export const UserFilter: React.FC = () => {
     const [adminFilter, setAdminFilter] = useState<boolean>(false)
     const [coachFilter, setCoachFilter] = useState<boolean>(false)
     const [statusFilter, setStatusFilter] = useState<string>("")
+    const {getSessionKey, setSessionKey} = useContext(SessionContext)
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -66,7 +68,28 @@ export const UserFilter: React.FC = () => {
         const query = "name=" + nameFilter + "&sort=" + nameOrder + "&email=" + emailFilter + "&sort=" + emailOrder
             + "&admin=" + adminFilter + "&coach=" + coachFilter + "&pending=" + statusFilter
         console.log(query)
-        // TODO -- Execute the query
+        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        console.log(sessionKey)
+        //TODO deze call moet nog verbeterd
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${sessionKey}`
+
+            }
+        }).then(response => response.json()).then(json => {
+            if (!json.success) {
+                return {success: false};
+            } else return json;
+        }).catch(err => {
+            console.log(err)
+            return {success: false};
+        });
+        if (setSessionKey) {
+            setSessionKey(response.sessionkey)
+        }
     }
 
     return (

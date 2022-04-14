@@ -12,43 +12,34 @@ import {LoginUser} from "../types/types";
  */
 const Users: NextPage = () => {
 
-    const {getSessionKey, setSessionKey} = useContext(SessionContext)
+    const {sessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<LoginUser>>()
 
-    // Load all users upon page load
-    useEffect(() => {
-        const getTempSession = () => {
-            if (getSessionKey) {
-                return getSessionKey()
+    const getAllUsers = async (route: string, sessionkey: string) => {
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `auth/osoc2 ${sessionkey}`
             }
-            return ""
-        }
+        })
+            .then(response => response.json()).then(json => {
+                if (!json.success) {
 
-        const getAllUsers = async (route: string, sessionkey: string) => {
-            return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `auth/osoc2 ${sessionkey}`
-                }
-            })
-                .then(response => response.json()).then(json => {
-                    if (!json.success) {
-
-                        //TODO Popup of zoiets
-                        return {success: false};
-                    } else return json;
-                })
-                .catch(err => {
-                    console.log(err)
                     //TODO Popup of zoiets
                     return {success: false};
-                })
-        }
-
-
-        getAllUsers("user", getTempSession()).then(response => {
+                } else return json;
+            })
+            .catch(err => {
+                console.log(err)
+                //TODO Popup of zoiets
+                return {success: false};
+            })
+    }
+    // Load all users upon page load
+    useEffect(() => {
+        getAllUsers("user", sessionKey).then(response => {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey)
             }
