@@ -415,40 +415,40 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationLevel(form: Requests.Form) : Promise<string[]> {
+function getEducationLevel(form: Requests.Form) : Promise<string> {
     const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w4K6BX");
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckEducationLevel]);
 
     if(!questionsExist || questionCheckEducationLevel.data?.value == null ||
-        questionCheckEducationLevel.data.value.length === 0 || questionCheckEducationLevel.data.value.length > 2) {
+        questionCheckEducationLevel.data.value.length !== 1) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    const educationLevels : string[] = [];
+    let educationLevel;
 
-    for(let i = 0; i < questionCheckEducationLevel.data.value.length; i++) {
-        if(questionCheckEducationLevel.data.options != undefined) {
-            const filteredOption = questionCheckEducationLevel.data.options.filter(option => option.id === questionCheckEducationLevel.data?.value[i]);
-            if(filteredOption.length !== 1) {
+    if(questionCheckEducationLevel.data.options != undefined) {
+        const filteredOption = questionCheckEducationLevel.data.options.filter(option => option.id === questionCheckEducationLevel.data?.value[0]);
+        if(filteredOption.length !== 1) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+        if(filteredOption[0].text.includes("Other")) {
+            const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3jlRba");
+            const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
+
+            if(!questionsExistOther || questionCheckOther.data?.value == null) {
                 return Promise.reject(errors.cookArgumentError());
             }
-            if(filteredOption[0].text.includes("Other")) {
-                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3jlRba");
-                const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
 
-                if(!questionsExistOther || questionCheckOther.data?.value == null) {
-                    return Promise.reject(errors.cookArgumentError());
-                }
-
-                educationLevels.push(questionCheckOther.data.value as string);
-            } else {
-                educationLevels.push(filteredOption[0].text);
-            }
+            educationLevel = questionCheckOther.data.value as string;
+        } else {
+            educationLevel = filteredOption[0].text;
         }
+    } else {
+        return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(educationLevels);
+    return Promise.resolve(educationLevel);
 }
 
 /**
@@ -988,14 +988,16 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
         most_fl_la_id = getMostFluentLanguageInDb.language_id;
     }
 
-    await ormJoSk.createJobApplicationSkill({
-        jobApplicationId : job_application_id,
-        skill : null,
-        languageId : most_fl_la_id,
-        level : null,
-        isPreferred : true,
-        isBest : false
-    });
+    if(!formResponse.most_fluent_language.includes("English")) {
+        await ormJoSk.createJobApplicationSkill({
+            jobApplicationId : job_application_id,
+            skill : null,
+            languageId : most_fl_la_id,
+            level : null,
+            isPreferred : true,
+            isBest : false
+        });
+    }
 
     let english_id;
     const getEnglishLanguage = await getLanguageByName("English");

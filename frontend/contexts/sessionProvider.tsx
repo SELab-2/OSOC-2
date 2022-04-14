@@ -93,12 +93,14 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 if (!router.pathname.startsWith("/login")) {
                     router.push("/login")
                 }
+                setSessionKey("")
                 return ""
             }
             if (response.account_status === AccountStatus.PENDING) {
                 if (!router.pathname.startsWith("/pending")) {
                     router.push("/pending")
                 }
+                setSessionKey("")
             }
             setSessionKey(sessionKey);
             return sessionKey
@@ -109,6 +111,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
             if (!router.pathname.startsWith("/login")) {
                 router.push("/login")
             }
+            setSessionKey("")
             return ""
         })
     }

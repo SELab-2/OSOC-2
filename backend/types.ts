@@ -208,7 +208,7 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationLevel: string[];
+  educationLevel: string;
   /**
    *  The email of this person.
    */
