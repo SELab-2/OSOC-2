@@ -26,7 +26,7 @@ const getDiplomaStyle = (diploma: string) => {
  * @param language
  * @constructor
  */
-export const Diploma: React.FC<{ diploma: string, edu_duration: number, edu_year: number }> = ({
+export const Diploma: React.FC<{ diploma: string, edu_duration: string, edu_year: string }> = ({
                                                                                                    diploma,
                                                                                                    edu_duration,
                                                                                                    edu_year
