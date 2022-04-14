@@ -54,7 +54,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
     return (
         <div className={styles.card}>
             <div className={styles.body}>
-                <h2>{`${student.student.person.firstname} ${student.student.person.lastname}`}</h2>
+                <h2>{`${student.firstname} ${student.lastname}`}</h2>
                 <div className={styles.grid}>
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>LANGUAGES</h6>
@@ -79,11 +79,11 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                     </div>
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>EMAIL</h6>
-                        <a href={`mailto:${student.student.person.email}`}>{student.student.person.email}</a>
+                        <a href={`mailto:${student.email}`}>{student.email}</a>
                         <h6 className={styles.categoryTitle}>PHONE NUMBER</h6>
-                        <a href={`tel:${student.student.phone_number}`}>{student.student.phone_number}</a>
-                        {student.student.person.github !== null ?
-                            <a className={styles.githubContainer} href={`https://github.com/${student.student.person.github}`}>
+                        <a href={`tel:${student.phone_number}`}>{student.phone_number}</a>
+                        {student.github !== null ?
+                            <a className={styles.githubContainer} href={`https://github.com/${student.github}`}>
                                 <div className={styles.githublogo}>
                                     <Image
                                         src={GitHubLogo}
@@ -91,7 +91,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({student}) => {
                                         alt="GitHub Logo"
                                     />
                                 </div>
-                                <p className={styles.github}>{student.student.person.github}</p>
+                                <p className={styles.github}>{student.github}</p>
                             </a>
                             : null}
                     </div>

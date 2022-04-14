@@ -60,13 +60,15 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc";
         const emailOrder = emailSort ? "Desc" : "Asc";
-        const query = "name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
+        const testRoles = ["Dev","Gamer"]
+        const query = "?name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
             "&Yes=" + filterYes + "&maybe=" + filterMaybe + "&no=" + filterNo + "&studentCoach=" + studentCoach +
-            "&alumni=" + alumni + "&roles=" + roles;
+            "&alumni=" + alumni + "&roles=" + testRoles;
+        console.log(selectedRoles)
         console.log(query);
-
-        //TODO hier moet de query nog verbonden worden
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`, {
+        console.log(sessionKey)
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`+ query)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`+ query, {
             method: 'GET',
             headers: {
                 'Authorization': `auth/osoc2 ${sessionKey}`,

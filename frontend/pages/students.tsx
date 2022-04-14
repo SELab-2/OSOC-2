@@ -60,10 +60,11 @@ const Students: NextPage = () => {
         setStudents([...filteredStudents])
     }
 
+
     return (
         <div className={styles.students}>
             <StudentFilter roles={roles} setFilteredStudents={setFilteredStudents}/>
-            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+            {students.map(student => <StudentCard key={student.jobApplication.student_id} student={student as Student}/>)}
         </div>
     )
 }

@@ -15,6 +15,8 @@ export interface Student {
             decision: Decision;
             motivation: string;
             is_final: boolean;
+            //TODO login user type needs to be made
+            login_user: string;
         }];
         osoc: {
             year: number;
@@ -61,22 +63,22 @@ export interface Student {
     languages: [string];
     roles: [string];
 
-    student: {
+    //student: {
         alumni: boolean;
-        gender: string;
-        nickname: string;
-        person: {
-            person_id: number,
+        //gender: string;
+        //nickname: string;
+        //person: {
+            //person_id: number,
             email: string,
             firstname: string;
             lastname: string;
             github: string
-        };
-        person_id: number;
+        //};
+        //person_id: number;
         phone_number: string;
         pronouns: [string];
-        student_id: number;
-    };
+        //student_id: number;
+    //};
 }
 
 export interface Role {
