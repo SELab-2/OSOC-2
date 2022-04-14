@@ -210,5 +210,5 @@ CREATE EXTENSION pg_cron;
 -- Delete old session keys every day at at 23:59 (GMT)
 SELECT cron.schedule('59 23 * * *', $$DELETE FROM session_key WHERE valid_date < now()$$);
 
--- Vacuum every day at 00:30 (GMT), this phiscally removes deleted and obsolete tuples
-SELECT cron.schedule('30 0 * * *', 'VACUUM');
+-- Vacuum every day at 01:30 (GMT), this phiscally removes deleted and obsolete tuples
+SELECT cron.schedule('30 1 * * *', 'VACUUM');
