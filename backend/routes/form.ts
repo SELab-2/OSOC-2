@@ -1093,8 +1093,7 @@ async function addRolesToDatabase(formResponse: Responses.FormRoles, job_applica
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
-    if (parsedRequest.data == null || parsedRequest.eventId == null
-        || parsedRequest.eventType == null || parsedRequest.createdAt == null) {
+    if (parsedRequest.data == null || parsedRequest.eventId == null || parsedRequest.createdAt == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
