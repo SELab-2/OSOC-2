@@ -177,6 +177,15 @@ The cron extesion is added in the create_db.sql script aswell as the jobs.
 For example every night at midnight we check if all session keys in the database are still valid, unvalid keys are removed.
 A postgresql vacuum job also runs every night, this physically removes all deleted entries and cleans up the database.
 
+### Database Backup
+The server uses a cron job to run a regular database backup, this runs every night at 0:30.
+In order to setup the cron job, after starting the server run the bash script with ```sudo bash database_backup.sh```
+The cron job creates a database backup file in the /home/backup folder. 
+The backup file is named osoc2-DAY.bak, where DAY is replaced by the daynumber. This means that there are a maximum of 31 backup files and that the database can
+be restored at max one month back in time.
+In order to restore the database from the backup files use ```cat osoc2-DAY.bak | docker exec -i osoc-2-db-1 psql -U osoc2``` where DAY should be replaced by
+the wanted version of the backup files.
+
 ## Frontend guide <a name="frontend"></a>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
