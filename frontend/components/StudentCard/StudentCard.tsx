@@ -63,7 +63,7 @@ export const StudentCard: React.FC<{ student: Student}> = ({student}) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const divClickHandler = (event: React.MouseEvent<HTMLDivElement>) => {
         router.push({
-            pathname: `/student/${student.student.student_id}`,
+            pathname: `/students/${student.student.student_id}`,
         }).then();
     }
 

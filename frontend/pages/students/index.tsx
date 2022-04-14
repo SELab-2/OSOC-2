@@ -1,12 +1,12 @@
 import {NextPage} from "next";
-import SessionContext from "../contexts/sessionProvider";
+import SessionContext from "../../contexts/sessionProvider";
 import {useContext, useEffect, useState} from "react";
-import {StudentCard} from "../components/StudentCard/StudentCard";
-import {Student} from "../types/types"
-import styles from "../styles/students.module.scss"
+import {StudentCard} from "../../components/StudentCard/StudentCard";
+import {Student} from "../../types/types"
+import styles from "../../styles/students.module.scss"
 
 
-const Students: NextPage = () => {
+const Index: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
     const [students, setStudents] = useState<(Student)[]>([]);
 
@@ -46,4 +46,4 @@ const Students: NextPage = () => {
     )
 }
 
-export default Students;
+export default Index;
