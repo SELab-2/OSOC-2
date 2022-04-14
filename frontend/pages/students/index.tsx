@@ -40,7 +40,9 @@ const Index: NextPage = () => {
     return (
         <div className={styles.students}>
             {students.map(student => {
-                return <StudentCard key={student.student.student_id} student={student as Student}/>
+                return (<div key={student.student.student_id} className={styles.card}>
+                    <StudentCard student={student as Student}/>
+                </div>)
             })}
         </div>
     )
