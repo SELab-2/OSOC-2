@@ -409,11 +409,8 @@ export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
 }
 
 export function queryToBody(req: express.Request) {
-  console.log('Original body: ' + JSON.stringify(req.body));
-  console.log('Original query: ' + JSON.stringify(req.query));
   for (const key in req.query) {
     req.body[key] = req.query[key];
   }
-  console.log('Resulting body: ' + JSON.stringify(req.body));
   return req;
 }
