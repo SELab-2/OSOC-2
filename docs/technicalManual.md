@@ -223,3 +223,8 @@ To learn more about Next.js, take a look at the following resources:
 In order to run the tests, make sure the docker daemon is running.  
 The tests are performed with npm, if it is the first time you want to run the test, consider running `npm install` in the `/backend` folder first.  
 The test can be executed by running the `npm run integrationTests` command in the `/backend` folder.
+
+### Form
+When creating a new form instance the key for each question will change.
+To use this new form when deploying or running local tests it's necessary to change the keys in `/backend/routes/form_keys.json`
+All these keys are used in `backend/routes/form.ts` and examples of where you can locate them in the json sent by Tally can be found in `/testforms/testform<x>.json`

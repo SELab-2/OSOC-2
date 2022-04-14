@@ -305,11 +305,11 @@ export interface CreateJobApplication {
     /**
      * expected graduation year
      */
-    eduYear: string,
+    eduYear: string | null,
     /**
      * institute the student is studying at
      */
-    eduInstitute: string,
+    eduInstitute: string | null,
     /**
      * information about a confirmation email for the evaluation
      */
