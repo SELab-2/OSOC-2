@@ -761,7 +761,6 @@ export interface ModTemplate extends IdRequest {
 
 export interface Form {
   eventId: string;
-  eventType: string;
   createdAt: string;
   data: DataForm;
 }
