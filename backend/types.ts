@@ -216,11 +216,11 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationYear: string;
+  educationYear: string | null;
   /**
    *  The email of this person.
    */
-  educationInstitute: string;
+  educationInstitute: string | null;
   /**
    *  The email of this person.
    */
