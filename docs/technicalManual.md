@@ -179,7 +179,9 @@ A postgresql vacuum job also runs every night, this physically removes all delet
 
 ### Database Backup
 The server uses a cron job to run a regular database backup, this runs every night at 0:30.
-In order to setup the cron job, after starting the server run the bash script with ```sudo bash database_backup.sh```
+The cron job script can be downloaded to the server using scp, specifically: ```scp database_backup.sh selab2@sel2-2.ugent.be:/home/selab2```
+This copies the script from the root of the project to the folder of the selab2-user on the server.
+In order to setup the cron job, after starting the server run the cron job bash script with ```sudo bash database_backup.sh```
 The cron job creates a database backup file in the /home/backup folder. 
 The backup file is named osoc2-DAY.bak, where DAY is replaced by the daynumber. This means that there are a maximum of 31 backup files and that the database can
 be restored at max one month back in time.
