@@ -186,6 +186,8 @@ be restored at max one month back in time.
 In order to restore the database from the backup files use ```cat osoc2-DAY.bak | docker exec -i osoc-2-db-1 psql -U osoc2``` where DAY should be replaced by
 the wanted version of the backup files.
 
+It is highly recommended to have a copy of these backup files on a different server. This will prevent loss of data when the main server crashes.
+
 ## Frontend guide <a name="frontend"></a>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
