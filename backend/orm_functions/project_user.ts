@@ -16,6 +16,10 @@ export async function createProjectUser(projectUser: CreateProjectUser) {
   return result;
 }
 
+/**
+ *  Gets the users associated with the given project.
+ *  @param project The ID of the project to get users for.
+ */
 export async function getUsersFor(project: number) {
   return await prisma.project_user.findMany({
     where : {project_id : project},
