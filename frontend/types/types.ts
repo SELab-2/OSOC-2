@@ -14,14 +14,16 @@ export enum AccountStatus {
     DISABLED = "DISABLED"
 }
 
+export interface Evaluation {
+    evaluation_id: number,
+    decision: Decision,
+    motivation: string,
+    is_final: boolean,
+}
+
 export interface Student {
     evaluations: [{
-        evaluation: [{
-            evaluation_id: number,
-            decision: Decision,
-            motivation: string,
-            is_final: boolean,
-        }],
+        evaluation: [Evaluation],
         osoc: {
             year: number,
         },

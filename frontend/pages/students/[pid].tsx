@@ -42,7 +42,8 @@ const Pid: NextPage = () => {
 
     return (
         <div>
-            {/* student !== undefined ? <StudentCard student={student}/> : null */}
+            {/* TODO -- Pending https://github.com/SELab-2/OSOC-2/issues/354}
+            {/* student !== undefined ? <StudentOverview student={student}/> : null */}
             <p>{pid}</p>
         </div>
     )

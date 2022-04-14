@@ -6,6 +6,7 @@ import {Student} from "../../types/types"
 import styles from "../../styles/students.module.scss"
 import {useRouter} from "next/router";
 import {StudentOverview} from "../../components/StudentOverview/StudentOverview";
+import {EvaluationBar} from "../../components/StudentCard/EvaluationBar";
 
 
 const Index: NextPage = () => {
@@ -84,6 +85,7 @@ const Index: NextPage = () => {
                 return (<div key={student.student.student_id} className={styles.card}
                              onClick={e => clickStudent(e, student.student.student_id, index)}>
                     <StudentCard student={student as Student}/>
+                    <EvaluationBar evaluations={student.evaluations[0].evaluation}/>
                 </div>)
             })}
             {selectedStudent !== -1 ? <StudentOverview student={students[selectedStudent]}/> : null}
