@@ -988,14 +988,16 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
         most_fl_la_id = getMostFluentLanguageInDb.language_id;
     }
 
-    await ormJoSk.createJobApplicationSkill({
-        jobApplicationId : job_application_id,
-        skill : null,
-        languageId : most_fl_la_id,
-        level : null,
-        isPreferred : true,
-        isBest : false
-    });
+    if(!formResponse.most_fluent_language.includes("English")) {
+        await ormJoSk.createJobApplicationSkill({
+            jobApplicationId : job_application_id,
+            skill : null,
+            languageId : most_fl_la_id,
+            level : null,
+            isPreferred : true,
+            isBest : false
+        });
+    }
 
     let english_id;
     const getEnglishLanguage = await getLanguageByName("English");
