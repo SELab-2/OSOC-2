@@ -21,7 +21,11 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
      /**
      * the person's email, may not be null if github is null
      */
-     email? : string
+     email? : string,
+     /**
+      *  the person's github id, if github is used
+      */
+     github_id?: string
 }
 
 /**

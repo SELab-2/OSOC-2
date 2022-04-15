@@ -668,6 +668,7 @@ export interface Login {
 export interface GHLogin {
   login: string;
   name: string;
+  id: string;
 }
 
 export interface KeyRequest {
