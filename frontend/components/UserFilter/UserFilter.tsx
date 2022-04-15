@@ -7,10 +7,10 @@ import CoachIconColor from "../../public/images/coach_icon_color.png"
 import CoachIcon from "../../public/images/coach_icon.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
-import {AccountStatus, getNextSort, Sort} from "../../types/types";
+import {AccountStatus, getNextSort, LoginUser, Sort} from "../../types/types";
 import SessionContext from "../../contexts/sessionProvider";
 
-export const UserFilter: React.FC = () => {
+export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => void }> = ({updateUsers}) => {
 
     const [nameFilter, setNameFilter] = useState<string>("")
     const [emailFilter, setEmailFilter] = useState<string>("")
@@ -18,7 +18,7 @@ export const UserFilter: React.FC = () => {
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE)
     const [adminFilter, setAdminFilter] = useState<boolean>(false)
     const [coachFilter, setCoachFilter] = useState<boolean>(false)
-    const [statusFilter, setStatusFilter] = useState<string>("")
+    const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.PENDING)
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
 
     const toggleNameSort = async (e: SyntheticEvent) => {
@@ -44,7 +44,7 @@ export const UserFilter: React.FC = () => {
     const togglePendingStatus = async (e: SyntheticEvent) => {
         e.preventDefault()
         if (statusFilter === AccountStatus.PENDING) {
-            setStatusFilter("")
+            setStatusFilter(AccountStatus.ACTIVATED)
         } else {
             setStatusFilter(AccountStatus.PENDING)
         }
@@ -53,7 +53,7 @@ export const UserFilter: React.FC = () => {
     const toggleDisabledStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
         if (statusFilter === AccountStatus.DISABLED) {
-            setStatusFilter("")
+            setStatusFilter(AccountStatus.ACTIVATED)
         } else {
             setStatusFilter(AccountStatus.DISABLED)
         }
@@ -65,13 +65,19 @@ export const UserFilter: React.FC = () => {
         //      -- Set the same variable queries in the frontend url so we can share and reuse the filter
         const nameOrder = nameSort ? "Desc" : "Asc"
         const emailOrder = emailSort ? "Desc" : "Asc"
-        const query = "name=" + nameFilter + "&sort=" + nameOrder + "&email=" + emailFilter + "&sort=" + emailOrder
-            + "&admin=" + adminFilter + "&coach=" + coachFilter + "&pending=" + statusFilter
+        console.log(nameFilter)
+        console.log(nameOrder)
+        console.log(emailOrder)
+        console.log(emailFilter)
+
+        const query = "?isAdminFilter=" + adminFilter
+        //"?nameFilter=" + nameFilter + "&nameSort=" + nameOrder + "&emailFilter=" + emailFilter +
+        //"&emailSort=" + emailOrder + "&isAdminFilter=" + adminFilter + "&isCoachFilter=" + coachFilter + "&statusFilter=" + statusFilter
         console.log(query)
         const sessionKey = getSessionKey ? await getSessionKey() : "";
         console.log(sessionKey)
-        //TODO deze call moet nog verbeterd
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,6 +96,7 @@ export const UserFilter: React.FC = () => {
         if (setSessionKey) {
             setSessionKey(response.sessionkey)
         }
+        updateUsers(response.data)
     }
 
     return (
@@ -105,8 +112,12 @@ export const UserFilter: React.FC = () => {
                         </div>
                     </div>
 
-                    <input className={`input ${styles.input}`} type="text" placeholder="Search.." onChange={e => setNameFilter(e.target.value)}/>
-                    <button className={`${statusFilter === AccountStatus.PENDING ? styles.pendingActive : styles.pendingButton}`} onClick={togglePendingStatus}>Pending</button>
+                    <input className={`input ${styles.input}`} type="text" placeholder="Search.."
+                           onChange={e => setNameFilter(e.target.value)}/>
+                    <button
+                        className={`${statusFilter === AccountStatus.PENDING ? styles.pendingActive : styles.pendingButton}`}
+                        onClick={togglePendingStatus}>Pending
+                    </button>
                 </div>
 
                 <div className={styles.query}>
@@ -119,7 +130,8 @@ export const UserFilter: React.FC = () => {
                         </div>
                     </div>
 
-                    <input className={`input ${styles.input}`} type="text" placeholder="Search.." onChange={e => setEmailFilter(e.target.value)}/>
+                    <input className={`input ${styles.input}`} type="text" placeholder="Search.."
+                           onChange={e => setEmailFilter(e.target.value)}/>
                     <button onClick={search}>Search</button>
                 </div>
 

@@ -63,9 +63,12 @@ const Users: NextPage = () => {
             }
         }
     }
+    const updateUsers = (users: Array<LoginUser>) => {
+        setUsers(users);
+    }
 
     return (<div className={styles.body}>
-        <UserFilter/>
+        <UserFilter updateUsers={updateUsers}/>
         <div>
 
             {users !== undefined ? users.map((user) => {
