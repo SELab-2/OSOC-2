@@ -10,6 +10,10 @@ import * as ormLU from "../orm_functions/login_user";
 
 import * as validator from 'validator';
 import {account_status_enum} from "@prisma/client";
+/*import * as ormSt from "../orm_functions/student";
+import * as ormJo from "../orm_functions/job_application";
+import * as ormRo from "../orm_functions/role";
+import * as ormLa from "../orm_functions/language";*/
 
 /**
  *  Attempts to list all students in the system.
@@ -134,6 +138,66 @@ async function deleteUserRequest(req: express.Request):
         .then(async parsed => setAccountStatus(parsed.data.id, 'DISABLED',
             parsed.data.sessionkey, Boolean(parsed.data.is_admin), Boolean(parsed.data.is_coach)));
 }
+
+/**
+ *  Attempts to filter users in the system by name, role, alumni, student coach, status or email.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+/*async function filterStudents(req: express.Request): Promise<Responses.StudentList> {
+    const parsedRequest = await rq.parseFilterStudentsRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const students = await ormSt.filterStudents(checkedSessionKey.data.firstNameFilter, checkedSessionKey.data.lastNameFilter,
+        checkedSessionKey.data.emailFilter, checkedSessionKey.data.roleFilter, checkedSessionKey.data.alumniFilter,
+        checkedSessionKey.data.coachFilter, checkedSessionKey.data.statusFilter, checkedSessionKey.data.firstNameSort,
+        checkedSessionKey.data.lastNameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.roleSort,
+        checkedSessionKey.data.alumniSort);
+
+    const studentlist = [];
+
+    for (const student of students) {
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+        if(jobApplication == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        const roles = [];
+        for(const applied_role of jobApplication.applied_role) {
+            const role = await ormRo.getRole(applied_role.role_id);
+            if(role != null) {
+                roles.push(role.name);
+            } else {
+                return Promise.reject(errors.cookInvalidID());
+            }
+        }
+
+        const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
+
+        for(const job_application_skill of jobApplication.job_application_skill) {
+            if(job_application_skill.language_id != null) {
+                const language = await ormLa.getLanguage(job_application_skill.language_id);
+                if(language == null) {
+                    return Promise.reject(errors.cookInvalidID());
+                }
+                job_application_skill.skill = language.name;
+            }
+        }
+
+        studentlist.push({
+            student : student,
+            jobApplication : jobApplication,
+            evaluations : evaluations,
+            roles: roles
+        });
+    }
+
+    return Promise.resolve({data : studentlist, sessionkey : req.body.sessionkey});
+}*/
 
 /**
  *  Gets the router for all `/user/` related endpoints.

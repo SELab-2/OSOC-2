@@ -259,13 +259,12 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
 }
 
 /**
- *  Parses a request to `POST /student/<id>/suggest`.
+ *  Parses a request to `GET /student/filter`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
-export async function parseFilterStudentsRequest(req: express.Request):
-    Promise<Requests.StudentFilter> {
+export async function parseFilterStudentsRequest(req: express.Request):Promise<Requests.StudentFilter> {
   let mail = undefined;
   if (("emailFilter" in req.body &&
        !validator.default.isEmail(req.body.emailFilter)) ||
@@ -305,6 +304,53 @@ export async function parseFilterStudentsRequest(req: express.Request):
     alumniSort : maybe(req.body, "alumniSort"),
   });
 }
+
+/**
+ *  Parses a request to `GET /user/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+/*export async function parseFilterUsersRequest(req: express.Request):Promise<Requests.UserFilter> {
+  let mail = undefined;
+  if (("emailFilter" in req.body &&
+          !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
+          req.body.statusFilter !== "MAYBE" && req.body.statusFilter !== "NO")) {
+    return rejector();
+  } else {
+    if ("emailFilter" in req.body) {
+      mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
+    }
+  }
+
+  console.log(mail);
+
+  for (const filter
+      of [maybe(req.body, "firstNameSort"),
+    maybe(req.body, "lastNameSort"), maybe(req.body, "emailSort"),
+    maybe(req.body, "roleSort"), maybe(req.body, "alumniSort")]) {
+    if (filter != undefined && filter !== "asc" && filter !== "desc") {
+      return rejector();
+    }
+  }
+
+  return Promise.resolve({
+    sessionkey : getSessionKey(req),
+    firstNameFilter : maybe(req.body, "firstNameFilter"),
+    lastNameFilter : maybe(req.body, "lastNameFilter"),
+    emailFilter : mail,
+    roleFilter : maybe(req.body, "roleFilter"),
+    alumniFilter : maybe(req.body, "alumniFilter"),
+    coachFilter : maybe(req.body, "coachFilter"),
+    statusFilter : maybe(req.body, "statusFilter"),
+    firstNameSort : maybe(req.body, "firstNameSort"),
+    lastNameSort : maybe(req.body, "lastNameSort"),
+    emailSort : maybe(req.body, "emailSort"),
+    roleSort : maybe(req.body, "roleSort"),
+    alumniSort : maybe(req.body, "alumniSort"),
+  });
+}*/
 
 /**
  *  Parses a request to `POST /student/<id>/confirm`.
