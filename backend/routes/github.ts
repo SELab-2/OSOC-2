@@ -8,12 +8,13 @@ import * as ormP from '../orm_functions/person';
 import * as ormSK from '../orm_functions/session_key';
 import {Anything, Requests, Responses} from '../types';
 import * as util from '../utility';
+
 import * as session_key from './session_key.json'
 
 let states: string[] = [];
 
 function getHome(): string {
-    const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
+  const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
   // check if dev or production
   console.log("Home is: " + root);
   return root;
@@ -79,9 +80,7 @@ async function ghExchangeAccessToken(req: express.Request,
       .then(ares => parseGHLogin(ares.data))
       .then(login => ghSignupOrLogin(login))
       .then(result => util.redirect(res, process.env.FRONTEND + "/login/" +
-                                             result.sessionkey +
-                                             "?is_admin=" + result.is_admin +
-                                             "&is_coach=" + result.is_coach))
+                                             result.sessionkey))
       .catch(err => {
         console.log('GITHUB ERROR ' + err);
         util.redirect(res, process.env.FRONTEND + "/login?loginError=" +
@@ -130,16 +129,16 @@ async function ghSignupOrLogin(login: Requests.GHLogin):
           return Promise.reject(error); // pass on
         }
       })
-      .then(async (loginuser) =>{
-          const key: string = util.generateKey();
-          const futureDate = new Date();
-          futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-          return ormSK.addSessionKey(loginuser.login_user_id, key,futureDate)
-              .then(newkey => Promise.resolve({
-                  sessionkey : newkey.session_key,
-                  is_admin : loginuser.is_admin,
-                  is_coach : loginuser.is_coach
-              }))
+      .then(async (loginuser) => {
+        const key: string = util.generateKey();
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+        return ormSK.addSessionKey(loginuser.login_user_id, key, futureDate)
+            .then(newkey => Promise.resolve({
+              sessionkey : newkey.session_key,
+              is_admin : loginuser.is_admin,
+              is_coach : loginuser.is_coach
+            }))
       });
 }
 
