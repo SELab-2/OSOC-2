@@ -254,8 +254,7 @@ async function createStudentConfirmation(req: express.Request): Promise<Response
 }
 
 /**
- *  Attempts to filter students in the system by name, role, status or mail
- * status.
+ *  Attempts to filter students in the system by name, role, alumni, student coach, status or email.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.

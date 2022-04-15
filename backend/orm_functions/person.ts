@@ -12,7 +12,8 @@ export async function createPerson(person: CreatePerson) {
       firstname : person.firstname,
       lastname : person.lastname,
       github : person.github,
-      email : person.email
+      email : person.email,
+      github_id : person.github_id
     },
   });
 }
@@ -54,8 +55,11 @@ export async function getPasswordPersonByEmail(email: string) {
  */
 export async function getPasswordPersonByGithub(github: string) {
   return await prisma.person.findUnique({
-    where : {github : github},
+    where : {github_id : github},
     select : {
+      github : true,
+      person_id : true,
+      firstname : true,
       login_user : {
         select : {
           password : true,

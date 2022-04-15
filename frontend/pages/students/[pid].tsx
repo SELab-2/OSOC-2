@@ -15,7 +15,7 @@ const Pid: NextPage = () => {
     const fetchStudent = async () => {
         if (getSessionKey !== undefined && pid !== undefined) {
             getSessionKey().then(async sessionKey => {
-                if (sessionKey != "") {
+                if (sessionKey !== "") {
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`, {
                         method: 'GET',
                         headers: {
