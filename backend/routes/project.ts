@@ -5,6 +5,7 @@ import * as ormEv from '../orm_functions/evaluation';
 import * as ormOsoc from '../orm_functions/osoc';
 import * as ormPr from '../orm_functions/project';
 import * as ormPrRole from '../orm_functions/project_role';
+import * as ormPU from '../orm_functions/project_user';
 import * as ormRole from '../orm_functions/role';
 import * as rq from '../request';
 import {InternalTypes, Responses, StringDict} from '../types';
@@ -58,15 +59,22 @@ async function listProjects(req: express.Request):
       .then(
           async parsed =>
               ormPr.getAllProjects()
-                  .then(obj => obj.map(val => ({
-                                         id : Number(val.project_id),
-                                         name : val.name,
-                                         partner : val.partner,
-                                         start_date : val.start_date.toString(),
-                                         end_date : val.end_date.toString(),
-                                         positions : val.positions,
-                                         osoc_id : val.osoc_id
-                                       })))
+                  .then(obj => Promise.all(obj.map(async val => {
+                    const students =
+                        await ormCtr.contractsByProject(val.project_id);
+                    const users = await ormPU.getUsersFor(val.project_id);
+                    return Promise.resolve({
+                      id : Number(val.project_id),
+                      name : val.name,
+                      partner : val.partner,
+                      start_date : val.start_date.toString(),
+                      end_date : val.end_date.toString(),
+                      positions : val.positions,
+                      osoc_id : val.osoc_id,
+                      students : students,
+                      coaches : users
+                    })
+                  })))
                   .then(
                       obj => Promise.resolve(
                           {sessionkey : parsed.data.sessionkey, data : obj})));
@@ -82,8 +90,10 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
   return rq.parseSingleProjectRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(parsed => util.isValidID(parsed.data, "project"))
-      .then(async parsed => ormPr.getProjectById(parsed.id).then(obj => {
+      .then(async parsed => ormPr.getProjectById(parsed.id).then(async obj => {
         if (obj !== null) {
+          const students = await ormCtr.contractsByProject(obj.project_id);
+          const users = await ormPU.getUsersFor(obj.project_id);
           return Promise.resolve({
             sessionkey : parsed.sessionkey,
             data : {
@@ -93,7 +103,9 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
               start_date : obj.start_date.toString(),
               end_date : obj.end_date.toString(),
               positions : obj.positions,
-              osoc_id : obj.osoc_id
+              osoc_id : obj.osoc_id,
+              students : students,
+              coaches : users
             }
           });
         } else {
