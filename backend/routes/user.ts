@@ -10,10 +10,6 @@ import * as ormLU from "../orm_functions/login_user";
 
 import * as validator from 'validator';
 import {account_status_enum} from "@prisma/client";
-/*import * as ormSt from "../orm_functions/student";
-import * as ormJo from "../orm_functions/job_application";
-import * as ormRo from "../orm_functions/role";
-import * as ormLa from "../orm_functions/language";*/
 
 /**
  *  Attempts to list all students in the system.
@@ -145,59 +141,31 @@ async function deleteUserRequest(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-/*async function filterStudents(req: express.Request): Promise<Responses.StudentList> {
-    const parsedRequest = await rq.parseFilterStudentsRequest(req);
+async function filterUsers(req: express.Request): Promise<Responses.UserList> {
+    const parsedRequest = await rq.parseFilterUsersRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const students = await ormSt.filterStudents(checkedSessionKey.data.firstNameFilter, checkedSessionKey.data.lastNameFilter,
-        checkedSessionKey.data.emailFilter, checkedSessionKey.data.roleFilter, checkedSessionKey.data.alumniFilter,
-        checkedSessionKey.data.coachFilter, checkedSessionKey.data.statusFilter, checkedSessionKey.data.firstNameSort,
-        checkedSessionKey.data.lastNameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.roleSort,
-        checkedSessionKey.data.alumniSort);
+    const users = await ormLU.filterLoginUsers(checkedSessionKey.data.nameFilter, checkedSessionKey.data.emailFilter,
+        checkedSessionKey.data.nameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.isCoachFilter, checkedSessionKey.data.isAdminFilter);
 
-    const studentlist = [];
+    users.map(val => ({
+        person_data : {
+            id : val.person.person_id,
+            name : val.person.firstname,
+            email: val.person.email,
+            github: val.person.github
+        },
+        coach : val.is_coach,
+        admin : val.is_admin,
+        activated : val.account_status as string
+    }))
 
-    for (const student of students) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
-        if(jobApplication == null) {
-            return Promise.reject(errors.cookInvalidID());
-        }
-
-        const roles = [];
-        for(const applied_role of jobApplication.applied_role) {
-            const role = await ormRo.getRole(applied_role.role_id);
-            if(role != null) {
-                roles.push(role.name);
-            } else {
-                return Promise.reject(errors.cookInvalidID());
-            }
-        }
-
-        const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
-
-        for(const job_application_skill of jobApplication.job_application_skill) {
-            if(job_application_skill.language_id != null) {
-                const language = await ormLa.getLanguage(job_application_skill.language_id);
-                if(language == null) {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-                job_application_skill.skill = language.name;
-            }
-        }
-
-        studentlist.push({
-            student : student,
-            jobApplication : jobApplication,
-            evaluations : evaluations,
-            roles: roles
-        });
-    }
-
-    return Promise.resolve({data : studentlist, sessionkey : req.body.sessionkey});
-}*/
+    return Promise.resolve({data : users, sessionkey : req.body.sessionkey});
+}
 
 /**
  *  Gets the router for all `/user/` related endpoints.
@@ -208,6 +176,7 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
     util.setupRedirect(router, '/user');
+    util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
     router.post('/request', (req, res) => util.respOrErrorNoReinject(
@@ -216,7 +185,7 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/request/:id", createUserAcceptance);
     util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id" ]);
+    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id", "/filter" ]);
 
     return router;
 }
