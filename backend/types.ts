@@ -680,6 +680,8 @@ export interface AccountAcceptance extends IdRequest {
 
 export interface StudentFilter extends KeyRequest {}
 
+export interface UserFilter extends KeyRequest {}
+
 export interface UpdateStudent extends IdRequest {
   emailOrGithub?: string;
   firstName?: string;
