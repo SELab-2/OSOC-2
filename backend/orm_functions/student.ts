@@ -128,13 +128,15 @@ export async function searchStudentByGender(gender: string){
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
     alumniSort: FilterSort) {
 
+     console.log(roleFilterArray)
+    console.log("jeajgkajk")
     return await prisma.student.findMany({
         where: {
             job_application: {
                 some: {
                     student_coach: coachFilter,
                     applied_role: {
-                        every: {
+                        some: {
                             role:{
                                 name: { in: roleFilterArray}
                             }
