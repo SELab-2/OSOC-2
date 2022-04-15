@@ -267,6 +267,7 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
 export async function parseFilterStudentsRequest(req: express.Request):
     Promise<Requests.StudentFilter> {
   let mail = maybe(req.body, "emailFilter");
+  let roles = maybe(req.body, "roleFilter");
   if (("emailFilter" in req.body &&
        !validator.default.isEmail(req.body.emailFilter)) ||
       ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
@@ -276,6 +277,10 @@ export async function parseFilterStudentsRequest(req: express.Request):
     if ("emailFilter" in req.body) {
       mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
     }
+  }
+
+  if("roleFilter" in req.body) {
+    roles = req.body.roleFilter.split(',');
   }
 
   console.log(mail);
@@ -294,7 +299,7 @@ export async function parseFilterStudentsRequest(req: express.Request):
     firstNameFilter : maybe(req.body, "firstNameFilter"),
     lastNameFilter : maybe(req.body, "lastNameFilter"),
     emailFilter : mail,
-    roleFilter : maybe(req.body, "roleFilter"),
+    roleFilter : roles,
     alumniFilter : maybe(req.body, "alumniFilter"),
     coachFilter : maybe(req.body, "coachFilter"),
     statusFilter : maybe(req.body, "statusFilter"),
