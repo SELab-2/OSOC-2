@@ -148,9 +148,11 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const users = await ormLU.filterLoginUsers(checkedSessionKey.data.nameFilter, checkedSessionKey.data.emailFilter,
+    const users = await ormLU.filterLoginUsers(
+        checkedSessionKey.data.nameFilter, checkedSessionKey.data.emailFilter,
         checkedSessionKey.data.nameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.isCoachFilter, checkedSessionKey.data.isAdminFilter);
+        checkedSessionKey.data.isCoachFilter, checkedSessionKey.data.isAdminFilter
+    );
 
     users.map(val => ({
         person_data : {
