@@ -1,7 +1,9 @@
 import prisma from "../../prisma/prisma";
-import {createJobApplicationSkill, getAllJobApplicationSkill, 
+import {
+    createJobApplicationSkill, getAllJobApplicationSkill,
     getAllJobApplicationSkillByJobApplication, getJobApplicationSkill,
-    updateJobApplicationSkill, deleteJobApplicationSkill} from "../../orm_functions/job_application_skill";
+    updateJobApplicationSkill, deleteJobApplicationSkill, deleteJobApplicationSkillsByJobApplication
+} from "../../orm_functions/job_application_skill";
 import { CreateJobApplicationSkill, UpdateJobApplicationSkill } from "../../orm_functions/orm_types";
 
 const jobApplicationSkill1: UpdateJobApplicationSkill = {
@@ -103,4 +105,25 @@ it('should delete the job application skill based upon id', async () => {
     expect(deleted_job_application_skill).toHaveProperty("level", jobApplicationSkill2.level);
     expect(deleted_job_application_skill).toHaveProperty("is_preferred", jobApplicationSkill2.isPreferred);
     expect(deleted_job_application_skill).toHaveProperty("is_best", jobApplicationSkill2.is_best);
+});
+
+it("should return the number of deleted records", async () => {
+    const [job_applications, languages] = await Promise.all([prisma.job_application.findMany(), prisma.language.findMany()])
+
+    const deleted = await deleteJobApplicationSkillsByJobApplication(job_applications[1].job_application_id);
+    expect(deleted).toHaveProperty("count", 1);
+
+    await prisma.job_application_skill.createMany({
+        data: [
+            {
+                job_application_id: job_applications[1].job_application_id,
+                skill: "SQL",
+                language_id: languages[0].language_id,
+                level: 5,
+                is_preferred: false,
+                is_best: true
+
+            },
+        ],
+    });
 });

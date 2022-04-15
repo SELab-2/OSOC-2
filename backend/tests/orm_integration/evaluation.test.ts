@@ -1,6 +1,8 @@
 import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from "../../orm_functions/orm_types";
-import {createEvaluationForStudent, checkIfFinalEvaluationExists, 
-    updateEvaluationForStudent, getLoginUserByEvaluationId} from "../../orm_functions/evaluation";
+import {
+    createEvaluationForStudent, checkIfFinalEvaluationExists,
+    updateEvaluationForStudent, getLoginUserByEvaluationId, deleteEvaluationsByJobApplication
+} from "../../orm_functions/evaluation";
 import prisma from "../../prisma/prisma";
 import {decision_enum} from "@prisma/client";
 
@@ -63,4 +65,30 @@ it('should update evaluation based upon evaluation id', async () => {
     expect(updated_evaluation).toHaveProperty("decision", evaluation1.decision);
     expect(updated_evaluation).toHaveProperty("motivation", evaluation1.motivation);
     expect(updated_evaluation).toHaveProperty("is_final", createdEvaluation.isFinal);
+});
+
+it("should return the number of deleted records", async () => {
+    const [login_users, job_applications] = await Promise.all([prisma.login_user.findMany(), prisma.job_application.findMany()])
+
+    const deleted = await deleteEvaluationsByJobApplication(job_applications[0].job_application_id);
+    expect(deleted).toHaveProperty("count", 2);
+
+    await prisma.evaluation.createMany({
+        data : [
+            {
+                login_user_id: login_users[0].login_user_id,
+                job_application_id: job_applications[0].job_application_id,
+                decision: decision_enum.MAYBE,
+                motivation: "low education level",
+                is_final: false,
+            },
+            {
+                login_user_id: login_users[0].login_user_id,
+                job_application_id: job_applications[0].job_application_id,
+                decision: decision_enum.YES,
+                motivation: "awesome job application",
+                is_final: true
+            }
+        ]
+    })
 });

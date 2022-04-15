@@ -102,7 +102,7 @@ export async function getEvaluationByPartiesFor(
  * @returns the number of deleted records in a promise
  */
 export async function deleteEvaluationsByJobApplication(jobApplicationId: number) {
-    prisma.evaluation.deleteMany({
+    return await prisma.evaluation.deleteMany({
         where : {
             job_application_id: jobApplicationId
         }

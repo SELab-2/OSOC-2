@@ -1,7 +1,7 @@
 import {prismaMock} from "./singleton";
 import {CreateJobApplicationSkill, UpdateJobApplicationSkill} from "../../orm_functions/orm_types";
 import {
-    createJobApplicationSkill, deleteJobApplicationSkill,
+    createJobApplicationSkill, deleteJobApplicationSkill, deleteJobApplicationSkillsByJobApplication,
     getAllJobApplicationSkill,
     getAllJobApplicationSkillByJobApplication, getJobApplicationSkill, updateJobApplicationSkill
 } from "../../orm_functions/job_application_skill";
@@ -83,7 +83,12 @@ test("should update the job application skill and return the updated record", as
 });
 
 test("should delete the jobApplication skill with the given ID and return the deleted record", async () => {
-
     prismaMock.job_application_skill.delete.mockResolvedValue(returnValue);
     await expect(deleteJobApplicationSkill(0)).resolves.toEqual(returnValue);
+});
+
+test("should delete the skills related to the job application", async () => {
+    const returnValue = {"count": 2}
+    prismaMock.job_application_skill.deleteMany.mockResolvedValue(returnValue);
+    await expect(deleteJobApplicationSkillsByJobApplication(1)).resolves.toEqual(returnValue);
 });

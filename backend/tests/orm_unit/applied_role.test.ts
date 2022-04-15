@@ -1,6 +1,10 @@
 import {prismaMock} from "./singleton";
 import { CreateAppliedRole } from "../../orm_functions/orm_types";
-import {createAppliedRole, getAppliedRolesByJobApplication } from "../../orm_functions/applied_role";
+import {
+    createAppliedRole,
+    deleteAppliedRolesByJobApplication,
+    getAppliedRolesByJobApplication
+} from "../../orm_functions/applied_role";
 
 const returnValue = {
     applied_role_id: 0,
@@ -22,3 +26,9 @@ test("should return all the appliedroles given the application in the db", async
     prismaMock.applied_role.findMany.mockResolvedValue([returnValue]);
     await expect(getAppliedRolesByJobApplication(0)).resolves.toEqual([returnValue]);
 });
+
+test("should delete the applied roles with given application id", async () => {
+    const returnValue = {count: 1}
+    prismaMock.applied_role.deleteMany.mockResolvedValue(returnValue);
+    await expect(deleteAppliedRolesByJobApplication(1)).resolves.toEqual(returnValue);
+})

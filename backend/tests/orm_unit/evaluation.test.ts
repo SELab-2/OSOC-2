@@ -2,7 +2,7 @@ import {prismaMock} from "./singleton";
 import {decision_enum} from "@prisma/client";
 import {
     checkIfFinalEvaluationExists,
-    createEvaluationForStudent,
+    createEvaluationForStudent, deleteEvaluationsByJobApplication,
     getLoginUserByEvaluationId,
     updateEvaluationForStudent
 } from "../../orm_functions/evaluation";
@@ -112,4 +112,10 @@ test("should return the loginUser with his info that made this evaluation", asyn
     }
     prismaMock.evaluation.findUnique.mockResolvedValue(result);
     await expect(getLoginUserByEvaluationId(7)).resolves.toEqual(result);
+});
+
+test("should delete the evaluations that belong to the job application", async () => {
+    const returnValue = {count: 2}
+    prismaMock.evaluation.deleteMany.mockResolvedValue(returnValue);
+    await expect(deleteEvaluationsByJobApplication(1)).resolves.toEqual(returnValue)
 });

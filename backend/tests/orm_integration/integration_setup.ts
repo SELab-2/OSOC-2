@@ -226,7 +226,6 @@ beforeAll(async () => {
         data: [
             {   
                 name: "Developer",
-
             },
             {
                 name: "Marketeer"
