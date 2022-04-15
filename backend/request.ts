@@ -294,8 +294,14 @@ export async function parseFilterStudentsRequest(req: express.Request):
     }
   }
 
+  let osoc_year = new Date().getFullYear();
+  if("osocYear" in req.body) {
+    osoc_year = req.body.osocYear;
+  }
+
   return Promise.resolve({
     sessionkey : getSessionKey(req),
+    osocYear: osoc_year,
     firstNameFilter : maybe(req.body, "firstNameFilter"),
     lastNameFilter : maybe(req.body, "lastNameFilter"),
     emailFilter : mail,

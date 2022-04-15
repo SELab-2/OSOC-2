@@ -265,15 +265,12 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
         return Promise.reject(errors.cookInvalidID());
     }
 
-    console.log(checkedSessionKey.data.roleFilter)
     const students = await ormSt.filterStudents(checkedSessionKey.data.firstNameFilter, checkedSessionKey.data.lastNameFilter,
         checkedSessionKey.data.emailFilter, checkedSessionKey.data.roleFilter, checkedSessionKey.data.alumniFilter,
-        checkedSessionKey.data.coachFilter, checkedSessionKey.data.statusFilter, checkedSessionKey.data.firstNameSort,
+        checkedSessionKey.data.coachFilter, checkedSessionKey.data.statusFilter, checkedSessionKey.data.osocYear, checkedSessionKey.data.firstNameSort,
         checkedSessionKey.data.lastNameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.roleSort,
         checkedSessionKey.data.alumniSort);
 
-    console.log(students)
-    console.log("studentsaaaa")
     const studentlist = [];
 
     for (const student of students) {
