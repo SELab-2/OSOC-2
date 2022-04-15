@@ -40,7 +40,11 @@
         },
         "lockedRequest": {
             "http": 423,
-            "reason": "This is an invalid request for this account type."
+            "reason": "Your account was deactivated. Please contact the webmaster."
+        },
+        "pendingAccount": {
+            "http": 424,
+            "reason": "Your account hasn't been activated yet. Please try again later."
         },
         "github": {
             "argumentMissing": {
