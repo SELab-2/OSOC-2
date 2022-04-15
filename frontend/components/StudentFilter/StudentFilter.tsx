@@ -14,7 +14,10 @@ import {Role, Student} from "../../types/types";
 import {RolesComponent} from "../RoleComponent/RolesComponent";
 import SessionContext from "../../contexts/sessionProvider";
 
-export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: (user: Array<Student>) => void }> = ({roles,setFilteredStudents}) => {
+export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: (user: Array<Student>) => void }> = ({
+                                                                                                                         roles,
+                                                                                                                         setFilteredStudents
+                                                                                                                     }) => {
     const [nameSort, setNameSort] = useState<boolean>(false);
     const [emailSort, setEmailSort] = useState<boolean>(false);
     const [filterYes, setFilterYes] = useState<boolean>(false);
@@ -60,15 +63,15 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc";
         const emailOrder = emailSort ? "Desc" : "Asc";
-        const testRoles = ["Dev","Gamer"]
+        const testRoles = ["Dev", "Gamer"]
         const query = "?name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
-            "&Yes=" + filterYes + "&maybe=" + filterMaybe + "&no=" + filterNo + "&studentCoach=" + studentCoach +
-            "&alumni=" + alumni + "&roles=" + testRoles;
+            "&Yes=" + filterYes + "&Maybe=" + filterMaybe + "&No=" + filterNo + "&studentCoach=" + studentCoach +
+            "&alumni=" + alumni + "&roles=[" + testRoles + "]";
         console.log(selectedRoles)
         console.log(query);
         console.log(sessionKey)
-        console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`+ query)
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter`+ query, {
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query, {
             method: 'GET',
             headers: {
                 'Authorization': `auth/osoc2 ${sessionKey}`,

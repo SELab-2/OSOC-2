@@ -485,12 +485,11 @@ export async function parseUpdateTemplateRequest(req: express.Request):
  */
 export async function parseFormRequest(req: express.Request):
     Promise<Requests.Form> {
-  return hasFields(req, [ "eventId", "eventType", "createdAt", "data" ],
+  return hasFields(req, [ "eventId", "createdAt", "data" ],
                    types.neither)
       .then(() => {
         return Promise.resolve({
           eventId : req.body.eventId,
-          eventType : req.body.eventType,
           createdAt : req.body.createdAt,
           data : req.body.data
         });

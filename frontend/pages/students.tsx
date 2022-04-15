@@ -15,7 +15,7 @@ const Students: NextPage = () => {
 
 
     const fetchStudentsAndRoles = async () => {
-        let sessionKey = getSessionKey != undefined ? getSessionKey() : ""
+        let sessionKey = getSessionKey != undefined ? await getSessionKey() : ""
         const responseStudents = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
             method: 'GET',
             headers: {
@@ -62,9 +62,12 @@ const Students: NextPage = () => {
 
 
     return (
+
         <div className={styles.students}>
             <StudentFilter roles={roles} setFilteredStudents={setFilteredStudents}/>
-            {students.map(student => <StudentCard key={student.jobApplication.student_id} student={student as Student}/>)}
+            {students.map(student => {
+                return <StudentCard key={student.student.student_id} student={student as Student}/>
+            })}
         </div>
     )
 }

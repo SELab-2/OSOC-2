@@ -3,10 +3,11 @@ import express from 'express';
 import {v1} from 'uuid';
 
 import * as config from './config.json';
-import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as ormLoUs from './orm_functions/login_user';
 import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
+import * as session_key from "./routes/session_key.json";
 import {
   Anything,
   ApiError,
@@ -29,6 +30,7 @@ export const errors: Errors = {
   cookArgumentError() { return config.apiErrors.argumentError;},
   cookUnauthenticated() { return config.apiErrors.unauthenticated;},
   cookInsufficientRights() { return config.apiErrors.insufficientRights;},
+  cookLockedRequest() { return config.apiErrors.lockedRequest;},
 
   cookNonExistent(url: string) {
     return {
@@ -239,9 +241,25 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey)
-      .then((uid) => Promise.resolve({data : obj, userId : uid.login_user_id}))
-      .catch(() => Promise.reject(errors.cookUnauthenticated()));
+    return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+        if (uid) {
+            return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
+                if (login_user != null && login_user.account_status != "DISABLED") {
+                    return Promise.resolve({
+                        data: obj, userId: uid.login_user_id, accountStatus: login_user.account_status,
+                        is_admin: login_user.is_admin, is_coach: login_user.is_coach
+                    });
+                } else {
+                    return Promise.reject(errors.cookLockedRequest());
+                }
+            })
+        } else {
+            return Promise.reject(errors.cookNonExistent);
+        }
+    }).catch(arg => {
+        console.log(arg);
+        return Promise.reject(errors.cookUnauthenticated());
+    });
 }
 
 /**
@@ -261,7 +279,7 @@ export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
       .catch(() => Promise.reject(errors.cookUnauthenticated()))
       .then(
           async id =>
-              searchAllAdminLoginUsers(true)
+              ormLoUs.searchAllAdminLoginUsers(true)
                   .catch(() => Promise.reject(errors.cookInsufficientRights()))
                   .then(admins => admins.some(a => a.login_user_id == id.userId)
                                       ? Promise.resolve(id)
@@ -287,7 +305,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  return skey.changeSessionKey(key, generateKey())
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+  return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
@@ -397,4 +417,11 @@ export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
   if (vl == null || vl == undefined)
     return Promise.reject(errors.cookNoDataError());
   return Promise.resolve(vl);
+}
+
+export function queryToBody(req: express.Request) {
+  for (const key in req.query) {
+    req.body[key] = req.query[key];
+  }
+  return req;
 }
