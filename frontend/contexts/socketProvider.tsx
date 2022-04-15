@@ -1,4 +1,4 @@
-import React, {createContext, useContext} from "react";
+import React, {createContext, ReactNode, useContext} from "react";
 import {io} from "socket.io-client";
 import {Socket} from "socket.io-client";
 import {ClientToServerEvents, ServerToClientEvents} from "../types";
@@ -10,7 +10,7 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(`${process
 const SocketsContext = createContext({socket});
 
 // provider for the socketcontext
-export const SocketsProvider: React.FC = ({ children }) => {
+export const SocketsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     return (
         <SocketsContext.Provider value={{socket}}>
             {children}
