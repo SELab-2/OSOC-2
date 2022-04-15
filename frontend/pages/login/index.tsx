@@ -11,6 +11,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from 'validator';
+import {AccountStatus} from "../../types/types";
 
 const Index: NextPage = () => {
 
@@ -123,7 +124,11 @@ const Index: NextPage = () => {
                 if (setIsCoach) {
                     setIsCoach(response.is_coach)
                 }
-                router.push("/students").then()
+                if (response.account_status === AccountStatus.ACTIVATED) {
+                    router.push("/students").then()
+                } else if (response.account_status === AccountStatus.PENDING) {
+                    router.push("/pending").then()
+                }
             }
         }
     }
