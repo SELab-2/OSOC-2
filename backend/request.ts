@@ -266,7 +266,7 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
  */
 export async function parseFilterStudentsRequest(req: express.Request):
     Promise<Requests.StudentFilter> {
-  let mail = undefined;
+  let mail = maybe(req.body, "emailFilter");
   if (("emailFilter" in req.body &&
        !validator.default.isEmail(req.body.emailFilter)) ||
       ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&

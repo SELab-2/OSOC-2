@@ -63,10 +63,11 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc";
         const emailOrder = emailSort ? "Desc" : "Asc";
-        const testRoles = ["Dev", "Gamer"]
-        const query = "?name=" + nameText + "&sort=" + nameOrder + "&email=" + emailText + "&sort=" + emailOrder +
-            "&Yes=" + filterYes + "&Maybe=" + filterMaybe + "&No=" + filterNo + "&studentCoach=" + studentCoach +
-            "&alumni=" + alumni + "&roles=[" + testRoles + "]";
+        console.log(nameOrder)
+        console.log(emailOrder)
+        console.log(alumni)
+        console.log(studentCoach)
+        const query = "?firstNameFilter=" + nameText + "&emailFilter=" + emailText + "&roleFilter=[" + selectedRoles + "]";
         console.log(selectedRoles)
         console.log(query);
         console.log(sessionKey)
