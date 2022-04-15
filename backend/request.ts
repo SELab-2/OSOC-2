@@ -267,13 +267,15 @@ export async function parseGetSuggestionsStudentRequest(req: express.Request):
 export async function parseFilterStudentsRequest(req: express.Request):
     Promise<Requests.StudentFilter> {
   let mail = maybe(req.body, "emailFilter");
-  if (("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
+  if (("emailFilter" in req.body &&
+       !validator.default.isEmail(req.body.emailFilter)) ||
+      ("statusFilter" in req.body && req.body.statusFilter !== "YES" &&
        req.body.statusFilter !== "MAYBE" && req.body.statusFilter !== "NO")) {
     return rejector();
-  }
-
-  if ("emailFilter" in req.body) {
-    mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
+  } else {
+    if ("emailFilter" in req.body) {
+      mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
+    }
   }
 
   console.log(mail);
