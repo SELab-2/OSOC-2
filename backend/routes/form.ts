@@ -10,6 +10,7 @@ import * as ormLa from '../orm_functions/language';
 import * as ormAtt from '../orm_functions/attachment';
 import * as ormRo from '../orm_functions/role';
 import * as ormAppRo from '../orm_functions/applied_role';
+import * as ormEv from '../orm_functions/evaluation';
 import {Requests, Responses} from '../types';
 import * as util from "../utility";
 import {errors} from "../utility";
@@ -956,6 +957,15 @@ async function addStudentToDatabase(formResponse : Responses.FormStudent, person
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addJobApplicationToDatabase(formResponse : Responses.FormJobApplication, student_id: Responses.Id): Promise<Responses.Id> {
+    const latestJobApplication = await ormJo.getLatestJobApplicationOfStudent(student_id.id);
+    if(latestJobApplication != null) {
+        await ormAppRo.deleteAppliedRolesByJobApplication(latestJobApplication.job_application_id);
+        await ormJoSk.deleteJobApplicationSkillsByJobApplication(latestJobApplication.job_application_id);
+        await ormAtt.deleteAllAttachmentsForApplication(latestJobApplication.job_application_id);
+        await ormEv.deleteEvaluationsByJobApplication(latestJobApplication.job_application_id);
+        await ormJo.deleteJobApplication(latestJobApplication.job_application_id);
+    }
+
     const jobApplication = await ormJo.createJobApplication({
         studentId : student_id.id,
         responsibilities : formResponse.responsibilities,
