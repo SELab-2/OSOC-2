@@ -136,6 +136,40 @@ async function deleteUserRequest(req: express.Request):
 }
 
 /**
+ *  Attempts to filter users in the system by name, email, status, coach or admin.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function filterUsers(req: express.Request): Promise<Responses.UserList> {
+    const parsedRequest = await rq.parseFilterUsersRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const users = await ormLU.filterLoginUsers(
+        checkedSessionKey.data.nameFilter, checkedSessionKey.data.emailFilter,
+        checkedSessionKey.data.nameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.isCoachFilter, checkedSessionKey.data.isAdminFilter
+    );
+
+    users.map(val => ({
+        person_data : {
+            id : val.person.person_id,
+            name : val.person.firstname,
+            email: val.person.email,
+            github: val.person.github
+        },
+        coach : val.is_coach,
+        admin : val.is_admin,
+        activated : val.account_status as string
+    }))
+
+    return Promise.resolve({data : users, sessionkey : req.body.sessionkey});
+}
+
+/**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
  * endpoints.
@@ -144,6 +178,7 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
     util.setupRedirect(router, '/user');
+    util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
     router.post('/request', (req, res) => util.respOrErrorNoReinject(
@@ -152,7 +187,7 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/request/:id", createUserAcceptance);
     util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id" ]);
+    util.addAllInvalidVerbs(router, [ "/", "/all", "/request", "/request/:id", "/filter" ]);
 
     return router;
 }
