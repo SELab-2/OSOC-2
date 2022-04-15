@@ -1,4 +1,8 @@
-import {account_status_enum, email_status_enum, type_enum} from "@prisma/client";
+import {
+  account_status_enum,
+  email_status_enum,
+  type_enum
+} from "@prisma/client";
 import express from 'express';
 
 /**
@@ -64,6 +68,10 @@ export interface Errors {
    *  Cooks up a No Data Error response.
    */
   cookNoDataError: () => ApiError;
+  /**
+   *  Cooks up a Pending Account Error response.
+   */
+  cookPendingAccount: () => ApiError;
 }
 
 /**
@@ -72,7 +80,7 @@ export interface Errors {
  */
 export namespace InternalTypes {
 import FormAttachmentResponse = Responses.FormAttachmentResponse;
-  /**
+/**
  *  A session key is a string.
  */
 export type SessionKey = string;
@@ -158,7 +166,7 @@ export interface FormStudent {
   /**
    *  The firstname of this person.
    */
-  pronouns: string | null;
+  pronouns: string|null;
   /**
    *  The lastname of this person.
    */
@@ -170,7 +178,7 @@ export interface FormStudent {
   /**
    *  The email of this person.
    */
-  nickname: string | null;
+  nickname: string|null;
   /**
    *  The email of this person.
    */
@@ -184,7 +192,7 @@ export interface FormJobApplication {
   /**
    *  The responsibilities of this person.
    */
-  responsibilities: string | null;
+  responsibilities: string|null;
   /**
    *  The fun fact of this person.
    */
@@ -196,7 +204,7 @@ export interface FormJobApplication {
   /**
    *  The check if this person wants to be a studentCoach
    */
-  studentCoach: boolean | null;
+  studentCoach: boolean|null;
   /**
    *  The email of this person.
    */
@@ -212,15 +220,15 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationDuration: number | null;
+  educationDuration: number|null;
   /**
    *  The email of this person.
    */
-  educationYear: string | null;
+  educationYear: string|null;
   /**
    *  The email of this person.
    */
-  educationInstitute: string | null;
+  educationInstitute: string|null;
   /**
    *  The email of this person.
    */
@@ -510,8 +518,8 @@ export interface UserList extends Keyed<InternalTypes.User[]> {}
  *
  */
 export interface FormAttachmentResponse {
-  data : string[];
-  types : type_enum[];
+  data: string[];
+  types: type_enum[];
 }
 
 /**
@@ -561,7 +569,8 @@ export interface FormPerson extends InternalTypes.FormPerson {}
 /**
  *  A form-jobApplicationSkill.
  */
-export interface FormJobApplicationSkill extends InternalTypes.FormJobApplicationSkill {}
+export interface FormJobApplicationSkill extends
+    InternalTypes.FormJobApplicationSkill {}
 
 /**
  *  form roles.
@@ -659,6 +668,7 @@ export interface Login {
 export interface GHLogin {
   login: string;
   name: string;
+  id: string;
 }
 
 export interface KeyRequest {
@@ -777,7 +787,7 @@ export interface DataForm {
 
 export interface Question {
   key: string;
-  value: string | FormValues[];
+  value: string|FormValues[];
   options?: Array<Option>;
 }
 

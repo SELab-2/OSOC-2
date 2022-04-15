@@ -31,6 +31,7 @@ export const errors: Errors = {
   cookUnauthenticated() { return config.apiErrors.unauthenticated;},
   cookInsufficientRights() { return config.apiErrors.insufficientRights;},
   cookLockedRequest() { return config.apiErrors.lockedRequest;},
+  cookPendingAccount() { return config.apiErrors.pendingAccount;},
 
   cookNonExistent(url: string) {
     return {
@@ -239,27 +240,43 @@ export async function redirect(res: express.Response,
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
-export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
-    return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+export async function checkSessionKey<T extends Requests.KeyRequest>(
+    obj: T, rejectOnPending = true): Promise<WithUserID<T>> {
+  return skey.checkSessionKey(obj.sessionkey)
+      .then(async (uid) => {
         if (uid) {
-            return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
-                if (login_user != null && login_user.account_status != "DISABLED") {
-                    return Promise.resolve({
-                        data: obj, userId: uid.login_user_id, accountStatus: login_user.account_status,
-                        is_admin: login_user.is_admin, is_coach: login_user.is_coach
-                    });
-                } else {
-                    return Promise.reject(errors.cookLockedRequest());
+          return ormLoUs.getLoginUserById(uid.login_user_id)
+              .then(login_user => {
+                if (login_user == null) {
+                  return Promise.reject({});
                 }
-            })
+
+                switch (login_user.account_status) {
+                case 'PENDING':
+                  if (rejectOnPending)
+                    return Promise.reject(errors.cookPendingAccount());
+                  break;
+                case 'DISABLED':
+                  return Promise.reject(errors.cookLockedRequest());
+                }
+                return Promise.resolve({
+                  data : obj,
+                  userId : uid.login_user_id,
+                  accountStatus : login_user.account_status,
+                  is_admin : login_user.is_admin,
+                  is_coach : login_user.is_coach
+                });
+              })
         } else {
-            return Promise.reject(errors.cookNonExistent);
+          return Promise.reject({});
         }
-    }).catch(arg => {
-        console.log(arg);
+      })
+      .catch(arg => {
+        if (arg instanceof Object && 'http' in arg && 'reason' in arg) {
+          return Promise.reject(arg);
+        }
         return Promise.reject(errors.cookUnauthenticated());
-    });
+      });
 }
 
 /**
@@ -273,9 +290,9 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.
  */
-export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
-  return checkSessionKey(obj)
+export async function isAdmin<T extends Requests.KeyRequest>(
+    obj: T, rejectOnPending = true): Promise<WithUserID<T>> {
+  return checkSessionKey(obj, rejectOnPending)
       .catch(() => Promise.reject(errors.cookUnauthenticated()))
       .then(
           async id =>
@@ -305,7 +322,7 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  const futureDate = new Date();
+  const futureDate = new Date(Date.now());
   futureDate.setDate(futureDate.getDate() + session_key.valid_period);
   return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
