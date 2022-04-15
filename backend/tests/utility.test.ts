@@ -530,7 +530,13 @@ test("utility.isAdmin can catch errors from the DB", async () => {
 
 test("utility.refreshKey removes a key and replaces it", async () => {
   session_keyMock.changeSessionKey.mockReset();
-  const futureDate = new Date();
+
+  // mock Date.now()
+  const realDateNow = Date.now.bind(global.Date);
+  const dateNowStub = jest.fn(() => 1530518207007);
+  global.Date.now = dateNowStub;
+
+  const futureDate = new Date(Date.now());
   futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
     return Promise.resolve({
@@ -553,6 +559,7 @@ test("utility.refreshKey removes a key and replaces it", async () => {
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
   expect(session_keyMock.changeSessionKey)
       .toHaveBeenCalledWith('ab', 'abcd', futureDate);
+  global.Date.now = realDateNow;
 });
 
 test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {

@@ -322,7 +322,7 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  const futureDate = new Date();
+  const futureDate = new Date(Date.now());
   futureDate.setDate(futureDate.getDate() + session_key.valid_period);
   return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
