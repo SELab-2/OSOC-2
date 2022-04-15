@@ -37,6 +37,7 @@ config.global.homes.forEach(home => util.addInvalidVerbs(app, home + "/"));
 
 io.on("connection", (socket) => {
     console.log("websocket connection achieved " + socket.id);
+    console.log("number of clients:" + io.engine.clientsCount);
 });
 httpServer.listen(port, () => {
     console.log(`TypeScript with Express
