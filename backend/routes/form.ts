@@ -960,11 +960,13 @@ async function addJobApplicationToDatabase(formResponse : Responses.FormJobAppli
     // delete the already existing job application of this edition
     const latestJobApplication = await ormJo.getLatestJobApplicationOfStudent(student_id.id);
     if(latestJobApplication != null) {
-        await ormAppRo.deleteAppliedRolesByJobApplication(latestJobApplication.job_application_id);
-        await ormJoSk.deleteJobApplicationSkillsByJobApplication(latestJobApplication.job_application_id);
-        await ormAtt.deleteAllAttachmentsForApplication(latestJobApplication.job_application_id);
-        await ormEv.deleteEvaluationsByJobApplication(latestJobApplication.job_application_id);
-        await ormJo.deleteJobApplication(latestJobApplication.job_application_id);
+        await Promise.all([
+            ormAppRo.deleteAppliedRolesByJobApplication(latestJobApplication.job_application_id),
+            ormJoSk.deleteJobApplicationSkillsByJobApplication(latestJobApplication.job_application_id),
+            ormAtt.deleteAllAttachmentsForApplication(latestJobApplication.job_application_id),
+            ormEv.deleteEvaluationsByJobApplication(latestJobApplication.job_application_id),
+            ormJo.deleteJobApplication(latestJobApplication.job_application_id),
+        ]);
     }
 
     const jobApplication = await ormJo.createJobApplication({
