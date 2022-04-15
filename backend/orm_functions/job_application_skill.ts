@@ -88,3 +88,16 @@ import {CreateJobApplicationSkill, UpdateJobApplicationSkill} from './orm_types'
         }
     });
 }
+
+/**
+ *
+ * @param jobApplicationId: the id of the jobApplication whose jobApplicationSkills we want to delete
+ * @returns the number of deleted records in a promise
+ */
+export async function deleteJobApplicationSkillsByJobApplication(jobApplicationId: number) {
+     return await prisma.job_application_skill.deleteMany({
+         where : {
+             job_application_id: jobApplicationId
+         }
+     });
+}
