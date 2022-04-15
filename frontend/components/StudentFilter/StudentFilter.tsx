@@ -27,6 +27,7 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
     const {sessionKey, setSessionKey} = useContext(SessionContext);
+    const [statusFilter, setStatusFilter] = useState<string>("");
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -39,14 +40,23 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
     const toggleFilterYes = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterYes(bool => !bool);
+        setFilterMaybe(false);
+        setFilterNo(false);
+        setStatusFilter("YES")
     }
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterMaybe(bool => !bool);
+        setFilterYes(false);
+        setFilterNo(false);
+        setStatusFilter("MAYBE")
     }
     const toggleFilterNo = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterNo(bool => !bool);
+        setFilterYes(false);
+        setFilterMaybe(false);
+        setStatusFilter("NO")
     }
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -59,17 +69,27 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
 
     const search = async (e: SyntheticEvent) => {
         e.preventDefault();
-        const nameText = (document.getElementById("nameText") as HTMLInputElement).value;
+        const firstNameText = (document.getElementById("firstNameText") as HTMLInputElement).value;
+        const lastNameText = (document.getElementById("lastNameText") as HTMLInputElement).value;
+        const osocEditionText = (document.getElementById("osocEditionText") as HTMLInputElement).value;
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
         const nameOrder = nameSort ? "Desc" : "Asc";
         const emailOrder = emailSort ? "Desc" : "Asc";
+
         console.log(nameOrder)
         console.log(emailOrder)
         console.log(alumni)
         console.log(studentCoach)
-        console.log(nameText)
+        console.log(firstNameText)
+        console.log(lastNameText)
+        console.log(osocEditionText)
         console.log(emailText)
-        const query = "?" + "roleFilter=" + selectedRoles;
+        console.log(statusFilter)
+
+        const query = "?" + "emailSort=" + emailOrder
+        //"?firstNameFilter=" + firstNameText + "&lastNameFilter=" + lastNameText + "&firstNameSort=" + nameOrder
+        //+ "&emailFilter" + emailText + "&emailSort=" + emailOrder + "&coachFilter=" + studentCoach + "&alumniFilter=" + alumni
+        //+ "osocYear=" + osocEditionText + "&roleFilter=" + selectedRoles + "&statusFilter=" + statusFilter;
         console.log(selectedRoles)
         console.log(query);
         console.log(sessionKey)
@@ -121,7 +141,10 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
 
                        onClick={toggleNameSort}/>
             </text>
-            <input id="nameText" type="text" placeholder="Will smith"/>
+            <input id="firstNameText" type="text" placeholder="Will"/>
+            <input id="lastNameText" type="text" placeholder="Smith"/>
+            <text>Osoc edition maybe dropdown?</text>
+            <input id="osocEditionText" type="text" placeholder="2022"/>
             <text>Email
                 <Image className={styles.buttonImage}
                        src={emailSort ? ArrowUp : ArrowDown}

@@ -146,7 +146,7 @@ export async function searchStudentByGender(gender: string){
         evaluationFilter = undefined
     }
 
-
+    console.log(alumniFilter)
     return await prisma.student.findMany({
         where: {
             job_application: {
