@@ -127,7 +127,6 @@ export async function searchStudentByGender(gender: string){
  * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
-// , coachSort: FilterSort, statusSort: FilterSort
  export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
     emailFilter: FilterString, roleFilterArray: FilterStringArray, alumniFilter: FilterBoolean, 
     coachFilter: FilterBoolean, statusFilter: decision_enum | undefined, osocYear: number,
