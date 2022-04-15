@@ -956,10 +956,8 @@ async function addStudentToDatabase(formResponse : Responses.FormStudent, person
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addJobApplicationToDatabase(formResponse : Responses.FormJobApplication, student_id: Responses.Id): Promise<Responses.Id> {
-    const studentId = student_id.id;
-
     const jobApplication = await ormJo.createJobApplication({
-        studentId : studentId,
+        studentId : student_id.id,
         responsibilities : formResponse.responsibilities,
         funFact : formResponse.funFact,
         studentVolunteerInfo : formResponse.volunteerInfo,
@@ -985,8 +983,6 @@ async function addJobApplicationToDatabase(formResponse : Responses.FormJobAppli
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSkill, job_applicationId: Responses.Id): Promise<Responses.Empty> {
-    const job_application_id = job_applicationId.id;
-
     let most_fl_la_id;
     const getMostFluentLanguageInDb = await ormLa.getLanguageByName(formResponse.most_fluent_language);
     if(getMostFluentLanguageInDb == null) {
@@ -998,7 +994,7 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
 
     if(!formResponse.most_fluent_language.includes("English")) {
         await ormJoSk.createJobApplicationSkill({
-            jobApplicationId : job_application_id,
+            jobApplicationId : job_applicationId.id,
             skill : null,
             languageId : most_fl_la_id,
             level : null,
@@ -1017,7 +1013,7 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
     }
 
     await ormJoSk.createJobApplicationSkill({
-        jobApplicationId : job_application_id,
+        jobApplicationId : job_applicationId.id,
         skill : null,
         languageId : english_id,
         level : formResponse.english_level,
@@ -1026,7 +1022,7 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
     });
 
     await ormJoSk.createJobApplicationSkill({
-        jobApplicationId : job_application_id,
+        jobApplicationId : job_applicationId.id,
         skill : formResponse.best_skill,
         languageId : null,
         level : null,
@@ -1045,18 +1041,16 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addAttachmentsToDatabase(formResponse: Responses.FormAttachment, job_applicationId: Responses.Id): Promise<Responses.Empty> {
-    const job_application_id = job_applicationId.id;
-
     if(formResponse.cv_links.data.length > 0) {
-        await ormAtt.createAttachment(job_application_id, formResponse.cv_links.data, formResponse.cv_links.types);
+        await ormAtt.createAttachment(job_applicationId.id, formResponse.cv_links.data, formResponse.cv_links.types);
     }
 
     if(formResponse.portfolio_links.data.length > 0) {
-        await ormAtt.createAttachment(job_application_id, formResponse.portfolio_links.data, formResponse.portfolio_links.types);
+        await ormAtt.createAttachment(job_applicationId.id, formResponse.portfolio_links.data, formResponse.portfolio_links.types);
     }
 
     if(formResponse.motivations.data.length > 0) {
-        await ormAtt.createAttachment(job_application_id, formResponse.motivations.data, formResponse.motivations.types);
+        await ormAtt.createAttachment(job_applicationId.id, formResponse.motivations.data, formResponse.motivations.types);
     }
 
     return Promise.resolve({});
@@ -1070,15 +1064,13 @@ async function addAttachmentsToDatabase(formResponse: Responses.FormAttachment, 
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addRolesToDatabase(formResponse: Responses.FormRoles, job_applicationId: Responses.Id): Promise<Responses.Empty> {
-    const job_application_id = job_applicationId.id;
-
     for(let role_index = 0; role_index < formResponse.roles.length; role_index++) {
         const role_exists = await ormRo.getRolesByName(formResponse.roles[role_index]);
         if(role_exists == null) {
             const created_role = await ormRo.createRole(formResponse.roles[role_index]);
-            await ormAppRo.createAppliedRole({jobApplicationId : job_application_id, roleId : created_role.role_id});
+            await ormAppRo.createAppliedRole({jobApplicationId : job_applicationId.id, roleId : created_role.role_id});
         } else {
-            await ormAppRo.createAppliedRole({jobApplicationId : job_application_id, roleId : role_exists.role_id});
+            await ormAppRo.createAppliedRole({jobApplicationId : job_applicationId.id, roleId : role_exists.role_id});
         }
     }
 
