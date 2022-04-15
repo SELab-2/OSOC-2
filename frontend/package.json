@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/validator": "^13.7.0",
     "@types/bcrypt": "^5.0.0",
-    "@types/node": "17.0.23",
+    "@types/node": "17.0.24",
     "@types/nodemailer": "^6.4.4",
     "@types/react": "18.0.5",
     "cross-env": "^7.0.3",
