@@ -34,7 +34,9 @@ const Index: NextPage = () => {
                 setLoginBackendError(loginError)
             }
         }
-    }, [getSessionKey, router, router.query])
+        // We do not want to reload the page when the router changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query])
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");

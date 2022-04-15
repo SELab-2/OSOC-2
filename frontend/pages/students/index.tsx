@@ -45,8 +45,6 @@ const Index: NextPage = () => {
                                     setSelectedStudent(i)
                                 }
                             }
-                        } else {
-                            setSelectedStudent(-1)
                         }
                     }
                 }
@@ -62,13 +60,14 @@ const Index: NextPage = () => {
         if (queryValue === undefined || queryValue === 0) {
             queryValue = -1
             setDisplay(Display.FULL)
+            setSelectedStudent(-1)
         } else {
             setDisplay(Display.LIMITED)
         }
         fetchStudents(queryValue).then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router]);
+    }, [router.query]);
 
     /**
      * Handles clicking on a student
