@@ -240,8 +240,8 @@ export async function redirect(res: express.Response,
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
-export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
+export async function checkSessionKey<T extends Requests.KeyRequest>(
+    obj: T, rejectOnPending = true): Promise<WithUserID<T>> {
   return skey.checkSessionKey(obj.sessionkey)
       .then(async (uid) => {
         if (uid) {
@@ -252,19 +252,20 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
                 }
 
                 switch (login_user.account_status) {
-                case 'ACTIVATED':
-                  return Promise.resolve({
-                    data : obj,
-                    userId : uid.login_user_id,
-                    accountStatus : login_user.account_status,
-                    is_admin : login_user.is_admin,
-                    is_coach : login_user.is_coach
-                  });
                 case 'PENDING':
-                  return Promise.reject(errors.cookPendingAccount());
+                  if (rejectOnPending)
+                    return Promise.reject(errors.cookPendingAccount());
+                  break;
                 case 'DISABLED':
                   return Promise.reject(errors.cookLockedRequest());
                 }
+                return Promise.resolve({
+                  data : obj,
+                  userId : uid.login_user_id,
+                  accountStatus : login_user.account_status,
+                  is_admin : login_user.is_admin,
+                  is_coach : login_user.is_coach
+                });
               })
         } else {
           return Promise.reject({});
@@ -289,9 +290,9 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.
  */
-export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
-  return checkSessionKey(obj)
+export async function isAdmin<T extends Requests.KeyRequest>(
+    obj: T, rejectOnPending = true): Promise<WithUserID<T>> {
+  return checkSessionKey(obj, rejectOnPending)
       .catch(() => Promise.reject(errors.cookUnauthenticated()))
       .then(
           async id =>
