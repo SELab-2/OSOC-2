@@ -117,7 +117,7 @@ export interface CreateStudent {
     /**
      * the pronouns the student wants to be addressed with
      */
-    pronouns?: string[],
+    pronouns?: string | null,
     /**
      * student's phone number
      */
@@ -147,7 +147,7 @@ export interface UpdateStudent {
     /**
      * undefined if unchanged or new list of pronouns
      */
-    pronouns?: string[],
+    pronouns?: string | null,
     /**
      * undefined if unchanged or the new phone number
      */
@@ -255,7 +255,11 @@ export interface UpdateContract {
     /**
      * status of the contract (draft, approved, cancelled,...)
      */
-    contractStatus?: contract_status_enum
+    contractStatus?: contract_status_enum,
+    /**
+     * updated role (id) for the student
+     */
+    projectRoleId?: number
 }
 
 /**
@@ -297,15 +301,15 @@ export interface CreateJobApplication {
     /**
      * how long this student has been studying for
      */
-    eduDuration: number,
+    eduDuration: number | null,
     /**
      * expected graduation year
      */
-    eduYear: number,
+    eduYear: string | null,
     /**
      * institute the student is studying at
      */
-    eduInstitute: string,
+    eduInstitute: string | null,
     /**
      * information about a confirmation email for the evaluation
      */
@@ -473,15 +477,15 @@ export interface UpdateProjectRole {
     /**
      * the skill of this job application
      */
-    skill: string,
+    skill: string | null,
     /**
      * the language id to which this skill is linked
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * the level of the skill of the applicant
      */
-    level: number,
+    level: number | null,
     /**
      * true if this skill is the preffered skill of the applicant
      */
@@ -507,11 +511,11 @@ export interface UpdateJobApplicationSkill {
     /**
      * undefined if unchanged or the new skill
      */
-    skill: string,
+    skill: string | null,
     /**
      * undefined if unchanged or the new language of the job application skill
      */
-    languageId: number,
+    languageId: number | null,
     /**
      * undefined if unchanged or the new level
      */
@@ -577,3 +581,41 @@ export interface AddStudentToProject {
      */
     roleId: number,
 }
+
+export interface CreateTemplate {
+    ownerId: number,
+    name: string,
+    content: string,
+    subject?: string,
+    cc?: string
+}
+
+export interface UpdateTemplate {
+    templateId: number,
+    ownerId?: number,
+    name?: string,
+    content?: string,
+    subject?: string,
+    cc?: string,
+}
+
+/**
+ * type to use in a filter query for sorting
+ */
+export type FilterSort = "asc" | "desc" | undefined;
+
+/**
+ * type to use in a filter query for strings
+ */
+export type FilterString = string | undefined;
+
+/**
+ * type to use in a filter query for array of strings
+ */
+ export type FilterStringArray = string[] | undefined;
+
+/**
+ * type to use in a filter query for booleans
+ */
+ export type FilterBoolean = boolean | undefined;
+

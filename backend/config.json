@@ -34,6 +34,14 @@
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
         },
+        "noDataError": {
+            "http": 412,
+            "reason": "The data you requested does not exist (yet)."
+        },
+        "lockedRequest": {
+            "http": 423,
+            "reason": "This is an invalid request for this account type."
+        },
         "github": {
             "argumentMissing": {
                 "http": 409,

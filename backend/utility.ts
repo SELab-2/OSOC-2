@@ -3,10 +3,11 @@ import express from 'express';
 import {v1} from 'uuid';
 
 import * as config from './config.json';
-import {searchAllAdminLoginUsers} from './orm_functions/login_user';
+import * as ormLoUs from './orm_functions/login_user';
+import * as ormPr from './orm_functions/project';
 import * as skey from './orm_functions/session_key';
 import * as ormSt from './orm_functions/student';
-import * as ormPr from './orm_functions/project';
+import * as session_key from "./routes/session_key.json";
 import {
   Anything,
   ApiError,
@@ -29,6 +30,7 @@ export const errors: Errors = {
   cookArgumentError() { return config.apiErrors.argumentError;},
   cookUnauthenticated() { return config.apiErrors.unauthenticated;},
   cookInsufficientRights() { return config.apiErrors.insufficientRights;},
+  cookLockedRequest() { return config.apiErrors.lockedRequest;},
 
   cookNonExistent(url: string) {
     return {
@@ -52,7 +54,8 @@ export const errors: Errors = {
     };
   },
 
-  cookServerError() { return config.apiErrors.serverError;}
+  cookServerError() { return config.apiErrors.serverError;},
+  cookNoDataError() { return config.apiErrors.noDataError;}
 }
 
 /**
@@ -174,8 +177,9 @@ export function logRequest(req: express.Request, next: express.NextFunction):
 export async function respOrErrorNoReinject(
     res: express.Response, prom: Promise<Responses.ApiResponse>):
     Promise<void> {
-      const isError = (err: Anything):
-          boolean => { return 'http' in err && 'reason' in err };
+      const isError = (err: Anything): boolean => {
+        return err != undefined && 'http' in err && 'reason' in err
+      };
 
       return prom
           .then(data => {
@@ -237,9 +241,25 @@ export async function redirect(res: express.Response,
  */
 export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
     Promise<WithUserID<T>> {
-  return skey.checkSessionKey(obj.sessionkey)
-      .then((uid) => Promise.resolve({data : obj, userId : uid.login_user_id}))
-      .catch(() => Promise.reject(errors.cookUnauthenticated()));
+    return skey.checkSessionKey(obj.sessionkey).then((uid) => {
+        if (uid) {
+            return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
+                if (login_user != null && login_user.account_status != "DISABLED") {
+                    return Promise.resolve({
+                        data: obj, userId: uid.login_user_id, accountStatus: login_user.account_status,
+                        is_admin: login_user.is_admin, is_coach: login_user.is_coach
+                    });
+                } else {
+                    return Promise.reject(errors.cookLockedRequest());
+                }
+            })
+        } else {
+            return Promise.reject(errors.cookNonExistent);
+        }
+    }).catch(arg => {
+        console.log(arg);
+        return Promise.reject(errors.cookUnauthenticated());
+    });
 }
 
 /**
@@ -259,7 +279,7 @@ export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
       .catch(() => Promise.reject(errors.cookUnauthenticated()))
       .then(
           async id =>
-              searchAllAdminLoginUsers(true)
+              ormLoUs.searchAllAdminLoginUsers(true)
                   .catch(() => Promise.reject(errors.cookInsufficientRights()))
                   .then(admins => admins.some(a => a.login_user_id == id.userId)
                                       ? Promise.resolve(id)
@@ -285,7 +305,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-  return skey.changeSessionKey(key, generateKey())
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+  return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
@@ -349,12 +371,16 @@ export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
 /**
  *  Checks whether the object contains a valid ID.
  */
-export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Table): Promise<T> {
-    const returnObj : {[key in Table]: boolean} =
-        {"student": await ormSt.getStudent(obj.id) != null,
-         "project": await ormPr.getProjectById(obj.id) != null};
+export async function isValidID<T extends Requests.IdRequest>(
+    obj: T, table: Table): Promise<T> {
+  const returnObj: {[key in Table]: boolean} = {
+    "student" : await ormSt.getStudent(obj.id) != null,
+    "project" : await ormPr.getProjectById(obj.id) != null
+  };
 
-    return table in returnObj && returnObj[table] != null ? Promise.resolve(obj) : Promise.reject(errors.cookInvalidID());
+  return table in returnObj && returnObj[table] != null
+             ? Promise.resolve(obj)
+             : Promise.reject(errors.cookInvalidID());
 }
 
 /**
@@ -364,4 +390,38 @@ export async function isValidID<T extends Requests.IdRequest>(obj: T, table: Tab
 export function setupRedirect(router: express.Router, ep: string): void {
   router.get('/',
              (_, res) => redirect(res, config.global.preferred + ep + "/all"));
+}
+
+/**
+ *  Returns the given value if not null, otherwise, return the defualt value.
+ *  @template T The type of the value
+ *  @param vl The value (or null)
+ *  @param def The default value
+ *  @returns The default if the value is null, otherwise the value itself.
+ */
+export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
+  if (vl == null || vl == undefined)
+    return def;
+  return vl;
+}
+
+/**
+ *  Resolves with the given value if not null, otherwise rejects with a valid
+ * API error.
+ *  @template T the type of the value.
+ *  @param vl The value (or null)
+ *  @returns A Promise which will resolve to the given value if it's non-null,
+ * or reject otherwise.
+ */
+export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
+  if (vl == null || vl == undefined)
+    return Promise.reject(errors.cookNoDataError());
+  return Promise.resolve(vl);
+}
+
+export function queryToBody(req: express.Request) {
+  for (const key in req.query) {
+    req.body[key] = req.query[key];
+  }
+  return req;
 }

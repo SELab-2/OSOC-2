@@ -18,8 +18,8 @@ model applied_role {
 model attachment {
   attachment_id      Int             @id @default(autoincrement())
   job_application_id Int             @default(autoincrement())
-  data               String
-  type               type_enum
+  data               String[]
+  type               type_enum[]
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -56,9 +56,9 @@ model job_application {
   osoc_id                Int
   edus                   String[]
   edu_level              String
-  edu_duration           Int
-  edu_year               Int
-  edu_institute          String
+  edu_duration           Int?
+  edu_year               String?
+  edu_institute          String?
   email_status           email_status_enum
   created_at             DateTime                @db.Timestamptz(6)
   osoc                   osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
@@ -72,13 +72,13 @@ model job_application {
 model job_application_skill {
   job_application_skill_id Int             @id @default(autoincrement())
   job_application_id       Int             @default(autoincrement())
-  skill                    String
-  language_id              Int             @default(autoincrement())
+  skill                    String?
+  language_id              Int?
   level                    Int?            @db.SmallInt
-  is_preferred             Boolean?
-  is_best                  Boolean?
+  is_preferred             Boolean
+  is_best                  Boolean
   job_application          job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
-  language                 language        @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
+  language                 language?       @relation(fields: [language_id], references: [language_id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model language {
@@ -100,6 +100,7 @@ model login_user {
   password_reset password_reset?
   project_user   project_user[]
   session_keys   session_keys[]
+  template_email template_email[]
 }
 
 model osoc {
@@ -162,7 +163,7 @@ model student {
   student_id      Int               @id @default(autoincrement())
   person_id       Int               @unique @default(autoincrement())
   gender          String
-  pronouns        String[]
+  pronouns        String?
   phone_number    String
   nickname        String?
   alumni          Boolean
@@ -174,6 +175,7 @@ model student {
 model session_keys {
   session_key_id Int        @id @default(autoincrement())
   login_user_id  Int        @default(autoincrement())
+  valid_until    DateTime   @db.Timestamptz(6)
   session_key    String     @unique @db.VarChar(128)
   login_user     login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -184,6 +186,18 @@ model password_reset {
   reset_id          String     @unique @db.VarChar(128)
   valid_until       DateTime   @db.Timestamptz(6)
   login_user        login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model template_email {
+  template_email_id Int        @id @default(autoincrement())
+  owner_id          Int        @default(autoincrement())
+  name              String
+  content           String
+  subject           String?
+  cc                String?
+  login_user        login_user @relation(fields: [owner_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([owner_id, name])
 }
 
 enum decision_enum {
@@ -221,5 +235,4 @@ enum account_status_enum {
   ACTIVATED
   PENDING
   DISABLED
-  UNVERIFIED
 }

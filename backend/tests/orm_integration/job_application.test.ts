@@ -27,7 +27,7 @@ function job_application_check(expected: {
                                    edu_level: string | null;
                                    edu_duration: number | null;
                                    edu_institute: string | null;
-                                   edu_year: number | null;
+                                   edu_year: string | null;
                                    created_at: Date;
                                    email_status: email_status_enum;
                                },
@@ -43,7 +43,7 @@ function job_application_check(expected: {
                                    edu_level: string | null;
                                    edu_duration: number | null;
                                    edu_institute: string | null;
-                                   edu_year: number | null;
+                                   edu_year: string | null;
                                    created_at: Date;
                                    email_status: email_status_enum;
                                }
@@ -86,8 +86,15 @@ it("should return all student evaluations for the student with given id", async 
             const evals = evaluations[i];
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
-            expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id")
-            expect(found_eval.evaluation[i]).toHaveProperty("is_final", evals.is_final)
+            expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            expect(found_eval.evaluation[i]).toHaveProperty("is_final", evals.is_final);
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
     });
 });
@@ -112,6 +119,13 @@ it("should return all final student evaluations for the student with given id", 
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
             expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
 
     });
@@ -137,6 +151,13 @@ it("should return all suggestion evaluations for the student with given id", asy
             expect(found_eval.evaluation[i]).toHaveProperty("decision", evals.decision);
             expect(found_eval.evaluation[i]).toHaveProperty("motivation", evals.motivation);
             expect(found_eval.evaluation[i]).toHaveProperty("evaluation_id");
+            // check if all the needed fields are selected (with the other checks we already insured we found the right evaluation)
+            expect(found_eval.evaluation[i].login_user).toHaveProperty("login_user_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("firstname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("lastname");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("person_id");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("github");
+            expect(found_eval.evaluation[i].login_user.person).toHaveProperty("email");
         }
 
     });
@@ -171,7 +192,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_level: "higher education",
             edu_duration: 5,
             edu_institute: "Ugent",
-            edu_year: 3,
+            edu_year: "3",
             email_status: email_status_enum.DRAFT,
             created_at: new Date("December 25, 2021 14:24:00"),
         },
@@ -186,7 +207,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_level: "MaNaMa",
             edu_duration: 8,
             edu_institute: "Ugent",
-            edu_year: 3,
+            edu_year: "3",
             email_status: email_status_enum.SENT,
             created_at: new Date("December 31, 2021 03:24:00"),
         }
@@ -215,7 +236,7 @@ it("should update the email status of the job application", async () => {
         edu_level: "higher education",
         edu_duration: 5,
         edu_institute: "Ugent",
-        edu_year: 3,
+        edu_year: "3",
         email_status: email_status_enum.DRAFT,
         created_at: new Date("December 25, 2021 14:24:00"),
     }
@@ -240,7 +261,7 @@ it("should delete the job application", async () => {
         edu_level: "higher education",
         edu_duration: 5,
         edu_institute: "Ugent",
-        edu_year: 3,
+        edu_year: "3",
         email_status: email_status_enum.SENT,
         created_at: new Date("December 25, 2021 14:24:00"),
     }
@@ -267,7 +288,7 @@ it("should create a new job_application", async () => {
         edu_level: "higher education",
         edu_duration: 3,
         edu_institute: "Hogent",
-        edu_year: 2,
+        edu_year: "2",
         email_status: email_status_enum.DRAFT,
         created_at: new Date("January 2, 2022 14:24:00"),
     }
@@ -283,7 +304,7 @@ it("should create a new job_application", async () => {
         eduLevel: "higher education",
         eduDuration: 3,
         eduInstitute: "Hogent",
-        eduYear: 2,
+        eduYear: "2",
         emailStatus: email_status_enum.DRAFT,
         createdAt: "January 2, 2022 14:24:00",
     }
@@ -333,7 +354,7 @@ it("should return the most recent job application of a student", async () => {
         edu_level: "MaNaMa",
         edu_duration: 8,
         edu_institute: "Ugent",
-        edu_year: 7,
+        edu_year: "7",
         email_status: email_status_enum.SENT,
         created_at: new Date("December 20, 2021 03:24:00"),
     }
