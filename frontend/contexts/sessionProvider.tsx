@@ -87,8 +87,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
                 'Authorization': `auth/osoc2 ${sessionKey}`
             }
         }).then(response => response.json()).then(response => {
-            setIsAdmin(response.is_coach === true)
-            setIsCoach(response.is_admin === true)
+            setIsAdmin(response.is_admin === true)
+            setIsCoach(response.is_coach === true)
             if (!response.valid || response.account_status === AccountStatus.DISABLED) {
                 if (!router.pathname.startsWith("/login")) {
                     router.push("/login")
