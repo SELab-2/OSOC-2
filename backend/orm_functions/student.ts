@@ -128,8 +128,20 @@ export async function searchStudentByGender(gender: string){
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
     alumniSort: FilterSort) {
 
-     console.log(roleFilterArray)
-    console.log("jeajgkajk")
+    // manually create filter object for evaluation because evaluation doesn't need to exist
+    // and then the whole object needs to be undefined
+    let evaluationFilter;
+    if (statusFilter) {
+         evaluationFilter = {
+             some: {
+                 decision: statusFilter
+             }
+         }
+    } else {
+        evaluationFilter = undefined
+    }
+
+
     return await prisma.student.findMany({
         where: {
             job_application: {
@@ -142,11 +154,7 @@ export async function searchStudentByGender(gender: string){
                             }
                         }
                     },
-                    evaluation: {
-                        some: {
-                            decision: statusFilter
-                        }
-                    }              
+                    evaluation: evaluationFilter
                 }
             },
             person: {
