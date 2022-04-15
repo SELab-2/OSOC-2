@@ -1,6 +1,13 @@
 import { decision_enum } from '@prisma/client';
 import prisma from '../prisma/prisma'
-import {CreateStudent, FilterSort, FilterString, FilterBoolean, UpdateStudent, FilterStringArray} from './orm_types';
+import {
+    CreateStudent,
+    FilterSort,
+    FilterString,
+    FilterBoolean,
+    UpdateStudent,
+    FilterStringArray,
+} from './orm_types';
 
 // TODO: how do we make sure there is no student for this person_id yet?
 /**
@@ -112,19 +119,18 @@ export async function searchStudentByGender(gender: string){
  * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
  * @param coachFilter coach status that we are filtering on (or undefined if not filtering on coach status)
  * @param statusFilter status that we are filtering on (or undefined if not filtering on status)
+ * @param osocYear: the osoc year the application belongs to (or undefined if not filtering on year)
  * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
  * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param roleSort asc or desc if we are sorting on role, undefined if we are not sorting on role
  * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
- * @param coachSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
- * @param statusSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 // , coachSort: FilterSort, statusSort: FilterSort
  export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
     emailFilter: FilterString, roleFilterArray: FilterStringArray, alumniFilter: FilterBoolean, 
-    coachFilter: FilterBoolean, statusFilter: decision_enum | undefined,
+    coachFilter: FilterBoolean, statusFilter: decision_enum | undefined, osocYear: number,
     firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
     alumniSort: FilterSort) {
 
@@ -147,6 +153,9 @@ export async function searchStudentByGender(gender: string){
             job_application: {
                 some: {
                     student_coach: coachFilter,
+                    osoc: {
+                        year: osocYear
+                    },
                     applied_role: {
                         some: {
                             role:{
@@ -170,7 +179,7 @@ export async function searchStudentByGender(gender: string){
                     contains: emailFilter,
                     mode: 'insensitive'
                 },
-            },            
+            },
             alumni: alumniFilter,
         },
         orderBy : {

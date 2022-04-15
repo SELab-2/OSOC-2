@@ -957,6 +957,7 @@ async function addStudentToDatabase(formResponse : Responses.FormStudent, person
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addJobApplicationToDatabase(formResponse : Responses.FormJobApplication, student_id: Responses.Id): Promise<Responses.Id> {
+    // delete the already existing job application of this edition
     const latestJobApplication = await ormJo.getLatestJobApplicationOfStudent(student_id.id);
     if(latestJobApplication != null) {
         await ormAppRo.deleteAppliedRolesByJobApplication(latestJobApplication.job_application_id);
