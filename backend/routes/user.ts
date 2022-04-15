@@ -136,7 +136,7 @@ async function deleteUserRequest(req: express.Request):
 }
 
 /**
- *  Attempts to filter users in the system by name, role, alumni, student coach, status or email.
+ *  Attempts to filter users in the system by name, email, status, coach or admin.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
