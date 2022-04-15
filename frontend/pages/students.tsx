@@ -11,18 +11,23 @@ const Students: NextPage = () => {
     const [students, setStudents] = useState<(Student)[]>([]);
 
     const fetchStudents = async () => {
-        const sessionKey = getSessionKey != undefined ? getSessionKey() : ""
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `auth/osoc2 ${sessionKey}`
-            }
-        }).then(response => response.json()).catch(error => console.log(error));
-        if (response !== undefined && response.success) {
-            if (setSessionKey) {
-                setSessionKey(response.sessionkey)
-            }
-            setStudents(response.data)
+        if (getSessionKey !== undefined) {
+            getSessionKey().then(async sessionKey => {
+                if (sessionKey !== "") {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `auth/osoc2 ${sessionKey}`
+                        }
+                    }).then(response => response.json()).catch(error => console.log(error));
+                    if (response !== undefined && response.success) {
+                        if (setSessionKey) {
+                            setSessionKey(response.sessionkey)
+                        }
+                        setStudents(response.data)
+                    }
+                }
+            })
         }
     }
 
@@ -34,7 +39,9 @@ const Students: NextPage = () => {
 
     return (
         <div className={styles.students}>
-            {students.map(student => <StudentCard key={student.student.student_id} student={student as Student}/>)}
+            {students.map(student => {
+                return <StudentCard key={student.student.student_id} student={student as Student}/>
+            })}
         </div>
     )
 }

@@ -27,9 +27,6 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
     const studentList: object[] = [];
     const students = await ormSt.getAllStudents();
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-        if(students[studentIndex].pronouns.length > 0 && students[studentIndex].pronouns[0] == "None") {
-            students[studentIndex].pronouns = [];
-        }
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(students[studentIndex].student_id);
         if (jobApplication != null) {
             const roles = [];
@@ -44,13 +41,14 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
 
             const evaluations = await ormJo.getStudentEvaluationsTotal(students[studentIndex].student_id);
 
-            const languages: string[] = [];
             for (let skillIndex = 0; skillIndex < jobApplication.job_application_skill.length; skillIndex++) {
-                const language = await ormLa.getLanguage(jobApplication.job_application_skill[skillIndex].language_id);
-                if (language != null) {
-                    languages.push(language.name);
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
+                if(jobApplication.job_application_skill[skillIndex].language_id != null) {
+                    const language = await ormLa.getLanguage(Number(jobApplication.job_application_skill[skillIndex].language_id));
+                    if (language != null) {
+                        jobApplication.job_application_skill[skillIndex].skill = language.name;
+                    } else {
+                        return Promise.reject(errors.cookInvalidID());
+                    }
                 }
             }
 
@@ -58,7 +56,6 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
                 student : students[studentIndex],
                 jobApplication : jobApplication,
                 evaluations : evaluations,
-                languages : languages,
                 roles: roles
             })
         } else {
@@ -87,10 +84,6 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    if(student.pronouns.length > 0 && student.pronouns[0] == "None") {
-        student.pronouns = [];
-    }
-
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
     if(jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
@@ -108,26 +101,19 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
 
-    const languages : string[] = [];
     for(const job_application_skill of jobApplication.job_application_skill) {
-        const language = await ormLa.getLanguage(job_application_skill.language_id);
-        if(language == null) {
-            return Promise.reject(errors.cookInvalidID());
+        if(job_application_skill.language_id != null) {
+            const language = await ormLa.getLanguage(job_application_skill.language_id);
+            if(language == null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+            job_application_skill.skill = language.name;
         }
-        languages.push(language.name);
     }
 
     return Promise.resolve({
         data : {
-            firstname : student.person.firstname,
-            lastname : student.person.lastname,
-            email : student.person.email,
-            github: student.person.github,
-            pronouns : student.pronouns,
-            phoneNumber : student.phone_number,
-            nickname : student.nickname,
-            alumni : student.alumni,
-            languages : languages,
+            student : student,
             jobApplication : jobApplication,
             evaluations : evaluations,
             roles: roles
@@ -266,8 +252,7 @@ async function createStudentConfirmation(req: express.Request): Promise<Response
 }
 
 /**
- *  Attempts to filter students in the system by name, role, status or mail
- * status.
+ *  Attempts to filter students in the system by name, role, alumni, student coach, status or email.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -288,10 +273,6 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
     const studentlist = [];
 
     for (const student of students) {
-        if(student.pronouns.length > 0 && student.pronouns[0] == "None") {
-            student.pronouns = [];
-        }
-
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
         if(jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
@@ -309,28 +290,21 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
 
         const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
 
-        const languages : string[] = [];
         for(const job_application_skill of jobApplication.job_application_skill) {
-            const language = await ormLa.getLanguage(job_application_skill.language_id);
-            if(language == null) {
-                return Promise.reject(errors.cookInvalidID());
+            if(job_application_skill.language_id != null) {
+                const language = await ormLa.getLanguage(job_application_skill.language_id);
+                if(language == null) {
+                    return Promise.reject(errors.cookInvalidID());
+                }
+                job_application_skill.skill = language.name;
             }
-            languages.push(language.name);
         }
 
         studentlist.push({
-                firstname : student.person.firstname,
-                lastname : student.person.lastname,
-                email : student.person.email,
-                github: student.person.github,
-                pronouns : student.pronouns,
-                phoneNumber : student.phone_number,
-                nickname : student.nickname,
-                alumni : student.alumni,
-                languages : languages,
-                jobApplication : jobApplication,
-                evaluations : evaluations,
-                roles: roles
+            student : student,
+            jobApplication : jobApplication,
+            evaluations : evaluations,
+            roles: roles
         });
     }
 

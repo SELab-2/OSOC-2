@@ -38,6 +38,14 @@
             "http": 412,
             "reason": "The data you requested does not exist (yet)."
         },
+        "lockedRequest": {
+            "http": 423,
+            "reason": "Your account was deactivated. Please contact the webmaster."
+        },
+        "pendingAccount": {
+            "http": 424,
+            "reason": "Your account hasn't been activated yet. Please try again later."
+        },
         "github": {
             "argumentMissing": {
                 "http": 409,

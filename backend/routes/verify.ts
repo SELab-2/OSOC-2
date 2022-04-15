@@ -3,7 +3,6 @@ import express from 'express';
 import * as rq from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
-//import {errors} from '../utility';
 
 /**
  *  Attempts to verify if the session key is valid.
@@ -12,14 +11,20 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
-    const parsedRequest = await rq.parseUserAllRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
-    if (checkedSessionKey.data == undefined) {
-        // Return false instead of promise reject
-        // return Promise.reject(errors.cookInvalidID);
-        return Promise.resolve({data : false, sessionkey : ""});
-    }
-    return Promise.resolve({data : true, sessionkey : checkedSessionKey.data.sessionkey});
+  const parsedRequest = await rq.parseUserAllRequest(req);
+  // verify works on PENDING accounts
+  const checkedSessionKey =
+      await util.checkSessionKey(parsedRequest, false).catch(res => res);
+  if (checkedSessionKey.data === undefined) {
+    return Promise.resolve({valid : false});
+  } else {
+    return Promise.resolve({
+      valid : true,
+      is_coach : checkedSessionKey.is_coach,
+      is_admin : checkedSessionKey.is_admin,
+      account_status : checkedSessionKey.accountStatus
+    });
+  }
 }
 
 /**
@@ -28,12 +33,13 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-    const router: express.Router = express.Router();
+  const router: express.Router = express.Router();
 
-    util.setupRedirect(router, '/verify');
-    util.route(router, "post", "/", verifyKey);
+  util.setupRedirect(router, '/verify');
+  router.post('/',
+              (req, res) => util.respOrErrorNoReinject(res, verifyKey(req)));
 
-    util.addAllInvalidVerbs(router, [ "/" ]);
+  util.addAllInvalidVerbs(router, [ "/" ]);
 
-    return router;
+  return router;
 }

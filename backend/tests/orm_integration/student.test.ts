@@ -6,7 +6,7 @@ import {createStudent, getAllStudents, getStudent,
 const student1: UpdateStudent = {
     studentId: 0,
     gender: "Male",
-    pronouns: ["He", "Him"],
+    pronouns: "He/ Him",
     phoneNumber: "013456789",
     nickname: "Superman",
     alumni: true
@@ -15,7 +15,7 @@ const student1: UpdateStudent = {
 const student2: UpdateStudent = {
     studentId: 0,
     gender: "Female",
-    pronouns: ["She", "Her"],
+    pronouns: "She/ Her",
     phoneNumber: "9876543210",
     nickname: "Superwoman",
     alumni: true
@@ -27,7 +27,7 @@ it('should create 1 new student', async () => {
         const student: CreateStudent = {
             personId: person[0].person_id,
             gender: "Male",
-            pronouns: ["He", "Him"],
+            pronouns: "He/ Him",
             phoneNumber: "013456789",
             nickname: "Superman",
             alumni: true
