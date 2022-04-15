@@ -260,7 +260,6 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
         console.log(arg);
         return Promise.reject(errors.cookUnauthenticated());
     });
-
 }
 
 /**
@@ -306,9 +305,9 @@ export function generateKey(): InternalTypes.SessionKey {
  */
 export async function refreshKey(key: InternalTypes.SessionKey):
     Promise<InternalTypes.SessionKey> {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-      return skey.changeSessionKey(key, generateKey(), futureDate)
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+  return skey.changeSessionKey(key, generateKey(), futureDate)
       .then(upd => Promise.resolve(upd.session_key));
 }
 
@@ -418,4 +417,11 @@ export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
   if (vl == null || vl == undefined)
     return Promise.reject(errors.cookNoDataError());
   return Promise.resolve(vl);
+}
+
+export function queryToBody(req: express.Request) {
+  for (const key in req.query) {
+    req.body[key] = req.query[key];
+  }
+  return req;
 }

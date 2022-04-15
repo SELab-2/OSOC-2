@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
-    "@types/node": "17.0.23",
-    "@types/react": "18.0.4",
+    "@types/node": "17.0.24",
+    "@types/react": "18.0.5",
     "@types/validator": "^13.7.0",
     "cross-env": "^7.0.3",
     "eslint": "8.13.0",

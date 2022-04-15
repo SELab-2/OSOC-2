@@ -91,8 +91,8 @@ CREATE TABLE IF NOT EXISTS job_application (
     edus                      TEXT []              NOT NULL,
     edu_level                 TEXT                 NOT NULL,
     edu_duration              INT,
-    edu_year                  TEXT                 NOT NULL, /* in the tally form the year is a free field that can have any text... */
-    edu_institute             TEXT                 NOT NULL,
+    edu_year                  TEXT, /* in the tally form the year is a free field that can have any text... */
+    edu_institute             TEXT,
     email_status              email_status_enum    NOT NULL,
     created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );

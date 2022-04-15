@@ -115,16 +115,8 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     return Promise.resolve({
         data : {
-            firstname : student.person.firstname,
-            lastname : student.person.lastname,
-            email : student.person.email,
-            github: student.person.github,
-            pronouns : student.pronouns,
-            phoneNumber : student.phone_number,
-            nickname : student.nickname,
-            alumni : student.alumni,
+            student : student,
             jobApplication : jobApplication,
-            jobApplicationSkills : jobApplication.job_application_skill,
             evaluations : evaluations,
             roles: roles
         },
@@ -312,18 +304,10 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
         }
 
         studentlist.push({
-                firstname : student.person.firstname,
-                lastname : student.person.lastname,
-                email : student.person.email,
-                github: student.person.github,
-                pronouns : student.pronouns,
-                phoneNumber : student.phone_number,
-                nickname : student.nickname,
-                alumni : student.alumni,
-                jobApplicationSkills: jobApplication.job_application_skill,
-                jobApplication : jobApplication,
-                evaluations : evaluations,
-                roles: roles
+            student : student,
+            jobApplication : jobApplication,
+            evaluations : evaluations,
+            roles: roles
         });
     }
 

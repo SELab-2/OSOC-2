@@ -216,11 +216,11 @@ export interface FormJobApplication {
   /**
    *  The email of this person.
    */
-  educationYear: string;
+  educationYear: string | null;
   /**
    *  The email of this person.
    */
-  educationInstitute: string;
+  educationInstitute: string | null;
   /**
    *  The email of this person.
    */
@@ -761,7 +761,6 @@ export interface ModTemplate extends IdRequest {
 
 export interface Form {
   eventId: string;
-  eventType: string;
   createdAt: string;
   data: DataForm;
 }
