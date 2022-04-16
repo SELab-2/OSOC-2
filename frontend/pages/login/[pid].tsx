@@ -20,7 +20,7 @@ const Pid: NextPage = () => {
             // redirect to /, root will then verify the session key
             router.push("/").then()
         }
-    })
+    }, [router.query])
 
     return <></>
 }
