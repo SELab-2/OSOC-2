@@ -21,18 +21,9 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
     const {sessionKey, setSessionKey} = useContext(SessionContext);
     const userId = user.login_user_id;
 
-    const reverseRole = (changed_val: string, status_enum: AccountStatus) => {
-        if (changed_val === "admin") {
-            setIsAdmin(admin => !admin);
-        } else if (changed_val === "coach") {
-            setIsCoach(isCoach => !isCoach);
-        } else if (changed_val === "enum") {
-            setStatus(status_enum)
-        }
-    }
 
     const setUserRole = async (route: string, changed_val: string, admin_bool: boolean, coach_bool: boolean, status_enum: AccountStatus
-        , original_status_enum: AccountStatus) => {
+    ) => {
         console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
 
         const json_body = JSON.stringify({isCoach: coach_bool, isAdmin: admin_bool, accountStatus: status_enum})
@@ -48,7 +39,6 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
         })
             .then(response => response.json()).then(async json => {
                 if (!json.success) {
-                    reverseRole(changed_val, original_status_enum);
                     return {success: false};
                 } else {
                     if (setSessionKey) {
@@ -59,40 +49,47 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
             })
             .catch(err => {
                 console.log(err);
-                reverseRole(changed_val, original_status_enum);
                 return {success: false};
             })
     }
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setIsAdmin(!isAdmin);
-        await setUserRole("admin", "admin", !isAdmin, isCoach, status, status);
+        const response = await setUserRole("admin", "admin", !isAdmin, isCoach, status);
+        if (response.success) {
+            setIsAdmin(!isAdmin);
+        }
     }
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setIsCoach(!isCoach);
-        await setUserRole("coach", "coach", isAdmin, !isCoach, status, status);
+        const response = await setUserRole("coach", "coach", isAdmin, !isCoach, status);
+        if (response.success) {
+            setIsCoach(!isCoach);
+        }
     }
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
         let temp_stat = AccountStatus.ACTIVATED
         if (status === AccountStatus.ACTIVATED) {
-            setStatus(AccountStatus.DISABLED);
             temp_stat = AccountStatus.DISABLED;
         } else if (status === AccountStatus.DISABLED) {
-            setStatus(AccountStatus.ACTIVATED);
             temp_stat = AccountStatus.ACTIVATED
         }
-        await setUserRole("coach", "activated", isAdmin, isCoach, temp_stat, status);
+        const response = await setUserRole("coach", "activated", isAdmin, isCoach, temp_stat);
+        if (response.success) {
+            setStatus(temp_stat);
+
+        }
     }
 
     const activateUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setStatus(AccountStatus.ACTIVATED);
-        await setUserRole("coach", "enum", isAdmin, isCoach, AccountStatus.ACTIVATED, AccountStatus.PENDING)
+        const response = await setUserRole("coach", "enum", isAdmin, isCoach, AccountStatus.ACTIVATED)
+        if (response.success) {
+            setStatus(AccountStatus.ACTIVATED);
+        }
     }
 
     const deleteUser = async (e: SyntheticEvent) => {
@@ -156,6 +153,6 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
                     </div>
                 </div>
             </div>
-                <button className={`delete ${styles.delete}`} onClick={deleteUser}/>
+            <button className={`delete ${styles.delete}`} onClick={deleteUser}/>
         </div>)
 }
