@@ -1,5 +1,4 @@
 import express from 'express';
-import * as session_key from './session_key.json'
 
 import {getPasswordPersonByEmail} from '../orm_functions/person';
 import {
@@ -9,6 +8,8 @@ import {
 import {parseLoginRequest, parseLogoutRequest} from '../request';
 import {Responses} from '../types';
 import * as util from '../utility';
+
+import * as session_key from './session_key.json'
 
 function orDefault<T>(v: T|undefined, def: T): T {
   return (v == undefined || false) ? def : v;
@@ -30,19 +31,18 @@ async function login(req: express.Request): Promise<Responses.Login> {
               {http : 409, reason : 'Invalid e-mail or password.'});
         }
         if (pass?.login_user?.account_status == 'DISABLED') {
-          return Promise.reject(
-              {http : 409, reason : 'Account is disabled.'});
+          return Promise.reject({http : 409, reason : 'Account is disabled.'});
         }
         const key: string = util.generateKey();
         const futureDate = new Date();
         futureDate.setDate(futureDate.getDate() + session_key.valid_period);
         return addSessionKey(pass.login_user.login_user_id, key, futureDate)
             .then(ins => ({
-                sessionkey : ins.session_key,
-                is_admin : orDefault(pass?.login_user?.is_admin, false),
-                is_coach : orDefault(pass?.login_user?.is_coach, false),
-                account_status : pass?.login_user?.account_status
-            }));
+                    sessionkey : ins.session_key,
+                    is_admin : orDefault(pass?.login_user?.is_admin, false),
+                    is_coach : orDefault(pass?.login_user?.is_coach, false),
+                    account_status : pass?.login_user?.account_status
+                  }));
       }));
 }
 
@@ -54,7 +54,8 @@ async function login(req: express.Request): Promise<Responses.Login> {
  */
 async function logout(req: express.Request): Promise<Responses.Empty> {
   return parseLogoutRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
+      .then(parsed => util.checkSessionKey(
+                parsed, false)) // logout can with pending account
       .then(async checked => {
         return removeAllKeysForUser(checked.data.sessionkey)
             .then(() => { return Promise.resolve({}); });

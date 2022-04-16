@@ -115,16 +115,8 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
 
     return Promise.resolve({
         data : {
-            firstname : student.person.firstname,
-            lastname : student.person.lastname,
-            email : student.person.email,
-            github: student.person.github,
-            pronouns : student.pronouns,
-            phoneNumber : student.phone_number,
-            nickname : student.nickname,
-            alumni : student.alumni,
+            student : student,
             jobApplication : jobApplication,
-            jobApplicationSkills : jobApplication.job_application_skill,
             evaluations : evaluations,
             roles: roles
         },
@@ -262,8 +254,7 @@ async function createStudentConfirmation(req: express.Request): Promise<Response
 }
 
 /**
- *  Attempts to filter students in the system by name, role, status or mail
- * status.
+ *  Attempts to filter students in the system by name, role, alumni, student coach, status or email.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -312,18 +303,10 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
         }
 
         studentlist.push({
-                firstname : student.person.firstname,
-                lastname : student.person.lastname,
-                email : student.person.email,
-                github: student.person.github,
-                pronouns : student.pronouns,
-                phoneNumber : student.phone_number,
-                nickname : student.nickname,
-                alumni : student.alumni,
-                jobApplicationSkills: jobApplication.job_application_skill,
-                jobApplication : jobApplication,
-                evaluations : evaluations,
-                roles: roles
+            student : student,
+            jobApplication : jobApplication,
+            evaluations : evaluations,
+            roles: roles
         });
     }
 

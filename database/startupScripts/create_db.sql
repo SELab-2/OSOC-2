@@ -2,9 +2,10 @@ CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
    github       TEXT               UNIQUE,
-   firstname    TEXT      NOT NULL,
-   lastname     TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   firstname    TEXT               NOT NULL,
+   lastname     TEXT               NOT NULL,
+   github_id    TEXT               UNIQUE,
+   CONSTRAINT login CHECK (email IS NOT NULL OR (github IS NOT NULL AND github_id IS NOT NULL)),
    CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
 );
 
@@ -89,10 +90,10 @@ CREATE TABLE IF NOT EXISTS job_application (
     student_coach             BOOLEAN              NOT NULL,
     osoc_id                   INT                  NOT NULL REFERENCES osoc(osoc_id),
     edus                      TEXT []              NOT NULL,
-    edu_level                 TEXT []              NOT NULL,
+    edu_level                 TEXT                 NOT NULL,
     edu_duration              INT,
-    edu_year                  TEXT                 NOT NULL, /* in the tally form the year is a free field that can have any text... */
-    edu_institute             TEXT                 NOT NULL,
+    edu_year                  TEXT, /* in the tally form the year is a free field that can have any text... */
+    edu_institute             TEXT,
     email_status              email_status_enum    NOT NULL,
     created_at                TIMESTAMP WITH TIME ZONE NOT NULL /* used to sort to get the latest application */
 );
@@ -210,5 +211,5 @@ CREATE EXTENSION pg_cron;
 -- Delete old session keys every day at at 23:59 (GMT)
 SELECT cron.schedule('59 23 * * *', $$DELETE FROM session_key WHERE valid_date < now()$$);
 
--- Vacuum every day at 00:30 (GMT), this phiscally removes deleted and obsolete tuples
-SELECT cron.schedule('30 0 * * *', 'VACUUM');
+-- Vacuum every day at 01:30 (GMT), this phiscally removes deleted and obsolete tuples
+SELECT cron.schedule('30 1 * * *', 'VACUUM');

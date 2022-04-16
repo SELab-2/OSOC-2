@@ -16,7 +16,7 @@ import {errors} from "../utility";
 import {type_enum} from "@prisma/client";
 import * as validator from 'validator';
 import * as rq from '../request';
-import {getLanguageByName} from "../orm_functions/language";
+import * as config from './form_keys.json';
 
 /**
  *  This function searches a question with a given key in the form.
@@ -68,7 +68,7 @@ function checkQuestionsExist(questions: Responses.FormResponse<Requests.Question
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getBirthName(form: Requests.Form) : Promise<string> {
-    const questionBirthName: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_npDErJ");
+    const questionBirthName: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.birthName);
     const questionsExist : boolean = checkQuestionsExist([questionBirthName]);
     if(!questionsExist || questionBirthName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -84,7 +84,7 @@ function getBirthName(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getLastName(form: Requests.Form) : Promise<string> {
-    const questionLastName: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_319eXp");
+    const questionLastName: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.lastName);
     const questionsExist : boolean = checkQuestionsExist([questionLastName]);
     if(!questionsExist || questionLastName.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -100,7 +100,7 @@ function getLastName(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEmail(form: Requests.Form) : Promise<string> {
-    const questionEmail: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mY46PB");
+    const questionEmail: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.emailAddress);
     const questionsExist : boolean = checkQuestionsExist([questionEmail]);
     if(!questionsExist || questionEmail.data?.value == null || !validator.default.isEmail(questionEmail.data.value as string)) {
         return Promise.reject(errors.cookArgumentError());
@@ -133,9 +133,9 @@ async function jsonToPerson(form: Requests.Form): Promise<Responses.FormPerson> 
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPronouns(form: Requests.Form) : Promise<string | null> {
-    const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3yJQMg");
-    const questionPreferredPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3X4aLg");
-    const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w8ZBq5");
+    const questionPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.addPronouns);
+    const questionPreferredPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.preferredPronouns);
+    const questionEnterPronouns: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.pronounsInput);
 
     const questionsExist : boolean = checkQuestionsExist([questionPronouns, questionPreferredPronouns, questionEnterPronouns]);
     if(!questionsExist || questionPronouns.data?.value == null) {
@@ -174,7 +174,7 @@ function getPronouns(form: Requests.Form) : Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getGender(form: Requests.Form) : Promise<string> {
-    const questionGender: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wg9laO");
+    const questionGender: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.gender);
     const questionsExist : boolean = checkQuestionsExist([questionGender]);
     if(!questionsExist || questionGender.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -196,7 +196,7 @@ function getGender(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPhoneNumber(form: Requests.Form) : Promise<string> {
-    const questionPhoneNumber: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wd9MEo");
+    const questionPhoneNumber: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.phoneNumber);
     const questionsExist : boolean = checkQuestionsExist([questionPhoneNumber]);
     if(!questionsExist || questionPhoneNumber.data?.value == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -212,8 +212,8 @@ function getPhoneNumber(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getNickname(form: Requests.Form) : Promise<string | null> {
-    const questionCheckNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wME4XM");
-    const questionEnterNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mJOPqo");
+    const questionCheckNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.nickname);
+    const questionEnterNickname: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.nicknameInput);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckNickname, questionEnterNickname]);
     if(!questionsExist || questionCheckNickname.data?.value == null) {
@@ -239,7 +239,7 @@ function getNickname(form: Requests.Form) : Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getAlumni(form: Requests.Form) : Promise<boolean> {
-    const questionCheckAlumni: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mVzejJ");
+    const questionCheckAlumni: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.alumni);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckAlumni]);
 
@@ -282,7 +282,7 @@ async function jsonToStudent(form: Requests.Form): Promise<Responses.FormStudent
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getResponsibilities(form: Requests.Form) : Promise<string | null> {
-    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wLPr9v");
+    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.responsibilities);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckResponsibilities]);
 
@@ -304,7 +304,7 @@ function getResponsibilities(form: Requests.Form) : Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getFunFact(form: Requests.Form) : Promise<string> {
-    const questionFunFact: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxpV");
+    const questionFunFact: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.funFact);
 
     const questionsExist : boolean = checkQuestionsExist([questionFunFact]);
 
@@ -322,7 +322,7 @@ function getFunFact(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getVolunteerInfo(form: Requests.Form) : Promise<string> {
-    const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wvPZM0");
+    const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.volunteerInfo);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckVolunteerInfo]);
 
@@ -348,7 +348,7 @@ function getVolunteerInfo(form: Requests.Form) : Promise<string> {
  */
 function isStudentCoach(form: Requests.Form, hasAlreadyParticipated: boolean) : Promise<boolean | null> {
     if (hasAlreadyParticipated) {
-        const questionStudentCoach: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nPzxD5");
+        const questionStudentCoach: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.studentCoach);
 
         const questionsExist : boolean = checkQuestionsExist([questionStudentCoach]);
 
@@ -374,7 +374,7 @@ function isStudentCoach(form: Requests.Form, hasAlreadyParticipated: boolean) : 
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducations(form: Requests.Form) : Promise<string[]> {
-    const questionCheckEducations: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3ExRK4");
+    const questionCheckEducations: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.edus);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckEducations]);
 
@@ -392,7 +392,7 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
                 return Promise.reject(errors.cookArgumentError());
             }
             if(filteredOption[0].text.includes("Other")) {
-                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nro45N");
+                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.edusInput);
                 const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
 
                 if(!questionsExistOther || questionCheckOther.data?.value == null) {
@@ -415,40 +415,40 @@ function getEducations(form: Requests.Form) : Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationLevel(form: Requests.Form) : Promise<string[]> {
-    const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w4K6BX");
+function getEducationLevel(form: Requests.Form) : Promise<string> {
+    const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.eduLevel);
 
     const questionsExist : boolean = checkQuestionsExist([questionCheckEducationLevel]);
 
     if(!questionsExist || questionCheckEducationLevel.data?.value == null ||
-        questionCheckEducationLevel.data.value.length === 0 || questionCheckEducationLevel.data.value.length > 2) {
+        questionCheckEducationLevel.data.value.length !== 1) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    const educationLevels : string[] = [];
+    let educationLevel;
 
-    for(let i = 0; i < questionCheckEducationLevel.data.value.length; i++) {
-        if(questionCheckEducationLevel.data.options != undefined) {
-            const filteredOption = questionCheckEducationLevel.data.options.filter(option => option.id === questionCheckEducationLevel.data?.value[i]);
-            if(filteredOption.length !== 1) {
+    if(questionCheckEducationLevel.data.options != undefined) {
+        const filteredOption = questionCheckEducationLevel.data.options.filter(option => option.id === questionCheckEducationLevel.data?.value[0]);
+        if(filteredOption.length !== 1) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+        if(filteredOption[0].text.includes("Other")) {
+            const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.eduLevelInput);
+            const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
+
+            if(!questionsExistOther || questionCheckOther.data?.value == null) {
                 return Promise.reject(errors.cookArgumentError());
             }
-            if(filteredOption[0].text.includes("Other")) {
-                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3jlRba");
-                const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
 
-                if(!questionsExistOther || questionCheckOther.data?.value == null) {
-                    return Promise.reject(errors.cookArgumentError());
-                }
-
-                educationLevels.push(questionCheckOther.data.value as string);
-            } else {
-                educationLevels.push(filteredOption[0].text);
-            }
+            educationLevel = questionCheckOther.data.value as string;
+        } else {
+            educationLevel = filteredOption[0].text;
         }
+    } else {
+        return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(educationLevels);
+    return Promise.resolve(educationLevel);
 }
 
 /**
@@ -458,7 +458,7 @@ function getEducationLevel(form: Requests.Form) : Promise<string[]> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducationDuration(form: Requests.Form) : Promise<number | null> {
-    const questionEducationDuration: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w2KWBj");
+    const questionEducationDuration: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.eduDuration);
 
     const questionsExist : boolean = checkQuestionsExist([questionEducationDuration]);
 
@@ -479,13 +479,17 @@ function getEducationDuration(form: Requests.Form) : Promise<number | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationYear(form: Requests.Form) : Promise<string> {
-    const questionEducationYear: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3xJqjr");
+function getEducationYear(form: Requests.Form) : Promise<string | null> {
+    const questionEducationYear: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.eduYear);
 
     const questionsExist : boolean = checkQuestionsExist([questionEducationYear]);
 
-    if(!questionsExist || questionEducationYear.data?.value == null) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionEducationYear.data?.value == null) {
+        return Promise.resolve(null);
     }
 
     return Promise.resolve(questionEducationYear.data.value as string);
@@ -497,13 +501,17 @@ function getEducationYear(form: Requests.Form) : Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationUniversity(form: Requests.Form) : Promise<string> {
-    const questionEducationUniversity: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mRDNdd");
+function getEducationUniversity(form: Requests.Form) : Promise<string | null> {
+    const questionEducationUniversity: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.eduInstitute);
 
     const questionsExist : boolean = checkQuestionsExist([questionEducationUniversity]);
 
-    if(!questionsExist || questionEducationUniversity.data?.value == null) {
+    if(!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    if(questionEducationUniversity.data?.value == null) {
+        return Promise.resolve(null);
     }
 
     return Promise.resolve(questionEducationUniversity.data.value as string);
@@ -554,7 +562,7 @@ async function jsonToJobApplication(form: Requests.Form, hasAlreadyTakenPart: bo
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
-    const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_n0e9dy");
+    const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.mostFluentLanguage);
 
     const questionsExist : boolean = checkQuestionsExist([questionMostFluentLanguage]);
 
@@ -571,7 +579,7 @@ function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
     let language = "";
 
     if(chosenLanguage.data.text.includes("Other")) {
-        const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wz79jR");
+        const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.mostFluentLanguageInput);
         const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
 
         if(!questionsExistOther || questionCheckOther.data?.value == null) {
@@ -593,7 +601,7 @@ function getMostFluentLanguage(form: Requests.Form) : Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEnglishLevel(form: Requests.Form) : Promise<number> {
-    const questionEnglishLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_w5Z7bo");
+    const questionEnglishLevel: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.englishLevel);
 
     const questionsExist : boolean = checkQuestionsExist([questionEnglishLevel]);
 
@@ -627,7 +635,7 @@ function getEnglishLevel(form: Requests.Form) : Promise<number> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getBestSkill(form: Requests.Form) : Promise<string> {
-    const questionBestSkill: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mO72l7");
+    const questionBestSkill: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.bestSkill);
 
     const questionsExist : boolean = checkQuestionsExist([questionBestSkill]);
 
@@ -662,8 +670,8 @@ async function jsonToSkills(form: Requests.Form): Promise<Responses.FormJobAppli
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
-    const questionCVUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mD78BR");
-    const questionCVLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_3l6GBk");
+    const questionCVUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.cvUpload);
+    const questionCVLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.cvLink);
 
     const questionsExist : boolean = checkQuestionsExist([questionCVUpload, questionCVLink]);
 
@@ -707,8 +715,8 @@ function getCV(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> 
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
-    const questionPortfolioUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mRDNx9");
-    const questionPortfolioLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wo2PEP");
+    const questionPortfolioUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.portfolioUpload);
+    const questionPortfolioLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.portfolioLink);
 
     const questionsExist : boolean = checkQuestionsExist([questionPortfolioUpload, questionPortfolioLink]);
 
@@ -753,9 +761,9 @@ function getPortfolio(form: Requests.Form) : Promise<Responses.FormAttachmentRes
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getMotivation(form: Requests.Form) : Promise<Responses.FormAttachmentResponse> {
-    const questionMotivationUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nGRG6Z");
-    const questionMotivationLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mO72aR");
-    const questionMotivationString: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_mVzeGg");
+    const questionMotivationUpload: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.motivationUpload);
+    const questionMotivationLink: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.motivationLink);
+    const questionMotivationString: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.motivationInput);
 
     const questionsExist : boolean = checkQuestionsExist([questionMotivationUpload, questionMotivationLink, questionMotivationString]);
 
@@ -824,7 +832,7 @@ async function jsonToAttachments(form: Requests.Form): Promise<Responses.FormAtt
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
-    const questionAppliedRoles: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_wo2PDe");
+    const questionAppliedRoles: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.appliedRole);
 
     const questionsExist : boolean = checkQuestionsExist([questionAppliedRoles]);
 
@@ -842,7 +850,7 @@ function getAppliedRoles(form: Requests.Form) : Promise<string[]> {
                 return Promise.reject(errors.cookArgumentError());
             }
             if(filteredOption[0].text.includes("Other")) {
-                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, "question_nGRGKp");
+                const questionCheckOther: Responses.FormResponse<Requests.Question> = filterQuestion(form, config.appliedRoleInput);
                 const questionsExistOther : boolean = checkQuestionsExist([questionCheckOther]);
 
                 if(!questionsExistOther || questionCheckOther.data?.value == null) {
@@ -980,7 +988,7 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
     const job_application_id = job_applicationId.id;
 
     let most_fl_la_id;
-    const getMostFluentLanguageInDb = await getLanguageByName(formResponse.most_fluent_language);
+    const getMostFluentLanguageInDb = await ormLa.getLanguageByName(formResponse.most_fluent_language);
     if(getMostFluentLanguageInDb == null) {
         const most_fl_la = await ormLa.createLanguage(formResponse.most_fluent_language);
         most_fl_la_id = most_fl_la.language_id;
@@ -988,17 +996,19 @@ async function addSkillsToDatabase(formResponse: Responses.FormJobApplicationSki
         most_fl_la_id = getMostFluentLanguageInDb.language_id;
     }
 
-    await ormJoSk.createJobApplicationSkill({
-        jobApplicationId : job_application_id,
-        skill : null,
-        languageId : most_fl_la_id,
-        level : null,
-        isPreferred : true,
-        isBest : false
-    });
+    if(!formResponse.most_fluent_language.includes("English")) {
+        await ormJoSk.createJobApplicationSkill({
+            jobApplicationId : job_application_id,
+            skill : null,
+            languageId : most_fl_la_id,
+            level : null,
+            isPreferred : true,
+            isBest : false
+        });
+    }
 
     let english_id;
-    const getEnglishLanguage = await getLanguageByName("English");
+    const getEnglishLanguage = await ormLa.getLanguageByName("English");
     if(getEnglishLanguage == null) {
         const english_language = await ormLa.createLanguage("English");
         english_id = english_language.language_id;
@@ -1083,13 +1093,12 @@ async function addRolesToDatabase(formResponse: Responses.FormRoles, job_applica
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
-    if (parsedRequest.data == null || parsedRequest.eventId == null
-        || parsedRequest.eventType == null || parsedRequest.createdAt == null) {
+    if (parsedRequest.data == null || parsedRequest.eventId == null || parsedRequest.createdAt == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const questionInBelgium: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, "question_wkNolR");
-    const questionCanWorkEnough: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, "question_mKVEz8");
+    const questionInBelgium: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, config.liveInBelgium);
+    const questionCanWorkEnough: Responses.FormResponse<Requests.Question> = filterQuestion(parsedRequest, config.workInJuly);
 
     const questionsExist : boolean = checkQuestionsExist([questionInBelgium, questionCanWorkEnough]);
     if(!questionsExist || questionInBelgium.data?.value == null || questionCanWorkEnough.data?.value == null) {

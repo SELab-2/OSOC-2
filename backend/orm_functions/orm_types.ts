@@ -21,7 +21,11 @@ import { contract_status_enum, decision_enum, email_status_enum, account_status_
      /**
      * the person's email, may not be null if github is null
      */
-     email? : string
+     email? : string,
+     /**
+      *  the person's github id, if github is used
+      */
+     github_id?: string
 }
 
 /**
@@ -297,7 +301,7 @@ export interface CreateJobApplication {
     /**
      * information about the education level of the student
      */
-    eduLevel: string[],
+    eduLevel: string,
     /**
      * how long this student has been studying for
      */
@@ -305,11 +309,11 @@ export interface CreateJobApplication {
     /**
      * expected graduation year
      */
-    eduYear: string,
+    eduYear: string | null,
     /**
      * institute the student is studying at
      */
-    eduInstitute: string,
+    eduInstitute: string | null,
     /**
      * information about a confirmation email for the evaluation
      */

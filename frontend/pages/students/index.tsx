@@ -13,7 +13,7 @@ const Index: NextPage = () => {
     const fetchStudents = async () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async sessionKey => {
-                if (sessionKey != "") {
+                if (sessionKey !== "") {
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                         method: 'GET',
                         headers: {
