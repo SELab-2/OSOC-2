@@ -7,7 +7,15 @@ import CoachIconColor from "../../public/images/coach_icon_color.png"
 import CoachIcon from "../../public/images/coach_icon.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
-import {AccountStatus, getNextSort, LoginUser, Sort} from "../../types/types";
+import {
+    AccountStatus,
+    FilterBoolean,
+    getNextFilterBoolean,
+    getNextSort,
+    getNextStatusNoPending,
+    LoginUser,
+    Sort
+} from "../../types/types";
 import SessionContext from "../../contexts/sessionProvider";
 
 export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => void }> = ({updateUsers}) => {
@@ -16,9 +24,9 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
     const [emailFilter, setEmailFilter] = useState<string>("")
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE)
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE)
-    const [adminFilter, setAdminFilter] = useState<boolean>(false)
-    const [coachFilter, setCoachFilter] = useState<boolean>(false)
-    const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.PENDING)
+    const [adminFilter, setAdminFilter] = useState<FilterBoolean>(FilterBoolean.NONE)
+    const [coachFilter, setCoachFilter] = useState<FilterBoolean>(FilterBoolean.NONE)
+    const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.NONE)
     const {sessionKey, setSessionKey} = useContext(SessionContext)
 
     const toggleNameSort = async (e: SyntheticEvent) => {
@@ -33,18 +41,18 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
     const toggleAdminFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setAdminFilter(!adminFilter);
+        setAdminFilter(prev => getNextFilterBoolean(prev));
     }
 
     const toggleCoachFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setCoachFilter(!coachFilter);
+        setCoachFilter(prev => getNextFilterBoolean(prev));
     }
 
     const togglePendingStatus = async (e: SyntheticEvent) => {
         e.preventDefault()
         if (statusFilter === AccountStatus.PENDING) {
-            setStatusFilter(AccountStatus.ACTIVATED)
+            setStatusFilter(AccountStatus.NONE)
         } else {
             setStatusFilter(AccountStatus.PENDING)
         }
@@ -52,27 +60,56 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
     const toggleDisabledStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (statusFilter === AccountStatus.DISABLED) {
-            setStatusFilter(AccountStatus.ACTIVATED)
-        } else {
-            setStatusFilter(AccountStatus.DISABLED)
-        }
+        setStatusFilter(prev => getNextStatusNoPending(prev))
     }
 
     const search = async (e: SyntheticEvent) => {
         e.preventDefault();
-        // TODO -- The query should be built dynamically, that is not every field should be in the query
-        //      -- Set the same variable queries in the frontend url so we can share and reuse the filter
-        const nameOrder = nameSort ? "Desc" : "Asc"
-        const emailOrder = emailSort ? "Desc" : "Asc"
-        console.log(nameFilter)
-        console.log(nameOrder)
-        console.log(emailOrder)
-        console.log(emailFilter)
+        let query = "?";
+        if (nameFilter !== "") {
+            query += "nameFilter=" + nameFilter
+        }
+        if (nameSort !== Sort.NONE) {
+            const nameOrder = nameSort === Sort.DESCENDING ? "desc" : "asc";
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "nameSort=" + nameOrder
+        }
+        if (emailFilter !== "") {
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "emailFilter=" + emailFilter
+        }
+        if (emailSort !== Sort.NONE) {
+            const emailOrder = emailSort === Sort.DESCENDING ? "desc" : "asc";
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "emailSort=" + emailOrder
+        }
 
-        const query = "?isAdminFilter=" + adminFilter
-        //"?nameFilter=" + nameFilter + "&nameSort=" + nameOrder + "&emailFilter=" + emailFilter +
-        //"&emailSort=" + emailOrder + "&isAdminFilter=" + adminFilter + "&isCoachFilter=" + coachFilter + "&statusFilter=" + statusFilter
+
+        if (adminFilter !== FilterBoolean.NONE) {
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "isAdminFilter=" + adminFilter
+        }
+        if (coachFilter !== FilterBoolean.NONE) {
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "isCoachFilter=" + coachFilter
+        }
+        if (statusFilter !== AccountStatus.NONE) {
+            if (query.length > 1) {
+                query += "&"
+            }
+            query += "statusFilter=" + statusFilter
+        }
+
         console.log(query)
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query, {
@@ -152,7 +189,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
                     <div className={styles.buttonContainer}>
                         <Image className={styles.buttonImage}
-                               src={statusFilter === AccountStatus.DISABLED ? ForbiddenIconColor : ForbiddenIcon}
+                               src={statusFilter === AccountStatus.NONE ? ForbiddenIcon : ForbiddenIconColor}
                                width={30} height={30} alt={"Disabled"}
                                onClick={toggleDisabledStatus}/>
                         <p>Disabled</p>

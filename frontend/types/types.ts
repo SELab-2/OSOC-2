@@ -8,14 +8,44 @@ export enum Sort {
     NONE = ""
 }
 
+export enum FilterBoolean {
+    TRUE = "true",
+    FALSE = "false",
+    NONE = ""
+}
+
+export const getNextFilterBoolean = (bool: FilterBoolean) => {
+    if (bool == FilterBoolean.TRUE) {
+        return FilterBoolean.FALSE
+    }
+
+    if (bool == FilterBoolean.FALSE) {
+        return FilterBoolean.NONE
+    }
+
+    return FilterBoolean.TRUE
+}
+
+
+export const getNextStatusNoPending = (accountStatus: AccountStatus) => {
+    if (accountStatus === AccountStatus.ACTIVATED) {
+        return AccountStatus.DISABLED
+    } else if (accountStatus === AccountStatus.DISABLED) {
+        return AccountStatus.NONE
+    }
+    return AccountStatus.ACTIVATED
+}
+
 /**
  * An enum for an user account status
  */
 export enum AccountStatus {
     ACTIVATED = "ACTIVATED",
     PENDING = "PENDING",
-    DISABLED = "DISABLED"
+    DISABLED = "DISABLED",
+    NONE = ""
 }
+
 
 /**
  * A function that helps cycling through sorting methods

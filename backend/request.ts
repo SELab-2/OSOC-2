@@ -313,6 +313,14 @@ export async function parseFilterStudentsRequest(req: express.Request):Promise<R
  */
 export async function parseFilterUsersRequest(req: express.Request):Promise<Requests.UserFilter> {
   let mail = undefined;
+  let isCoachFilter = maybe(req.body, "isCoachFilter");
+  if ("isCoachFilter" in req.body){
+    isCoachFilter= Boolean(req.body.isCoachFilter);
+  }
+  let isAdminFilter = maybe(req.body, "isAdminFilter")
+  if ("isAdminFilter" in req.body){
+    isAdminFilter= Boolean(req.body.isAdminFilter);
+  }
   if (("emailFilter" in req.body &&
           !validator.default.isEmail(req.body.emailFilter)) ||
       ("statusFilter" in req.body && req.body.statusFilter !== "ACTIVATED" &&
@@ -337,8 +345,8 @@ export async function parseFilterUsersRequest(req: express.Request):Promise<Requ
     statusFilter : maybe(req.body, "statusFilter"),
     nameSort : maybe(req.body, "nameSort"),
     emailSort : maybe(req.body, "emailSort"),
-    isCoachFilter : maybe(req.body, "isCoachFilter"),
-    isAdminFilter : maybe(req.body, "isAdminFilter")
+    isCoachFilter : isCoachFilter,
+    isAdminFilter : isAdminFilter
   });
 }
 
