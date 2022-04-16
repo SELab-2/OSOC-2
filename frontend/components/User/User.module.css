@@ -10,6 +10,22 @@
     position: relative;
 }
 
+@media (max-width: 1000px) {
+    .row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        grid-gap: 0.5rem;
+    }
+
+    .name {
+        display: flex !important;
+        gap: 1rem;
+    }
+
+}
+
 .row * {
     margin-block: 0;
 }
@@ -18,6 +34,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
+    width: 100%;
 }
 
 .buttonContainer {

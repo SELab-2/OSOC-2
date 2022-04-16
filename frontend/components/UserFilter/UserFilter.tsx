@@ -19,7 +19,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
     const [adminFilter, setAdminFilter] = useState<boolean>(false)
     const [coachFilter, setCoachFilter] = useState<boolean>(false)
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.PENDING)
-    const {getSessionKey, setSessionKey} = useContext(SessionContext)
+    const {sessionKey, setSessionKey} = useContext(SessionContext)
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -74,8 +74,6 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
         //"?nameFilter=" + nameFilter + "&nameSort=" + nameOrder + "&emailFilter=" + emailFilter +
         //"&emailSort=" + emailOrder + "&isAdminFilter=" + adminFilter + "&isCoachFilter=" + coachFilter + "&statusFilter=" + statusFilter
         console.log(query)
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
-        console.log(sessionKey)
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query, {
             method: 'GET',

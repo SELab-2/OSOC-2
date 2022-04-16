@@ -49,8 +49,6 @@ const Users: NextPage = () => {
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
             const index = users.indexOf(user, 0);
-            console.log(index)
-            console.log(users)
             if (index > -1) {
                 users.splice(index, 1);
                 setUsers([...users])

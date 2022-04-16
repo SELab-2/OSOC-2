@@ -70,6 +70,13 @@
     padding: 0.5rem;
 }
 
+@media (max-width: 1000px) {
+    .form {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
 /* The query and the label for the query */
 .form .query, .query div {
     display: flex;
@@ -108,6 +115,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
+    width: 100%;
 }
 .buttonContainer {
     margin-inline: auto;
