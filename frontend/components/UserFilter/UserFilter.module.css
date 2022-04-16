@@ -74,6 +74,11 @@
     .form {
         display: flex;
         flex-wrap: wrap;
+        grid-gap: 0.5rem;
+    }
+
+    .query {
+        flex-wrap: wrap;
     }
 }
 
@@ -83,8 +88,10 @@
     align-items: center;
 }
 
-.form .query {
-    gap: 5%;
+.query {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
 }
 
 .query div {
