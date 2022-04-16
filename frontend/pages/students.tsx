@@ -4,11 +4,13 @@ import {useContext, useEffect, useState} from "react";
 import {StudentCard} from "../components/StudentCard/StudentCard";
 import {Student} from "../types/types"
 import styles from "../styles/students.module.scss"
+import {useSockets} from "../contexts/socketProvider";
 
 
 const Students: NextPage = () => {
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
     const [students, setStudents] = useState<(Student)[]>([]);
+    const {socket} = useSockets();
 
     const fetchStudents = async () => {
         if (getSessionKey !== undefined) {
@@ -33,9 +35,13 @@ const Students: NextPage = () => {
 
     useEffect(() => {
         fetchStudents().then();
+        socket.on('formAdded', () => {
+            fetchStudents().then();
+            console.log("fetch students executed!")
+        });
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [socket]);
 
     return (
         <div className={styles.students}>
