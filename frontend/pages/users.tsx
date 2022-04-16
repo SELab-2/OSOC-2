@@ -12,40 +12,34 @@ import {LoginUser} from "../types/types";
  */
 const Users: NextPage = () => {
 
-    const {sessionKey, setSessionKey} = useContext(SessionContext)
+    const {getSessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<LoginUser>>()
 
-    const getAllUsers = async (route: string, sessionkey: string) => {
-        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/all", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `auth/osoc2 ${sessionkey}`
-            }
-        })
-            .then(response => response.json()).then(json => {
-                if (!json.success) {
-
-                    //TODO Popup of zoiets
-                    return {success: false};
-                } else return json;
+    const getAllUsers = async () => {
+        if (getSessionKey !== undefined) {
+            getSessionKey().then(async sessionKey => {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `auth/osoc2 ${sessionKey}`
+                    }
+                })
+                    .then(response => response.json()).catch(error => console.log(error))
+                if (response !== undefined) {
+                    if (setSessionKey) {
+                        setSessionKey(response.sessionkey)
+                    }
+                    setUsers(response.data)
+                }
             })
-            .catch(err => {
-                console.log(err)
-                //TODO Popup of zoiets
-                return {success: false};
-            })
+        }
     }
+
     // Load all users upon page load
     useEffect(() => {
-        getAllUsers("user", sessionKey).then(response => {
-            if (setSessionKey) {
-                setSessionKey(response.sessionkey)
-            }
-            setUsers(response.data)
-        })
-
+        getAllUsers().then()
         // We need to disable this warning. We of course do not want do reload the page when the data is changed
         // because that is exactly what this function does.
         // eslint-disable-next-line react-hooks/exhaustive-deps

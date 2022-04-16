@@ -7,6 +7,7 @@
     padding-block: 0.75rem;
     width: 100%;
     border-bottom: solid var(--neutral-200) 0.15rem;
+    position: relative;
 }
 
 .row * {
@@ -45,4 +46,12 @@
     display: grid;
     grid-template-columns: 4fr 1fr;
     align-items: center;
+}
+
+/* The delete button */
+.delete {
+    position: absolute;
+    left: 100%;
+    margin-left: 0.5rem;
+    padding: 0;
 }

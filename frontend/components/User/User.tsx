@@ -92,7 +92,7 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
     const activateUser = async (e: SyntheticEvent) => {
         e.preventDefault();
         setStatus(AccountStatus.ACTIVATED);
-        setUserRole("coach", "enum", isAdmin, isCoach, AccountStatus.ACTIVATED, AccountStatus.PENDING)
+        await setUserRole("coach", "enum", isAdmin, isCoach, AccountStatus.ACTIVATED, AccountStatus.PENDING)
     }
 
     const deleteUser = async (e: SyntheticEvent) => {
@@ -155,14 +155,7 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
                                width={30} height={30} alt={"Disabled"}/>
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={deleteUser}>
-                    <div className={styles.button}>
-                        <Image className={styles.buttonImage}
-                               src={ForbiddenIconColor}
-                               width={30} height={30} alt={"Disabled"}/>
-                    </div>
-                </div>
-
             </div>
+                <button className={`delete ${styles.delete}`} onClick={deleteUser}/>
         </div>)
 }
