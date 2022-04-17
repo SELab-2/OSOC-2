@@ -321,14 +321,14 @@ export async function parseFilterUsersRequest(req: express.Request):Promise<Requ
   if ("isAdminFilter" in req.body){
     isAdminFilter= Boolean(req.body.isAdminFilter);
   }
-  if (("emailFilter" in req.body &&
-          !validator.default.isEmail(req.body.emailFilter)) ||
-      ("statusFilter" in req.body && req.body.statusFilter !== "ACTIVATED" &&
-          req.body.statusFilter !== "PENDING" && req.body.statusFilter !== "DISABLED")) {
+  if ("statusFilter" in req.body && req.body.statusFilter !== "ACTIVATED" &&
+          req.body.statusFilter !== "PENDING" && req.body.statusFilter !== "DISABLED") {
     return rejector();
   } else {
-    if ("emailFilter" in req.body) {
+    if ("emailFilter" in req.body && validator.default.isEmail(req.body.emailFilter)) {
       mail = validator.default.normalizeEmail(req.body.emailFilter).toString();
+    } else {
+      mail = req.body.emailFilter
     }
   }
 

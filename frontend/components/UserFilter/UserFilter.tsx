@@ -17,6 +17,7 @@ import {
     Sort
 } from "../../types/types";
 import SessionContext from "../../contexts/sessionProvider";
+import {useRouter} from "next/router";
 
 export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => void }> = ({updateUsers}) => {
 
@@ -29,8 +30,11 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.NONE)
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
 
+    const router = useRouter()
+
     /**
-     * Every time a filter changes we perform a search
+     * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
+     * the query parameters
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
@@ -94,7 +98,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
         }
 
         if (emailFilter !== "") {
-            filters.push(`"emailFilter=${emailFilter}`)
+            filters.push(`emailFilter=${emailFilter}`)
         }
 
         if (emailSort !== Sort.NONE) {
@@ -113,8 +117,8 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
             filters.push(`statusFilter=${statusFilter}`)
         }
         const query = filters.length > 0 ? `?${filters.join('&')}` : ""
+        await router.push(`/users${query}`)
 
-        console.log(query)
         const sessionKey = getSessionKey ? await getSessionKey() : ""
         if (sessionKey !== "") {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query, {
