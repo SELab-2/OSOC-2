@@ -296,9 +296,17 @@ export async function parseFilterStudentsRequest(req: express.Request):
 
   let osoc_year = new Date().getFullYear();
   if("osocYear" in req.body) {
-    osoc_year = req.body.osocYear;
+    osoc_year = Number(req.body.osocYear);
   }
 
+  let alumniFilter = maybe(req.body, "alumniFilter");
+  if ("alumniFilter" in req.body){
+    alumniFilter= Boolean(req.body.alumniFilter);
+  }
+  let coachFilter = maybe(req.body, "coachFilter");
+  if ("coachFilter" in req.body){
+    coachFilter= Boolean(req.body.coachFilter);
+  }
   return Promise.resolve({
     sessionkey : getSessionKey(req),
     osocYear: osoc_year,
@@ -306,8 +314,8 @@ export async function parseFilterStudentsRequest(req: express.Request):
     lastNameFilter : maybe(req.body, "lastNameFilter"),
     emailFilter : mail,
     roleFilter : roles,
-    alumniFilter : maybe(req.body, "alumniFilter"),
-    coachFilter : maybe(req.body, "coachFilter"),
+    alumniFilter : alumniFilter,
+    coachFilter : coachFilter,
     statusFilter : maybe(req.body, "statusFilter"),
     firstNameSort : maybe(req.body, "firstNameSort"),
     lastNameSort : maybe(req.body, "lastNameSort"),

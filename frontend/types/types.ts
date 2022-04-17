@@ -8,6 +8,42 @@ export enum Decision {
     NO = "NO"
 }
 
+export enum FilterBoolean {
+    TRUE = "true",
+    FALSE = "false",
+    NONE = ""
+}
+
+export const getNextFilterBoolean = (bool: FilterBoolean) => {
+    if (bool == FilterBoolean.TRUE) {
+        return FilterBoolean.FALSE
+    }
+
+    if (bool == FilterBoolean.FALSE) {
+        return FilterBoolean.NONE
+    }
+
+    return FilterBoolean.TRUE
+}
+
+export enum Sort {
+    ASCENDING = "asc",
+    DESCENDING = "desc",
+    NONE = ""
+}
+
+export const getNextSort = (sort: Sort) => {
+    if (sort == Sort.ASCENDING) {
+        return Sort.DESCENDING
+    }
+
+    if (sort == Sort.DESCENDING) {
+        return Sort.NONE
+    }
+
+    return Sort.ASCENDING
+}
+
 export enum AccountStatus {
     ACTIVATED = "ACTIVATED",
     PENDING = "PENDING",

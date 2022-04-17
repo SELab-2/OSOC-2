@@ -10,7 +10,7 @@ import CheckIcon from "../../public/images/green_check_mark.png"
 import CheckIconColor from "../../public/images/green_check_mark_color.png"
 import ExclamationIcon from "../../public/images/exclamation_mark.png"
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png"
-import {Role, Student} from "../../types/types";
+import {FilterBoolean, getNextFilterBoolean, getNextSort, Role, Sort, Student} from "../../types/types";
 import {RolesComponent} from "../RoleComponent/RolesComponent";
 import SessionContext from "../../contexts/sessionProvider";
 
@@ -18,75 +18,132 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
                                                                                                                          roles,
                                                                                                                          setFilteredStudents
                                                                                                                      }) => {
-    const [nameSort, setNameSort] = useState<boolean>(false);
-    const [emailSort, setEmailSort] = useState<boolean>(false);
+    const [firstNameSort, setFirstNameSort] = useState<Sort>(Sort.NONE);
+    const [alumniSort, setAlumniSort] = useState<Sort>(Sort.NONE);
+    const [lastNameSort, setLastNameSort] = useState<Sort>(Sort.NONE);
+    const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE);
     const [filterYes, setFilterYes] = useState<boolean>(false);
     const [filterMaybe, setFilterMaybe] = useState<boolean>(false);
     const [filterNo, setFilterNo] = useState<boolean>(false);
-    const [alumni, setAlumni] = useState<boolean>(false);
-    const [studentCoach, setstudentCoach] = useState<boolean>(false);
+    const [alumni, setAlumni] = useState<FilterBoolean>(FilterBoolean.NONE);
+    const [studentCoach, setstudentCoach] = useState<FilterBoolean>(FilterBoolean.NONE);
     const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
     const {sessionKey, setSessionKey} = useContext(SessionContext);
     const [statusFilter, setStatusFilter] = useState<string>("");
 
-    const toggleNameSort = async (e: SyntheticEvent) => {
+    const toggleFirstNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setNameSort(bool => !bool);
+        setFirstNameSort(prev => getNextSort(prev));
+    }
+    const toggleAlumniSort = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        setAlumniSort(prev => getNextSort(prev));
+    }
+    const toggleLastNameSort = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        setLastNameSort(prev => getNextSort(prev));
     }
     const toggleEmailSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setEmailSort(bool => !bool);
+        setEmailSort(prev => getNextSort(prev));
     }
     const toggleFilterYes = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterYes(bool => !bool);
         setFilterMaybe(false);
         setFilterNo(false);
-        setStatusFilter("YES")
+        if (filterYes) {
+            setStatusFilter("Yes");
+        } else {
+            setStatusFilter("");
+        }
     }
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterMaybe(bool => !bool);
         setFilterYes(false);
         setFilterNo(false);
-        setStatusFilter("MAYBE")
+        if (filterMaybe) {
+            setStatusFilter("MAYBE");
+        } else {
+            setStatusFilter("");
+        }
     }
     const toggleFilterNo = async (e: SyntheticEvent) => {
         e.preventDefault();
         setFilterNo(bool => !bool);
         setFilterYes(false);
         setFilterMaybe(false);
-        setStatusFilter("NO")
+        if (filterNo) {
+            setStatusFilter("NO");
+        } else {
+            setStatusFilter("");
+        }
     }
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setAlumni(bool => !bool);
+        setAlumni(prev => getNextFilterBoolean(prev));
     }
     const toggleStudentCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setstudentCoach(bool => !bool);
+        setstudentCoach(prev => getNextFilterBoolean(prev));
     }
 
+    const addAndcharIfNeeded = (query: string, paramAdd: string) => {
+        if (query.length > 1) {
+            query += "&"
+        }
+        return query + paramAdd
+    }
     const search = async (e: SyntheticEvent) => {
         e.preventDefault();
         const firstNameText = (document.getElementById("firstNameText") as HTMLInputElement).value;
         const lastNameText = (document.getElementById("lastNameText") as HTMLInputElement).value;
         const osocEditionText = (document.getElementById("osocEditionText") as HTMLInputElement).value;
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
-        const nameOrder = nameSort ? "Desc" : "Asc";
-        const emailOrder = emailSort ? "Desc" : "Asc";
 
-        console.log(nameOrder)
-        console.log(emailOrder)
-        console.log(alumni)
-        console.log(studentCoach)
-        console.log(firstNameText)
-        console.log(lastNameText)
+        let query = "?"
+        if (firstNameText !== "") {
+            query += "firstNameFilter=" + firstNameText
+        }
+        if (firstNameSort !== Sort.NONE) {
+            const order = firstNameSort === Sort.DESCENDING ? "desc" : "asc";
+            query = addAndcharIfNeeded(query, "firstNameSort=" + order)
+        }
+        if (lastNameText !== "") {
+            query = addAndcharIfNeeded(query, "lastNameFilter=" + lastNameText)
+        }
+        if (lastNameSort !== Sort.NONE) {
+            const order = lastNameSort === Sort.DESCENDING ? "desc" : "asc";
+            query = addAndcharIfNeeded(query, "lastNameSort=" + order)
+        }
+        if (emailText !== "") {
+            query = addAndcharIfNeeded(query, "emailFilter=" + emailText)
+        }
+        if (emailSort !== Sort.NONE) {
+            const order = emailSort === Sort.DESCENDING ? "desc" : "asc";
+            query = addAndcharIfNeeded(query, "emailSort=" + order)
+        }
+        if (alumni !== FilterBoolean.NONE) {
+            query = addAndcharIfNeeded(query, "alumniFilter=" + alumni)
+        }
+        if (alumniSort !== Sort.NONE){
+            const order = alumniSort === Sort.DESCENDING ? "desc" : "asc";
+            query = addAndcharIfNeeded(query, "alumniSort=" + order)
+        }
+        if (studentCoach !== FilterBoolean.NONE) {
+            query = addAndcharIfNeeded(query, "coachFilter=" + studentCoach)
+        }
+        if (osocEditionText !== "") {
+            query = addAndcharIfNeeded(query, "osocYear=" + osocEditionText)
+        }
+        if (selectedRoles.length !== 0) {
+            query = addAndcharIfNeeded(query, "roleFilter=" + selectedRoles.toString())
+        }
+        if (statusFilter !== "") {
+            query = addAndcharIfNeeded(query, "statusFilter=" + selectedRoles.toString())
+        }
         console.log(osocEditionText)
-        console.log(emailText)
-        console.log(statusFilter)
-
-        const query = "?" + "emailSort=" + emailOrder
         //"?firstNameFilter=" + firstNameText + "&lastNameFilter=" + lastNameText + "&firstNameSort=" + nameOrder
         //+ "&emailFilter" + emailText + "&emailSort=" + emailOrder + "&coachFilter=" + studentCoach + "&alumniFilter=" + alumni
         //+ "osocYear=" + osocEditionText + "&roleFilter=" + selectedRoles + "&statusFilter=" + statusFilter;
@@ -134,24 +191,35 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
     }
     return (
         <div className={styles.filter}>
-            <text>Name
+            <text>firstName
                 <Image className={styles.buttonImage}
-                       src={nameSort ? ArrowUp : ArrowDown}
+                       src={firstNameSort !== Sort.NONE ? ArrowUp : ArrowDown}
                        width={15} height={15} alt={"Disabled"}
 
-                       onClick={toggleNameSort}/>
+                       onClick={toggleFirstNameSort}/>
             </text>
             <input id="firstNameText" type="text" placeholder="Will"/>
+            <text>lastName
+                <Image className={styles.buttonImage}
+                       src={lastNameSort !== Sort.NONE ? ArrowUp : ArrowDown}
+                       width={15} height={15} alt={"Disabled"}
+
+                       onClick={toggleLastNameSort}/>
+            </text>
             <input id="lastNameText" type="text" placeholder="Smith"/>
             <text>Osoc edition maybe dropdown?</text>
             <input id="osocEditionText" type="text" placeholder="2022"/>
             <text>Email
                 <Image className={styles.buttonImage}
-                       src={emailSort ? ArrowUp : ArrowDown}
+                       src={emailSort !== Sort.NONE ? ArrowUp : ArrowDown}
                        width={15} height={15} alt={"Disabled"}
                        onClick={toggleEmailSort}/>
             </text>
             <input id="emailText" type="text" placeholder="Search.."/>
+            <Image className={styles.buttonImage}
+                   src={alumniSort !== Sort.NONE ? ArrowUp : ArrowDown}
+                   width={15} height={15} alt={"Disabled"}
+                   onClick={toggleAlumniSort}/>
             <button onClick={toggleAlumni}>
                 Alumni
             </button>
