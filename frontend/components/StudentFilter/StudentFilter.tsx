@@ -10,9 +10,10 @@ import CheckIcon from "../../public/images/green_check_mark.png"
 import CheckIconColor from "../../public/images/green_check_mark_color.png"
 import ExclamationIcon from "../../public/images/exclamation_mark.png"
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png"
-import {FilterBoolean, getNextFilterBoolean, getNextSort, Role, Sort, Student} from "../../types/types";
+import {getNextSort, Role, Sort, Student} from "../../types/types";
 import {RolesComponent} from "../RoleComponent/RolesComponent";
 import SessionContext from "../../contexts/sessionProvider";
+//import {useRouter} from "next/router";
 
 export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: (user: Array<Student>) => void }> = ({
                                                                                                                          roles,
@@ -25,11 +26,17 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
     const [filterYes, setFilterYes] = useState<boolean>(false);
     const [filterMaybe, setFilterMaybe] = useState<boolean>(false);
     const [filterNo, setFilterNo] = useState<boolean>(false);
-    const [alumni, setAlumni] = useState<FilterBoolean>(FilterBoolean.NONE);
-    const [studentCoach, setstudentCoach] = useState<FilterBoolean>(FilterBoolean.NONE);
+    const [alumni, setAlumni] = useState<boolean>(false);
+    const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
     const {sessionKey, setSessionKey} = useContext(SessionContext);
     const [statusFilter, setStatusFilter] = useState<string>("");
+    //const router = useRouter()
+
+    //TODO dit werkt nog niet
+    //useEffect(() => {
+    //    search().then()
+    //}, [firstNameSort,lastNameSort, emailSort, alumni, studentCoach, statusFilter])
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -49,103 +56,95 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
     }
     const toggleFilterYes = async (e: SyntheticEvent) => {
         e.preventDefault();
+        //This is because the call is async
+        if (!filterYes) {
+            setStatusFilter(() => "YES");
+        } else {
+            setStatusFilter(() => "");
+        }
         setFilterYes(bool => !bool);
         setFilterMaybe(false);
         setFilterNo(false);
-        if (filterYes) {
-            setStatusFilter("Yes");
-        } else {
-            setStatusFilter("");
-        }
     }
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (!filterMaybe) {
+            setStatusFilter(() => "MAYBE");
+        } else {
+            setStatusFilter(() => "");
+        }
         setFilterMaybe(bool => !bool);
         setFilterYes(false);
         setFilterNo(false);
-        if (filterMaybe) {
-            setStatusFilter("MAYBE");
-        } else {
-            setStatusFilter("");
-        }
     }
     const toggleFilterNo = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (!filterNo) {
+            setStatusFilter(() => "NO");
+        } else {
+            setStatusFilter(() => "");
+        }
         setFilterNo(bool => !bool);
         setFilterYes(false);
         setFilterMaybe(false);
-        if (filterNo) {
-            setStatusFilter("NO");
-        } else {
-            setStatusFilter("");
-        }
+
     }
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setAlumni(prev => getNextFilterBoolean(prev));
+        setAlumni(prev => !prev);
     }
     const toggleStudentCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setstudentCoach(prev => getNextFilterBoolean(prev));
+        setstudentCoach(prev => !prev);
     }
 
-    const addAndcharIfNeeded = (query: string, paramAdd: string) => {
-        if (query.length > 1) {
-            query += "&"
-        }
-        return query + paramAdd
-    }
-    const search = async (e: SyntheticEvent) => {
-        e.preventDefault();
+    const search = async () => {
         const firstNameText = (document.getElementById("firstNameText") as HTMLInputElement).value;
         const lastNameText = (document.getElementById("lastNameText") as HTMLInputElement).value;
         const osocEditionText = (document.getElementById("osocEditionText") as HTMLInputElement).value;
         const emailText = (document.getElementById("emailText") as HTMLInputElement).value;
-
-        let query = "?"
+        const filters = []
         if (firstNameText !== "") {
-            query += "firstNameFilter=" + firstNameText
+            filters.push("firstNameFilter=" + firstNameText);
         }
         if (firstNameSort !== Sort.NONE) {
-            const order = firstNameSort === Sort.DESCENDING ? "desc" : "asc";
-            query = addAndcharIfNeeded(query, "firstNameSort=" + order)
+            filters.push(`firstNameSort=${firstNameSort}`);
         }
         if (lastNameText !== "") {
-            query = addAndcharIfNeeded(query, "lastNameFilter=" + lastNameText)
+            filters.push(`lastNameFilter=${lastNameText}`);
         }
         if (lastNameSort !== Sort.NONE) {
-            const order = lastNameSort === Sort.DESCENDING ? "desc" : "asc";
-            query = addAndcharIfNeeded(query, "lastNameSort=" + order)
+            filters.push(`lastNameSort=${lastNameSort}`);
         }
         if (emailText !== "") {
-            query = addAndcharIfNeeded(query, "emailFilter=" + emailText)
+            filters.push(`emailFilter=${emailText}`);
         }
         if (emailSort !== Sort.NONE) {
-            const order = emailSort === Sort.DESCENDING ? "desc" : "asc";
-            query = addAndcharIfNeeded(query, "emailSort=" + order)
+            filters.push(`emailSort=${emailSort}`);
         }
-        if (alumni !== FilterBoolean.NONE) {
-            query = addAndcharIfNeeded(query, "alumniFilter=" + alumni)
+        if (alumni) {
+            filters.push(`alumniFilter=${alumni}`);
         }
-        if (alumniSort !== Sort.NONE){
-            const order = alumniSort === Sort.DESCENDING ? "desc" : "asc";
-            query = addAndcharIfNeeded(query, "alumniSort=" + order)
+        if (alumniSort !== Sort.NONE) {
+            filters.push(`alumniSort=${alumniSort}`);
         }
-        if (studentCoach !== FilterBoolean.NONE) {
-            query = addAndcharIfNeeded(query, "coachFilter=" + studentCoach)
+        if (studentCoach) {
+            filters.push(`coachFilter=${studentCoach}`);
         }
         if (osocEditionText !== "") {
-            query = addAndcharIfNeeded(query, "osocYear=" + osocEditionText)
+            filters.push(`osocYear=${osocEditionText}`);
         }
         if (selectedRoles.length !== 0) {
-            query = addAndcharIfNeeded(query, "roleFilter=" + selectedRoles.toString())
+            filters.push(`roleFilter=${selectedRoles.toString()}`);
         }
         if (statusFilter !== "") {
-            query = addAndcharIfNeeded(query, "statusFilter=" + selectedRoles.toString())
+            filters.push(`statusFilter=${statusFilter}`);
         }
+        const query = filters.length > 0 ? `?${filters.join('&')}` : "";
+        //await router.push(`/student/filter${query}`)
 
         console.log(query);
-        console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query)
+        console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query, {
             method: 'GET',
             headers: {
@@ -167,12 +166,11 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
         if (setSessionKey) {
             setSessionKey(response.sessionkey);
         }
-        setFilteredStudents(response.data)
+        setFilteredStudents(response.data);
     }
 
     const changeSelectedRolesProp = (changeRole: string) => {
-        const roles = selectedRoles
-        console.log(roles)
+        const roles = selectedRoles;
         const index = selectedRoles.indexOf(changeRole, 0);
         if (index > -1) {
             roles.splice(index, 1);
@@ -181,6 +179,11 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
             roles.push(changeRole)
         }
         setSelectedRoles(roles);
+    }
+
+    const searchPress = (e: SyntheticEvent) => {
+        e.preventDefault()
+        search().then()
     }
     return (
         <div className={styles.filter}>
@@ -242,7 +245,7 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
                            width={30} height={30} alt={"Disabled"}
                            onClick={toggleFilterNo}/>
                 </div>
-                <button onClick={search}>
+                <button onClick={searchPress}>
                     search
                 </button>
             </div>
