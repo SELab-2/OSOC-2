@@ -143,13 +143,8 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
         if (statusFilter !== "") {
             query = addAndcharIfNeeded(query, "statusFilter=" + selectedRoles.toString())
         }
-        console.log(osocEditionText)
-        //"?firstNameFilter=" + firstNameText + "&lastNameFilter=" + lastNameText + "&firstNameSort=" + nameOrder
-        //+ "&emailFilter" + emailText + "&emailSort=" + emailOrder + "&coachFilter=" + studentCoach + "&alumniFilter=" + alumni
-        //+ "osocYear=" + osocEditionText + "&roleFilter=" + selectedRoles + "&statusFilter=" + statusFilter;
-        console.log(selectedRoles)
+
         console.log(query);
-        console.log(sessionKey)
         console.log(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query)
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query, {
             method: 'GET',
@@ -173,8 +168,6 @@ export const StudentFilter: React.FC<{ roles: Array<Role>, setFilteredStudents: 
             setSessionKey(response.sessionkey);
         }
         setFilteredStudents(response.data)
-
-
     }
 
     const changeSelectedRolesProp = (changeRole: string) => {
