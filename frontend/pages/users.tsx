@@ -1,6 +1,5 @@
 import {NextPage} from "next";
-import React, {useContext, useEffect, useState} from "react";
-import SessionContext from "../contexts/sessionProvider";
+import React, {useState} from "react";
 import {User} from "../components/User/User";
 import styles from "../styles/users.module.css"
 import {UserFilter} from "../components/UserFilter/UserFilter";
@@ -12,39 +11,7 @@ import {LoginUser} from "../types/types";
  */
 const Users: NextPage = () => {
 
-    const {getSessionKey, setSessionKey} = useContext(SessionContext)
     const [users, setUsers] = useState<Array<LoginUser>>()
-
-    const getAllUsers = async () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async sessionKey => {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/all`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': `auth/osoc2 ${sessionKey}`
-                    }
-                })
-                    .then(response => response.json()).catch(error => console.log(error))
-                if (response !== undefined) {
-                    if (setSessionKey) {
-                        setSessionKey(response.sessionkey)
-                    }
-                    setUsers(response.data)
-                }
-            })
-        }
-    }
-
-    // Load all users upon page load
-    useEffect(() => {
-        getAllUsers().then()
-        // We need to disable this warning. We of course do not want do reload the page when the data is changed
-        // because that is exactly what this function does.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
 
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
