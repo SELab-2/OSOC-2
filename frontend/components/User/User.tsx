@@ -71,16 +71,16 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        let temp_stat = AccountStatus.ACTIVATED
         if (status === AccountStatus.ACTIVATED) {
-            temp_stat = AccountStatus.DISABLED;
+            const response = await setUserRole("coach", "activated", isAdmin, isCoach, AccountStatus.DISABLED);
+            if (response && response.success) {
+                setStatus(AccountStatus.DISABLED);
+            }
         } else if (status === AccountStatus.DISABLED) {
-            temp_stat = AccountStatus.ACTIVATED
-        }
-        const response = await setUserRole("coach", "activated", isAdmin, isCoach, temp_stat);
-        if (response.success) {
-            setStatus(temp_stat);
-
+            const response = await setUserRole("coach", "activated", isAdmin, isCoach, AccountStatus.ACTIVATED);
+            if (response && response.success) {
+                setStatus(AccountStatus.ACTIVATED);
+            }
         }
     }
 
