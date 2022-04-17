@@ -283,8 +283,6 @@ export async function parseFilterStudentsRequest(req: express.Request):
     roles = req.body.roleFilter.split(',');
   }
 
-  console.log(mail);
-
   for (const filter
            of [maybe(req.body, "firstNameSort"),
                maybe(req.body, "lastNameSort"), maybe(req.body, "emailSort"),
