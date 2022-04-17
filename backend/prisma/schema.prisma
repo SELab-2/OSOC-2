@@ -116,6 +116,7 @@ model person {
   github     String?     @unique
   firstname  String
   lastname   String
+  github_id  String?     @unique
   login_user login_user?
   student    student?
 }

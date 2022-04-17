@@ -13,7 +13,8 @@ const returnValue = {
     email: "email@mail.com",
     firstname: "FirstName",
     lastname: "LastName",
-    github: null
+    github: null,
+    github_id: '666'
 }
 
 test("should create a person in the db with the given object, returns the new record", async () => {
