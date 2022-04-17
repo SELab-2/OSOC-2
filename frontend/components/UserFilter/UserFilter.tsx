@@ -7,15 +7,7 @@ import CoachIconColor from "../../public/images/coach_icon_color.png"
 import CoachIcon from "../../public/images/coach_icon.png"
 import ForbiddenIcon from "../../public/images/forbidden_icon.png"
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png"
-import {
-    AccountStatus,
-    FilterBoolean,
-    getNextFilterBoolean,
-    getNextSort,
-    getNextStatusNoPending,
-    LoginUser,
-    Sort
-} from "../../types/types";
+import {AccountStatus, getNextSort, LoginUser, Sort} from "../../types/types";
 import SessionContext from "../../contexts/sessionProvider";
 import {useRouter} from "next/router";
 
@@ -25,8 +17,8 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
     const [emailFilter, setEmailFilter] = useState<string>("")
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE)
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE)
-    const [adminFilter, setAdminFilter] = useState<FilterBoolean>(FilterBoolean.NONE)
-    const [coachFilter, setCoachFilter] = useState<FilterBoolean>(FilterBoolean.NONE)
+    const [adminFilter, setAdminFilter] = useState<boolean>(false)
+    const [coachFilter, setCoachFilter] = useState<boolean>(false)
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.NONE)
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
 
@@ -53,12 +45,12 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
     const toggleAdminFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setAdminFilter(getNextFilterBoolean(adminFilter));
+        setAdminFilter(() => !adminFilter);
     }
 
     const toggleCoachFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setCoachFilter(prev => getNextFilterBoolean(prev));
+        setCoachFilter(() => !coachFilter);
     }
 
     const togglePendingStatus = async (e: SyntheticEvent) => {
@@ -72,7 +64,11 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
     const toggleDisabledStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setStatusFilter(prev => getNextStatusNoPending(prev));
+        if (statusFilter === AccountStatus.DISABLED) {
+            setStatusFilter(() => AccountStatus.ACTIVATED)
+        } else {
+            setStatusFilter(() => AccountStatus.DISABLED)
+        }
     }
 
     /**
@@ -105,11 +101,11 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
             filters.push(`emailSort=${emailSort}`)
         }
 
-        if (adminFilter !== FilterBoolean.NONE) {
+        if (adminFilter) {
             filters.push(`isAdminFilter=${adminFilter}`)
         }
 
-        if (coachFilter !== FilterBoolean.NONE) {
+        if (coachFilter) {
             filters.push(`isCoachFilter=${coachFilter}`)
         }
 
@@ -194,7 +190,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
                     <div className={styles.buttonContainer}>
                         <Image className={styles.buttonImage}
-                               src={statusFilter === AccountStatus.NONE ? ForbiddenIcon : ForbiddenIconColor}
+                               src={statusFilter === AccountStatus.DISABLED ? ForbiddenIconColor : ForbiddenIcon}
                                width={30} height={30} alt={"Disabled"}
                                onClick={toggleDisabledStatus}/>
                         <p>Disabled</p>

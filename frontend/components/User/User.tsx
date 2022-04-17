@@ -24,10 +24,8 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
 
     const setUserRole = async (route: string, changed_val: string, admin_bool: boolean, coach_bool: boolean, status_enum: AccountStatus
     ) => {
-        console.log(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString())
 
         const json_body = JSON.stringify({isCoach: coach_bool, isAdmin: admin_bool, accountStatus: status_enum})
-        console.log(json_body)
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/` + route + "/" + userId.toString(), {
             method: 'POST',
             body: json_body,
@@ -109,7 +107,6 @@ export const User: React.FC<{ user: LoginUser, removeUser: (user: LoginUser) => 
                 if (setSessionKey) {
                     setSessionKey(json.sessionkey)
                 }
-                console.log(json)
                 removeUser(user)
                 return json;
 
