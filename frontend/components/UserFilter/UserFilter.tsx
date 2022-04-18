@@ -36,6 +36,7 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
