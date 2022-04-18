@@ -1,6 +1,6 @@
-import prisma from '../prisma/prisma';
+import prisma from "../prisma/prisma";
 
-import {CreateContract, UpdateContract} from './orm_types';
+import { CreateContract, UpdateContract } from "./orm_types";
 
 /**
  * add contract created by login_user_id for student_id that has the role
@@ -11,15 +11,15 @@ import {CreateContract, UpdateContract} from './orm_types';
  * @returns created contract object in the database
  */
 export async function createContract(contract: CreateContract) {
-  return await prisma.contract.create({
-    data : {
-      student_id : contract.studentId,
-      project_role_id : contract.projectRoleId,
-      information : contract.information,
-      created_by_login_user_id : contract.loginUserId,
-      contract_status : contract.contractStatus,
-    }
-  });
+    return await prisma.contract.create({
+        data: {
+            student_id: contract.studentId,
+            project_role_id: contract.projectRoleId,
+            information: contract.information,
+            created_by_login_user_id: contract.loginUserId,
+            contract_status: contract.contractStatus,
+        },
+    });
 }
 
 /**
@@ -33,15 +33,15 @@ export async function createContract(contract: CreateContract) {
  * @returns the updated contract
  */
 export async function updateContract(contract: UpdateContract) {
-  return await prisma.contract.update({
-    where : {contract_id : contract.contractId},
-    data : {
-      created_by_login_user_id : contract.loginUserId,
-      contract_status : contract.contractStatus,
-      information : contract.information,
-      project_role_id : contract.projectRoleId
-    }
-  });
+    return await prisma.contract.update({
+        where: { contract_id: contract.contractId },
+        data: {
+            created_by_login_user_id: contract.loginUserId,
+            contract_status: contract.contractStatus,
+            information: contract.information,
+            project_role_id: contract.projectRoleId,
+        },
+    });
 }
 
 /**
@@ -51,7 +51,9 @@ export async function updateContract(contract: UpdateContract) {
  * @returns the number of removed contracts {count: number}
  */
 export async function removeContractsFromStudent(studentId: number) {
-  return await prisma.contract.deleteMany({where : {student_id : studentId}});
+    return await prisma.contract.deleteMany({
+        where: { student_id: studentId },
+    });
 }
 
 /**
@@ -61,7 +63,7 @@ export async function removeContractsFromStudent(studentId: number) {
  * @returns the removed contract
  */
 export async function removeContract(contractId: number) {
-  return await prisma.contract.delete({where : {contract_id : contractId}});
+    return await prisma.contract.delete({ where: { contract_id: contractId } });
 }
 
 /**
@@ -71,43 +73,50 @@ export async function removeContract(contractId: number) {
  * @returns the contract(s)
  */
 export async function contractsForStudent(studentId: number) {
-  return await prisma.contract.findMany({
-    where : {student_id : studentId},
-    select : {
-      contract_id : true,
-      project_role :
-          {select : {project_id : true, project : {select : {osoc_id : true}}}},
-      student : true
-    }
-  });
+    return await prisma.contract.findMany({
+        where: { student_id: studentId },
+        select: {
+            contract_id: true,
+            project_role: {
+                select: {
+                    project_id: true,
+                    project: { select: { osoc_id: true } },
+                },
+            },
+            student: true,
+        },
+    });
 }
 
 export async function contractsByProject(projectId: number) {
-  return await prisma.contract.findMany({
-    where : {project_role : {project_id : projectId}},
-    select : {
-      student : {
-        select : {
-          student_id : true,
-          gender : true,
-          pronouns : true,
-          phone_number : true,
-          nickname : true,
-          alumni : true,
-          person : true
-        }
-      },
-      project_role : true,
-      contract_status : true,
-      contract_id : true
-    }
-  })
+    return await prisma.contract.findMany({
+        where: { project_role: { project_id: projectId } },
+        select: {
+            student: {
+                select: {
+                    student_id: true,
+                    gender: true,
+                    pronouns: true,
+                    phone_number: true,
+                    nickname: true,
+                    alumni: true,
+                    person: true,
+                },
+            },
+            project_role: true,
+            contract_status: true,
+            contract_id: true,
+        },
+    });
 }
 
 export async function sortedContractsByOsocEdition(osocId: number) {
-  return await prisma.contract.findMany({
-    where : {project_role : {project : {osoc_id : osocId}}},
-    orderBy : {student_id : 'asc'},
-    select : {project_role : {select : {project : true}}, student_id : true}
-  });
+    return await prisma.contract.findMany({
+        where: { project_role: { project: { osoc_id: osocId } } },
+        orderBy: { student_id: "asc" },
+        select: {
+            project_role: { select: { project: true } },
+            student_id: true,
+        },
+    });
 }

@@ -1,12 +1,12 @@
-import React, {createContext, ReactNode, useEffect, useState} from 'react';
-import {useRouter} from "next/router";
-import {AccountStatus} from "../types/types";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { AccountStatus } from "../types/types";
 
 /**
  * Interface for the context, stores the user session application wide
  */
 interface ISessionContext {
-    sessionKey: string
+    sessionKey: string;
     getSessionKey?: () => Promise<string>;
     setSessionKey?: (key: string) => void;
 
@@ -20,9 +20,8 @@ interface ISessionContext {
 const defaultState = {
     sessionKey: "", // No user is logged in
     isCoach: false,
-    isAdmin: false
-}
-
+    isAdmin: false,
+};
 
 const SessionContext = createContext<ISessionContext>(defaultState);
 
@@ -32,28 +31,33 @@ const SessionContext = createContext<ISessionContext>(defaultState);
  * @param children
  * @constructor
  */
-export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) => {
-
-    const router = useRouter()
+export const SessionProvider: React.FC<{ children: ReactNode }> = ({
+    children,
+}) => {
+    const router = useRouter();
 
     const [sessionKey, setSessionKeyState] = useState<string>("");
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
 
     // Because `useEffect` can have a different order we need to check if the session id has already been verified
-    let verified = false
+    let verified = false;
 
     /**
      * Everytime the page is reloaded we need to get the session from local storage
      */
     useEffect(() => {
-        setIsAdmin(localStorage.getItem('isAdmin') === 'true' && sessionKey != "")
-        setIsCoach(localStorage.getItem('isCoach') === 'true' && sessionKey != "")
+        setIsAdmin(
+            localStorage.getItem("isAdmin") === "true" && sessionKey != ""
+        );
+        setIsCoach(
+            localStorage.getItem("isCoach") === "true" && sessionKey != ""
+        );
         if (!verified) {
-            getSessionKey().then()
+            getSessionKey().then();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []);
 
     /**
      * The `useEffect` is not always called before other page's use effect
@@ -62,79 +66,94 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({children}) =
      */
     const getSessionKey = async () => {
         // Get the sessionKey from localStorage
-        const fromStorage = localStorage.getItem('sessionKey')
-        const sessionKey = fromStorage ? fromStorage : ""
+        const fromStorage = localStorage.getItem("sessionKey");
+        const sessionKey = fromStorage ? fromStorage : "";
 
         if (sessionKey === "") {
             if (!router.pathname.startsWith("/login")) {
-                router.push("/login").then()
+                router.push("/login").then();
             }
-            return sessionKey
+            return sessionKey;
         }
 
         // Avoid calling /verify twice
         // verified gets set to false every page reload
         if (verified) {
-            return sessionKey
+            return sessionKey;
         }
 
-        verified = true
+        verified = true;
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `auth/osoc2 ${sessionKey}`
-            }
-        }).then(response => response.json()).then(response => {
-            setIsAdmin(response.is_admin === true)
-            setIsCoach(response.is_coach === true)
-            if (!response.valid || response.account_status === AccountStatus.DISABLED) {
-                if (!router.pathname.startsWith("/login")) {
-                    router.push("/login")
-                }
-                setSessionKey("")
-                return ""
-            }
-            if (response.account_status === AccountStatus.PENDING) {
-                router.push("/pending")
-                return ""
-            }
-            setSessionKey(sessionKey)
-            return sessionKey
-        }).catch(error => {
-            console.log(error)
-            setIsAdmin(false)
-            setIsCoach(false)
-            if (!router.pathname.startsWith("/login")) {
-                router.push("/login")
-            }
-            setSessionKey("")
-            return ""
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `auth/osoc2 ${sessionKey}`,
+            },
         })
-    }
+            .then((response) => response.json())
+            .then((response) => {
+                setIsAdmin(response.is_admin === true);
+                setIsCoach(response.is_coach === true);
+                if (
+                    !response.valid ||
+                    response.account_status === AccountStatus.DISABLED
+                ) {
+                    if (!router.pathname.startsWith("/login")) {
+                        router.push("/login");
+                    }
+                    setSessionKey("");
+                    return "";
+                }
+                if (response.account_status === AccountStatus.PENDING) {
+                    router.push("/pending");
+                    return "";
+                }
+                setSessionKey(sessionKey);
+                return sessionKey;
+            })
+            .catch((error) => {
+                console.log(error);
+                setIsAdmin(false);
+                setIsCoach(false);
+                if (!router.pathname.startsWith("/login")) {
+                    router.push("/login");
+                }
+                setSessionKey("");
+                return "";
+            });
+    };
 
     const setSessionKey = (sessionKey: string) => {
-        setSessionKeyState(sessionKey)
+        setSessionKeyState(sessionKey);
         // Update localStorage
-        localStorage.setItem('sessionKey', sessionKey)
-    }
+        localStorage.setItem("sessionKey", sessionKey);
+    };
 
     const setIsCoach = (isCoach: boolean) => {
-        setIsCoachState(isCoach)
+        setIsCoachState(isCoach);
         // Update localStorage
-        localStorage.setItem('isCoach', String(isCoach))
-    }
+        localStorage.setItem("isCoach", String(isCoach));
+    };
 
     const setIsAdmin = (isAdmin: boolean) => {
-        setIsAdminState(isAdmin)
+        setIsAdminState(isAdmin);
         // Update localStorage
-        localStorage.setItem('isAdmin', String(isAdmin))
-    }
+        localStorage.setItem("isAdmin", String(isAdmin));
+    };
 
     return (
         <SessionContext.Provider
-            value={{sessionKey, getSessionKey, setSessionKey, isCoach, setIsCoach, isAdmin, setIsAdmin}}>
+            value={{
+                sessionKey,
+                getSessionKey,
+                setSessionKey,
+                isCoach,
+                setIsCoach,
+                isAdmin,
+                setIsAdmin,
+            }}
+        >
             {children}
         </SessionContext.Provider>
     );
