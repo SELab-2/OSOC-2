@@ -1,6 +1,6 @@
-import prisma from '../prisma/prisma'
+import prisma from "../prisma/prisma";
 
-import {CreatePerson, UpdatePerson} from './orm_types';
+import { CreatePerson, UpdatePerson } from "./orm_types";
 
 /**
  *
@@ -8,12 +8,12 @@ import {CreatePerson, UpdatePerson} from './orm_types';
  */
 export async function createPerson(person: CreatePerson) {
   return await prisma.person.create({
-    data : {
-      firstname : person.firstname,
-      lastname : person.lastname,
-      github : person.github,
-      email : person.email,
-      github_id : person.github_id
+    data: {
+      firstname: person.firstname,
+      lastname: person.lastname,
+      github: person.github,
+      email: person.email,
+      github_id: person.github_id,
     },
   });
 }
@@ -22,7 +22,9 @@ export async function createPerson(person: CreatePerson) {
  *
  * @returns a list of all the person objects in the database
  */
-export async function getAllPersons() { return await prisma.person.findMany() }
+export async function getAllPersons() {
+  return await prisma.person.findMany();
+}
 
 /**
  *
@@ -32,18 +34,18 @@ export async function getAllPersons() { return await prisma.person.findMany() }
  */
 export async function getPasswordPersonByEmail(email: string) {
   return await prisma.person.findUnique({
-    where : {email : email},
-    select : {
-      login_user : {
-        select : {
-          password : true,
-          login_user_id : true,
-          account_status : true,
-          is_admin : true,
-          is_coach : true
-        }
-      }
-    }
+    where: { email: email },
+    select: {
+      login_user: {
+        select: {
+          password: true,
+          login_user_id: true,
+          account_status: true,
+          is_admin: true,
+          is_coach: true,
+        },
+      },
+    },
   });
 }
 
@@ -55,21 +57,21 @@ export async function getPasswordPersonByEmail(email: string) {
  */
 export async function getPasswordPersonByGithub(github: string) {
   return await prisma.person.findUnique({
-    where : {github_id : github},
-    select : {
-      github : true,
-      person_id : true,
-      firstname : true,
-      login_user : {
-        select : {
-          password : true,
-          login_user_id : true,
-          account_status : true,
-          is_admin : true,
-          is_coach : true
-        }
-      }
-    }
+    where: { github_id: github },
+    select: {
+      github: true,
+      person_id: true,
+      firstname: true,
+      login_user: {
+        select: {
+          password: true,
+          login_user_id: true,
+          account_status: true,
+          is_admin: true,
+          is_coach: true,
+        },
+      },
+    },
   });
 }
 
@@ -81,13 +83,13 @@ export async function getPasswordPersonByGithub(github: string) {
  */
 export async function searchPersonByName(name: string) {
   return await prisma.person.findMany({
-    where : {
-      OR : [
+    where: {
+      OR: [
         {
-          firstname : {contains : name},
+          firstname: { contains: name },
         },
         {
-          lastname : {contains : name},
+          lastname: { contains: name },
         },
       ],
     },
@@ -102,13 +104,13 @@ export async function searchPersonByName(name: string) {
  */
 export async function searchPersonByLogin(login: string) {
   return prisma.person.findMany({
-    where : {
-      OR : [
+    where: {
+      OR: [
         {
-          email : {contains : login},
+          email: { contains: login },
         },
         {
-          github : {contains : login},
+          github: { contains: login },
         },
       ],
     },
@@ -122,12 +124,12 @@ export async function searchPersonByLogin(login: string) {
  */
 export async function updatePerson(person: UpdatePerson) {
   return await prisma.person.update({
-    where : {person_id : person.personId},
-    data : {
-      firstname : person.firstname,
-      lastname : person.lastname,
-      github : person.github,
-      email : person.email
+    where: { person_id: person.personId },
+    data: {
+      firstname: person.firstname,
+      lastname: person.lastname,
+      github: person.github,
+      email: person.email,
     },
   });
 }
@@ -138,5 +140,5 @@ export async function updatePerson(person: UpdatePerson) {
  * @returns the deleted person record
  */
 export async function deletePersonById(personId: number) {
-  return await prisma.person.delete({where : {person_id : personId}});
+  return await prisma.person.delete({ where: { person_id: personId } });
 }

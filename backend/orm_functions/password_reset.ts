@@ -9,24 +9,28 @@ import prisma from "../prisma/prisma";
  * @param validUntil timestamp that shows until when the resetId is valid
  * @return the created/updated entry from the database in a promise
  */
-export async function createOrUpdateReset(loginUserId: number, resetId: string,
-                                          validUntil: Date) {
+export async function createOrUpdateReset(
+  loginUserId: number,
+  resetId: string,
+  validUntil: Date
+) {
   return await prisma.password_reset.upsert({
-    where : {
-      login_user_id : loginUserId,
+    where: {
+      login_user_id: loginUserId,
     },
-    create : {
-      login_user_id : loginUserId,
-      reset_id : resetId,
-      valid_until : validUntil
+    create: {
+      login_user_id: loginUserId,
+      reset_id: resetId,
+      valid_until: validUntil,
     },
-    update : {reset_id : resetId, valid_until : validUntil}
+    update: { reset_id: resetId, valid_until: validUntil },
   });
 }
 
 export async function findResetByCode(resetCode: string) {
-  return await prisma.password_reset.findUnique(
-      {where : {reset_id : resetCode}});
+  return await prisma.password_reset.findUnique({
+    where: { reset_id: resetCode },
+  });
 }
 
 /**
@@ -36,8 +40,9 @@ export async function findResetByCode(resetCode: string) {
  * @returns the deleted entry (or null if there was no entry) inside a promise
  */
 export async function deleteResetWithLoginUser(loginUserId: number) {
-  return await prisma.password_reset.delete(
-      {where : {login_user_id : loginUserId}});
+  return await prisma.password_reset.delete({
+    where: { login_user_id: loginUserId },
+  });
 }
 
 /**
@@ -47,8 +52,8 @@ export async function deleteResetWithLoginUser(loginUserId: number) {
  */
 export async function deleteResetWithResetId(resetId: string) {
   return await prisma.password_reset.delete({
-    where : {
-      reset_id : resetId,
-    }
+    where: {
+      reset_id: resetId,
+    },
   });
 }

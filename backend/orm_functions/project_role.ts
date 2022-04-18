@@ -1,6 +1,6 @@
-import prisma from '../prisma/prisma'
+import prisma from "../prisma/prisma";
 
-import {CreateProjectRole, UpdateProjectRole} from './orm_types';
+import { CreateProjectRole, UpdateProjectRole } from "./orm_types";
 
 /**
  *
@@ -8,10 +8,10 @@ import {CreateProjectRole, UpdateProjectRole} from './orm_types';
  */
 export async function createProjectRole(projectRole: CreateProjectRole) {
   const result = await prisma.project_role.create({
-    data : {
-      project_id : projectRole.projectId,
-      role_id : projectRole.roleId,
-      positions : projectRole.positions
+    data: {
+      project_id: projectRole.projectId,
+      role_id: projectRole.roleId,
+      positions: projectRole.positions,
     },
   });
   return result;
@@ -25,7 +25,7 @@ export async function createProjectRole(projectRole: CreateProjectRole) {
  */
 export async function getProjectRolesByProject(projectId: number) {
   const result = prisma.project_role.findMany({
-    where : {project_id : projectId},
+    where: { project_id: projectId },
   });
   return result;
 }
@@ -38,15 +38,14 @@ export async function getProjectRolesByProject(projectId: number) {
  *     number of positions
  * @returns: returns the number of positions for the projectrole of that project
  */
-export async function getNumberOfRolesByProjectAndRole(projectId: number,
-                                                       projectRoleId: number) {
+export async function getNumberOfRolesByProjectAndRole(
+  projectId: number,
+  projectRoleId: number
+) {
   const result = prisma.project_role.findMany({
-    where : {
-      AND : [
-        {project_id : projectId},
-        {project_role_id : projectRoleId},
-      ],
-    }
+    where: {
+      AND: [{ project_id: projectId }, { project_role_id: projectRoleId }],
+    },
   });
   return result;
 }
@@ -60,8 +59,10 @@ export async function getNumberOfRolesByProjectAndRole(projectId: number,
  * for that project
  */
 export async function getProjectRoleNamesByProject(projectId: number) {
-  const result = prisma.project_role.findMany(
-      {where : {project_id : projectId}, include : {role : true}});
+  const result = prisma.project_role.findMany({
+    where: { project_id: projectId },
+    include: { role: true },
+  });
   return result;
 }
 
@@ -73,8 +74,8 @@ export async function getProjectRoleNamesByProject(projectId: number) {
  */
 export async function updateProjectRole(projectRole: UpdateProjectRole) {
   const result = await prisma.project_role.update({
-    where : {project_role_id : projectRole.projectRoleId},
-    data : {positions : projectRole.positions},
+    where: { project_role_id: projectRole.projectRoleId },
+    data: { positions: projectRole.positions },
   });
   return result;
 }
@@ -86,8 +87,9 @@ export async function updateProjectRole(projectRole: UpdateProjectRole) {
  * @returns TODO: what does this return?
  */
 export async function deleteProjectRole(projectRoleId: number) {
-  const result = await prisma.project_role.delete(
-      {where : {project_role_id : projectRoleId}});
+  const result = await prisma.project_role.delete({
+    where: { project_role_id: projectRoleId },
+  });
   return result;
 }
 
@@ -100,21 +102,25 @@ export async function deleteProjectRole(projectRoleId: number) {
  */
 export async function getNumberOfFreePositions(projectRoleId: number) {
   const result = await prisma.project_role.findUnique({
-    where : {project_role_id : projectRoleId},
-    select : {positions : true, contract : true}
+    where: { project_role_id: projectRoleId },
+    select: { positions: true, contract: true },
   });
 
   if (result) {
-    return result.positions - result.contract.length
+    return result.positions - result.contract.length;
   }
   return result;
 }
 
 export async function getProjectRoleById(projectRoleId: number) {
   const result = await prisma.project_role.findUnique({
-    where : {project_role_id : projectRoleId},
-    select :
-        {project_role_id : true, project_id : true, role_id : true, role : true}
+    where: { project_role_id: projectRoleId },
+    select: {
+      project_role_id: true,
+      project_id: true,
+      role_id: true,
+      role: true,
+    },
   });
   return result;
 }

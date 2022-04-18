@@ -1,6 +1,6 @@
-import {NextPage} from "next";
-import {useRouter} from "next/router";
-import {useContext, useEffect} from "react";
+import { NextPage } from "next";
+import { useRouter } from "next/router";
+import { useContext, useEffect } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 
 /**
@@ -9,20 +9,23 @@ import SessionContext from "../../contexts/sessionProvider";
  * @constructor
  */
 const Pid: NextPage = () => {
+  const router = useRouter();
+  const { setSessionKey } = useContext(SessionContext);
+  const { pid } = router.query; // pid is the session key
 
-    const router = useRouter()
-    const {setSessionKey} = useContext(SessionContext)
-    const {pid} = router.query // pid is the session key
+  useEffect(() => {
+    if (
+      pid !== undefined &&
+      typeof pid === "string" &&
+      setSessionKey !== undefined
+    ) {
+      setSessionKey(pid);
+      // redirect to /, root will then verify the session key
+      router.push("/").then();
+    }
+  });
 
-    useEffect(() => {
-        if (pid !== undefined && typeof pid === 'string' && setSessionKey !== undefined) {
-            setSessionKey(pid)
-            // redirect to /, root will then verify the session key
-            router.push("/").then()
-        }
-    })
-
-    return <></>
-}
+  return <></>;
+};
 
 export default Pid;

@@ -1,60 +1,65 @@
-import express from 'express';
-import * as gapi from 'googleapis';
-import * as nodemailer from 'nodemailer';
+import express from "express";
+import * as gapi from "googleapis";
+import * as nodemailer from "nodemailer";
 
-import * as config from '../config.json';
-import * as ormLU from '../orm_functions/login_user';
-import * as ormPR from '../orm_functions/password_reset';
-import * as ormP from '../orm_functions/person';
-import * as ormSK from '../orm_functions/session_key';
-import * as rq from '../request';
-import {Email, Responses} from '../types';
-import * as util from '../utility';
+import * as config from "../config.json";
+import * as ormLU from "../orm_functions/login_user";
+import * as ormPR from "../orm_functions/password_reset";
+import * as ormP from "../orm_functions/person";
+import * as ormSK from "../orm_functions/session_key";
+import * as rq from "../request";
+import { Email, Responses } from "../types";
+import * as util from "../utility";
 import * as session_key from "./session_key.json";
 
 export async function sendMail(mail: Email) {
   const oauthclient = new gapi.Auth.OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET);
-  oauthclient.setCredentials({refresh_token : process.env.GOOGLE_REFRESH_TOKEN});
-  const accesstoken =
-      await oauthclient.getAccessToken()
-          .then(token => {
-            if (token != null && token.token != null) {
-              return token.token
-            } else {
-              return Promise.reject(
-                  new Error("Received token from Google OAuth was null"));
-            }
-          })
-          .catch(e => console.log('Email error:' + JSON.stringify(e)));
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+  oauthclient.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+  });
+  const accesstoken = await oauthclient
+    .getAccessToken()
+    .then((token) => {
+      if (token != null && token.token != null) {
+        return token.token;
+      } else {
+        return Promise.reject(
+          new Error("Received token from Google OAuth was null")
+        );
+      }
+    })
+    .catch((e) => console.log("Email error:" + JSON.stringify(e)));
 
   const transp = nodemailer.createTransport({
-    service : 'gmail',
-    auth : {
-      type : 'OAUTH2',
-      user : 'osoc2.be@gmail.com',
-      clientId : process.env.GOOGLE_CLIENT_ID,
-      clientSecret : process.env.GOOGLE_CLIENT_SECRET,
-      refreshToken : process.env.GOOGLE_REFRESH_TOKEN,
-      accessToken : accesstoken as string
-    }
+    service: "gmail",
+    auth: {
+      type: "OAUTH2",
+      user: "osoc2.be@gmail.com",
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      accessToken: accesstoken as string,
+    },
   });
 
   return transp
-      .sendMail({
-        from : config.email.from,
-        to : mail.to,
-        subject : mail.subject,
-        html : mail.html
-      })
-      .then(res => {
-        transp.close();
-        return Promise.resolve(res);
-      })
-      .catch(e => {
-        console.log('Email error: ' + JSON.stringify(e));
-        return Promise.reject(config.apiErrors.reset.sendEmail)
-      });
+    .sendMail({
+      from: config.email.from,
+      to: mail.to,
+      subject: mail.subject,
+      html: mail.html,
+    })
+    .then((res) => {
+      transp.close();
+      return Promise.resolve(res);
+    })
+    .catch((e) => {
+      console.log("Email error: " + JSON.stringify(e));
+      return Promise.reject(config.apiErrors.reset.sendEmail);
+    });
 }
 
 /**
@@ -64,34 +69,36 @@ export async function sendMail(mail: Email) {
  * @param req Request body should be of form { email: string }
  */
 async function requestReset(req: express.Request): Promise<Responses.Empty> {
-  return rq.parseRequestResetRequest(req).then(
-      (parsed) =>
-          ormP.getPasswordPersonByEmail(parsed.email).then(async (person) => {
-            if (person == null || person.login_user == null) {
-              return Promise.reject(config.apiErrors.reset.invalidEmail);
-            }
-            const date: Date = new Date(Date.now());
-            date.setHours(date.getHours() + 24);
-            return ormPR
-                .createOrUpdateReset(person.login_user.login_user_id,
-                                     util.generateKey(), date)
-                .catch((e) => {
-                  console.log(e);
-                  return Promise.reject()
-                })
-                .then(async (code) => {
-                  return sendMail({
-                           to : parsed.email,
-                           subject : config.email.header,
-                           html : createEmail(code.reset_id)
-                         })
-                      .then(data => {
-                        console.log(data);
-                        nodemailer.getTestMessageUrl(data);
-                        return Promise.resolve({});
-                      });
-                });
-          }));
+  return rq.parseRequestResetRequest(req).then((parsed) =>
+    ormP.getPasswordPersonByEmail(parsed.email).then(async (person) => {
+      if (person == null || person.login_user == null) {
+        return Promise.reject(config.apiErrors.reset.invalidEmail);
+      }
+      const date: Date = new Date(Date.now());
+      date.setHours(date.getHours() + 24);
+      return ormPR
+        .createOrUpdateReset(
+          person.login_user.login_user_id,
+          util.generateKey(),
+          date
+        )
+        .catch((e) => {
+          console.log(e);
+          return Promise.reject();
+        })
+        .then(async (code) => {
+          return sendMail({
+            to: parsed.email,
+            subject: config.email.header,
+            html: createEmail(code.reset_id),
+          }).then((data) => {
+            console.log(data);
+            nodemailer.getTestMessageUrl(data);
+            return Promise.resolve({});
+          });
+        });
+    })
+  );
 }
 
 /**
@@ -100,15 +107,16 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
  * @param req
  */
 async function checkCode(req: express.Request): Promise<Responses.Empty> {
-  return rq.parseCheckResetCodeRequest(req)
-      .then(parsed => ormPR.findResetByCode(parsed.code))
-      .then(res => {
-        if (res == null || res.valid_until < new Date(Date.now()))
-          return Promise.reject();
+  return rq
+    .parseCheckResetCodeRequest(req)
+    .then((parsed) => ormPR.findResetByCode(parsed.code))
+    .then((res) => {
+      if (res == null || res.valid_until < new Date(Date.now()))
+        return Promise.reject();
 
-        return Promise.resolve({});
-      })
-      .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
+      return Promise.resolve({});
+    })
+    .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
 }
 
 /**
@@ -118,50 +126,61 @@ async function checkCode(req: express.Request): Promise<Responses.Empty> {
  * @param req
  */
 async function resetPassword(req: express.Request): Promise<Responses.Key> {
-  return rq.parseResetPasswordRequest(req).then(
-      parsed => ormPR.findResetByCode(parsed.code).then(async code => {
-        if (code == null || code.valid_until < new Date(Date.now()))
-          return Promise.reject(util.errors.cookArgumentError());
+  return rq.parseResetPasswordRequest(req).then((parsed) =>
+    ormPR.findResetByCode(parsed.code).then(async (code) => {
+      if (code == null || code.valid_until < new Date(Date.now()))
+        return Promise.reject(util.errors.cookArgumentError());
 
-        return ormLU.getLoginUserById(code.login_user_id)
-            .then(user => {
-              if (user == null)
-                return Promise.reject();
-              console.log("Updating user " + JSON.stringify(user) +
-                          "'s  password to " + parsed.password);
-              return ormLU.updateLoginUser({
-                loginUserId : user.login_user_id,
-                isAdmin : user.is_admin,
-                isCoach : user.is_coach,
-                accountStatus : user?.account_status,
-                password : parsed.password
-              });
-            })
-            .then(user => {
-              console.log(JSON.stringify(user));
-              const futureDate = new Date();
-              futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-              return ormSK.addSessionKey(user.login_user_id,
-                                         util.generateKey(), futureDate);
-            })
-            .then(async key => {
-              return ormPR.deleteResetWithResetId(code.reset_id)
-                  .then(() => Promise.resolve({sessionkey : key.session_key}));
-            })
-      .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
-      }));
+      return ormLU
+        .getLoginUserById(code.login_user_id)
+        .then((user) => {
+          if (user == null) return Promise.reject();
+          console.log(
+            "Updating user " +
+              JSON.stringify(user) +
+              "'s  password to " +
+              parsed.password
+          );
+          return ormLU.updateLoginUser({
+            loginUserId: user.login_user_id,
+            isAdmin: user.is_admin,
+            isCoach: user.is_coach,
+            accountStatus: user?.account_status,
+            password: parsed.password,
+          });
+        })
+        .then((user) => {
+          console.log(JSON.stringify(user));
+          const futureDate = new Date();
+          futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+          return ormSK.addSessionKey(
+            user.login_user_id,
+            util.generateKey(),
+            futureDate
+          );
+        })
+        .then(async (key) => {
+          return ormPR
+            .deleteResetWithResetId(code.reset_id)
+            .then(() => Promise.resolve({ sessionkey: key.session_key }));
+        })
+        .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
+    })
+  );
 }
 
 export function getRouter(): express.Router {
   const router: express.Router = express.Router();
 
-  router.post('/',
-              (req, res) => util.respOrErrorNoReinject(res, requestReset(req)));
-  router.get('/:id',
-             (req, res) => util.respOrErrorNoReinject(res, checkCode(req)));
-  util.routeKeyOnly(router, 'post', '/:id', resetPassword);
+  router.post("/", (req, res) =>
+    util.respOrErrorNoReinject(res, requestReset(req))
+  );
+  router.get("/:id", (req, res) =>
+    util.respOrErrorNoReinject(res, checkCode(req))
+  );
+  util.routeKeyOnly(router, "post", "/:id", resetPassword);
 
-  util.addAllInvalidVerbs(router, [ "/", "/:id" ]);
+  util.addAllInvalidVerbs(router, ["/", "/:id"]);
 
   return router;
 }
@@ -208,8 +227,7 @@ function createEmail(resetID: string) {
                     <td style="padding: 8px;font-family: 'Montserrat', sans-serif;color: #0A0839;"><strong>Note:</strong> This link is only valid for 24 hours.</td>
                 </tr>
                 <tr>
-                    <td style="padding: 12px 8px;"> <a href=${
-      process.env.FRONTEND}/reset/${resetID} style="
+                    <td style="padding: 12px 8px;"> <a href=${process.env.FRONTEND}/reset/${resetID} style="
                     font-family: 'Montserrat', sans-serif;
                     color: #0A0839;
                     border: none;
@@ -227,5 +245,5 @@ function createEmail(resetID: string) {
             </table>
         </body>
         </html>
-    `
+    `;
 }

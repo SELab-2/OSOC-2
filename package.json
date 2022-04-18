@@ -20,7 +20,7 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "eslint": "eslint . --fix --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
     "validator": "^13.7.0"
