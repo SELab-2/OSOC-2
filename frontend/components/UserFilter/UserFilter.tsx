@@ -73,7 +73,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
         e.preventDefault();
         if (loading) return
         if (statusFilter === AccountStatus.DISABLED) {
-            setStatusFilter(() => AccountStatus.ACTIVATED)
+            setStatusFilter(() => AccountStatus.NONE)
         } else {
             setStatusFilter(() => AccountStatus.DISABLED)
         }
@@ -122,6 +122,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
         if (statusFilter !== AccountStatus.NONE) {
             filters.push(`statusFilter=${statusFilter}`)
         }
+
         const query = filters.length > 0 ? `?${filters.join('&')}` : ""
         await router.push(`/users${query}`)
 
