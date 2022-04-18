@@ -3,6 +3,7 @@ import express from 'express';
 import {mockDeep} from 'jest-mock-extended';
 
 import * as session_key from '../orm_functions/session_key';
+import * as sessionKey from "../routes/session_key.json";
 
 import {
   expectRouter,
@@ -34,6 +35,7 @@ const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 import * as config from '../config.json';
 import {ApiError, Anything} from '../types';
 import * as util from '../utility';
+import {errors} from "../utility";
 
 interface Req {
   url: string, verb: string
@@ -68,7 +70,9 @@ test("utility.errors.cook* work as expected", () => {
   expect(util.errors.cookInsufficientRights())
       .toBe(config.apiErrors.insufficientRights);
   expect(util.errors.cookServerError()).toBe(config.apiErrors.serverError);
-  expect(util.errors.cookNoDataError()).toBe(config.apiErrors.noDataError);
+  expect(util.errors.cookLockedRequest()).toBe(config.apiErrors.lockedRequest);
+  expect(util.errors.cookPendingAccount())
+      .toBe(config.apiErrors.pendingAccount);
 
   // annoying ones
   // non-existent endpoint
@@ -277,9 +281,13 @@ test("utility.respOrError sends responses with updated keys", async () => {
   setSessionKey(req, "key");
 
   session_keyMock.changeSessionKey.mockReset();
-  session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
-    return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw});
+  session_keyMock.changeSessionKey.mockImplementation((_, nw, nd) => {
+    return Promise.resolve({
+      session_key_id : 0,
+      login_user_id : 0,
+      session_key : nw,
+      valid_until : nd
+    });
   });
 
   cryptoMock.createHash.mockReset();
@@ -310,16 +318,106 @@ test("utility.redirect sends an HTTP 303", () => {
 });
 
 test("utility.checkSessionKey works on valid session key", async () => {
+  login_userMock.getLoginUserById.mockReset();
   session_keyMock.checkSessionKey.mockReset();
+  login_userMock.getLoginUserById.mockResolvedValue({
+    login_user_id : 123456789,
+    person_id : 987654321,
+    password : "pass",
+    is_admin : true,
+    is_coach : false,
+    account_status : "ACTIVATED",
+    person : {
+      firstname : "Bob",
+      lastname : "Test",
+      email : "bob.test@mail.com",
+      github : "bob.test@github.com",
+      person_id : 987654321,
+      github_id : '46845'
+    }
+  });
   session_keyMock.checkSessionKey.mockResolvedValue(
       {login_user_id : 123456789});
   const obj = {sessionkey : "key"};
-  const res = {data : {sessionkey : "key"}, userId : 123456789};
+  const res = {
+    data : {sessionkey : "key"},
+    userId : 123456789,
+    accountStatus : "ACTIVATED",
+    is_admin : true,
+    is_coach : false
+  };
 
   await expect(util.checkSessionKey(obj)).resolves.toStrictEqual(res);
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
   expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith('key');
 });
+
+test("utility.checkSessionKey fails on valid session key (pending)",
+     async () => {
+       login_userMock.getLoginUserById.mockReset();
+       session_keyMock.checkSessionKey.mockReset();
+       login_userMock.getLoginUserById.mockResolvedValue({
+         login_user_id : 123456789,
+         person_id : 987654321,
+         password : "pass",
+         is_admin : true,
+         is_coach : false,
+         account_status : "PENDING",
+         person : {
+           firstname : "Bob",
+           lastname : "Test",
+           email : "bob.test@mail.com",
+           github : "bob.test@github.com",
+           person_id : 987654321,
+           github_id : '46845'
+         }
+       });
+       session_keyMock.checkSessionKey.mockResolvedValue(
+           {login_user_id : 123456789});
+       const obj = {sessionkey : "key"};
+
+       await expect(util.checkSessionKey(obj))
+           .rejects.toStrictEqual(errors.cookPendingAccount());
+       expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+       expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith('key');
+     });
+
+test("utility.checkSessionKey works on valid session key (pending,false)",
+     async () => {
+       login_userMock.getLoginUserById.mockReset();
+       session_keyMock.checkSessionKey.mockReset();
+       login_userMock.getLoginUserById.mockResolvedValue({
+         login_user_id : 123456789,
+         person_id : 987654321,
+         password : "pass",
+         is_admin : true,
+         is_coach : false,
+         account_status : "PENDING",
+         person : {
+           firstname : "Bob",
+           lastname : "Test",
+           email : "bob.test@mail.com",
+           github : "bob.test@github.com",
+           person_id : 987654321,
+           github_id : '46845'
+         }
+       });
+       session_keyMock.checkSessionKey.mockResolvedValue(
+           {login_user_id : 123456789});
+       const obj = {sessionkey : "key"};
+       const res = {
+         data : {sessionkey : "key"},
+         userId : 123456789,
+         accountStatus : "PENDING",
+         is_admin : true,
+         is_coach : false
+       };
+
+       await expect(util.checkSessionKey(obj, false))
+           .resolves.toStrictEqual(res);
+       expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+       expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith('key');
+     });
 
 test("utility.checkSessionKey fails on invalid session key", async () => {
   session_keyMock.checkSessionKey.mockReset();
@@ -345,6 +443,46 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
          return Promise.reject(new Error());
        });
 
+       login_userMock.getLoginUserById.mockReset();
+       login_userMock.getLoginUserById.mockImplementation(
+           (loginUserId: number) => {
+             if (loginUserId == 3)
+               return Promise.reject(errors.cookLockedRequest());
+             if (loginUserId == 2)
+               return Promise.resolve({
+                 login_user_id : 2,
+                 person_id : -2,
+                 password : "pass",
+                 is_admin : false,
+                 is_coach : false,
+                 account_status : "ACTIVATED",
+                 person : {
+                   firstname : "firstname",
+                   lastname : "lastname",
+                   email : "email@hotmail.com",
+                   github : "hiethub",
+                   person_id : 1,
+                   github_id : '123'
+                 }
+               });
+             return Promise.resolve({
+               login_user_id : 1,
+               person_id : -1,
+               password : "imapassword",
+               is_admin : true,
+               is_coach : false,
+               account_status : "ACTIVATED",
+               person : {
+                 firstname : "firstname",
+                 lastname : "lastname",
+                 email : "email@mail.com",
+                 github : "hiethub",
+                 person_id : 0,
+                 github_id : '123456'
+               }
+             });
+           });
+
        login_userMock.searchAllAdminLoginUsers.mockReset();
        login_userMock.searchAllAdminLoginUsers.mockImplementation(
            (isAdmin: boolean) => {
@@ -362,7 +500,8 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
                  firstname : "firstname",
                  github : "hiethub",
                  person_id : 0,
-                 email : "email@mail.com"
+                 email : "email@mail.com",
+                 github_id : '123456'
                },
                session_keys : []
              } ]);
@@ -371,7 +510,13 @@ test("utility.isAdmin should succeed on valid keys, fail on invalid keys" +
        // test 1: succesfull
        await expect(util.isAdmin({
          sessionkey : "key_1"
-       })).resolves.toStrictEqual({data : {sessionkey : "key_1"}, userId : 1});
+       })).resolves.toStrictEqual({
+         data : {sessionkey : "key_1"},
+         userId : 1,
+         accountStatus : "ACTIVATED",
+         is_admin : true,
+         is_coach : false
+       });
        // test 2: not an admin
        await expect(util.isAdmin({
          sessionkey : "key_2"
@@ -401,9 +546,21 @@ test("utility.isAdmin can catch errors from the DB", async () => {
 
 test("utility.refreshKey removes a key and replaces it", async () => {
   session_keyMock.changeSessionKey.mockReset();
+
+  // mock Date.now()
+  const realDateNow = Date.now.bind(global.Date);
+  const dateNowStub = jest.fn(() => 1530518207007);
+  global.Date.now = dateNowStub;
+
+  const futureDate = new Date(Date.now());
+  futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
-    return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw});
+    return Promise.resolve({
+      session_key_id : 0,
+      login_user_id : 0,
+      session_key : nw,
+      valid_until : futureDate
+    });
   });
 
   cryptoMock.createHash.mockReset();
@@ -416,14 +573,22 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
   await expect(util.refreshKey('ab')).resolves.toBe('abcd');
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd');
+  expect(session_keyMock.changeSessionKey)
+      .toHaveBeenCalledWith('ab', 'abcd', futureDate);
+  global.Date.now = realDateNow;
 });
 
 test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   session_keyMock.changeSessionKey.mockReset();
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
   session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
-    return Promise.resolve(
-        {session_key_id : 0, login_user_id : 0, session_key : nw});
+    return Promise.resolve({
+      session_key_id : 0,
+      login_user_id : 0,
+      session_key : nw,
+      valid_until : futureDate
+    });
   });
 
   cryptoMock.createHash.mockReset();
@@ -447,7 +612,8 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
   expect(util.refreshAndInjectKey('ab', initial))
       .resolves.toStrictEqual(result);
   expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-  expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith('ab', 'abcd');
+  expect(session_keyMock.changeSessionKey)
+      .toHaveBeenCalledWith('ab', 'abcd', futureDate);
 });
 
 test("utility.getSessionKey fetches session key or crashes", () => {

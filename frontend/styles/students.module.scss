@@ -2,4 +2,8 @@
 .students {
   width: clamp(18rem, 92vw, 60rem);
   margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);;
 }
