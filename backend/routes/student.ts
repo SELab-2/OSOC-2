@@ -74,8 +74,6 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
  */
 async function getStudent(req: express.Request): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
-    console.log('\n\nhello');
-    console.log(parsedRequest);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());

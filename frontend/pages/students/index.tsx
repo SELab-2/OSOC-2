@@ -25,7 +25,6 @@ const Index: NextPage = () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async sessionKey => {
                 if (sessionKey != "" && id > -2) {
-                    console.log(id)
                     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                         method: 'GET',
                         headers: {

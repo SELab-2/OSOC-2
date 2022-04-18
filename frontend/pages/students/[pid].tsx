@@ -3,12 +3,12 @@ import {useRouter} from "next/router";
 import SessionContext from "../../contexts/sessionProvider";
 import {useContext, useEffect, useState} from "react"
 import {Student} from "../../types/types"
+import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 
 
 const Pid: NextPage = () => {
     const router = useRouter();
     const {getSessionKey, setSessionKey} = useContext(SessionContext);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [student, setStudent] = useState<Student>();
     const {pid} = router.query; // pid is the student id
 
@@ -27,7 +27,6 @@ const Pid: NextPage = () => {
                             setSessionKey(response.sessionkey)
                         }
                         setStudent(response.data as Student)
-                        console.log(response.data)
                     }
                 }
             })
@@ -37,14 +36,13 @@ const Pid: NextPage = () => {
     useEffect(() => {
         fetchStudent().then();
         // We do not want to reload the data when the data changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
 
     return (
         <div>
-            {/* TODO -- Pending https://github.com/SELab-2/OSOC-2/issues/354}
-            {/* student !== undefined ? <StudentOverview student={student}/> : null */}
-            <p>{pid}</p>
+            <p></p>
+            {student !== undefined ? <StudentOverview student={student}/> : null}
         </div>
     )
 }
