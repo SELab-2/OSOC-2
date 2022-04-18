@@ -21,6 +21,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
     const [coachFilter, setCoachFilter] = useState<boolean>(false)
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(AccountStatus.NONE)
     const {getSessionKey, setSessionKey} = useContext(SessionContext)
+    const [loading, isLoading] = useState<boolean>(false) // Check if we are executing a request
 
     const router = useRouter()
 
@@ -30,31 +31,37 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
+        if (loading) return
         search().then()
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter])
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (loading) return
         setNameSort(getNextSort(nameSort));
     }
 
     const toggleEmailSort = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (loading) return
         setEmailSort(getNextSort(emailSort));
     }
 
     const toggleAdminFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (loading) return
         setAdminFilter(() => !adminFilter);
     }
 
     const toggleCoachFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (loading) return
         setCoachFilter(() => !coachFilter);
     }
 
     const togglePendingStatus = async (e: SyntheticEvent) => {
         e.preventDefault()
+        if (loading) return
         if (statusFilter === AccountStatus.PENDING) {
             setStatusFilter(AccountStatus.NONE)
         } else {
@@ -64,6 +71,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
 
     const toggleDisabledStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
+        if (loading) return
         if (statusFilter === AccountStatus.DISABLED) {
             setStatusFilter(() => AccountStatus.ACTIVATED)
         } else {
@@ -77,6 +85,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault()
+        if (loading) return
         search().then()
     }
 
@@ -84,6 +93,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
      * Build and execute the query
      */
     const search = async () => {
+        isLoading(true)
         const filters = []
         if (nameFilter !== "") {
             filters.push(`nameFilter=${nameFilter}`)
@@ -132,6 +142,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
                 setSessionKey(response.sessionkey)
             }
             updateUsers(response.data)
+            isLoading(false)
         }
     }
 
