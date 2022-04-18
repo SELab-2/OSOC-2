@@ -2,10 +2,10 @@ import {account_status_enum} from '@prisma/client';
 import express from 'express';
 
 import * as ormLU from '../orm_functions/login_user';
+import * as ormP from "../orm_functions/person";
 import * as rq from '../request';
 import {InternalTypes, Responses} from '../types';
 import * as util from '../utility';
-import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -13,7 +13,8 @@ import * as ormP from "../orm_functions/person";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
+export async function listCoaches(req: express.Request):
+    Promise<Responses.CoachList> {
   return rq.parseCoachAllRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(
@@ -22,10 +23,11 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                   .then(obj =>
                             obj.map(val => ({
                                       person_data : {
-                                          id : val.person.person_id,
-                                          name : val.person.firstname + " " + val.person.lastname,
-                                          email : val.person.email,
-                                          github : val.person.github
+                                        id : val.person.person_id,
+                                        name : val.person.firstname + " " +
+                                                   val.person.lastname,
+                                        email : val.person.email,
+                                        github : val.person.github
                                       },
                                       coach : val.is_coach,
                                       admin : val.is_admin,
@@ -42,7 +44,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoach(req: express.Request): Promise<Responses.Coach> {
+export async function getCoach(req: express.Request): Promise<Responses.Coach> {
   return rq.parseSingleCoachRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
       .then(() => {
@@ -56,7 +58,7 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(req: express.Request):
+export async function modCoach(req: express.Request):
     Promise<Responses.Keyed<InternalTypes.IdName>> {
   return rq.parseUpdateCoachRequest(req)
       .then(parsed => util.checkSessionKey(parsed))
@@ -85,15 +87,16 @@ async function modCoach(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteCoach(req: express.Request): Promise<Responses.Key> {
+export async function deleteCoach(req: express.Request):
+    Promise<Responses.Key> {
   return rq.parseDeleteCoachRequest(req)
       .then(parsed => util.isAdmin(parsed))
       .then(async parsed => {
         return ormLU.deleteLoginUserByPersonId(parsed.data.id)
-            .then(() => {
-                return ormP.deletePersonById(parsed.data.id)
-                    .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}))
-            });
+            .then(
+                () => {return ormP.deletePersonById(parsed.data.id)
+                           .then(() => Promise.resolve(
+                                     {sessionkey : parsed.data.sessionkey}))});
       });
 }
 
@@ -103,7 +106,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequests(req: express.Request):
+export async function getCoachRequests(req: express.Request):
     Promise<Responses.CoachList> {
   return rq.parseGetAllCoachRequestsRequest(req)
       .then(parsed => util.isAdmin(parsed))
@@ -132,7 +135,7 @@ async function getCoachRequests(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequest(req: express.Request):
+export async function getCoachRequest(req: express.Request):
     Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
   return rq.parseGetCoachRequestRequest(req)
       .then(parsed => util.isAdmin(parsed))
