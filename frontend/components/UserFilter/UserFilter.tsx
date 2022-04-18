@@ -164,7 +164,7 @@ export const UserFilter: React.FC<{ updateUsers: (users: Array<LoginUser>) => vo
                            onChange={e => setNameFilter(e.target.value)}/>
                     <button
                         className={`${statusFilter === AccountStatus.PENDING ? styles.pendingActive : styles.pendingButton}`}
-                        onClick={togglePendingStatus}>Pending
+                        type="button" onClick={togglePendingStatus}>Pending
                     </button>
                 </div>
 
