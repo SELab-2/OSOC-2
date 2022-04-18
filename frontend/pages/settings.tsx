@@ -14,12 +14,12 @@ const Settings: NextPage = () => {
             firstname: "",
             lastname: "",
             github: "",
+            github_id: 0,
         },
         login_user_id: -1,
         person_id: -1,
         is_admin: false,
         is_coach: false,
-        password: "",
         account_status: AccountStatus.DISABLED,
     };
 
@@ -46,7 +46,7 @@ const Settings: NextPage = () => {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey);
             }
-            setUser(response.data);
+            setUser(response.data.login_user);
         }
     };
 
