@@ -1,6 +1,6 @@
 // pages/_document.js
 
-import Document, {Head, Html, Main, NextScript} from 'next/document'
+import Document, { Head, Html, Main, NextScript } from "next/document";
 
 class MyDocument extends Document {
     render() {
@@ -9,15 +9,16 @@ class MyDocument extends Document {
                 <Head>
                     <link
                         href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
-                        rel="stylesheet"/>
+                        rel="stylesheet"
+                    />
                 </Head>
                 <body>
-                <Main/>
-                <NextScript/>
+                    <Main />
+                    <NextScript />
                 </body>
             </Html>
-        )
+        );
     }
 }
 
-export default MyDocument
+export default MyDocument;
