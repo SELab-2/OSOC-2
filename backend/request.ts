@@ -365,20 +365,31 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
+    let isCoachFilter = maybe(req.body, "isCoachFilter");
+    if ("isCoachFilter" in req.body) {
+        isCoachFilter = Boolean(req.body.isCoachFilter);
+    }
+    let isAdminFilter = maybe(req.body, "isAdminFilter");
+    if ("isAdminFilter" in req.body) {
+        isAdminFilter = Boolean(req.body.isAdminFilter);
+    }
     if (
-        ("emailFilter" in req.body &&
-            !validator.default.isEmail(req.body.emailFilter)) ||
-        ("statusFilter" in req.body &&
-            req.body.statusFilter !== "ACTIVATED" &&
-            req.body.statusFilter !== "PENDING" &&
-            req.body.statusFilter !== "DISABLED")
+        "statusFilter" in req.body &&
+        req.body.statusFilter !== "ACTIVATED" &&
+        req.body.statusFilter !== "PENDING" &&
+        req.body.statusFilter !== "DISABLED"
     ) {
         return rejector();
     } else {
-        if ("emailFilter" in req.body) {
+        if (
+            "emailFilter" in req.body &&
+            validator.default.isEmail(req.body.emailFilter)
+        ) {
             mail = validator.default
                 .normalizeEmail(req.body.emailFilter)
                 .toString();
+        } else {
+            mail = req.body.emailFilter;
         }
     }
 
@@ -398,8 +409,8 @@ export async function parseFilterUsersRequest(
         statusFilter: maybe(req.body, "statusFilter"),
         nameSort: maybe(req.body, "nameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        isCoachFilter: maybe(req.body, "isCoachFilter"),
-        isAdminFilter: maybe(req.body, "isAdminFilter"),
+        isCoachFilter: isCoachFilter,
+        isAdminFilter: isAdminFilter,
     });
 }
 
