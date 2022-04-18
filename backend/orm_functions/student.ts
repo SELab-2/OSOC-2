@@ -1,5 +1,5 @@
-import { decision_enum } from '@prisma/client';
-import prisma from '../prisma/prisma'
+import { decision_enum } from "@prisma/client";
+import prisma from "../prisma/prisma";
 import {
     CreateStudent,
     FilterSort,
@@ -7,11 +7,11 @@ import {
     FilterBoolean,
     UpdateStudent,
     FilterStringArray,
-} from './orm_types';
+} from "./orm_types";
 
 // TODO: how do we make sure there is no student for this person_id yet?
 /**
- * 
+ *
  * @param student: student object with the needed information
  */
 export async function createStudent(student: CreateStudent) {
@@ -23,24 +23,24 @@ export async function createStudent(student: CreateStudent) {
             phone_number: student.phoneNumber,
             nickname: student.nickname,
             alumni: student.alumni,
-        }
+        },
     });
-} 
+}
 
 /**
- * 
+ *
  * @returns a list of all the student objects in the database together with their personal info
  */
 export async function getAllStudents() {
     return await prisma.student.findMany({
         include: {
             person: true,
-        }
-    })
+        },
+    });
 }
 
 /**
- * 
+ *
  * @param studentId: this is the id of the student we are looking up in the database
  * @returns: object with all the info about this student together with their personal info
  */
@@ -51,14 +51,14 @@ export async function getStudent(studentId: number) {
         },
         include: {
             person: true,
-        }
+        },
     });
 }
 
 /**
- * 
+ *
  * @param student: UpdateStudent object with the values that need to be updated
- * @returns the updated entry in the database 
+ * @returns the updated entry in the database
  */
 export async function updateStudent(student: UpdateStudent) {
     return await prisma.student.update({
@@ -70,16 +70,16 @@ export async function updateStudent(student: UpdateStudent) {
             phone_number: student.phoneNumber,
             nickname: student.nickname,
             alumni: student.alumni,
-            gender: student.gender
+            gender: student.gender,
         },
         include: {
             person: true,
-        }
+        },
     });
 }
 
 /**
- * 
+ *
  * @param studentId the student who's info we are deleting from the student-table
  * @returns personal info about the student, this info can be used to further remove the personal info about this student in other tables
  */
@@ -88,9 +88,10 @@ export async function deleteStudent(studentId: number) {
         where: {
             student_id: studentId,
         },
-        include: { // returns the person info of the removed student, can later be used to also remove everything from this person?
-            person: true
-        }
+        include: {
+            // returns the person info of the removed student, can later be used to also remove everything from this person?
+            person: true,
+        },
     });
 }
 
@@ -99,14 +100,14 @@ export async function deleteStudent(studentId: number) {
  * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
-export async function searchStudentByGender(gender: string){
+export async function searchStudentByGender(gender: string) {
     return prisma.student.findMany({
         where: {
-            gender: gender
+            gender: gender,
         },
         include: {
             person: true,
-        }
+        },
     });
 }
 
@@ -127,89 +128,98 @@ export async function searchStudentByGender(gender: string){
  * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
- export async function filterStudents(firstNameFilter: FilterString, lastNameFilter: FilterString,
-    emailFilter: FilterString, roleFilterArray: FilterStringArray, alumniFilter: FilterBoolean, 
-    coachFilter: FilterBoolean, statusFilter: decision_enum | undefined, osocYear: number,
-    firstNameSort: FilterSort, lastNameSort: FilterSort, emailSort: FilterSort, roleSort: FilterSort,
-    alumniSort: FilterSort) {
-
+export async function filterStudents(
+    firstNameFilter: FilterString,
+    lastNameFilter: FilterString,
+    emailFilter: FilterString,
+    roleFilterArray: FilterStringArray,
+    alumniFilter: FilterBoolean,
+    coachFilter: FilterBoolean,
+    statusFilter: decision_enum | undefined,
+    osocYear: number,
+    firstNameSort: FilterSort,
+    lastNameSort: FilterSort,
+    emailSort: FilterSort,
+    roleSort: FilterSort,
+    alumniSort: FilterSort
+) {
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
     let evaluationFilter;
     if (statusFilter) {
-         evaluationFilter = {
-             some: {
-                 decision: statusFilter
-             }
-         }
+        evaluationFilter = {
+            some: {
+                decision: statusFilter,
+            },
+        };
     } else {
-        evaluationFilter = undefined
+        evaluationFilter = undefined;
     }
 
-    console.log(alumniFilter)
+    console.log(alumniFilter);
     return await prisma.student.findMany({
         where: {
             job_application: {
                 some: {
                     student_coach: coachFilter,
                     osoc: {
-                        year: osocYear
+                        year: osocYear,
                     },
                     applied_role: {
                         some: {
-                            role:{
-                                name: { in: roleFilterArray}
-                            }
-                        }
+                            role: {
+                                name: { in: roleFilterArray },
+                            },
+                        },
                     },
-                    evaluation: evaluationFilter
-                }
+                    evaluation: evaluationFilter,
+                },
             },
             person: {
                 firstname: {
                     contains: firstNameFilter,
-                    mode: 'insensitive'
+                    mode: "insensitive",
                 },
                 lastname: {
                     contains: lastNameFilter,
-                    mode: 'insensitive'
+                    mode: "insensitive",
                 },
                 email: {
                     contains: emailFilter,
-                    mode: 'insensitive'
+                    mode: "insensitive",
                 },
             },
             alumni: alumniFilter,
         },
-        orderBy : {
-            person :  {
+        orderBy: {
+            person: {
                 firstname: firstNameSort,
                 lastname: lastNameSort,
                 email: emailSort,
             },
-            alumni: alumniSort
+            alumni: alumniSort,
         },
-        include : {
+        include: {
             person: true,
             job_application: {
-                select : {
+                select: {
                     student_coach: true,
                     applied_role: {
-                        include : {
+                        include: {
                             role: {
-                                select : {
-                                    name: true
-                                }
-                            }
-                        }
+                                select: {
+                                    name: true,
+                                },
+                            },
+                        },
                     },
                     evaluation: {
-                        select : {
-                            decision: true
-                        }
-                    }  
-                }
-            }
-        }
+                        select: {
+                            decision: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 }

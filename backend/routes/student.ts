@@ -1,15 +1,15 @@
-import express from 'express';
+import express from "express";
 
-import * as ormEv from '../orm_functions/evaluation';
-import * as ormJo from '../orm_functions/job_application';
-import * as ormLa from '../orm_functions/language';
-import * as ormRo from '../orm_functions/role';
-import * as ormSt from '../orm_functions/student';
-import * as ormOs from '../orm_functions/osoc';
-import * as rq from '../request';
-import {Responses} from '../types';
-import * as util from '../utility';
-import {errors} from '../utility';
+import * as ormEv from "../orm_functions/evaluation";
+import * as ormJo from "../orm_functions/job_application";
+import * as ormLa from "../orm_functions/language";
+import * as ormRo from "../orm_functions/role";
+import * as ormSt from "../orm_functions/student";
+import * as ormOs from "../orm_functions/osoc";
+import * as rq from "../request";
+import { Responses } from "../types";
+import * as util from "../utility";
+import { errors } from "../utility";
 import * as ormP from "../orm_functions/person";
 
 /**
@@ -18,34 +18,55 @@ import * as ormP from "../orm_functions/person";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudents(req: express.Request): Promise<Responses.StudentList> {
+async function listStudents(
+    req: express.Request
+): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseStudentAllRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
     const studentList: object[] = [];
     const students = await ormSt.getAllStudents();
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(students[studentIndex].student_id);
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+            students[studentIndex].student_id
+        );
         if (jobApplication != null) {
             const roles = [];
-            for(const applied_role of jobApplication.applied_role) {
+            for (const applied_role of jobApplication.applied_role) {
                 const role = await ormRo.getRole(applied_role.role_id);
-                if(role != null) {
+                if (role != null) {
                     roles.push(role.name);
                 } else {
                     return Promise.reject(errors.cookInvalidID());
                 }
             }
 
-            const evaluations = await ormJo.getStudentEvaluationsTotal(students[studentIndex].student_id);
+            const evaluations = await ormJo.getStudentEvaluationsTotal(
+                students[studentIndex].student_id
+            );
 
-            for (let skillIndex = 0; skillIndex < jobApplication.job_application_skill.length; skillIndex++) {
-                if(jobApplication.job_application_skill[skillIndex].language_id != null) {
-                    const language = await ormLa.getLanguage(Number(jobApplication.job_application_skill[skillIndex].language_id));
+            for (
+                let skillIndex = 0;
+                skillIndex < jobApplication.job_application_skill.length;
+                skillIndex++
+            ) {
+                if (
+                    jobApplication.job_application_skill[skillIndex]
+                        .language_id != null
+                ) {
+                    const language = await ormLa.getLanguage(
+                        Number(
+                            jobApplication.job_application_skill[skillIndex]
+                                .language_id
+                        )
+                    );
                     if (language != null) {
-                        jobApplication.job_application_skill[skillIndex].skill = language.name;
+                        jobApplication.job_application_skill[skillIndex].skill =
+                            language.name;
                     } else {
                         return Promise.reject(errors.cookInvalidID());
                     }
@@ -53,17 +74,20 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
             }
 
             studentList.push({
-                student : students[studentIndex],
-                jobApplication : jobApplication,
-                evaluations : evaluations,
-                roles: roles
-            })
+                student: students[studentIndex],
+                jobApplication: jobApplication,
+                evaluations: evaluations,
+                roles: roles,
+            });
         } else {
             return Promise.reject(errors.cookInvalidID());
         }
     }
 
-    return Promise.resolve({data : studentList, sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({
+        data: studentList,
+        sessionkey: checkedSessionKey.data.sessionkey,
+    });
 }
 
 /**
@@ -74,37 +98,45 @@ async function listStudents(req: express.Request): Promise<Responses.StudentList
  */
 async function getStudent(req: express.Request): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
-    if(student == null) {
+    if (student == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
-    if(jobApplication == null) {
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
+    if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const roles = [];
-    for(const applied_role of jobApplication.applied_role) {
+    for (const applied_role of jobApplication.applied_role) {
         const role = await ormRo.getRole(applied_role.role_id);
-        if(role != null) {
+        if (role != null) {
             roles.push(role.name);
         } else {
             return Promise.reject(errors.cookInvalidID());
         }
     }
 
-    const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
+    const evaluations = await ormJo.getStudentEvaluationsTotal(
+        student.student_id
+    );
 
-    for(const job_application_skill of jobApplication.job_application_skill) {
-        if(job_application_skill.language_id != null) {
-            const language = await ormLa.getLanguage(job_application_skill.language_id);
-            if(language == null) {
+    for (const job_application_skill of jobApplication.job_application_skill) {
+        if (job_application_skill.language_id != null) {
+            const language = await ormLa.getLanguage(
+                job_application_skill.language_id
+            );
+            if (language == null) {
                 return Promise.reject(errors.cookInvalidID());
             }
             job_application_skill.skill = language.name;
@@ -112,13 +144,13 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
     }
 
     return Promise.resolve({
-        data : {
-            student : student,
-            jobApplication : jobApplication,
-            evaluations : evaluations,
-            roles: roles
+        data: {
+            student: student,
+            jobApplication: jobApplication,
+            evaluations: evaluations,
+            roles: roles,
         },
-        sessionkey : checkedSessionKey.data.sessionkey
+        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -129,12 +161,18 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function deleteStudent(req: express.Request): Promise<Responses.Key> {
-    return rq.parseDeleteStudentRequest(req)
-        .then(parsed => util.isAdmin(parsed))
-        .then(async parsed => {return ormSt.deleteStudent(parsed.data.id).then(
-            () => ormP.deletePersonById(parsed.data.id)
-                .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}))
-        )})
+    return rq
+        .parseDeleteStudentRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormSt.deleteStudent(parsed.data.id).then(() =>
+                ormP.deletePersonById(parsed.data.id).then(() =>
+                    Promise.resolve({
+                        sessionkey: parsed.data.sessionkey,
+                    })
+                )
+            );
+        });
 }
 
 /**
@@ -143,9 +181,13 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentSuggestion(req: express.Request): Promise<Responses.Key> {
+async function createStudentSuggestion(
+    req: express.Request
+): Promise<Responses.Key> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -155,20 +197,22 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     await ormEv.createEvaluationForStudent({
-        loginUserId : checkedSessionKey.userId,
-        jobApplicationId : jobApplication.job_application_id,
-        decision : checkedSessionKey.data.suggestion,
-        motivation : checkedSessionKey.data.reason,
-        isFinal : false
+        loginUserId: checkedSessionKey.userId,
+        jobApplicationId: jobApplication.job_application_id,
+        decision: checkedSessionKey.data.suggestion,
+        motivation: checkedSessionKey.data.reason,
+        isFinal: false,
     });
 
-    return Promise.resolve({sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({ sessionkey: checkedSessionKey.data.sessionkey });
 }
 
 /**
@@ -177,9 +221,13 @@ async function createStudentSuggestion(req: express.Request): Promise<Responses.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudentSuggestions(req: express.Request): Promise<Responses.SuggestionInfo> {
+async function getStudentSuggestions(
+    req: express.Request
+): Promise<Responses.SuggestionInfo> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -189,32 +237,44 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const year = checkedSessionKey.data.year == undefined ? await ormOs.getLatestOsoc() : checkedSessionKey.data.year;
-    if(year == null) {
-        return Promise.resolve({data: [], sessionkey : checkedSessionKey.data.sessionkey});
+    const osoc =
+        checkedSessionKey.data.year == undefined
+            ? await ormOs.getLatestOsoc()
+            : checkedSessionKey.data.year;
+    if (osoc == null) {
+        return Promise.resolve({
+            data: [],
+            sessionkey: checkedSessionKey.data.sessionkey,
+        });
     }
-    const suggestionsTotal = (await ormJo.getStudentEvaluationsTotal(student.student_id))
-        .filter(suggestion => suggestion.osoc.year === year);
+    const suggestionsTotal = (
+        await ormJo.getStudentEvaluationsTotal(student.student_id)
+    ).filter((suggestion) => suggestion.osoc.year === osoc.year);
 
     const suggestionsInfo = [];
-    for(const suggestion of suggestionsTotal) {
-        for(const evaluation of suggestion.evaluation) {
+    for (const suggestion of suggestionsTotal) {
+        for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
                 senderFirstname: evaluation.login_user.person.firstname,
                 senderLastname: evaluation.login_user.person.lastname,
                 reason: evaluation.motivation,
                 decision: evaluation.decision,
-                isFinal: evaluation.is_final
-            })
+                isFinal: evaluation.is_final,
+            });
         }
     }
 
-    return Promise.resolve({data: suggestionsInfo, sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({
+        data: suggestionsInfo,
+        sessionkey: checkedSessionKey.data.sessionkey,
+    });
 }
 
 /**
@@ -223,9 +283,13 @@ async function getStudentSuggestions(req: express.Request): Promise<Responses.Su
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentConfirmation(req: express.Request): Promise<Responses.Key> {
+async function createStudentConfirmation(
+    req: express.Request
+): Promise<Responses.Key> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -235,20 +299,22 @@ async function createStudentConfirmation(req: express.Request): Promise<Response
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     await ormEv.createEvaluationForStudent({
-        loginUserId : checkedSessionKey.userId,
-        jobApplicationId : jobApplication.job_application_id,
-        decision : checkedSessionKey.data.reply,
-        motivation : checkedSessionKey.data.reason,
-        isFinal : true
+        loginUserId: checkedSessionKey.userId,
+        jobApplicationId: jobApplication.job_application_id,
+        decision: checkedSessionKey.data.reply,
+        motivation: checkedSessionKey.data.reason,
+        isFinal: true,
     });
 
-    return Promise.resolve({sessionkey : checkedSessionKey.data.sessionkey});
+    return Promise.resolve({ sessionkey: checkedSessionKey.data.sessionkey });
 }
 
 /**
@@ -257,43 +323,63 @@ async function createStudentConfirmation(req: express.Request): Promise<Response
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterStudents(req: express.Request): Promise<Responses.StudentList> {
+async function filterStudents(
+    req: express.Request
+): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest).catch(res => res);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const students = await ormSt.filterStudents(checkedSessionKey.data.firstNameFilter, checkedSessionKey.data.lastNameFilter,
-        checkedSessionKey.data.emailFilter, checkedSessionKey.data.roleFilter, checkedSessionKey.data.alumniFilter,
-        checkedSessionKey.data.coachFilter, checkedSessionKey.data.statusFilter, checkedSessionKey.data.osocYear, checkedSessionKey.data.firstNameSort,
-        checkedSessionKey.data.lastNameSort, checkedSessionKey.data.emailSort, checkedSessionKey.data.roleSort,
-        checkedSessionKey.data.alumniSort);
+    const students = await ormSt.filterStudents(
+        checkedSessionKey.data.firstNameFilter,
+        checkedSessionKey.data.lastNameFilter,
+        checkedSessionKey.data.emailFilter,
+        checkedSessionKey.data.roleFilter,
+        checkedSessionKey.data.alumniFilter,
+        checkedSessionKey.data.coachFilter,
+        checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.osocYear,
+        checkedSessionKey.data.firstNameSort,
+        checkedSessionKey.data.lastNameSort,
+        checkedSessionKey.data.emailSort,
+        checkedSessionKey.data.roleSort,
+        checkedSessionKey.data.alumniSort
+    );
 
     const studentlist = [];
 
     for (const student of students) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(student.student_id);
-        if(jobApplication == null) {
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+            student.student_id
+        );
+        if (jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
         }
 
         const roles = [];
-        for(const applied_role of jobApplication.applied_role) {
+        for (const applied_role of jobApplication.applied_role) {
             const role = await ormRo.getRole(applied_role.role_id);
-            if(role != null) {
+            if (role != null) {
                 roles.push(role.name);
             } else {
                 return Promise.reject(errors.cookInvalidID());
             }
         }
 
-        const evaluations = await ormJo.getStudentEvaluationsTotal(student.student_id);
+        const evaluations = await ormJo.getStudentEvaluationsTotal(
+            student.student_id
+        );
 
-        for(const job_application_skill of jobApplication.job_application_skill) {
-            if(job_application_skill.language_id != null) {
-                const language = await ormLa.getLanguage(job_application_skill.language_id);
-                if(language == null) {
+        for (const job_application_skill of jobApplication.job_application_skill) {
+            if (job_application_skill.language_id != null) {
+                const language = await ormLa.getLanguage(
+                    job_application_skill.language_id
+                );
+                if (language == null) {
                     return Promise.reject(errors.cookInvalidID());
                 }
                 job_application_skill.skill = language.name;
@@ -301,14 +387,17 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
         }
 
         studentlist.push({
-            student : student,
-            jobApplication : jobApplication,
-            evaluations : evaluations,
-            roles: roles
+            student: student,
+            jobApplication: jobApplication,
+            evaluations: evaluations,
+            roles: roles,
         });
     }
 
-    return Promise.resolve({data : studentlist, sessionkey : req.body.sessionkey});
+    return Promise.resolve({
+        data: studentlist,
+        sessionkey: req.body.sessionkey,
+    });
 }
 
 /**
@@ -319,19 +408,31 @@ async function filterStudents(req: express.Request): Promise<Responses.StudentLi
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    util.setupRedirect(router, '/student');
+    util.setupRedirect(router, "/student");
     util.route(router, "get", "/filter", filterStudents);
     util.route(router, "get", "/all", listStudents);
     util.route(router, "get", "/:id", getStudent);
-    util.routeKeyOnly(router, 'delete', '/:id', deleteStudent);
+    util.routeKeyOnly(router, "delete", "/:id", deleteStudent);
 
-    util.routeKeyOnly(router, 'post', '/:id/suggest', createStudentSuggestion);
+    util.routeKeyOnly(router, "post", "/:id/suggest", createStudentSuggestion);
 
     util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
-    util.routeKeyOnly(router, "post", "/:id/confirm", createStudentConfirmation);
+    util.routeKeyOnly(
+        router,
+        "post",
+        "/:id/confirm",
+        createStudentConfirmation
+    );
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/:id", "/:id/suggest", "/:id/confirm", "/filter" ]);
+    util.addAllInvalidVerbs(router, [
+        "/",
+        "/all",
+        "/:id",
+        "/:id/suggest",
+        "/:id/confirm",
+        "/filter",
+    ]);
 
     return router;
 }
