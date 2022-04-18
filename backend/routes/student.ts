@@ -244,11 +244,11 @@ async function getStudentSuggestions(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const year =
+    const osoc =
         checkedSessionKey.data.year == undefined
             ? await ormOs.getLatestOsoc()
             : checkedSessionKey.data.year;
-    if (year == null) {
+    if (osoc == null) {
         return Promise.resolve({
             data: [],
             sessionkey: checkedSessionKey.data.sessionkey,
@@ -256,7 +256,7 @@ async function getStudentSuggestions(
     }
     const suggestionsTotal = (
         await ormJo.getStudentEvaluationsTotal(student.student_id)
-    ).filter((suggestion) => suggestion.osoc.year === year);
+    ).filter((suggestion) => suggestion.osoc.year === osoc.year);
 
     const suggestionsInfo = [];
     for (const suggestion of suggestionsTotal) {
