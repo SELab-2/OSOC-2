@@ -1,26 +1,31 @@
-import {CreatePerson, UpdatePerson} from "../../orm_functions/orm_types";
-import {createPerson, getAllPersons,
-    searchPersonByName, searchPersonByLogin, updatePerson, deletePersonById} 
-    from "../../orm_functions/person";
+import { CreatePerson, UpdatePerson } from "../../orm_functions/orm_types";
+import {
+    createPerson,
+    getAllPersons,
+    searchPersonByName,
+    searchPersonByLogin,
+    updatePerson,
+    deletePersonById,
+} from "../../orm_functions/person";
 
-const person4 : CreatePerson = {
+const person4: CreatePerson = {
     email: "test@email.be",
     firstname: "first_name",
     lastname: "last_name",
-}
+};
 
 const person5: CreatePerson = {
     github: "testhub.com",
     firstname: "person5",
     lastname: "second name",
-}
+};
 
-it('should create 1 new person where github is null', async () => {
+it("should create 1 new person where github is null", async () => {
     const person0: CreatePerson = {
         email: "test@email.be",
         firstname: "first_name",
         lastname: "last_name",
-    }
+    };
 
     const created_person = await createPerson(person0);
     expect(created_person).toHaveProperty("github", null);
@@ -29,12 +34,12 @@ it('should create 1 new person where github is null', async () => {
     expect(created_person).toHaveProperty("email", person0.email);
 });
 
-it('should create 1 new person where email is null', async () => {
+it("should create 1 new person where email is null", async () => {
     const person1: CreatePerson = {
         github: "testhub.com",
         firstname: "person5",
         lastname: "second name",
-    }
+    };
 
     const created_person = await createPerson(person1);
     expect(created_person).toHaveProperty("github", person1.github);
@@ -43,7 +48,7 @@ it('should create 1 new person where email is null', async () => {
     expect(created_person).toHaveProperty("email", null);
 });
 
-it('should find all the persons in the db, 2 in total', async () => {
+it("should find all the persons in the db, 2 in total", async () => {
     const searched_persons = await getAllPersons();
     expect(searched_persons[5]).toHaveProperty("github", null);
     expect(searched_persons[5]).toHaveProperty("firstname", person4.firstname);
@@ -65,7 +70,7 @@ it('should find all the persons in the db, 2 in total', async () => {
     expect(searched_person).toHaveProperty("email", person4.email);
 });*/
 
-it('should find person 1 in the db, by searching for its firstname', async () => {
+it("should find person 1 in the db, by searching for its firstname", async () => {
     const searched_person = await searchPersonByName(person4.firstname);
     expect(searched_person[0]).toHaveProperty("github", null);
     expect(searched_person[0]).toHaveProperty("firstname", person4.firstname);
@@ -73,7 +78,7 @@ it('should find person 1 in the db, by searching for its firstname', async () =>
     expect(searched_person[0]).toHaveProperty("email", person4.email);
 });
 
-it('should find person 2 in the db, by searching for its lastname', async () => {
+it("should find person 2 in the db, by searching for its lastname", async () => {
     const searched_person4 = await searchPersonByName(person5.lastname);
     expect(searched_person4[0]).toHaveProperty("github", person5.github);
     expect(searched_person4[0]).toHaveProperty("firstname", person5.firstname);
@@ -81,34 +86,46 @@ it('should find person 2 in the db, by searching for its lastname', async () => 
     expect(searched_person4[0]).toHaveProperty("email", null);
 });
 
-it('should find all the persons in the db with given email, 1 in total', async () => {
+it("should find all the persons in the db with given email, 1 in total", async () => {
     if (person4.email != undefined) {
         const searched_persons = await searchPersonByLogin(person4.email);
         expect(searched_persons[0]).toHaveProperty("github", null);
-        expect(searched_persons[0]).toHaveProperty("firstname", person4.firstname);
-        expect(searched_persons[0]).toHaveProperty("lastname", person4.lastname);
+        expect(searched_persons[0]).toHaveProperty(
+            "firstname",
+            person4.firstname
+        );
+        expect(searched_persons[0]).toHaveProperty(
+            "lastname",
+            person4.lastname
+        );
         expect(searched_persons[0]).toHaveProperty("email", person4.email);
     }
 });
 
-it('should find all the persons in the db with given github, 1 in total', async () => {
+it("should find all the persons in the db with given github, 1 in total", async () => {
     if (person5.github) {
         const searched_persons = await searchPersonByLogin(person5.github);
         expect(searched_persons[0]).toHaveProperty("github", person5.github);
-        expect(searched_persons[0]).toHaveProperty("firstname", person5.firstname);
-        expect(searched_persons[0]).toHaveProperty("lastname", person5.lastname);
+        expect(searched_persons[0]).toHaveProperty(
+            "firstname",
+            person5.firstname
+        );
+        expect(searched_persons[0]).toHaveProperty(
+            "lastname",
+            person5.lastname
+        );
         expect(searched_persons[0]).toHaveProperty("email", null);
     }
 });
 
-it('should update person based upon personid', async () => {
+it("should update person based upon personid", async () => {
     const searched_person3 = await searchPersonByName(person4.firstname);
     const personUpdate: UpdatePerson = {
         personId: searched_person3[0].person_id,
         email: "new@email.be",
         firstname: "new_name",
         lastname: "different_name",
-    }
+    };
     const updated_person = await updatePerson(personUpdate);
     expect(updated_person).toHaveProperty("github", null);
     expect(updated_person).toHaveProperty("firstname", personUpdate.firstname);
@@ -116,12 +133,20 @@ it('should update person based upon personid', async () => {
     expect(updated_person).toHaveProperty("email", personUpdate.email);
 });
 
-it('should delete the person based upon personid', async () => {
+it("should delete the person based upon personid", async () => {
     const searched_person5 = await searchPersonByName(person5.lastname);
-    const deleted_person = await deletePersonById(searched_person5[0].person_id);
-    expect(deleted_person).toHaveProperty("person_id", searched_person5[0].person_id);
+    const deleted_person = await deletePersonById(
+        searched_person5[0].person_id
+    );
+    expect(deleted_person).toHaveProperty(
+        "person_id",
+        searched_person5[0].person_id
+    );
     expect(deleted_person).toHaveProperty("github", deleted_person.github);
-    expect(deleted_person).toHaveProperty("firstname", deleted_person.firstname);
+    expect(deleted_person).toHaveProperty(
+        "firstname",
+        deleted_person.firstname
+    );
     expect(deleted_person).toHaveProperty("lastname", deleted_person.lastname);
     expect(deleted_person).toHaveProperty("email", deleted_person.email);
 });
