@@ -3,11 +3,11 @@ import styles from "./Labels.module.scss";
 
 // Maps a number to a color
 const colors = [
-  styles.blue,
-  styles.green,
-  styles.yellow,
-  styles.red,
-  styles.other,
+    styles.blue,
+    styles.green,
+    styles.yellow,
+    styles.red,
+    styles.other,
 ];
 
 /**
@@ -16,13 +16,13 @@ const colors = [
  * @param label
  */
 const getLabelColor = (label: string) => {
-  let color = 0;
-  for (let i = 0; i < label.length; i++) {
-    color += label.charCodeAt(i) % colors.length;
-  }
-  color %= colors.length;
+    let color = 0;
+    for (let i = 0; i < label.length; i++) {
+        color += label.charCodeAt(i) % colors.length;
+    }
+    color %= colors.length;
 
-  return colors[color];
+    return colors[color];
 };
 
 // Maps a skill to a color
@@ -33,11 +33,11 @@ languageToStyle.set("French", styles.yellow);
 languageToStyle.set("German", styles.red);
 
 const getLanguageStyle = (language: string) => {
-  if (languageToStyle.has(language)) {
-    return languageToStyle.get(language);
-  }
+    if (languageToStyle.has(language)) {
+        return languageToStyle.get(language);
+    }
 
-  return getLabelColor(language);
+    return getLabelColor(language);
 };
 
 /**
@@ -46,11 +46,11 @@ const getLanguageStyle = (language: string) => {
  * @constructor
  */
 export const LanguageAndSkill: React.FC<{ language: string }> = ({
-  language,
+    language,
 }) => {
-  return (
-    <div className={`${styles.label} ${getLanguageStyle(language)}`}>
-      {language}
-    </div>
-  );
+    return (
+        <div className={`${styles.label} ${getLanguageStyle(language)}`}>
+            {language}
+        </div>
+    );
 };

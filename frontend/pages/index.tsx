@@ -9,21 +9,21 @@ import { useRouter } from "next/router";
  * @constructor
  */
 const Home: NextPage = () => {
-  const { getSessionKey } = useContext(SessionContext);
-  const router = useRouter();
+    const { getSessionKey } = useContext(SessionContext);
+    const router = useRouter();
 
-  useEffect(() => {
-    if (getSessionKey) {
-      getSessionKey().then((sessionKey) => {
-        if (sessionKey !== "") {
-          router.push("/students").then();
+    useEffect(() => {
+        if (getSessionKey) {
+            getSessionKey().then((sessionKey) => {
+                if (sessionKey !== "") {
+                    router.push("/students").then();
+                }
+            });
         }
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  return <></>;
+    return <></>;
 };
 
 export default Home;

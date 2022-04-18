@@ -1,7 +1,7 @@
 import prisma from "../prisma/prisma";
 import {
-  CreateJobApplicationSkill,
-  UpdateJobApplicationSkill,
+    CreateJobApplicationSkill,
+    UpdateJobApplicationSkill,
 } from "./orm_types";
 
 /**
@@ -9,18 +9,18 @@ import {
  * @param jobApplicationSkill: job application skill object with the needed information
  */
 export async function createJobApplicationSkill(
-  jobApplicationSkill: CreateJobApplicationSkill
+    jobApplicationSkill: CreateJobApplicationSkill
 ) {
-  return prisma.job_application_skill.create({
-    data: {
-      job_application_id: jobApplicationSkill.jobApplicationId,
-      skill: jobApplicationSkill.skill,
-      language_id: jobApplicationSkill.languageId,
-      level: jobApplicationSkill.level,
-      is_preferred: jobApplicationSkill.isPreferred,
-      is_best: jobApplicationSkill.isBest,
-    },
-  });
+    return prisma.job_application_skill.create({
+        data: {
+            job_application_id: jobApplicationSkill.jobApplicationId,
+            skill: jobApplicationSkill.skill,
+            language_id: jobApplicationSkill.languageId,
+            level: jobApplicationSkill.level,
+            is_preferred: jobApplicationSkill.isPreferred,
+            is_best: jobApplicationSkill.isBest,
+        },
+    });
 }
 
 /**
@@ -28,7 +28,7 @@ export async function createJobApplicationSkill(
  * @returns a list of all the jobapplicationskill objects in the database
  */
 export async function getAllJobApplicationSkill() {
-  return await prisma.job_application_skill.findMany();
+    return await prisma.job_application_skill.findMany();
 }
 
 /**
@@ -37,13 +37,13 @@ export async function getAllJobApplicationSkill() {
  * @returns: object with all the info about this job_application_skill
  */
 export async function getAllJobApplicationSkillByJobApplication(
-  jobApplicationId: number
+    jobApplicationId: number
 ) {
-  return await prisma.job_application_skill.findMany({
-    where: {
-      job_application_id: jobApplicationId,
-    },
-  });
+    return await prisma.job_application_skill.findMany({
+        where: {
+            job_application_id: jobApplicationId,
+        },
+    });
 }
 
 /**
@@ -52,11 +52,11 @@ export async function getAllJobApplicationSkillByJobApplication(
  * @returns: object with all the info about this job_application_skill
  */
 export async function getJobApplicationSkill(jobApplicationSkillId: number) {
-  return await prisma.job_application_skill.findUnique({
-    where: {
-      job_application_skill_id: jobApplicationSkillId,
-    },
-  });
+    return await prisma.job_application_skill.findUnique({
+        where: {
+            job_application_skill_id: jobApplicationSkillId,
+        },
+    });
 }
 
 /**
@@ -65,21 +65,21 @@ export async function getJobApplicationSkill(jobApplicationSkillId: number) {
  * @returns the updated entry in the database
  */
 export async function updateJobApplicationSkill(
-  jobApplicationSkill: UpdateJobApplicationSkill
+    jobApplicationSkill: UpdateJobApplicationSkill
 ) {
-  return await prisma.job_application_skill.update({
-    where: {
-      job_application_skill_id: jobApplicationSkill.JobApplicationSkillId,
-    },
-    data: {
-      job_application_id: jobApplicationSkill.JobApplicationId,
-      skill: jobApplicationSkill.skill,
-      language_id: jobApplicationSkill.languageId,
-      level: jobApplicationSkill.level,
-      is_preferred: jobApplicationSkill.isPreferred,
-      is_best: jobApplicationSkill.is_best,
-    },
-  });
+    return await prisma.job_application_skill.update({
+        where: {
+            job_application_skill_id: jobApplicationSkill.JobApplicationSkillId,
+        },
+        data: {
+            job_application_id: jobApplicationSkill.JobApplicationId,
+            skill: jobApplicationSkill.skill,
+            language_id: jobApplicationSkill.languageId,
+            level: jobApplicationSkill.level,
+            is_preferred: jobApplicationSkill.isPreferred,
+            is_best: jobApplicationSkill.is_best,
+        },
+    });
 }
 
 /**
@@ -88,13 +88,13 @@ export async function updateJobApplicationSkill(
  * @returns the job application, this info can be used to further remove the job application
  */
 export async function deleteJobApplicationSkill(jobApplicationSkillId: number) {
-  return await prisma.job_application_skill.delete({
-    where: {
-      job_application_skill_id: jobApplicationSkillId,
-    },
-    include: {
-      // returns the job application, this info can be used to further remove the job application
-      job_application: true,
-    },
-  });
+    return await prisma.job_application_skill.delete({
+        where: {
+            job_application_skill_id: jobApplicationSkillId,
+        },
+        include: {
+            // returns the job application, this info can be used to further remove the job application
+            job_application: true,
+        },
+    });
 }

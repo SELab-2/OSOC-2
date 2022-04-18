@@ -6,11 +6,11 @@ import { UpdateOsoc } from "./orm_types";
  * @param year: create osoc edition, only needs year
  */
 export async function createOsoc(year: number) {
-  return await prisma.osoc.create({
-    data: {
-      year: year,
-    },
-  });
+    return await prisma.osoc.create({
+        data: {
+            year: year,
+        },
+    });
 }
 
 /**
@@ -18,7 +18,7 @@ export async function createOsoc(year: number) {
  * @returns a list of all the osoc objects in the database
  */
 export async function getAllOsoc() {
-  return prisma.osoc.findMany();
+    return prisma.osoc.findMany();
 }
 
 /**
@@ -26,11 +26,11 @@ export async function getAllOsoc() {
  * @returns the latest the osoc edition in the database
  */
 export async function getLatestOsoc() {
-  return prisma.osoc.findFirst({
-    orderBy: {
-      year: "desc",
-    },
-  });
+    return prisma.osoc.findFirst({
+        orderBy: {
+            year: "desc",
+        },
+    });
 }
 
 /**
@@ -39,11 +39,11 @@ export async function getLatestOsoc() {
  * @returns: osoc object
  */
 export async function getOsocByYear(year: number) {
-  return prisma.osoc.findUnique({
-    where: {
-      year: year,
-    },
-  });
+    return prisma.osoc.findUnique({
+        where: {
+            year: year,
+        },
+    });
 }
 
 /**
@@ -52,13 +52,13 @@ export async function getOsocByYear(year: number) {
  * @returns: all the osoc objects that took place before the supplied year
  */
 export async function getOsocBeforeYear(year: number) {
-  return prisma.osoc.findMany({
-    where: {
-      year: {
-        lt: year,
-      },
-    },
-  });
+    return prisma.osoc.findMany({
+        where: {
+            year: {
+                lt: year,
+            },
+        },
+    });
 }
 
 /**
@@ -67,13 +67,13 @@ export async function getOsocBeforeYear(year: number) {
  * @returns: all the osoc objects that took place after the supplied year
  */
 export async function getOsocAfterYear(year: number) {
-  return prisma.osoc.findMany({
-    where: {
-      year: {
-        gt: year,
-      },
-    },
-  });
+    return prisma.osoc.findMany({
+        where: {
+            year: {
+                gt: year,
+            },
+        },
+    });
 }
 
 /**
@@ -82,14 +82,14 @@ export async function getOsocAfterYear(year: number) {
  * @returns the updated entry in the database
  */
 export async function updateOsoc(osoc: UpdateOsoc) {
-  return await prisma.osoc.update({
-    where: {
-      osoc_id: osoc.osocId,
-    },
-    data: {
-      year: osoc.year,
-    },
-  });
+    return await prisma.osoc.update({
+        where: {
+            osoc_id: osoc.osocId,
+        },
+        data: {
+            year: osoc.year,
+        },
+    });
 }
 
 /**
@@ -98,11 +98,11 @@ export async function updateOsoc(osoc: UpdateOsoc) {
  * @returns the deleted osoc record
  */
 export async function deleteOsoc(osocId: number) {
-  return await prisma.osoc.delete({
-    where: {
-      osoc_id: osocId,
-    },
-  });
+    return await prisma.osoc.delete({
+        where: {
+            osoc_id: osocId,
+        },
+    });
 }
 
 /**
@@ -111,20 +111,20 @@ export async function deleteOsoc(osocId: number) {
  * @returns the deleted osoc record
  */
 export async function deleteOsocByYear(year: number) {
-  return await prisma.osoc.delete({
-    where: {
-      year: year,
-    },
-  });
+    return await prisma.osoc.delete({
+        where: {
+            year: year,
+        },
+    });
 }
 
 /**
  * @returns the newest Osoc edition
  */
 export async function getNewestOsoc() {
-  return await prisma.osoc.findFirst({
-    orderBy: {
-      year: "desc",
-    },
-  });
+    return await prisma.osoc.findFirst({
+        orderBy: {
+            year: "desc",
+        },
+    });
 }

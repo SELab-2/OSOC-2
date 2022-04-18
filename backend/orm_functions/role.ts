@@ -6,12 +6,12 @@ import { UpdateRole } from "./orm_types";
  * @param name: the name of the role we want to add to the database
  */
 export async function createRole(name: string) {
-  const result = await prisma.role.create({
-    data: {
-      name: name,
-    },
-  });
-  return result;
+    const result = await prisma.role.create({
+        data: {
+            name: name,
+        },
+    });
+    return result;
 }
 
 /**
@@ -19,7 +19,7 @@ export async function createRole(name: string) {
  * @returns a list of all the role objects in the database
  */
 export async function getAllRoles() {
-  return await prisma.role.findMany();
+    return await prisma.role.findMany();
 }
 
 /**
@@ -28,11 +28,11 @@ export async function getAllRoles() {
  * @returns: object with the name of the role
  */
 export async function getRole(roleId: number) {
-  return await prisma.role.findUnique({
-    where: {
-      role_id: roleId,
-    },
-  });
+    return await prisma.role.findUnique({
+        where: {
+            role_id: roleId,
+        },
+    });
 }
 
 /**
@@ -41,11 +41,11 @@ export async function getRole(roleId: number) {
  * @returns: all the role objects with a matching name
  */
 export async function getRolesByName(name: string) {
-  return await prisma.role.findUnique({
-    where: {
-      name: name,
-    },
-  });
+    return await prisma.role.findUnique({
+        where: {
+            name: name,
+        },
+    });
 }
 
 /**
@@ -55,26 +55,26 @@ export async function getRolesByName(name: string) {
  * @returns the project_role or an error from the database
  */
 export async function getProjectRoleWithRoleName(
-  name: string,
-  projectId: number
+    name: string,
+    projectId: number
 ) {
-  const id = await prisma.role.findUnique({
-    where: {
-      name: name,
-    },
-    select: {
-      role_id: true,
-    },
-  });
-  if (id) {
-    return await prisma.project_role.findFirst({
-      where: {
-        role_id: id.role_id,
-        project_id: projectId,
-      },
+    const id = await prisma.role.findUnique({
+        where: {
+            name: name,
+        },
+        select: {
+            role_id: true,
+        },
     });
-  }
-  return id;
+    if (id) {
+        return await prisma.project_role.findFirst({
+            where: {
+                role_id: id.role_id,
+                project_id: projectId,
+            },
+        });
+    }
+    return id;
 }
 
 /**
@@ -83,14 +83,14 @@ export async function getProjectRoleWithRoleName(
  * @returns the updated entry in the database
  */
 export async function updateRole(role: UpdateRole) {
-  return await prisma.role.update({
-    where: {
-      role_id: role.roleId,
-    },
-    data: {
-      name: role.name,
-    },
-  });
+    return await prisma.role.update({
+        where: {
+            role_id: role.roleId,
+        },
+        data: {
+            name: role.name,
+        },
+    });
 }
 
 /**
@@ -99,11 +99,11 @@ export async function updateRole(role: UpdateRole) {
  * @returns a promise with the deleted record inside
  */
 export async function deleteRole(roleId: number) {
-  return await prisma.role.delete({
-    where: {
-      role_id: roleId,
-    },
-  });
+    return await prisma.role.delete({
+        where: {
+            role_id: roleId,
+        },
+    });
 }
 
 /**
@@ -112,9 +112,9 @@ export async function deleteRole(roleId: number) {
  * @returns a promise with the deleted record inside
  */
 export async function deleteRoleByName(name: string) {
-  return await prisma.role.delete({
-    where: {
-      name: name,
-    },
-  });
+    return await prisma.role.delete({
+        where: {
+            name: name,
+        },
+    });
 }

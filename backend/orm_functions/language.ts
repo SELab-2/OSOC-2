@@ -6,11 +6,11 @@ import { UpdateLanguage } from "./orm_types";
  * @param name: the name of the language we want to add to the database
  */
 export async function createLanguage(name: string) {
-  return await prisma.language.create({
-    data: {
-      name: name,
-    },
-  });
+    return await prisma.language.create({
+        data: {
+            name: name,
+        },
+    });
 }
 
 /**
@@ -18,7 +18,7 @@ export async function createLanguage(name: string) {
  * @returns a list of all the language objects in the database
  */
 export async function getAllLanguages() {
-  return await prisma.language.findMany();
+    return await prisma.language.findMany();
 }
 
 /**
@@ -27,11 +27,11 @@ export async function getAllLanguages() {
  * @returns: object with the name of the language
  */
 export async function getLanguage(languageId: number) {
-  return await prisma.language.findUnique({
-    where: {
-      language_id: languageId,
-    },
-  });
+    return await prisma.language.findUnique({
+        where: {
+            language_id: languageId,
+        },
+    });
 }
 
 /**
@@ -40,11 +40,11 @@ export async function getLanguage(languageId: number) {
  * @returns: the language object with a matching name
  */
 export async function getLanguageByName(name: string) {
-  return await prisma.language.findUnique({
-    where: {
-      name: name,
-    },
-  });
+    return await prisma.language.findUnique({
+        where: {
+            name: name,
+        },
+    });
 }
 
 /**
@@ -53,14 +53,14 @@ export async function getLanguageByName(name: string) {
  * @returns the updated entry in the database
  */
 export async function updateLanguage(language: UpdateLanguage) {
-  return await prisma.language.update({
-    where: {
-      language_id: language.languageId,
-    },
-    data: {
-      name: language.name,
-    },
-  });
+    return await prisma.language.update({
+        where: {
+            language_id: language.languageId,
+        },
+        data: {
+            name: language.name,
+        },
+    });
 }
 
 /**
@@ -69,11 +69,11 @@ export async function updateLanguage(language: UpdateLanguage) {
  * @returns the deleted record in the database
  */
 export async function deleteLanguage(languageId: number) {
-  return await prisma.language.delete({
-    where: {
-      language_id: languageId,
-    },
-  });
+    return await prisma.language.delete({
+        where: {
+            language_id: languageId,
+        },
+    });
 }
 
 /**
@@ -82,9 +82,9 @@ export async function deleteLanguage(languageId: number) {
  * @returns the deleted record in the database
  */
 export async function deleteLanguageByName(name: string) {
-  return await prisma.language.delete({
-    where: {
-      name: name,
-    },
-  });
+    return await prisma.language.delete({
+        where: {
+            name: name,
+        },
+    });
 }

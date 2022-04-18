@@ -14,7 +14,7 @@ const port: number = config.port;
 // that is not easy to work around
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config({
-  path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
+    path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
 });
 
 app.use(body.urlencoded({ extended: true }));
@@ -22,14 +22,14 @@ app.use(express.json());
 app.use(cors());
 app.use((req, _, next) => util.logRequest(req, next));
 app.use((req, _, next) => {
-  util.queryToBody(req);
-  next();
+    util.queryToBody(req);
+    next();
 });
 ep.attach(app);
 config.global.homes.forEach((home) => util.addInvalidVerbs(app, home + "/"));
 
 // Server setup
 app.listen(port, () => {
-  console.log(`TypeScript with Express
+    console.log(`TypeScript with Express
          http://localhost:${port}/`);
 });

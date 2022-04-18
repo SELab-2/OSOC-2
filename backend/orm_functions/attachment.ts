@@ -10,17 +10,17 @@ import prisma from "../prisma/prisma";
  * @returns the created attachment
  */
 export async function createAttachment(
-  jobApplicationId: number,
-  data: string[],
-  type: type_enum[]
+    jobApplicationId: number,
+    data: string[],
+    type: type_enum[]
 ) {
-  return await prisma.attachment.create({
-    data: {
-      job_application_id: jobApplicationId,
-      data: data,
-      type: type,
-    },
-  });
+    return await prisma.attachment.create({
+        data: {
+            job_application_id: jobApplicationId,
+            data: data,
+            type: type,
+        },
+    });
 }
 
 /**
@@ -29,11 +29,11 @@ export async function createAttachment(
  * @returns the removed entry in the database
  */
 export async function deleteAttachment(attachmentId: number) {
-  return await prisma.attachment.delete({
-    where: {
-      attachment_id: attachmentId,
-    },
-  });
+    return await prisma.attachment.delete({
+        where: {
+            attachment_id: attachmentId,
+        },
+    });
 }
 
 /**
@@ -43,13 +43,13 @@ export async function deleteAttachment(attachmentId: number) {
  * @returns the number of removed attachments {count: number}
  */
 export async function deleteAllAttachmentsForApplication(
-  jobApplicationId: number
+    jobApplicationId: number
 ) {
-  return await prisma.attachment.deleteMany({
-    where: {
-      job_application_id: jobApplicationId,
-    },
-  });
+    return await prisma.attachment.deleteMany({
+        where: {
+            job_application_id: jobApplicationId,
+        },
+    });
 }
 
 /**
@@ -58,9 +58,9 @@ export async function deleteAllAttachmentsForApplication(
  * @returns promise with the found attachment or null
  */
 export async function getAttachmentById(attachmentId: number) {
-  return await prisma.attachment.findUnique({
-    where: {
-      attachment_id: attachmentId,
-    },
-  });
+    return await prisma.attachment.findUnique({
+        where: {
+            attachment_id: attachmentId,
+        },
+    });
 }

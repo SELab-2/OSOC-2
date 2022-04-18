@@ -7,14 +7,14 @@ import { CreateProjectRole, UpdateProjectRole } from "./orm_types";
  * @param projectRole: project role object with the needed information
  */
 export async function createProjectRole(projectRole: CreateProjectRole) {
-  const result = await prisma.project_role.create({
-    data: {
-      project_id: projectRole.projectId,
-      role_id: projectRole.roleId,
-      positions: projectRole.positions,
-    },
-  });
-  return result;
+    const result = await prisma.project_role.create({
+        data: {
+            project_id: projectRole.projectId,
+            role_id: projectRole.roleId,
+            positions: projectRole.positions,
+        },
+    });
+    return result;
 }
 
 /**
@@ -24,10 +24,10 @@ export async function createProjectRole(projectRole: CreateProjectRole) {
  * @returns: all the project role objects for that project
  */
 export async function getProjectRolesByProject(projectId: number) {
-  const result = prisma.project_role.findMany({
-    where: { project_id: projectId },
-  });
-  return result;
+    const result = prisma.project_role.findMany({
+        where: { project_id: projectId },
+    });
+    return result;
 }
 
 /**
@@ -39,15 +39,18 @@ export async function getProjectRolesByProject(projectId: number) {
  * @returns: returns the number of positions for the projectrole of that project
  */
 export async function getNumberOfRolesByProjectAndRole(
-  projectId: number,
-  projectRoleId: number
+    projectId: number,
+    projectRoleId: number
 ) {
-  const result = prisma.project_role.findMany({
-    where: {
-      AND: [{ project_id: projectId }, { project_role_id: projectRoleId }],
-    },
-  });
-  return result;
+    const result = prisma.project_role.findMany({
+        where: {
+            AND: [
+                { project_id: projectId },
+                { project_role_id: projectRoleId },
+            ],
+        },
+    });
+    return result;
 }
 
 // Get all Project Role Names for a certain Project
@@ -59,11 +62,11 @@ export async function getNumberOfRolesByProjectAndRole(
  * for that project
  */
 export async function getProjectRoleNamesByProject(projectId: number) {
-  const result = prisma.project_role.findMany({
-    where: { project_id: projectId },
-    include: { role: true },
-  });
-  return result;
+    const result = prisma.project_role.findMany({
+        where: { project_id: projectId },
+        include: { role: true },
+    });
+    return result;
 }
 
 /**
@@ -73,11 +76,11 @@ export async function getProjectRoleNamesByProject(projectId: number) {
  * @returns the updated entry in the database
  */
 export async function updateProjectRole(projectRole: UpdateProjectRole) {
-  const result = await prisma.project_role.update({
-    where: { project_role_id: projectRole.projectRoleId },
-    data: { positions: projectRole.positions },
-  });
-  return result;
+    const result = await prisma.project_role.update({
+        where: { project_role_id: projectRole.projectRoleId },
+        data: { positions: projectRole.positions },
+    });
+    return result;
 }
 
 /**
@@ -87,10 +90,10 @@ export async function updateProjectRole(projectRole: UpdateProjectRole) {
  * @returns TODO: what does this return?
  */
 export async function deleteProjectRole(projectRoleId: number) {
-  const result = await prisma.project_role.delete({
-    where: { project_role_id: projectRoleId },
-  });
-  return result;
+    const result = await prisma.project_role.delete({
+        where: { project_role_id: projectRoleId },
+    });
+    return result;
 }
 
 /**
@@ -101,26 +104,26 @@ export async function deleteProjectRole(projectRoleId: number) {
  *     found in db)
  */
 export async function getNumberOfFreePositions(projectRoleId: number) {
-  const result = await prisma.project_role.findUnique({
-    where: { project_role_id: projectRoleId },
-    select: { positions: true, contract: true },
-  });
+    const result = await prisma.project_role.findUnique({
+        where: { project_role_id: projectRoleId },
+        select: { positions: true, contract: true },
+    });
 
-  if (result) {
-    return result.positions - result.contract.length;
-  }
-  return result;
+    if (result) {
+        return result.positions - result.contract.length;
+    }
+    return result;
 }
 
 export async function getProjectRoleById(projectRoleId: number) {
-  const result = await prisma.project_role.findUnique({
-    where: { project_role_id: projectRoleId },
-    select: {
-      project_role_id: true,
-      project_id: true,
-      role_id: true,
-      role: true,
-    },
-  });
-  return result;
+    const result = await prisma.project_role.findUnique({
+        where: { project_role_id: projectRoleId },
+        select: {
+            project_role_id: true,
+            project_id: true,
+            role_id: true,
+            role: true,
+        },
+    });
+    return result;
 }

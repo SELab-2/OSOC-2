@@ -18,31 +18,31 @@ import { account_status_enum } from "@prisma/client";
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listUsers(req: express.Request): Promise<Responses.UserList> {
-  const parsedRequest = await rq.parseUserAllRequest(req);
-  const checkedSessionKey = await util
-    .checkSessionKey(parsedRequest)
-    .catch((res) => res);
-  if (checkedSessionKey.data == undefined) {
-    return Promise.reject(errors.cookInvalidID);
-  }
-  const loginUsers = await ormL.getAllLoginUsers();
+    const parsedRequest = await rq.parseUserAllRequest(req);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID);
+    }
+    const loginUsers = await ormL.getAllLoginUsers();
 
-  loginUsers.map((val) => ({
-    person_data: {
-      id: val.person.person_id,
-      name: val.person.firstname,
-      email: val.person.email,
-      github: val.person.github,
-    },
-    coach: val.is_coach,
-    admin: val.is_admin,
-    activated: val.account_status as string,
-  }));
+    loginUsers.map((val) => ({
+        person_data: {
+            id: val.person.person_id,
+            name: val.person.firstname,
+            email: val.person.email,
+            github: val.person.github,
+        },
+        coach: val.is_coach,
+        admin: val.is_admin,
+        activated: val.account_status as string,
+    }));
 
-  return Promise.resolve({
-    data: loginUsers,
-    sessionkey: checkedSessionKey.data.sessionkey,
-  });
+    return Promise.resolve({
+        data: loginUsers,
+        sessionkey: checkedSessionKey.data.sessionkey,
+    });
 }
 
 /**
@@ -52,74 +52,76 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createUserRequest(
-  req: express.Request
+    req: express.Request
 ): Promise<InternalTypes.IdOnly> {
-  return rq.parseRequestUserRequest(req).then(async (parsed) => {
-    if (parsed.pass == undefined) {
-      console.log(" -> WARNING user request without password");
-      return Promise.reject(util.errors.cookArgumentError());
-    }
-    return ormP
-      .createPerson({
-        firstname: parsed.firstName,
-        lastname: parsed.lastName,
-        email: validator.default.normalizeEmail(parsed.email).toString(),
-      })
-      .then((person) => {
-        console.log("Created a person: " + person);
-        return ormLU.createLoginUser({
-          personId: person.person_id,
-          password: parsed.pass,
-          isAdmin: false,
-          isCoach: true,
-          accountStatus: "PENDING",
-        });
-      })
-      .then((user) => {
-        console.log("Attached a login user: " + user);
-        return Promise.resolve({ id: user.login_user_id });
-      })
-      .catch((e) => {
-        if ("code" in e && e.code == "P2002") {
-          return Promise.reject({
-            http: 400,
-            reason: "Can't register the same email address twice.",
-          });
+    return rq.parseRequestUserRequest(req).then(async (parsed) => {
+        if (parsed.pass == undefined) {
+            console.log(" -> WARNING user request without password");
+            return Promise.reject(util.errors.cookArgumentError());
         }
-        return Promise.reject(e);
-      });
-  });
+        return ormP
+            .createPerson({
+                firstname: parsed.firstName,
+                lastname: parsed.lastName,
+                email: validator.default
+                    .normalizeEmail(parsed.email)
+                    .toString(),
+            })
+            .then((person) => {
+                console.log("Created a person: " + person);
+                return ormLU.createLoginUser({
+                    personId: person.person_id,
+                    password: parsed.pass,
+                    isAdmin: false,
+                    isCoach: true,
+                    accountStatus: "PENDING",
+                });
+            })
+            .then((user) => {
+                console.log("Attached a login user: " + user);
+                return Promise.resolve({ id: user.login_user_id });
+            })
+            .catch((e) => {
+                if ("code" in e && e.code == "P2002") {
+                    return Promise.reject({
+                        http: 400,
+                        reason: "Can't register the same email address twice.",
+                    });
+                }
+                return Promise.reject(e);
+            });
+    });
 }
 
 async function setAccountStatus(
-  person_id: number,
-  stat: account_status_enum,
-  key: string,
-  is_admin: boolean,
-  is_coach: boolean
+    person_id: number,
+    stat: account_status_enum,
+    key: string,
+    is_admin: boolean,
+    is_coach: boolean
 ): Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return ormLU
-    .searchLoginUserByPerson(person_id)
-    .then((obj) =>
-      obj == null
-        ? Promise.reject(util.errors.cookInvalidID())
-        : ormLU.updateLoginUser({
-            loginUserId: obj.login_user_id,
-            isAdmin: is_admin,
-            isCoach: is_coach,
-            accountStatus: stat,
-          })
-    )
-    .then((res) => {
-      console.log(res.person.firstname);
-      return Promise.resolve({
-        sessionkey: key,
-        data: {
-          id: res.person_id,
-          name: res.person.firstname + " " + res.person.lastname,
-        },
-      });
-    });
+    return ormLU
+        .searchLoginUserByPerson(person_id)
+        .then((obj) =>
+            obj == null
+                ? Promise.reject(util.errors.cookInvalidID())
+                : ormLU.updateLoginUser({
+                      loginUserId: obj.login_user_id,
+                      isAdmin: is_admin,
+                      isCoach: is_coach,
+                      accountStatus: stat,
+                  })
+        )
+        .then((res) => {
+            console.log(res.person.firstname);
+            return Promise.resolve({
+                sessionkey: key,
+                data: {
+                    id: res.person_id,
+                    name: res.person.firstname + " " + res.person.lastname,
+                },
+            });
+        });
 }
 
 /**
@@ -129,20 +131,20 @@ async function setAccountStatus(
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createUserAcceptance(
-  req: express.Request
+    req: express.Request
 ): Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return rq
-    .parseAcceptNewUserRequest(req)
-    .then((parsed) => util.isAdmin(parsed))
-    .then(async (parsed) =>
-      setAccountStatus(
-        parsed.data.id,
-        "ACTIVATED",
-        parsed.data.sessionkey,
-        Boolean(parsed.data.is_admin),
-        Boolean(parsed.data.is_coach)
-      )
-    );
+    return rq
+        .parseAcceptNewUserRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) =>
+            setAccountStatus(
+                parsed.data.id,
+                "ACTIVATED",
+                parsed.data.sessionkey,
+                Boolean(parsed.data.is_admin),
+                Boolean(parsed.data.is_coach)
+            )
+        );
 }
 
 /**
@@ -152,18 +154,18 @@ async function createUserAcceptance(
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
-  return rq
-    .parseAcceptNewUserRequest(req)
-    .then((parsed) => util.isAdmin(parsed))
-    .then(async (parsed) =>
-      setAccountStatus(
-        parsed.data.id,
-        "DISABLED",
-        parsed.data.sessionkey,
-        Boolean(parsed.data.is_admin),
-        Boolean(parsed.data.is_coach)
-      )
-    );
+    return rq
+        .parseAcceptNewUserRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) =>
+            setAccountStatus(
+                parsed.data.id,
+                "DISABLED",
+                parsed.data.sessionkey,
+                Boolean(parsed.data.is_admin),
+                Boolean(parsed.data.is_coach)
+            )
+        );
 }
 
 /**
@@ -173,37 +175,37 @@ async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function filterUsers(req: express.Request): Promise<Responses.UserList> {
-  const parsedRequest = await rq.parseFilterUsersRequest(req);
-  const checkedSessionKey = await util
-    .checkSessionKey(parsedRequest)
-    .catch((res) => res);
-  if (checkedSessionKey.data == undefined) {
-    return Promise.reject(errors.cookInvalidID());
-  }
+    const parsedRequest = await rq.parseFilterUsersRequest(req);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
 
-  const users = await ormLU.filterLoginUsers(
-    checkedSessionKey.data.nameFilter,
-    checkedSessionKey.data.emailFilter,
-    checkedSessionKey.data.nameSort,
-    checkedSessionKey.data.emailSort,
-    checkedSessionKey.data.statusFilter,
-    checkedSessionKey.data.isCoachFilter,
-    checkedSessionKey.data.isAdminFilter
-  );
+    const users = await ormLU.filterLoginUsers(
+        checkedSessionKey.data.nameFilter,
+        checkedSessionKey.data.emailFilter,
+        checkedSessionKey.data.nameSort,
+        checkedSessionKey.data.emailSort,
+        checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.isCoachFilter,
+        checkedSessionKey.data.isAdminFilter
+    );
 
-  users.map((val) => ({
-    person_data: {
-      id: val.person.person_id,
-      name: val.person.firstname,
-      email: val.person.email,
-      github: val.person.github,
-    },
-    coach: val.is_coach,
-    admin: val.is_admin,
-    activated: val.account_status as string,
-  }));
+    users.map((val) => ({
+        person_data: {
+            id: val.person.person_id,
+            name: val.person.firstname,
+            email: val.person.email,
+            github: val.person.github,
+        },
+        coach: val.is_coach,
+        admin: val.is_admin,
+        activated: val.account_status as string,
+    }));
 
-  return Promise.resolve({ data: users, sessionkey: req.body.sessionkey });
+    return Promise.resolve({ data: users, sessionkey: req.body.sessionkey });
 }
 
 /**
@@ -212,26 +214,26 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
  * endpoints.
  */
 export function getRouter(): express.Router {
-  const router: express.Router = express.Router();
+    const router: express.Router = express.Router();
 
-  util.setupRedirect(router, "/user");
-  util.route(router, "get", "/filter", filterUsers);
-  util.route(router, "get", "/all", listUsers);
+    util.setupRedirect(router, "/user");
+    util.route(router, "get", "/filter", filterUsers);
+    util.route(router, "get", "/all", listUsers);
 
-  router.post("/request", (req, res) =>
-    util.respOrErrorNoReinject(res, createUserRequest(req))
-  );
+    router.post("/request", (req, res) =>
+        util.respOrErrorNoReinject(res, createUserRequest(req))
+    );
 
-  util.route(router, "post", "/request/:id", createUserAcceptance);
-  util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
+    util.route(router, "post", "/request/:id", createUserAcceptance);
+    util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
 
-  util.addAllInvalidVerbs(router, [
-    "/",
-    "/all",
-    "/request",
-    "/request/:id",
-    "/filter",
-  ]);
+    util.addAllInvalidVerbs(router, [
+        "/",
+        "/all",
+        "/request",
+        "/request/:id",
+        "/filter",
+    ]);
 
-  return router;
+    return router;
 }

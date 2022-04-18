@@ -1,11 +1,11 @@
 import prisma from "../prisma/prisma";
 
 import {
-  CreateLoginUser,
-  FilterBoolean,
-  FilterSort,
-  FilterString,
-  UpdateLoginUser,
+    CreateLoginUser,
+    FilterBoolean,
+    FilterSort,
+    FilterString,
+    UpdateLoginUser,
 } from "./orm_types";
 import { account_status_enum } from "@prisma/client";
 
@@ -14,16 +14,16 @@ import { account_status_enum } from "@prisma/client";
  * @param loginUser: login user object with the needed information
  */
 export async function createLoginUser(loginUser: CreateLoginUser) {
-  const result = await prisma.login_user.create({
-    data: {
-      person_id: loginUser.personId,
-      password: loginUser.password,
-      is_admin: loginUser.isAdmin,
-      is_coach: loginUser.isCoach,
-      account_status: loginUser.accountStatus,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.create({
+        data: {
+            person_id: loginUser.personId,
+            password: loginUser.password,
+            is_admin: loginUser.isAdmin,
+            is_coach: loginUser.isCoach,
+            account_status: loginUser.accountStatus,
+        },
+    });
+    return result;
 }
 
 /**
@@ -31,7 +31,7 @@ export async function createLoginUser(loginUser: CreateLoginUser) {
  * @returns a list of all the login user objects in the database
  */
 export async function getAllLoginUsers() {
-  return await prisma.login_user.findMany({ include: { person: true } });
+    return await prisma.login_user.findMany({ include: { person: true } });
 }
 
 /**
@@ -41,11 +41,11 @@ export async function getAllLoginUsers() {
  * @returns: password of the login user object
  */
 export async function getPasswordLoginUserByPerson(personId: number) {
-  const result = await prisma.login_user.findUnique({
-    where: { person_id: personId },
-    select: { password: true },
-  });
-  return result;
+    const result = await prisma.login_user.findUnique({
+        where: { person_id: personId },
+        select: { password: true },
+    });
+    return result;
 }
 
 /**
@@ -55,11 +55,11 @@ export async function getPasswordLoginUserByPerson(personId: number) {
  * @returns: password of the login user object
  */
 export async function getPasswordLoginUser(loginUserId: number) {
-  const result = await prisma.login_user.findUnique({
-    where: { login_user_id: loginUserId },
-    select: { password: true },
-  });
-  return result;
+    const result = await prisma.login_user.findUnique({
+        where: { login_user_id: loginUserId },
+        select: { password: true },
+    });
+    return result;
 }
 
 /**
@@ -69,15 +69,15 @@ export async function getPasswordLoginUser(loginUserId: number) {
  * @returns: login user object
  */
 export async function searchLoginUserByPerson(personId: number) {
-  const result = await prisma.login_user.findUnique({
-    where: {
-      person_id: personId,
-    },
-    include: {
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.findUnique({
+        where: {
+            person_id: personId,
+        },
+        include: {
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -86,13 +86,13 @@ export async function searchLoginUserByPerson(personId: number) {
  * @returns: all login user objects that match with the admin status
  */
 export async function searchAllAdminLoginUsers(isAdmin: boolean) {
-  const result = await prisma.login_user.findMany({
-    where: { is_admin: isAdmin },
-    include: {
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.findMany({
+        where: { is_admin: isAdmin },
+        include: {
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -101,13 +101,13 @@ export async function searchAllAdminLoginUsers(isAdmin: boolean) {
  * @returns: all login user objects that match with the coach status
  */
 export async function searchAllCoachLoginUsers(isCoach: boolean) {
-  const result = await prisma.login_user.findMany({
-    where: { is_coach: isCoach },
-    include: {
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.findMany({
+        where: { is_coach: isCoach },
+        include: {
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -116,22 +116,22 @@ export async function searchAllCoachLoginUsers(isCoach: boolean) {
  * @returns: all login user objects where the bool matches with both the admin and coach status
  */
 export async function searchAllAdminAndCoachLoginUsers(bool: boolean) {
-  const result = await prisma.login_user.findMany({
-    where: {
-      AND: [
-        {
-          is_admin: bool,
+    const result = await prisma.login_user.findMany({
+        where: {
+            AND: [
+                {
+                    is_admin: bool,
+                },
+                {
+                    is_coach: bool,
+                },
+            ],
         },
-        {
-          is_coach: bool,
+        include: {
+            person: true,
         },
-      ],
-    },
-    include: {
-      person: true,
-    },
-  });
-  return result;
+    });
+    return result;
 }
 
 /**
@@ -140,21 +140,21 @@ export async function searchAllAdminAndCoachLoginUsers(bool: boolean) {
  * @returns the updated entry in the database
  */
 export async function updateLoginUser(loginUser: UpdateLoginUser) {
-  const result = await prisma.login_user.update({
-    where: {
-      login_user_id: loginUser.loginUserId,
-    },
-    data: {
-      password: loginUser.password,
-      is_admin: loginUser.isAdmin,
-      is_coach: loginUser.isCoach,
-      account_status: loginUser.accountStatus,
-    },
-    include: {
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.update({
+        where: {
+            login_user_id: loginUser.loginUserId,
+        },
+        data: {
+            password: loginUser.password,
+            is_admin: loginUser.isAdmin,
+            is_coach: loginUser.isCoach,
+            account_status: loginUser.accountStatus,
+        },
+        include: {
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -163,16 +163,16 @@ export async function updateLoginUser(loginUser: UpdateLoginUser) {
  * @returns personal info about the login user, this info can be used to further remove the person
  */
 export async function deleteLoginUserById(loginUserId: number) {
-  const result = await prisma.login_user.delete({
-    where: {
-      login_user_id: loginUserId,
-    },
-    include: {
-      // returns the person info of the removed login user
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.delete({
+        where: {
+            login_user_id: loginUserId,
+        },
+        include: {
+            // returns the person info of the removed login user
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -183,14 +183,14 @@ export async function deleteLoginUserById(loginUserId: number) {
  *     remove the person
  */
 export async function deleteLoginUserByPersonId(personId: number) {
-  const result = await prisma.login_user.delete({
-    where: { person_id: personId },
-    include: {
-      // returns the person info of the removed login user
-      person: true,
-    },
-  });
-  return result;
+    const result = await prisma.login_user.delete({
+        where: { person_id: personId },
+        include: {
+            // returns the person info of the removed login user
+            person: true,
+        },
+    });
+    return result;
 }
 
 /**
@@ -200,12 +200,12 @@ export async function deleteLoginUserByPersonId(personId: number) {
  *     loginUser has the given id
  */
 export async function getLoginUserById(loginUserId: number) {
-  return await prisma.login_user.findUnique({
-    where: {
-      login_user_id: loginUserId,
-    },
-    include: { person: true },
-  });
+    return await prisma.login_user.findUnique({
+        where: {
+            login_user_id: loginUserId,
+        },
+        include: { person: true },
+    });
 }
 
 /**
@@ -220,45 +220,45 @@ export async function getLoginUserById(loginUserId: number) {
  * @returns the filtered loginUsers with their person data in a promise
  */
 export async function filterLoginUsers(
-  nameFilter: FilterString,
-  emailFilter: FilterString,
-  nameSort: FilterSort,
-  emailSort: FilterSort,
-  statusFilter: account_status_enum | undefined,
-  isCoach: FilterBoolean,
-  isAdmin: FilterBoolean
+    nameFilter: FilterString,
+    emailFilter: FilterString,
+    nameSort: FilterSort,
+    emailSort: FilterSort,
+    statusFilter: account_status_enum | undefined,
+    isCoach: FilterBoolean,
+    isAdmin: FilterBoolean
 ) {
-  if (nameSort !== undefined && emailSort !== undefined) {
-    return Promise.reject("Sorting is only allowed on 1 field");
-  }
+    if (nameSort !== undefined && emailSort !== undefined) {
+        return Promise.reject("Sorting is only allowed on 1 field");
+    }
 
-  // execute the query
-  return await prisma.login_user.findMany({
-    where: {
-      person: {
-        firstname: {
-          contains: nameFilter,
-          mode: "insensitive",
+    // execute the query
+    return await prisma.login_user.findMany({
+        where: {
+            person: {
+                firstname: {
+                    contains: nameFilter,
+                    mode: "insensitive",
+                },
+                email: {
+                    contains: emailFilter,
+                    mode: "insensitive",
+                },
+            },
+            account_status: statusFilter,
+            is_coach: isCoach,
+            is_admin: isAdmin,
         },
-        email: {
-          contains: emailFilter,
-          mode: "insensitive",
+        orderBy: {
+            person: {
+                firstname: nameSort,
+                email: emailSort,
+            },
         },
-      },
-      account_status: statusFilter,
-      is_coach: isCoach,
-      is_admin: isAdmin,
-    },
-    orderBy: {
-      person: {
-        firstname: nameSort,
-        email: emailSort,
-      },
-    },
-    include: {
-      person: true,
-    },
-  });
+        include: {
+            person: true,
+        },
+    });
 }
 
 /**
@@ -269,17 +269,17 @@ export async function filterLoginUsers(
  * @return a promise with the updated entry, the person object is also included
  */
 export async function setCoach(loginUserId: number, isCoach: boolean) {
-  return await prisma.login_user.update({
-    where: {
-      login_user_id: loginUserId,
-    },
-    data: {
-      is_coach: isCoach,
-    },
-    include: {
-      person: true,
-    },
-  });
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_coach: isCoach,
+        },
+        include: {
+            person: true,
+        },
+    });
 }
 
 /**
@@ -290,15 +290,15 @@ export async function setCoach(loginUserId: number, isCoach: boolean) {
  * @returns a promise with the updated entry, the person object is also included
  */
 export async function setAdmin(loginUserId: number, isAdmin: boolean) {
-  return await prisma.login_user.update({
-    where: {
-      login_user_id: loginUserId,
-    },
-    data: {
-      is_admin: isAdmin,
-    },
-    include: {
-      person: true,
-    },
-  });
+    return await prisma.login_user.update({
+        where: {
+            login_user_id: loginUserId,
+        },
+        data: {
+            is_admin: isAdmin,
+        },
+        include: {
+            person: true,
+        },
+    });
 }

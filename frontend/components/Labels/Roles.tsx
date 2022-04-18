@@ -17,11 +17,11 @@ roleToStyle.set("Video editor", ["Video Editor", styles.red]);
 roleToStyle.set("Copywriter", ["Copywriter", styles.yellow]);
 
 const getRoleStyle = (role: string) => {
-  if (roleToStyle.has(role)) {
-    return roleToStyle.get(role);
-  }
+    if (roleToStyle.has(role)) {
+        return roleToStyle.get(role);
+    }
 
-  return [role, styles.other];
+    return [role, styles.other];
 };
 
 /**
@@ -30,8 +30,8 @@ const getRoleStyle = (role: string) => {
  * @constructor
  */
 export const Role: React.FC<{ role: string }> = ({ role }) => {
-  const styleAndString = getRoleStyle(role);
-  const betterRole = styleAndString ? styleAndString[0] : role;
-  const style = styleAndString ? styleAndString[1] : styles.other;
-  return <div className={`${styles.label} ${style}`}>{betterRole}</div>;
+    const styleAndString = getRoleStyle(role);
+    const betterRole = styleAndString ? styleAndString[0] : role;
+    const style = styleAndString ? styleAndString[1] : styles.other;
+    return <div className={`${styles.label} ${style}`}>{betterRole}</div>;
 };

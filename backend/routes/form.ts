@@ -25,15 +25,15 @@ import * as config from "./form_keys.json";
  *  @returns The question that corresponds with the given key.
  */
 function filterQuestion(
-  form: Requests.Form,
-  key: string
+    form: Requests.Form,
+    key: string
 ): Responses.FormResponse<Requests.Question> {
-  const filteredQuestion = form.data.fields.filter(
-    (question) => question.key == key
-  );
-  return filteredQuestion.length > 0
-    ? { data: filteredQuestion[0] }
-    : { data: null };
+    const filteredQuestion = form.data.fields.filter(
+        (question) => question.key == key
+    );
+    return filteredQuestion.length > 0
+        ? { data: filteredQuestion[0] }
+        : { data: null };
 }
 
 /**
@@ -42,15 +42,15 @@ function filterQuestion(
  *  @returns The option that corresponds with the given answer.
  */
 function filterChosenOption(
-  question: Requests.Question
+    question: Requests.Question
 ): Responses.FormResponse<Requests.Option> {
-  if (question.options != undefined) {
-    const filteredOption = question.options.filter(
-      (option) => option.id === question.value
-    );
-    return { data: filteredOption[0] };
-  }
-  return { data: null };
+    if (question.options != undefined) {
+        const filteredOption = question.options.filter(
+            (option) => option.id === question.value
+        );
+        return { data: filteredOption[0] };
+    }
+    return { data: null };
 }
 
 /**
@@ -60,22 +60,22 @@ function filterChosenOption(
  *  @returns True if the question options contain the word, else false.
  */
 function checkWordInAnswer(
-  question: Requests.Question,
-  word: string
+    question: Requests.Question,
+    word: string
 ): Responses.FormResponse<boolean> {
-  const chosenOption: Responses.FormResponse<Requests.Option> =
-    filterChosenOption(question);
-  return chosenOption.data != null
-    ? { data: chosenOption.data.text.toLowerCase().includes(word) }
-    : { data: null };
+    const chosenOption: Responses.FormResponse<Requests.Option> =
+        filterChosenOption(question);
+    return chosenOption.data != null
+        ? { data: chosenOption.data.text.toLowerCase().includes(word) }
+        : { data: null };
 }
 
 function checkQuestionsExist(
-  questions: Responses.FormResponse<Requests.Question>[]
+    questions: Responses.FormResponse<Requests.Question>[]
 ): boolean {
-  const checkErrorInForm: Responses.FormResponse<Requests.Question>[] =
-    questions.filter((dataError) => dataError.data == null);
-  return checkErrorInForm.length === 0;
+    const checkErrorInForm: Responses.FormResponse<Requests.Question>[] =
+        questions.filter((dataError) => dataError.data == null);
+    return checkErrorInForm.length === 0;
 }
 
 /* parse form to person
@@ -88,14 +88,14 @@ function checkQuestionsExist(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getBirthName(form: Requests.Form): Promise<string> {
-  const questionBirthName: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.birthName);
-  const questionsExist: boolean = checkQuestionsExist([questionBirthName]);
-  if (!questionsExist || questionBirthName.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionBirthName: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.birthName);
+    const questionsExist: boolean = checkQuestionsExist([questionBirthName]);
+    if (!questionsExist || questionBirthName.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(questionBirthName.data.value as string);
+    return Promise.resolve(questionBirthName.data.value as string);
 }
 
 /**
@@ -105,14 +105,14 @@ function getBirthName(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getLastName(form: Requests.Form): Promise<string> {
-  const questionLastName: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.lastName);
-  const questionsExist: boolean = checkQuestionsExist([questionLastName]);
-  if (!questionsExist || questionLastName.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionLastName: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.lastName);
+    const questionsExist: boolean = checkQuestionsExist([questionLastName]);
+    if (!questionsExist || questionLastName.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(questionLastName.data.value as string);
+    return Promise.resolve(questionLastName.data.value as string);
 }
 
 /**
@@ -122,22 +122,22 @@ function getLastName(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEmail(form: Requests.Form): Promise<string> {
-  const questionEmail: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.emailAddress);
-  const questionsExist: boolean = checkQuestionsExist([questionEmail]);
-  if (
-    !questionsExist ||
-    questionEmail.data?.value == null ||
-    !validator.default.isEmail(questionEmail.data.value as string)
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionEmail: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.emailAddress);
+    const questionsExist: boolean = checkQuestionsExist([questionEmail]);
+    if (
+        !questionsExist ||
+        questionEmail.data?.value == null ||
+        !validator.default.isEmail(questionEmail.data.value as string)
+    ) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(
-    validator.default
-      .normalizeEmail(questionEmail.data.value as string)
-      .toString()
-  );
+    return Promise.resolve(
+        validator.default
+            .normalizeEmail(questionEmail.data.value as string)
+            .toString()
+    );
 }
 
 /**
@@ -147,17 +147,17 @@ function getEmail(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToPerson(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormPerson> {
-  const birthName = await getBirthName(form);
-  const lastName = await getLastName(form);
-  const email = await getEmail(form);
+    const birthName = await getBirthName(form);
+    const lastName = await getLastName(form);
+    const email = await getEmail(form);
 
-  return Promise.resolve({
-    birthName: birthName,
-    lastName: lastName,
-    email: email,
-  });
+    return Promise.resolve({
+        birthName: birthName,
+        lastName: lastName,
+        email: email,
+    });
 }
 
 /* parse form to student
@@ -170,57 +170,60 @@ async function jsonToPerson(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPronouns(form: Requests.Form): Promise<string | null> {
-  const questionPronouns: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.addPronouns);
-  const questionPreferredPronouns: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.preferredPronouns);
-  const questionEnterPronouns: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.pronounsInput);
+    const questionPronouns: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.addPronouns);
+    const questionPreferredPronouns: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.preferredPronouns);
+    const questionEnterPronouns: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.pronounsInput);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionPronouns,
-    questionPreferredPronouns,
-    questionEnterPronouns,
-  ]);
-  if (!questionsExist || questionPronouns.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  let pronouns = "";
-
-  const wordInAnswer: Responses.FormResponse<boolean> = checkWordInAnswer(
-    questionPronouns.data,
-    "yes"
-  );
-
-  if (wordInAnswer.data == null) {
-    return Promise.resolve(null);
-  }
-
-  if (wordInAnswer.data) {
-    const chosenOption: Responses.FormResponse<Requests.Option> =
-      filterChosenOption(questionPreferredPronouns.data as Requests.Question);
-    if (
-      chosenOption.data == null ||
-      chosenOption.data?.id.length === 0 ||
-      questionPreferredPronouns.data?.value == null ||
-      checkWordInAnswer(questionPreferredPronouns.data, "other").data == null
-    ) {
-      return Promise.reject(util.errors.cookArgumentError());
-    } else if (
-      !checkWordInAnswer(questionPreferredPronouns.data, "other").data &&
-      chosenOption.data?.text != undefined
-    ) {
-      pronouns = chosenOption.data.text;
-    } else {
-      if (questionEnterPronouns.data?.value == null) {
-        return Promise.resolve(null);
-      }
-      pronouns = questionEnterPronouns.data.value as string;
+    const questionsExist: boolean = checkQuestionsExist([
+        questionPronouns,
+        questionPreferredPronouns,
+        questionEnterPronouns,
+    ]);
+    if (!questionsExist || questionPronouns.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
     }
-  }
 
-  return Promise.resolve(pronouns);
+    let pronouns = "";
+
+    const wordInAnswer: Responses.FormResponse<boolean> = checkWordInAnswer(
+        questionPronouns.data,
+        "yes"
+    );
+
+    if (wordInAnswer.data == null) {
+        return Promise.resolve(null);
+    }
+
+    if (wordInAnswer.data) {
+        const chosenOption: Responses.FormResponse<Requests.Option> =
+            filterChosenOption(
+                questionPreferredPronouns.data as Requests.Question
+            );
+        if (
+            chosenOption.data == null ||
+            chosenOption.data?.id.length === 0 ||
+            questionPreferredPronouns.data?.value == null ||
+            checkWordInAnswer(questionPreferredPronouns.data, "other").data ==
+                null
+        ) {
+            return Promise.reject(util.errors.cookArgumentError());
+        } else if (
+            !checkWordInAnswer(questionPreferredPronouns.data, "other").data &&
+            chosenOption.data?.text != undefined
+        ) {
+            pronouns = chosenOption.data.text;
+        } else {
+            if (questionEnterPronouns.data?.value == null) {
+                return Promise.resolve(null);
+            }
+            pronouns = questionEnterPronouns.data.value as string;
+        }
+    }
+
+    return Promise.resolve(pronouns);
 }
 
 /**
@@ -230,21 +233,21 @@ function getPronouns(form: Requests.Form): Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getGender(form: Requests.Form): Promise<string> {
-  const questionGender: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.gender);
-  const questionsExist: boolean = checkQuestionsExist([questionGender]);
-  if (!questionsExist || questionGender.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionGender: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.gender);
+    const questionsExist: boolean = checkQuestionsExist([questionGender]);
+    if (!questionsExist || questionGender.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  const chosenGender: Responses.FormResponse<Requests.Option> =
-    filterChosenOption(questionGender.data);
+    const chosenGender: Responses.FormResponse<Requests.Option> =
+        filterChosenOption(questionGender.data);
 
-  if (chosenGender.data == null || chosenGender.data.id.length === 0) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (chosenGender.data == null || chosenGender.data.id.length === 0) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(chosenGender.data.text);
+    return Promise.resolve(chosenGender.data.text);
 }
 
 /**
@@ -254,14 +257,14 @@ function getGender(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPhoneNumber(form: Requests.Form): Promise<string> {
-  const questionPhoneNumber: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.phoneNumber);
-  const questionsExist: boolean = checkQuestionsExist([questionPhoneNumber]);
-  if (!questionsExist || questionPhoneNumber.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionPhoneNumber: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.phoneNumber);
+    const questionsExist: boolean = checkQuestionsExist([questionPhoneNumber]);
+    if (!questionsExist || questionPhoneNumber.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(questionPhoneNumber.data.value as string);
+    return Promise.resolve(questionPhoneNumber.data.value as string);
 }
 
 /**
@@ -271,29 +274,29 @@ function getPhoneNumber(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getNickname(form: Requests.Form): Promise<string | null> {
-  const questionCheckNickname: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.nickname);
-  const questionEnterNickname: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.nicknameInput);
+    const questionCheckNickname: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.nickname);
+    const questionEnterNickname: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.nicknameInput);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCheckNickname,
-    questionEnterNickname,
-  ]);
-  if (!questionsExist || questionCheckNickname.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  let nickname = null;
-  const addNickName = checkWordInAnswer(questionCheckNickname.data, "yes");
-  if (addNickName.data != null && addNickName.data) {
-    if (questionEnterNickname.data?.value == null) {
-      return Promise.reject(errors.cookArgumentError());
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCheckNickname,
+        questionEnterNickname,
+    ]);
+    if (!questionsExist || questionCheckNickname.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
     }
-    nickname = questionEnterNickname.data.value as string;
-  }
 
-  return Promise.resolve(nickname);
+    let nickname = null;
+    const addNickName = checkWordInAnswer(questionCheckNickname.data, "yes");
+    if (addNickName.data != null && addNickName.data) {
+        if (questionEnterNickname.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+        nickname = questionEnterNickname.data.value as string;
+    }
+
+    return Promise.resolve(nickname);
 }
 
 /**
@@ -303,25 +306,25 @@ function getNickname(form: Requests.Form): Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getAlumni(form: Requests.Form): Promise<boolean> {
-  const questionCheckAlumni: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.alumni);
+    const questionCheckAlumni: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.alumni);
 
-  const questionsExist: boolean = checkQuestionsExist([questionCheckAlumni]);
+    const questionsExist: boolean = checkQuestionsExist([questionCheckAlumni]);
 
-  if (!questionsExist || questionCheckAlumni.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist || questionCheckAlumni.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  const wordInAnswer: boolean | null = checkWordInAnswer(
-    questionCheckAlumni.data,
-    "yes"
-  ).data;
+    const wordInAnswer: boolean | null = checkWordInAnswer(
+        questionCheckAlumni.data,
+        "yes"
+    ).data;
 
-  if (wordInAnswer == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (wordInAnswer == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(wordInAnswer);
+    return Promise.resolve(wordInAnswer);
 }
 
 /**
@@ -331,21 +334,21 @@ function getAlumni(form: Requests.Form): Promise<boolean> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToStudent(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormStudent> {
-  const pronouns = await getPronouns(form);
-  const gender = await getGender(form);
-  const phoneNumber = await getPhoneNumber(form);
-  const nickname = await getNickname(form);
-  const alumni = await getAlumni(form);
+    const pronouns = await getPronouns(form);
+    const gender = await getGender(form);
+    const phoneNumber = await getPhoneNumber(form);
+    const nickname = await getNickname(form);
+    const alumni = await getAlumni(form);
 
-  return Promise.resolve({
-    pronouns: pronouns,
-    gender: gender,
-    phoneNumber: phoneNumber,
-    nickname: nickname,
-    alumni: alumni,
-  });
+    return Promise.resolve({
+        pronouns: pronouns,
+        gender: gender,
+        phoneNumber: phoneNumber,
+        nickname: nickname,
+        alumni: alumni,
+    });
 }
 
 /* parse form to job application
@@ -358,22 +361,22 @@ async function jsonToStudent(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getResponsibilities(form: Requests.Form): Promise<string | null> {
-  const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.responsibilities);
+    const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.responsibilities);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCheckResponsibilities,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCheckResponsibilities,
+    ]);
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  if (questionCheckResponsibilities.data?.value == undefined) {
-    return Promise.resolve(null);
-  }
+    if (questionCheckResponsibilities.data?.value == undefined) {
+        return Promise.resolve(null);
+    }
 
-  return Promise.resolve(questionCheckResponsibilities.data?.value as string);
+    return Promise.resolve(questionCheckResponsibilities.data?.value as string);
 }
 
 /**
@@ -383,16 +386,16 @@ function getResponsibilities(form: Requests.Form): Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getFunFact(form: Requests.Form): Promise<string> {
-  const questionFunFact: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.funFact);
+    const questionFunFact: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.funFact);
 
-  const questionsExist: boolean = checkQuestionsExist([questionFunFact]);
+    const questionsExist: boolean = checkQuestionsExist([questionFunFact]);
 
-  if (!questionsExist || questionFunFact.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist || questionFunFact.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(questionFunFact.data.value as string);
+    return Promise.resolve(questionFunFact.data.value as string);
 }
 
 /**
@@ -402,28 +405,28 @@ function getFunFact(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getVolunteerInfo(form: Requests.Form): Promise<string> {
-  const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.volunteerInfo);
+    const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.volunteerInfo);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCheckVolunteerInfo,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCheckVolunteerInfo,
+    ]);
 
-  if (!questionsExist || questionCheckVolunteerInfo.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist || questionCheckVolunteerInfo.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  const chosenVolunteerInfo: Responses.FormResponse<Requests.Option> =
-    filterChosenOption(questionCheckVolunteerInfo.data);
+    const chosenVolunteerInfo: Responses.FormResponse<Requests.Option> =
+        filterChosenOption(questionCheckVolunteerInfo.data);
 
-  if (
-    chosenVolunteerInfo.data == null ||
-    chosenVolunteerInfo.data.id.length === 0
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (
+        chosenVolunteerInfo.data == null ||
+        chosenVolunteerInfo.data.id.length === 0
+    ) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(chosenVolunteerInfo.data.text);
+    return Promise.resolve(chosenVolunteerInfo.data.text);
 }
 
 /**
@@ -434,31 +437,33 @@ function getVolunteerInfo(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function isStudentCoach(
-  form: Requests.Form,
-  hasAlreadyParticipated: boolean
+    form: Requests.Form,
+    hasAlreadyParticipated: boolean
 ): Promise<boolean | null> {
-  if (hasAlreadyParticipated) {
-    const questionStudentCoach: Responses.FormResponse<Requests.Question> =
-      filterQuestion(form, config.studentCoach);
+    if (hasAlreadyParticipated) {
+        const questionStudentCoach: Responses.FormResponse<Requests.Question> =
+            filterQuestion(form, config.studentCoach);
 
-    const questionsExist: boolean = checkQuestionsExist([questionStudentCoach]);
+        const questionsExist: boolean = checkQuestionsExist([
+            questionStudentCoach,
+        ]);
 
-    if (!questionsExist || questionStudentCoach.data?.value == null) {
-      return Promise.reject(errors.cookArgumentError());
+        if (!questionsExist || questionStudentCoach.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        const wordInAnswer: boolean | null = checkWordInAnswer(
+            questionStudentCoach.data,
+            "yes"
+        ).data;
+
+        if (wordInAnswer == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        return Promise.resolve(wordInAnswer);
     }
-
-    const wordInAnswer: boolean | null = checkWordInAnswer(
-      questionStudentCoach.data,
-      "yes"
-    ).data;
-
-    if (wordInAnswer == null) {
-      return Promise.reject(errors.cookArgumentError());
-    }
-
-    return Promise.resolve(wordInAnswer);
-  }
-  return Promise.resolve(null);
+    return Promise.resolve(null);
 }
 
 /**
@@ -468,51 +473,54 @@ function isStudentCoach(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducations(form: Requests.Form): Promise<string[]> {
-  const questionCheckEducations: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.edus);
+    const questionCheckEducations: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.edus);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCheckEducations,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCheckEducations,
+    ]);
 
-  if (
-    !questionsExist ||
-    questionCheckEducations.data?.value == null ||
-    questionCheckEducations.data.value.length === 0 ||
-    questionCheckEducations.data.value.length > 2
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  const educations: string[] = [];
-
-  for (let i = 0; i < questionCheckEducations.data.value.length; i++) {
-    if (questionCheckEducations.data.options != undefined) {
-      const filteredOption = questionCheckEducations.data.options.filter(
-        (option) => option.id === questionCheckEducations.data?.value[i]
-      );
-      if (filteredOption.length !== 1) {
+    if (
+        !questionsExist ||
+        questionCheckEducations.data?.value == null ||
+        questionCheckEducations.data.value.length === 0 ||
+        questionCheckEducations.data.value.length > 2
+    ) {
         return Promise.reject(errors.cookArgumentError());
-      }
-      if (filteredOption[0].text.includes("Other")) {
-        const questionCheckOther: Responses.FormResponse<Requests.Question> =
-          filterQuestion(form, config.edusInput);
-        const questionsExistOther: boolean = checkQuestionsExist([
-          questionCheckOther,
-        ]);
-
-        if (!questionsExistOther || questionCheckOther.data?.value == null) {
-          return Promise.reject(errors.cookArgumentError());
-        }
-
-        educations.push(questionCheckOther.data.value as string);
-      } else {
-        educations.push(filteredOption[0].text);
-      }
     }
-  }
 
-  return Promise.resolve(educations);
+    const educations: string[] = [];
+
+    for (let i = 0; i < questionCheckEducations.data.value.length; i++) {
+        if (questionCheckEducations.data.options != undefined) {
+            const filteredOption = questionCheckEducations.data.options.filter(
+                (option) => option.id === questionCheckEducations.data?.value[i]
+            );
+            if (filteredOption.length !== 1) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+            if (filteredOption[0].text.includes("Other")) {
+                const questionCheckOther: Responses.FormResponse<Requests.Question> =
+                    filterQuestion(form, config.edusInput);
+                const questionsExistOther: boolean = checkQuestionsExist([
+                    questionCheckOther,
+                ]);
+
+                if (
+                    !questionsExistOther ||
+                    questionCheckOther.data?.value == null
+                ) {
+                    return Promise.reject(errors.cookArgumentError());
+                }
+
+                educations.push(questionCheckOther.data.value as string);
+            } else {
+                educations.push(filteredOption[0].text);
+            }
+        }
+    }
+
+    return Promise.resolve(educations);
 }
 
 /**
@@ -522,50 +530,53 @@ function getEducations(form: Requests.Form): Promise<string[]> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducationLevel(form: Requests.Form): Promise<string> {
-  const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.eduLevel);
+    const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.eduLevel);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCheckEducationLevel,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCheckEducationLevel,
+    ]);
 
-  if (
-    !questionsExist ||
-    questionCheckEducationLevel.data?.value == null ||
-    questionCheckEducationLevel.data.value.length !== 1
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  let educationLevel;
-
-  if (questionCheckEducationLevel.data.options != undefined) {
-    const filteredOption = questionCheckEducationLevel.data.options.filter(
-      (option) => option.id === questionCheckEducationLevel.data?.value[0]
-    );
-    if (filteredOption.length !== 1) {
-      return Promise.reject(errors.cookArgumentError());
-    }
-    if (filteredOption[0].text.includes("Other")) {
-      const questionCheckOther: Responses.FormResponse<Requests.Question> =
-        filterQuestion(form, config.eduLevelInput);
-      const questionsExistOther: boolean = checkQuestionsExist([
-        questionCheckOther,
-      ]);
-
-      if (!questionsExistOther || questionCheckOther.data?.value == null) {
+    if (
+        !questionsExist ||
+        questionCheckEducationLevel.data?.value == null ||
+        questionCheckEducationLevel.data.value.length !== 1
+    ) {
         return Promise.reject(errors.cookArgumentError());
-      }
-
-      educationLevel = questionCheckOther.data.value as string;
-    } else {
-      educationLevel = filteredOption[0].text;
     }
-  } else {
-    return Promise.reject(errors.cookArgumentError());
-  }
 
-  return Promise.resolve(educationLevel);
+    let educationLevel;
+
+    if (questionCheckEducationLevel.data.options != undefined) {
+        const filteredOption = questionCheckEducationLevel.data.options.filter(
+            (option) => option.id === questionCheckEducationLevel.data?.value[0]
+        );
+        if (filteredOption.length !== 1) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+        if (filteredOption[0].text.includes("Other")) {
+            const questionCheckOther: Responses.FormResponse<Requests.Question> =
+                filterQuestion(form, config.eduLevelInput);
+            const questionsExistOther: boolean = checkQuestionsExist([
+                questionCheckOther,
+            ]);
+
+            if (
+                !questionsExistOther ||
+                questionCheckOther.data?.value == null
+            ) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+
+            educationLevel = questionCheckOther.data.value as string;
+        } else {
+            educationLevel = filteredOption[0].text;
+        }
+    } else {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    return Promise.resolve(educationLevel);
 }
 
 /**
@@ -575,22 +586,22 @@ function getEducationLevel(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducationDuration(form: Requests.Form): Promise<number | null> {
-  const questionEducationDuration: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.eduDuration);
+    const questionEducationDuration: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.eduDuration);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionEducationDuration,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionEducationDuration,
+    ]);
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  if (questionEducationDuration.data?.value == null) {
-    return Promise.resolve(null);
-  }
+    if (questionEducationDuration.data?.value == null) {
+        return Promise.resolve(null);
+    }
 
-  return Promise.resolve(Number(questionEducationDuration.data?.value));
+    return Promise.resolve(Number(questionEducationDuration.data?.value));
 }
 
 /**
@@ -600,20 +611,22 @@ function getEducationDuration(form: Requests.Form): Promise<number | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducationYear(form: Requests.Form): Promise<string | null> {
-  const questionEducationYear: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.eduYear);
+    const questionEducationYear: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.eduYear);
 
-  const questionsExist: boolean = checkQuestionsExist([questionEducationYear]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionEducationYear,
+    ]);
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  if (questionEducationYear.data?.value == null) {
-    return Promise.resolve(null);
-  }
+    if (questionEducationYear.data?.value == null) {
+        return Promise.resolve(null);
+    }
 
-  return Promise.resolve(questionEducationYear.data.value as string);
+    return Promise.resolve(questionEducationYear.data.value as string);
 }
 
 /**
@@ -623,22 +636,22 @@ function getEducationYear(form: Requests.Form): Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEducationUniversity(form: Requests.Form): Promise<string | null> {
-  const questionEducationUniversity: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.eduInstitute);
+    const questionEducationUniversity: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.eduInstitute);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionEducationUniversity,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionEducationUniversity,
+    ]);
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  if (questionEducationUniversity.data?.value == null) {
-    return Promise.resolve(null);
-  }
+    if (questionEducationUniversity.data?.value == null) {
+        return Promise.resolve(null);
+    }
 
-  return Promise.resolve(questionEducationUniversity.data.value as string);
+    return Promise.resolve(questionEducationUniversity.data.value as string);
 }
 
 /**
@@ -649,43 +662,43 @@ function getEducationUniversity(form: Requests.Form): Promise<string | null> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToJobApplication(
-  form: Requests.Form,
-  hasAlreadyTakenPart: boolean
+    form: Requests.Form,
+    hasAlreadyTakenPart: boolean
 ): Promise<Responses.FormJobApplication> {
-  const responsibilities = await getResponsibilities(form);
-  const funFact = await getFunFact(form);
-  const volunteerInfo = await getVolunteerInfo(form);
-  const studentCoach = await isStudentCoach(form, hasAlreadyTakenPart);
-  const latestOsoc = await ormOs.getLatestOsoc();
-  if (latestOsoc == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-  const osocId = latestOsoc.osoc_id;
-  const educations = await getEducations(form);
-  const educationLevel = await getEducationLevel(form);
-  const educationDuration = await getEducationDuration(form);
-  const educationYear = await getEducationYear(form);
-  const educationInstitute = await getEducationUniversity(form);
-  const emailStatus = "NONE";
-  let createdAt = new Date(Date.now()).toString();
-  if (form.createdAt != undefined) {
-    createdAt = form.createdAt;
-  }
+    const responsibilities = await getResponsibilities(form);
+    const funFact = await getFunFact(form);
+    const volunteerInfo = await getVolunteerInfo(form);
+    const studentCoach = await isStudentCoach(form, hasAlreadyTakenPart);
+    const latestOsoc = await ormOs.getLatestOsoc();
+    if (latestOsoc == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+    const osocId = latestOsoc.osoc_id;
+    const educations = await getEducations(form);
+    const educationLevel = await getEducationLevel(form);
+    const educationDuration = await getEducationDuration(form);
+    const educationYear = await getEducationYear(form);
+    const educationInstitute = await getEducationUniversity(form);
+    const emailStatus = "NONE";
+    let createdAt = new Date(Date.now()).toString();
+    if (form.createdAt != undefined) {
+        createdAt = form.createdAt;
+    }
 
-  return Promise.resolve({
-    responsibilities: responsibilities,
-    funFact: funFact,
-    volunteerInfo: volunteerInfo,
-    studentCoach: studentCoach,
-    osocId: osocId,
-    educations: educations,
-    educationLevel: educationLevel,
-    educationDuration: educationDuration,
-    educationYear: educationYear,
-    educationInstitute: educationInstitute,
-    emailStatus: emailStatus,
-    createdAt: createdAt,
-  });
+    return Promise.resolve({
+        responsibilities: responsibilities,
+        funFact: funFact,
+        volunteerInfo: volunteerInfo,
+        studentCoach: studentCoach,
+        osocId: osocId,
+        educations: educations,
+        educationLevel: educationLevel,
+        educationDuration: educationDuration,
+        educationYear: educationYear,
+        educationInstitute: educationInstitute,
+        emailStatus: emailStatus,
+        createdAt: createdAt,
+    });
 }
 
 /* parse form to job application skills
@@ -698,43 +711,43 @@ async function jsonToJobApplication(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getMostFluentLanguage(form: Requests.Form): Promise<string> {
-  const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.mostFluentLanguage);
+    const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.mostFluentLanguage);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionMostFluentLanguage,
-  ]);
-
-  if (!questionsExist || questionMostFluentLanguage.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  const chosenLanguage: Responses.FormResponse<Requests.Option> =
-    filterChosenOption(questionMostFluentLanguage.data);
-
-  if (chosenLanguage.data == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  let language = "";
-
-  if (chosenLanguage.data.text.includes("Other")) {
-    const questionCheckOther: Responses.FormResponse<Requests.Question> =
-      filterQuestion(form, config.mostFluentLanguageInput);
-    const questionsExistOther: boolean = checkQuestionsExist([
-      questionCheckOther,
+    const questionsExist: boolean = checkQuestionsExist([
+        questionMostFluentLanguage,
     ]);
 
-    if (!questionsExistOther || questionCheckOther.data?.value == null) {
-      return Promise.reject(errors.cookArgumentError());
+    if (!questionsExist || questionMostFluentLanguage.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
     }
 
-    language = questionCheckOther.data.value as string;
-  } else {
-    language = chosenLanguage.data.text;
-  }
+    const chosenLanguage: Responses.FormResponse<Requests.Option> =
+        filterChosenOption(questionMostFluentLanguage.data);
 
-  return Promise.resolve(language);
+    if (chosenLanguage.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
+
+    let language = "";
+
+    if (chosenLanguage.data.text.includes("Other")) {
+        const questionCheckOther: Responses.FormResponse<Requests.Question> =
+            filterQuestion(form, config.mostFluentLanguageInput);
+        const questionsExistOther: boolean = checkQuestionsExist([
+            questionCheckOther,
+        ]);
+
+        if (!questionsExistOther || questionCheckOther.data?.value == null) {
+            return Promise.reject(errors.cookArgumentError());
+        }
+
+        language = questionCheckOther.data.value as string;
+    } else {
+        language = chosenLanguage.data.text;
+    }
+
+    return Promise.resolve(language);
 }
 
 /**
@@ -744,33 +757,33 @@ function getMostFluentLanguage(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getEnglishLevel(form: Requests.Form): Promise<number> {
-  const questionEnglishLevel: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.englishLevel);
+    const questionEnglishLevel: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.englishLevel);
 
-  const questionsExist: boolean = checkQuestionsExist([questionEnglishLevel]);
+    const questionsExist: boolean = checkQuestionsExist([questionEnglishLevel]);
 
-  if (!questionsExist || questionEnglishLevel.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist || questionEnglishLevel.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  const chosenLanguage: Responses.FormResponse<Requests.Option> =
-    filterChosenOption(questionEnglishLevel.data);
+    const chosenLanguage: Responses.FormResponse<Requests.Option> =
+        filterChosenOption(questionEnglishLevel.data);
 
-  if (chosenLanguage.data == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (chosenLanguage.data == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  if (chosenLanguage.data.text.toLowerCase().includes("★★★★★")) {
-    return Promise.resolve(5);
-  } else if (chosenLanguage.data.text.toLowerCase().includes("★★★★")) {
-    return Promise.resolve(4);
-  } else if (chosenLanguage.data.text.toLowerCase().includes("★★★")) {
-    return Promise.resolve(3);
-  } else if (chosenLanguage.data.text.toLowerCase().includes("★★")) {
-    return Promise.resolve(2);
-  }
+    if (chosenLanguage.data.text.toLowerCase().includes("★★★★★")) {
+        return Promise.resolve(5);
+    } else if (chosenLanguage.data.text.toLowerCase().includes("★★★★")) {
+        return Promise.resolve(4);
+    } else if (chosenLanguage.data.text.toLowerCase().includes("★★★")) {
+        return Promise.resolve(3);
+    } else if (chosenLanguage.data.text.toLowerCase().includes("★★")) {
+        return Promise.resolve(2);
+    }
 
-  return Promise.resolve(1);
+    return Promise.resolve(1);
 }
 
 /**
@@ -780,16 +793,16 @@ function getEnglishLevel(form: Requests.Form): Promise<number> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getBestSkill(form: Requests.Form): Promise<string> {
-  const questionBestSkill: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.bestSkill);
+    const questionBestSkill: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.bestSkill);
 
-  const questionsExist: boolean = checkQuestionsExist([questionBestSkill]);
+    const questionsExist: boolean = checkQuestionsExist([questionBestSkill]);
 
-  if (!questionsExist || questionBestSkill.data?.value == null) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    if (!questionsExist || questionBestSkill.data?.value == null) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  return Promise.resolve(questionBestSkill.data.value as string);
+    return Promise.resolve(questionBestSkill.data.value as string);
 }
 
 /**
@@ -799,17 +812,17 @@ function getBestSkill(form: Requests.Form): Promise<string> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToSkills(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormJobApplicationSkill> {
-  const most_fluent_language = await getMostFluentLanguage(form);
-  const english_level = await getEnglishLevel(form);
-  const best_skill = await getBestSkill(form);
+    const most_fluent_language = await getMostFluentLanguage(form);
+    const english_level = await getEnglishLevel(form);
+    const best_skill = await getBestSkill(form);
 
-  return Promise.resolve({
-    most_fluent_language: most_fluent_language,
-    english_level: english_level,
-    best_skill: best_skill,
-  });
+    return Promise.resolve({
+        most_fluent_language: most_fluent_language,
+        english_level: english_level,
+        best_skill: best_skill,
+    });
 }
 
 /* parse form to attachments
@@ -822,63 +835,69 @@ async function jsonToSkills(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getCV(form: Requests.Form): Promise<Responses.FormAttachmentResponse> {
-  const questionCVUpload: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.cvUpload);
-  const questionCVLink: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.cvLink);
+    const questionCVUpload: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.cvUpload);
+    const questionCVLink: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.cvLink);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionCVUpload,
-    questionCVLink,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionCVUpload,
+        questionCVLink,
+    ]);
 
-  const links: string[] = [];
-  const types: type_enum[] = [];
+    const links: string[] = [];
+    const types: type_enum[] = [];
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-  if (
-    questionCVUpload.data?.value == null &&
-    questionCVLink.data?.value == null
-  ) {
-    return Promise.resolve({ data: [], types: [] });
-  }
-
-  if (questionCVLink.data?.value != null) {
-    if ((questionCVLink.data?.value as string).trim() != "") {
-      links.push(questionCVLink.data?.value as string);
-      types.push("CV_URL");
-    }
-  }
-
-  if (questionCVUpload.data?.value != null) {
-    for (
-      let linkIndex = 0;
-      linkIndex < questionCVUpload.data?.value.length;
-      linkIndex++
-    ) {
-      if (
-        (questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url ==
-        undefined
-      ) {
+    if (!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
-      }
-
-      if (
-        (
-          questionCVUpload.data?.value[linkIndex] as Requests.FormValues
-        ).url.trim() != ""
-      ) {
-        links.push(
-          (questionCVUpload.data?.value[linkIndex] as Requests.FormValues).url
-        );
-        types.push("CV_URL");
-      }
     }
-  }
+    if (
+        questionCVUpload.data?.value == null &&
+        questionCVLink.data?.value == null
+    ) {
+        return Promise.resolve({ data: [], types: [] });
+    }
 
-  return Promise.resolve({ data: links, types: types });
+    if (questionCVLink.data?.value != null) {
+        if ((questionCVLink.data?.value as string).trim() != "") {
+            links.push(questionCVLink.data?.value as string);
+            types.push("CV_URL");
+        }
+    }
+
+    if (questionCVUpload.data?.value != null) {
+        for (
+            let linkIndex = 0;
+            linkIndex < questionCVUpload.data?.value.length;
+            linkIndex++
+        ) {
+            if (
+                (questionCVUpload.data?.value[linkIndex] as Requests.FormValues)
+                    .url == undefined
+            ) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+
+            if (
+                (
+                    questionCVUpload.data?.value[
+                        linkIndex
+                    ] as Requests.FormValues
+                ).url.trim() != ""
+            ) {
+                links.push(
+                    (
+                        questionCVUpload.data?.value[
+                            linkIndex
+                        ] as Requests.FormValues
+                    ).url
+                );
+                types.push("CV_URL");
+            }
+        }
+    }
+
+    return Promise.resolve({ data: links, types: types });
 }
 
 /**
@@ -888,70 +907,75 @@ function getCV(form: Requests.Form): Promise<Responses.FormAttachmentResponse> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getPortfolio(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormAttachmentResponse> {
-  const questionPortfolioUpload: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.portfolioUpload);
-  const questionPortfolioLink: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.portfolioLink);
+    const questionPortfolioUpload: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.portfolioUpload);
+    const questionPortfolioLink: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.portfolioLink);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionPortfolioUpload,
-    questionPortfolioLink,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionPortfolioUpload,
+        questionPortfolioLink,
+    ]);
 
-  const links: string[] = [];
-  const types: type_enum[] = [];
+    const links: string[] = [];
+    const types: type_enum[] = [];
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  if (
-    questionPortfolioUpload.data?.value == null &&
-    questionPortfolioLink.data?.value == null
-  ) {
-    return Promise.resolve({ data: [], types: [] });
-  }
-
-  if (questionPortfolioLink.data?.value != null) {
-    if ((questionPortfolioLink.data?.value as string).trim() != "") {
-      links.push(questionPortfolioLink.data?.value as string);
-      types.push("PORTFOLIO_URL");
-    }
-  }
-
-  if (questionPortfolioUpload.data?.value != null) {
-    for (
-      let linkIndex = 0;
-      linkIndex < questionPortfolioUpload.data?.value.length;
-      linkIndex++
-    ) {
-      if (
-        (questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues)
-          .url == undefined
-      ) {
+    if (!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
-      }
-
-      if (
-        (
-          questionPortfolioUpload.data?.value[linkIndex] as Requests.FormValues
-        ).url.trim() != ""
-      ) {
-        links.push(
-          (
-            questionPortfolioUpload.data?.value[
-              linkIndex
-            ] as Requests.FormValues
-          ).url
-        );
-        types.push("PORTFOLIO_URL");
-      }
     }
-  }
 
-  return Promise.resolve({ data: links, types: types });
+    if (
+        questionPortfolioUpload.data?.value == null &&
+        questionPortfolioLink.data?.value == null
+    ) {
+        return Promise.resolve({ data: [], types: [] });
+    }
+
+    if (questionPortfolioLink.data?.value != null) {
+        if ((questionPortfolioLink.data?.value as string).trim() != "") {
+            links.push(questionPortfolioLink.data?.value as string);
+            types.push("PORTFOLIO_URL");
+        }
+    }
+
+    if (questionPortfolioUpload.data?.value != null) {
+        for (
+            let linkIndex = 0;
+            linkIndex < questionPortfolioUpload.data?.value.length;
+            linkIndex++
+        ) {
+            if (
+                (
+                    questionPortfolioUpload.data?.value[
+                        linkIndex
+                    ] as Requests.FormValues
+                ).url == undefined
+            ) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+
+            if (
+                (
+                    questionPortfolioUpload.data?.value[
+                        linkIndex
+                    ] as Requests.FormValues
+                ).url.trim() != ""
+            ) {
+                links.push(
+                    (
+                        questionPortfolioUpload.data?.value[
+                            linkIndex
+                        ] as Requests.FormValues
+                    ).url
+                );
+                types.push("PORTFOLIO_URL");
+            }
+        }
+    }
+
+    return Promise.resolve({ data: links, types: types });
 }
 
 /**
@@ -961,81 +985,86 @@ function getPortfolio(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getMotivation(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormAttachmentResponse> {
-  const questionMotivationUpload: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.motivationUpload);
-  const questionMotivationLink: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.motivationLink);
-  const questionMotivationString: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.motivationInput);
+    const questionMotivationUpload: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.motivationUpload);
+    const questionMotivationLink: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.motivationLink);
+    const questionMotivationString: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.motivationInput);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionMotivationUpload,
-    questionMotivationLink,
-    questionMotivationString,
-  ]);
+    const questionsExist: boolean = checkQuestionsExist([
+        questionMotivationUpload,
+        questionMotivationLink,
+        questionMotivationString,
+    ]);
 
-  const data: string[] = [];
-  const types: type_enum[] = [];
+    const data: string[] = [];
+    const types: type_enum[] = [];
 
-  if (!questionsExist) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  if (
-    questionMotivationUpload.data?.value == null &&
-    questionMotivationLink.data?.value == null &&
-    questionMotivationString.data?.value == null
-  ) {
-    return Promise.resolve({ data: [], types: [] });
-  }
-
-  if (questionMotivationLink.data?.value != null) {
-    if ((questionMotivationLink.data?.value as string).trim() != "") {
-      data.push(questionMotivationLink.data?.value as string);
-      types.push("MOTIVATION_URL");
-    }
-  }
-
-  if (questionMotivationUpload.data?.value != null) {
-    for (
-      let linkIndex = 0;
-      linkIndex < questionMotivationUpload.data?.value.length;
-      linkIndex++
-    ) {
-      if (
-        (questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues)
-          .url == undefined
-      ) {
+    if (!questionsExist) {
         return Promise.reject(errors.cookArgumentError());
-      }
-
-      if (
-        (
-          questionMotivationUpload.data?.value[linkIndex] as Requests.FormValues
-        ).url.trim() != ""
-      ) {
-        data.push(
-          (
-            questionMotivationUpload.data?.value[
-              linkIndex
-            ] as Requests.FormValues
-          ).url
-        );
-        types.push("MOTIVATION_URL");
-      }
     }
-  }
 
-  if (questionMotivationString.data?.value != null) {
-    if ((questionMotivationString.data?.value as string).trim() != "") {
-      data.push(questionMotivationString.data?.value as string);
-      types.push("MOTIVATION_URL");
+    if (
+        questionMotivationUpload.data?.value == null &&
+        questionMotivationLink.data?.value == null &&
+        questionMotivationString.data?.value == null
+    ) {
+        return Promise.resolve({ data: [], types: [] });
     }
-  }
 
-  return Promise.resolve({ data: data, types: types });
+    if (questionMotivationLink.data?.value != null) {
+        if ((questionMotivationLink.data?.value as string).trim() != "") {
+            data.push(questionMotivationLink.data?.value as string);
+            types.push("MOTIVATION_URL");
+        }
+    }
+
+    if (questionMotivationUpload.data?.value != null) {
+        for (
+            let linkIndex = 0;
+            linkIndex < questionMotivationUpload.data?.value.length;
+            linkIndex++
+        ) {
+            if (
+                (
+                    questionMotivationUpload.data?.value[
+                        linkIndex
+                    ] as Requests.FormValues
+                ).url == undefined
+            ) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+
+            if (
+                (
+                    questionMotivationUpload.data?.value[
+                        linkIndex
+                    ] as Requests.FormValues
+                ).url.trim() != ""
+            ) {
+                data.push(
+                    (
+                        questionMotivationUpload.data?.value[
+                            linkIndex
+                        ] as Requests.FormValues
+                    ).url
+                );
+                types.push("MOTIVATION_URL");
+            }
+        }
+    }
+
+    if (questionMotivationString.data?.value != null) {
+        if ((questionMotivationString.data?.value as string).trim() != "") {
+            data.push(questionMotivationString.data?.value as string);
+            types.push("MOTIVATION_URL");
+        }
+    }
+
+    return Promise.resolve({ data: data, types: types });
 }
 
 /**
@@ -1045,17 +1074,17 @@ function getMotivation(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToAttachments(
-  form: Requests.Form
+    form: Requests.Form
 ): Promise<Responses.FormAttachment> {
-  const cv_links = await getCV(form);
-  const portfolio_links = await getPortfolio(form);
-  const motivations = await getMotivation(form);
+    const cv_links = await getCV(form);
+    const portfolio_links = await getPortfolio(form);
+    const motivations = await getMotivation(form);
 
-  return Promise.resolve({
-    cv_links: cv_links,
-    portfolio_links: portfolio_links,
-    motivations: motivations,
-  });
+    return Promise.resolve({
+        cv_links: cv_links,
+        portfolio_links: portfolio_links,
+        motivations: motivations,
+    });
 }
 
 /* parse form to applied roles
@@ -1068,49 +1097,52 @@ async function jsonToAttachments(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 function getAppliedRoles(form: Requests.Form): Promise<string[]> {
-  const questionAppliedRoles: Responses.FormResponse<Requests.Question> =
-    filterQuestion(form, config.appliedRole);
+    const questionAppliedRoles: Responses.FormResponse<Requests.Question> =
+        filterQuestion(form, config.appliedRole);
 
-  const questionsExist: boolean = checkQuestionsExist([questionAppliedRoles]);
+    const questionsExist: boolean = checkQuestionsExist([questionAppliedRoles]);
 
-  if (
-    !questionsExist ||
-    questionAppliedRoles.data?.value == null ||
-    questionAppliedRoles.data.value.length === 0 ||
-    questionAppliedRoles.data.value.length > 2
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
-
-  const appliedRoles: string[] = [];
-
-  for (let i = 0; i < questionAppliedRoles.data.value.length; i++) {
-    if (questionAppliedRoles.data.options != undefined) {
-      const filteredOption = questionAppliedRoles.data.options.filter(
-        (option) => option.id === questionAppliedRoles.data?.value[i]
-      );
-      if (filteredOption.length !== 1) {
+    if (
+        !questionsExist ||
+        questionAppliedRoles.data?.value == null ||
+        questionAppliedRoles.data.value.length === 0 ||
+        questionAppliedRoles.data.value.length > 2
+    ) {
         return Promise.reject(errors.cookArgumentError());
-      }
-      if (filteredOption[0].text.includes("Other")) {
-        const questionCheckOther: Responses.FormResponse<Requests.Question> =
-          filterQuestion(form, config.appliedRoleInput);
-        const questionsExistOther: boolean = checkQuestionsExist([
-          questionCheckOther,
-        ]);
-
-        if (!questionsExistOther || questionCheckOther.data?.value == null) {
-          return Promise.reject(errors.cookArgumentError());
-        }
-
-        appliedRoles.push(questionCheckOther.data.value as string);
-      } else {
-        appliedRoles.push(filteredOption[0].text);
-      }
     }
-  }
 
-  return Promise.resolve(appliedRoles);
+    const appliedRoles: string[] = [];
+
+    for (let i = 0; i < questionAppliedRoles.data.value.length; i++) {
+        if (questionAppliedRoles.data.options != undefined) {
+            const filteredOption = questionAppliedRoles.data.options.filter(
+                (option) => option.id === questionAppliedRoles.data?.value[i]
+            );
+            if (filteredOption.length !== 1) {
+                return Promise.reject(errors.cookArgumentError());
+            }
+            if (filteredOption[0].text.includes("Other")) {
+                const questionCheckOther: Responses.FormResponse<Requests.Question> =
+                    filterQuestion(form, config.appliedRoleInput);
+                const questionsExistOther: boolean = checkQuestionsExist([
+                    questionCheckOther,
+                ]);
+
+                if (
+                    !questionsExistOther ||
+                    questionCheckOther.data?.value == null
+                ) {
+                    return Promise.reject(errors.cookArgumentError());
+                }
+
+                appliedRoles.push(questionCheckOther.data.value as string);
+            } else {
+                appliedRoles.push(filteredOption[0].text);
+            }
+        }
+    }
+
+    return Promise.resolve(appliedRoles);
 }
 
 /**
@@ -1120,9 +1152,9 @@ function getAppliedRoles(form: Requests.Form): Promise<string[]> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function jsonToRoles(form: Requests.Form): Promise<Responses.FormRoles> {
-  const roles = await getAppliedRoles(form);
+    const roles = await getAppliedRoles(form);
 
-  return Promise.resolve({ roles: roles });
+    return Promise.resolve({ roles: roles });
 }
 
 /**
@@ -1132,35 +1164,35 @@ async function jsonToRoles(form: Requests.Form): Promise<Responses.FormRoles> {
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addPersonToDatabase(
-  formResponse: Responses.FormPerson
+    formResponse: Responses.FormPerson
 ): Promise<Responses.Id> {
-  const allPersons = await ormP.getAllPersons();
+    const allPersons = await ormP.getAllPersons();
 
-  const checkIfEmailInDb = allPersons.filter(
-    (person) => person.email === formResponse.email
-  );
+    const checkIfEmailInDb = allPersons.filter(
+        (person) => person.email === formResponse.email
+    );
 
-  let personId;
+    let personId;
 
-  if (checkIfEmailInDb.length > 0) {
-    await ormP.updatePerson({
-      personId: checkIfEmailInDb[0].person_id,
-      firstname: formResponse.birthName,
-      lastname: formResponse.lastName,
-      github: null,
-      email: formResponse.email,
-    });
-    personId = checkIfEmailInDb[0].person_id;
-  } else {
-    const person = await ormP.createPerson({
-      firstname: formResponse.birthName,
-      lastname: formResponse.lastName,
-      email: formResponse.email,
-    });
-    personId = person.person_id;
-  }
+    if (checkIfEmailInDb.length > 0) {
+        await ormP.updatePerson({
+            personId: checkIfEmailInDb[0].person_id,
+            firstname: formResponse.birthName,
+            lastname: formResponse.lastName,
+            github: null,
+            email: formResponse.email,
+        });
+        personId = checkIfEmailInDb[0].person_id;
+    } else {
+        const person = await ormP.createPerson({
+            firstname: formResponse.birthName,
+            lastname: formResponse.lastName,
+            email: formResponse.email,
+        });
+        personId = person.person_id;
+    }
 
-  return Promise.resolve({ id: personId });
+    return Promise.resolve({ id: personId });
 }
 
 /**
@@ -1171,45 +1203,50 @@ async function addPersonToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addStudentToDatabase(
-  formResponse: Responses.FormStudent,
-  personId: Responses.Id
+    formResponse: Responses.FormStudent,
+    personId: Responses.Id
 ): Promise<Responses.Id_alumni> {
-  const allStudents = await ormSt.getAllStudents();
+    const allStudents = await ormSt.getAllStudents();
 
-  const checkIfIdInDb = allStudents.filter(
-    (student) => student.person_id === personId.id
-  );
+    const checkIfIdInDb = allStudents.filter(
+        (student) => student.person_id === personId.id
+    );
 
-  let studentId;
+    let studentId;
 
-  if (checkIfIdInDb.length > 0) {
-    await ormSt.updateStudent({
-      studentId: checkIfIdInDb[0].student_id,
-      gender: formResponse.gender,
-      pronouns: formResponse.pronouns == null ? "" : formResponse.pronouns,
-      phoneNumber: formResponse.phoneNumber,
-      nickname: formResponse.nickname,
-      alumni: formResponse.alumni,
+    if (checkIfIdInDb.length > 0) {
+        await ormSt.updateStudent({
+            studentId: checkIfIdInDb[0].student_id,
+            gender: formResponse.gender,
+            pronouns:
+                formResponse.pronouns == null ? "" : formResponse.pronouns,
+            phoneNumber: formResponse.phoneNumber,
+            nickname: formResponse.nickname,
+            alumni: formResponse.alumni,
+        });
+        studentId = checkIfIdInDb[0].student_id;
+    } else {
+        const student = await ormSt.createStudent({
+            personId: personId.id,
+            gender: formResponse.gender,
+            pronouns:
+                formResponse.pronouns != null
+                    ? formResponse.pronouns
+                    : undefined,
+            phoneNumber: formResponse.phoneNumber,
+            nickname:
+                formResponse.nickname != null
+                    ? formResponse.nickname
+                    : undefined,
+            alumni: formResponse.alumni,
+        });
+        studentId = student.student_id;
+    }
+
+    return Promise.resolve({
+        id: studentId,
+        hasAlreadyTakenPart: formResponse.alumni,
     });
-    studentId = checkIfIdInDb[0].student_id;
-  } else {
-    const student = await ormSt.createStudent({
-      personId: personId.id,
-      gender: formResponse.gender,
-      pronouns:
-        formResponse.pronouns != null ? formResponse.pronouns : undefined,
-      phoneNumber: formResponse.phoneNumber,
-      nickname:
-        formResponse.nickname != null ? formResponse.nickname : undefined,
-      alumni: formResponse.alumni,
-    });
-    studentId = student.student_id;
-  }
-
-  return Promise.resolve({
-    id: studentId,
-    hasAlreadyTakenPart: formResponse.alumni,
-  });
 }
 
 /**
@@ -1220,29 +1257,31 @@ async function addStudentToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addJobApplicationToDatabase(
-  formResponse: Responses.FormJobApplication,
-  student_id: Responses.Id
+    formResponse: Responses.FormJobApplication,
+    student_id: Responses.Id
 ): Promise<Responses.Id> {
-  const studentId = student_id.id;
+    const studentId = student_id.id;
 
-  const jobApplication = await ormJo.createJobApplication({
-    studentId: studentId,
-    responsibilities: formResponse.responsibilities,
-    funFact: formResponse.funFact,
-    studentVolunteerInfo: formResponse.volunteerInfo,
-    studentCoach:
-      formResponse.studentCoach == null ? false : formResponse.studentCoach,
-    osocId: formResponse.osocId,
-    edus: formResponse.educations,
-    eduLevel: formResponse.educationLevel,
-    eduDuration: formResponse.educationDuration,
-    eduYear: formResponse.educationYear,
-    eduInstitute: formResponse.educationInstitute,
-    emailStatus: formResponse.emailStatus,
-    createdAt: formResponse.createdAt,
-  });
+    const jobApplication = await ormJo.createJobApplication({
+        studentId: studentId,
+        responsibilities: formResponse.responsibilities,
+        funFact: formResponse.funFact,
+        studentVolunteerInfo: formResponse.volunteerInfo,
+        studentCoach:
+            formResponse.studentCoach == null
+                ? false
+                : formResponse.studentCoach,
+        osocId: formResponse.osocId,
+        edus: formResponse.educations,
+        eduLevel: formResponse.educationLevel,
+        eduDuration: formResponse.educationDuration,
+        eduYear: formResponse.educationYear,
+        eduInstitute: formResponse.educationInstitute,
+        emailStatus: formResponse.emailStatus,
+        createdAt: formResponse.createdAt,
+    });
 
-  return Promise.resolve({ id: jobApplication.job_application_id });
+    return Promise.resolve({ id: jobApplication.job_application_id });
 }
 
 /**
@@ -1253,63 +1292,63 @@ async function addJobApplicationToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addSkillsToDatabase(
-  formResponse: Responses.FormJobApplicationSkill,
-  job_applicationId: Responses.Id
+    formResponse: Responses.FormJobApplicationSkill,
+    job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
-  const job_application_id = job_applicationId.id;
+    const job_application_id = job_applicationId.id;
 
-  let most_fl_la_id;
-  const getMostFluentLanguageInDb = await ormLa.getLanguageByName(
-    formResponse.most_fluent_language
-  );
-  if (getMostFluentLanguageInDb == null) {
-    const most_fl_la = await ormLa.createLanguage(
-      formResponse.most_fluent_language
+    let most_fl_la_id;
+    const getMostFluentLanguageInDb = await ormLa.getLanguageByName(
+        formResponse.most_fluent_language
     );
-    most_fl_la_id = most_fl_la.language_id;
-  } else {
-    most_fl_la_id = getMostFluentLanguageInDb.language_id;
-  }
+    if (getMostFluentLanguageInDb == null) {
+        const most_fl_la = await ormLa.createLanguage(
+            formResponse.most_fluent_language
+        );
+        most_fl_la_id = most_fl_la.language_id;
+    } else {
+        most_fl_la_id = getMostFluentLanguageInDb.language_id;
+    }
 
-  if (!formResponse.most_fluent_language.includes("English")) {
+    if (!formResponse.most_fluent_language.includes("English")) {
+        await ormJoSk.createJobApplicationSkill({
+            jobApplicationId: job_application_id,
+            skill: null,
+            languageId: most_fl_la_id,
+            level: null,
+            isPreferred: true,
+            isBest: false,
+        });
+    }
+
+    let english_id;
+    const getEnglishLanguage = await ormLa.getLanguageByName("English");
+    if (getEnglishLanguage == null) {
+        const english_language = await ormLa.createLanguage("English");
+        english_id = english_language.language_id;
+    } else {
+        english_id = getEnglishLanguage.language_id;
+    }
+
     await ormJoSk.createJobApplicationSkill({
-      jobApplicationId: job_application_id,
-      skill: null,
-      languageId: most_fl_la_id,
-      level: null,
-      isPreferred: true,
-      isBest: false,
+        jobApplicationId: job_application_id,
+        skill: null,
+        languageId: english_id,
+        level: formResponse.english_level,
+        isPreferred: false,
+        isBest: false,
     });
-  }
 
-  let english_id;
-  const getEnglishLanguage = await ormLa.getLanguageByName("English");
-  if (getEnglishLanguage == null) {
-    const english_language = await ormLa.createLanguage("English");
-    english_id = english_language.language_id;
-  } else {
-    english_id = getEnglishLanguage.language_id;
-  }
+    await ormJoSk.createJobApplicationSkill({
+        jobApplicationId: job_application_id,
+        skill: formResponse.best_skill,
+        languageId: null,
+        level: null,
+        isPreferred: false,
+        isBest: true,
+    });
 
-  await ormJoSk.createJobApplicationSkill({
-    jobApplicationId: job_application_id,
-    skill: null,
-    languageId: english_id,
-    level: formResponse.english_level,
-    isPreferred: false,
-    isBest: false,
-  });
-
-  await ormJoSk.createJobApplicationSkill({
-    jobApplicationId: job_application_id,
-    skill: formResponse.best_skill,
-    languageId: null,
-    level: null,
-    isPreferred: false,
-    isBest: true,
-  });
-
-  return Promise.resolve({});
+    return Promise.resolve({});
 }
 
 /**
@@ -1320,36 +1359,36 @@ async function addSkillsToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addAttachmentsToDatabase(
-  formResponse: Responses.FormAttachment,
-  job_applicationId: Responses.Id
+    formResponse: Responses.FormAttachment,
+    job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
-  const job_application_id = job_applicationId.id;
+    const job_application_id = job_applicationId.id;
 
-  if (formResponse.cv_links.data.length > 0) {
-    await ormAtt.createAttachment(
-      job_application_id,
-      formResponse.cv_links.data,
-      formResponse.cv_links.types
-    );
-  }
+    if (formResponse.cv_links.data.length > 0) {
+        await ormAtt.createAttachment(
+            job_application_id,
+            formResponse.cv_links.data,
+            formResponse.cv_links.types
+        );
+    }
 
-  if (formResponse.portfolio_links.data.length > 0) {
-    await ormAtt.createAttachment(
-      job_application_id,
-      formResponse.portfolio_links.data,
-      formResponse.portfolio_links.types
-    );
-  }
+    if (formResponse.portfolio_links.data.length > 0) {
+        await ormAtt.createAttachment(
+            job_application_id,
+            formResponse.portfolio_links.data,
+            formResponse.portfolio_links.types
+        );
+    }
 
-  if (formResponse.motivations.data.length > 0) {
-    await ormAtt.createAttachment(
-      job_application_id,
-      formResponse.motivations.data,
-      formResponse.motivations.types
-    );
-  }
+    if (formResponse.motivations.data.length > 0) {
+        await ormAtt.createAttachment(
+            job_application_id,
+            formResponse.motivations.data,
+            formResponse.motivations.types
+        );
+    }
 
-  return Promise.resolve({});
+    return Promise.resolve({});
 }
 
 /**
@@ -1360,36 +1399,36 @@ async function addAttachmentsToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function addRolesToDatabase(
-  formResponse: Responses.FormRoles,
-  job_applicationId: Responses.Id
+    formResponse: Responses.FormRoles,
+    job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
-  const job_application_id = job_applicationId.id;
+    const job_application_id = job_applicationId.id;
 
-  for (
-    let role_index = 0;
-    role_index < formResponse.roles.length;
-    role_index++
-  ) {
-    const role_exists = await ormRo.getRolesByName(
-      formResponse.roles[role_index]
-    );
-    if (role_exists == null) {
-      const created_role = await ormRo.createRole(
-        formResponse.roles[role_index]
-      );
-      await ormAppRo.createAppliedRole({
-        jobApplicationId: job_application_id,
-        roleId: created_role.role_id,
-      });
-    } else {
-      await ormAppRo.createAppliedRole({
-        jobApplicationId: job_application_id,
-        roleId: role_exists.role_id,
-      });
+    for (
+        let role_index = 0;
+        role_index < formResponse.roles.length;
+        role_index++
+    ) {
+        const role_exists = await ormRo.getRolesByName(
+            formResponse.roles[role_index]
+        );
+        if (role_exists == null) {
+            const created_role = await ormRo.createRole(
+                formResponse.roles[role_index]
+            );
+            await ormAppRo.createAppliedRole({
+                jobApplicationId: job_application_id,
+                roleId: created_role.role_id,
+            });
+        } else {
+            await ormAppRo.createAppliedRole({
+                jobApplicationId: job_application_id,
+                roleId: role_exists.role_id,
+            });
+        }
     }
-  }
 
-  return Promise.resolve({});
+    return Promise.resolve({});
 }
 
 /**
@@ -1399,76 +1438,80 @@ async function addRolesToDatabase(
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
-  const parsedRequest = await rq.parseFormRequest(req);
-  if (
-    parsedRequest.data == null ||
-    parsedRequest.eventId == null ||
-    parsedRequest.createdAt == null
-  ) {
-    return Promise.reject(errors.cookInvalidID());
-  }
+    const parsedRequest = await rq.parseFormRequest(req);
+    if (
+        parsedRequest.data == null ||
+        parsedRequest.eventId == null ||
+        parsedRequest.createdAt == null
+    ) {
+        return Promise.reject(errors.cookInvalidID());
+    }
 
-  const questionInBelgium: Responses.FormResponse<Requests.Question> =
-    filterQuestion(parsedRequest, config.liveInBelgium);
-  const questionCanWorkEnough: Responses.FormResponse<Requests.Question> =
-    filterQuestion(parsedRequest, config.workInJuly);
+    const questionInBelgium: Responses.FormResponse<Requests.Question> =
+        filterQuestion(parsedRequest, config.liveInBelgium);
+    const questionCanWorkEnough: Responses.FormResponse<Requests.Question> =
+        filterQuestion(parsedRequest, config.workInJuly);
 
-  const questionsExist: boolean = checkQuestionsExist([
-    questionInBelgium,
-    questionCanWorkEnough,
-  ]);
-  if (
-    !questionsExist ||
-    questionInBelgium.data?.value == null ||
-    questionCanWorkEnough.data?.value == null
-  ) {
-    return Promise.reject(errors.cookArgumentError());
-  }
+    const questionsExist: boolean = checkQuestionsExist([
+        questionInBelgium,
+        questionCanWorkEnough,
+    ]);
+    if (
+        !questionsExist ||
+        questionInBelgium.data?.value == null ||
+        questionCanWorkEnough.data?.value == null
+    ) {
+        return Promise.reject(errors.cookArgumentError());
+    }
 
-  const wordInAnswerInBelgium: Responses.FormResponse<boolean> =
-    checkWordInAnswer(questionInBelgium.data, "yes");
-  const wordInAnswerCanWorkEnough: Responses.FormResponse<boolean> =
-    checkWordInAnswer(questionCanWorkEnough.data, "yes");
+    const wordInAnswerInBelgium: Responses.FormResponse<boolean> =
+        checkWordInAnswer(questionInBelgium.data, "yes");
+    const wordInAnswerCanWorkEnough: Responses.FormResponse<boolean> =
+        checkWordInAnswer(questionCanWorkEnough.data, "yes");
 
-  if (
-    wordInAnswerInBelgium.data == null ||
-    wordInAnswerCanWorkEnough.data == null
-  ) {
+    if (
+        wordInAnswerInBelgium.data == null ||
+        wordInAnswerCanWorkEnough.data == null
+    ) {
+        return Promise.resolve({});
+    }
+
+    if (wordInAnswerInBelgium.data && wordInAnswerCanWorkEnough.data) {
+        const person: Responses.FormPerson = await jsonToPerson(parsedRequest);
+        const student: Responses.FormStudent = await jsonToStudent(
+            parsedRequest
+        );
+        const jobApplication: Responses.FormJobApplication =
+            await jsonToJobApplication(parsedRequest, student.alumni);
+        const jobApplicationSkills: Responses.FormJobApplicationSkill =
+            await jsonToSkills(parsedRequest);
+        const attachments: Responses.FormAttachment = await jsonToAttachments(
+            parsedRequest
+        );
+        const roles: Responses.FormRoles = await jsonToRoles(parsedRequest);
+
+        const addedPersonToDatabase = await addPersonToDatabase(person);
+        const addedStudentToDatabase = await addStudentToDatabase(student, {
+            id: addedPersonToDatabase.id,
+        });
+        const addedJobApplicationToDatabase = await addJobApplicationToDatabase(
+            jobApplication,
+            { id: addedStudentToDatabase.id }
+        );
+        await addSkillsToDatabase(jobApplicationSkills, {
+            id: addedJobApplicationToDatabase.id,
+        });
+        await addAttachmentsToDatabase(attachments, {
+            id: addedJobApplicationToDatabase.id,
+        });
+        await addRolesToDatabase(roles, {
+            id: addedJobApplicationToDatabase.id,
+        });
+
+        return Promise.resolve({});
+    }
+
     return Promise.resolve({});
-  }
-
-  if (wordInAnswerInBelgium.data && wordInAnswerCanWorkEnough.data) {
-    const person: Responses.FormPerson = await jsonToPerson(parsedRequest);
-    const student: Responses.FormStudent = await jsonToStudent(parsedRequest);
-    const jobApplication: Responses.FormJobApplication =
-      await jsonToJobApplication(parsedRequest, student.alumni);
-    const jobApplicationSkills: Responses.FormJobApplicationSkill =
-      await jsonToSkills(parsedRequest);
-    const attachments: Responses.FormAttachment = await jsonToAttachments(
-      parsedRequest
-    );
-    const roles: Responses.FormRoles = await jsonToRoles(parsedRequest);
-
-    const addedPersonToDatabase = await addPersonToDatabase(person);
-    const addedStudentToDatabase = await addStudentToDatabase(student, {
-      id: addedPersonToDatabase.id,
-    });
-    const addedJobApplicationToDatabase = await addJobApplicationToDatabase(
-      jobApplication,
-      { id: addedStudentToDatabase.id }
-    );
-    await addSkillsToDatabase(jobApplicationSkills, {
-      id: addedJobApplicationToDatabase.id,
-    });
-    await addAttachmentsToDatabase(attachments, {
-      id: addedJobApplicationToDatabase.id,
-    });
-    await addRolesToDatabase(roles, { id: addedJobApplicationToDatabase.id });
-
-    return Promise.resolve({});
-  }
-
-  return Promise.resolve({});
 }
 
 /**
@@ -1477,13 +1520,13 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
  *  endpoints.
  */
 export function getRouter(): express.Router {
-  const router: express.Router = express.Router();
+    const router: express.Router = express.Router();
 
-  router.post("/", (req, res) =>
-    util.respOrErrorNoReinject(res, createForm(req))
-  );
+    router.post("/", (req, res) =>
+        util.respOrErrorNoReinject(res, createForm(req))
+    );
 
-  util.addAllInvalidVerbs(router, ["/"]);
+    util.addAllInvalidVerbs(router, ["/"]);
 
-  return router;
+    return router;
 }

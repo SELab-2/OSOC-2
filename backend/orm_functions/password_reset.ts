@@ -10,27 +10,27 @@ import prisma from "../prisma/prisma";
  * @return the created/updated entry from the database in a promise
  */
 export async function createOrUpdateReset(
-  loginUserId: number,
-  resetId: string,
-  validUntil: Date
+    loginUserId: number,
+    resetId: string,
+    validUntil: Date
 ) {
-  return await prisma.password_reset.upsert({
-    where: {
-      login_user_id: loginUserId,
-    },
-    create: {
-      login_user_id: loginUserId,
-      reset_id: resetId,
-      valid_until: validUntil,
-    },
-    update: { reset_id: resetId, valid_until: validUntil },
-  });
+    return await prisma.password_reset.upsert({
+        where: {
+            login_user_id: loginUserId,
+        },
+        create: {
+            login_user_id: loginUserId,
+            reset_id: resetId,
+            valid_until: validUntil,
+        },
+        update: { reset_id: resetId, valid_until: validUntil },
+    });
 }
 
 export async function findResetByCode(resetCode: string) {
-  return await prisma.password_reset.findUnique({
-    where: { reset_id: resetCode },
-  });
+    return await prisma.password_reset.findUnique({
+        where: { reset_id: resetCode },
+    });
 }
 
 /**
@@ -40,9 +40,9 @@ export async function findResetByCode(resetCode: string) {
  * @returns the deleted entry (or null if there was no entry) inside a promise
  */
 export async function deleteResetWithLoginUser(loginUserId: number) {
-  return await prisma.password_reset.delete({
-    where: { login_user_id: loginUserId },
-  });
+    return await prisma.password_reset.delete({
+        where: { login_user_id: loginUserId },
+    });
 }
 
 /**
@@ -51,9 +51,9 @@ export async function deleteResetWithLoginUser(loginUserId: number) {
  * @returns the deleted entry (or null if there was no entry) inside a promise
  */
 export async function deleteResetWithResetId(resetId: string) {
-  return await prisma.password_reset.delete({
-    where: {
-      reset_id: resetId,
-    },
-  });
+    return await prisma.password_reset.delete({
+        where: {
+            reset_id: resetId,
+        },
+    });
 }

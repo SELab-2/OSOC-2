@@ -10,30 +10,30 @@ import styles from "./Modal.module.scss";
  * @param title - The title for the modal
  */
 export const Modal: React.FC<{
-  children: ReactNode;
-  title: string;
-  visible: boolean;
-  handleClose: (e: SyntheticEvent) => void;
+    children: ReactNode;
+    title: string;
+    visible: boolean;
+    handleClose: (e: SyntheticEvent) => void;
 }> = ({ children, visible, handleClose, title }) => {
-  return (
-    <div
-      className={`${styles.modal} ${
-        visible ? styles.displayBlock : styles.displayNone
-      }`}
-    >
-      <div className={styles.modalMain}>
-        <div className={styles.header}>
-          <p>{title}</p>
-          <button
-            className={styles.modalButton}
-            type="button"
-            onClick={handleClose}
-          >
-            Close
-          </button>
+    return (
+        <div
+            className={`${styles.modal} ${
+                visible ? styles.displayBlock : styles.displayNone
+            }`}
+        >
+            <div className={styles.modalMain}>
+                <div className={styles.header}>
+                    <p>{title}</p>
+                    <button
+                        className={styles.modalButton}
+                        type="button"
+                        onClick={handleClose}
+                    >
+                        Close
+                    </button>
+                </div>
+                {children}
+            </div>
         </div>
-        {children}
-      </div>
-    </div>
-  );
+    );
 };

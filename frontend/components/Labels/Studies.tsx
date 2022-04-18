@@ -8,8 +8,8 @@ const studyToStyle = new Map<string, [string, string]>();
 studyToStyle.set("Backend development", ["Backend Development", styles.blue]);
 studyToStyle.set("Business management", ["Business Management", styles.green]);
 studyToStyle.set("Communication Sciences", [
-  "Communication Sciences",
-  styles.yellow,
+    "Communication Sciences",
+    styles.yellow,
 ]);
 studyToStyle.set("Computer Sciences", ["Computer Sciences", styles.red]);
 studyToStyle.set("Design", ["Design", styles.other]);
@@ -19,11 +19,11 @@ studyToStyle.set("Photography", ["Photography", styles.yellow]);
 studyToStyle.set("Videography", ["Videography", styles.red]);
 
 const getStudyStyle = (study: string) => {
-  if (studyToStyle.has(study)) {
-    return studyToStyle.get(study);
-  }
+    if (studyToStyle.has(study)) {
+        return studyToStyle.get(study);
+    }
 
-  return [study, styles.other];
+    return [study, styles.other];
 };
 
 /**
@@ -32,8 +32,8 @@ const getStudyStyle = (study: string) => {
  * @constructor
  */
 export const Study: React.FC<{ study: string }> = ({ study }) => {
-  const styleAndString = getStudyStyle(study);
-  const betterStudy = styleAndString ? styleAndString[0] : study;
-  const style = styleAndString ? styleAndString[1] : styles.other;
-  return <div className={`${styles.label} ${style}`}>{betterStudy}</div>;
+    const styleAndString = getStudyStyle(study);
+    const betterStudy = styleAndString ? styleAndString[0] : study;
+    const style = styleAndString ? styleAndString[1] : styles.other;
+    return <div className={`${styles.label} ${style}`}>{betterStudy}</div>;
 };
