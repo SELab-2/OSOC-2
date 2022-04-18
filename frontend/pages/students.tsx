@@ -11,8 +11,10 @@ const Students: NextPage = () => {
     const [students, setStudents] = useState<(Student)[]>([]);
 
     const fetchStudents = async () => {
-        if (getSessionKey !== undefined) {getSessionKey().then(async sessionKey => {
-                if (sessionKey !== "") {const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
+        if (getSessionKey !== undefined) {
+            getSessionKey().then(async sessionKey => {
+                if (sessionKey !== "") {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/all`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `auth/osoc2 ${sessionKey}`
