@@ -1,28 +1,23 @@
 import React from "react";
-import styles from "./Settings.module.scss"
-import {LoginUser} from "../../types/types";
+import styles from "./Settings.module.scss";
+import { LoginUser } from "../../types/types";
 
-export const SettingsComponent: React.FC<{person:LoginUser }> = ({person}) => {
-
-
+export const SettingsComponent: React.FC<{ person: LoginUser }> = ({
+    person,
+}) => {
     return (
         <div className={styles.settings}>
-
-            <text>current name: {person.login_user.person.firstname}</text>
-            <br/>
+            <text>current name: {person.person.firstname}</text>
+            <br />
             <text>new name</text>
-            <input/>
-            <button>
-                Change name
-            </button>
+            <input />
+            <button>Change name</button>
 
             <text>current password</text>
-            <input/>
+            <input />
             <text>new password</text>
-            <input/>
-            <button>
-                Change password
-            </button>
+            <input />
+            <button>Change password</button>
         </div>
-    )
-}
+    );
+};
