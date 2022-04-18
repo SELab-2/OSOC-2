@@ -10,7 +10,7 @@
     }
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["jest", "@typescript-eslint"],
+  "plugins": ["jest", "@typescript-eslint", "prettier"],
   "env": {
     "jest": true
   },
