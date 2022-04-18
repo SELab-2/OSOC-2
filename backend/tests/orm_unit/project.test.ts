@@ -1,12 +1,26 @@
-import {prismaMock} from "./singleton";
+import { prismaMock } from "./singleton";
 import { CreateProject, UpdateProject } from "../../orm_functions/orm_types";
-import {createProject, getProjectByName, getAllProjects,
-    getProjectsByOsocEdition, getProjectsByPartner, getProjectsStartedAfterDate,
-    getProjectsByStartDate, getProjectsStartedBeforeDate, getProjectsByEndDate,
-    getProjectsEndedBeforeDate, getProjectsEndedAfterDate, getProjectsByNumberPositions,
-    getProjectsLessPositions, getProjectsMorePositions, deleteProject, updateProject,
-    deleteProjectByOsocEdition, deleteProjectByPartner, getProjectById}
-    from "../../orm_functions/project";
+import {
+    createProject,
+    getProjectByName,
+    getAllProjects,
+    getProjectsByOsocEdition,
+    getProjectsByPartner,
+    getProjectsStartedAfterDate,
+    getProjectsByStartDate,
+    getProjectsStartedBeforeDate,
+    getProjectsByEndDate,
+    getProjectsEndedBeforeDate,
+    getProjectsEndedAfterDate,
+    getProjectsByNumberPositions,
+    getProjectsLessPositions,
+    getProjectsMorePositions,
+    deleteProject,
+    updateProject,
+    deleteProjectByOsocEdition,
+    deleteProjectByPartner,
+    getProjectById,
+} from "../../orm_functions/project";
 
 const returnValue = {
     project_id: 0,
@@ -16,8 +30,8 @@ const returnValue = {
     start_date: new Date("2022-07-13"),
     end_date: new Date("2022-08-31"),
     positions: 10,
-    description: ""
-}
+    description: "",
+};
 
 test("should create a project in the db with the given object, returns the new record", async () => {
     const project: CreateProject = {
@@ -26,11 +40,11 @@ test("should create a project in the db with the given object, returns the new r
         partner: "Best partner",
         startDate: new Date("2022-07-13"),
         endDate: new Date("2022-08-31"),
-        positions: 10
+        positions: 10,
     };
- 
-     prismaMock.project.create.mockResolvedValue(returnValue)
-     await expect(createProject(project)).resolves.toEqual(returnValue);
+
+    prismaMock.project.create.mockResolvedValue(returnValue);
+    await expect(createProject(project)).resolves.toEqual(returnValue);
 });
 
 test("should return all projects in the db", async () => {
@@ -45,7 +59,9 @@ test("should return the project with the given project id", async () => {
 
 test("should return all the projects with the given name", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectByName("Test project")).resolves.toEqual([returnValue]);
+    await expect(getProjectByName("Test project")).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should return all the projects with the given osoc edition", async () => {
@@ -55,42 +71,58 @@ test("should return all the projects with the given osoc edition", async () => {
 
 test("should return all the project with the given partner name", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsByPartner("Best partner")).resolves.toEqual([returnValue]);
+    await expect(getProjectsByPartner("Best partner")).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should return all the project with the given start date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsByStartDate(new Date("2022-07-13"))).resolves.toEqual([returnValue]);
+    await expect(
+        getProjectsByStartDate(new Date("2022-07-13"))
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should return all the project that started after the given start date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsStartedAfterDate(new Date("2022-01-01"))).resolves.toEqual([returnValue]);
+    await expect(
+        getProjectsStartedAfterDate(new Date("2022-01-01"))
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should return all the project that started before the given start date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsStartedBeforeDate(new Date("2023-01-01"))).resolves.toEqual([returnValue]);
+    await expect(
+        getProjectsStartedBeforeDate(new Date("2023-01-01"))
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should return all the project with the given end date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsByEndDate(new Date("2022-08-31"))).resolves.toEqual([returnValue]);
+    await expect(getProjectsByEndDate(new Date("2022-08-31"))).resolves.toEqual(
+        [returnValue]
+    );
 });
 
 test("should return all the project that ended after the given end date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsEndedAfterDate(new Date("2022-01-01"))).resolves.toEqual([returnValue]);
+    await expect(
+        getProjectsEndedAfterDate(new Date("2022-01-01"))
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should return all the project that ended before the given end date", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsEndedBeforeDate(new Date("2023-01-01"))).resolves.toEqual([returnValue]);
+    await expect(
+        getProjectsEndedBeforeDate(new Date("2023-01-01"))
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should return all the projects with the given number of positions", async () => {
     prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsByNumberPositions(10)).resolves.toEqual([returnValue]);
+    await expect(getProjectsByNumberPositions(10)).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should return all the projects with less positions", async () => {
@@ -104,14 +136,14 @@ test("should return all the projects with more positions", async () => {
 });
 
 test("should update the project with the new data and return the updated record", async () => {
-    const project : UpdateProject = {
+    const project: UpdateProject = {
         projectId: 0,
         name: "Different project",
         osocId: 0,
         partner: "UGent",
         startDate: new Date("2022-06-05"),
         endDate: new Date("2022-09-16"),
-        positions: 7
+        positions: 7,
     };
 
     prismaMock.project.update.mockResolvedValue(returnValue);
@@ -124,13 +156,13 @@ test("should delete the project with the given id and return the deleted record"
 });
 
 test("should delete all the projects with the given osoc id and return number of deleted records", async () => {
-    const count = {count: 2}
+    const count = { count: 2 };
     prismaMock.project.deleteMany.mockResolvedValue(count);
     await expect(deleteProjectByOsocEdition(0)).resolves.toEqual(count);
 });
 
 test("should delete all the projects with the given partner name and return the number of deleted records", async () => {
-    const count = {count: 2}
+    const count = { count: 2 };
     prismaMock.project.deleteMany.mockResolvedValue(count);
     await expect(deleteProjectByPartner("UGent")).resolves.toEqual(count);
 });

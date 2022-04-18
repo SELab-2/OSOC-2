@@ -2,15 +2,15 @@
  * Projects overview page
  * TODO
  */
-import {NextPage} from "next";
-import {UnderConstruction} from "../components/UnderConstruction/UnderConstruction";
+import { NextPage } from "next";
+import { UnderConstruction } from "../components/UnderConstruction/UnderConstruction";
 
 const Projects: NextPage = () => {
     return (
         <div>
-            <UnderConstruction/>
+            <UnderConstruction />
         </div>
-    )
-}
+    );
+};
 
 export default Projects;

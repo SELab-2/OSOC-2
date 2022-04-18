@@ -1,9 +1,9 @@
-import prisma from '../prisma/prisma'
+import prisma from "../prisma/prisma";
 
 import {
-  CreateEvaluationForStudent,
-  UpdateEvaluationForStudent
-} from './orm_types';
+    CreateEvaluationForStudent,
+    UpdateEvaluationForStudent,
+} from "./orm_types";
 
 /**
  * helper function of createEvaluationForStudent
@@ -13,15 +13,15 @@ import {
  * @returns the found evaluation or null if no final evaluation exists yet
  */
 export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
-  return await prisma.evaluation.findFirst({
-    where : {
-      job_application_id : jobApplicationId,
-      is_final : true,
-    },
-    select : {
-      evaluation_id : true,
-    },
-  });
+    return await prisma.evaluation.findFirst({
+        where: {
+            job_application_id: jobApplicationId,
+            is_final: true,
+        },
+        select: {
+            evaluation_id: true,
+        },
+    });
 }
 
 // TODO: check if this really works?
@@ -34,29 +34,30 @@ export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
  * @returns a promise with the created evaluation
  */
 export async function createEvaluationForStudent(
-    evaluation: CreateEvaluationForStudent) {
-
-  if (evaluation.isFinal) {
-    const foundEvaluation =
-        await checkIfFinalEvaluationExists(evaluation.jobApplicationId);
-    if (foundEvaluation) {
-      return await updateEvaluationForStudent({
-        evaluation_id : foundEvaluation.evaluation_id,
-        loginUserId : evaluation.loginUserId,
-        decision : evaluation.decision,
-        motivation : evaluation.motivation
-      });
+    evaluation: CreateEvaluationForStudent
+) {
+    if (evaluation.isFinal) {
+        const foundEvaluation = await checkIfFinalEvaluationExists(
+            evaluation.jobApplicationId
+        );
+        if (foundEvaluation) {
+            return await updateEvaluationForStudent({
+                evaluation_id: foundEvaluation.evaluation_id,
+                loginUserId: evaluation.loginUserId,
+                decision: evaluation.decision,
+                motivation: evaluation.motivation,
+            });
+        }
     }
-  }
-  return await prisma.evaluation.create({
-    data : {
-      login_user_id : evaluation.loginUserId,
-      job_application_id : evaluation.jobApplicationId,
-      decision : evaluation.decision,
-      motivation : evaluation.motivation,
-      is_final : evaluation.isFinal
-    }
-  });
+    return await prisma.evaluation.create({
+        data: {
+            login_user_id: evaluation.loginUserId,
+            job_application_id: evaluation.jobApplicationId,
+            decision: evaluation.decision,
+            motivation: evaluation.motivation,
+            is_final: evaluation.isFinal,
+        },
+    });
 }
 
 /**
@@ -66,32 +67,36 @@ export async function createEvaluationForStudent(
  * @returns the updated evaluation.
  */
 export async function updateEvaluationForStudent(
-    evaluation: UpdateEvaluationForStudent) {
-  return await prisma.evaluation.update({
-    where : {
-      evaluation_id : evaluation.evaluation_id,
-    },
-    data : {
-      login_user_id : evaluation.loginUserId,
-      decision : evaluation.decision,
-      motivation : evaluation.motivation,
-    }
-  });
+    evaluation: UpdateEvaluationForStudent
+) {
+    return await prisma.evaluation.update({
+        where: {
+            evaluation_id: evaluation.evaluation_id,
+        },
+        data: {
+            login_user_id: evaluation.loginUserId,
+            decision: evaluation.decision,
+            motivation: evaluation.motivation,
+        },
+    });
 }
 
 export async function getLoginUserByEvaluationId(evaluationId: number) {
-  return await prisma.evaluation.findUnique({
-    where : {evaluation_id : evaluationId},
-    include : {login_user : {include : {person : true}}}
-  });
+    return await prisma.evaluation.findUnique({
+        where: { evaluation_id: evaluationId },
+        include: { login_user: { include: { person: true } } },
+    });
 }
 
 export async function getEvaluationByPartiesFor(
-    userId: number, studentId: number, osocId: number) {
-  return await prisma.evaluation.findMany({
-    where : {
-      login_user_id : userId,
-      job_application : {student_id : studentId, osoc_id : osocId}
-    }
-  })
+    userId: number,
+    studentId: number,
+    osocId: number
+) {
+    return await prisma.evaluation.findMany({
+        where: {
+            login_user_id: userId,
+            job_application: { student_id: studentId, osoc_id: osocId },
+        },
+    });
 }
