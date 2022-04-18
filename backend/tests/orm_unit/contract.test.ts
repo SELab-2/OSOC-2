@@ -1,16 +1,20 @@
-import {prismaMock} from "./singleton";
-import {contract_status_enum} from "@prisma/client";
-import {createContract, removeContract, removeContractsFromStudent, updateContract} from "../../orm_functions/contract";
+import { prismaMock } from "./singleton";
+import { contract_status_enum } from "@prisma/client";
+import {
+    createContract,
+    removeContract,
+    removeContractsFromStudent,
+    updateContract,
+} from "../../orm_functions/contract";
 
 test("should create a contract", async () => {
-
     const contract = {
         studentId: 1,
         projectRoleId: 1,
         information: "fake information",
         loginUserId: 5,
-        contractStatus: contract_status_enum.WAIT_APPROVAL
-}
+        contractStatus: contract_status_enum.WAIT_APPROVAL,
+    };
 
     const returnContract = {
         contract_id: 5,
@@ -18,8 +22,8 @@ test("should create a contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL
-    }
+        contract_status: contract_status_enum.WAIT_APPROVAL,
+    };
 
     prismaMock.contract.create.mockResolvedValue(returnContract);
 
@@ -31,8 +35,8 @@ test("should update a contract", async () => {
         contractId: 1,
         information: "fake information",
         loginUserId: 5,
-        contractStatus: contract_status_enum.WAIT_APPROVAL
-    }
+        contractStatus: contract_status_enum.WAIT_APPROVAL,
+    };
 
     const returnContract = {
         contract_id: 1,
@@ -40,8 +44,8 @@ test("should update a contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL
-    }
+        contract_status: contract_status_enum.WAIT_APPROVAL,
+    };
 
     prismaMock.contract.update.mockResolvedValue(returnContract);
 
@@ -49,13 +53,13 @@ test("should update a contract", async () => {
 });
 
 test("should remove contracts associated with the student", async () => {
-   const count = { count: 4};
+    const count = { count: 4 };
 
-   const studentId = 2;
+    const studentId = 2;
 
-   prismaMock.contract.deleteMany.mockResolvedValue(count);
+    prismaMock.contract.deleteMany.mockResolvedValue(count);
 
-   await expect(removeContractsFromStudent(studentId)).resolves.toEqual(count);
+    await expect(removeContractsFromStudent(studentId)).resolves.toEqual(count);
 });
 
 test("should remove the give contract", async () => {
@@ -67,12 +71,10 @@ test("should remove the give contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL
-    }
+        contract_status: contract_status_enum.WAIT_APPROVAL,
+    };
 
     prismaMock.contract.delete.mockResolvedValue(returnContract);
 
     await expect(removeContract(contractId)).resolves.toEqual(returnContract);
 });
-
-

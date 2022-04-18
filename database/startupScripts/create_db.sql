@@ -2,9 +2,10 @@ CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
    github       TEXT               UNIQUE,
-   firstname    TEXT      NOT NULL,
-   lastname     TEXT      NOT NULL,
-   CONSTRAINT login CHECK (email IS NOT NULL OR github IS NOT NULL),
+   firstname    TEXT               NOT NULL,
+   lastname     TEXT               NOT NULL,
+   github_id    TEXT               UNIQUE,
+   CONSTRAINT login CHECK (email IS NOT NULL OR (github IS NOT NULL AND github_id IS NOT NULL)),
    CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
 );
 
@@ -50,7 +51,6 @@ CREATE TABLE IF NOT EXISTS login_user(
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
     CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
 

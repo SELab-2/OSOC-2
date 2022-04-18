@@ -1,62 +1,83 @@
-import {createHash, randomBytes} from 'crypto';
-import express from 'express';
-import {v1} from 'uuid';
+import { createHash, randomBytes } from "crypto";
+import express from "express";
+import { v1 } from "uuid";
 
-import * as config from './config.json';
-import * as ormLoUs from './orm_functions/login_user';
-import * as ormPr from './orm_functions/project';
-import * as skey from './orm_functions/session_key';
-import * as ormSt from './orm_functions/student';
+import * as config from "./config.json";
+import * as ormLoUs from "./orm_functions/login_user";
+import * as ormPr from "./orm_functions/project";
+import * as skey from "./orm_functions/session_key";
+import * as ormSt from "./orm_functions/student";
 import * as session_key from "./routes/session_key.json";
 import {
-  Anything,
-  ApiError,
-  Errors,
-  InternalTypes,
-  Requests,
-  Responses,
-  RouteCallback,
-  Table,
-  Verb,
-  WithUserID
-} from './types';
+    Anything,
+    ApiError,
+    Errors,
+    InternalTypes,
+    Requests,
+    Responses,
+    RouteCallback,
+    Table,
+    Verb,
+    WithUserID,
+} from "./types";
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
  * config.json.
  */
 export const errors: Errors = {
-  cookInvalidID() { return config.apiErrors.invalidID;},
-  cookArgumentError() { return config.apiErrors.argumentError;},
-  cookUnauthenticated() { return config.apiErrors.unauthenticated;},
-  cookInsufficientRights() { return config.apiErrors.insufficientRights;},
-  cookLockedRequest() { return config.apiErrors.lockedRequest;},
+    cookInvalidID() {
+        return config.apiErrors.invalidID;
+    },
+    cookArgumentError() {
+        return config.apiErrors.argumentError;
+    },
+    cookUnauthenticated() {
+        return config.apiErrors.unauthenticated;
+    },
+    cookInsufficientRights() {
+        return config.apiErrors.insufficientRights;
+    },
+    cookLockedRequest() {
+        return config.apiErrors.lockedRequest;
+    },
+    cookPendingAccount() {
+        return config.apiErrors.pendingAccount;
+    },
 
-  cookNonExistent(url: string) {
-    return {
-      http : config.apiErrors.nonExistent.http,
-      reason : config.apiErrors.nonExistent.reason.replace(/~url/, url)
-    };
-  },
+    cookNonExistent(url: string) {
+        return {
+            http: config.apiErrors.nonExistent.http,
+            reason: config.apiErrors.nonExistent.reason.replace(/~url/, url),
+        };
+    },
 
-  cookInvalidVerb(req: express.Request) {
-    return {
-      http : config.apiErrors.invalidVerb.http,
-      reason : config.apiErrors.invalidVerb.reason.replace(/~verb/, req.method)
-                   .replace(/~url/, req.url)
-    };
-  },
+    cookInvalidVerb(req: express.Request) {
+        return {
+            http: config.apiErrors.invalidVerb.http,
+            reason: config.apiErrors.invalidVerb.reason
+                .replace(/~verb/, req.method)
+                .replace(/~url/, req.url),
+        };
+    },
 
-  cookNonJSON(mime: string) {
-    return {
-      http : config.apiErrors.nonJSONRequest.http,
-      reason : config.apiErrors.nonJSONRequest.reason.replace(/~mime/, mime)
-    };
-  },
+    cookNonJSON(mime: string) {
+        return {
+            http: config.apiErrors.nonJSONRequest.http,
+            reason: config.apiErrors.nonJSONRequest.reason.replace(
+                /~mime/,
+                mime
+            ),
+        };
+    },
 
-  cookServerError() { return config.apiErrors.serverError;},
-  cookNoDataError() { return config.apiErrors.noDataError;}
-}
+    cookServerError() {
+        return config.apiErrors.serverError;
+    },
+    cookNoDataError() {
+        return config.apiErrors.noDataError;
+    },
+};
 
 /**
  *  Extracts the session key from the request headers.
@@ -65,16 +86,18 @@ export const errors: Errors = {
  *  @returns The extracted session key.
  *  @see hasFields.
  */
-export function getSessionKey(req: express.Request):
-    string {
-      const authHeader = req.headers.authorization;
-      if (authHeader == undefined ||
-          !authHeader.startsWith(config.global.authScheme)) {
+export function getSessionKey(req: express.Request): string {
+    const authHeader = req.headers.authorization;
+    if (
+        authHeader == undefined ||
+        !authHeader.startsWith(config.global.authScheme)
+    ) {
         throw Error(
-            'No session key - you should check for the session key first.');
-      }
-      return authHeader.replace(config.global.authScheme + " ", "");
+            "No session key - you should check for the session key first."
+        );
     }
+    return authHeader.replace(config.global.authScheme + " ", "");
+}
 
 /**
  *  Promise-based debugging function. Logs the data, then passes it through
@@ -83,11 +106,10 @@ export function getSessionKey(req: express.Request):
  *  @param data The data to log and pass through.
  *  @returns A `Promise<typeof data>` resolving with the given data.
  */
-export function debug(data: unknown):
-    Promise<typeof data> {
-      console.log(data);
-      return Promise.resolve(data);
-    }
+export function debug(data: unknown): Promise<typeof data> {
+    console.log(data);
+    return Promise.resolve(data);
+}
 
 /**
  *  Finishes a promise chain by sending a response.
@@ -96,11 +118,14 @@ export function debug(data: unknown):
  *  @param data The data object to send.
  *  @returns An empty promise (`Promise<void>`).
  */
-export function reply(resp: express.Response, status: number, data: unknown):
-    Promise<void> {
-      resp.status(status).send(data);
-      return Promise.resolve();
-    }
+export function reply(
+    resp: express.Response,
+    status: number,
+    data: unknown
+): Promise<void> {
+    resp.status(status).send(data);
+    return Promise.resolve();
+}
 
 /**
  *  Replies to a request with an error. Wrapper for {@link reply}.
@@ -108,10 +133,12 @@ export function reply(resp: express.Response, status: number, data: unknown):
  *  @param error The API error to send.
  *  @returns An empty promise (`Promise<void>`).
  */
-export function replyError(resp: express.Response, error: ApiError):
-    Promise<void> {
-      return reply(resp, error.http, {success : false, reason : error.reason});
-    }
+export function replyError(
+    resp: express.Response,
+    error: ApiError
+): Promise<void> {
+    return reply(resp, error.http, { success: false, reason: error.reason });
+}
 
 /**
  *  Replies to a request with a success response. Wrapper for {@link reply}.
@@ -119,15 +146,17 @@ export function replyError(resp: express.Response, error: ApiError):
  *  @param data The data to send.
  *  @returns An empty promise (`Promise<void>`).
  */
-export function replySuccess(resp: express.Response, data: unknown):
-    // yes, `data` should  should be a nicely typed value but
-    // how in the hell are we otherwise supposed to add a single field
-    // without messing with the entire type hierarchy???
-    Promise<void> {
-      const _data = data as Anything;
-      _data.success = true;
-      return reply(resp, 200, data);
-    }
+export function replySuccess(
+    resp: express.Response,
+    data: unknown
+): // yes, `data` should  should be a nicely typed value but
+// how in the hell are we otherwise supposed to add a single field
+// without messing with the entire type hierarchy???
+Promise<void> {
+    const _data = data as Anything;
+    _data.success = true;
+    return reply(resp, 200, data);
+}
 
 /**
  *  Adds an Invalid HTTP Verb response to this endpoint. Each HTTP verb that
@@ -136,19 +165,24 @@ export function replySuccess(resp: express.Response, data: unknown):
  *  @param router The Express.js router to install the route on.
  *  @param ep The endpoint (partial) URL to add the verbs to.
  */
-export function addInvalidVerbs(router: express.Router, ep: string):
-    void {
-      router.all(
-          ep, (req: express.Request, res: express.Response): Promise<void> => {
+export function addInvalidVerbs(router: express.Router, ep: string): void {
+    router.all(
+        ep,
+        (req: express.Request, res: express.Response): Promise<void> => {
             return replyError(res, errors.cookInvalidVerb(req));
-          });
-    }
+        }
+    );
+}
 
 /**
  *  Adds Invalid HTTP Verb responses to each endpoint in the list.
  */
-export function addAllInvalidVerbs(router: express.Router, eps: string[]):
-    void { eps.forEach(ep => addInvalidVerbs(router, ep));}
+export function addAllInvalidVerbs(
+    router: express.Router,
+    eps: string[]
+): void {
+    eps.forEach((ep) => addInvalidVerbs(router, ep));
+}
 
 /**
  *  Logs the given request, then passes priority to the next Express.js
@@ -157,11 +191,13 @@ export function addAllInvalidVerbs(router: express.Router, eps: string[]):
  *  @param req The request to log.
  *  @param next The next callback.
  */
-export function logRequest(req: express.Request, next: express.NextFunction):
-    void {
-      console.log(req.method + " " + req.url);
-      next();
-    }
+export function logRequest(
+    req: express.Request,
+    next: express.NextFunction
+): void {
+    console.log(req.method + " " + req.url);
+    next();
+}
 
 /**
  *  Finalizes the promise chain by sending a success response (using
@@ -175,27 +211,30 @@ export function logRequest(req: express.Request, next: express.NextFunction):
  *  @returns An empty promise (`Promise<void>`).
  */
 export async function respOrErrorNoReinject(
-    res: express.Response, prom: Promise<Responses.ApiResponse>):
-    Promise<void> {
-      const isError = (err: Anything): boolean => {
-        return err != undefined && 'http' in err && 'reason' in err
-      };
+    res: express.Response,
+    prom: Promise<Responses.ApiResponse>
+): Promise<void> {
+    const isError = (err: Anything): boolean => {
+        return err != undefined && "http" in err && "reason" in err;
+    };
 
-      return prom
-          .then(data => {
+    return prom
+        .then((data) => {
             console.log(data);
             return Promise.resolve(data);
-          })
-          .then((data: Responses.ApiResponse): Promise<void> =>
-                    replySuccess(res, data as typeof data))
-          .catch((err: unknown): Promise<void> => {
+        })
+        .then(
+            (data: Responses.ApiResponse): Promise<void> =>
+                replySuccess(res, data as typeof data)
+        )
+        .catch((err: unknown): Promise<void> => {
             console.log(err);
             if (isError(err as Anything))
-              return replyError(res, err as ApiError);
+                return replyError(res, err as ApiError);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
             return replyError(res, errors.cookServerError());
-          });
-    }
+        });
+}
 
 /**
  *  Finalizes the promise chain by attempting to refresh the session key in the
@@ -210,10 +249,14 @@ export async function respOrErrorNoReinject(
  *  @returns An empty promise (`Promise<void>`).
  */
 export async function respOrError<T>(
-    req: express.Request, res: express.Response,
-    prom: Promise<Responses.ApiResponse&Responses.Keyed<T>>): Promise<void> {
-  return respOrErrorNoReinject(
-      res, prom.then((res) => refreshAndInjectKey(getSessionKey(req), res)));
+    req: express.Request,
+    res: express.Response,
+    prom: Promise<Responses.ApiResponse & Responses.Keyed<T>>
+): Promise<void> {
+    return respOrErrorNoReinject(
+        res,
+        prom.then((res) => refreshAndInjectKey(getSessionKey(req), res))
+    );
 }
 
 /**
@@ -223,12 +266,14 @@ export async function respOrError<T>(
  * absolute.
  *  @returns An empty promise (`Promise<void>`).
  */
-export async function redirect(res: express.Response,
-                               url: string): Promise<void> {
-  res.status(303);
-  res.header({'Location' : url});
-  res.send();
-  return Promise.resolve();
+export async function redirect(
+    res: express.Response,
+    url: string
+): Promise<void> {
+    res.status(303);
+    res.header({ Location: url });
+    res.send();
+    return Promise.resolve();
 }
 
 /**
@@ -239,27 +284,51 @@ export async function redirect(res: express.Response,
  * an Unauthenticated Request API error upon failure (either the session key is
  * not present, or it's not correct).
  */
-export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
-    return skey.checkSessionKey(obj.sessionkey).then((uid) => {
-        if (uid) {
-            return ormLoUs.getLoginUserById(uid.login_user_id).then(login_user => {
-                if (login_user != null && login_user.account_status != "DISABLED") {
-                    return Promise.resolve({
-                        data: obj, userId: uid.login_user_id, accountStatus: login_user.account_status,
-                        is_admin: login_user.is_admin, is_coach: login_user.is_coach
+export async function checkSessionKey<T extends Requests.KeyRequest>(
+    obj: T,
+    rejectOnPending = true
+): Promise<WithUserID<T>> {
+    return skey
+        .checkSessionKey(obj.sessionkey)
+        .then(async (uid) => {
+            if (uid) {
+                return ormLoUs
+                    .getLoginUserById(uid.login_user_id)
+                    .then((login_user) => {
+                        if (login_user == null) {
+                            return Promise.reject({});
+                        }
+
+                        switch (login_user.account_status) {
+                            case "PENDING":
+                                if (rejectOnPending)
+                                    return Promise.reject(
+                                        errors.cookPendingAccount()
+                                    );
+                                break;
+                            case "DISABLED":
+                                return Promise.reject(
+                                    errors.cookLockedRequest()
+                                );
+                        }
+                        return Promise.resolve({
+                            data: obj,
+                            userId: uid.login_user_id,
+                            accountStatus: login_user.account_status,
+                            is_admin: login_user.is_admin,
+                            is_coach: login_user.is_coach,
+                        });
                     });
-                } else {
-                    return Promise.reject(errors.cookLockedRequest());
-                }
-            })
-        } else {
-            return Promise.reject(errors.cookNonExistent);
-        }
-    }).catch(arg => {
-        console.log(arg);
-        return Promise.reject(errors.cookUnauthenticated());
-    });
+            } else {
+                return Promise.reject({});
+            }
+        })
+        .catch((arg) => {
+            if (arg instanceof Object && "http" in arg && "reason" in arg) {
+                return Promise.reject(arg);
+            }
+            return Promise.reject(errors.cookUnauthenticated());
+        });
 }
 
 /**
@@ -273,18 +342,22 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(obj: T):
  * an Unauthenticated API error. If the session key corresponds to a non-admin
  * user, returns a promise rejecting with an Unauthorized API error.
  */
-export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
-    Promise<WithUserID<T>> {
-  return checkSessionKey(obj)
-      .catch(() => Promise.reject(errors.cookUnauthenticated()))
-      .then(
-          async id =>
-              ormLoUs.searchAllAdminLoginUsers(true)
-                  .catch(() => Promise.reject(errors.cookInsufficientRights()))
-                  .then(admins => admins.some(a => a.login_user_id == id.userId)
-                                      ? Promise.resolve(id)
-                                      : Promise.reject(
-                                            errors.cookInsufficientRights())));
+export async function isAdmin<T extends Requests.KeyRequest>(
+    obj: T,
+    rejectOnPending = true
+): Promise<WithUserID<T>> {
+    return checkSessionKey(obj, rejectOnPending)
+        .catch(() => Promise.reject(errors.cookUnauthenticated()))
+        .then(async (id) =>
+            ormLoUs
+                .searchAllAdminLoginUsers(true)
+                .catch(() => Promise.reject(errors.cookInsufficientRights()))
+                .then((admins) =>
+                    admins.some((a) => a.login_user_id == id.userId)
+                        ? Promise.resolve(id)
+                        : Promise.reject(errors.cookInsufficientRights())
+                )
+        );
 }
 
 /**
@@ -292,10 +365,10 @@ export async function isAdmin<T extends Requests.KeyRequest>(obj: T):
  *  @returns The newly generated session key.
  */
 export function generateKey(): InternalTypes.SessionKey {
-  return createHash('sha256')
-      .update(v1())
-      .update(randomBytes(256))
-      .digest("hex");
+    return createHash("sha256")
+        .update(v1())
+        .update(randomBytes(256))
+        .digest("hex");
 }
 
 /**
@@ -303,12 +376,14 @@ export function generateKey(): InternalTypes.SessionKey {
  *  @param key The old key.
  *  @returns A promise resolving to the new key.
  */
-export async function refreshKey(key: InternalTypes.SessionKey):
-    Promise<InternalTypes.SessionKey> {
-  const futureDate = new Date();
-  futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-  return skey.changeSessionKey(key, generateKey(), futureDate)
-      .then(upd => Promise.resolve(upd.session_key));
+export async function refreshKey(
+    key: InternalTypes.SessionKey
+): Promise<InternalTypes.SessionKey> {
+    const futureDate = new Date(Date.now());
+    futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+    return skey
+        .changeSessionKey(key, generateKey(), futureDate)
+        .then((upd) => Promise.resolve(upd.session_key));
 }
 
 /**
@@ -321,14 +396,16 @@ export async function refreshKey(key: InternalTypes.SessionKey):
  *  @param response The response to inject the new key into.
  *  @returns A promise resolving to the updated response.
  */
-export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
-                                             response: Responses.Keyed<T>):
-    Promise<Responses.Keyed<T>> {
-  return refreshKey(key).then(
-      (newkey: InternalTypes.SessionKey): Promise<Responses.Keyed<T>> => {
-        response.sessionkey = newkey;
-        return Promise.resolve(response);
-      });
+export async function refreshAndInjectKey<T>(
+    key: InternalTypes.SessionKey,
+    response: Responses.Keyed<T>
+): Promise<Responses.Keyed<T>> {
+    return refreshKey(key).then(
+        (newkey: InternalTypes.SessionKey): Promise<Responses.Keyed<T>> => {
+            response.sessionkey = newkey;
+            return Promise.resolve(response);
+        }
+    );
 }
 
 /**
@@ -344,10 +421,14 @@ export async function refreshAndInjectKey<T>(key: InternalTypes.SessionKey,
  *  @param callback The function which will respond.
  */
 export function route<T extends Responses.ApiResponse>(
-    router: express.Router, verb: Verb, path: string,
-    callback: RouteCallback<Responses.Keyed<T>>): void {
-  router[verb](path, (req: express.Request, res: express.Response) =>
-                         respOrError(req, res, callback(req)));
+    router: express.Router,
+    verb: Verb,
+    path: string,
+    callback: RouteCallback<Responses.Keyed<T>>
+): void {
+    router[verb](path, (req: express.Request, res: express.Response) =>
+        respOrError(req, res, callback(req))
+    );
 }
 
 /**
@@ -358,29 +439,37 @@ export function route<T extends Responses.ApiResponse>(
  *  @param path The (relative) route path.
  *  @param callback The function which will respond.
  */
-export function routeKeyOnly(router: express.Router, verb: Verb, path: string,
-                             callback: RouteCallback<Responses.Key>) {
-  router[verb](
-      path,
-      (req: express.Request, res: express.Response) => respOrErrorNoReinject(
-          res, callback(req)
-                   .then(toupd => refreshKey(toupd.sessionkey))
-                   .then(upd => Promise.resolve({sessionkey : upd}))));
+export function routeKeyOnly(
+    router: express.Router,
+    verb: Verb,
+    path: string,
+    callback: RouteCallback<Responses.Key>
+) {
+    router[verb](path, (req: express.Request, res: express.Response) =>
+        respOrErrorNoReinject(
+            res,
+            callback(req)
+                .then((toupd) => refreshKey(toupd.sessionkey))
+                .then((upd) => Promise.resolve({ sessionkey: upd }))
+        )
+    );
 }
 
 /**
  *  Checks whether the object contains a valid ID.
  */
 export async function isValidID<T extends Requests.IdRequest>(
-    obj: T, table: Table): Promise<T> {
-  const returnObj: {[key in Table]: boolean} = {
-    "student" : await ormSt.getStudent(obj.id) != null,
-    "project" : await ormPr.getProjectById(obj.id) != null
-  };
+    obj: T,
+    table: Table
+): Promise<T> {
+    const returnObj: { [key in Table]: boolean } = {
+        student: (await ormSt.getStudent(obj.id)) != null,
+        project: (await ormPr.getProjectById(obj.id)) != null,
+    };
 
-  return table in returnObj && returnObj[table] != null
-             ? Promise.resolve(obj)
-             : Promise.reject(errors.cookInvalidID());
+    return table in returnObj && returnObj[table] != null
+        ? Promise.resolve(obj)
+        : Promise.reject(errors.cookInvalidID());
 }
 
 /**
@@ -388,8 +477,9 @@ export async function isValidID<T extends Requests.IdRequest>(
  * preferred home from the config file.
  */
 export function setupRedirect(router: express.Router, ep: string): void {
-  router.get('/',
-             (_, res) => redirect(res, config.global.preferred + ep + "/all"));
+    router.get("/", (_, res) =>
+        redirect(res, config.global.preferred + ep + "/all")
+    );
 }
 
 /**
@@ -399,10 +489,9 @@ export function setupRedirect(router: express.Router, ep: string): void {
  *  @param def The default value
  *  @returns The default if the value is null, otherwise the value itself.
  */
-export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
-  if (vl == null || vl == undefined)
-    return def;
-  return vl;
+export function getOrDefault<T>(vl: T | null | undefined, def: T): T {
+    if (vl == null || vl == undefined) return def;
+    return vl;
 }
 
 /**
@@ -413,15 +502,15 @@ export function getOrDefault<T>(vl: T|null|undefined, def: T): T {
  *  @returns A Promise which will resolve to the given value if it's non-null,
  * or reject otherwise.
  */
-export function getOrReject<T>(vl: T|null|undefined): Promise<T> {
-  if (vl == null || vl == undefined)
-    return Promise.reject(errors.cookNoDataError());
-  return Promise.resolve(vl);
+export function getOrReject<T>(vl: T | null | undefined): Promise<T> {
+    if (vl == null || vl == undefined)
+        return Promise.reject(errors.cookNoDataError());
+    return Promise.resolve(vl);
 }
 
 export function queryToBody(req: express.Request) {
-  for (const key in req.query) {
-    req.body[key] = req.query[key];
-  }
-  return req;
+    for (const key in req.query) {
+        req.body[key] = req.query[key];
+    }
+    return req;
 }
