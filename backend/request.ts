@@ -3,7 +3,13 @@ import express from "express";
 import * as validator from "validator";
 
 import * as config from "./config.json";
-import { Anything, FollowupType, InternalTypes, Requests } from "./types";
+import {
+    Anything,
+    Decision,
+    FollowupType,
+    InternalTypes,
+    Requests,
+} from "./types";
 import { errors, getSessionKey } from "./utility";
 
 /**
@@ -255,9 +261,9 @@ export async function parseSuggestStudentRequest(
     return hasFields(req, ["suggestion", "senderId"], types.id).then(() => {
         const sug: unknown = req.body.suggestion;
         if (
-            sug != "YES" &&
-            sug != "MAYBE" &&
-            sug != "NO" &&
+            sug != Decision.YES &&
+            sug != Decision.MAYBE &&
+            sug != Decision.NO &&
             req.body.senderId != null
         )
             return rejector();
@@ -311,9 +317,9 @@ export async function parseFilterStudentsRequest(
         ("emailFilter" in req.body &&
             !validator.default.isEmail(req.body.emailFilter)) ||
         ("statusFilter" in req.body &&
-            req.body.statusFilter !== "YES" &&
-            req.body.statusFilter !== "MAYBE" &&
-            req.body.statusFilter !== "NO")
+            req.body.statusFilter !== Decision.YES &&
+            req.body.statusFilter !== Decision.MAYBE &&
+            req.body.statusFilter !== Decision.NO)
     ) {
         return rejector();
     } else {
@@ -426,9 +432,9 @@ export async function parseFinalizeDecisionRequest(
     return hasFields(req, [], types.id).then(() => {
         if ("reply" in req.body) {
             if (
-                req.body.reply != "YES" &&
-                req.body.reply != "MAYBE" &&
-                req.body.reply != "NO"
+                req.body.reply != Decision.YES &&
+                req.body.reply != Decision.MAYBE &&
+                req.body.reply != Decision.NO
             )
                 return rejector();
         }

@@ -262,8 +262,7 @@ const Index: NextPage = () => {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        firstName: registerFirstName,
-                        lastName: registerLastName,
+                        firstName: registerFirstName + registerLastName,
                         email: registerEmail,
                         pass: encryptedPassword,
                     }),
