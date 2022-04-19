@@ -200,7 +200,7 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllLoginUser"
+              "$ref": "#/definitions/AllLoginUsers"
             }
           }
         }
@@ -459,10 +459,54 @@
         ],
         "responses": {
           "200": {
-            "description": "The response is empty.",
+            "description": "The response is an empty object.",
             "schema": {
               "$ref": "#/definitions/Form"
             }
+          }
+        }
+      }
+    },
+    "/github": {
+      "get": {
+        "tags": [
+          "github"
+        ],
+        "description": "Redirects towards another github url.",
+        "operationId": "github",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 towards another url"
+          }
+        }
+      }
+    },
+    "/github/challenge": {
+      "get": {
+        "tags": [
+          "github"
+        ],
+        "description": "Attempts to get a github exchange access token.",
+        "operationId": "github_challenge",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "code",
+            "description": "The code for the post request.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "state",
+            "description": "The state.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is empty."
           }
         }
       }
