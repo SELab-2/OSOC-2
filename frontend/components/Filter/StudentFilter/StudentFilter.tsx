@@ -1,20 +1,22 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import Image from "next/image";
-import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
-import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import CheckIcon from "../../../public/images/green_check_mark.png";
-import CheckIconColor from "../../../public/images/green_check_mark_color.png";
-import ExclamationIcon from "../../../public/images/exclamation_mark.png";
-import ExclamationIconColor from "../../../public/images/exclamation_mark_color.png";
 import { getNextSort, Role, Sort, Student } from "../../../types/types";
-import { RolesComponent } from "../../RoleComponent/RolesComponent";
 import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
+import Image from "next/image";
+import CheckIconColor from "../../../public/images/green_check_mark_color.png";
+import CheckIcon from "../../../public/images/green_check_mark.png";
+import ExclamationIconColor from "../../../public/images/exclamation_mark_color.png";
+import ExclamationIcon from "../../../public/images/exclamation_mark.png";
+import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
+import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
 }> = ({ setFilteredStudents }) => {
+    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const router = useRouter();
+
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
     const [lastNameFilter, setLastNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
@@ -26,12 +28,14 @@ export const StudentFilter: React.FC<{
     const [filterNo, setFilterNo] = useState<boolean>(false);
     const [alumni, setAlumni] = useState<boolean>(false);
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
-    const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [osocYear, setOsocYear] = useState<string>("");
+
+    // Roles used in the dropdown
     const [roles, setRoles] = useState<Array<Role>>([]);
-    const router = useRouter();
+    // A set of active roles
+    const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
+    const [dropdownActive, setDropdownActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
         const sessionKey =
@@ -62,10 +66,11 @@ export const StudentFilter: React.FC<{
     };
 
     useEffect(() => {
-        if (roles === []) {
-            fetchRoles().then();
+        if (roles.length === 0) {
+            fetchRoles().then(() => search());
+        } else {
+            search().then();
         }
-        search().then();
     }, [
         firstNameSort,
         lastNameSort,
@@ -73,6 +78,7 @@ export const StudentFilter: React.FC<{
         alumni,
         studentCoach,
         statusFilter,
+        selectedRoles,
     ]);
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
@@ -166,7 +172,7 @@ export const StudentFilter: React.FC<{
         if (osocYear !== "") {
             filters.push(`osocYear=${osocYear}`);
         }
-        if (selectedRoles.length !== 0) {
+        if (selectedRoles.size !== 0) {
             filters.push(`roleFilter=${selectedRoles.toString()}`);
         }
         if (statusFilter !== "") {
@@ -206,15 +212,15 @@ export const StudentFilter: React.FC<{
         }
     };
 
-    const changeSelectedRolesProp = (changeRole: string) => {
-        const roles = selectedRoles;
-        const index = selectedRoles.indexOf(changeRole, 0);
-        if (index > -1) {
-            roles.splice(index, 1);
+    const selectRole = (role: string) => {
+        // Unselect role
+        if (selectedRoles.has(role)) {
+            selectedRoles.delete(role);
         } else {
-            roles.push(changeRole);
+            // Select role
+            selectedRoles.add(role);
         }
-        setSelectedRoles(roles);
+        setSelectedRoles(selectedRoles);
     };
 
     const searchPress = (e: SyntheticEvent) => {
@@ -322,18 +328,37 @@ export const StudentFilter: React.FC<{
                 Student Coach Only
             </button>
 
-            <div className="dropdown">
-                <div className="dropdown-trigger">Roles</div>
+            <div className={`dropdown ${dropdownActive ? "is-active" : ""}`}>
+                <div
+                    className="dropdown-trigger"
+                    onClick={() => setDropdownActive(!dropdownActive)}
+                >
+                    {selectedRoles.size > 0
+                        ? selectedRoles.size === 1
+                            ? `${selectedRoles.size} role selected`
+                            : `${selectedRoles.size} roles selected`
+                        : "No role selected"}
+                </div>
                 <div className="dropdown-menu">
-                    {roles !== undefined
-                        ? roles.map((role) => (
-                              <RolesComponent
-                                  role={role}
-                                  key={role.role_id}
-                                  setSelected={changeSelectedRolesProp}
-                              />
-                          ))
-                        : null}
+                    <div className="dropdown-content">
+                        {roles !== undefined
+                            ? roles.map((role) => (
+                                  <div
+                                      className={`${
+                                          styles.dropdownItem
+                                      } dropdown-item ${
+                                          selectedRoles.has(role.name)
+                                              ? styles.selected
+                                              : ""
+                                      }`}
+                                      key={role.role_id}
+                                      onClick={() => selectRole(role.name)}
+                                  >
+                                      {role.name}
+                                  </div>
+                              ))
+                            : null}
+                    </div>
                 </div>
             </div>
 
