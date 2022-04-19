@@ -1,13 +1,9 @@
 import prisma from "../prisma/prisma";
 
-import {
-    CreateLoginUser,
-    FilterBoolean,
-    FilterSort,
-    FilterString,
-    UpdateLoginUser,
-} from "./orm_types";
-import { account_status_enum } from "@prisma/client";
+
+import {CreateLoginUser, FilterBoolean, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
+import {account_status_enum} from "@prisma/client";
+
 
 /**
  *
@@ -212,6 +208,8 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
+ * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coach)
+ * @param adminFilter adminstatus that we are filtering on (or undefined if not filtering on admin)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
@@ -219,6 +217,7 @@ export async function getLoginUserById(loginUserId: number) {
  * @param isAdmin: true or false if we want only admins resp no admins or undefined if we don't want to filter on this field
  * @returns the filtered loginUsers with their person data in a promise
  */
+
 export async function filterLoginUsers(
     nameFilter: FilterString,
     emailFilter: FilterString,
