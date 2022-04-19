@@ -1,5 +1,5 @@
 import styles from "../Filter.module.css";
-import React, { SyntheticEvent, useContext, useState } from "react";
+import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
@@ -10,12 +10,11 @@ import ExclamationIconColor from "../../../public/images/exclamation_mark_color.
 import { getNextSort, Role, Sort, Student } from "../../../types/types";
 import { RolesComponent } from "../../RoleComponent/RolesComponent";
 import SessionContext from "../../../contexts/sessionProvider";
-//import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 
 export const StudentFilter: React.FC<{
-    roles: Array<Role>;
     setFilteredStudents: (user: Array<Student>) => void;
-}> = ({ roles, setFilteredStudents }) => {
+}> = ({ setFilteredStudents }) => {
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
     const [lastNameFilter, setLastNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
@@ -28,15 +27,53 @@ export const StudentFilter: React.FC<{
     const [alumni, setAlumni] = useState<boolean>(false);
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [selectedRoles, setSelectedRoles] = useState<Array<string>>([]);
-    const { sessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey, setSessionKey } = useContext(SessionContext);
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [osocYear, setOsocYear] = useState<string>("");
-    //const router = useRouter()
+    const [roles, setRoles] = useState<Array<Role>>([]);
+    const router = useRouter();
 
-    //TODO dit werkt nog niet
-    //useEffect(() => {
-    //    search().then()
-    //}, [firstNameSort,lastNameSort, emailSort, alumni, studentCoach, statusFilter])
+    const fetchRoles = async () => {
+        const sessionKey =
+            getSessionKey != undefined ? await getSessionKey() : "";
+        const responseRoles = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .then((json) => {
+                if (!json.success) {
+                    return { success: false };
+                } else return json;
+            })
+            .catch((err) => {
+                console.log(err);
+                return { success: false };
+            });
+        if (setSessionKey) {
+            setSessionKey(responseRoles.sessionkey);
+        }
+        setRoles(responseRoles.data);
+    };
+
+    useEffect(() => {
+        if (roles === []) {
+            fetchRoles().then();
+        }
+        search().then();
+    }, [
+        firstNameSort,
+        lastNameSort,
+        emailSort,
+        alumni,
+        studentCoach,
+        statusFilter,
+    ]);
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -136,38 +173,37 @@ export const StudentFilter: React.FC<{
             filters.push(`statusFilter=${statusFilter}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        //await router.push(`/student/filter${query}`)
+        await router.push(`/students${query}`);
 
-        console.log(query);
-        console.log(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query
-        );
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `auth/osoc2 ${sessionKey}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            }
-        )
-            .then((response) => response.json())
-            .then((json) => {
-                console.log(json);
-                if (!json.success) {
+        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        if (sessionKey !== "") {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }
+            )
+                .then((response) => response.json())
+                .then((json) => {
+                    console.log(json);
+                    if (!json.success) {
+                        return { success: false };
+                    } else return json;
+                })
+                .catch((err) => {
+                    console.log(err);
                     return { success: false };
-                } else return json;
-            })
-            .catch((err) => {
-                console.log(err);
-                return { success: false };
-            });
-        if (setSessionKey) {
-            setSessionKey(response.sessionkey);
+                });
+            if (setSessionKey) {
+                setSessionKey(response.sessionkey);
+            }
+            setFilteredStudents(response.data);
         }
-        setFilteredStudents(response.data);
     };
 
     const changeSelectedRolesProp = (changeRole: string) => {
@@ -286,15 +322,19 @@ export const StudentFilter: React.FC<{
                 Student Coach Only
             </button>
 
-            <div>
-                roles
-                {roles.map((role) => (
-                    <RolesComponent
-                        role={role}
-                        key={role.role_id}
-                        setSelected={changeSelectedRolesProp}
-                    />
-                ))}
+            <div className="dropdown">
+                <div className="dropdown-trigger">Roles</div>
+                <div className="dropdown-menu">
+                    {roles !== undefined
+                        ? roles.map((role) => (
+                              <RolesComponent
+                                  role={role}
+                                  key={role.role_id}
+                                  setSelected={changeSelectedRolesProp}
+                              />
+                          ))
+                        : null}
+                </div>
             </div>
 
             <div className={styles.buttons}>
