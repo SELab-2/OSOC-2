@@ -5,7 +5,7 @@ import CoachIconColor from "../../public/images/coach_icon_color.png";
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import React, { SyntheticEvent, useContext, useState } from "react";
+import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser } from "../../types/types";
@@ -15,8 +15,6 @@ export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    console.log("loginuser:");
-    console.log(user);
     const [name] = useState<string>(user.person.firstname);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
@@ -25,8 +23,14 @@ export const User: React.FC<{
     const { sessionKey, setSessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
-    console.log("admin: " + isAdmin);
-    console.log("coach: " + isCoach);
+
+    // needed for when an update is received via websockets
+    useEffect(() => {
+        setIsAdmin(user.is_admin);
+        setIsCoach(user.is_coach);
+        setStatus(user.account_status);
+    }, [user]);
+
     const setUserRole = async (
         route: string,
         changed_val: string,
@@ -39,7 +43,6 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
-        console.log(sessionKey);
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +

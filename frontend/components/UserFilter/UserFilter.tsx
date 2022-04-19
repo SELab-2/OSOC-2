@@ -26,15 +26,13 @@ export const UserFilter: React.FC<{
     );
     const { getSessionKey, setSessionKey } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-
     const router = useRouter();
 
     const { socket } = useSockets();
 
     useEffect(() => {
-        socket.connect(); // connect to the socket on mount
         return () => {
-            socket.disconnect();
+            socket.off("loginUserUpdated");
         }; // disconnect from the socket on dismount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -47,14 +45,31 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
 
+    /**
+     * when the server notifies that a user has changed, we should re-fetch to get the latest changes
+     * we need the dependency array to make sure we use the latest version of the filter fields
+     */
     useEffect(() => {
+        socket.off("loginUserUpdated"); // remove the earlier added listeners
+        // add new listener
         socket.on("loginUserUpdated", () => {
+            if (loading) return;
             search().then();
-            console.log("loginUseUpdated received");
         });
-    }, [socket]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        socket,
+        nameFilter,
+        nameSort,
+        emailFilter,
+        emailSort,
+        statusFilter,
+        coachFilter,
+        adminFilter,
+    ]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -149,7 +164,6 @@ export const UserFilter: React.FC<{
 
         const sessionKey = getSessionKey ? await getSessionKey() : "";
         if (sessionKey !== "") {
-            console.log(sessionKey);
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
                 {
@@ -168,8 +182,7 @@ export const UserFilter: React.FC<{
             if (setSessionKey && response && response.sessionkey) {
                 setSessionKey(response.sessionkey);
             }
-            console.log("search called!");
-            updateUsers(response.data); //TODO: waarom kan response hier undefined zijn?
+            updateUsers(response.data);
             isLoading(false);
         }
     };

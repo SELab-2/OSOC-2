@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
 import { UserFilter } from "../components/UserFilter/UserFilter";
@@ -12,10 +12,6 @@ import { LoginUser } from "../types/types";
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
 
-    useEffect(() => {
-        console.log(users);
-    }, [users]);
-
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
             const index = users.indexOf(user, 0);
@@ -26,8 +22,7 @@ const Users: NextPage = () => {
         }
     };
     const updateUsers = (users: Array<LoginUser>) => {
-        console.log(users);
-        setUsers([...users]);
+        setUsers(users);
     };
 
     return (

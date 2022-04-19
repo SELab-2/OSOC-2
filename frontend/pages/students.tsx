@@ -38,11 +38,9 @@ const Students: NextPage = () => {
     };
 
     useEffect(() => {
-        socket.connect(); // connect to the socket on mount
         fetchStudents().then();
         return () => {
-            console.log("dismount!");
-            socket.disconnect();
+            socket.off("formAdded");
         }; // disconnect from the socket on dismount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -50,7 +48,6 @@ const Students: NextPage = () => {
     useEffect(() => {
         socket.on("formAdded", () => {
             fetchStudents().then();
-            console.log("fetch students executed!");
         });
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
