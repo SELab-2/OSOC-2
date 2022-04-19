@@ -169,11 +169,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(
-        req,
-        ["isAdmin", "isCoach", "accountStatus"],
-        types.id
-    ).then(() => {
+    return hasFields(req, [], types.id).then(() => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),

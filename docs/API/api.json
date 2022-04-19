@@ -7,28 +7,56 @@
   },
   "tags": [
     {
-      "name": "login",
-      "description": "Everything about the login."
-    },
-    {
-      "name": "student",
-      "description": "Everything about students."
+      "name": "admin",
+      "description": "Everything about admins."
     },
     {
       "name": "coach",
       "description": "Everything about coaches."
     },
     {
-      "name": "admin",
-      "description": "Everything about admins."
+      "name": "followup",
+      "description": "Everything about followups."
+    },
+    {
+      "name": "form",
+      "description": "Everything about the form."
+    },
+    {
+      "name": "github",
+      "description": "Everything about the login with github."
+    },
+    {
+      "name": "login",
+      "description": "Everything about the login."
     },
     {
       "name": "project",
       "description": "Everything about projects."
     },
     {
-      "name": "followup",
-      "description": "Everything about followups."
+      "name": "reset",
+      "description": "Everything about resetting a password."
+    },
+    {
+      "name": "role",
+      "description": "Everything about roles."
+    },
+    {
+      "name": "student",
+      "description": "Everything about students."
+    },
+    {
+      "name": "template",
+      "description": "Everything about sending emails."
+    },
+    {
+      "name": "user",
+      "description": "Everything about users."
+    },
+    {
+      "name": "verify",
+      "description": "Everything about verifying the session keys."
     }
   ],
   "schemes": [
@@ -36,6 +64,122 @@
     "http"
   ],
   "paths": {
+    "/admin/all": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Lists all the admins.",
+        "operationId": "all_admins",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllLoginUser"
+            }
+          }
+        }
+      }
+    },
+    "/admin/<admin-id>": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Updates the admin in the system.",
+        "operationId": "update_admin",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the user.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "isCoach",
+            "description": "True if the user is a coach, else False.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "isAdmin",
+            "description": "True if the user is an admin, else False.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "accountStatus",
+            "description": "Shows the status of the account.",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "PENDING",
+              "DISABLED"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "If the session key is invalid or the id is not an id of an admin, an error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/ModifyLoginUser"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Removes the given admin from the system.",
+        "operationId": "admin_id_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the user.",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -632,37 +776,6 @@
       }
     },
     "/coach/<coach-id>": {
-      "get": {
-        "tags": [
-          "coach"
-        ],
-        "description": "Get the selected coach from the system.",
-        "operationId": "get_coach_id",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "coach_id",
-            "description": "The unique id of the coach.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/LoginUserSession"
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
           "coach"
@@ -739,140 +852,6 @@
         }
       }
     },
-    "/admin/all": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "description": "Lists all the users that have a login in the system.",
-        "operationId": "all_login_users",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllLoginUser"
-            }
-          }
-        }
-      }
-    },
-    "/admin/<admin-id>": {
-      "get": {
-        "tags": [
-          "admin"
-        ],
-        "description": "Get the selected admin from the system.",
-        "operationId": "get_admin_id",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "login_user_id",
-            "description": "The unique id of the admin.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/LoginUserSession"
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "admin"
-        ],
-        "description": "Updates the admin in the system.",
-        "operationId": "update_admin",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "name",
-            "description": "The name of the project.",
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "isCoach",
-            "description": "Shows the user is a coach.",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "isAdmin",
-            "description": "Shows if the user is a coach.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "accountStatus",
-            "description": "Shows the status of the account",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The admin field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "admin"
-        ],
-        "description": "Removes the given admin from the system.",
-        "operationId": "admin_id_delete",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a sessionkey for the next action.",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      }
-    },
     "/verify": {
       "get": {
         "tags": [
@@ -926,6 +905,63 @@
         "name": "Sessionkey"
       }
     },
+    "LoginUser": {
+      "type": "object",
+      "properties": {
+        "person_data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "github": {
+              "type": "string"
+            }
+          }
+        },
+        "coach": {
+          "type": "boolean"
+        },
+        "admin": {
+          "type": "boolean"
+        },
+        "activated": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "LoginUser"
+      }
+    },
+    "LoginUserList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/LoginUser"
+      },
+      "xml": {
+        "name": "LoginUserList"
+      }
+    },
+    "AllLoginUser": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/LoginUserList"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "AllLoginUser"
+      }
+    },
     "Login": {
       "type": "object",
       "properties": {
@@ -937,7 +973,37 @@
         },
         "is_coach": {
           "type": "boolean"
+        },
+        "email_status": {
+          "type": "string",
+          "enum": [
+            "ACTIVATED",
+            "PENDING",
+            "DISABLED"
+          ]
         }
+      }
+    },
+    "ModifyLoginUser": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "ModifyLoginUser"
       }
     },
     "NameId": {
@@ -1524,63 +1590,6 @@
       },
       "xml": {
         "name": "Project_session"
-      }
-    },
-    "LoginUser": {
-      "type": "object",
-      "properties": {
-        "person_data": {
-          "$ref": "#/definitions/NameId"
-        },
-        "coach": {
-          "type": "boolean"
-        },
-        "admin": {
-          "type": "boolean"
-        },
-        "activated": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "LoginUser"
-      }
-    },
-    "LoginUserSession": {
-      "type": "object",
-      "properties": {
-        "login person_data": {
-          "$ref": "#/definitions/LoginUser"
-        },
-        "sessionkey": {
-          "$ref": "#/definitions/Sessionkey"
-        }
-      },
-      "xml": {
-        "name": "LoginUser"
-      }
-    },
-    "LoginUserList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/LoginUser"
-      },
-      "xml": {
-        "name": "LoginUserList"
-      }
-    },
-    "AllLoginUser": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/LoginUserList"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "AllLoginUser"
       }
     },
     "AllVerify": {

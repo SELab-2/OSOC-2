@@ -60,6 +60,12 @@ async function getAdmin(req: express.Request): Promise<Responses.Admin> {
         );
 }
 
+/**
+ *  Attempts to update a certain admin in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
@@ -112,7 +118,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
 
 /**
  *  Gets the router for all `/admin/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/admin/`
+ *  @returns An Express.js {@link express.Router} routing all `/admin/`
  * endpoints.
  */
 export function getRouter(): express.Router {
