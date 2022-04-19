@@ -9,6 +9,7 @@ import React, { SyntheticEvent, useContext, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser } from "../../types/types";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -20,6 +21,7 @@ export const User: React.FC<{
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
     const [status, setStatus] = useState<AccountStatus>(user.account_status);
     const { sessionKey, setSessionKey } = useContext(SessionContext);
+    const { socket } = useSockets();
     const userId = user.login_user_id;
 
     const setUserRole = async (
@@ -34,7 +36,8 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
-        return await fetch(
+        console.log(sessionKey);
+        const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -64,6 +67,10 @@ export const User: React.FC<{
                 console.log(err);
                 return { success: false };
             });
+        if (res.success !== false) {
+            socket.emit("updateUser", userId);
+        }
+        return res;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {

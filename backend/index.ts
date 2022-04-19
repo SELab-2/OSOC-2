@@ -13,6 +13,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from "./types";
+import { registerLoginUserHandlers } from "./websocket_events/login_user";
 
 const app: express.Application = express();
 const port: number = config.port;
@@ -49,6 +50,7 @@ config.global.homes.forEach((home) => util.addInvalidVerbs(app, home + "/"));
 io.on("connection", (socket) => {
     console.log("websocket connection achieved " + socket.id);
     console.log("number of clients:" + io.engine.clientsCount);
+    registerLoginUserHandlers(io, socket);
 });
 httpServer.listen(port, () => {
     console.log(`TypeScript with Express

@@ -10,6 +10,7 @@ import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import { AccountStatus, getNextSort, LoginUser, Sort } from "../../types/types";
 import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
     updateUsers: (users: Array<LoginUser>) => void;
@@ -28,6 +29,16 @@ export const UserFilter: React.FC<{
 
     const router = useRouter();
 
+    const { socket } = useSockets();
+
+    useEffect(() => {
+        socket.connect(); // connect to the socket on mount
+        return () => {
+            socket.disconnect();
+        }; // disconnect from the socket on dismount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
      * the query parameters
@@ -37,6 +48,13 @@ export const UserFilter: React.FC<{
         if (loading) return;
         search().then();
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
+
+    useEffect(() => {
+        socket.on("loginUserUpdated", () => {
+            search().then();
+            console.log("loginUseUpdated received");
+        });
+    }, [socket]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -131,6 +149,7 @@ export const UserFilter: React.FC<{
 
         const sessionKey = getSessionKey ? await getSessionKey() : "";
         if (sessionKey !== "") {
+            console.log(sessionKey);
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
                 {
@@ -149,7 +168,8 @@ export const UserFilter: React.FC<{
             if (setSessionKey && response && response.sessionkey) {
                 setSessionKey(response.sessionkey);
             }
-            updateUsers(response.data);
+            console.log("search called!");
+            updateUsers(response.data); //TODO: waarom kan response hier undefined zijn?
             isLoading(false);
         }
     };
