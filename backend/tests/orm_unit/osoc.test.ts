@@ -1,18 +1,21 @@
-import {prismaMock} from "./singleton";
+import { prismaMock } from "./singleton";
 import {
-    createOsoc, deleteOsoc, deleteOsocByYear,
+    createOsoc,
+    deleteOsoc,
+    deleteOsocByYear,
     getAllOsoc,
     getOsocAfterYear,
     getOsocBeforeYear,
     getOsocByYear,
-    updateOsoc
+    updateOsoc,
+    getLatestOsoc,
 } from "../../orm_functions/osoc";
-import {UpdateOsoc} from "../../orm_functions/orm_types";
+import { UpdateOsoc } from "../../orm_functions/orm_types";
 
 const returnValue = {
     osoc_id: 0,
-    year: 2022
-}
+    year: 2022,
+};
 
 test("should create a new OSOC edition and return it", async () => {
     prismaMock.osoc.create.mockResolvedValue(returnValue);
@@ -20,13 +23,25 @@ test("should create a new OSOC edition and return it", async () => {
 });
 
 test("should return all osoc editions", async () => {
-    const returnValue = [{
-        osoc_id: 0,
-        year: 2022
-    }];
+    const returnValue = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
 
     prismaMock.osoc.findMany.mockResolvedValue(returnValue);
     await expect(getAllOsoc()).resolves.toEqual(returnValue);
+});
+
+test("should return the latest osoc editions", async () => {
+    const returnValue = {
+        osoc_id: 0,
+        year: 2022,
+    };
+
+    prismaMock.osoc.findFirst.mockResolvedValue(returnValue);
+    await expect(getLatestOsoc()).resolves.toEqual(returnValue);
 });
 
 test("should return the osoc edition of the given year", async () => {
@@ -35,20 +50,24 @@ test("should return the osoc edition of the given year", async () => {
 });
 
 test("should return every osoc edition BEFORE (exclusive) the given year", async () => {
-    const returnValue = [{
-        osoc_id: 0,
-        year: 2022
-    }];
+    const returnValue = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
 
     prismaMock.osoc.findMany.mockResolvedValue(returnValue);
     await expect(getOsocBeforeYear(2023)).resolves.toEqual(returnValue);
 });
 
 test("should return every osoc edition AFTER (exclusive) the given year", async () => {
-    const returnValue = [{
-        osoc_id: 0,
-        year: 2022
-    }];
+    const returnValue = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
 
     prismaMock.osoc.findMany.mockResolvedValue(returnValue);
     await expect(getOsocAfterYear(2020)).resolves.toEqual(returnValue);
@@ -57,16 +76,16 @@ test("should return every osoc edition AFTER (exclusive) the given year", async 
 test("should update the osoc edition", async () => {
     const updatedOsoc: UpdateOsoc = {
         osocId: 0,
-        year: 2023
-    }
+        year: 2023,
+    };
 
-    prismaMock.osoc.update.mockResolvedValue(returnValue)
+    prismaMock.osoc.update.mockResolvedValue(returnValue);
     await expect(updateOsoc(updatedOsoc)).resolves.toEqual(returnValue);
 });
 
 test("should delete the given osoc by id and return the deleted record", async () => {
-   prismaMock.osoc.delete.mockResolvedValue(returnValue);
-   await expect(deleteOsoc(0)).resolves.toEqual(returnValue);
+    prismaMock.osoc.delete.mockResolvedValue(returnValue);
+    await expect(deleteOsoc(0)).resolves.toEqual(returnValue);
 });
 
 test("should delete the given osoc by year and return the deleted record", async () => {

@@ -2,7 +2,8 @@
   "extends": [
       "eslint:recommended",
       "next/core-web-vitals",
-      "plugin:@typescript-eslint/recommended"
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended"
   ],
   "settings": {
     "next": {
@@ -10,19 +11,19 @@
     }
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": ["jest", "@typescript-eslint"],
+  "plugins": ["jest", "@typescript-eslint", "prettier"],
   "env": {
     "jest": true
   },
   "ignorePatterns": ["**/docs/*"],
   "rules": {
-    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/no-explicit-any": [
         "error",
         { "fixToUnknown": true }
-    ]
+    ],
+    "prettier/prettier": ["error", {"tabWidth": 4}]
   }
 }

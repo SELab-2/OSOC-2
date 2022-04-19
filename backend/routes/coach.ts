@@ -1,11 +1,11 @@
-import {account_status_enum} from '@prisma/client';
-import express from 'express';
+import { account_status_enum } from "@prisma/client";
+import express from "express";
 
-import * as ormLU from '../orm_functions/login_user';
-import * as ormP from '../orm_functions/person';
-import * as rq from '../request';
-import {InternalTypes, Responses} from '../types';
-import * as util from '../utility';
+import * as ormLU from "../orm_functions/login_user";
+import * as rq from "../request";
+import { InternalTypes, Responses } from "../types";
+import * as util from "../utility";
+import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -14,23 +14,35 @@ import * as util from '../utility';
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
-    return rq.parseCoachAllRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(
-            async parsed =>
-                ormLU.searchAllCoachLoginUsers(true)
-                    .then(obj =>
-                        obj.map(val => ({
-                            person_data : {
-                                id : val.person.person_id,
-                                name : val.person.firstname + " " + val.person.lastname,
-                                email: val.person.email
-                            },
-                            coach : val.is_coach,
-                            admin : val.is_admin,
-                            activated : val.account_status as string
-                        })))
-                    .then(obj => Promise.resolve({sessionkey : parsed.data.sessionkey, data : obj})));
+    return rq
+        .parseCoachAllRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (parsed) =>
+            ormLU
+                .searchAllCoachLoginUsers(true)
+                .then((obj) =>
+                    obj.map((val) => ({
+                        person_data: {
+                            id: val.person.person_id,
+                            name:
+                                val.person.firstname +
+                                " " +
+                                val.person.lastname,
+                            email: val.person.email,
+                            github: val.person.github,
+                        },
+                        coach: val.is_coach,
+                        admin: val.is_admin,
+                        activated: val.account_status as string,
+                    }))
+                )
+                .then((obj) =>
+                    Promise.resolve({
+                        sessionkey: parsed.data.sessionkey,
+                        data: obj,
+                    })
+                )
+        );
 }
 
 /**
@@ -40,11 +52,15 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function getCoach(req: express.Request): Promise<Responses.Coach> {
-  return rq.parseSingleCoachRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(() => {
-        return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
-      });
+    return rq
+        .parseSingleCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(() => {
+            return Promise.reject({
+                http: 410,
+                reason: "Deprecated endpoint.",
+            });
+        });
 }
 
 /**
@@ -53,27 +69,35 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(req: express.Request):
-    Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return rq.parseUpdateCoachRequest(req)
-      .then(parsed => util.checkSessionKey(parsed))
-      .then(async parsed => {
-        return ormLU
-            .updateLoginUser({
-              loginUserId : parsed.data.id,
-              password : parsed.data.pass,
-              isAdmin : parsed.data.isAdmin,
-              isCoach : parsed.data.isCoach,
-              accountStatus : parsed.data.accountStatus as account_status_enum
-            })
-            .then(res => Promise.resolve({
-              sessionkey : parsed.data.sessionkey,
-              data : {
-                id : res.login_user_id,
-                name : res.person.firstname + " " + res.person.lastname
-              }
-            }));
-      });
+async function modCoach(
+    req: express.Request
+): Promise<Responses.Keyed<InternalTypes.IdName>> {
+    return rq
+        .parseUpdateCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (parsed) => {
+            return ormLU
+                .updateLoginUser({
+                    loginUserId: parsed.data.id,
+                    password: parsed.data.pass,
+                    isAdmin: parsed.data.isAdmin,
+                    isCoach: parsed.data.isCoach,
+                    accountStatus: parsed.data
+                        .accountStatus as account_status_enum,
+                })
+                .then((res) =>
+                    Promise.resolve({
+                        sessionkey: parsed.data.sessionkey,
+                        data: {
+                            id: res.login_user_id,
+                            name:
+                                res.person.firstname +
+                                " " +
+                                res.person.lastname,
+                        },
+                    })
+                );
+        });
 }
 
 /**
@@ -83,12 +107,18 @@ async function modCoach(req: express.Request):
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function deleteCoach(req: express.Request): Promise<Responses.Key> {
-  return rq.parseDeleteCoachRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => {
-        return ormLU.deleteLoginUserByPersonId(parsed.data.id)
-            .then(() => Promise.resolve({sessionkey : parsed.data.sessionkey}));
-      });
+    return rq
+        .parseDeleteCoachRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormLU.deleteLoginUserByPersonId(parsed.data.id).then(() => {
+                return ormP
+                    .deletePersonById(parsed.data.id)
+                    .then(() =>
+                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
+                    );
+            });
+        });
 }
 
 /**
@@ -97,64 +127,40 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequests(req: express.Request):
-    Promise<Responses.CoachList> {
-  return rq.parseGetAllCoachRequestsRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => {
-        return ormLU.getAllLoginUsers()
-            .then(obj => obj.filter(v => v.is_coach &&
-                                         v.account_status == 'PENDING')
-                             .map(v => ({
-                                    person_data : {
-                                      id : v.person.person_id,
-                                      name : v.person.firstname + " " +
-                                                 v.person.lastname
-                                    },
-                                    coach : v.is_coach,
-                                    admin : v.is_admin,
-                                    activated : v.account_status as string
-                                  })))
-            .then(arr => Promise.resolve(
-                      {sessionkey : parsed.data.sessionkey, data : arr}));
-      });
-}
-
-/**
- *  Attempts to create a new user in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function createCoachRequest(req: express.Request):
-    Promise<InternalTypes.IdOnly> {
-  return rq.parseRequestCoachRequest(req).then(async parsed => {
-    if (parsed.pass == undefined) {
-      console.log(" -> WARNING coach request without password - " +
-                  "currently only accepting email-based applications.");
-      return Promise.reject(util.errors.cookArgumentError());
-    }
-    return ormP
-        .createPerson({
-          firstname : parsed.firstName,
-          lastname : parsed.lastName,
-          email : parsed.emailOrGithub
-        })
-        .then(person => {
-          console.log("Created a person: " + person);
-          return ormLU.createLoginUser({
-            personId : person.person_id,
-            password : parsed.pass,
-            isAdmin : false,
-            isCoach : true,
-            accountStatus : 'PENDING'
-          })
-        })
-        .then(user => {
-          console.log("Attached a login user: " + user);
-          return Promise.resolve({id : user.login_user_id});
+async function getCoachRequests(
+    req: express.Request
+): Promise<Responses.CoachList> {
+    return rq
+        .parseGetAllCoachRequestsRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormLU
+                .getAllLoginUsers()
+                .then((obj) =>
+                    obj
+                        .filter(
+                            (v) => v.is_coach && v.account_status == "PENDING"
+                        )
+                        .map((v) => ({
+                            person_data: {
+                                id: v.person.person_id,
+                                name:
+                                    v.person.firstname +
+                                    " " +
+                                    v.person.lastname,
+                            },
+                            coach: v.is_coach,
+                            admin: v.is_admin,
+                            activated: v.account_status as string,
+                        }))
+                )
+                .then((arr) =>
+                    Promise.resolve({
+                        sessionkey: parsed.data.sessionkey,
+                        data: arr,
+                    })
+                );
         });
-  });
 }
 
 /**
@@ -163,61 +169,18 @@ async function createCoachRequest(req: express.Request):
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequest(req: express.Request):
-    Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
-  return rq.parseGetCoachRequestRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(() => {
-        return Promise.reject({http : 410, reason : 'Deprecated endpoint.'});
-      });
-}
-
-async function setAccountStatus(lu_id: number, stat: account_status_enum,
-                                key: string):
-    Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return ormLU.searchLoginUserByPerson(lu_id)
-      .then(obj => obj == null ? Promise.reject(util.errors.cookInvalidID())
-                               : ormLU.updateLoginUser({
-                                   loginUserId : obj.login_user_id,
-                                   isAdmin : obj.is_admin,
-                                   isCoach : obj.is_coach,
-                                   accountStatus : stat
-                                 }))
-      .then(res => Promise.resolve({
-        sessionkey : key,
-        data : {
-          id : res.person_id,
-          name : res.person.firstname + " " + res.person.lastname
-        }
-      }));
-}
-
-/**
- *  Attempts to accept a request for becoming a coach.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function createCoachAcceptance(req: express.Request):
-    Promise<Responses.Keyed<InternalTypes.IdName>> {
-  return rq.parseAcceptNewCoachRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => setAccountStatus(parsed.data.id, 'ACTIVATED',
-                                             parsed.data.sessionkey));
-}
-
-/**
- *  Attempts to deny a request for becoming a coach.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function deleteCoachRequest(req: express.Request):
-    Promise<Responses.Key> {
-  return rq.parseAcceptNewCoachRequest(req)
-      .then(parsed => util.isAdmin(parsed))
-      .then(async parsed => setAccountStatus(parsed.data.id, 'DISABLED',
-                                             parsed.data.sessionkey));
+async function getCoachRequest(
+    req: express.Request
+): Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
+    return rq
+        .parseGetCoachRequestRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(() => {
+            return Promise.reject({
+                http: 410,
+                reason: "Deprecated endpoint.",
+            });
+        });
 }
 
 /**
@@ -226,25 +189,25 @@ async function deleteCoachRequest(req: express.Request):
  * endpoints.
  */
 export function getRouter(): express.Router {
-  const router: express.Router = express.Router({strict : true});
-  util.setupRedirect(router, '/coach');
-  util.route(router, "get", "/all", listCoaches);
+    const router: express.Router = express.Router({ strict: true });
+    util.setupRedirect(router, "/coach");
+    util.route(router, "get", "/all", listCoaches);
 
-  util.route(router, "get", "/request", getCoachRequests);
-  router.post('/request', (req, res) => util.respOrErrorNoReinject(
-                              res, createCoachRequest(req)));
-  util.route(router, "get", "/request/:id", getCoachRequest);
+    util.route(router, "get", "/request", getCoachRequests);
+    util.route(router, "get", "/request/:id", getCoachRequest);
 
-  util.route(router, "post", "/request/:id", createCoachAcceptance);
-  util.routeKeyOnly(router, "delete", "/request/:id", deleteCoachRequest);
+    util.route(router, "get", "/:id", getCoach);
 
-  util.route(router, "get", "/:id", getCoach);
+    util.route(router, "post", "/:id", modCoach);
+    util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
 
-  util.route(router, "post", "/:id", modCoach);
-  util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
+    util.addAllInvalidVerbs(router, [
+        "/",
+        "/all",
+        "/:id",
+        "/request",
+        "/request/:id",
+    ]);
 
-  util.addAllInvalidVerbs(router,
-                          [ "/", "/all", "/:id", "/request", "/request/:id" ]);
-
-  return router;
+    return router;
 }

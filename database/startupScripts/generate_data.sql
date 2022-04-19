@@ -1,13 +1,13 @@
 /* Insert data into person table */
 INSERT INTO person(email, firstname, lastname)
 VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
-('Bob@admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
+('bob.admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
 ('osoc2@mail.com', 'Osoc', 'TeamTwo');
 
 /* Insert data into student table */
-INSERT INTO student(person_id, gender, pronouns, phone_number, nickname, alumni)
+INSERT INTO student(person_id, gender, phone_number, nickname, alumni)
 VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'), 
-'Female', '{None}', '0032476553498', 'Unicorn', TRUE);
+'Female', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
@@ -23,7 +23,7 @@ INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, respons
  edus, edu_level, edu_duration, edu_year, edu_institute, email_status, created_at)VALUES
  ((SELECT student_id FROM student WHERE phone_number = '0032476553498'), (SELECT osoc_id FROM osoc WHERE year = 2022), 
  'Yes, I can work with a student employment agreement in Belgium', 'Very responsible',  'I am a very funny fact', TRUE, '{"Informatics"}',
- 'Universitarian', 3, 3, 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
+ 'Universitarian', 3, '2022', 'Ghent University', 'NONE', '2022-03-14 23:10:00+01');
 
  /* Insert data into evaluation table */
  INSERT INTO evaluation(login_user_id, job_application_id, decision, motivation, is_final)VALUES
@@ -67,8 +67,14 @@ INSERT INTO job_application_skill(job_application_id, skill, language_id, level,
 /* Insert data into attachment table */
 INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'), 
-'https://github.com/SELab-2/OSOC-2', 'CV_URL');
+'{https://github.com/SELab-2/OSOC-2}', '{CV_URL}');
 
 INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'),
-'I really need the money', 'MOTIVATION_STRING');
+'{I really need the money}', '{MOTIVATION_STRING}');
+
+/* Insert data into template table */
+INSERT INTO template_email(owner_id, name, content)VALUES
+((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Template', '<p>I am a template</p>');
+INSERT INTO template_email(owner_id, name, content, cc, subject)VALUES
+((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Advanced Template', '<p>I am an advanced template</p>', 'nobody@me.com', 'A non-suspicious email!');

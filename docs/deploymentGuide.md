@@ -107,6 +107,7 @@ A link with information to do this can also be found in the [Technical manual](/
 1. Install docker & docker-compose on your local machine, also add the server as a remote docker context (see [Technical manual](/docs/technicalManual.md))
 2. Make sure you have ssh access to the deployment server. This means that you should start a vpn if this is required for the ssh access,...
 3. deploy by executing the command `docker-compose --context remote-server up -d --build` in the root of the project on your local machine.
+4. Run ```sudo bash database_backup.sh``` to start the databse backup cron job.
 
 This last command will push the docker containers to the deployment server via ssh and start the containers.
 
