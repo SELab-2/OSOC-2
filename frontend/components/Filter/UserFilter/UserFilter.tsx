@@ -1,14 +1,19 @@
-import styles from "./UserFilter.module.css";
+import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import AdminIconColor from "../../public/images/admin_icon_color.png";
-import AdminIcon from "../../public/images/admin_icon.png";
-import CoachIconColor from "../../public/images/coach_icon_color.png";
-import CoachIcon from "../../public/images/coach_icon.png";
-import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
-import { AccountStatus, getNextSort, LoginUser, Sort } from "../../types/types";
-import SessionContext from "../../contexts/sessionProvider";
+import AdminIconColor from "../../../public/images/admin_icon_color.png";
+import AdminIcon from "../../../public/images/admin_icon.png";
+import CoachIconColor from "../../../public/images/coach_icon_color.png";
+import CoachIcon from "../../../public/images/coach_icon.png";
+import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
+import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
+import {
+    AccountStatus,
+    getNextSort,
+    LoginUser,
+    Sort,
+} from "../../../types/types";
+import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 
 export const UserFilter: React.FC<{
@@ -36,6 +41,7 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
@@ -155,7 +161,7 @@ export const UserFilter: React.FC<{
     };
 
     return (
-        <div className={styles.filter}>
+        <div className={styles.userfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
                     <div onClick={toggleNameSort}>
@@ -182,8 +188,8 @@ export const UserFilter: React.FC<{
                     <button
                         className={`${
                             statusFilter === AccountStatus.PENDING
-                                ? styles.pendingActive
-                                : styles.pendingButton
+                                ? styles.active
+                                : styles.inactive
                         }`}
                         type="button"
                         onClick={togglePendingStatus}

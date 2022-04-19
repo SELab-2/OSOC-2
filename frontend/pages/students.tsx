@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
-import { StudentFilter } from "../components/StudentFilter/StudentFilter";
+import { StudentFilter } from "../components/Filter/StudentFilter/StudentFilter";
 import { Role } from "../types/types";
 import { Student } from "../types/types";
 import styles from "../styles/students.module.scss";
