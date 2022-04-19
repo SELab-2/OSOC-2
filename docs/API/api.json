@@ -84,7 +84,7 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllLoginUser"
+              "$ref": "#/definitions/AllLoginUsers"
             }
           }
         }
@@ -158,7 +158,7 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
           },
@@ -274,7 +274,7 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
           },
@@ -317,6 +317,110 @@
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/AllCoachRequests"
+            }
+          }
+        }
+      }
+    },
+    "/followup/all": {
+      "get": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Lists all the followups in the system.",
+        "operationId": "all_followups",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllFollowups"
+            }
+          }
+        }
+      }
+    },
+    "/followup/<followup-id>": {
+      "get": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Lists all details about the followup with the given id.",
+        "operationId": "followup_id_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the followup.",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Followup_Id"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Attempts to update a followup with the given id and type.",
+        "operationId": "followup_id_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the followup.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "type",
+            "description": "The email status.",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "SENT",
+              "FAILED",
+              "NONE",
+              "DRAFT"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Followup_Id"
             }
           }
         }
@@ -987,7 +1091,7 @@
         "name": "LoginUserList"
       }
     },
-    "AllLoginUser": {
+    "AllLoginUsers": {
       "type": "object",
       "properties": {
         "data": {
@@ -998,7 +1102,7 @@
         }
       },
       "xml": {
-        "name": "AllLoginUser"
+        "name": "AllLoginUsers"
       }
     },
     "CoachRequests": {
@@ -1094,6 +1198,67 @@
       },
       "xml": {
         "name": "ModifyLoginUser"
+      }
+    },
+    "Followup": {
+      "type": "object",
+      "properties": {
+        "student": {
+          "type": "number"
+        },
+        "application": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SCHEDULED",
+            "SENT",
+            "FAILED",
+            "NONE",
+            "DRAFT"
+          ]
+        }
+      },
+      "xml": {
+        "name": "Followup"
+      }
+    },
+    "FollowupsList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Followup"
+      },
+      "xml": {
+        "name": "FollowupsList"
+      }
+    },
+    "AllFollowups": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/FollowupsList"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "AllFollowups"
+      }
+    },
+    "Followup_Id": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Followup"
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Followup_Id"
       }
     },
     "NameId": {
