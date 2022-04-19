@@ -46,21 +46,6 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
 }
 
 /**
- *  Attempts to get all data for a certain admin in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function getAdmin(req: express.Request): Promise<Responses.Admin> {
-    return rq
-        .parseSingleAdminRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() =>
-            Promise.reject({ http: 410, reason: "Deprecated endpoint." })
-        );
-}
-
-/**
  *  Attempts to update a certain admin in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -126,7 +111,6 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/admin");
     util.route(router, "get", "/all", listAdmins);
-    util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
     util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
