@@ -15,6 +15,8 @@ export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
+    console.log("loginuser:");
+    console.log(user);
     const [name] = useState<string>(user.person.firstname);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
@@ -23,7 +25,8 @@ export const User: React.FC<{
     const { sessionKey, setSessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
-
+    console.log("admin: " + isAdmin);
+    console.log("coach: " + isCoach);
     const setUserRole = async (
         route: string,
         changed_val: string,
