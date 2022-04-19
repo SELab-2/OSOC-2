@@ -58,7 +58,7 @@ const Settings: NextPage = () => {
 
     return (
         <div>
-            <SettingsComponent person={user} />
+            <SettingsComponent person={user} setUser={setUser} />
             <UnderConstruction />
         </div>
     );
