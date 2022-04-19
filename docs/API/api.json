@@ -426,6 +426,47 @@
         }
       }
     },
+    "/form": {
+      "post": {
+        "tags": [
+          "form"
+        ],
+        "description": "Attempts to create a new form in the database.",
+        "operationId": "create_form",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "eventId",
+            "description": "The event id.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "createdAt",
+            "description": "The date when this form was created.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "data",
+            "description": "The data of the form.",
+            "required": true,
+            "type": "string",
+            "default": "This is actually an object with the data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response is empty.",
+            "schema": {
+              "$ref": "#/definitions/Form"
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
@@ -1259,6 +1300,12 @@
       },
       "xml": {
         "name": "Followup_Id"
+      }
+    },
+    "Form": {
+      "type": "object",
+      "xml": {
+        "name": "Form"
       }
     },
     "NameId": {
