@@ -248,12 +248,10 @@ export async function filterLoginUsers(
             is_coach: isCoach,
             is_admin: isAdmin,
         },
-        orderBy: {
-            person: {
-                firstname: nameSort,
-                email: emailSort,
-            },
-        },
+        orderBy: [
+            { person: { firstname: nameSort } },
+            { person: { email: emailSort } },
+        ],
         include: {
             person: true,
         },
