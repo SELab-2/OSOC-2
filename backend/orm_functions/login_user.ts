@@ -1,9 +1,13 @@
 import prisma from "../prisma/prisma";
 
-
-import {CreateLoginUser, FilterBoolean, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
-import {account_status_enum} from "@prisma/client";
-
+import {
+    CreateLoginUser,
+    FilterBoolean,
+    FilterSort,
+    FilterString,
+    UpdateLoginUser,
+} from "./orm_types";
+import { account_status_enum } from "@prisma/client";
 
 /**
  *
@@ -227,10 +231,6 @@ export async function filterLoginUsers(
     isCoach: FilterBoolean,
     isAdmin: FilterBoolean
 ) {
-    if (nameSort !== undefined && emailSort !== undefined) {
-        return Promise.reject("Sorting is only allowed on 1 field");
-    }
-
     // execute the query
     return await prisma.login_user.findMany({
         where: {
@@ -248,12 +248,10 @@ export async function filterLoginUsers(
             is_coach: isCoach,
             is_admin: isAdmin,
         },
-        orderBy: {
-            person: {
-                firstname: nameSort,
-                email: emailSort,
-            },
-        },
+        orderBy: [
+            { person: { firstname: nameSort } },
+            { person: { email: emailSort } },
+        ],
         include: {
             person: true,
         },
