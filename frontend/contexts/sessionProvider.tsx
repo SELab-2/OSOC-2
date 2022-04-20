@@ -66,7 +66,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
      */
     const getSessionKey = async () => {
         // Get the sessionKey from localStorage
-        const fromStorage = localStorage.getItem("sessionKey");
+        const fromStorage = sessionStorage.getItem("sessionKey");
         const sessionKey = fromStorage ? fromStorage : "";
 
         if (sessionKey === "") {
@@ -126,8 +126,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
     const setSessionKey = (sessionKey: string) => {
         setSessionKeyState(sessionKey);
-        // Update localStorage
-        localStorage.setItem("sessionKey", sessionKey);
+        // Update sessionStorage
+        sessionStorage.setItem("sessionKey", sessionKey);
     };
 
     const setIsCoach = (isCoach: boolean) => {
