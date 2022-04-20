@@ -899,3 +899,9 @@ export interface SocketData {
     name: string;
     age: number;
 }
+
+export enum Decision {
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
+}
