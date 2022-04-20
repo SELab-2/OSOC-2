@@ -188,7 +188,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Key> {
 }
 
 /**
- *  Attempts to get all drafted students in the system.
+ *  Attempts to get all drafted students in the system for a project.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
