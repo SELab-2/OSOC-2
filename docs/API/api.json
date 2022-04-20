@@ -1015,6 +1015,79 @@
         }
       }
     },
+    "/role": {
+      "get": {
+        "tags": [
+          "role"
+        ],
+        "description": "Redirects towards GET /role/all.",
+        "operationId": "role",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /role/all"
+          }
+        }
+      }
+    },
+    "/role/all": {
+      "get": {
+        "tags": [
+          "role"
+        ],
+        "description": "Lists all roles in the system.",
+        "operationId": "all_roles",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/All_roles"
+            }
+          }
+        }
+      }
+    },
+    "/role/create": {
+      "post": {
+        "tags": [
+          "role"
+        ],
+        "description": "Create a role in the system.",
+        "operationId": "create_role",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the role.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Create_role"
+            }
+          }
+        }
+      }
+    },
     "/student": {
       "get": {
         "tags": [
@@ -1190,65 +1263,6 @@
         "responses": {
           "200": {
             "description": "The confirmation field contains all updated fields. If no field is updated, an Argument error is thrown.",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      }
-    },
-    "/role/all": {
-      "get": {
-        "tags": [
-          "student"
-        ],
-        "description": "Get all the roles a student can be in OSOC",
-        "operationId": "Get_all_roles",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AllRoles"
-            }
-          }
-        }
-      }
-    },
-    "/role/create": {
-      "post": {
-        "tags": [
-          "student"
-        ],
-        "description": "Creates a role in ",
-        "operationId": "Create_role",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "role name",
-            "description": "The name of your role",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -1824,6 +1838,45 @@
       },
       "xml": {
         "name": "Project_conflicts"
+      }
+    },
+    "All_roles": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role_id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "All_roles"
+      }
+    },
+    "Create_role": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Create_role"
       }
     },
     "NameId": {
