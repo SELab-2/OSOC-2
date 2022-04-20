@@ -105,8 +105,6 @@ export const StudentFilter: React.FC<{
             setStatusFilter(() => "");
         }
         setFilterYes((bool) => !bool);
-        setFilterMaybe(false);
-        setFilterNo(false);
     };
 
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
@@ -117,8 +115,6 @@ export const StudentFilter: React.FC<{
             setStatusFilter(() => "");
         }
         setFilterMaybe((bool) => !bool);
-        setFilterYes(false);
-        setFilterNo(false);
     };
 
     const toggleFilterNo = async (e: SyntheticEvent) => {
@@ -129,8 +125,6 @@ export const StudentFilter: React.FC<{
             setStatusFilter(() => "");
         }
         setFilterNo((bool) => !bool);
-        setFilterYes(false);
-        setFilterMaybe(false);
     };
 
     const toggleAlumni = async (e: SyntheticEvent) => {
@@ -141,6 +135,22 @@ export const StudentFilter: React.FC<{
     const toggleStudentCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
         setstudentCoach((prev) => !prev);
+    };
+
+    const selectRole = (role: string) => {
+        // Unselect role
+        if (selectedRoles.has(role)) {
+            selectedRoles.delete(role);
+        } else {
+            // Select role
+            selectedRoles.add(role);
+        }
+        setSelectedRoles(selectedRoles);
+    };
+
+    const searchPress = (e: SyntheticEvent) => {
+        e.preventDefault();
+        search().then();
     };
 
     const search = async () => {
@@ -212,21 +222,6 @@ export const StudentFilter: React.FC<{
         }
     };
 
-    const selectRole = (role: string) => {
-        // Unselect role
-        if (selectedRoles.has(role)) {
-            selectedRoles.delete(role);
-        } else {
-            // Select role
-            selectedRoles.add(role);
-        }
-        setSelectedRoles(selectedRoles);
-    };
-
-    const searchPress = (e: SyntheticEvent) => {
-        e.preventDefault();
-        search().then();
-    };
     return (
         <div className={styles.studentfilter}>
             <div className={styles.query}>
@@ -253,9 +248,7 @@ export const StudentFilter: React.FC<{
                     placeholder="Search.."
                     onChange={(e) => setFirstNameFilter(e.target.value)}
                 />
-            </div>
 
-            <div className={styles.query}>
                 <div onClick={toggleLastNameSort}>
                     Lastname
                     <div className={styles.triangleContainer}>
@@ -280,17 +273,6 @@ export const StudentFilter: React.FC<{
             </div>
 
             <div className={styles.query}>
-                Osoc edition
-                {/* Maybe dropdown */}
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="2022"
-                    onChange={(e) => setOsocYear(e.target.value)}
-                />
-            </div>
-
-            <div className={styles.query}>
                 <div onClick={toggleEmailSort}>
                     Email
                     <div className={styles.triangleContainer}>
@@ -305,104 +287,130 @@ export const StudentFilter: React.FC<{
                         />
                     </div>
                 </div>
-
                 <input
                     className={`input ${styles.input}`}
                     type="text"
                     placeholder="Search.."
                     onChange={(e) => setEmailFilter(e.target.value)}
                 />
+                Osoc edition
+                {/* Maybe dropdown */}
+                <input
+                    className={`input ${styles.input}`}
+                    type="text"
+                    placeholder="2022"
+                    onChange={(e) => setOsocYear(e.target.value)}
+                />
             </div>
 
-            <button
-                className={`${alumni ? styles.active : styles.inactive}`}
-                onClick={toggleAlumni}
-            >
-                Alumni Only
-            </button>
-
-            <button
-                className={`${studentCoach ? styles.active : styles.inactive}`}
-                onClick={toggleStudentCoach}
-            >
-                Student Coach Only
-            </button>
-
-            <div className={`dropdown ${dropdownActive ? "is-active" : ""}`}>
-                <div
-                    className="dropdown-trigger"
-                    onClick={() => setDropdownActive(!dropdownActive)}
+            <div className={styles.studentButtonsContainer}>
+                <button
+                    className={`${alumni ? styles.active : styles.inactive}`}
+                    onClick={toggleAlumni}
                 >
-                    {selectedRoles.size > 0
-                        ? selectedRoles.size === 1
-                            ? `${selectedRoles.size} role selected`
-                            : `${selectedRoles.size} roles selected`
-                        : "No role selected"}
-                </div>
-                <div className="dropdown-menu">
-                    <div className="dropdown-content">
-                        {roles !== undefined
-                            ? roles.map((role) => (
-                                  <div
-                                      className={`${
-                                          styles.dropdownItem
-                                      } dropdown-item ${
-                                          selectedRoles.has(role.name)
-                                              ? styles.selected
-                                              : ""
-                                      }`}
-                                      key={role.role_id}
-                                      onClick={() => selectRole(role.name)}
-                                  >
-                                      {role.name}
-                                  </div>
-                              ))
-                            : null}
+                    Alumni Only
+                </button>
+
+                <button
+                    className={`${
+                        studentCoach ? styles.active : styles.inactive
+                    }`}
+                    onClick={toggleStudentCoach}
+                >
+                    Student Coach Only
+                </button>
+
+                <div
+                    className={`dropdown ${dropdownActive ? "is-active" : ""}`}
+                >
+                    <div
+                        className={`dropdown-trigger ${
+                            dropdownActive || selectedRoles.size > 0
+                                ? styles.active
+                                : styles.inactive
+                        } ${styles.dropdownTrigger}`}
+                        onClick={() => setDropdownActive(!dropdownActive)}
+                    >
+                        {selectedRoles.size > 0
+                            ? selectedRoles.size === 1
+                                ? `${selectedRoles.size} role selected`
+                                : `${selectedRoles.size} roles selected`
+                            : "No role selected"}
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    dropdownActive ? styles.up : ""
+                                } ${styles.triangle}`}
+                            />
+                        </div>
+                    </div>
+                    <div className="dropdown-menu">
+                        <div className="dropdown-content">
+                            {roles !== undefined
+                                ? roles.map((role) => (
+                                      <div
+                                          className={`${
+                                              styles.dropdownItem
+                                          } dropdown-item ${
+                                              selectedRoles.has(role.name)
+                                                  ? styles.selected
+                                                  : ""
+                                          }`}
+                                          key={role.role_id}
+                                          onClick={() => selectRole(role.name)}
+                                      >
+                                          {role.name}
+                                      </div>
+                                  ))
+                                : null}
+                        </div>
                     </div>
                 </div>
+
+                <div className={styles.studentButtons}>
+                    <div className={styles.buttonContainer}>
+                        <Image
+                            className={styles.buttonImage}
+                            src={filterYes ? CheckIconColor : CheckIcon}
+                            width={30}
+                            height={30}
+                            alt={"Disabled"}
+                            onClick={toggleFilterYes}
+                        />
+                        <p>YES</p>
+                    </div>
+
+                    <div className={styles.buttonContainer}>
+                        <Image
+                            className={styles.buttonImage}
+                            src={
+                                filterMaybe
+                                    ? ExclamationIconColor
+                                    : ExclamationIcon
+                            }
+                            width={30}
+                            height={30}
+                            alt={"Disabled"}
+                            onClick={toggleFilterMaybe}
+                        />
+                        <p>MAYBE</p>
+                    </div>
+
+                    <div className={styles.buttonContainer}>
+                        <Image
+                            className={styles.buttonImage}
+                            src={filterNo ? ForbiddenIconColor : ForbiddenIcon}
+                            width={30}
+                            height={30}
+                            alt={"Disabled"}
+                            onClick={toggleFilterNo}
+                        />
+                        <p>NO</p>
+                    </div>
+                </div>
+
+                <button onClick={searchPress}>Search</button>
             </div>
-
-            <div className={styles.buttons}>
-                <div className={styles.buttonContainer}>
-                    <Image
-                        className={styles.buttonImage}
-                        src={filterYes ? CheckIconColor : CheckIcon}
-                        width={30}
-                        height={30}
-                        alt={"Disabled"}
-                        onClick={toggleFilterYes}
-                    />
-                    <p>YES</p>
-                </div>
-
-                <div className={styles.buttonContainer}>
-                    <Image
-                        className={styles.buttonImage}
-                        src={
-                            filterMaybe ? ExclamationIconColor : ExclamationIcon
-                        }
-                        width={30}
-                        height={30}
-                        alt={"Disabled"}
-                        onClick={toggleFilterMaybe}
-                    />
-                    <p>MAYBE</p>
-                </div>
-
-                <div className={styles.buttonContainer}>
-                    <Image
-                        className={styles.buttonImage}
-                        src={filterNo ? ForbiddenIconColor : ForbiddenIcon}
-                        width={30}
-                        height={30}
-                        alt={"Disabled"}
-                        onClick={toggleFilterNo}
-                    />
-                    <p>NO</p>
-                </div>
-            </div>
-
-            <button onClick={searchPress}>Search</button>
         </div>
     );
 };

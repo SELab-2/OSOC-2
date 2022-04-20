@@ -107,7 +107,7 @@
 
 .query {
     justify-content: space-between;
-    gap: 1rem;
+    width: 100%;
 }
 
 .query div {
@@ -138,7 +138,6 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
-    width: 100%;
 }
 
 .buttonContainer {
@@ -183,10 +182,10 @@
 
 .active {
     background-color: var(--neutral-100);
-    border: none;
     color: var(--primary-100);
     font-weight: normal;
     transition-duration: 0.2s;
+    border: 0.1rem solid transparent;
     border-radius: 0.4rem;
     font-size: large;
 }
@@ -196,10 +195,44 @@
     box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
+.dropdownTrigger {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    padding-inline: 0.8rem;
+}
+
+
 .dropdownItem:hover {
     background-color: var(--neutral-150);
 }
 
 .selected {
     background-color: var(--succes-100);
+}
+
+.studentButtonsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.studentButtonsContainer button {
+    margin-inline: auto;
+}
+
+.studentButtonsContainer button:first-child {
+    margin-left: 0;
+}
+
+.studentButtonsContainer button:last-child {
+    margin-right: 0;
+}
+
+.studentButtons {
+    display: flex;
+    gap: 1rem !important;
+    justify-content: space-between;
 }
