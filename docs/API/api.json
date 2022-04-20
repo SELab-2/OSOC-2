@@ -938,6 +938,83 @@
         }
       }
     },
+    "/reset": {
+      "post": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Handles a password reset request.",
+        "operationId": "reset_request",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "email",
+            "description": "The email address.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is empty."
+          }
+        }
+      }
+    },
+    "/reset/<reset-id>": {
+      "get": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Checks if a reset code is valid.",
+        "operationId": "reset_check_code",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The code.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is empty."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Resets the password when the code and password are valid.",
+        "operationId": "password_reset",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The code.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "password",
+            "description": "The new password.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
     "/student": {
       "get": {
         "tags": [
