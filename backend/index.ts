@@ -47,11 +47,14 @@ app.use((req, _, next) => {
 ep.attach(app);
 config.global.homes.forEach((home) => util.addInvalidVerbs(app, home + "/"));
 
+/**
+ * install all the socket.io listeners.
+ * We do this by using function "register...." that contain the listeners
+ */
 io.on("connection", (socket) => {
-    console.log("websocket connection achieved " + socket.id);
-    console.log("number of clients:" + io.engine.clientsCount);
     registerLoginUserHandlers(io, socket);
 });
+
 httpServer.listen(port, () => {
     console.log(`TypeScript with Express
           http://localhost:${port}/`);

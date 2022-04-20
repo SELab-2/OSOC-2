@@ -872,25 +872,29 @@ export interface Email {
 }
 
 /**
- * types for socket.io
+ * types for socket.io when sending something from the server to the client
  */
 export interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
     formAdded: () => void;
     loginUserUpdated: () => void;
 }
 
+/**
+ * types for socket.io when sending something from the client to the server
+ */
 export interface ClientToServerEvents {
-    hello: () => void;
     updateUser: (loginUserId: number) => void;
 }
 
-export interface InterServerEvents {
-    ping: () => void;
-}
+/**
+ * types for communication between multiple socket.io servers.
+ * This is empty because we don't need (we have only 1 server)
+ */
+export interface InterServerEvents {}
 
+/**
+ * information about the socket.io socket
+ */
 export interface SocketData {
     name: string;
     age: number;

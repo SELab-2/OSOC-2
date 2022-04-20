@@ -162,15 +162,17 @@ export interface LoginUser {
     account_status: AccountStatus;
 }
 
+/**
+ * types for socket.io when sending something from the server to the client
+ */
 export interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
     formAdded: () => void;
     loginUserUpdated: () => void;
 }
 
+/**
+ * types for socket.io when sending something from the client to the server
+ */
 export interface ClientToServerEvents {
-    hello: () => void;
     updateUser: (loginUserId: number) => void;
 }

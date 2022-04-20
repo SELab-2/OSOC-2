@@ -1,5 +1,5 @@
 import React from "react";
-import { Decision, Student } from "../../types/types";
+import { Decision, Student } from "../../types";
 import styles from "./StudentCard.module.scss";
 import { Role } from "../Labels/Roles";
 import { Study } from "../Labels/Studies";

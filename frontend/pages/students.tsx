@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
-import { Student } from "../types/types";
+import { Student } from "../types";
 import styles from "../styles/students.module.scss";
 import { useSockets } from "../contexts/socketProvider";
 

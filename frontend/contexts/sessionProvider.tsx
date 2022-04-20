@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { AccountStatus } from "../types/types";
+import { AccountStatus } from "../types";
 
 /**
  * Interface for the context, stores the user session application wide

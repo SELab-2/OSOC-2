@@ -8,7 +8,7 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types/types";
+import { AccountStatus, LoginUser } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 
 export const User: React.FC<{
