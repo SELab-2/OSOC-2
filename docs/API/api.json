@@ -682,16 +682,16 @@
           {
             "in": "header",
             "name": "project_id",
-            "description": "The unique id of the project.",
+            "description": "The id of the project.",
             "required": true,
-            "type": "string"
+            "type": "number"
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/CreateProject"
+              "$ref": "#/definitions/Project_Students_Coaches"
             }
           }
         }
@@ -712,52 +712,52 @@
           },
           {
             "in": "header",
-            "name": "name",
-            "description": "The name of the project",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "osoc_id",
-            "description": "The id of the osoc edition this project is connected to",
-            "required": false,
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
             "type": "number"
           },
           {
             "in": "header",
+            "name": "name",
+            "description": "The name of the project.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
             "name": "partner",
-            "description": "The partner's name of this project",
+            "description": "The partner's name of this project.",
             "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "start_date",
-            "description": "The start date of this project",
+            "name": "start",
+            "description": "The start date of this project.",
             "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "end_date",
-            "description": "The end date of this project",
+            "name": "end",
+            "description": "The end date of this project.",
             "required": false,
             "type": "string"
           },
           {
             "in": "header",
             "name": "positions",
-            "description": "The amount of positions for the project",
+            "description": "The amount of positions for the project.",
             "required": false,
             "type": "number"
           }
         ],
         "responses": {
           "200": {
-            "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/CreateProject"
+              "$ref": "#/definitions/Modify_project"
             }
           }
         }
@@ -772,7 +772,7 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
           },
@@ -786,7 +786,7 @@
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -799,8 +799,126 @@
         "tags": [
           "project"
         ],
-        "description": "Lists all students for the selected project.",
+        "description": "Lists all drafted students of the selected project.",
         "operationId": "all_students_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Drafted_students_project"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Add the student to the selected project.",
+        "operationId": "add_student_to_project",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "studentId",
+            "description": "The id of the selected student.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "role",
+            "description": "The selected role for this student.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Draft_student_project"
+            }
+          }
+        }
+      }
+    },
+    "/project/<project-id>/assignee": {
+      "delete": {
+        "tags": [
+          "project"
+        ],
+        "description": "Removes the student from the project.",
+        "operationId": "project_student_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "student",
+            "description": "The id of the student.",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/project/conflicts": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Lists all project conflicts.",
+        "operationId": "project_conflicts",
         "parameters": [
           {
             "in": "header",
@@ -814,39 +932,8 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllStudents"
+              "$ref": "#/definitions/Project_conflicts"
             }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Add the selected students for the selected project.",
-        "operationId": "add_students_to_project",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "students",
-            "description": "The ids of the selected students.",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\"."
           }
         }
       }
@@ -1179,20 +1266,14 @@
         "name": "LoginUser"
       }
     },
-    "LoginUserList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/LoginUser"
-      },
-      "xml": {
-        "name": "LoginUserList"
-      }
-    },
     "AllLoginUsers": {
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/LoginUserList"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LoginUser"
+          }
         },
         "sessionkey": {
           "type": "string"
@@ -1202,48 +1283,36 @@
         "name": "AllLoginUsers"
       }
     },
-    "CoachRequests": {
-      "type": "object",
-      "properties": {
-        "person_data": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            }
-          }
-        },
-        "coach": {
-          "type": "boolean"
-        },
-        "admin": {
-          "type": "boolean"
-        },
-        "activated": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "CoachRequests"
-      }
-    },
-    "AllCoachRequestsList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/CoachRequests"
-      },
-      "xml": {
-        "name": "AllCoachRequestsList"
-      }
-    },
     "AllCoachRequests": {
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/AllCoachRequestsList"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "person_data": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "coach": {
+                "type": "boolean"
+              },
+              "admin": {
+                "type": "boolean"
+              },
+              "activated": {
+                "type": "string"
+              }
+            }
+          }
         },
         "sessionkey": {
           "type": "string"
@@ -1273,6 +1342,9 @@
             "DISABLED"
           ]
         }
+      },
+      "xml": {
+        "name": "Login"
       }
     },
     "ModifyLoginUser": {
@@ -1407,71 +1479,77 @@
         "name": "CreateProject"
       }
     },
-    "Project_role": {
-      "type": "object",
-      "properties": {
-        "project_id": {
-          "type": "number"
-        },
-        "project_role_id": {
-          "type": "number"
-        },
-        "role_id": {
-          "type": "number"
-        },
-        "positions": {
-          "type": "number"
-        }
-      }
-    },
-    "Project_student": {
-      "type": "object",
-      "properties": {
-        "contract_id": {
-          "type": "number"
-        },
-        "project_role": {
-          "$ref": "#/definitions/Project_role"
-        },
-        "contract_status": {
-          "type": "string",
-          "enum": [
-            "DRAFT",
-            "APPROVED",
-            "CANCELLED",
-            "WAIT_APPROVAL",
-            "SIGNED",
-            "SENT"
-          ]
-        },
-        "student": {
-          "$ref": "#/definitions/Student"
-        }
-      }
-    },
-    "Project_login_user": {
-      "type": "object",
-      "properties": {
-        "login_user_id": {
-          "type": "number"
-        },
-        "is_coach": {
-          "type": "boolean"
-        },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "person": {
-          "$ref": "#/definitions/Person"
-        }
-      }
-    },
     "Project_coach": {
       "type": "object",
       "properties": {
         "login_user": {
-          "$ref": "#/definitions/Project_login_user"
+          "type": "object",
+          "properties": {
+            "login_user_id": {
+              "type": "number"
+            },
+            "is_coach": {
+              "type": "boolean"
+            },
+            "is_admin": {
+              "type": "boolean"
+            },
+            "person": {
+              "$ref": "#/definitions/Person"
+            }
+          }
         }
+      }
+    },
+    "Project_students": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "contract_id": {
+            "type": "number"
+          },
+          "project_role": {
+            "type": "object",
+            "properties": {
+              "project_id": {
+                "type": "number"
+              },
+              "project_role_id": {
+                "type": "number"
+              },
+              "role_id": {
+                "type": "number"
+              },
+              "positions": {
+                "type": "number"
+              }
+            }
+          },
+          "contract_status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "APPROVED",
+              "CANCELLED",
+              "WAIT_APPROVAL",
+              "SIGNED",
+              "SENT"
+            ]
+          },
+          "student": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Student"
+            }
+          }
+        }
+      }
+    },
+    "Project_coaches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Project_coach"
       }
     },
     "Project_Students_Coaches": {
@@ -1499,10 +1577,10 @@
           "type": "number"
         },
         "students": {
-          "$ref": "#/definitions/Project_student"
+          "$ref": "#/definitions/Project_students"
         },
-        "coach": {
-          "$ref": "#/definitions/Project_coach"
+        "coaches": {
+          "$ref": "#/definitions/Project_coaches"
         }
       },
       "xml": {
@@ -1532,18 +1610,143 @@
         "name": "Allprojects"
       }
     },
-    "Project_session": {
+    "Modify_project": {
       "type": "object",
       "properties": {
-        "data": {
-          "$ref": "#/definitions/Project"
-        },
         "sessionkey": {
-          "type": "string"
+          "$ref": "#/definitions/Sessionkey"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "partner": {
+              "type": "string"
+            },
+            "start_date": {
+              "type": "string"
+            },
+            "end_date": {
+              "type": "string"
+            },
+            "positions": {
+              "type": "number"
+            },
+            "osoc_id": {
+              "type": "number"
+            }
+          }
         }
       },
       "xml": {
-        "name": "Project_session"
+        "name": "Modify_project"
+      }
+    },
+    "Drafted_students_project": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "students": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "student": {
+                    "$ref": "#/definitions/Student"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "DRAFT",
+                      "APPROVED",
+                      "CANCELLED",
+                      "WAIT_APPROVAL",
+                      "SIGNED",
+                      "SENT"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "Drafted_students_project"
+      }
+    },
+    "Draft_student_project": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "drafted": {
+              "type": "boolean"
+            },
+            "role": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "Draft_student_project"
+      }
+    },
+    "Project_conflicts": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "student": {
+                "type": "number"
+              },
+              "projects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "Project_conflicts"
       }
     },
     "NameId": {
