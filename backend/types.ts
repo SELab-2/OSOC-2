@@ -870,3 +870,9 @@ export interface Email {
     subject: string;
     html: string;
 }
+
+export enum Decision {
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
+}
