@@ -485,7 +485,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listProjects);
 
     util.route(router, "get", "/:id", getProject);
-    util.route(router, "post", "/:id", createProject);
+    util.route(router, "post", "/", createProject);
 
     util.route(router, "post", "/:id", modProject);
     util.routeKeyOnly(router, "delete", "/:id", deleteProject);
