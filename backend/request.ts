@@ -179,7 +179,6 @@ async function parseUpdateLoginUser(
             id: Number(req.params.id),
             isAdmin: maybe(req.body, "isAdmin") as boolean,
             isCoach: maybe(req.body, "isCoach") as boolean,
-            pass: maybe(req.body, "pass") as string,
             accountStatus: maybe(
                 req.body,
                 "accountStatus"

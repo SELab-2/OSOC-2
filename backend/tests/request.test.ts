@@ -110,34 +110,25 @@ test("Can parse update login user requests", () => {
         isCoach: false,
         accountStatus: "PENDING",
     };
-    const valid2: T.Anything = {
-        isAdmin: false,
-        isCoach: false,
-        accountStatus: "PENDING",
-        pass: "mypass",
-    };
 
     const invalid1: T.Anything = { isCoach: false, accountStatus: "PENDING" };
     const invalid2: T.Anything = {
         isCoach: false,
         accountStatus: "PENDING",
-        pass: "mypass",
     };
     const invalid_sk: T.Anything = {
         isAdmin: false,
         isCoach: false,
         accountStatus: "PENDING",
-        pass: "mypass",
     };
 
-    const s = [valid1, valid2].map((x) => {
+    const s = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        if (!("pass" in x)) x.pass = undefined;
         return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
     });
 
@@ -153,11 +144,10 @@ test("Can parse update login user requests", () => {
         );
     });
 
-    const s_ = [valid1, valid2].map((x) => {
+    const s_ = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         setSessionKey(r, key);
-        if (!("pass" in x)) x.pass = undefined;
         r.params.id = id.toString();
         x.id = id;
         x.sessionkey = key;
