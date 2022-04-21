@@ -1139,16 +1139,23 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id from the student.",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\". The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/Student_Id"
+              "$ref": "#/definitions/Student"
             }
           }
         }
@@ -1163,14 +1170,21 @@
           {
             "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the student.",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -1179,11 +1193,49 @@
       }
     },
     "/student/<student-id>/suggest": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Lists all suggestions for a certain student.",
+        "operationId": "get_student_suggestions",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the student.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "year",
+            "description": "The osoc year.",
+            "required": false,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllStudentSuggestions"
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "student"
         ],
-        "description": "Login user suggest if the student is suitable for OSOC.",
+        "description": "A login user suggests if the student is suitable for OSOC.",
         "operationId": "suggest_student",
         "parameters": [
           {
@@ -1192,6 +1244,13 @@
             "description": "Your current session key.",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the student.",
+            "required": true,
+            "type": "number"
           },
           {
             "in": "header",
@@ -1204,19 +1263,20 @@
             "in": "header",
             "name": "reason",
             "description": "The motivation for the suggestion.",
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "login user id",
-            "description": "The id of the one that made the suggestion.",
+            "name": "senderId",
+            "description": "The id of the login user.",
             "required": true,
-            "type": "string"
+            "type": "number"
           }
         ],
         "responses": {
           "200": {
-            "description": "The suggestion field contains all updated fields. If no field is updated, an Argument error is thrown.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
             }
@@ -1241,30 +1301,149 @@
           },
           {
             "in": "header",
-            "name": "suggestion",
+            "name": "reply",
             "description": "The suggestion for the student.",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "motivation",
-            "description": "The motivation for the suggestion.",
+            "name": "reason",
+            "description": "The reason for the suggestion.",
+            "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "login user id",
-            "description": "The id of the one that made the confirmation.",
+            "name": "id",
+            "description": "The id of the student.",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "The confirmation field contains all updated fields. If no field is updated, an Argument error is thrown.",
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
               "$ref": "#/definitions/Sessionkey"
+            }
+          }
+        }
+      }
+    },
+    "/student/filter": {
+      "get": {
+        "tags": [
+          "student"
+        ],
+        "description": "Filters the students with one or more filters.",
+        "operationId": "filter_students",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "firstNameFilter",
+            "description": "The firstname filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "lastNameFilter",
+            "description": "The lastname filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "emailFilter",
+            "description": "The email filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "roleFilter",
+            "description": "The role filter.",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "alumniFilter",
+            "description": "The alumni filter.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "coachFilter",
+            "description": "The student-coach filter.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "statusFilter",
+            "description": "The status filter.",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "YES",
+              "MAYBE",
+              "NO"
+            ]
+          },
+          {
+            "in": "header",
+            "name": "firstNameSort",
+            "description": "Sorting by firstname (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "lastNameSort",
+            "description": "Sorting by lastname (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "emailSort",
+            "description": "Sorting by email (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "roleSort",
+            "description": "Sorting by role (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "alumniSort",
+            "description": "Sorting by alumni (asc or desc).",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllStudents"
             }
           }
         }
@@ -1916,386 +2095,36 @@
         "name": "CreateStudent"
       }
     },
-    "AllStudents": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "student": {
-              "type": "object",
-              "properties": {
-                "person": {
-                  "$ref": "#/definitions/Person"
-                },
-                "student_id": {
-                  "type": "number"
-                },
-                "gender": {
-                  "type": "string"
-                },
-                "pronouns": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "phone_number": {
-                  "type": "string"
-                },
-                "nickname": {
-                  "type": "string"
-                },
-                "alumni": {
-                  "type": "boolean"
-                }
-              }
-            },
-            "languages": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "evaluations": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AllStudentEvaluations"
-              }
-            },
-            "jobApplication": {
-              "type": "object",
-              "properties": {
-                "job_application_id": {
-                  "type": "number"
-                },
-                "edus": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "default": "Informatics"
-                  }
-                },
-                "created_at": {
-                  "type": "string",
-                  "example": "2022-03-14 23:10:00+01"
-                },
-                "edu_duration": {
-                  "type": "number",
-                  "default": 5
-                },
-                "edu_institute": {
-                  "type": "string",
-                  "default": "Ghent university"
-                },
-                "edu_level": {
-                  "type": "string",
-                  "default": "Third bachelors degree"
-                },
-                "edu_year": {
-                  "type": "number",
-                  "default": 3
-                },
-                "email_status": {
-                  "type": "string",
-                  "enum": [
-                    "SCHEDULED",
-                    "SENT",
-                    "FAILED",
-                    "NONE",
-                    "DRAFT"
-                  ],
-                  "default": "NONE"
-                },
-                "fun_fact": {
-                  "type": "string",
-                  "default": "I like basketball."
-                },
-                "osoc_id": {
-                  "type": "number"
-                },
-                "responsibilities": {
-                  "type": "string",
-                  "default": "I play basketball from 5pm until 7pm."
-                },
-                "student_coach": {
-                  "type": "boolean"
-                },
-                "student_id": {
-                  "type": "number"
-                },
-                "student_volunteer_info": {
-                  "type": "string",
-                  "default": "Yes, I can work with a student employment agreement in Belgium."
-                },
-                "attachment": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Attachment"
-                  }
-                },
-                "job_application_skill": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/JobApplicationSkill"
-                  }
-                },
-                "applied_role": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/AppliedRole"
-                  }
-                }
-              }
-            },
-            "roles": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "AllStudents"
-      }
-    },
-    "AllStudentEvaluations": {
-      "type": "object",
-      "properties": {
-        "evaluation": {
-          "items": {
-            "$ref": "#/definitions/Evaluation"
-          }
-        },
-        "osoc": {
-          "items": {
-            "$ref": "#/definitions/Osoc"
-          }
-        }
-      }
-    },
-    "Evaluation": {
-      "type": "object",
-      "properties": {
-        "evaluation_id": {
-          "type": "number"
-        },
-        "decision": {
-          "type": "string",
-          "enum": [
-            "YES",
-            "MAYBE",
-            "NO"
-          ]
-        },
-        "motivation": {
-          "type": "string"
-        },
-        "is_final": {
-          "type": "boolean"
-        }
-      }
-    },
-    "Osoc": {
-      "type": "object",
-      "properties": {
-        "year": {
-          "type": "number"
-        }
-      }
-    },
-    "Person": {
-      "type": "object",
-      "properties": {
-        "person_id": {
-          "type": "number"
-        },
-        "email": {
-          "type": "string"
-        },
-        "firstname": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "github": {
-          "type": "string"
-        },
-        "github_id": {
-          "type": "string"
-        }
-      }
-    },
-    "Attachment": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "attachment_id": {
-          "type": "number"
-        },
-        "data": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "CV_URL",
-            "PORTFOLIO_URL",
-            "FILE_URL",
-            "MOTIVATION_STRING",
-            "MOTIVATION_URL"
-          ]
-        }
-      },
-      "xml": {
-        "name": "Attachment"
-      }
-    },
-    "JobApplicationSkill": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "job_application_skill_id": {
-          "type": "number"
-        },
-        "skill": {
-          "type": "string"
-        },
-        "is_best": {
-          "type": "boolean"
-        },
-        "language_id": {
-          "type": "number"
-        },
-        "is_preferred": {
-          "type": "boolean"
-        },
-        "level": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
-    "AppliedRole": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "applied_role_id": {
-          "type": "number"
-        },
-        "role_id": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
     "Student": {
       "type": "object",
       "properties": {
-        "student_id": {
-          "type": "number"
-        },
-        "pronouns": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "alumni": {
-          "type": "boolean"
-        },
-        "gender": {
-          "type": "string"
-        },
-        "phone_number": {
-          "type": "string"
-        },
-        "person": {
-          "$ref": "#/definitions/Person"
-        }
-      }
-    },
-    "Student_Id_contract": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "info": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Student_Id_contract"
-      }
-    },
-    "Student_Id_project": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "contract": {
-          "$ref": "#/definitions/Student_Id_contract"
-        },
-        "roles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "xml": {
-        "name": "Student_Id_project"
-      }
-    },
-    "Student_Id_data": {
-      "type": "object",
-      "properties": {
-        "firstname": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "pronouns": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "phoneNumber": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "alumni": {
-          "type": "boolean"
-        },
-        "languages": {
-          "type": "array",
-          "items": {
-            "type": "string"
+        "student": {
+          "type": "object",
+          "properties": {
+            "person": {
+              "$ref": "#/definitions/Person"
+            },
+            "person_id": {
+              "type": "number"
+            },
+            "student_id": {
+              "type": "number"
+            },
+            "gender": {
+              "type": "string"
+            },
+            "pronouns": {
+              "type": "string"
+            },
+            "phone_number": {
+              "type": "string"
+            },
+            "nickname": {
+              "type": "string"
+            },
+            "alumni": {
+              "type": "boolean"
+            }
           }
         },
         "evaluations": {
@@ -2319,7 +2148,7 @@
             },
             "created_at": {
               "type": "string",
-              "example": "2022-03-14 23:10:00+01"
+              "example": "This is actually a date: 2022-03-14 23:10:00+01"
             },
             "edu_duration": {
               "type": "number",
@@ -2334,7 +2163,7 @@
               "default": "Third bachelors degree"
             },
             "edu_year": {
-              "type": "number",
+              "type": "string",
               "default": 3
             },
             "email_status": {
@@ -2397,21 +2226,243 @@
         }
       },
       "xml": {
-        "name": "Student_Id_data"
+        "name": "Student"
       }
     },
-    "Student_Id": {
+    "AllStudents": {
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/Student_Id_data"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Student"
+          }
         },
         "sessionkey": {
           "type": "string"
         }
       },
       "xml": {
-        "name": "Student_Id"
+        "name": "AllStudents"
+      }
+    },
+    "AllStudentEvaluations": {
+      "type": "object",
+      "properties": {
+        "evaluation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Evaluation"
+          }
+        },
+        "osoc": {
+          "type": "object",
+          "properties": {
+            "year": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "AllStudentEvaluations"
+      }
+    },
+    "AllStudentSuggestions": {
+      "type": "object",
+      "properties": {
+        "sessionkey": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "senderFirstname": {
+                "type": "string"
+              },
+              "senderLastname": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "decision": {
+                "type": "string",
+                "enum": [
+                  "YES",
+                  "MAYBE",
+                  "NO"
+                ]
+              },
+              "isFinal": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "AllStudentSuggestions"
+      }
+    },
+    "Evaluation": {
+      "type": "object",
+      "properties": {
+        "evaluation_id": {
+          "type": "number"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "YES",
+            "MAYBE",
+            "NO"
+          ]
+        },
+        "motivation": {
+          "type": "string"
+        },
+        "is_final": {
+          "type": "boolean"
+        },
+        "login_user": {
+          "type": "object",
+          "properties": {
+            "login_user_id": {
+              "type": "number"
+            },
+            "person": {
+              "type": "object",
+              "properties": {
+                "person_id": {
+                  "type": "number"
+                },
+                "firstname": {
+                  "type": "string"
+                },
+                "lastname": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "github": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "xml": {
+        "name": "Evaluation"
+      }
+    },
+    "Person": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "number"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstname": {
+          "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "github": {
+          "type": "string"
+        },
+        "github_id": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Person"
+      }
+    },
+    "Attachment": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "attachment_id": {
+          "type": "number"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "CV_URL",
+              "PORTFOLIO_URL",
+              "FILE_URL",
+              "MOTIVATION_STRING",
+              "MOTIVATION_URL"
+            ]
+          }
+        }
+      },
+      "xml": {
+        "name": "Attachment"
+      }
+    },
+    "JobApplicationSkill": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "job_application_skill_id": {
+          "type": "number"
+        },
+        "skill": {
+          "type": "string"
+        },
+        "is_best": {
+          "type": "boolean"
+        },
+        "language_id": {
+          "type": "number"
+        },
+        "is_preferred": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "JobApplicationSkill"
+      }
+    },
+    "AppliedRole": {
+      "type": "object",
+      "properties": {
+        "job_application_id": {
+          "type": "number"
+        },
+        "applied_role_id": {
+          "type": "number"
+        },
+        "role_id": {
+          "type": "number"
+        }
+      },
+      "xml": {
+        "name": "JobApplicationSkill"
       }
     },
     "AllVerify": {

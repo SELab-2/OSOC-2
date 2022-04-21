@@ -216,7 +216,7 @@ async function createStudentSuggestion(
 }
 
 /**
- *  Attempts to list all student suggestions in the system.
+ *  Attempts to list all suggestions for a certain student.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
