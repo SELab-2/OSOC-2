@@ -179,7 +179,6 @@ async function parseUpdateLoginUser(
             id: Number(req.params.id),
             isAdmin: maybe(req.body, "isAdmin") as boolean,
             isCoach: maybe(req.body, "isCoach") as boolean,
-            pass: maybe(req.body, "pass") as string,
             accountStatus: maybe(
                 req.body,
                 "accountStatus"
@@ -691,6 +690,33 @@ export async function parseRemoveAssigneeRequest(
             id: Number(req.params.id),
         })
     );
+}
+
+export async function parseUserModSelfRequest(
+    req: express.Request
+): Promise<Requests.UserPwd> {
+    return hasFields(req, [], types.key).then(() => {
+        if ("pass" in req.body) {
+            try {
+                if (
+                    !("oldpass" in req.body.pass) ||
+                    !("newpass" in req.body.pass)
+                ) {
+                    return rejector();
+                }
+            } catch (e) {
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            sessionkey: getSessionKey(req),
+            pass: maybe(req.body, "pass") as {
+                oldpass: string;
+                newpass: string;
+            },
+            name: maybe(req.body, "name") as string,
+        });
+    });
 }
 
 /**

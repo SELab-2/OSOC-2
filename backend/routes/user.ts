@@ -1,15 +1,14 @@
+import { account_status_enum } from "@prisma/client";
 import express from "express";
+import * as validator from "validator";
 
+import * as ormLU from "../orm_functions/login_user";
 import * as ormL from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { InternalTypes, Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import * as ormP from "../orm_functions/person";
-import * as ormLU from "../orm_functions/login_user";
-
-import * as validator from "validator";
-import { account_status_enum } from "@prisma/client";
 
 /**
  *  Attempts to list all students in the system.
@@ -169,7 +168,8 @@ async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
 }
 
 /**
- *  Attempts to filter users in the system by name, email, status, coach or admin.
+ *  Attempts to filter users in the system by name, email, status, coach or
+ * admin.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -208,6 +208,49 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
     return Promise.resolve({ data: users, sessionkey: req.body.sessionkey });
 }
 
+async function userModSelf(req: express.Request): Promise<Responses.Key> {
+    return rq
+        .parseUserModSelfRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed, false))
+        .then((checked) => {
+            return ormLU
+                .getLoginUserById(checked.userId)
+                .then((user) => util.getOrReject(user))
+                .then((user) => {
+                    if (
+                        checked.data.pass != undefined &&
+                        user.password != checked.data.pass.oldpass
+                    )
+                        return Promise.reject();
+                    return Promise.resolve(user);
+                })
+                .then((user) =>
+                    ormLU.updateLoginUser({
+                        loginUserId: checked.userId,
+                        isAdmin: user.is_admin,
+                        isCoach: user.is_coach,
+                        accountStatus: user.account_status,
+                        password: checked.data.pass?.newpass,
+                    })
+                )
+                .then((user) => Promise.resolve(user.person))
+                .then((person) => {
+                    if (checked.data.name != undefined) {
+                        return ormP
+                            .updatePerson({
+                                personId: person.person_id,
+                                firstname: checked.data.name,
+                            })
+                            .then(() => Promise.resolve());
+                    }
+                    return Promise.resolve();
+                })
+                .then(() =>
+                    Promise.resolve({ sessionkey: checked.data.sessionkey })
+                );
+        });
+}
+
 /**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
@@ -219,6 +262,8 @@ export function getRouter(): express.Router {
     util.setupRedirect(router, "/user");
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
+
+    util.routeKeyOnly(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
@@ -233,6 +278,7 @@ export function getRouter(): express.Router {
         "/request",
         "/request/:id",
         "/filter",
+        "/self",
     ]);
 
     return router;

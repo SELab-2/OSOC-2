@@ -1,12 +1,12 @@
-import prisma from '../prisma/prisma';
+import prisma from "../prisma/prisma";
 import {
     CreateProject,
     UpdateProject,
     FilterString,
     FilterSort,
     FilterBoolean,
-    FilterNumberArray
-} from './orm_types';
+    FilterNumberArray,
+} from "./orm_types";
 
 /**
  *
@@ -304,60 +304,66 @@ export async function deleteProjectByPartner(partner: string) {
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
  * @returns the filtered students with their person data and other filter fields in a promise
  */
-export async function filterProjects(projectNameFilter: FilterString, clientNameFilter: FilterString,
-    assignedCoachesFilterArray: FilterNumberArray, fullyAssignedFilter: FilterBoolean,
-    projectNameSort: FilterSort, clientNameSort: FilterSort){
-
+export async function filterProjects(
+    projectNameFilter: FilterString,
+    clientNameFilter: FilterString,
+    assignedCoachesFilterArray: FilterNumberArray,
+    fullyAssignedFilter: FilterBoolean,
+    projectNameSort: FilterSort,
+    clientNameSort: FilterSort
+) {
     const projects = await prisma.project_role.groupBy({
-        by: ['project_id'],
+        by: ["project_id"],
         _sum: {
-            positions: true
-        }
+            positions: true,
+        },
     });
-    
-    const filtered_projects =  await prisma.project.findMany({
+
+    const filtered_projects = await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
             project_user: {
                 some: {
                     login_user: {
-                        login_user_id: { in: assignedCoachesFilterArray}
-                    }
-                }
+                        login_user_id: { in: assignedCoachesFilterArray },
+                    },
+                },
             },
         },
-        orderBy : {
+        orderBy: {
             name: projectNameSort,
-            partner: clientNameSort
+            partner: clientNameSort,
         },
-        include : {
+        include: {
             project_user: {
                 select: {
                     login_user: {
                         select: {
                             login_user_id: true,
-                            is_coach: true
-                        }
-                    }
-                }
+                            is_coach: true,
+                        },
+                    },
+                },
             },
             project_role: {
                 select: {
                     positions: true,
                     role: {
                         select: {
-                            name: true
-                        }
-                    }
-                }
-            }
-        }
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 
-    if (fullyAssignedFilter){
-        return filtered_projects.filter(project => 
-            project.positions == projects[project.project_id]._sum.positions);
+    if (fullyAssignedFilter) {
+        return filtered_projects.filter(
+            (project) =>
+                project.positions == projects[project.project_id]._sum.positions
+        );
     }
     return filtered_projects;
 }

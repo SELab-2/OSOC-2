@@ -2,10 +2,10 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormLU from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { InternalTypes, Responses } from "../types";
 import * as util from "../utility";
-import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -76,7 +76,7 @@ async function modCoach(
             return ormLU
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: parsed.data.pass,
+                    password: null,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
