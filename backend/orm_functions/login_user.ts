@@ -1,9 +1,13 @@
 import prisma from "../prisma/prisma";
 
-
-import {CreateLoginUser, FilterBoolean, FilterSort, FilterString, UpdateLoginUser} from './orm_types';
-import {account_status_enum} from "@prisma/client";
-
+import {
+    CreateLoginUser,
+    FilterBoolean,
+    FilterSort,
+    FilterString,
+    UpdateLoginUser,
+} from "./orm_types";
+import { account_status_enum } from "@prisma/client";
 
 /**
  *

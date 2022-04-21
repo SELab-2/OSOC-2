@@ -693,6 +693,29 @@ export async function parseRemoveAssigneeRequest(
     );
 }
 
+export async function parseUserModSelfRequest(
+    req: express.Request
+): Promise<Requests.UserPwd> {
+    return hasFields(req, [], types.key).then(() => {
+        if ("pass" in req.body) {
+            if (
+                !("oldpass" in req.body.pass) ||
+                !("newpass" in req.body.pass)
+            ) {
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            sessionkey: getSessionKey(req),
+            pass: maybe(req.body, "pass") as {
+                oldpass: string;
+                newpass: string;
+            },
+            name: maybe(req.body, "name") as string,
+        });
+    });
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
