@@ -11,7 +11,7 @@ import {
     getInvalidEndpointError,
     getInvalidVerbEndpointError,
     getMockRouter,
-} from "./mocks";
+} from "./mocking/mocks";
 
 jest.mock("../orm_functions/session_key");
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
