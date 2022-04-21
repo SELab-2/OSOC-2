@@ -704,6 +704,11 @@ export namespace Requests {
         is_coach: boolean;
     }
 
+    export interface UserPwd extends KeyRequest {
+        pass?: { newpass: string; oldpass: string };
+        name?: string;
+    }
+
     export interface StudentFilter extends KeyRequest {}
 
     export interface UserFilter extends KeyRequest {}
@@ -875,4 +880,10 @@ export interface Email {
     to: string;
     subject: string;
     html: string;
+}
+
+export enum Decision {
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
 }

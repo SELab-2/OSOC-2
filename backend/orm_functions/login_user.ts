@@ -212,6 +212,8 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
+ * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coach)
+ * @param adminFilter adminstatus that we are filtering on (or undefined if not filtering on admin)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
@@ -219,6 +221,7 @@ export async function getLoginUserById(loginUserId: number) {
  * @param isAdmin: true or false if we want only admins resp no admins or undefined if we don't want to filter on this field
  * @returns the filtered loginUsers with their person data in a promise
  */
+
 export async function filterLoginUsers(
     nameFilter: FilterString,
     emailFilter: FilterString,
@@ -228,10 +231,6 @@ export async function filterLoginUsers(
     isCoach: FilterBoolean,
     isAdmin: FilterBoolean
 ) {
-    if (nameSort !== undefined && emailSort !== undefined) {
-        return Promise.reject("Sorting is only allowed on 1 field");
-    }
-
     // execute the query
     return await prisma.login_user.findMany({
         where: {
@@ -249,12 +248,10 @@ export async function filterLoginUsers(
             is_coach: isCoach,
             is_admin: isAdmin,
         },
-        orderBy: {
-            person: {
-                firstname: nameSort,
-                email: emailSort,
-            },
-        },
+        orderBy: [
+            { person: { firstname: nameSort } },
+            { person: { email: emailSort } },
+        ],
         include: {
             person: true,
         },

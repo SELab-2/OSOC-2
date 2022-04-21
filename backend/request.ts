@@ -3,7 +3,13 @@ import express from "express";
 import * as validator from "validator";
 
 import * as config from "./config.json";
-import { Anything, FollowupType, InternalTypes, Requests } from "./types";
+import {
+    Anything,
+    Decision,
+    FollowupType,
+    InternalTypes,
+    Requests,
+} from "./types";
 import { errors, getSessionKey } from "./utility";
 
 /**
@@ -173,7 +179,6 @@ async function parseUpdateLoginUser(
             id: Number(req.params.id),
             isAdmin: maybe(req.body, "isAdmin") as boolean,
             isCoach: maybe(req.body, "isCoach") as boolean,
-            pass: maybe(req.body, "pass") as string,
             accountStatus: maybe(
                 req.body,
                 "accountStatus"
@@ -255,9 +260,9 @@ export async function parseSuggestStudentRequest(
     return hasFields(req, ["suggestion", "senderId"], types.id).then(() => {
         const sug: unknown = req.body.suggestion;
         if (
-            sug != "YES" &&
-            sug != "MAYBE" &&
-            sug != "NO" &&
+            sug != Decision.YES &&
+            sug != Decision.MAYBE &&
+            sug != Decision.NO &&
             req.body.senderId != null
         )
             return rejector();
@@ -311,9 +316,9 @@ export async function parseFilterStudentsRequest(
         ("emailFilter" in req.body &&
             !validator.default.isEmail(req.body.emailFilter)) ||
         ("statusFilter" in req.body &&
-            req.body.statusFilter !== "YES" &&
-            req.body.statusFilter !== "MAYBE" &&
-            req.body.statusFilter !== "NO")
+            req.body.statusFilter !== Decision.YES &&
+            req.body.statusFilter !== Decision.MAYBE &&
+            req.body.statusFilter !== Decision.NO)
     ) {
         return rejector();
     } else {
@@ -426,9 +431,9 @@ export async function parseFinalizeDecisionRequest(
     return hasFields(req, [], types.id).then(() => {
         if ("reply" in req.body) {
             if (
-                req.body.reply != "YES" &&
-                req.body.reply != "MAYBE" &&
-                req.body.reply != "NO"
+                req.body.reply != Decision.YES &&
+                req.body.reply != Decision.MAYBE &&
+                req.body.reply != Decision.NO
             )
                 return rejector();
         }
@@ -685,6 +690,33 @@ export async function parseRemoveAssigneeRequest(
             id: Number(req.params.id),
         })
     );
+}
+
+export async function parseUserModSelfRequest(
+    req: express.Request
+): Promise<Requests.UserPwd> {
+    return hasFields(req, [], types.key).then(() => {
+        if ("pass" in req.body) {
+            try {
+                if (
+                    !("oldpass" in req.body.pass) ||
+                    !("newpass" in req.body.pass)
+                ) {
+                    return rejector();
+                }
+            } catch (e) {
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            sessionkey: getSessionKey(req),
+            pass: maybe(req.body, "pass") as {
+                oldpass: string;
+                newpass: string;
+            },
+            name: maybe(req.body, "name") as string,
+        });
+    });
 }
 
 /**

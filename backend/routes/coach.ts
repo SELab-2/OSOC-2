@@ -2,10 +2,10 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormLU from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { InternalTypes, Responses } from "../types";
 import * as util from "../utility";
-import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -24,10 +24,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                     obj.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
-                            name:
-                                val.person.firstname +
-                                " " +
-                                val.person.lastname,
+                            name: val.person.firstname,
                             email: val.person.email,
                             github: val.person.github,
                         },
@@ -79,7 +76,7 @@ async function modCoach(
             return ormLU
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: parsed.data.pass,
+                    password: null,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
@@ -144,10 +141,7 @@ async function getCoachRequests(
                         .map((v) => ({
                             person_data: {
                                 id: v.person.person_id,
-                                name:
-                                    v.person.firstname +
-                                    " " +
-                                    v.person.lastname,
+                                name: v.person.firstname,
                             },
                             coach: v.is_coach,
                             admin: v.is_admin,
