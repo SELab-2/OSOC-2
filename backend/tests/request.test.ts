@@ -811,3 +811,47 @@ test("Can parse update template request", () => {
 
     return Promise.all([okays, fails1, fails2, fails3].flat());
 });
+
+test("Can parse self-modify requests", () => {
+    const key = "Im bobs secret key, dont tell anyone";
+    const v1: T.Anything = {};
+    const v2: T.Anything = { name: "BOBv2" };
+    const v3: T.Anything = { pass: { oldpass: "PASSv1", newpass: "PASSv2" } };
+
+    const i1: T.Anything = { name: "BOBv2", pass: "Nothing" };
+    const i2: T.Anything = { name: "BOBv2", pass: { oldpass: "PASSv1" } };
+    const i3: T.Anything = { name: "BOBv2", pass: { newpass: "PASSv2" } };
+
+    const valids = [v1, v2, v3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+        setSessionKey(req, key);
+        r.sessionkey = key;
+        ["name", "pass"].forEach((x) => {
+            if (!(x in r)) r[x] = undefined;
+        });
+
+        expect(Rq.parseUserModSelfRequest(req)).resolves.toStrictEqual(r);
+    });
+
+    const invalids = [i1, i2, i3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+        setSessionKey(req, key);
+
+        expect(Rq.parseUserModSelfRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    const unauths = [v1, v2, v3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+
+        expect(Rq.parseUserModSelfRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([valids, invalids, unauths].flat());
+});

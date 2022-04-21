@@ -697,10 +697,14 @@ export async function parseUserModSelfRequest(
 ): Promise<Requests.UserPwd> {
     return hasFields(req, [], types.key).then(() => {
         if ("pass" in req.body) {
-            if (
-                !("oldpass" in req.body.pass) ||
-                !("newpass" in req.body.pass)
-            ) {
+            try {
+                if (
+                    !("oldpass" in req.body.pass) ||
+                    !("newpass" in req.body.pass)
+                ) {
+                    return rejector();
+                }
+            } catch (e) {
                 return rejector();
             }
         }
