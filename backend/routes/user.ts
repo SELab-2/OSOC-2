@@ -211,7 +211,7 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
 async function userModSelf(req: express.Request): Promise<Responses.Key> {
     return rq
         .parseUserModSelfRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.checkSessionKey(parsed, false))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
