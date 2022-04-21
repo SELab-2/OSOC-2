@@ -263,7 +263,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
-    util.routeKeyOnly(router, "post", "/:id", userModSelf);
+    util.routeKeyOnly(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
@@ -278,6 +278,7 @@ export function getRouter(): express.Router {
         "/request",
         "/request/:id",
         "/filter",
+        "/self",
     ]);
 
     return router;
