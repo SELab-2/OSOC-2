@@ -37,6 +37,7 @@ const people: (login_user & { person: person })[] = [
             lastname: "Jan",
             email: "jeffrey@jan.be",
             github: null,
+            github_id: null,
         },
         is_coach: false,
         is_admin: true,
@@ -52,6 +53,7 @@ const people: (login_user & { person: person })[] = [
             lastname: "Jeffrey",
             email: null,
             github: "@jan_jeffrey",
+            github_id: "9846516845",
         },
         is_coach: false,
         is_admin: true,
@@ -80,10 +82,22 @@ beforeEach(() => {
 
     // mocks for utility
     utilMock.checkSessionKey.mockImplementation((v) =>
-        Promise.resolve({ userId: 0, data: v })
+        Promise.resolve({
+            userId: 0,
+            data: v,
+            accountStatus: "ACTIVATED",
+            is_admin: true,
+            is_coach: true,
+        })
     );
     utilMock.isAdmin.mockImplementation((v) =>
-        Promise.resolve({ userId: 0, data: v })
+        Promise.resolve({
+            userId: 0,
+            data: v,
+            accountStatus: "ACTIVATED",
+            is_admin: true,
+            is_coach: true,
+        })
     );
 
     // mocks for orm

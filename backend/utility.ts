@@ -467,7 +467,7 @@ export async function isValidID<T extends Requests.IdRequest>(
         project: (await ormPr.getProjectById(obj.id)) != null,
     };
 
-    return table in returnObj && returnObj[table] != null
+    return table in returnObj && returnObj[table] != null && returnObj[table]
         ? Promise.resolve(obj)
         : Promise.reject(errors.cookInvalidID());
 }

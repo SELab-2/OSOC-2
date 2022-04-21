@@ -13,7 +13,9 @@ import * as ormP from "../orm_functions/person";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
+export async function listCoaches(
+    req: express.Request
+): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -48,7 +50,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoach(req: express.Request): Promise<Responses.Coach> {
+export async function getCoach(req: express.Request): Promise<Responses.Coach> {
     return rq
         .parseSingleCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -66,7 +68,7 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(
+export async function modCoach(
     req: express.Request
 ): Promise<Responses.Keyed<InternalTypes.IdName>> {
     return rq
@@ -103,7 +105,9 @@ async function modCoach(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteCoach(req: express.Request): Promise<Responses.Key> {
+export async function deleteCoach(
+    req: express.Request
+): Promise<Responses.Key> {
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -124,7 +128,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequests(
+export async function getCoachRequests(
     req: express.Request
 ): Promise<Responses.CoachList> {
     return rq
@@ -163,7 +167,7 @@ async function getCoachRequests(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequest(
+export async function getCoachRequest(
     req: express.Request
 ): Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
     return rq
