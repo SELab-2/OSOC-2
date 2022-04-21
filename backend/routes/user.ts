@@ -252,6 +252,37 @@ async function userModSelf(req: express.Request): Promise<Responses.Key> {
 }
 
 /**
+ *  Attempts to get all data for a certain student in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function getCurrentUser(req: express.Request): Promise<Responses.User> {
+    const parsedRequest = await rq.parseCurrentUserRequest(req);
+
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const login_user = await ormL
+        .getLoginUserById(checkedSessionKey.userId)
+        .then((obj) => util.getOrReject(obj));
+    login_user.password = null;
+
+    return Promise.resolve({
+        data: {
+            login_user: login_user,
+        },
+        sessionkey: checkedSessionKey.data.sessionkey,
+    }).then((obj) => {
+        console.log(JSON.stringify(obj));
+        return Promise.resolve(obj);
+    });
+}
+/**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
  * endpoints.
@@ -263,6 +294,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
+    util.route(router, "get", "/self", getCurrentUser);
     util.routeKeyOnly(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>

@@ -30,7 +30,7 @@ const Settings: NextPage = () => {
             getSessionKey != undefined ? await getSessionKey() : "";
         console.log(sessionKey);
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/user/current`,
+            `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
             {
                 method: "GET",
                 headers: {
@@ -41,7 +41,6 @@ const Settings: NextPage = () => {
             .then((response) => response.json())
             .catch((error) => console.log(error));
         console.log(response);
-        console.log("aahahah");
         if (response !== undefined && response.success) {
             if (setSessionKey) {
                 setSessionKey(response.sessionkey);
@@ -58,7 +57,7 @@ const Settings: NextPage = () => {
 
     return (
         <div>
-            <SettingsComponent person={user} setUser={setUser} />
+            <SettingsComponent person={user} fetchUser={fetchUser} />
             <UnderConstruction />
         </div>
     );
