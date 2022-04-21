@@ -794,6 +794,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /verify` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseVerifyRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID

@@ -1454,22 +1454,8 @@
         "tags": [
           "verify"
         ],
-        "description": "Redirects towards GET /verify/all.",
+        "description": "Attempts to verify if the session key is valid.",
         "operationId": "verify",
-        "responses": {
-          "303": {
-            "description": "http HTTP/2 303 See Location: /verify/all"
-          }
-        }
-      }
-    },
-    "/verify/all": {
-      "get": {
-        "tags": [
-          "verify"
-        ],
-        "description": "Attempts to verify if the session key is valid",
-        "operationId": "all_verify",
         "parameters": [
           {
             "in": "header",
@@ -1483,7 +1469,7 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllVerify"
+              "$ref": "#/definitions/Verify"
             }
           }
         }
@@ -2465,15 +2451,32 @@
         "name": "JobApplicationSkill"
       }
     },
-    "AllVerify": {
+    "Verify": {
       "type": "object",
+      "required": [
+        "valid"
+      ],
       "properties": {
-        "data": {
+        "valid": {
           "type": "boolean"
         },
-        "sessionkey": {
-          "type": "string"
+        "is_coach": {
+          "type": "boolean"
+        },
+        "is_admin": {
+          "type": "boolean"
+        },
+        "account_status": {
+          "type": "string",
+          "enum": [
+            "ACTIVATED",
+            "PENDING",
+            "DISABLED"
+          ]
         }
+      },
+      "xml": {
+        "name": "Verify"
       }
     },
     "Suggestion": {
