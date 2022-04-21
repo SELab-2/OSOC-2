@@ -1,0 +1,5 @@
+.body {
+    width: clamp(18rem, 86vw, 100rem);
+    margin-inline: auto;
+    margin-bottom: clamp(1rem, 2vw, 2.5rem);;
+}

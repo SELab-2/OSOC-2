@@ -1,13 +1,26 @@
-import {prismaMock} from "./singleton";
-import {account_status_enum} from "@prisma/client";
-import { CreateLoginUser, UpdateLoginUser } from "../../orm_functions/orm_types";
+import { prismaMock } from "./singleton";
+import { account_status_enum } from "@prisma/client";
 import {
-    createLoginUser, getAllLoginUsers, getPasswordLoginUserByPerson,
-    getPasswordLoginUser, searchLoginUserByPerson, searchAllAdminLoginUsers,
-    searchAllCoachLoginUsers, searchAllAdminAndCoachLoginUsers, updateLoginUser,
-    deleteLoginUserById, deleteLoginUserByPersonId, getLoginUserById, setCoach, setAdmin, filterLoginUsers
-}
-    from "../../orm_functions/login_user";
+    CreateLoginUser,
+    UpdateLoginUser,
+} from "../../orm_functions/orm_types";
+import {
+    createLoginUser,
+    getAllLoginUsers,
+    getPasswordLoginUserByPerson,
+    getPasswordLoginUser,
+    searchLoginUserByPerson,
+    searchAllAdminLoginUsers,
+    searchAllCoachLoginUsers,
+    searchAllAdminAndCoachLoginUsers,
+    updateLoginUser,
+    deleteLoginUserById,
+    deleteLoginUserByPersonId,
+    getLoginUserById,
+    setCoach,
+    setAdmin,
+    filterLoginUsers,
+} from "../../orm_functions/login_user";
 
 const response = {
     session_id: "50",
@@ -17,8 +30,8 @@ const response = {
     is_admin: false,
     is_coach: false,
     session_keys: ["key1", "key2"],
-    account_status: account_status_enum.DISABLED
-}
+    account_status: account_status_enum.DISABLED,
+};
 
 const returnValue = {
     login_user_id: 0,
@@ -27,8 +40,8 @@ const returnValue = {
     is_admin: true,
     is_coach: true,
     account_status: account_status_enum.ACTIVATED,
-    session_keys: []
-}
+    session_keys: [],
+};
 
 test("should create a login user in the db with the given object, returns the new record", async () => {
     const loginUser: CreateLoginUser = {
@@ -36,14 +49,14 @@ test("should create a login user in the db with the given object, returns the ne
         password: "Password",
         isAdmin: true,
         isCoach: true,
-        accountStatus: account_status_enum.ACTIVATED
+        accountStatus: account_status_enum.ACTIVATED,
     };
- 
-     prismaMock.login_user.create.mockResolvedValue(returnValue)
-     await expect(createLoginUser(loginUser)).resolves.toEqual(returnValue);
- });
 
- test("should return all login users in the db", async () => {
+    prismaMock.login_user.create.mockResolvedValue(returnValue);
+    await expect(createLoginUser(loginUser)).resolves.toEqual(returnValue);
+});
+
+test("should return all login users in the db", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
     await expect(getAllLoginUsers()).resolves.toEqual([returnValue]);
 });
@@ -65,26 +78,32 @@ test("should return the searched login user record with the given person id", as
 
 test("should return all the login user records that are admin", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-    await expect(searchAllAdminLoginUsers(true)).resolves.toEqual([returnValue]);
+    await expect(searchAllAdminLoginUsers(true)).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should return all the login user records that are coach", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-    await expect(searchAllCoachLoginUsers(true)).resolves.toEqual([returnValue]);
+    await expect(searchAllCoachLoginUsers(true)).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should return all the login user records that are coach aswell as admin", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-    await expect(searchAllAdminAndCoachLoginUsers(true)).resolves.toEqual([returnValue]);
+    await expect(searchAllAdminAndCoachLoginUsers(true)).resolves.toEqual([
+        returnValue,
+    ]);
 });
 
 test("should update the login user with the new data and return the updated record", async () => {
-    const loginUser : UpdateLoginUser = {
+    const loginUser: UpdateLoginUser = {
         loginUserId: 0,
         password: "New_pass",
         isAdmin: false,
         isCoach: false,
-        accountStatus: "ACTIVATED"
+        accountStatus: "ACTIVATED",
     };
 
     prismaMock.login_user.update.mockResolvedValue(returnValue);
@@ -107,17 +126,34 @@ test("should return the login_user with given id", async () => {
 });
 
 test("should return the filtered list of users", async () => {
-   prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
-   await expect(filterLoginUsers(undefined, undefined, undefined, undefined, undefined, undefined, undefined))
-       .resolves.toEqual([returnValue]);
+    prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
+    await expect(
+        filterLoginUsers(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined
+        )
+    ).resolves.toEqual([returnValue]);
 });
 
 test("should reject and throw an error because only sorting on 1 field is allowed", async () => {
     try {
-        await filterLoginUsers(undefined, undefined, 'asc', 'desc', undefined, undefined, undefined);
+        await filterLoginUsers(
+            undefined,
+            undefined,
+            "asc",
+            "desc",
+            undefined,
+            undefined,
+            undefined
+        );
         // this should never get executed because filterLoginUser should reject
-        expect(true).toBeFalsy()
-    } catch(e) {
+        expect(true).toBeFalsy();
+    } catch (e) {
         // This should get executed!
         expect(true).toBeTruthy();
     }
