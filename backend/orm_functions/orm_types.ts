@@ -621,7 +621,7 @@ export type FilterString = string | undefined;
  */
 export type FilterNumberArray = number[] | undefined;
 
- /*
+/*
  * type to use in a filter query for array of strings
  */
 export type FilterStringArray = string[] | undefined;
