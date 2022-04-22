@@ -78,7 +78,6 @@ export const StudentFilter: React.FC<{
         alumni,
         studentCoach,
         statusFilter,
-        selectedRoles,
     ]);
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
@@ -145,7 +144,8 @@ export const StudentFilter: React.FC<{
             // Select role
             selectedRoles.add(role);
         }
-        setSelectedRoles(selectedRoles);
+        console.log(selectedRoles);
+        setSelectedRoles(new Set(selectedRoles));
     };
 
     const searchPress = (e: SyntheticEvent) => {
