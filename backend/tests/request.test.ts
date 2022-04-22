@@ -731,7 +731,6 @@ test("Can parse update template request", () => {
     const ok2: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
     };
     const ok3: T.Anything = {
         name: "my-template",
@@ -741,24 +740,20 @@ test("Can parse update template request", () => {
     const ok4: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok5: T.Anything = {
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok6: T.Anything = {
         name: "my-template",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok7: T.Anything = {
         name: "my-template",
         content: "hello-there",
         subject: "I like C++",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
 
@@ -772,7 +767,7 @@ test("Can parse update template request", () => {
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        ["name", "content", "subject", "desc", "cc"].forEach((v) => {
+        ["name", "content", "subject", "cc"].forEach((v) => {
             if (!(v in x)) x[v] = undefined;
         });
 
