@@ -17,8 +17,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "npm-root"
       include: "scope"
@@ -39,8 +38,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "npm-frontend"
       include: "scope"
@@ -61,8 +59,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "npm-backend"
       include: "scope"
@@ -83,8 +80,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "docker-backend"
       include: "scope"
@@ -105,8 +101,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "docker-database"
       include: "scope"
@@ -127,8 +122,7 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "docker-frontend"
       include: "scope"
@@ -150,12 +144,9 @@ updates:
     # Set the target branch to `development` instead of default `main`
     target-branch: "development"
     assignees:
-      - "BramDevlaminck"
-      - "Jonathan-Vanbrabant"
-      - "HuanYu-Tan"
+      - "SELab-2/osoc-team2"
     commit-message:
       prefix: "github-actions"
       include: "scope"
     labels:
       - "CI/CD"
-
