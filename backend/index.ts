@@ -25,8 +25,10 @@ export const io = new Server<
     SocketData
 >(httpServer, {
     cors: {
-        origin: "http://localhost:3000", //TODO: get this url from some kind of config file
+        origin: process.env.FRONTEND,
+        //origin: "http://localhost:3000",
     },
+    path: "/socket.io",
 });
 
 // require makes it A LOT easier to use this. Import gives some weird behaviour
