@@ -183,7 +183,9 @@ export const StudentFilter: React.FC<{
             filters.push(`osocYear=${osocYear}`);
         }
         if (selectedRoles.size !== 0) {
-            filters.push(`roleFilter=${selectedRoles.toString()}`);
+            filters.push(
+                `roleFilter=${Array.from(selectedRoles.values()).toString()}`
+            );
         }
         if (statusFilter !== "") {
             filters.push(`statusFilter=${statusFilter}`);

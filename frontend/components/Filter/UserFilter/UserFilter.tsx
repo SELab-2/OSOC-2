@@ -1,4 +1,4 @@
-import styles from "../Filter.module.css";
+import styles from "./UserFilter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import AdminIconColor from "../../../public/images/admin_icon_color.png";
@@ -41,7 +41,6 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
@@ -161,7 +160,7 @@ export const UserFilter: React.FC<{
     };
 
     return (
-        <div className={styles.userfilter}>
+        <div className={styles.filter}>
             <form className={styles.form}>
                 <div className={styles.query}>
                     <div onClick={toggleNameSort}>
@@ -188,8 +187,8 @@ export const UserFilter: React.FC<{
                     <button
                         className={`${
                             statusFilter === AccountStatus.PENDING
-                                ? styles.active
-                                : styles.inactive
+                                ? styles.pendingActive
+                                : styles.pendingButton
                         }`}
                         type="button"
                         onClick={togglePendingStatus}
