@@ -18,6 +18,14 @@ import { registerLoginUserHandlers } from "./websocket_events/login_user";
 const app: express.Application = express();
 const port: number = config.port;
 const httpServer = createServer(app);
+
+// require makes it A LOT easier to use this. Import gives some weird behaviour
+// that is not easy to work around
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config({
+    path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
+});
+
 export const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
@@ -26,16 +34,8 @@ export const io = new Server<
 >(httpServer, {
     cors: {
         origin: process.env.FRONTEND,
-        //origin: "http://localhost:3000",
     },
-    path: "/socket.io",
-});
-
-// require makes it A LOT easier to use this. Import gives some weird behaviour
-// that is not easy to work around
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require("dotenv").config({
-    path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
+    path: "/socket.io", // we locate the place for websockets at `/socket.io` inside the express server
 });
 
 app.use(body.urlencoded({ extended: true }));
