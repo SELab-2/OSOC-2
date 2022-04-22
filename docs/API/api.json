@@ -1,10 +1,15 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.1",
   "info": {
+    "title": "OSOC - API",
     "description": "An overview of API endpoints, verbs and their uses. Note: this is still in-progress and will change over time.",
-    "version": "2.0.0",
-    "title": "OSOC - API"
+    "version": "2.0.0"
   },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
   "tags": [
     {
       "name": "admin",
@@ -59,10 +64,6 @@
       "description": "Everything about verifying the session keys."
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
   "paths": {
     "/admin/all": {
       "get": {
@@ -73,18 +74,24 @@
         "operationId": "all_admins",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllLoginUsers"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllLoginUsers"
+                }
+              }
             }
           }
         }
@@ -99,51 +106,62 @@
         "operationId": "update_admin",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the user.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "accountStatus",
+            "in": "header",
             "description": "Shows the status of the account.",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "ACTIVATED",
-              "DISABLED",
-              "PENDING"
-            ]
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVATED",
+                "DISABLED",
+                "PENDING"
+              ]
+            }
           },
           {
-            "in": "header",
             "name": "isAdmin",
+            "in": "header",
             "description": "True if the user is an admin, else False.",
-            "required": false,
-            "type": "boolean"
+            "schema": {
+              "type": "boolean"
+            }
           },
           {
-            "in": "header",
             "name": "isCoach",
+            "in": "header",
             "description": "True if the user is a coach, else False.",
-            "required": false,
-            "type": "boolean"
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "If the session key is invalid or the id is not an id of an admin, an error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/ModifyLoginUser"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyLoginUser"
+                }
+              }
             }
           }
         }
@@ -156,25 +174,33 @@
         "operationId": "admin_id_delete",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the user.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -189,18 +215,24 @@
         "operationId": "all_coaches",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllLoginUsers"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllLoginUsers"
+                }
+              }
             }
           }
         }
@@ -215,51 +247,62 @@
         "operationId": "update_coach",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the user.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "accountStatus",
+            "in": "header",
             "description": "Shows the status of the account.",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "ACTIVATED",
-              "DISABLED",
-              "PENDING"
-            ]
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVATED",
+                "DISABLED",
+                "PENDING"
+              ]
+            }
           },
           {
-            "in": "header",
             "name": "isAdmin",
+            "in": "header",
             "description": "True if the user is an admin, else False.",
-            "required": false,
-            "type": "boolean"
+            "schema": {
+              "type": "boolean"
+            }
           },
           {
-            "in": "header",
             "name": "isCoach",
+            "in": "header",
             "description": "True if the user is a coach, else False.",
-            "required": false,
-            "type": "boolean"
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "If the session key is invalid or the id is not an id of a coach, an error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/ModifyLoginUser"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyLoginUser"
+                }
+              }
             }
           }
         }
@@ -272,25 +315,33 @@
         "operationId": "coach_id_delete",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the user.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -305,18 +356,24 @@
         "operationId": "all_coach_requests",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllCoachRequests"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllCoachRequests"
+                }
+              }
             }
           }
         }
@@ -331,18 +388,24 @@
         "operationId": "all_followups",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllFollowups"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllFollowups"
+                }
+              }
             }
           }
         }
@@ -357,25 +420,33 @@
         "operationId": "followup_id_get",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the followup.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Followup_Id"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Followup_Id"
+                }
+              }
             }
           }
         }
@@ -388,39 +459,49 @@
         "operationId": "followup_id_post",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the followup.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "type",
+            "in": "header",
             "description": "The email status.",
             "required": true,
-            "type": "string",
-            "enum": [
-              "DRAFT",
-              "FAILED",
-              "NONE",
-              "SCHEDULED",
-              "SENT"
-            ]
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "FAILED",
+                "NONE",
+                "SCHEDULED",
+                "SENT"
+              ]
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Followup_Id"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Followup_Id"
+                }
+              }
             }
           }
         }
@@ -435,33 +516,43 @@
         "operationId": "create_form",
         "parameters": [
           {
-            "in": "header",
             "name": "createdAt",
+            "in": "header",
             "description": "The date when this form was created.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "data",
+            "in": "header",
             "description": "The data of the form.",
             "required": true,
-            "type": "string",
-            "default": "This is actually an object with the data."
+            "schema": {
+              "type": "string",
+              "default": "This is actually an object with the data."
+            }
           },
           {
-            "in": "header",
             "name": "eventId",
+            "in": "header",
             "description": "The event id.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "The response is an empty object.",
-            "schema": {
-              "$ref": "#/definitions/Form"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Form"
+                }
+              }
             }
           }
         }
@@ -476,7 +567,8 @@
         "operationId": "github",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 towards another url"
+            "description": "http HTTP/2 303 towards another url",
+            "content": {}
           }
         }
       }
@@ -490,23 +582,28 @@
         "operationId": "github_challenge",
         "parameters": [
           {
-            "in": "header",
             "name": "code",
+            "in": "header",
             "description": "The code for the post request.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "state",
+            "in": "header",
             "description": "The state.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "The response is empty."
+            "description": "The response is empty.",
+            "content": {}
           }
         }
       }
@@ -520,25 +617,33 @@
         "operationId": "login",
         "parameters": [
           {
-            "in": "header",
             "name": "email",
+            "in": "header",
             "description": "The email of the user to log in.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "password",
+            "in": "header",
             "description": "The hashed password of the user to log in.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Login"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
             }
           }
         }
@@ -551,16 +656,19 @@
         "operationId": "logout",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "The session key of the user to log out.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Logged out."
+            "description": "Logged out.",
+            "content": {}
           }
         }
       }
@@ -574,7 +682,8 @@
         "operationId": "project",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /project/all"
+            "description": "http HTTP/2 303 See Location: /project/all",
+            "content": {}
           }
         }
       },
@@ -586,53 +695,69 @@
         "operationId": "create_project",
         "parameters": [
           {
-            "in": "header",
             "name": "end_date",
+            "in": "header",
             "description": "The end date of this project.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "name",
+            "in": "header",
             "description": "The name of the project.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "osocId",
+            "in": "header",
             "description": "The id of the osoc .",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "partner",
+            "in": "header",
             "description": "The partner's name of this project.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "positions",
+            "in": "header",
             "description": "The amount of positions for the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "start_date",
+            "in": "header",
             "description": "The start date of this project.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/CreateProject"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateProject"
+                }
+              }
             }
           }
         }
@@ -647,18 +772,24 @@
         "operationId": "all_projects",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/All_projects"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/All_projects"
+                }
+              }
             }
           }
         }
@@ -673,25 +804,33 @@
         "operationId": "get_project_id",
         "parameters": [
           {
-            "in": "header",
             "name": "project_id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Project_Students_Coaches"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project_Students_Coaches"
+                }
+              }
             }
           }
         }
@@ -704,60 +843,73 @@
         "operationId": "update_project",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "end",
+            "in": "header",
             "description": "The end date of this project.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "name",
+            "in": "header",
             "description": "The name of the project.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "partner",
+            "in": "header",
             "description": "The partner's name of this project.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "positions",
+            "in": "header",
             "description": "The amount of positions for the project.",
-            "required": false,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "start",
+            "in": "header",
             "description": "The start date of this project.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Modify_project"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Modify_project"
+                }
+              }
             }
           }
         }
@@ -770,25 +922,33 @@
         "operationId": "project_id_delete",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -803,25 +963,33 @@
         "operationId": "all_students_project",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Drafted_students_project"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Drafted_students_project"
+                }
+              }
             }
           }
         }
@@ -834,39 +1002,51 @@
         "operationId": "add_student_to_project",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "role",
+            "in": "header",
             "description": "The selected role for this student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "studentId",
+            "in": "header",
             "description": "The id of the selected student.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Draft_student_project"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Draft_student_project"
+                }
+              }
             }
           }
         }
@@ -881,32 +1061,42 @@
         "operationId": "project_student_delete",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the project.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "student",
+            "in": "header",
             "description": "The id of the student.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -921,18 +1111,24 @@
         "operationId": "project_conflicts",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Project_conflicts"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project_conflicts"
+                }
+              }
             }
           }
         }
@@ -947,16 +1143,19 @@
         "operationId": "reset_request",
         "parameters": [
           {
-            "in": "header",
             "name": "email",
+            "in": "header",
             "description": "The email address.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "The response is empty."
+            "description": "The response is empty.",
+            "content": {}
           }
         }
       }
@@ -970,16 +1169,19 @@
         "operationId": "reset_check_code",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The code.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "The response is empty."
+            "description": "The response is empty.",
+            "content": {}
           }
         }
       },
@@ -991,25 +1193,33 @@
         "operationId": "password_reset",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The code.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "password",
+            "in": "header",
             "description": "The new password.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -1024,7 +1234,8 @@
         "operationId": "role",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /role/all"
+            "description": "http HTTP/2 303 See Location: /role/all",
+            "content": {}
           }
         }
       }
@@ -1038,18 +1249,24 @@
         "operationId": "all_roles",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/All_roles"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/All_roles"
+                }
+              }
             }
           }
         }
@@ -1064,25 +1281,33 @@
         "operationId": "create_role",
         "parameters": [
           {
-            "in": "header",
             "name": "name",
+            "in": "header",
             "description": "The name of the role.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Create_role"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_role"
+                }
+              }
             }
           }
         }
@@ -1097,7 +1322,8 @@
         "operationId": "student",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /student/all"
+            "description": "http HTTP/2 303 See Location: /student/all",
+            "content": {}
           }
         }
       }
@@ -1111,18 +1337,24 @@
         "operationId": "all_students",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllStudents"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudents"
+                }
+              }
             }
           }
         }
@@ -1137,25 +1369,33 @@
         "operationId": "student_id_get",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id from the student.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Student"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
             }
           }
         }
@@ -1168,25 +1408,33 @@
         "operationId": "student_id_delete",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -1201,32 +1449,41 @@
         "operationId": "get_student_suggestions",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the student.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "year",
+            "in": "header",
             "description": "The osoc year.",
-            "required": false,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllStudentSuggestions"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudentSuggestions"
+                }
+              }
             }
           }
         }
@@ -1239,46 +1496,59 @@
         "operationId": "suggest_student",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the student.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "senderId",
+            "in": "header",
             "description": "The id of the login user.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "suggestion",
+            "in": "header",
             "description": "The suggestion for the student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "reason",
+            "in": "header",
             "description": "The motivation for the suggestion.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -1293,39 +1563,49 @@
         "operationId": "confirm_student",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "reason",
+            "in": "header",
             "description": "The reason for the suggestion.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "reply",
+            "in": "header",
             "description": "The suggestion for the student.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
             }
           }
         }
@@ -1340,110 +1620,130 @@
         "operationId": "filter_students",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "alumniFilter",
-            "description": "The alumni filter.",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "in": "header",
-            "name": "alumniSort",
-            "description": "Sorting by alumni (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "coachFilter",
-            "description": "The student-coach filter.",
-            "required": false,
-            "type": "boolean"
-          },
-          {
-            "in": "header",
-            "name": "emailFilter",
-            "description": "The email filter.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "emailSort",
-            "description": "Sorting by email (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "firstNameFilter",
-            "description": "The firstname filter.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "firstNameSort",
-            "description": "Sorting by firstname (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "lastNameFilter",
-            "description": "The lastname filter.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "lastNameSort",
-            "description": "Sorting by lastname (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "roleFilter",
-            "description": "The role filter.",
-            "required": false,
-            "type": "array",
-            "items": {
+            "schema": {
               "type": "string"
             }
           },
           {
+            "name": "alumniFilter",
             "in": "header",
-            "name": "roleSort",
-            "description": "Sorting by role (asc or desc).",
-            "required": false,
-            "type": "string"
+            "description": "The alumni filter.",
+            "schema": {
+              "type": "boolean"
+            }
           },
           {
+            "name": "alumniSort",
             "in": "header",
+            "description": "Sorting by alumni (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coachFilter",
+            "in": "header",
+            "description": "The student-coach filter.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "emailFilter",
+            "in": "header",
+            "description": "The email filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailSort",
+            "in": "header",
+            "description": "Sorting by email (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstNameFilter",
+            "in": "header",
+            "description": "The firstname filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstNameSort",
+            "in": "header",
+            "description": "Sorting by firstname (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastNameFilter",
+            "in": "header",
+            "description": "The lastname filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastNameSort",
+            "in": "header",
+            "description": "Sorting by lastname (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleFilter",
+            "in": "header",
+            "description": "The role filter.",
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "roleSort",
+            "in": "header",
+            "description": "Sorting by role (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "statusFilter",
+            "in": "header",
             "description": "The status filter.",
-            "required": false,
-            "type": "string",
-            "enum": [
-              "MAYBE",
-              "NO",
-              "YES"
-            ]
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAYBE",
+                "FALSE",
+                "TRUE"
+              ]
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllStudents"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudents"
+                }
+              }
             }
           }
         }
@@ -1458,7 +1758,8 @@
         "operationId": "template",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /template/all"
+            "description": "http HTTP/2 303 See Location: /template/all",
+            "content": {}
           }
         }
       },
@@ -1470,46 +1771,58 @@
         "operationId": "create_template",
         "parameters": [
           {
-            "in": "header",
             "name": "content",
+            "in": "header",
             "description": "The content of the template.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "name",
+            "in": "header",
             "description": "The name of the template.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "cc",
+            "in": "header",
             "description": "The copy field of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "subject",
+            "in": "header",
             "description": "The subject of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Create_template"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_template"
+                }
+              }
             }
           }
         }
@@ -1524,18 +1837,24 @@
         "operationId": "all_templates",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/All_templates"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/All_templates"
+                }
+              }
             }
           }
         }
@@ -1550,25 +1869,33 @@
         "operationId": "get_template",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the template.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Template"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Template"
+                }
+              }
             }
           }
         }
@@ -1581,53 +1908,65 @@
         "operationId": "update_template",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the template.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "cc",
+            "in": "header",
             "description": "The copy field of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "content",
+            "in": "header",
             "description": "The content of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "name",
+            "in": "header",
             "description": "The name of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "subject",
+            "in": "header",
             "description": "The subject of the template.",
-            "required": false,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Create_template"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_template"
+                }
+              }
             }
           }
         }
@@ -1640,25 +1979,420 @@
         "operationId": "delete_template",
         "parameters": [
           {
-            "in": "header",
             "name": "id",
+            "in": "header",
             "description": "The id of the template.",
             "required": true,
-            "type": "number"
+            "schema": {
+              "type": "number"
+            }
           },
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Redirects towards GET /user/all.",
+        "operationId": "user",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /user/all",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/user/all": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Lists all users in the system.",
+        "operationId": "all_users",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Sessionkey"
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllLoginUsers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/request": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Creates a new user request.",
+        "operationId": "create_user_request",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "header",
+            "description": "The email of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstname",
+            "in": "header",
+            "description": "The firstname of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastname",
+            "in": "header",
+            "description": "The lastname of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "header",
+            "description": "The password of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The id is the id of the new user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserId"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/request/<user-id>": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to accept a new user.",
+        "operationId": "accept_user_request",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the new user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_admin",
+            "in": "header",
+            "description": "True if the new user is an admin, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_coach",
+            "in": "header",
+            "description": "True if the new user is a coach, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to delete a user request.",
+        "operationId": "delete_user_request",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the new user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_admin",
+            "in": "header",
+            "description": "True if the new user is an admin, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_coach",
+            "in": "header",
+            "description": "True if the new user is a coach, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/self": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to modify the data of the current user.",
+        "operationId": "modify_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "header",
+            "description": "The name of the user.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "header",
+            "description": "The old and new password.",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newpass": {
+                  "type": "string"
+                },
+                "oldpass": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessionkey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/filter": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to filter the users.",
+        "operationId": "filter_users",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailFilter",
+            "in": "header",
+            "description": "The email filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailSort",
+            "in": "header",
+            "description": "Sorting by email (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAdminFilter",
+            "in": "header",
+            "description": "True if the users are admins, else false.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "iscoachFilter",
+            "in": "header",
+            "description": "True if the users are coaches, else false.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "nameFilter",
+            "in": "header",
+            "description": "The name filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nameSort",
+            "in": "header",
+            "description": "Sorting by name (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "statusFilter",
+            "in": "header",
+            "description": "The status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAYBE",
+                "FALSE",
+                "TRUE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/AllLoginUsers"
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -1673,534 +2407,112 @@
         "operationId": "verify",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Verify"
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verify"
+                }
+              }
             }
           }
         }
       }
     }
   },
-  "definitions": {
-    "Sessionkey": {
-      "type": "object",
-      "properties": {
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Sessionkey"
-      }
-    },
-    "LoginUser": {
-      "type": "object",
-      "properties": {
-        "activated": {
-          "type": "string"
-        },
-        "admin": {
-          "type": "boolean"
-        },
-        "coach": {
-          "type": "boolean"
-        },
-        "person_data": {
-          "type": "object",
-          "properties": {
-            "email": {
-              "type": "string"
-            },
-            "github": {
-              "type": "string"
-            },
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "xml": {
-        "name": "LoginUser"
-      }
-    },
-    "AllLoginUsers": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/LoginUser"
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "AllLoginUsers"
-      }
-    },
-    "AllCoachRequests": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "activated": {
-                "type": "string"
-              },
-              "admin": {
-                "type": "boolean"
-              },
-              "coach": {
-                "type": "boolean"
-              },
-              "person_data": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "number"
-                  },
-                  "name": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "AllCoachRequests"
-      }
-    },
-    "Login": {
-      "type": "object",
-      "properties": {
-        "email_status": {
-          "type": "string",
-          "enum": [
-            "ACTIVATED",
-            "PENDING",
-            "DISABLED"
-          ]
-        },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "is_coach": {
-          "type": "boolean"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Login"
-      }
-    },
-    "ModifyLoginUser": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "ModifyLoginUser"
-      }
-    },
-    "Followup": {
-      "type": "object",
-      "properties": {
-        "application": {
-          "type": "number"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "DRAFT",
-            "FAILED",
-            "NONE",
-            "SCHEDULED",
-            "SENT"
-          ]
-        },
-        "student": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "Followup"
-      }
-    },
-    "FollowupsList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Followup"
-      },
-      "xml": {
-        "name": "FollowupsList"
-      }
-    },
-    "AllFollowups": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/FollowupsList"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "AllFollowups"
-      }
-    },
-    "Followup_Id": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Followup"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Followup_Id"
-      }
-    },
-    "Form": {
-      "type": "object",
-      "xml": {
-        "name": "Form"
-      }
-    },
-    "Project": {
-      "type": "object",
-      "properties": {
-        "end_date": {
-          "type": "string"
-        },
-        "id": {
-          "type": "number"
-        },
-        "name": {
-          "type": "string"
-        },
-        "osoc_id": {
-          "type": "number"
-        },
-        "partner": {
-          "type": "string"
-        },
-        "positions": {
-          "type": "number"
-        },
-        "start_date": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Project"
-      }
-    },
-    "CreateProject": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Project"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "CreateProject"
-      }
-    },
-    "Project_coach": {
-      "type": "object",
-      "properties": {
-        "login_user": {
-          "type": "object",
-          "properties": {
-            "is_admin": {
-              "type": "boolean"
-            },
-            "is_coach": {
-              "type": "boolean"
-            },
-            "login_user_id": {
-              "type": "number"
-            },
-            "person": {
-              "$ref": "#/definitions/Person"
-            }
-          }
-        }
-      },
-      "xml": {
-        "name": "Project_coach"
-      }
-    },
-    "Project_students": {
-      "type": "array",
-      "items": {
+  "components": {
+    "schemas": {
+      "Sessionkey": {
         "type": "object",
         "properties": {
-          "contract_id": {
-            "type": "number"
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Sessionkey"
+        }
+      },
+      "LoginUser": {
+        "type": "object",
+        "properties": {
+          "activated": {
+            "type": "string"
           },
-          "contract_status": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "CANCELLED",
-              "DRAFT",
-              "SENT",
-              "SIGNED",
-              "WAIT_APPROVAL"
-            ]
+          "admin": {
+            "type": "boolean"
           },
-          "project_role": {
+          "coach": {
+            "type": "boolean"
+          },
+          "person_data": {
             "type": "object",
             "properties": {
-              "positions": {
+              "email": {
+                "type": "string"
+              },
+              "github": {
+                "type": "string"
+              },
+              "id": {
                 "type": "number"
               },
-              "project_id": {
-                "type": "number"
-              },
-              "project_role_id": {
-                "type": "number"
-              },
-              "role_id": {
-                "type": "number"
+              "name": {
+                "type": "string"
               }
             }
-          },
-          "student": {
+          }
+        },
+        "xml": {
+          "name": "LoginUser"
+        }
+      },
+      "AllLoginUsers": {
+        "type": "object",
+        "properties": {
+          "data": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/Student"
+              "$ref": "#/components/schemas/LoginUser"
             }
-          }
-        }
-      },
-      "xml": {
-        "name": "Project_students"
-      }
-    },
-    "Project_coaches": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Project_coach"
-      }
-    },
-    "Project_Students_Coaches": {
-      "type": "object",
-      "properties": {
-        "coaches": {
-          "$ref": "#/definitions/Project_coaches"
-        },
-        "end_date": {
-          "type": "string"
-        },
-        "id": {
-          "type": "number"
-        },
-        "name": {
-          "type": "string"
-        },
-        "osoc_id": {
-          "type": "number"
-        },
-        "partner": {
-          "type": "string"
-        },
-        "positions": {
-          "type": "number"
-        },
-        "start_date": {
-          "type": "string"
-        },
-        "students": {
-          "$ref": "#/definitions/Project_students"
-        }
-      },
-      "xml": {
-        "name": "Project_Students_Coaches"
-      }
-    },
-    "Project_list": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Project_Students_Coaches"
-      },
-      "xml": {
-        "name": "ProjectList"
-      }
-    },
-    "All_projects": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Project_list"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Allprojects"
-      }
-    },
-    "Modify_project": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
-            "partner": {
-              "type": "string"
-            },
-            "start_date": {
-              "type": "string"
-            },
-            "end_date": {
-              "type": "string"
-            },
-            "positions": {
-              "type": "number"
-            },
-            "osoc_id": {
-              "type": "number"
-            }
+          },
+          "sessionkey": {
+            "type": "string"
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "AllLoginUsers"
         }
       },
-      "xml": {
-        "name": "Modify_project"
-      }
-    },
-    "Drafted_students_project": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
-            "students": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "APPROVED",
-                      "CANCELLED",
-                      "DRAFT",
-                      "SENT",
-                      "SIGNED",
-                      "WAIT_APPROVAL"
-                    ]
-                  },
-                  "student": {
-                    "$ref": "#/definitions/Student"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Drafted_students_project"
-      }
-    },
-    "Draft_student_project": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "drafted": {
-              "type": "boolean"
-            },
-            "role": {
-              "type": "string"
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Draft_student_project"
-      }
-    },
-    "Project_conflicts": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "projects": {
-                "type": "array",
-                "items": {
+      "AllCoachRequests": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "activated": {
+                  "type": "string"
+                },
+                "admin": {
+                  "type": "boolean"
+                },
+                "coach": {
+                  "type": "boolean"
+                },
+                "person_data": {
                   "type": "object",
                   "properties": {
                     "id": {
@@ -2211,438 +2523,891 @@
                     }
                   }
                 }
-              },
-              "student": {
-                "type": "number"
               }
             }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Project_conflicts"
-      }
-    },
-    "All_roles": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "role_id": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "All_roles"
-      }
-    },
-    "Create_role": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Create_role"
-      }
-    },
-    "Student": {
-      "type": "object",
-      "properties": {
-        "evaluations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AllStudentEvaluations"
-          }
-        },
-        "jobApplication": {
-          "type": "object",
-          "properties": {
-            "applied_role": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AppliedRole"
-              }
-            },
-            "attachment": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attachment"
-              }
-            },
-            "created_at": {
-              "type": "string",
-              "example": "This is actually a date: 2022-03-14 23:10:00+01"
-            },
-            "edus": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "default": "Informatics"
-              }
-            },
-            "edu_duration": {
-              "type": "number",
-              "default": 5
-            },
-            "edu_institute": {
-              "type": "string",
-              "default": "Ghent university"
-            },
-            "edu_level": {
-              "type": "string",
-              "default": "Third bachelors degree"
-            },
-            "edu_year": {
-              "type": "string",
-              "default": 3
-            },
-            "email_status": {
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "FAILED",
-                "NONE",
-                "SCHEDULED",
-                "SENT"
-              ],
-              "default": "NONE"
-            },
-            "fun_fact": {
-              "type": "string",
-              "default": "I like basketball."
-            },
-            "job_application_id": {
-              "type": "number"
-            },
-            "job_application_skill": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/JobApplicationSkill"
-              }
-            },
-            "osoc_id": {
-              "type": "number"
-            },
-            "responsibilities": {
-              "type": "string",
-              "default": "I play basketball from 5pm until 7pm."
-            },
-            "student_coach": {
-              "type": "boolean"
-            },
-            "student_id": {
-              "type": "number"
-            },
-            "student_volunteer_info": {
-              "type": "string",
-              "default": "Yes, I can work with a student employment agreement in Belgium."
-            }
-          }
-        },
-        "roles": {
-          "type": "array",
-          "items": {
+          },
+          "sessionkey": {
             "type": "string"
           }
         },
-        "student": {
-          "type": "object",
-          "properties": {
-            "alumni": {
-              "type": "boolean"
-            },
-            "gender": {
-              "type": "string"
-            },
-            "nickname": {
-              "type": "string"
-            },
-            "person": {
-              "$ref": "#/definitions/Person"
-            },
-            "person_id": {
-              "type": "number"
-            },
-            "phone_number": {
-              "type": "string"
-            },
-            "pronouns": {
-              "type": "string"
-            },
-            "student_id": {
-              "type": "number"
-            }
-          }
+        "xml": {
+          "name": "AllCoachRequests"
         }
       },
-      "xml": {
-        "name": "Student"
-      }
-    },
-    "AllStudents": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Student"
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "PENDING",
+              "DISABLED"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_coach": {
+            "type": "boolean"
+          },
+          "sessionkey": {
+            "type": "string"
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Login"
         }
       },
-      "xml": {
-        "name": "AllStudents"
-      }
-    },
-    "AllStudentEvaluations": {
-      "type": "object",
-      "properties": {
-        "evaluation": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Evaluation"
-          }
-        },
-        "osoc": {
-          "type": "object",
-          "properties": {
-            "year": {
-              "type": "number"
-            }
-          }
-        }
-      },
-      "xml": {
-        "name": "AllStudentEvaluations"
-      }
-    },
-    "AllStudentSuggestions": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
+      "ModifyLoginUser": {
+        "type": "object",
+        "properties": {
+          "data": {
             "type": "object",
             "properties": {
-              "decision": {
-                "type": "string",
-                "enum": [
-                  "MAYBE",
-                  "NO",
-                  "YES"
-                ]
+              "id": {
+                "type": "number"
               },
-              "isFinal": {
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "ModifyLoginUser"
+        }
+      },
+      "Followup": {
+        "type": "object",
+        "properties": {
+          "application": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FAILED",
+              "NONE",
+              "SCHEDULED",
+              "SENT"
+            ]
+          },
+          "student": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "Followup"
+        }
+      },
+      "FollowupsList": {
+        "type": "array",
+        "xml": {
+          "name": "FollowupsList"
+        },
+        "items": {
+          "$ref": "#/components/schemas/Followup"
+        }
+      },
+      "AllFollowups": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FollowupsList"
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "AllFollowups"
+        }
+      },
+      "Followup_Id": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Followup"
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Followup_Id"
+        }
+      },
+      "Form": {
+        "type": "object",
+        "xml": {
+          "name": "Form"
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "end_date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "osoc_id": {
+            "type": "number"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "start_date": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Project"
+        }
+      },
+      "CreateProject": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Project"
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "CreateProject"
+        }
+      },
+      "Project_coach": {
+        "type": "object",
+        "properties": {
+          "login_user": {
+            "type": "object",
+            "properties": {
+              "is_admin": {
                 "type": "boolean"
               },
-              "reason": {
-                "type": "string"
+              "is_coach": {
+                "type": "boolean"
               },
-              "senderFirstname": {
-                "type": "string"
+              "login_user_id": {
+                "type": "number"
               },
-              "senderLastname": {
-                "type": "string"
+              "person": {
+                "$ref": "#/components/schemas/Person"
               }
             }
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Project_coach"
         }
       },
-      "xml": {
-        "name": "AllStudentSuggestions"
-      }
-    },
-    "Evaluation": {
-      "type": "object",
-      "properties": {
-        "decision": {
-          "type": "string",
-          "enum": [
-            "MAYBE",
-            "NO",
-            "YES"
-          ]
+      "Project_students": {
+        "type": "array",
+        "xml": {
+          "name": "Project_students"
         },
-        "evaluation_id": {
-          "type": "number"
-        },
-        "is_final": {
-          "type": "boolean"
-        },
-        "login_user": {
+        "items": {
           "type": "object",
           "properties": {
-            "login_user_id": {
+            "contract_id": {
               "type": "number"
             },
-            "person": {
+            "contract_status": {
+              "type": "string",
+              "enum": [
+                "APPROVED",
+                "CANCELLED",
+                "DRAFT",
+                "SENT",
+                "SIGNED",
+                "WAIT_APPROVAL"
+              ]
+            },
+            "project_role": {
               "type": "object",
               "properties": {
-                "email": {
-                  "type": "string"
+                "positions": {
+                  "type": "number"
                 },
-                "firstname": {
-                  "type": "string"
+                "project_id": {
+                  "type": "number"
                 },
-                "github": {
-                  "type": "string"
+                "project_role_id": {
+                  "type": "number"
                 },
-                "lastname": {
-                  "type": "string"
+                "role_id": {
+                  "type": "number"
+                }
+              }
+            },
+            "student": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Student"
+              }
+            }
+          }
+        }
+      },
+      "Project_coaches": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Project_coach"
+        }
+      },
+      "Project_Students_Coaches": {
+        "type": "object",
+        "properties": {
+          "coaches": {
+            "$ref": "#/components/schemas/Project_coaches"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "osoc_id": {
+            "type": "number"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "students": {
+            "$ref": "#/components/schemas/Project_students"
+          }
+        },
+        "xml": {
+          "name": "Project_Students_Coaches"
+        }
+      },
+      "Project_list": {
+        "type": "array",
+        "xml": {
+          "name": "ProjectList"
+        },
+        "items": {
+          "$ref": "#/components/schemas/Project_Students_Coaches"
+        }
+      },
+      "All_projects": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Project_list"
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Allprojects"
+        }
+      },
+      "Modify_project": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "partner": {
+                "type": "string"
+              },
+              "start_date": {
+                "type": "string"
+              },
+              "end_date": {
+                "type": "string"
+              },
+              "positions": {
+                "type": "number"
+              },
+              "osoc_id": {
+                "type": "number"
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Modify_project"
+        }
+      },
+      "Drafted_students_project": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "students": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "APPROVED",
+                        "CANCELLED",
+                        "DRAFT",
+                        "SENT",
+                        "SIGNED",
+                        "WAIT_APPROVAL"
+                      ]
+                    },
+                    "student": {
+                      "$ref": "#/components/schemas/Student"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Drafted_students_project"
+        }
+      },
+      "Draft_student_project": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "drafted": {
+                "type": "boolean"
+              },
+              "role": {
+                "type": "string"
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Draft_student_project"
+        }
+      },
+      "Project_conflicts": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "projects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 },
-                "person_id": {
+                "student": {
                   "type": "number"
                 }
               }
             }
-          }
-        },
-        "motivation": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Evaluation"
-      }
-    },
-    "Person": {
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string"
-        },
-        "firstname": {
-          "type": "string"
-        },
-        "github": {
-          "type": "string"
-        },
-        "github_id": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "person_id": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "Person"
-      }
-    },
-    "Attachment": {
-      "type": "object",
-      "properties": {
-        "attachment_id": {
-          "type": "number"
-        },
-        "data": {
-          "type": "array",
-          "items": {
+          },
+          "sessionkey": {
             "type": "string"
           }
         },
-        "job_application_id": {
-          "type": "number"
-        },
-        "type": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "CV_URL",
-              "FILE_URL",
-              "MOTIVATION_STRING",
-              "MOTIVATION_URL",
-              "PORTFOLIO_URL"
-            ]
+        "xml": {
+          "name": "Project_conflicts"
+        }
+      },
+      "All_roles": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "role_id": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
           }
+        },
+        "xml": {
+          "name": "All_roles"
         }
       },
-      "xml": {
-        "name": "Attachment"
-      }
-    },
-    "JobApplicationSkill": {
-      "type": "object",
-      "properties": {
-        "is_best": {
-          "type": "boolean"
+      "Create_role": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sessionkey": {
+            "type": "string"
+          }
         },
-        "is_preferred": {
-          "type": "boolean"
-        },
-        "job_application_id": {
-          "type": "number"
-        },
-        "job_application_skill_id": {
-          "type": "number"
-        },
-        "language_id": {
-          "type": "number"
-        },
-        "level": {
-          "type": "number"
-        },
-        "skill": {
-          "type": "string"
+        "xml": {
+          "name": "Create_role"
         }
       },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
-    "AppliedRole": {
-      "type": "object",
-      "properties": {
-        "applied_role_id": {
-          "type": "number"
-        },
-        "job_application_id": {
-          "type": "number"
-        },
-        "role_id": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
-    "All_templates": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "array",
-          "items": {
+      "Student": {
+        "type": "object",
+        "properties": {
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllStudentEvaluations"
+            }
+          },
+          "jobApplication": {
             "type": "object",
             "properties": {
+              "applied_role": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AppliedRole"
+                }
+              },
+              "attachment": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "example": "This is actually a date: 2022-03-14 23:10:00+01"
+              },
+              "edus": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "default": "Informatics"
+                }
+              },
+              "edu_duration": {
+                "type": "number"
+              },
+              "edu_institute": {
+                "type": "string",
+                "default": "Ghent university"
+              },
+              "edu_level": {
+                "type": "string",
+                "default": "Third bachelors degree"
+              },
+              "edu_year": {
+                "type": "string",
+                "default": "3"
+              },
+              "email_status": {
+                "type": "string",
+                "default": "NONE",
+                "enum": [
+                  "DRAFT",
+                  "FAILED",
+                  "NONE",
+                  "SCHEDULED",
+                  "SENT"
+                ]
+              },
+              "fun_fact": {
+                "type": "string",
+                "default": "I like basketball."
+              },
+              "job_application_id": {
+                "type": "number"
+              },
+              "job_application_skill": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JobApplicationSkill"
+                }
+              },
+              "osoc_id": {
+                "type": "number"
+              },
+              "responsibilities": {
+                "type": "string",
+                "default": "I play basketball from 5pm until 7pm."
+              },
+              "student_coach": {
+                "type": "boolean"
+              },
+              "student_id": {
+                "type": "number"
+              },
+              "student_volunteer_info": {
+                "type": "string",
+                "default": "Yes, I can work with a student employment agreement in Belgium."
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "student": {
+            "type": "object",
+            "properties": {
+              "alumni": {
+                "type": "boolean"
+              },
+              "gender": {
+                "type": "string"
+              },
+              "nickname": {
+                "type": "string"
+              },
+              "person": {
+                "$ref": "#/components/schemas/Person"
+              },
+              "person_id": {
+                "type": "number"
+              },
+              "phone_number": {
+                "type": "string"
+              },
+              "pronouns": {
+                "type": "string"
+              },
+              "student_id": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Student"
+        }
+      },
+      "AllStudents": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Student"
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "AllStudents"
+        }
+      },
+      "AllStudentEvaluations": {
+        "type": "object",
+        "properties": {
+          "evaluation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evaluation"
+            }
+          },
+          "osoc": {
+            "type": "object",
+            "properties": {
+              "year": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "AllStudentEvaluations"
+        }
+      },
+      "AllStudentSuggestions": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "decision": {
+                  "type": "string",
+                  "enum": [
+                    "MAYBE"
+                  ]
+                },
+                "isFinal": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "senderFirstname": {
+                  "type": "string"
+                },
+                "senderLastname": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "AllStudentSuggestions"
+        }
+      },
+      "Evaluation": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "MAYBE"
+            ]
+          },
+          "evaluation_id": {
+            "type": "number"
+          },
+          "is_final": {
+            "type": "boolean"
+          },
+          "login_user": {
+            "type": "object",
+            "properties": {
+              "login_user_id": {
+                "type": "number"
+              },
+              "person": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "github": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "person_id": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "motivation": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Evaluation"
+        }
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "github": {
+            "type": "string"
+          },
+          "github_id": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "person_id": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "Person"
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "attachment_id": {
+            "type": "number"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CV_URL",
+                "FILE_URL",
+                "MOTIVATION_STRING",
+                "MOTIVATION_URL",
+                "PORTFOLIO_URL"
+              ]
+            }
+          }
+        },
+        "xml": {
+          "name": "Attachment"
+        }
+      },
+      "JobApplicationSkill": {
+        "type": "object",
+        "properties": {
+          "is_best": {
+            "type": "boolean"
+          },
+          "is_preferred": {
+            "type": "boolean"
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "job_application_skill_id": {
+            "type": "number"
+          },
+          "language_id": {
+            "type": "number"
+          },
+          "level": {
+            "type": "number"
+          },
+          "skill": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "JobApplicationSkill"
+        }
+      },
+      "AppliedRole": {
+        "type": "object",
+        "properties": {
+          "applied_role_id": {
+            "type": "number"
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "role_id": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "JobApplicationSkill"
+        }
+      },
+      "All_templates": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "sessionkey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "All_templates"
+        }
+      },
+      "Template": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "content": {
+                "type": "string"
+              },
               "id": {
                 "type": "number"
               },
@@ -2653,104 +3418,109 @@
                 "type": "number"
               }
             }
+          },
+          "sessionkey": {
+            "type": "string"
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Template"
         }
       },
-      "xml": {
-        "name": "All_templates"
-      }
-    },
-    "Template": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "content": {
-              "type": "string"
-            },
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
-            "owner": {
-              "type": "number"
+      "Create_template": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "cc": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "number"
+              },
+              "subject": {
+                "type": "string"
+              }
             }
+          },
+          "sessionkey": {
+            "type": "string"
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Create_template"
         }
       },
-      "xml": {
-        "name": "Template"
-      }
-    },
-    "Create_template": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "cc": {
-              "type": "string"
-            },
-            "content": {
-              "type": "string"
-            },
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
-            "owner": {
-              "type": "number"
-            },
-            "subject": {
-              "type": "string"
+      "UserId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "UserId"
+        }
+      },
+      "UserIdName": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              }
             }
+          },
+          "sessionkey": {
+            "type": "string"
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "UserIdName"
         }
       },
-      "xml": {
-        "name": "Create_template"
-      }
-    },
-    "Verify": {
-      "type": "object",
-      "required": [
-        "valid"
-      ],
-      "properties": {
-        "account_status": {
-          "type": "string",
-          "enum": [
-            "ACTIVATED",
-            "DISABLED",
-            "PENDING"
-          ]
+      "Verify": {
+        "required": [
+          "valid"
+        ],
+        "type": "object",
+        "properties": {
+          "account_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_coach": {
+            "type": "boolean"
+          },
+          "valid": {
+            "type": "boolean"
+          }
         },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "is_coach": {
-          "type": "boolean"
-        },
-        "valid": {
-          "type": "boolean"
+        "xml": {
+          "name": "Verify"
         }
-      },
-      "xml": {
-        "name": "Verify"
       }
     }
   }
