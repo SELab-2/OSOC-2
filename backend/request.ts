@@ -595,14 +595,13 @@ export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
     return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, ["name", "desc", "subject", "cc", "content"]))
+        if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             name: maybe(req.body, "name"),
-            desc: maybe(req.body, "desc"),
             subject: maybe(req.body, "subject"),
             cc: maybe(req.body, "cc"),
             content: maybe(req.body, "content"),

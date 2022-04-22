@@ -100,13 +100,6 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the user.",
             "required": true,
@@ -114,10 +107,22 @@
           },
           {
             "in": "header",
-            "name": "isCoach",
-            "description": "True if the user is a coach, else False.",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "accountStatus",
+            "description": "Shows the status of the account.",
             "required": false,
-            "type": "boolean"
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
           },
           {
             "in": "header",
@@ -128,15 +133,10 @@
           },
           {
             "in": "header",
-            "name": "accountStatus",
-            "description": "Shows the status of the account.",
+            "name": "isCoach",
+            "description": "True if the user is a coach, else False.",
             "required": false,
-            "type": "string",
-            "enum": [
-              "ACTIVATED",
-              "PENDING",
-              "DISABLED"
-            ]
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -157,17 +157,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the user.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -216,13 +216,6 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the user.",
             "required": true,
@@ -230,10 +223,22 @@
           },
           {
             "in": "header",
-            "name": "isCoach",
-            "description": "True if the user is a coach, else False.",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "accountStatus",
+            "description": "Shows the status of the account.",
             "required": false,
-            "type": "boolean"
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
           },
           {
             "in": "header",
@@ -244,15 +249,10 @@
           },
           {
             "in": "header",
-            "name": "accountStatus",
-            "description": "Shows the status of the account.",
+            "name": "isCoach",
+            "description": "True if the user is a coach, else False.",
             "required": false,
-            "type": "string",
-            "enum": [
-              "ACTIVATED",
-              "PENDING",
-              "DISABLED"
-            ]
+            "type": "boolean"
           }
         ],
         "responses": {
@@ -273,17 +273,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the user.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -358,17 +358,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the followup.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -389,17 +389,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the followup.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           },
           {
             "in": "header",
@@ -408,11 +408,11 @@
             "required": true,
             "type": "string",
             "enum": [
-              "SCHEDULED",
-              "SENT",
+              "DRAFT",
               "FAILED",
               "NONE",
-              "DRAFT"
+              "SCHEDULED",
+              "SENT"
             ]
           }
         ],
@@ -436,13 +436,6 @@
         "parameters": [
           {
             "in": "header",
-            "name": "eventId",
-            "description": "The event id.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "createdAt",
             "description": "The date when this form was created.",
             "required": true,
@@ -455,6 +448,13 @@
             "required": true,
             "type": "string",
             "default": "This is actually an object with the data."
+          },
+          {
+            "in": "header",
+            "name": "eventId",
+            "description": "The event id.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -521,15 +521,15 @@
         "parameters": [
           {
             "in": "header",
-            "name": "password",
-            "description": "The hashed password of the user to log in.",
+            "name": "email",
+            "description": "The email of the user to log in.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "email",
-            "description": "The email of the user to log in.",
+            "name": "password",
+            "description": "The hashed password of the user to log in.",
             "required": true,
             "type": "string"
           }
@@ -587,29 +587,15 @@
         "parameters": [
           {
             "in": "header",
-            "name": "name",
-            "description": "The name of the project.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "partner",
-            "description": "The partner's name of this project.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "start_date",
-            "description": "The start date of this project.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "end_date",
             "description": "The end date of this project.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the project.",
             "required": true,
             "type": "string"
           },
@@ -622,10 +608,24 @@
           },
           {
             "in": "header",
+            "name": "partner",
+            "description": "The partner's name of this project.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
             "name": "positions",
             "description": "The amount of positions for the project.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "start_date",
+            "description": "The start date of this project.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -674,17 +674,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "project_id",
             "description": "The id of the project.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -705,6 +705,13 @@
         "parameters": [
           {
             "in": "header",
+            "name": "id",
+            "description": "The id of the project.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
             "name": "sessionkey",
             "description": "Your current session key.",
             "required": true,
@@ -712,10 +719,10 @@
           },
           {
             "in": "header",
-            "name": "id",
-            "description": "The id of the project.",
-            "required": true,
-            "type": "number"
+            "name": "end",
+            "description": "The end date of this project.",
+            "required": false,
+            "type": "string"
           },
           {
             "in": "header",
@@ -733,24 +740,17 @@
           },
           {
             "in": "header",
-            "name": "start",
-            "description": "The start date of this project.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "end",
-            "description": "The end date of this project.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "positions",
             "description": "The amount of positions for the project.",
             "required": false,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "start",
+            "description": "The start date of this project.",
+            "required": false,
+            "type": "string"
           }
         ],
         "responses": {
@@ -771,17 +771,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the project.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -804,17 +804,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the project.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -835,22 +835,8 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the project.",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "studentId",
-            "description": "The id of the selected student.",
             "required": true,
             "type": "number"
           },
@@ -860,6 +846,20 @@
             "description": "The selected role for this student.",
             "required": true,
             "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "studentId",
+            "description": "The id of the selected student.",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {
@@ -882,17 +882,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the project.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           },
           {
             "in": "header",
@@ -1065,15 +1065,15 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "name": "name",
+            "description": "The name of the role.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "name",
-            "description": "The name of the role.",
+            "name": "sessionkey",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
           }
@@ -1138,17 +1138,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id from the student.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -1169,15 +1169,15 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "name": "id",
+            "description": "The id of the student.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "id",
-            "description": "The id of the student.",
+            "name": "sessionkey",
+            "description": "Your current session key.",
             "required": true,
             "type": "string"
           }
@@ -1202,17 +1202,17 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the student.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           },
           {
             "in": "header",
@@ -1240,17 +1240,24 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
             "description": "The id of the student.",
             "required": true,
             "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "senderId",
+            "description": "The id of the login user.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
           },
           {
             "in": "header",
@@ -1265,13 +1272,6 @@
             "description": "The motivation for the suggestion.",
             "required": false,
             "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "senderId",
-            "description": "The id of the login user.",
-            "required": true,
-            "type": "number"
           }
         ],
         "responses": {
@@ -1294,16 +1294,16 @@
         "parameters": [
           {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "name": "id",
+            "description": "The id of the student.",
             "required": true,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "reply",
-            "description": "The suggestion for the student.",
-            "required": false,
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
             "type": "string"
           },
           {
@@ -1315,9 +1315,9 @@
           },
           {
             "in": "header",
-            "name": "id",
-            "description": "The id of the student.",
-            "required": true,
+            "name": "reply",
+            "description": "The suggestion for the student.",
+            "required": false,
             "type": "string"
           }
         ],
@@ -1348,8 +1348,50 @@
           },
           {
             "in": "header",
+            "name": "alumniFilter",
+            "description": "The alumni filter.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "alumniSort",
+            "description": "Sorting by alumni (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "coachFilter",
+            "description": "The student-coach filter.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "emailFilter",
+            "description": "The email filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "emailSort",
+            "description": "Sorting by email (asc or desc).",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
             "name": "firstNameFilter",
             "description": "The firstname filter.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "firstNameSort",
+            "description": "Sorting by firstname (asc or desc).",
             "required": false,
             "type": "string"
           },
@@ -1362,8 +1404,8 @@
           },
           {
             "in": "header",
-            "name": "emailFilter",
-            "description": "The email filter.",
+            "name": "lastNameSort",
+            "description": "Sorting by lastname (asc or desc).",
             "required": false,
             "type": "string"
           },
@@ -1379,17 +1421,10 @@
           },
           {
             "in": "header",
-            "name": "alumniFilter",
-            "description": "The alumni filter.",
+            "name": "roleSort",
+            "description": "Sorting by role (asc or desc).",
             "required": false,
-            "type": "boolean"
-          },
-          {
-            "in": "header",
-            "name": "coachFilter",
-            "description": "The student-coach filter.",
-            "required": false,
-            "type": "boolean"
+            "type": "string"
           },
           {
             "in": "header",
@@ -1398,43 +1433,74 @@
             "required": false,
             "type": "string",
             "enum": [
-              "YES",
               "MAYBE",
-              "NO"
+              "NO",
+              "YES"
             ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/AllStudents"
+            }
+          }
+        }
+      }
+    },
+    "/template": {
+      "get": {
+        "tags": [
+          "template"
+        ],
+        "description": "Redirects towards GET /template/all.",
+        "operationId": "template",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /template/all"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "template"
+        ],
+        "description": "Creates a new template.",
+        "operationId": "create_template",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "content",
+            "description": "The content of the template.",
+            "required": true,
+            "type": "string"
           },
           {
             "in": "header",
-            "name": "firstNameSort",
-            "description": "Sorting by firstname (asc or desc).",
+            "name": "name",
+            "description": "The name of the template.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "cc",
+            "description": "The copy field of the template.",
             "required": false,
             "type": "string"
           },
           {
             "in": "header",
-            "name": "lastNameSort",
-            "description": "Sorting by lastname (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "emailSort",
-            "description": "Sorting by email (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "roleSort",
-            "description": "Sorting by role (asc or desc).",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "alumniSort",
-            "description": "Sorting by alumni (asc or desc).",
+            "name": "subject",
+            "description": "The subject of the template.",
             "required": false,
             "type": "string"
           }
@@ -1443,7 +1509,156 @@
           "200": {
             "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllStudents"
+              "$ref": "#/definitions/Create_template"
+            }
+          }
+        }
+      }
+    },
+    "/template/all": {
+      "get": {
+        "tags": [
+          "template"
+        ],
+        "description": "Lists all templates in the system.",
+        "operationId": "all_templates",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/All_templates"
+            }
+          }
+        }
+      }
+    },
+    "/template/<template-id>": {
+      "get": {
+        "tags": [
+          "template"
+        ],
+        "description": "Gets a single template with the given id.",
+        "operationId": "get_template",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the template.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Template"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "template"
+        ],
+        "description": "Attempts to update a template.",
+        "operationId": "update_template",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the template.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "cc",
+            "description": "The copy field of the template.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "content",
+            "description": "The content of the template.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "name",
+            "description": "The name of the template.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "subject",
+            "description": "The subject of the template.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Create_template"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "template"
+        ],
+        "description": "Attempts to delete a template.",
+        "operationId": "delete_template",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "id",
+            "description": "The id of the template.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "header",
+            "name": "sessionkey",
+            "description": "Your current session key.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "schema": {
+              "$ref": "#/definitions/Sessionkey"
             }
           }
         }
@@ -1491,31 +1706,31 @@
     "LoginUser": {
       "type": "object",
       "properties": {
+        "activated": {
+          "type": "string"
+        },
+        "admin": {
+          "type": "boolean"
+        },
+        "coach": {
+          "type": "boolean"
+        },
         "person_data": {
           "type": "object",
           "properties": {
-            "id": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
             "email": {
               "type": "string"
             },
             "github": {
               "type": "string"
+            },
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
             }
           }
-        },
-        "coach": {
-          "type": "boolean"
-        },
-        "admin": {
-          "type": "boolean"
-        },
-        "activated": {
-          "type": "string"
         }
       },
       "xml": {
@@ -1547,6 +1762,15 @@
           "items": {
             "type": "object",
             "properties": {
+              "activated": {
+                "type": "string"
+              },
+              "admin": {
+                "type": "boolean"
+              },
+              "coach": {
+                "type": "boolean"
+              },
               "person_data": {
                 "type": "object",
                 "properties": {
@@ -1557,15 +1781,6 @@
                     "type": "string"
                   }
                 }
-              },
-              "coach": {
-                "type": "boolean"
-              },
-              "admin": {
-                "type": "boolean"
-              },
-              "activated": {
-                "type": "string"
               }
             }
           }
@@ -1581,15 +1796,6 @@
     "Login": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "is_coach": {
-          "type": "boolean"
-        },
         "email_status": {
           "type": "string",
           "enum": [
@@ -1597,6 +1803,15 @@
             "PENDING",
             "DISABLED"
           ]
+        },
+        "is_admin": {
+          "type": "boolean"
+        },
+        "is_coach": {
+          "type": "boolean"
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1606,9 +1821,6 @@
     "ModifyLoginUser": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "object",
           "properties": {
@@ -1619,6 +1831,9 @@
               "type": "string"
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1628,21 +1843,21 @@
     "Followup": {
       "type": "object",
       "properties": {
-        "student": {
-          "type": "number"
-        },
         "application": {
           "type": "number"
         },
         "status": {
           "type": "string",
           "enum": [
-            "SCHEDULED",
-            "SENT",
+            "DRAFT",
             "FAILED",
             "NONE",
-            "DRAFT"
+            "SCHEDULED",
+            "SENT"
           ]
+        },
+        "student": {
+          "type": "number"
         }
       },
       "xml": {
@@ -1695,26 +1910,26 @@
     "Project": {
       "type": "object",
       "properties": {
+        "end_date": {
+          "type": "string"
+        },
         "id": {
           "type": "number"
         },
         "name": {
           "type": "string"
         },
+        "osoc_id": {
+          "type": "number"
+        },
         "partner": {
-          "type": "string"
-        },
-        "start_date": {
-          "type": "string"
-        },
-        "end_date": {
           "type": "string"
         },
         "positions": {
           "type": "number"
         },
-        "osoc_id": {
-          "type": "number"
+        "start_date": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1741,20 +1956,23 @@
         "login_user": {
           "type": "object",
           "properties": {
-            "login_user_id": {
-              "type": "number"
+            "is_admin": {
+              "type": "boolean"
             },
             "is_coach": {
               "type": "boolean"
             },
-            "is_admin": {
-              "type": "boolean"
+            "login_user_id": {
+              "type": "number"
             },
             "person": {
               "$ref": "#/definitions/Person"
             }
           }
         }
+      },
+      "xml": {
+        "name": "Project_coach"
       }
     },
     "Project_students": {
@@ -1765,9 +1983,23 @@
           "contract_id": {
             "type": "number"
           },
+          "contract_status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "CANCELLED",
+              "DRAFT",
+              "SENT",
+              "SIGNED",
+              "WAIT_APPROVAL"
+            ]
+          },
           "project_role": {
             "type": "object",
             "properties": {
+              "positions": {
+                "type": "number"
+              },
               "project_id": {
                 "type": "number"
               },
@@ -1776,22 +2008,8 @@
               },
               "role_id": {
                 "type": "number"
-              },
-              "positions": {
-                "type": "number"
               }
             }
-          },
-          "contract_status": {
-            "type": "string",
-            "enum": [
-              "DRAFT",
-              "APPROVED",
-              "CANCELLED",
-              "WAIT_APPROVAL",
-              "SIGNED",
-              "SENT"
-            ]
           },
           "student": {
             "type": "array",
@@ -1800,6 +2018,9 @@
             }
           }
         }
+      },
+      "xml": {
+        "name": "Project_students"
       }
     },
     "Project_coaches": {
@@ -1811,32 +2032,32 @@
     "Project_Students_Coaches": {
       "type": "object",
       "properties": {
+        "coaches": {
+          "$ref": "#/definitions/Project_coaches"
+        },
+        "end_date": {
+          "type": "string"
+        },
         "id": {
           "type": "number"
         },
         "name": {
           "type": "string"
         },
+        "osoc_id": {
+          "type": "number"
+        },
         "partner": {
-          "type": "string"
-        },
-        "start_date": {
-          "type": "string"
-        },
-        "end_date": {
           "type": "string"
         },
         "positions": {
           "type": "number"
         },
-        "osoc_id": {
-          "type": "number"
+        "start_date": {
+          "type": "string"
         },
         "students": {
           "$ref": "#/definitions/Project_students"
-        },
-        "coaches": {
-          "$ref": "#/definitions/Project_coaches"
         }
       },
       "xml": {
@@ -1869,9 +2090,6 @@
     "Modify_project": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "$ref": "#/definitions/Sessionkey"
-        },
         "data": {
           "type": "object",
           "properties": {
@@ -1897,6 +2115,9 @@
               "type": "number"
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1906,9 +2127,6 @@
     "Drafted_students_project": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "object",
           "properties": {
@@ -1923,24 +2141,27 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "student": {
-                    "$ref": "#/definitions/Student"
-                  },
                   "status": {
                     "type": "string",
                     "enum": [
-                      "DRAFT",
                       "APPROVED",
                       "CANCELLED",
-                      "WAIT_APPROVAL",
+                      "DRAFT",
+                      "SENT",
                       "SIGNED",
-                      "SENT"
+                      "WAIT_APPROVAL"
                     ]
+                  },
+                  "student": {
+                    "$ref": "#/definitions/Student"
                   }
                 }
               }
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1950,9 +2171,6 @@
     "Draft_student_project": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "object",
           "properties": {
@@ -1963,6 +2181,9 @@
               "type": "string"
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -1972,17 +2193,11 @@
     "Project_conflicts": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "student": {
-                "type": "number"
-              },
               "projects": {
                 "type": "array",
                 "items": {
@@ -1996,9 +2211,15 @@
                     }
                   }
                 }
+              },
+              "student": {
+                "type": "number"
               }
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -2008,22 +2229,22 @@
     "All_roles": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "role_id": {
-                "type": "number"
-              },
               "name": {
                 "type": "string"
+              },
+              "role_id": {
+                "type": "number"
               }
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -2033,10 +2254,10 @@
     "Create_role": {
       "type": "object",
       "properties": {
-        "sessionkey": {
+        "name": {
           "type": "string"
         },
-        "name": {
+        "sessionkey": {
           "type": "string"
         }
       },
@@ -2044,75 +2265,9 @@
         "name": "Create_role"
       }
     },
-    "NameId": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "NameId"
-      }
-    },
-    "NameIdList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/NameId"
-      },
-      "xml": {
-        "name": "NameIdList"
-      }
-    },
-    "CreateStudent": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/NameId"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "CreateStudent"
-      }
-    },
     "Student": {
       "type": "object",
       "properties": {
-        "student": {
-          "type": "object",
-          "properties": {
-            "person": {
-              "$ref": "#/definitions/Person"
-            },
-            "person_id": {
-              "type": "number"
-            },
-            "student_id": {
-              "type": "number"
-            },
-            "gender": {
-              "type": "string"
-            },
-            "pronouns": {
-              "type": "string"
-            },
-            "phone_number": {
-              "type": "string"
-            },
-            "nickname": {
-              "type": "string"
-            },
-            "alumni": {
-              "type": "boolean"
-            }
-          }
-        },
         "evaluations": {
           "type": "array",
           "items": {
@@ -2122,8 +2277,21 @@
         "jobApplication": {
           "type": "object",
           "properties": {
-            "job_application_id": {
-              "type": "number"
+            "applied_role": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AppliedRole"
+              }
+            },
+            "attachment": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attachment"
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "example": "This is actually a date: 2022-03-14 23:10:00+01"
             },
             "edus": {
               "type": "array",
@@ -2131,10 +2299,6 @@
                 "type": "string",
                 "default": "Informatics"
               }
-            },
-            "created_at": {
-              "type": "string",
-              "example": "This is actually a date: 2022-03-14 23:10:00+01"
             },
             "edu_duration": {
               "type": "number",
@@ -2155,17 +2319,26 @@
             "email_status": {
               "type": "string",
               "enum": [
-                "SCHEDULED",
-                "SENT",
+                "DRAFT",
                 "FAILED",
                 "NONE",
-                "DRAFT"
+                "SCHEDULED",
+                "SENT"
               ],
               "default": "NONE"
             },
             "fun_fact": {
               "type": "string",
               "default": "I like basketball."
+            },
+            "job_application_id": {
+              "type": "number"
+            },
+            "job_application_skill": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/JobApplicationSkill"
+              }
             },
             "osoc_id": {
               "type": "number"
@@ -2183,24 +2356,6 @@
             "student_volunteer_info": {
               "type": "string",
               "default": "Yes, I can work with a student employment agreement in Belgium."
-            },
-            "attachment": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attachment"
-              }
-            },
-            "job_application_skill": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/JobApplicationSkill"
-              }
-            },
-            "applied_role": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AppliedRole"
-              }
             }
           }
         },
@@ -2208,6 +2363,35 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        },
+        "student": {
+          "type": "object",
+          "properties": {
+            "alumni": {
+              "type": "boolean"
+            },
+            "gender": {
+              "type": "string"
+            },
+            "nickname": {
+              "type": "string"
+            },
+            "person": {
+              "$ref": "#/definitions/Person"
+            },
+            "person_id": {
+              "type": "number"
+            },
+            "phone_number": {
+              "type": "string"
+            },
+            "pronouns": {
+              "type": "string"
+            },
+            "student_id": {
+              "type": "number"
+            }
           }
         }
       },
@@ -2257,36 +2441,36 @@
     "AllStudentSuggestions": {
       "type": "object",
       "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
         "data": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
+              "decision": {
+                "type": "string",
+                "enum": [
+                  "MAYBE",
+                  "NO",
+                  "YES"
+                ]
+              },
+              "isFinal": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              },
               "senderFirstname": {
                 "type": "string"
               },
               "senderLastname": {
                 "type": "string"
-              },
-              "reason": {
-                "type": "string"
-              },
-              "decision": {
-                "type": "string",
-                "enum": [
-                  "YES",
-                  "MAYBE",
-                  "NO"
-                ]
-              },
-              "isFinal": {
-                "type": "boolean"
               }
             }
           }
+        },
+        "sessionkey": {
+          "type": "string"
         }
       },
       "xml": {
@@ -2296,19 +2480,16 @@
     "Evaluation": {
       "type": "object",
       "properties": {
-        "evaluation_id": {
-          "type": "number"
-        },
         "decision": {
           "type": "string",
           "enum": [
-            "YES",
             "MAYBE",
-            "NO"
+            "NO",
+            "YES"
           ]
         },
-        "motivation": {
-          "type": "string"
+        "evaluation_id": {
+          "type": "number"
         },
         "is_final": {
           "type": "boolean"
@@ -2322,24 +2503,27 @@
             "person": {
               "type": "object",
               "properties": {
-                "person_id": {
-                  "type": "number"
+                "email": {
+                  "type": "string"
                 },
                 "firstname": {
+                  "type": "string"
+                },
+                "github": {
                   "type": "string"
                 },
                 "lastname": {
                   "type": "string"
                 },
-                "email": {
-                  "type": "string"
-                },
-                "github": {
-                  "type": "string"
+                "person_id": {
+                  "type": "number"
                 }
               }
             }
           }
+        },
+        "motivation": {
+          "type": "string"
         }
       },
       "xml": {
@@ -2349,16 +2533,10 @@
     "Person": {
       "type": "object",
       "properties": {
-        "person_id": {
-          "type": "number"
-        },
         "email": {
           "type": "string"
         },
         "firstname": {
-          "type": "string"
-        },
-        "lastname": {
           "type": "string"
         },
         "github": {
@@ -2366,6 +2544,12 @@
         },
         "github_id": {
           "type": "string"
+        },
+        "lastname": {
+          "type": "string"
+        },
+        "person_id": {
+          "type": "number"
         }
       },
       "xml": {
@@ -2375,9 +2559,6 @@
     "Attachment": {
       "type": "object",
       "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
         "attachment_id": {
           "type": "number"
         },
@@ -2387,16 +2568,19 @@
             "type": "string"
           }
         },
+        "job_application_id": {
+          "type": "number"
+        },
         "type": {
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "CV_URL",
-              "PORTFOLIO_URL",
               "FILE_URL",
               "MOTIVATION_STRING",
-              "MOTIVATION_URL"
+              "MOTIVATION_URL",
+              "PORTFOLIO_URL"
             ]
           }
         }
@@ -2408,26 +2592,26 @@
     "JobApplicationSkill": {
       "type": "object",
       "properties": {
+        "is_best": {
+          "type": "boolean"
+        },
+        "is_preferred": {
+          "type": "boolean"
+        },
         "job_application_id": {
           "type": "number"
         },
         "job_application_skill_id": {
           "type": "number"
         },
-        "skill": {
-          "type": "string"
-        },
-        "is_best": {
-          "type": "boolean"
-        },
         "language_id": {
           "type": "number"
         },
-        "is_preferred": {
-          "type": "boolean"
-        },
         "level": {
           "type": "number"
+        },
+        "skill": {
+          "type": "string"
         }
       },
       "xml": {
@@ -2437,10 +2621,10 @@
     "AppliedRole": {
       "type": "object",
       "properties": {
-        "job_application_id": {
+        "applied_role_id": {
           "type": "number"
         },
-        "applied_role_id": {
+        "job_application_id": {
           "type": "number"
         },
         "role_id": {
@@ -2451,109 +2635,122 @@
         "name": "JobApplicationSkill"
       }
     },
-    "Verify": {
-      "type": "object",
-      "required": [
-        "valid"
-      ],
-      "properties": {
-        "valid": {
-          "type": "boolean"
-        },
-        "is_coach": {
-          "type": "boolean"
-        },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "account_status": {
-          "type": "string",
-          "enum": [
-            "ACTIVATED",
-            "PENDING",
-            "DISABLED"
-          ]
-        }
-      },
-      "xml": {
-        "name": "Verify"
-      }
-    },
-    "Suggestion": {
-      "type": "object",
-      "properties": {
-        "motivation": {
-          "type": "string"
-        },
-        "suggestion": {
-          "type": "string"
-        },
-        "loginuserid": {
-          "type": "number"
-        },
-        "jobapplicationid": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "Suggestion"
-      }
-    },
-    "Confirmation": {
-      "type": "object",
-      "properties": {
-        "motivation": {
-          "type": "string"
-        },
-        "confirmation": {
-          "type": "string"
-        },
-        "loginuserid": {
-          "type": "number"
-        },
-        "jobapplicationid": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "confirmation"
-      }
-    },
-    "Role": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "id": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "role"
-      }
-    },
-    "RoleList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Role"
-      },
-      "xml": {
-        "name": "RoleList"
-      }
-    },
-    "AllRoles": {
+    "All_templates": {
       "type": "object",
       "properties": {
         "data": {
-          "$ref": "#/definitions/RoleList"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "number"
+              }
+            }
+          }
         },
         "sessionkey": {
           "type": "string"
         }
       },
       "xml": {
-        "name": "AllRoles"
+        "name": "All_templates"
+      }
+    },
+    "Template": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string"
+            },
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "owner": {
+              "type": "number"
+            }
+          }
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Template"
+      }
+    },
+    "Create_template": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "cc": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "id": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "owner": {
+              "type": "number"
+            },
+            "subject": {
+              "type": "string"
+            }
+          }
+        },
+        "sessionkey": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Create_template"
+      }
+    },
+    "Verify": {
+      "type": "object",
+      "required": [
+        "valid"
+      ],
+      "properties": {
+        "account_status": {
+          "type": "string",
+          "enum": [
+            "ACTIVATED",
+            "DISABLED",
+            "PENDING"
+          ]
+        },
+        "is_admin": {
+          "type": "boolean"
+        },
+        "is_coach": {
+          "type": "boolean"
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "xml": {
+        "name": "Verify"
       }
     }
   }
