@@ -76,7 +76,6 @@ async function modCoach(
             return ormLU
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: null, // TODO: dit zorgt voor crash
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
