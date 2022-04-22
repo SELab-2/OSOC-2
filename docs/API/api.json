@@ -2,12 +2,12 @@
   "openapi": "3.0.1",
   "info": {
     "title": "OSOC - API",
-    "description": "An overview of API endpoints, verbs and their uses. Note: this is still in-progress and will change over time.",
+    "description": "An overview of API endpoints.",
     "version": "2.0.0"
   },
   "servers": [
     {
-      "url": "/"
+      "url": "https://sel2-2.ugent.be/api-osoc"
     }
   ],
   "tags": [
@@ -65,12 +65,26 @@
     }
   ],
   "paths": {
+    "/admin": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Redirects towards GET /admin/all.",
+        "operationId": "admin",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /admin/all"
+          }
+        }
+      }
+    },
     "/admin/all": {
       "get": {
         "tags": [
           "admin"
         ],
-        "description": "Lists all the admins.",
+        "description": "Returns a list of all the admins in the system.",
         "operationId": "all_admins",
         "parameters": [
           {
@@ -85,14 +99,34 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info of all admins.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AllLoginUsers"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -102,7 +136,7 @@
         "tags": [
           "admin"
         ],
-        "description": "Updates the admin in the system.",
+        "description": "Attempts to update the admin in the system.",
         "operationId": "update_admin",
         "parameters": [
           {
@@ -155,7 +189,7 @@
         ],
         "responses": {
           "200": {
-            "description": "If the session key is invalid or the id is not an id of an admin, an error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the id and name of the modified login user.",
             "content": {
               "application/json": {
                 "schema": {
@@ -163,6 +197,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -202,6 +248,29 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          }
+        }
+      }
+    },
+    "/coach": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Redirects towards GET /coach/all.",
+        "operationId": "coach",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /coach/all"
           }
         }
       }
@@ -211,7 +280,7 @@
         "tags": [
           "coach"
         ],
-        "description": "Lists all the coaches in the system.",
+        "description": "Returns a list of all the coaches in the system.",
         "operationId": "all_coaches",
         "parameters": [
           {
@@ -226,14 +295,34 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info of all coaches.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AllLoginUsers"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -243,8 +332,8 @@
         "tags": [
           "coach"
         ],
-        "description": "Updates the coach in the system.",
-        "operationId": "update_coach",
+        "description": "Attempts to modify the coach in the system.",
+        "operationId": "modify_coach",
         "parameters": [
           {
             "name": "id",
@@ -296,7 +385,7 @@
         ],
         "responses": {
           "200": {
-            "description": "If the session key is invalid or the id is not an id of a coach, an error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the id and name of the modified login user.",
             "content": {
               "application/json": {
                 "schema": {
@@ -304,6 +393,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -343,6 +444,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -367,14 +477,53 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info of all coach requests.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AllCoachRequests"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "activated": {
+                            "type": "string"
+                          },
+                          "admin": {
+                            "type": "boolean"
+                          },
+                          "coach": {
+                            "type": "boolean"
+                          },
+                          "person_data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "number"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -384,7 +533,7 @@
         "tags": [
           "followup"
         ],
-        "description": "Lists all the followups in the system.",
+        "description": "Returns a list of all the followups in the system.",
         "operationId": "all_followups",
         "parameters": [
           {
@@ -399,14 +548,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info of all followups in the system.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AllFollowups"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Followup"
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -440,14 +612,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains info of the followup.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Followup_Id"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Followup"
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -495,14 +690,31 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains info of the followup.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Followup_Id"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Followup"
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -546,14 +758,10 @@
         ],
         "responses": {
           "200": {
-            "description": "The response is an empty object.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Form"
-                }
-              }
-            }
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           }
         }
       }
@@ -567,8 +775,7 @@
         "operationId": "github",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 towards another url",
-            "content": {}
+            "description": "http HTTP/2 303 towards another url"
           }
         }
       }
@@ -602,8 +809,13 @@
         ],
         "responses": {
           "204": {
-            "description": "The response is empty.",
-            "content": {}
+            "description": "The response is empty."
+          },
+          "409": {
+            "description": "Something went wrong while authenticating with GitHub."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
           }
         }
       }
@@ -613,7 +825,7 @@
         "tags": [
           "login"
         ],
-        "description": "Attempts to log a user in into the system",
+        "description": "Attempts to log a user in into the system.",
         "operationId": "login",
         "parameters": [
           {
@@ -637,7 +849,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The response contains info about this user.",
             "content": {
               "application/json": {
                 "schema": {
@@ -645,6 +857,9 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Invalid e-mail or password."
           }
         }
       },
@@ -667,8 +882,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Logged out.",
-            "content": {}
+            "description": "The user was logged out. The response is an empty object."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -682,8 +905,7 @@
         "operationId": "project",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /project/all",
-            "content": {}
+            "description": "http HTTP/2 303 See Location: /project/all"
           }
         }
       },
@@ -751,14 +973,31 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains info about the newly created project.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateProject"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Project"
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -768,7 +1007,7 @@
         "tags": [
           "project"
         ],
-        "description": "Lists all projects in the system.",
+        "description": "Returns a list of all projects in the system.",
         "operationId": "all_projects",
         "parameters": [
           {
@@ -783,7 +1022,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info of all projects.",
             "content": {
               "application/json": {
                 "schema": {
@@ -791,6 +1030,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -800,7 +1048,7 @@
         "tags": [
           "project"
         ],
-        "description": "Get the selected project from the system.",
+        "description": "Returns the selected project from the system.",
         "operationId": "get_project_id",
         "parameters": [
           {
@@ -824,7 +1072,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The coaches list contains info about all coaches who supervise this project. The students list contains info about all students who contribute to the project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -832,6 +1080,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       },
@@ -839,8 +1099,8 @@
         "tags": [
           "project"
         ],
-        "description": "Updates the project in the system.",
-        "operationId": "update_project",
+        "description": "Attempts to modify the project in the system.",
+        "operationId": "modify_project",
         "parameters": [
           {
             "name": "id",
@@ -903,7 +1163,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the new info.",
             "content": {
               "application/json": {
                 "schema": {
@@ -911,6 +1171,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       },
@@ -918,7 +1190,7 @@
         "tags": [
           "project"
         ],
-        "description": "Removes the given project from the system.",
+        "description": "Attempts to remove the project from the system.",
         "operationId": "project_id_delete",
         "parameters": [
           {
@@ -950,6 +1222,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -983,7 +1267,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The students list contains info about all drafted students of this project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -991,6 +1275,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1040,7 +1336,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the role of the student if the student contributes to the project.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1048,6 +1344,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "The selected student is not assigned to this project."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "409": {
+            "description": "That role doesn't exist."
           }
         }
       }
@@ -1098,6 +1409,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1107,7 +1430,7 @@
         "tags": [
           "project"
         ],
-        "description": "Lists all project conflicts.",
+        "description": "Returns a list of all project conflicts.",
         "operationId": "project_conflicts",
         "parameters": [
           {
@@ -1122,7 +1445,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains the conflicting projects for the student with id 'student'.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1130,6 +1453,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1154,8 +1489,13 @@
         ],
         "responses": {
           "204": {
-            "description": "The response is empty.",
-            "content": {}
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "503": {
+            "description": "Failed to send the email. If you're certain that your email address is correct, then please contact the admin."
           }
         }
       }
@@ -1180,8 +1520,10 @@
         ],
         "responses": {
           "204": {
-            "description": "The response is empty.",
-            "content": {}
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "Failed to update your password. Perhaps you used an invalid key?"
           }
         }
       },
@@ -1189,7 +1531,7 @@
         "tags": [
           "reset"
         ],
-        "description": "Resets the password when the code and password are valid.",
+        "description": "Resets the password if the code and password are valid.",
         "operationId": "password_reset",
         "parameters": [
           {
@@ -1221,6 +1563,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           }
         }
       }
@@ -1234,8 +1579,7 @@
         "operationId": "role",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /role/all",
-            "content": {}
+            "description": "http HTTP/2 303 See Location: /role/all"
           }
         }
       }
@@ -1245,7 +1589,7 @@
         "tags": [
           "role"
         ],
-        "description": "Lists all roles in the system.",
+        "description": "Returns a list of all roles in the system.",
         "operationId": "all_roles",
         "parameters": [
           {
@@ -1260,7 +1604,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all roles.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1268,6 +1612,15 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1277,7 +1630,7 @@
         "tags": [
           "role"
         ],
-        "description": "Create a role in the system.",
+        "description": "Attempts to create a role in the system.",
         "operationId": "create_role",
         "parameters": [
           {
@@ -1301,7 +1654,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The response contains the name of the newly created role.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1309,6 +1662,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1322,8 +1687,7 @@
         "operationId": "student",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /student/all",
-            "content": {}
+            "description": "http HTTP/2 303 See Location: /student/all"
           }
         }
       }
@@ -1333,7 +1697,7 @@
         "tags": [
           "student"
         ],
-        "description": "Lists all students in the system.",
+        "description": "Returns a list of all students in the system.",
         "operationId": "all_students",
         "parameters": [
           {
@@ -1348,7 +1712,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all students.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1356,6 +1720,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1389,7 +1765,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The response contains all info about this student.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1397,6 +1773,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1436,6 +1827,15 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -1445,7 +1845,7 @@
         "tags": [
           "student"
         ],
-        "description": "Lists all suggestions for a certain student.",
+        "description": "Returns a list of all suggestions about this student.",
         "operationId": "get_student_suggestions",
         "parameters": [
           {
@@ -1477,7 +1877,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all suggestions.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1485,6 +1885,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1550,6 +1965,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1607,6 +2037,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1737,7 +2182,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all filtered students.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1745,6 +2190,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1758,8 +2218,7 @@
         "operationId": "template",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /template/all",
-            "content": {}
+            "description": "http HTTP/2 303 See Location: /template/all"
           }
         }
       },
@@ -1816,7 +2275,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains info about the newly created template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1824,6 +2283,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1833,7 +2304,7 @@
         "tags": [
           "template"
         ],
-        "description": "Lists all templates in the system.",
+        "description": "Returns a list of all templates in the system.",
         "operationId": "all_templates",
         "parameters": [
           {
@@ -1848,14 +2319,45 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all templates.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/All_templates"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "owner": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1889,7 +2391,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains info about this template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1897,6 +2399,21 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1904,8 +2421,8 @@
         "tags": [
           "template"
         ],
-        "description": "Attempts to update a template.",
-        "operationId": "update_template",
+        "description": "Attempts to modify a template.",
+        "operationId": "modify_template",
         "parameters": [
           {
             "name": "id",
@@ -1960,7 +2477,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the new info of this template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1968,6 +2485,21 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -2007,6 +2539,24 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2020,8 +2570,7 @@
         "operationId": "user",
         "responses": {
           "303": {
-            "description": "http HTTP/2 303 See Location: /user/all",
-            "content": {}
+            "description": "http HTTP/2 303 See Location: /user/all"
           }
         }
       }
@@ -2031,7 +2580,7 @@
         "tags": [
           "user"
         ],
-        "description": "Lists all users in the system.",
+        "description": "Returns a list of all users in the system.",
         "operationId": "all_users",
         "parameters": [
           {
@@ -2046,14 +2595,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains info about all users.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AllLoginUsers"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2113,6 +2685,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           }
         }
       }
@@ -2164,7 +2739,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data object contains the id and name of the new user.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2172,6 +2747,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       },
@@ -2229,6 +2816,18 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           }
         }
       }
@@ -2287,6 +2886,21 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2378,14 +2992,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The data list contains the info about the filtered students.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "properties": {
                     "data": {
-                      "$ref": "#/components/schemas/AllLoginUsers"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
                     },
                     "sessionkey": {
                       "type": "string"
@@ -2394,6 +3010,21 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2418,14 +3049,30 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "The response contains the data of the verification.",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Verify"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Verify"
+                    },
+                    {
+                      "$ref": "#/components/schemas/VerifyValid"
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2448,7 +3095,12 @@
         "type": "object",
         "properties": {
           "activated": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
           },
           "admin": {
             "type": "boolean"
@@ -2460,10 +3112,13 @@
             "type": "object",
             "properties": {
               "email": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "github": {
-                "type": "string"
+                "type": "string",
+                "nullable": true,
+                "default": null
               },
               "id": {
                 "type": "number"
@@ -2476,62 +3131,6 @@
         },
         "xml": {
           "name": "LoginUser"
-        }
-      },
-      "AllLoginUsers": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LoginUser"
-            }
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "AllLoginUsers"
-        }
-      },
-      "AllCoachRequests": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "activated": {
-                  "type": "string"
-                },
-                "admin": {
-                  "type": "boolean"
-                },
-                "coach": {
-                  "type": "boolean"
-                },
-                "person_data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "number"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "AllCoachRequests"
         }
       },
       "Login": {
@@ -2605,49 +3204,6 @@
           "name": "Followup"
         }
       },
-      "FollowupsList": {
-        "type": "array",
-        "xml": {
-          "name": "FollowupsList"
-        },
-        "items": {
-          "$ref": "#/components/schemas/Followup"
-        }
-      },
-      "AllFollowups": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/FollowupsList"
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "AllFollowups"
-        }
-      },
-      "Followup_Id": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Followup"
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Followup_Id"
-        }
-      },
-      "Form": {
-        "type": "object",
-        "xml": {
-          "name": "Form"
-        }
-      },
       "Project": {
         "type": "object",
         "properties": {
@@ -2675,20 +3231,6 @@
         },
         "xml": {
           "name": "Project"
-        }
-      },
-      "CreateProject": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/Project"
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "CreateProject"
         }
       },
       "Project_coach": {
@@ -3115,7 +3657,8 @@
                 "type": "string"
               },
               "nickname": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "person": {
                 "$ref": "#/components/schemas/Person"
@@ -3127,7 +3670,8 @@
                 "type": "string"
               },
               "pronouns": {
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "student_id": {
                 "type": "number"
@@ -3276,10 +3820,12 @@
             "type": "string"
           },
           "github": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "github_id": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "lastname": {
             "type": "string"
@@ -3369,34 +3915,6 @@
         },
         "xml": {
           "name": "JobApplicationSkill"
-        }
-      },
-      "All_templates": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "number"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "owner": {
-                  "type": "number"
-                }
-              }
-            }
-          },
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "All_templates"
         }
       },
       "Template": {
@@ -3520,6 +4038,14 @@
         },
         "xml": {
           "name": "Verify"
+        }
+      },
+      "VerifyValid": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          }
         }
       }
     }
