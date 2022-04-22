@@ -12,7 +12,7 @@ on:
   
 jobs:
   ci:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     
     services:
      postgres: # this is for the integration testing of the orm functions
