@@ -16,7 +16,7 @@ async function getAllTemplates(
     return rq
         .parseTemplateListRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then((checked) =>
+        .then(() =>
             ormT
                 .getAllTemplates()
                 .then((res) =>
@@ -154,7 +154,7 @@ export function getRouter(): express.Router {
 
     util.route(router, "get", "/:id", getSingleTemplate);
     util.route(router, "post", "/:id", updateTemplate);
-    // util.routeKeyOnly(router, "delete", "/:id", deleteTemplate);
+    util.route(router, "delete", "/:id", deleteTemplate);
 
     return router;
 }

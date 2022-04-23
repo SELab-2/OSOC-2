@@ -17,7 +17,7 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
     return rq
         .parseAdminAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormL
                 .searchAllAdminLoginUsers(true)
                 .then((obj) =>
@@ -114,7 +114,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
-    // util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
+    util.route(router, "delete", "/:id", deleteAdmin);
 
     util.addAllInvalidVerbs(router, ["/", "/all", "/:id"]);
 

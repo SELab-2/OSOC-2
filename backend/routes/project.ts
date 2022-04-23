@@ -58,7 +58,7 @@ async function listProjects(
     return rq
         .parseProjectAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormPr
                 .getAllProjects()
                 .then((obj) =>
@@ -409,7 +409,7 @@ async function getProjectConflicts(
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (checked) => {
+        .then(async () => {
             return ormOsoc
                 .getNewestOsoc()
                 .then((osoc) => util.getOrReject(osoc))
@@ -469,12 +469,12 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/:id", createProject);
 
     util.route(router, "post", "/:id", modProject);
-    // util.routeKeyOnly(router, "delete", "/:id", deleteProject);
+    util.route(router, "delete", "/:id", deleteProject);
 
     util.route(router, "get", "/:id/draft", getDraftedStudents);
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
-    // util.routeKeyOnly(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/assignee", unAssignStudent);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 

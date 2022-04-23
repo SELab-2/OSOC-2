@@ -259,14 +259,14 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
-    // util.routeKeyOnly(router, "post", "/self", userModSelf);
+    util.route(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
     );
 
     util.route(router, "post", "/request/:id", createUserAcceptance);
-    // util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
+    util.route(router, "delete", "/request/:id", deleteUserRequest);
 
     util.addAllInvalidVerbs(router, [
         "/",

@@ -433,6 +433,7 @@ export function route<T extends Responses.ApiResponse>(
  *  @param verb The HTTP verb.
  *  @param path The (relative) route path.
  *  @param callback The function which will respond.
+ *  @deprecated Use route instead.
  */
 export function routeKeyOnly(
     router: express.Router,
@@ -440,12 +441,13 @@ export function routeKeyOnly(
     path: string,
     callback: RouteCallback<Responses.Key>
 ): void {
+    console.log("[WARNING]: routeKeyOnly is deprecated. Use route instead.");
     router[verb](path, (req: express.Request, res: express.Response) =>
         respOrErrorNoReinject(
             res,
             callback(req)
                 .then((toupd) => refreshKey(toupd.sessionkey))
-                .then((upd) => Promise.resolve({}))
+                .then(() => Promise.resolve({}))
         )
     );
 }

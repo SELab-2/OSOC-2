@@ -405,18 +405,13 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterStudents);
     util.route(router, "get", "/all", listStudents);
     util.route(router, "get", "/:id", getStudent);
-    // util.routeKeyOnly(router, "delete", "/:id", deleteStudent);
+    util.route(router, "delete", "/:id", deleteStudent);
 
-    // util.routeKeyOnly(router, "post", "/:id/suggest", createStudentSuggestion);
+    util.route(router, "post", "/:id/suggest", createStudentSuggestion);
 
     util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
-    // util.routeKeyOnly(
-    //     router,
-    //     "post",
-    //     "/:id/confirm",
-    //     createStudentConfirmation
-    // );
+    util.route(router, "post", "/:id/confirm", createStudentConfirmation);
 
     util.addAllInvalidVerbs(router, [
         "/",

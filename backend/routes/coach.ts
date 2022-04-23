@@ -17,7 +17,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormLU
                 .searchAllCoachLoginUsers(true)
                 .then((obj) =>
@@ -119,7 +119,7 @@ async function getCoachRequests(
     return rq
         .parseGetAllCoachRequestsRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
+        .then(async () => {
             return ormLU
                 .getAllLoginUsers()
                 .then((obj) =>
@@ -181,7 +181,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id", getCoach);
 
     util.route(router, "post", "/:id", modCoach);
-    // util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
+    util.route(router, "delete", "/:id", deleteCoach);
 
     util.addAllInvalidVerbs(router, [
         "/",
