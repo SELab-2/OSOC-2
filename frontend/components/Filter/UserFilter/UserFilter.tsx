@@ -1,4 +1,4 @@
-import styles from "./UserFilter.module.css";
+import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import AdminIconColor from "../../../public/images/admin_icon_color.png";
