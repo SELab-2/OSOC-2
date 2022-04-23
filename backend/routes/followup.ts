@@ -6,6 +6,12 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 
+/**
+ *  Attempts to list all followups in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function listFollowups(
     req: express.Request
 ): Promise<Responses.FollowupList> {
@@ -35,6 +41,12 @@ async function listFollowups(
         );
 }
 
+/**
+ *  Attempts to get a single followup.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function getFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {
@@ -55,6 +67,12 @@ async function getFollowup(
         );
 }
 
+/**
+ *  Attempts to update a single followup.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function updateFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {

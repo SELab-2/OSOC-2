@@ -169,11 +169,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(
-        req,
-        ["isAdmin", "isCoach", "accountStatus"],
-        types.id
-    ).then(() => {
+    return hasFields(req, [], types.id).then(() => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
@@ -596,14 +592,13 @@ export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
     return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, ["name", "desc", "subject", "cc", "content"]))
+        if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             name: maybe(req.body, "name"),
-            desc: maybe(req.body, "desc"),
             subject: maybe(req.body, "subject"),
             cc: maybe(req.body, "cc"),
             content: maybe(req.body, "content"),
@@ -795,6 +790,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /verify` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseVerifyRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID

@@ -4,7 +4,7 @@ import express from "express";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { InternalTypes, Responses } from "../types";
+import { Responses } from "../types";
 import * as util from "../utility";
 
 /**
@@ -39,24 +39,6 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                     })
                 )
         );
-}
-
-/**
- *  Attempts to get all data for a certain coach in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function getCoach(req: express.Request): Promise<Responses.Coach> {
-    return rq
-        .parseSingleCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(() => {
-            return Promise.reject({
-                http: 410,
-                reason: "Deprecated endpoint.",
-            });
-        });
 }
 
 /**
@@ -146,26 +128,6 @@ async function getCoachRequests(
 }
 
 /**
- *  Attempts to get the details of a coach request in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function getCoachRequest(
-    req: express.Request
-): Promise<InternalTypes.CoachRequest> {
-    return rq
-        .parseGetCoachRequestRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() => {
-            return Promise.reject({
-                http: 410,
-                reason: "Deprecated endpoint.",
-            });
-        });
-}
-
-/**
  *  Gets the router for all `/coaches/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/coaches/`
  * endpoints.
@@ -176,20 +138,11 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listCoaches);
 
     util.route(router, "get", "/request", getCoachRequests);
-    util.route(router, "get", "/request/:id", getCoachRequest);
-
-    util.route(router, "get", "/:id", getCoach);
 
     util.route(router, "post", "/:id", modCoach);
     util.route(router, "delete", "/:id", deleteCoach);
 
-    util.addAllInvalidVerbs(router, [
-        "/",
-        "/all",
-        "/:id",
-        "/request",
-        "/request/:id",
-    ]);
+    util.addAllInvalidVerbs(router, ["/", "/all", "/:id", "/request"]);
 
     return router;
 }
