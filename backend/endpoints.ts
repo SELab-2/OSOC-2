@@ -14,6 +14,7 @@ import * as student from "./routes/student";
 import * as user from "./routes/user";
 import * as verify from "./routes/verify";
 import * as util from "./utility";
+import * as osoc from "./routes/osoc";
 
 import * as template from "./routes/template";
 
@@ -36,6 +37,7 @@ export function attach(app: express.Application): void {
         app.use(home + "/template", template.getRouter());
         app.use(home + "/followup", followup.getRouter());
         app.use(home + "/verify", verify.getRouter());
+        app.use(home + "/osoc", osoc.getRouter());
     });
 
     app.use(

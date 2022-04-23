@@ -881,3 +881,8 @@ export const parseUpdateCoachRequest = parseUpdateLoginUser;
  * {@link parseUpdateLoginUser}.
  */
 export const parseUpdateAdminRequest = parseUpdateLoginUser;
+/**
+ *  A request to `GET /osoc/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseOsocAllRequest = parseKeyRequest;

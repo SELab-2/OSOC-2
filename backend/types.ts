@@ -291,6 +291,11 @@ export namespace InternalTypes {
     export interface User {}
 
     /**
+     *  Represents an osoc edition, with all associated data.
+     */
+    export interface OsocEdition {}
+
+    /**
      *  Represents a check of the key, holds the key aswell as boolean value.
      */
     export interface CheckKey {}
@@ -514,6 +519,12 @@ export namespace Responses {
      *
      */
     export interface UserList extends Keyed<InternalTypes.User[]> {}
+
+    /**
+     *
+     */
+    export interface OsocEditionList
+        extends Keyed<InternalTypes.OsocEdition[]> {}
 
     /**
      *
