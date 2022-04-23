@@ -456,17 +456,14 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(
-        req,
-        ["firstName", "lastName", "email", "pass"],
-        types.neither
-    ).then(() =>
-        Promise.resolve({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            pass: req.body.pass,
-        })
+    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
+        () =>
+            Promise.resolve({
+                firstName: req.body.firstName,
+                lastName: "",
+                email: req.body.email,
+                pass: req.body.pass,
+            })
     );
 }
 
