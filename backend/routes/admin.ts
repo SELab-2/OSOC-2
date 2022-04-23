@@ -61,10 +61,7 @@ async function getAdmin(req: express.Request): Promise<Responses.Admin> {
 }
 
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
-    return rq
-        .parseUpdateAdminRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) => {
+    return rq.parseUpdateAdminRequest(req).then((parsed) => util.checkSessionKey(parsed)).then(async (parsed) => {
             return ormL
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
