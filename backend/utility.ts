@@ -382,7 +382,7 @@ export async function refreshKey(
     const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + session_key.valid_period);
     return skey
-        .changeSessionKey(key, generateKey(), futureDate)
+        .refreshKey(key, futureDate)
         .then((upd) => Promise.resolve(upd.session_key));
 }
 
