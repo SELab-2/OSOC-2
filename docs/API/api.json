@@ -110,9 +110,6 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -240,14 +237,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified admin was removed. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -306,9 +296,6 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -436,14 +423,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified coach was removed. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -510,9 +490,6 @@
                           }
                         }
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -559,9 +536,6 @@
                       "items": {
                         "$ref": "#/components/schemas/Followup"
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -616,15 +590,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Followup"
-                    },
-                    "sessionkey": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Followup"
                 }
               }
             }
@@ -694,15 +660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Followup"
-                    },
-                    "sessionkey": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Followup"
                 }
               }
             }
@@ -771,7 +729,7 @@
         "tags": [
           "github"
         ],
-        "description": "Redirects towards another github url.",
+        "description": "Attempts to authorize a user using GitHub OAuth. Upon success, redirects to our own frontend with a newly generated session key.",
         "operationId": "github",
         "responses": {
           "303": {
@@ -785,7 +743,7 @@
         "tags": [
           "github"
         ],
-        "description": "Attempts to get a github exchange access token.",
+        "description": "Should not be used from outside code. Is only used as a GitHub OAuth redirect URL.",
         "operationId": "github_challenge",
         "parameters": [
           {
@@ -977,15 +935,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Project"
-                    },
-                    "sessionkey": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Project"
                 }
               }
             }
@@ -1214,14 +1164,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified project was removed. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -1401,14 +1344,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified student was removed from the project. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -1559,7 +1495,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
+                  "type": "object",
+                  "properties": {
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -1819,14 +1760,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified student was removed. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -1957,14 +1891,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified student was marked as suggested. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2029,14 +1956,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified student was confirmed to be added or not. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2341,9 +2261,6 @@
                           }
                         }
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -2531,14 +2448,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The specified template was removed. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -2606,9 +2516,6 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -2808,14 +2715,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserIdName"
-                }
-              }
-            }
+            "description": "The specified user request was denied. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2878,14 +2778,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Sessionkey"
-                }
-              }
-            }
+            "description": "The user associated with the session key has been modified. The response is an empty object."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -2906,7 +2799,7 @@
       }
     },
     "/user/filter": {
-      "post": {
+      "get": {
         "tags": [
           "user"
         ],
@@ -3002,9 +2895,6 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
-                    },
-                    "sessionkey": {
-                      "type": "string"
                     }
                   }
                 }
@@ -3080,17 +2970,6 @@
   },
   "components": {
     "schemas": {
-      "Sessionkey": {
-        "type": "object",
-        "properties": {
-          "sessionkey": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Sessionkey"
-        }
-      },
       "LoginUser": {
         "type": "object",
         "properties": {
@@ -3136,7 +3015,7 @@
       "Login": {
         "type": "object",
         "properties": {
-          "email_status": {
+          "account_status": {
             "type": "string",
             "enum": [
               "ACTIVATED",
@@ -3161,18 +3040,10 @@
       "ModifyLoginUser": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
+          "id": {
+            "type": "number"
           },
-          "sessionkey": {
+          "name": {
             "type": "string"
           }
         },
@@ -3361,9 +3232,6 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Project_list"
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3373,34 +3241,26 @@
       "Modify_project": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              },
-              "partner": {
-                "type": "string"
-              },
-              "start_date": {
-                "type": "string"
-              },
-              "end_date": {
-                "type": "string"
-              },
-              "positions": {
-                "type": "number"
-              },
-              "osoc_id": {
-                "type": "number"
-              }
-            }
+          "id": {
+            "type": "number"
           },
-          "sessionkey": {
+          "name": {
             "type": "string"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "osoc_id": {
+            "type": "number"
           }
         },
         "xml": {
@@ -3410,41 +3270,33 @@
       "Drafted_students_project": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              },
-              "students": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "APPROVED",
-                        "CANCELLED",
-                        "DRAFT",
-                        "SENT",
-                        "SIGNED",
-                        "WAIT_APPROVAL"
-                      ]
-                    },
-                    "student": {
-                      "$ref": "#/components/schemas/Student"
-                    }
-                  }
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "students": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "APPROVED",
+                    "CANCELLED",
+                    "DRAFT",
+                    "SENT",
+                    "SIGNED",
+                    "WAIT_APPROVAL"
+                  ]
+                },
+                "student": {
+                  "$ref": "#/components/schemas/Student"
                 }
               }
             }
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3454,18 +3306,10 @@
       "Draft_student_project": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "drafted": {
-                "type": "boolean"
-              },
-              "role": {
-                "type": "string"
-              }
-            }
+          "drafted": {
+            "type": "boolean"
           },
-          "sessionkey": {
+          "role": {
             "type": "string"
           }
         },
@@ -3500,9 +3344,6 @@
                 }
               }
             }
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3525,9 +3366,6 @@
                 }
               }
             }
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3538,9 +3376,6 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
-          },
-          "sessionkey": {
             "type": "string"
           }
         },
@@ -3691,9 +3526,6 @@
             "items": {
               "$ref": "#/components/schemas/Student"
             }
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3750,9 +3582,6 @@
                 }
               }
             }
-          },
-          "sessionkey": {
-            "type": "string"
           }
         },
         "xml": {
@@ -3920,25 +3749,17 @@
       "Template": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "content": {
-                "type": "string"
-              },
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              },
-              "owner": {
-                "type": "number"
-              }
-            }
-          },
-          "sessionkey": {
+          "content": {
             "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "number"
           }
         },
         "xml": {
@@ -3948,30 +3769,22 @@
       "Create_template": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "cc": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              },
-              "owner": {
-                "type": "number"
-              },
-              "subject": {
-                "type": "string"
-              }
-            }
+          "cc": {
+            "type": "string"
           },
-          "sessionkey": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "number"
+          },
+          "subject": {
             "type": "string"
           }
         },
@@ -3993,18 +3806,10 @@
       "UserIdName": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              }
-            }
+          "id": {
+            "type": "number"
           },
-          "sessionkey": {
+          "name": {
             "type": "string"
           }
         },
