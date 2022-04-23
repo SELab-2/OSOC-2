@@ -58,7 +58,7 @@ async function createUserRequest(req: express.Request): Promise<Responses.Id> {
         return ormP
             .createPerson({
                 firstname: parsed.firstName,
-                lastname: parsed.lastName,
+                lastname: "",
                 email: validator.default
                     .normalizeEmail(parsed.email)
                     .toString(),
