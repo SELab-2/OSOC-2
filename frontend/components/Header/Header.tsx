@@ -65,6 +65,9 @@ export const Header: React.FC = () => {
                 }`}
             >
                 {sessionKey !== "" && !router.pathname.startsWith("/reset") ? (
+                    <Link href={"/osoc_editions"}>Osoc Editions</Link>
+                ) : null}
+                {sessionKey !== "" && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/students"}>Students</Link>
                 ) : null}
                 {sessionKey !== "" && !router.pathname.startsWith("/reset") ? (
