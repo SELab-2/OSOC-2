@@ -8,6 +8,7 @@ export const Osoc: React.FC<{
     removeOsoc: (osoc: OsocEdition) => void;
 }> = ({ osoc, removeOsoc }) => {
     const [year] = useState<number>(osoc.year);
+    const [projects] = useState<number>(osoc._count.project);
     const { sessionKey, setSessionKey } = useContext(SessionContext);
     const osocId = osoc.osoc_id;
 
@@ -46,10 +47,10 @@ export const Osoc: React.FC<{
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p>{year}</p>
+                <p>Osoc Edition: {year}</p>
             </div>
 
-            <p>{year}</p>
+            <p># Projects: {projects}</p>
             <button
                 className={`delete ${styles.delete}`}
                 onClick={deleteOsoc}

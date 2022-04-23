@@ -165,4 +165,9 @@ export interface LoginUser {
 export interface OsocEdition {
     osoc_id: number;
     year: number;
+    _count: ProjectCount;
+}
+
+export interface ProjectCount {
+    project: number;
 }

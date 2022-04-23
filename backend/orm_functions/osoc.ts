@@ -18,7 +18,13 @@ export async function createOsoc(year: number) {
  * @returns a list of all the osoc objects in the database
  */
 export async function getAllOsoc() {
-    return prisma.osoc.findMany();
+    return prisma.osoc.findMany({
+        include: {
+            _count: {
+                select: { project: true },
+            },
+        },
+    });
 }
 
 /**
