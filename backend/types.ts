@@ -527,6 +527,12 @@ export namespace Responses {
         extends Keyed<InternalTypes.OsocEdition[]> {}
 
     /**
+     *  A osoc edition response is the keyed version of the osoc edition and their associated
+     * data.
+     */
+    export interface OsocEdition extends Keyed<InternalTypes.OsocEdition> {}
+
+    /**
      *
      */
     export interface FormAttachmentResponse {
@@ -719,6 +725,10 @@ export namespace Requests {
     export interface UserFilter extends KeyRequest {}
 
     export interface OsocFilter extends KeyRequest {}
+
+    export interface OsocEdition extends KeyRequest {
+        year: number;
+    }
 
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;

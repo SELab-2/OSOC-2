@@ -7,10 +7,11 @@ import { useRouter } from "next/router";
 export const OsocCreateFilter: React.FC<{
     updateOsoc: (osocs: Array<OsocEdition>) => void;
 }> = ({ updateOsoc }) => {
-    // const [osocCreate, setOsocCreate] = useState<string>("");
+    const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey, setSessionKey, sessionKey } =
+        useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
 
     const router = useRouter();
@@ -112,6 +113,36 @@ export const OsocCreateFilter: React.FC<{
     //     }
     // };
 
+    const create = async () => {
+        const json_body = JSON.stringify({
+            year: osocCreate,
+        });
+        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/osoc/create`, {
+            method: "POST",
+            body: json_body,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `auth/osoc2 ${sessionKey}`,
+            },
+        })
+            .then((response) => response.json())
+            .then(async (json) => {
+                if (!json.success) {
+                    return { success: false };
+                } else {
+                    if (setSessionKey) {
+                        setSessionKey(json.sessionkey);
+                    }
+                    return json;
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                return { success: false };
+            });
+    };
+
     return (
         <div className={styles.filter}>
             <form className={styles.form}>
@@ -123,7 +154,7 @@ export const OsocCreateFilter: React.FC<{
                         placeholder="Year.."
                         onChange={(e) => setOsocCreate(e.target.value)}
                     />
-                    <button onClick={searchPress}>Create</button>
+                    <button onClick={create}>Create</button>
                 </div>
 
                 <div className={styles.query}>

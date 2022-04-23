@@ -6,6 +6,31 @@ import { errors } from "../utility";
 import * as ormO from "../orm_functions/osoc";
 
 /**
+ *  Attempts to create a new project in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function createOsocEdition(
+    req: express.Request
+): Promise<Responses.OsocEdition> {
+    return rq
+        .parseNewOsocEditionRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormO.createOsoc(parsed.data.year).then((osoc) =>
+                Promise.resolve({
+                    sessionkey: parsed.data.sessionkey,
+                    data: {
+                        id: osoc.osoc_id,
+                        year: osoc.year,
+                    },
+                })
+            );
+        });
+}
+
+/**
  *  Attempts to list all osoc editions in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -68,6 +93,7 @@ export function getRouter(): express.Router {
     util.setupRedirect(router, "/osoc");
     util.route(router, "get", "/all", listOsocEditions);
     util.route(router, "get", "/filter", filterYear);
+    util.route(router, "post", "/create", createOsocEdition);
 
     util.addAllInvalidVerbs(router, ["/", "/all"]);
 

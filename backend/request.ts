@@ -917,3 +917,28 @@ export const parseUpdateAdminRequest = parseUpdateLoginUser;
  * {@link parseKeyRequest}.
  */
 export const parseOsocAllRequest = parseKeyRequest;
+/**
+ *  Parses a request to `POST /osoc/`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseNewOsocEditionRequest(
+    req: express.Request
+): Promise<Requests.OsocEdition> {
+    let year = 0;
+    if ("year" in req.body && !parseInt(req.body.year)) {
+        return rejector();
+    } else {
+        if ("year" in req.body) {
+            year = parseInt(req.body.year);
+        }
+    }
+
+    return hasFields(req, ["year"], types.key).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            year: year,
+        })
+    );
+}
