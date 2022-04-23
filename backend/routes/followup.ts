@@ -28,7 +28,6 @@ async function listFollowups(
                         )
                         .then((res) =>
                             Promise.resolve({
-                                sessionkey: checked.data.sessionkey,
                                 data: res,
                             })
                         )
@@ -48,12 +47,9 @@ async function getFollowup(
                 .then((data) => util.getOrReject(data))
                 .then((ja) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            student: ja.student_id,
-                            application: ja.job_application_id,
-                            status: ja.email_status,
-                        },
+                        student: ja.student_id,
+                        application: ja.job_application_id,
+                        status: ja.email_status,
                     })
                 )
         );
@@ -80,12 +76,9 @@ async function updateFollowup(
                 )
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            student: res.student_id,
-                            application: res.job_application_id,
-                            status: res.email_status,
-                        },
+                        student: res.student_id,
+                        application: res.job_application_id,
+                        status: res.email_status,
                     })
                 )
         );

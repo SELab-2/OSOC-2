@@ -28,7 +28,6 @@ async function getAllTemplates(
                 )
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
                         data: res,
                     })
                 )
@@ -47,13 +46,10 @@ async function getSingleTemplate(
                 .then((res) => util.getOrReject(res))
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            id: res.template_email_id,
-                            owner: res.owner_id,
-                            name: res.name,
-                            content: res.content,
-                        },
+                        id: res.template_email_id,
+                        owner: res.owner_id,
+                        name: res.name,
+                        content: res.content,
                     })
                 )
         );
@@ -76,15 +72,12 @@ async function createTemplate(
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            id: res.template_email_id,
-                            name: res.name,
-                            content: res.content,
-                            cc: res.cc,
-                            owner: res.owner_id,
-                            subject: res.subject,
-                        },
+                        id: res.template_email_id,
+                        name: res.name,
+                        content: res.content,
+                        cc: res.cc,
+                        owner: res.owner_id,
+                        subject: res.subject,
                     })
                 )
         );
@@ -118,21 +111,18 @@ async function updateTemplate(
                 )
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            content: res.content,
-                            id: res.template_email_id,
-                            owner: res.owner_id,
-                            name: res.name,
-                            cc: res.cc,
-                            subject: res.subject,
-                        },
+                        content: res.content,
+                        id: res.template_email_id,
+                        owner: res.owner_id,
+                        name: res.name,
+                        cc: res.cc,
+                        subject: res.subject,
                     })
                 );
         });
 }
 
-async function deleteTemplate(req: express.Request): Promise<Responses.Key> {
+async function deleteTemplate(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteTemplateRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -150,9 +140,7 @@ async function deleteTemplate(req: express.Request): Promise<Responses.Key> {
                     return Promise.resolve(templ);
                 })
                 .then((templ) => ormT.deleteTemplate(templ.template_email_id))
-                .then(() =>
-                    Promise.resolve({ sessionkey: checked.data.sessionkey })
-                );
+                .then(() => Promise.resolve({}));
         });
 }
 
@@ -166,7 +154,7 @@ export function getRouter(): express.Router {
 
     util.route(router, "get", "/:id", getSingleTemplate);
     util.route(router, "post", "/:id", updateTemplate);
-    util.routeKeyOnly(router, "delete", "/:id", deleteTemplate);
+    // util.routeKeyOnly(router, "delete", "/:id", deleteTemplate);
 
     return router;
 }

@@ -40,7 +40,6 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
 
     return Promise.resolve({
         data: loginUsers,
-        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -98,7 +97,7 @@ async function setAccountStatus(
     key: string,
     is_admin: boolean,
     is_coach: boolean
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<InternalTypes.IdName> {
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -114,11 +113,8 @@ async function setAccountStatus(
         .then((res) => {
             console.log(res.person.firstname);
             return Promise.resolve({
-                sessionkey: key,
-                data: {
-                    id: res.person_id,
-                    name: res.person.firstname + " " + res.person.lastname,
-                },
+                id: res.person_id,
+                name: res.person.firstname + " " + res.person.lastname,
             });
         });
 }
@@ -131,7 +127,7 @@ async function setAccountStatus(
  */
 async function createUserAcceptance(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<InternalTypes.IdName> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -152,7 +148,9 @@ async function createUserAcceptance(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
+async function deleteUserRequest(
+    req: express.Request
+): Promise<InternalTypes.IdName> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -205,10 +203,10 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
         activated: val.account_status as string,
     }));
 
-    return Promise.resolve({ data: users, sessionkey: req.body.sessionkey });
+    return Promise.resolve({ data: users });
 }
 
-async function userModSelf(req: express.Request): Promise<Responses.Key> {
+async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
@@ -245,9 +243,7 @@ async function userModSelf(req: express.Request): Promise<Responses.Key> {
                     }
                     return Promise.resolve();
                 })
-                .then(() =>
-                    Promise.resolve({ sessionkey: checked.data.sessionkey })
-                );
+                .then(() => Promise.resolve({}));
         });
 }
 
@@ -263,14 +259,14 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
-    util.routeKeyOnly(router, "post", "/self", userModSelf);
+    // util.routeKeyOnly(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
     );
 
     util.route(router, "post", "/request/:id", createUserAcceptance);
-    util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
+    // util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
 
     util.addAllInvalidVerbs(router, [
         "/",

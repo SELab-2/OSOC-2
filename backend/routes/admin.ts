@@ -38,7 +38,6 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
@@ -76,14 +75,8 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
-                        },
+                        id: res.login_user_id,
+                        name: res.person.firstname + " " + res.person.lastname,
                     })
                 );
         });
@@ -95,7 +88,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
+async function deleteAdmin(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -103,9 +96,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
             return ormL.deleteLoginUserByPersonId(parsed.data.id).then(() => {
                 return ormP
                     .deletePersonById(parsed.data.id)
-                    .then(() =>
-                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                    );
+                    .then(() => Promise.resolve({}));
             });
         });
 }
@@ -123,7 +114,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
-    util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
+    // util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
 
     util.addAllInvalidVerbs(router, ["/", "/all", "/:id"]);
 

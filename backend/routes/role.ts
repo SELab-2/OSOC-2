@@ -20,7 +20,6 @@ async function listStudentRoles(
             return ormRo.getAllRoles().then((roles) =>
                 Promise.resolve({
                     data: roles,
-                    sessionkey: parsed.data.sessionkey,
                 })
             );
         });
@@ -34,16 +33,13 @@ async function listStudentRoles(
  */
 async function createStudentRole(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<InternalTypes.IdName> {
     return rq
         .parseStudentRoleRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (parsed) => {
             return ormRo.createRole(parsed.data.name).then((role) => {
-                return Promise.resolve({
-                    data: { name: role.name, id: role.role_id },
-                    sessionkey: parsed.data.sessionkey,
-                });
+                return Promise.resolve({ name: role.name, id: role.role_id });
             });
         });
 }
