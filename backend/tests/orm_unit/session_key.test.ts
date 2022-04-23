@@ -1,7 +1,7 @@
 import { prismaMock } from "./singleton";
 import {
     addSessionKey,
-    changeSessionKey,
+    refreshKey,
     checkSessionKey,
     removeAllKeysForUser,
 } from "../../orm_functions/session_key";
@@ -44,9 +44,7 @@ test("should update to the new sesion key", async () => {
     };
 
     prismaMock.session_keys.update.mockResolvedValue(response);
-    await expect(
-        changeSessionKey("oldkey", "newkey", futureDate)
-    ).resolves.toEqual(response);
+    await expect(refreshKey("oldkey", futureDate)).resolves.toEqual(response);
 });
 
 test("should remove all keys from the user with the given key", async () => {
