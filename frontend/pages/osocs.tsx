@@ -4,12 +4,13 @@ import { NextPage } from "next";
 import React, { useContext, useEffect, useState } from "react";
 import styles from "../styles/users.module.css";
 import SessionContext from "../contexts/sessionProvider";
+import { OsocCreateFilter } from "../components/Osoc/OsocCreate";
 
 /**
  * The `osoc edition` page, only accessible for admins
  * @constructor
  */
-const Osoc_editions: NextPage = () => {
+const Osocs: NextPage = () => {
     const { getSessionKey, setSessionKey } = useContext(SessionContext);
     const [osoc_editions, setOsocs] = useState<Array<OsocEdition>>();
 
@@ -54,10 +55,14 @@ const Osoc_editions: NextPage = () => {
             }
         }
     };
+    const updateOsocEditions = (osocs: Array<OsocEdition>) => {
+        setOsocs(osocs);
+    };
 
     return (
         <div className={styles.body}>
             <div>
+                <OsocCreateFilter updateOsoc={updateOsocEditions} />
                 {osoc_editions !== undefined
                     ? osoc_editions.map((osoc) => {
                           return (
@@ -74,4 +79,4 @@ const Osoc_editions: NextPage = () => {
     );
 };
 
-export default Osoc_editions;
+export default Osocs;
