@@ -17,7 +17,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormLU
                 .searchAllCoachLoginUsers(true)
                 .then((obj) =>
@@ -35,7 +35,6 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
@@ -66,9 +65,7 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(
-    req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+async function modCoach(req: express.Request): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -83,14 +80,8 @@ async function modCoach(
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
-                        },
+                        id: res.login_user_id,
+                        name: res.person.firstname + " " + res.person.lastname,
                     })
                 );
         });
@@ -102,7 +93,7 @@ async function modCoach(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteCoach(req: express.Request): Promise<Responses.Key> {
+async function deleteCoach(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -110,9 +101,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
             return ormLU.deleteLoginUserByPersonId(parsed.data.id).then(() => {
                 return ormP
                     .deletePersonById(parsed.data.id)
-                    .then(() =>
-                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                    );
+                    .then(() => Promise.resolve({}));
             });
         });
 }
@@ -129,7 +118,7 @@ async function getCoachRequests(
     return rq
         .parseGetAllCoachRequestsRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
+        .then(async () => {
             return ormLU
                 .getAllLoginUsers()
                 .then((obj) =>
@@ -149,7 +138,6 @@ async function getCoachRequests(
                 )
                 .then((arr) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: arr,
                     })
                 );
@@ -164,7 +152,7 @@ async function getCoachRequests(
  */
 async function getCoachRequest(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
+): Promise<InternalTypes.CoachRequest> {
     return rq
         .parseGetCoachRequestRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -192,7 +180,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id", getCoach);
 
     util.route(router, "post", "/:id", modCoach);
-    util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
+    util.route(router, "delete", "/:id", deleteCoach);
 
     util.addAllInvalidVerbs(router, [
         "/",

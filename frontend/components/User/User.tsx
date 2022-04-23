@@ -20,7 +20,7 @@ export const User: React.FC<{
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
     const [status, setStatus] = useState<AccountStatus>(user.account_status);
-    const { sessionKey, setSessionKey } = useContext(SessionContext);
+    const { sessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
 
@@ -63,9 +63,6 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 } else {
-                    if (setSessionKey) {
-                        setSessionKey(json.sessionkey);
-                    }
                     return json;
                 }
             })
@@ -168,9 +165,6 @@ export const User: React.FC<{
             .then(async (json) => {
                 if (!json.success) {
                     return { success: false };
-                }
-                if (setSessionKey) {
-                    setSessionKey(json.sessionkey);
                 }
                 removeUser(user);
                 return json;

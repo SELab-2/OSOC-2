@@ -24,7 +24,7 @@ export const UserFilter: React.FC<{
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(
         AccountStatus.NONE
     );
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
     const router = useRouter();
 
@@ -179,9 +179,6 @@ export const UserFilter: React.FC<{
                 .catch((err) => {
                     console.log(err);
                 });
-            if (setSessionKey && response && response.sessionkey) {
-                setSessionKey(response.sessionkey);
-            }
             updateUsers(response.data);
             isLoading(false);
         }

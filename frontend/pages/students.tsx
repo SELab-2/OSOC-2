@@ -7,7 +7,7 @@ import styles from "../styles/students.module.scss";
 import { useSockets } from "../contexts/socketProvider";
 
 const Students: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     const { socket } = useSockets();
 
@@ -27,9 +27,6 @@ const Students: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        if (setSessionKey) {
-                            setSessionKey(response.sessionkey);
-                        }
                         setStudents(response.data);
                     }
                 }

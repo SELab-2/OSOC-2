@@ -47,12 +47,8 @@ const Index: NextPage = () => {
     // Register field values with corresponding error messages
     const [registerEmail, setRegisterEmail] = useState<string>("");
     const [registerEmailError, setRegisterEmailError] = useState<string>("");
-    const [registerFirstName, setRegisterFirstName] = useState<string>("");
-    const [registerFirstNameError, setRegisterFirstNameError] =
-        useState<string>("");
-    const [registerLastName, setRegisterLastName] = useState<string>("");
-    const [registerLastNameError, setRegisterLastNameError] =
-        useState<string>("");
+    const [registerName, setRegisterName] = useState<string>("");
+    const [registerNameError, setRegisterNameError] = useState<string>("");
     const [registerPassword, setRegisterPassword] = useState<string>("");
     const [registerPasswordError, setRegisterPasswordError] =
         useState<string>("");
@@ -217,18 +213,11 @@ const Index: NextPage = () => {
             setRegisterEmailError("");
         }
 
-        if (registerFirstName === "") {
-            setRegisterFirstNameError("First name cannot be empty");
+        if (registerName === "") {
+            setRegisterNameError("Name cannot be empty");
             error = true;
         } else {
-            setRegisterFirstNameError("");
-        }
-
-        if (registerLastName === "") {
-            setRegisterLastNameError("Last name cannot be empty");
-            error = true;
-        } else {
-            setRegisterLastNameError("");
+            setRegisterNameError("");
         }
 
         if (registerPassword === "") {
@@ -262,11 +251,7 @@ const Index: NextPage = () => {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        firstName: (
-                            registerFirstName +
-                            " " +
-                            registerLastName
-                        ).trim(),
+                        firstName: registerName.trim(),
                         email: registerEmail,
                         pass: encryptedPassword,
                     }),
@@ -483,40 +468,22 @@ const Index: NextPage = () => {
                         }}
                     >
                         <label className={styles.label}>
-                            First Name
+                            Name
                             <input
                                 type="text"
-                                name="registerFirstName"
-                                value={registerFirstName}
+                                name="registerName"
+                                value={registerName}
                                 onChange={(e) =>
-                                    setRegisterFirstName(e.target.value)
+                                    setRegisterName(e.target.value)
                                 }
                             />
                         </label>
                         <p
                             className={`${styles.textFieldError} ${
-                                registerFirstNameError !== "" ? styles.anim : ""
+                                registerNameError !== "" ? styles.anim : ""
                             }`}
                         >
-                            {registerFirstNameError}
-                        </p>
-                        <label className={styles.label}>
-                            Last Name
-                            <input
-                                type="text"
-                                name="registerLastName"
-                                value={registerLastName}
-                                onChange={(e) =>
-                                    setRegisterLastName(e.target.value)
-                                }
-                            />
-                        </label>
-                        <p
-                            className={`${styles.textFieldError} ${
-                                registerLastNameError !== "" ? styles.anim : ""
-                            }`}
-                        >
-                            {registerLastNameError}
+                            {registerNameError}
                         </p>
                         <label className={styles.label}>
                             Email
