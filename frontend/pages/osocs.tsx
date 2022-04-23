@@ -1,9 +1,8 @@
 import { Osoc } from "../components/Osoc/Osoc";
 import { OsocEdition } from "../types/types";
 import { NextPage } from "next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import styles from "../styles/users.module.css";
-import SessionContext from "../contexts/sessionProvider";
 import { OsocCreateFilter } from "../components/Osoc/OsocCreate";
 
 /**
@@ -11,40 +10,7 @@ import { OsocCreateFilter } from "../components/Osoc/OsocCreate";
  * @constructor
  */
 const Osocs: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
     const [osoc_editions, setOsocs] = useState<Array<OsocEdition>>();
-
-    const fetchOsocEditions = async () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
-                if (sessionKey !== "") {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                            },
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        if (setSessionKey) {
-                            setSessionKey(response.sessionkey);
-                        }
-                        setOsocs(response.data);
-                    }
-                }
-            });
-        }
-    };
-
-    useEffect(() => {
-        fetchOsocEditions().then();
-        // We do not want to reload the data when the data changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osoc_editions !== undefined) {

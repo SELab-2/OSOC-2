@@ -1,5 +1,5 @@
 import prisma from "../prisma/prisma";
-import { UpdateOsoc } from "./orm_types";
+import { UpdateOsoc, FilterNumber, FilterSort } from "./orm_types";
 
 /**
  *
@@ -131,6 +131,31 @@ export async function getNewestOsoc() {
     return await prisma.osoc.findFirst({
         orderBy: {
             year: "desc",
+        },
+    });
+}
+
+/**
+ *
+ * @param yearFilter year that we are filtering on (or undefined if not filtering on year)
+ * @param yearSort asc or desc if we are sorting on year, undefined if we are not sorting on year
+ * @returns the filtered osoc editions with their project count in a promise
+ */
+export async function filterOsocs(
+    yearFilter: FilterNumber,
+    yearSort: FilterSort
+) {
+    return await prisma.osoc.findMany({
+        where: {
+            year: yearFilter,
+        },
+        orderBy: {
+            year: yearSort,
+        },
+        include: {
+            _count: {
+                select: { project: true },
+            },
         },
     });
 }

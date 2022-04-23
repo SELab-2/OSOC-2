@@ -718,6 +718,8 @@ export namespace Requests {
 
     export interface UserFilter extends KeyRequest {}
 
+    export interface OsocFilter extends KeyRequest {}
+
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;
         firstName?: string;

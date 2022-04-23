@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 export const OsocCreateFilter: React.FC<{
     updateOsoc: (osocs: Array<OsocEdition>) => void;
 }> = ({ updateOsoc }) => {
-    const [osocCreate, setOsocCreate] = useState<string>("");
+    // const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
     const { getSessionKey, setSessionKey } = useContext(SessionContext);
@@ -87,30 +87,30 @@ export const OsocCreateFilter: React.FC<{
     /**
      * Create the new osoc edition
      */
-    const create = async () => {
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create` + osocCreate,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            if (setSessionKey && response && response.sessionkey) {
-                setSessionKey(response.sessionkey);
-            }
-            updateOsoc(response.data);
-        }
-    };
+    // const create = async () => {
+    //     const sessionKey = getSessionKey ? await getSessionKey() : "";
+    //     if (sessionKey !== "") {
+    //         const response = await fetch(
+    //             `${process.env.NEXT_PUBLIC_API_URL}/osoc/create` + osocCreate,
+    //             {
+    //                 method: "POST",
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     Accept: "application/json",
+    //                     Authorization: `auth/osoc2 ${sessionKey}`,
+    //                 },
+    //             }
+    //         )
+    //             .then((response) => response.json())
+    //             .catch((err) => {
+    //                 console.log(err);
+    //             });
+    //         if (setSessionKey && response && response.sessionkey) {
+    //             setSessionKey(response.sessionkey);
+    //         }
+    //         updateOsoc(response.data);
+    //     }
+    // };
 
     return (
         <div className={styles.filter}>
@@ -123,7 +123,7 @@ export const OsocCreateFilter: React.FC<{
                         placeholder="Year.."
                         onChange={(e) => setOsocCreate(e.target.value)}
                     />
-                    <button onClick={create}>Create</button>
+                    <button onClick={searchPress}>Create</button>
                 </div>
 
                 <div className={styles.query}>

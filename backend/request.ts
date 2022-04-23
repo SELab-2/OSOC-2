@@ -303,6 +303,37 @@ export async function parseGetSuggestionsStudentRequest(
 }
 
 /**
+ *  Parses a request to `GET /osoc/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterOsocsRequest(
+    req: express.Request
+): Promise<Requests.OsocFilter> {
+    let year = undefined;
+    if ("yearFilter" in req.body && !parseInt(req.body.yearFilter)) {
+        return rejector();
+    } else {
+        if ("yearFilter" in req.body) {
+            year = parseInt(req.body.yearFilter);
+        }
+    }
+
+    for (const filter of [maybe(req.body, "yearSort")]) {
+        if (filter != undefined && filter !== "asc" && filter !== "desc") {
+            return rejector();
+        }
+    }
+
+    return Promise.resolve({
+        sessionkey: getSessionKey(req),
+        yearFilter: year,
+        yearSort: maybe(req.body, "yearSort"),
+    });
+}
+
+/**
  *  Parses a request to `GET /student/filter`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an

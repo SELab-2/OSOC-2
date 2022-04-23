@@ -30,6 +30,34 @@ async function listOsocEditions(
 }
 
 /**
+ *  Attempts to filter osoc editions in the system by year.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function filterYear(
+    req: express.Request
+): Promise<Responses.OsocEditionList> {
+    const parsedRequest = await rq.parseFilterOsocsRequest(req);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const osocs = await ormO.filterOsocs(
+        checkedSessionKey.data.yearFilter,
+        checkedSessionKey.data.yearSort
+    );
+
+    return Promise.resolve({
+        data: osocs,
+        sessionkey: req.body.sessionkey,
+    });
+}
+
+/**
  *  Gets the router for all `/osoc/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/osoc/`
  * endpoints.
@@ -39,6 +67,7 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/osoc");
     util.route(router, "get", "/all", listOsocEditions);
+    util.route(router, "get", "/filter", filterYear);
 
     util.addAllInvalidVerbs(router, ["/", "/all"]);
 
