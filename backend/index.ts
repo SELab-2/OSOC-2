@@ -17,6 +17,7 @@ require("dotenv").config({
     path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
 });
 
+console.log("testprint");
 app.use(body.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
