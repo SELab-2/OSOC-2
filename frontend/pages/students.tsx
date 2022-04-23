@@ -6,7 +6,7 @@ import { Student } from "../types/types";
 import styles from "../styles/students.module.scss";
 
 const Students: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
 
     const fetchStudents = async () => {
@@ -25,9 +25,6 @@ const Students: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        if (setSessionKey) {
-                            setSessionKey(response.sessionkey);
-                        }
                         setStudents(response.data);
                     }
                 }
