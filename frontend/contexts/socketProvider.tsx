@@ -6,7 +6,6 @@ import { ClientToServerEvents, ServerToClientEvents } from "../types";
 // the socket we are using with the right url to the server
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
     `${process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_URL}`,
-    //"http://localhost:4096",
     { path: process.env.NEXT_PUBLIC_WEBSOCKET_SERVER_PATH }
 );
 

@@ -71,7 +71,6 @@ export const User: React.FC<{
                 return { success: false };
             });
         if (res.success !== false) {
-            console.log("emitted");
             socket.emit("updateUser", userId);
         }
         return res;
