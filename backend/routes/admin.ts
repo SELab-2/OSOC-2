@@ -2,7 +2,6 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormL from "../orm_functions/login_user";
-import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
@@ -100,13 +99,11 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormL.deleteLoginUserByPersonId(parsed.data.id).then(() => {
-                return ormP
-                    .deletePersonById(parsed.data.id)
-                    .then(() =>
-                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                    );
-            });
+            return ormL
+                .deleteLoginUserFromDB(parsed.data.id)
+                .then(() =>
+                    Promise.resolve({ sessionkey: parsed.data.sessionkey })
+                );
         });
 }
 
