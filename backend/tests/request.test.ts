@@ -193,8 +193,8 @@ test("Can parse update student request", () => {
     const dataV: T.Anything = {
         emailOrGithub: "ab@c.de",
         alumni: false,
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -223,8 +223,8 @@ test("Can parse update student request", () => {
 
     const failure2: T.Anything = {
         emailOrGithub: "ab@c.de",
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -389,15 +389,15 @@ test("Can parse final decision request", () => {
 
 test("Can parse coach access request", () => {
     const r1: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
         pass: "thisismypassword",
     };
 
     const r2: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
     };
 

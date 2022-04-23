@@ -42,21 +42,15 @@ export async function checkSessionKey(key: string) {
 /**
  *
  * @param key: the old key we want to overwrite
- * @param newkey: the key that we use to replace the old key
  * @param date
  * @returns the updated record in a promise
  */
-export async function changeSessionKey(
-    key: string,
-    newkey: string,
-    date: Date
-) {
+export async function refreshKey(key: string, date: Date) {
     return await prisma.session_keys.update({
         where: {
             session_key: key,
         },
         data: {
-            session_key: newkey,
             valid_until: date,
         },
     });
