@@ -34,16 +34,13 @@ async function createProject(req: express.Request): Promise<Responses.Project> {
                 })
                 .then((project) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: project.project_id,
-                            name: project.name,
-                            partner: project.partner,
-                            start_date: project.start_date.toString(),
-                            end_date: project.end_date.toString(),
-                            positions: project.positions,
-                            osoc_id: project.osoc_id,
-                        },
+                        id: project.project_id,
+                        name: project.name,
+                        partner: project.partner,
+                        start_date: project.start_date.toString(),
+                        end_date: project.end_date.toString(),
+                        positions: project.positions,
+                        osoc_id: project.osoc_id,
                     })
                 );
         });
@@ -61,7 +58,7 @@ async function listProjects(
     return rq
         .parseProjectAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormPr
                 .getAllProjects()
                 .then((obj) =>
@@ -89,7 +86,6 @@ async function listProjects(
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
@@ -115,18 +111,15 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
                     );
                     const users = await ormPU.getUsersFor(obj.project_id);
                     return Promise.resolve({
-                        sessionkey: parsed.sessionkey,
-                        data: {
-                            id: Number(obj.project_id),
-                            name: obj.name,
-                            partner: obj.partner,
-                            start_date: obj.start_date.toString(),
-                            end_date: obj.end_date.toString(),
-                            positions: obj.positions,
-                            osoc_id: obj.osoc_id,
-                            students: students,
-                            coaches: users,
-                        },
+                        id: Number(obj.project_id),
+                        name: obj.name,
+                        partner: obj.partner,
+                        start_date: obj.start_date.toString(),
+                        end_date: obj.end_date.toString(),
+                        positions: obj.positions,
+                        osoc_id: obj.osoc_id,
+                        students: students,
+                        coaches: users,
                     });
                 } else {
                     return Promise.reject(errors.cookInvalidID());
@@ -154,16 +147,13 @@ async function modProject(req: express.Request): Promise<Responses.Project> {
                 })
                 .then((project) =>
                     Promise.resolve({
-                        sessionkey: parsed.sessionkey,
-                        data: {
-                            id: project.project_id,
-                            name: project.name,
-                            partner: project.partner,
-                            start_date: project.start_date.toString(),
-                            end_date: project.end_date.toString(),
-                            positions: project.positions,
-                            osoc_id: project.osoc_id,
-                        },
+                        id: project.project_id,
+                        name: project.name,
+                        partner: project.partner,
+                        start_date: project.start_date.toString(),
+                        end_date: project.end_date.toString(),
+                        positions: project.positions,
+                        osoc_id: project.osoc_id,
                     })
                 );
         });
@@ -175,7 +165,7 @@ async function modProject(req: express.Request): Promise<Responses.Project> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteProject(req: express.Request): Promise<Responses.Key> {
+async function deleteProject(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -183,7 +173,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Key> {
         .then(async (parsed) => {
             return ormPr
                 .deleteProject(parsed.id)
-                .then(() => Promise.resolve({ sessionkey: parsed.sessionkey }));
+                .then(() => Promise.resolve({}));
         });
 }
 
@@ -206,15 +196,12 @@ async function getDraftedStudents(
 
             return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
                 Promise.resolve({
-                    sessionkey: parsed.data.sessionkey,
-                    data: {
-                        id: parsed.data.id,
-                        name: util.getOrDefault(prName, "(unnamed project)"),
-                        students: arr.map((obj) => ({
-                            student: obj.student,
-                            status: obj.contract_status,
-                        })),
-                    },
+                    id: parsed.data.id,
+                    name: util.getOrDefault(prName, "(unnamed project)"),
+                    students: arr.map((obj) => ({
+                        student: obj.student,
+                        status: obj.contract_status,
+                    })),
                 })
             );
         });
@@ -346,17 +333,14 @@ async function modProjectStudent(
                 )
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            drafted: true,
-                            role: util.getOrDefault(res?.role.name, ""),
-                        },
+                        drafted: true,
+                        role: util.getOrDefault(res?.role.name, ""),
                     })
                 );
         });
 }
 
-async function unAssignStudent(req: express.Request): Promise<Responses.Key> {
+async function unAssignStudent(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -414,9 +398,7 @@ async function unAssignStudent(req: express.Request): Promise<Responses.Key> {
                             );
                     }
 
-                    return Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                    });
+                    return Promise.resolve({});
                 });
         });
 }
@@ -427,7 +409,7 @@ async function getProjectConflicts(
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (checked) => {
+        .then(async () => {
             return ormOsoc
                 .getNewestOsoc()
                 .then((osoc) => util.getOrReject(osoc))
@@ -466,7 +448,6 @@ async function getProjectConflicts(
                 })
                 .then((arr) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
                         data: arr,
                     })
                 );
@@ -488,12 +469,12 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/:id", createProject);
 
     util.route(router, "post", "/:id", modProject);
-    util.routeKeyOnly(router, "delete", "/:id", deleteProject);
+    util.route(router, "delete", "/:id", deleteProject);
 
     util.route(router, "get", "/:id/draft", getDraftedStudents);
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
-    util.routeKeyOnly(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/assignee", unAssignStudent);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 
