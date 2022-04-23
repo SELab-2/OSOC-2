@@ -15,9 +15,7 @@ export const Osoc: React.FC<{
     const deleteOsoc = async (e: SyntheticEvent) => {
         e.preventDefault();
         await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/` +
-                "admin/" +
-                osocId.toString(),
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/` + osocId.toString(),
             {
                 method: "DELETE",
                 headers: {

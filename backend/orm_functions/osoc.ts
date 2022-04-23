@@ -125,6 +125,124 @@ export async function deleteOsocByYear(year: number) {
 }
 
 /**
+ *
+ * @param osoc_id the osoc edition that we are deleting from the database
+ */
+export async function deleteOsocFromDB(osocId: number) {
+    const project_ids = await prisma.project.findMany({
+        where: {
+            osoc_id: osocId,
+        },
+        select: {
+            project_id: true,
+        },
+    });
+
+    const project_roles_ids = await prisma.project_role.findMany({
+        where: {
+            project_id: {
+                in: project_ids.map((X) => X.project_id),
+            },
+        },
+        select: {
+            project_role_id: true,
+        },
+    });
+
+    const job_application_ids = await prisma.job_application.findMany({
+        where: {
+            osoc_id: osocId,
+        },
+        select: {
+            job_application_id: true,
+        },
+    });
+
+    // Remove all the linked projectUsers
+    await prisma.project_user.deleteMany({
+        where: {
+            project_id: {
+                in: project_ids.map((X) => X.project_id),
+            },
+        },
+    });
+
+    // Remove all the linked contracts
+    await prisma.contract.deleteMany({
+        where: {
+            project_role_id: {
+                in: project_roles_ids.map((X) => X.project_role_id),
+            },
+        },
+    });
+
+    // Remove all the linked projectroles
+    await prisma.project_role.deleteMany({
+        where: {
+            project_id: {
+                in: project_ids.map((X) => X.project_id),
+            },
+        },
+    });
+
+    // Remove all the linked projects
+    await prisma.project.deleteMany({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+
+    // Remove all the linked evaluations
+    await prisma.evaluation.deleteMany({
+        where: {
+            job_application_id: {
+                in: job_application_ids.map((X) => X.job_application_id),
+            },
+        },
+    });
+
+    // Remove all the linked applied roles
+    await prisma.applied_role.deleteMany({
+        where: {
+            job_application_id: {
+                in: job_application_ids.map((X) => X.job_application_id),
+            },
+        },
+    });
+
+    // Remove all the linked job application skills
+    await prisma.job_application_skill.deleteMany({
+        where: {
+            job_application_id: {
+                in: job_application_ids.map((X) => X.job_application_id),
+            },
+        },
+    });
+
+    // Remove all the linked attachments
+    await prisma.attachment.deleteMany({
+        where: {
+            job_application_id: {
+                in: job_application_ids.map((X) => X.job_application_id),
+            },
+        },
+    });
+
+    // Remove all the linked job applications
+    await prisma.job_application.deleteMany({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+
+    await prisma.osoc.delete({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+}
+
+/**
  * @returns the newest Osoc edition
  */
 export async function getNewestOsoc() {

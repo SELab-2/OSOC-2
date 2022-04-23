@@ -83,6 +83,26 @@ async function filterYear(
 }
 
 /**
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+async function deleteOsocEditionRequest(
+    req: express.Request
+): Promise<Responses.Key> {
+    return rq
+        .parseDeleteOsocEditionRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormO.deleteOsocFromDB(parsed.data.id).then(() =>
+                Promise.resolve({
+                    sessionkey: parsed.data.sessionkey,
+                })
+            );
+        });
+}
+
+/**
  *  Gets the router for all `/osoc/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/osoc/`
  * endpoints.
@@ -94,8 +114,8 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listOsocEditions);
     util.route(router, "get", "/filter", filterYear);
     util.route(router, "post", "/create", createOsocEdition);
-
-    util.addAllInvalidVerbs(router, ["/", "/all"]);
+    util.routeKeyOnly(router, "delete", "/:id", deleteOsocEditionRequest);
+    util.addAllInvalidVerbs(router, ["/", "/all, /filter, /create, /:id"]);
 
     return router;
 }

@@ -923,6 +923,11 @@ export const parseOsocAllRequest = parseKeyRequest;
  *  @returns A Promise resolving to the parsed data or rejecting with an
  * Argument or Unauthenticated error.
  */
+/**
+ *  A request to `DELETE /osoc/<id>` only requires a session key and an ID
+ * {@link parseKeyIdRequest}.
+ */
+export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
