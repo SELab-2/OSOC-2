@@ -30,9 +30,9 @@ model contract {
   information              String?
   created_by_login_user_id Int                  @default(autoincrement())
   contract_status          contract_status_enum
-  login_user               login_user           @relation(fields: [created_by_login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  login_user               login_user           @relation(fields: [created_by_login_user_id], references: [login_user_id], onDelete: SetNull, onUpdate: NoAction)
   project_role             project_role         @relation(fields: [project_role_id], references: [project_role_id], onDelete: NoAction, onUpdate: NoAction)
-  student                  student              @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  student                  student              @relation(fields: [student_id], references: [student_id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model evaluation {
@@ -43,7 +43,7 @@ model evaluation {
   motivation         String?
   is_final           Boolean
   job_application    job_application @relation(fields: [job_application_id], references: [job_application_id], onDelete: NoAction, onUpdate: NoAction)
-  login_user         login_user      @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  login_user         login_user      @relation(fields: [login_user_id], references: [login_user_id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model job_application {
@@ -62,7 +62,7 @@ model job_application {
   email_status           email_status_enum
   created_at             DateTime                @db.Timestamptz(6)
   osoc                   osoc                    @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
-  student                student                 @relation(fields: [student_id], references: [student_id], onDelete: NoAction, onUpdate: NoAction)
+  student                student                 @relation(fields: [student_id], references: [student_id], onDelete: SetNull, onUpdate: NoAction)
   applied_role           applied_role[]
   attachment             attachment[]
   evaluation             evaluation[]

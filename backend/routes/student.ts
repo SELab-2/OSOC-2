@@ -10,7 +10,6 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import * as ormP from "../orm_functions/person";
 
 /**
  *  Attempts to list all students in the system.
@@ -165,13 +164,11 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormSt.deleteStudent(parsed.data.id).then(() =>
-                ormP.deletePersonById(parsed.data.id).then(() =>
-                    Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                    })
-                )
-            );
+            return ormSt
+                .deleteStudentFromDB(parsed.data.id)
+                .then(() =>
+                    Promise.resolve({ sessionkey: parsed.data.sessionkey })
+                );
         });
 }
 
