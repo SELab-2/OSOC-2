@@ -61,7 +61,7 @@ async function createUserRequest(
         return ormP
             .createPerson({
                 firstname: parsed.firstName,
-                lastname: parsed.lastName,
+                lastname: "",
                 email: validator.default
                     .normalizeEmail(parsed.email)
                     .toString(),
