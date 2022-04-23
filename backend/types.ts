@@ -466,6 +466,16 @@ export namespace Responses {
     export interface PartialStudent extends InternalTypes.IdName {}
 
     /**
+     *  A partial user response is the combination of their id and name.
+     */
+    export interface PartialUser extends InternalTypes.IdName {}
+
+    /**
+     *  A partial user response is the combination of their id and name.
+     */
+    export interface PartialCoach extends PartialUser {}
+
+    /**
      *  A student response is the keyed version of the student and their associated
      * data.
      */

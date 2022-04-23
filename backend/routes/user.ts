@@ -6,7 +6,7 @@ import * as ormLU from "../orm_functions/login_user";
 import * as ormL from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { InternalTypes, Responses } from "../types";
+import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 
@@ -49,9 +49,7 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserRequest(
-    req: express.Request
-): Promise<InternalTypes.IdOnly> {
+async function createUserRequest(req: express.Request): Promise<Responses.Id> {
     return rq.parseRequestUserRequest(req).then(async (parsed) => {
         if (parsed.pass == undefined) {
             console.log(" -> WARNING user request without password");
@@ -97,7 +95,7 @@ async function setAccountStatus(
     key: string,
     is_admin: boolean,
     is_coach: boolean
-): Promise<InternalTypes.IdName> {
+): Promise<Responses.PartialUser> {
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -127,7 +125,7 @@ async function setAccountStatus(
  */
 async function createUserAcceptance(
     req: express.Request
-): Promise<InternalTypes.IdName> {
+): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -150,7 +148,7 @@ async function createUserAcceptance(
  */
 async function deleteUserRequest(
     req: express.Request
-): Promise<InternalTypes.IdName> {
+): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))

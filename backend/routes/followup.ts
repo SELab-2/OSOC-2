@@ -12,7 +12,7 @@ async function listFollowups(
     return rq
         .parseFollowupAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then((checked) =>
+        .then(() =>
             ormOsoc
                 .getLatestOsoc()
                 .then((osoc) => util.getOrReject(osoc))

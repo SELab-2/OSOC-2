@@ -65,7 +65,7 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(req: express.Request): Promise<InternalTypes.IdName> {
+async function modCoach(req: express.Request): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
