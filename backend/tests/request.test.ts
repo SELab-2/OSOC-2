@@ -132,18 +132,6 @@ test("Can parse update login user requests", () => {
         return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
     });
 
-    const f = [invalid1, invalid2].map((x) => {
-        const r: express.Request = getMockReq();
-        r.body = { ...x };
-        r.params.id = id.toString();
-        setSessionKey(r, key);
-        x.id = id;
-        x.sessionkey = key;
-        return expect(Rq.parseUpdateCoachRequest(r)).rejects.toBe(
-            errors.cookArgumentError()
-        );
-    });
-
     const s_ = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
@@ -172,7 +160,7 @@ test("Can parse update login user requests", () => {
         }
     );
 
-    return Promise.all([s, f, s_, f_, f__].flat());
+    return Promise.all([s, s_, f_, f__].flat());
 });
 
 test("Can parse login request", () => {
