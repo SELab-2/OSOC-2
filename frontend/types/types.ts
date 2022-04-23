@@ -161,3 +161,8 @@ export interface LoginUser {
     password: string;
     account_status: AccountStatus;
 }
+
+export interface OsocEdition {
+    osoc_id: number;
+    year: number;
+}
