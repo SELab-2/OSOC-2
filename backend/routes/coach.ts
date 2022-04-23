@@ -108,7 +108,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Key> {
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
             return ormLU
-                .deleteLoginUserFromDb(parsed.data.id)
+                .deleteLoginUserFromDB(parsed.data.id)
                 .then(() =>
                     Promise.resolve({ sessionkey: parsed.data.sessionkey })
                 );
