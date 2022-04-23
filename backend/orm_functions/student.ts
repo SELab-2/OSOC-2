@@ -97,6 +97,45 @@ export async function deleteStudent(studentId: number) {
 
 /**
  *
+ * @param studentId the student who's info we are deleting from the database
+ */
+export async function deleteStudentFromDB(studentId: number) {
+    const job_application_ids = await prisma.job_application.findMany({
+        where: {
+            student_id: studentId,
+        },
+        select: {
+            job_application_id: true,
+        },
+    });
+
+    // Remove all the linked attachments
+    await prisma.attachment.deleteMany({
+        where: {
+            job_application_id: {
+                in: job_application_ids.map((X) => X.job_application_id),
+            },
+        },
+    });
+
+    const person = await prisma.student.delete({
+        where: {
+            student_id: studentId,
+        },
+        include: {
+            person: true,
+        },
+    });
+
+    await prisma.person.delete({
+        where: {
+            person_id: person.person_id,
+        },
+    });
+}
+
+/**
+ *
  * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
