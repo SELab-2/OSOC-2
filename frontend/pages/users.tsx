@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
 import { UserFilter } from "../components/UserFilter/UserFilter";
-import { LoginUser } from "../types/types";
+import { LoginUser } from "../types";
 
 /**
  * The `manage users` page, only accessible for admins

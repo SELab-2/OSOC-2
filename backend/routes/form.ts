@@ -17,6 +17,7 @@ import { type_enum } from "@prisma/client";
 import * as validator from "validator";
 import * as rq from "../request";
 import * as config from "./form_keys.json";
+import { io } from "../index";
 
 /**
  *  This function searches a question with a given key in the form.
@@ -1507,7 +1508,7 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
         await addRolesToDatabase(roles, {
             id: addedJobApplicationToDatabase.id,
         });
-
+        io.emit("formAdded");
         return Promise.resolve({});
     }
 

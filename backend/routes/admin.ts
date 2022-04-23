@@ -58,7 +58,6 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
             return ormL
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: null,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
