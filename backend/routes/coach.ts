@@ -51,7 +51,7 @@ export async function listCoaches(
  */
 export async function modCoach(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -81,7 +81,7 @@ export async function modCoach(
  */
 export async function deleteCoach(
     req: express.Request
-): Promise<Responses.Key> {
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))

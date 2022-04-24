@@ -175,7 +175,6 @@ test("Can list all coaches", async () => {
 
     await expect(coach.listCoaches(req)).resolves.toStrictEqual({
         data: res,
-        sessionkey: "abcd",
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
     expectCall(reqMock.parseCoachAllRequest, req);
@@ -183,29 +182,18 @@ test("Can list all coaches", async () => {
     expectNoCall(utilMock.isAdmin);
 });
 
-test("Getting a single coach is deprecated.", async () => {
-    await expect(coach.getCoach(getMockReq())).rejects.toStrictEqual({
-        http: 410,
-        reason: "Deprecated endpoint.",
-    });
-    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(1);
-    expectNoCall(utilMock.isAdmin);
-});
-
 test("Can modify a single coach (1).", async () => {
     const req = getMockReq();
-    req.body = { id: 7, pass: "jeff", sessionkey: "abcd" };
-    const res = { data: { id: 7, name: "Jeffrey Jan" }, sessionkey: "abcd" };
+    req.body = { id: 7, sessionkey: "abcd" };
+    const res = { id: 7, name: "Jeffrey Jan" };
     await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.checkSessionKey, {
         id: 7,
-        pass: "jeff",
         sessionkey: "abcd",
     });
     expectCall(reqMock.parseUpdateCoachRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
-        password: "jeff",
         isAdmin: undefined,
         isCoach: undefined,
         accountStatus: undefined,
@@ -217,18 +205,16 @@ test("Can modify a single coach (2).", async () => {
     const req = getMockReq();
     req.body = {
         id: 7,
-        pass: "jeff",
         isAdmin: true,
         isCoach: false,
         sessionkey: "abcd",
     };
-    const res = { data: { id: 7, name: "Jeffrey Jan" }, sessionkey: "abcd" };
+    const res = { id: 7, name: "Jeffrey Jan" };
     await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.checkSessionKey, req.body);
     expectCall(reqMock.parseUpdateCoachRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
-        password: "jeff",
         isAdmin: true,
         isCoach: false,
         accountStatus: undefined,
@@ -239,40 +225,11 @@ test("Can modify a single coach (2).", async () => {
 test("Can delete coaches", async () => {
     const req = getMockReq();
     req.body = { id: 1, sessionkey: "abcd" };
-    const res = { sessionkey: "abcd" };
+    const res = {};
 
     await expect(coach.deleteCoach(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteCoachRequest, req);
     expectCall(ormLMock.deleteLoginUserByPersonId, req.body.id);
     expectCall(ormPMock.deletePersonById, req.body.id);
-});
-
-test("Can get coach requests", async () => {
-    const req = getMockReq();
-    const res_ = people
-        .filter((v) => v.is_coach && v.account_status == "PENDING")
-        .map((v) => ({
-            person_data: {
-                id: v.person.person_id,
-                name: v.person.firstname,
-            },
-            coach: v.is_coach,
-            admin: v.is_admin,
-            activated: v.account_status as string,
-        }));
-    const res = { data: res_, sessionkey: "abcd" };
-    await expect(coach.getCoachRequests(req)).resolves.toStrictEqual(res);
-    expectCall(utilMock.isAdmin, { sessionkey: "abcd" });
-    expectCall(reqMock.parseGetAllCoachRequestsRequest, req);
-    expect(ormLMock.getAllLoginUsers).toHaveBeenCalledTimes(1);
-});
-
-test("Getting a single coach request is deprecated.", async () => {
-    await expect(coach.getCoachRequest(getMockReq())).rejects.toStrictEqual({
-        http: 410,
-        reason: "Deprecated endpoint.",
-    });
-    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
-    expectNoCall(utilMock.checkSessionKey);
 });
