@@ -625,7 +625,7 @@ export async function parseFormRequest(
             }
         }
         return Promise.resolve({
-            createdAt: maybe(req.body.createdAt, "createdAt"),
+            createdAt: maybe(req.body, "createdAt"),
             data: req.body.data,
         });
     });
