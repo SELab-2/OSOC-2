@@ -203,7 +203,6 @@ test("Can get all followup data", async () => {
             application: x.job_application_id,
             status: x.email_status,
         })),
-        sessionkey: "abcd",
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
     expectCall(reqMock.parseFollowupAllRequest, req);
@@ -215,12 +214,9 @@ test("Can get all followup data", async () => {
 test("Can get single followup", async () => {
     const req: express.Request = getMockReq();
     await expect(followup.getFollowup(req)).resolves.toStrictEqual({
-        sessionkey: "abcd",
-        data: {
-            student: jobapps[0].student_id,
-            application: jobapps[0].job_application_id,
-            status: jobapps[0].email_status,
-        },
+        student: jobapps[0].student_id,
+        application: jobapps[0].job_application_id,
+        status: jobapps[0].email_status,
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
@@ -234,7 +230,8 @@ test("Can update single followup", async () => {
     req.body.id = 5;
     req.body.sessionkey = "abcd";
     await expect(followup.updateFollowup(req)).resolves.toStrictEqual({
-        data: { student: 5, application: 1, status: "SENT" },
-        sessionkey: "abcd",
+        student: 5,
+        application: 1,
+        status: "SENT",
     });
 });
