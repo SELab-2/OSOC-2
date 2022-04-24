@@ -251,7 +251,7 @@ export async function respOrErrorNoReinject(
 export async function respOrError<T>(
     req: express.Request,
     res: express.Response,
-    prom: Promise<Responses.ApiResponse & Responses.Keyed<T>>
+    prom: Promise<Responses.ApiResponse & T>
 ): Promise<void> {
     return respOrErrorNoReinject(
         res,
@@ -382,7 +382,7 @@ export async function refreshKey(
     const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + session_key.valid_period);
     return skey
-        .changeSessionKey(key, generateKey(), futureDate)
+        .refreshKey(key, futureDate)
         .then((upd) => Promise.resolve(upd.session_key));
 }
 
@@ -398,14 +398,9 @@ export async function refreshKey(
  */
 export async function refreshAndInjectKey<T>(
     key: InternalTypes.SessionKey,
-    response: Responses.Keyed<T>
-): Promise<Responses.Keyed<T>> {
-    return refreshKey(key).then(
-        (newkey: InternalTypes.SessionKey): Promise<Responses.Keyed<T>> => {
-            response.sessionkey = newkey;
-            return Promise.resolve(response);
-        }
-    );
+    response: T
+): Promise<T> {
+    return refreshKey(key).then(() => Promise.resolve(response));
 }
 
 /**
@@ -424,7 +419,7 @@ export function route<T extends Responses.ApiResponse>(
     router: express.Router,
     verb: Verb,
     path: string,
-    callback: RouteCallback<Responses.Keyed<T>>
+    callback: RouteCallback<T>
 ): void {
     router[verb](path, (req: express.Request, res: express.Response) =>
         respOrError(req, res, callback(req))
@@ -438,19 +433,21 @@ export function route<T extends Responses.ApiResponse>(
  *  @param verb The HTTP verb.
  *  @param path The (relative) route path.
  *  @param callback The function which will respond.
+ *  @deprecated Use route instead.
  */
 export function routeKeyOnly(
     router: express.Router,
     verb: Verb,
     path: string,
     callback: RouteCallback<Responses.Key>
-) {
+): void {
+    console.log("[WARNING]: routeKeyOnly is deprecated. Use route instead.");
     router[verb](path, (req: express.Request, res: express.Response) =>
         respOrErrorNoReinject(
             res,
             callback(req)
                 .then((toupd) => refreshKey(toupd.sessionkey))
-                .then((upd) => Promise.resolve({ sessionkey: upd }))
+                .then(() => Promise.resolve({}))
         )
     );
 }

@@ -1,15 +1,14 @@
+import { account_status_enum } from "@prisma/client";
 import express from "express";
+import * as validator from "validator";
 
+import * as ormLU from "../orm_functions/login_user";
 import * as ormL from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { InternalTypes, Responses } from "../types";
+import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import * as ormP from "../orm_functions/person";
-import * as ormLU from "../orm_functions/login_user";
-
-import * as validator from "validator";
-import { account_status_enum } from "@prisma/client";
 
 /**
  *  Attempts to list all students in the system.
@@ -23,7 +22,7 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
         .checkSessionKey(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID);
+        return Promise.reject(errors.cookInvalidID());
     }
     const loginUsers = await ormL.getAllLoginUsers();
 
@@ -41,7 +40,6 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
 
     return Promise.resolve({
         data: loginUsers,
-        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -51,9 +49,7 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserRequest(
-    req: express.Request
-): Promise<InternalTypes.IdOnly> {
+async function createUserRequest(req: express.Request): Promise<Responses.Id> {
     return rq.parseRequestUserRequest(req).then(async (parsed) => {
         if (parsed.pass == undefined) {
             console.log(" -> WARNING user request without password");
@@ -62,7 +58,7 @@ async function createUserRequest(
         return ormP
             .createPerson({
                 firstname: parsed.firstName,
-                lastname: parsed.lastName,
+                lastname: "",
                 email: validator.default
                     .normalizeEmail(parsed.email)
                     .toString(),
@@ -99,7 +95,7 @@ async function setAccountStatus(
     key: string,
     is_admin: boolean,
     is_coach: boolean
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<Responses.PartialUser> {
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -115,11 +111,8 @@ async function setAccountStatus(
         .then((res) => {
             console.log(res.person.firstname);
             return Promise.resolve({
-                sessionkey: key,
-                data: {
-                    id: res.person_id,
-                    name: res.person.firstname + " " + res.person.lastname,
-                },
+                id: res.person_id,
+                name: res.person.firstname + " " + res.person.lastname,
             });
         });
 }
@@ -132,7 +125,7 @@ async function setAccountStatus(
  */
 async function createUserAcceptance(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -153,7 +146,9 @@ async function createUserAcceptance(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
+async function deleteUserRequest(
+    req: express.Request
+): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -169,7 +164,8 @@ async function deleteUserRequest(req: express.Request): Promise<Responses.Key> {
 }
 
 /**
- *  Attempts to filter users in the system by name, email, status, coach or admin.
+ *  Attempts to filter users in the system by name, email, status, coach or
+ * admin.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -205,7 +201,48 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
         activated: val.account_status as string,
     }));
 
-    return Promise.resolve({ data: users, sessionkey: req.body.sessionkey });
+    return Promise.resolve({ data: users });
+}
+
+async function userModSelf(req: express.Request): Promise<Responses.Empty> {
+    return rq
+        .parseUserModSelfRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed, false))
+        .then((checked) => {
+            return ormLU
+                .getLoginUserById(checked.userId)
+                .then((user) => util.getOrReject(user))
+                .then((user) => {
+                    if (
+                        checked.data.pass != undefined &&
+                        user.password != checked.data.pass.oldpass
+                    )
+                        return Promise.reject();
+                    return Promise.resolve(user);
+                })
+                .then((user) =>
+                    ormLU.updateLoginUser({
+                        loginUserId: checked.userId,
+                        isAdmin: user.is_admin,
+                        isCoach: user.is_coach,
+                        accountStatus: user.account_status,
+                        password: checked.data.pass?.newpass,
+                    })
+                )
+                .then((user) => Promise.resolve(user.person))
+                .then((person) => {
+                    if (checked.data.name != undefined) {
+                        return ormP
+                            .updatePerson({
+                                personId: person.person_id,
+                                firstname: checked.data.name,
+                            })
+                            .then(() => Promise.resolve());
+                    }
+                    return Promise.resolve();
+                })
+                .then(() => Promise.resolve({}));
+        });
 }
 
 /**
@@ -220,12 +257,14 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
+    util.route(router, "post", "/self", userModSelf);
+
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
     );
 
     util.route(router, "post", "/request/:id", createUserAcceptance);
-    util.routeKeyOnly(router, "delete", "/request/:id", deleteUserRequest);
+    util.route(router, "delete", "/request/:id", deleteUserRequest);
 
     util.addAllInvalidVerbs(router, [
         "/",
@@ -233,6 +272,7 @@ export function getRouter(): express.Router {
         "/request",
         "/request/:id",
         "/filter",
+        "/self",
     ]);
 
     return router;

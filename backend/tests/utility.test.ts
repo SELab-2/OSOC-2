@@ -327,12 +327,12 @@ test("utility.respOrError sends responses with updated keys", async () => {
     // req.body.sessionkey = "key";
     setSessionKey(req, "key");
 
-    session_keyMock.changeSessionKey.mockReset();
-    session_keyMock.changeSessionKey.mockImplementation((_, nw, nd) => {
+    session_keyMock.refreshKey.mockReset();
+    session_keyMock.refreshKey.mockImplementation((k, nd) => {
         return Promise.resolve({
             session_key_id: 0,
             login_user_id: 0,
-            session_key: nw,
+            session_key: k,
             valid_until: nd,
         });
     });
@@ -346,7 +346,7 @@ test("utility.respOrError sends responses with updated keys", async () => {
     });
 
     const obj = { data: { some: "data" }, sessionkey: "" };
-    const exp = { data: { some: "data" }, sessionkey: "abcd", success: true };
+    const exp = { data: { some: "data" }, sessionkey: "", success: true };
 
     await expect(
         util.respOrError(req, res, Promise.resolve(obj))
@@ -611,7 +611,7 @@ test("utility.isAdmin can catch errors from the DB", async () => {
 });
 
 test("utility.refreshKey removes a key and replaces it", async () => {
-    session_keyMock.changeSessionKey.mockReset();
+    session_keyMock.refreshKey.mockReset();
 
     // mock Date.now()
     const realDateNow = Date.now.bind(global.Date);
@@ -620,11 +620,11 @@ test("utility.refreshKey removes a key and replaces it", async () => {
 
     const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
-    session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
+    session_keyMock.refreshKey.mockImplementation((old) => {
         return Promise.resolve({
             session_key_id: 0,
             login_user_id: 0,
-            session_key: nw,
+            session_key: old,
             valid_until: futureDate,
         });
     });
@@ -637,25 +637,27 @@ test("utility.refreshKey removes a key and replaces it", async () => {
         return h;
     });
 
-    await expect(util.refreshKey("ab")).resolves.toBe("abcd");
-    expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-    expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith(
-        "ab",
-        "abcd",
-        futureDate
-    );
+    await expect(util.refreshKey("ab")).resolves.toBe("ab");
+    expect(session_keyMock.refreshKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.refreshKey).toHaveBeenCalledWith("ab", futureDate);
     global.Date.now = realDateNow;
 });
 
 test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
-    session_keyMock.changeSessionKey.mockReset();
-    const futureDate = new Date();
+    session_keyMock.refreshKey.mockReset();
+
+    // mock Date.now()
+    const realDateNow = Date.now.bind(global.Date);
+    const dateNowStub = jest.fn(() => 1530518207007);
+    global.Date.now = dateNowStub;
+
+    const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + sessionKey.valid_period);
-    session_keyMock.changeSessionKey.mockImplementation((_, nw) => {
+    session_keyMock.refreshKey.mockImplementation((k) => {
         return Promise.resolve({
             session_key_id: 0,
             login_user_id: 0,
-            session_key: nw,
+            session_key: k,
             valid_until: futureDate,
         });
     });
@@ -674,19 +676,17 @@ test("utility.refreshAndInjectKey refreshes a key and injects it", async () => {
     };
 
     const result = {
-        sessionkey: "abcd",
+        sessionkey: "",
         data: { id: 5, name: "jef", email: "jef@jef.com" },
     };
 
     expect(util.refreshAndInjectKey("ab", initial)).resolves.toStrictEqual(
         result
     );
-    expect(session_keyMock.changeSessionKey).toHaveBeenCalledTimes(1);
-    expect(session_keyMock.changeSessionKey).toHaveBeenCalledWith(
-        "ab",
-        "abcd",
-        futureDate
-    );
+    expect(session_keyMock.refreshKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.refreshKey).toHaveBeenCalledWith("ab", futureDate);
+
+    global.Date.now = realDateNow;
 });
 
 test("utility.getSessionKey fetches session key or crashes", () => {

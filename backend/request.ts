@@ -169,17 +169,12 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(
-        req,
-        ["isAdmin", "isCoach", "accountStatus"],
-        types.id
-    ).then(() => {
+    return hasFields(req, [], types.id).then(() => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             isAdmin: maybe(req.body, "isAdmin") as boolean,
             isCoach: maybe(req.body, "isCoach") as boolean,
-            pass: maybe(req.body, "pass") as string,
             accountStatus: maybe(
                 req.body,
                 "accountStatus"
@@ -457,17 +452,14 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(
-        req,
-        ["firstName", "lastName", "email", "pass"],
-        types.neither
-    ).then(() =>
-        Promise.resolve({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            pass: req.body.pass,
-        })
+    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
+        () =>
+            Promise.resolve({
+                firstName: req.body.firstName,
+                lastName: "",
+                email: req.body.email,
+                pass: req.body.pass,
+            })
     );
 }
 
@@ -600,14 +592,13 @@ export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
     return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, ["name", "desc", "subject", "cc", "content"]))
+        if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             name: maybe(req.body, "name"),
-            desc: maybe(req.body, "desc"),
             subject: maybe(req.body, "subject"),
             cc: maybe(req.body, "cc"),
             content: maybe(req.body, "content"),
@@ -693,6 +684,33 @@ export async function parseRemoveAssigneeRequest(
     );
 }
 
+export async function parseUserModSelfRequest(
+    req: express.Request
+): Promise<Requests.UserPwd> {
+    return hasFields(req, [], types.key).then(() => {
+        if ("pass" in req.body) {
+            try {
+                if (
+                    !("oldpass" in req.body.pass) ||
+                    !("newpass" in req.body.pass)
+                ) {
+                    return rejector();
+                }
+            } catch (e) {
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            sessionkey: getSessionKey(req),
+            pass: maybe(req.body, "pass") as {
+                oldpass: string;
+                newpass: string;
+            },
+            name: maybe(req.body, "name") as string,
+        });
+    });
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
@@ -772,6 +790,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /verify` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseVerifyRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID

@@ -19,7 +19,7 @@ export async function listAdmins(
     return rq
         .parseAdminAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormL
                 .searchAllAdminLoginUsers(true)
                 .then((obj) =>
@@ -40,7 +40,6 @@ export async function listAdmins(
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
@@ -48,20 +47,11 @@ export async function listAdmins(
 }
 
 /**
- *  Attempts to get all data for a certain admin in the system.
+ *  Attempts to update a certain admin in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-export async function getAdmin(req: express.Request): Promise<Responses.Admin> {
-    return rq
-        .parseSingleAdminRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() =>
-            Promise.reject({ http: 410, reason: "Deprecated endpoint." })
-        );
-}
-
 export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
@@ -70,7 +60,6 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
             return ormL
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: parsed.data.pass,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
@@ -78,14 +67,8 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
-                        },
+                        id: res.login_user_id,
+                        name: res.person.firstname + " " + res.person.lastname,
                     })
                 );
         });
@@ -107,16 +90,14 @@ export async function deleteAdmin(
             return ormL.deleteLoginUserByPersonId(parsed.data.id).then(() => {
                 return ormP
                     .deletePersonById(parsed.data.id)
-                    .then(() =>
-                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                    );
+                    .then(() => Promise.resolve({}));
             });
         });
 }
 
 /**
  *  Gets the router for all `/admin/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/admin/`
+ *  @returns An Express.js {@link express.Router} routing all `/admin/`
  * endpoints.
  */
 export function getRouter(): express.Router {
@@ -124,10 +105,9 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/admin");
     util.route(router, "get", "/all", listAdmins);
-    util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
-    util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
+    util.route(router, "delete", "/:id", deleteAdmin);
 
     util.addAllInvalidVerbs(router, ["/", "/all", "/:id"]);
 
