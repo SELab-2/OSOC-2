@@ -1,10 +1,10 @@
-import { getMockRes } from "@jest-mock/express";
+import { getMockReq, getMockRes } from "@jest-mock/express";
 
 import { Anything } from "../../types";
 
-// import axios from 'axios';
-// jest.mock('axios');
-// const axiosMock = axios as jest.Mocked<typeof axios>;
+import axios from "axios";
+jest.mock("axios");
+const axiosMock = axios as jest.Mocked<typeof axios>;
 
 import * as ormP from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
@@ -23,6 +23,7 @@ jest.mock("../../utility");
 const utilMock = util as jest.Mocked<typeof util>;
 
 import * as session_key from "../../routes/session_key.json";
+import * as config from "../../config.json";
 
 import * as github from "../../routes/github";
 
@@ -298,4 +299,86 @@ test("Can register if account doesn't exist", async () => {
     expect(ormSK.addSessionKey).toHaveBeenCalledTimes(1);
     expect(ormSK.addSessionKey).toHaveBeenCalledWith(5678, "abcd", f);
     expectNoCall(ormP.updatePerson);
+});
+
+test("Login/Register fails if the request is incorrect", async () => {
+    const req = getMockReq();
+    const res = getMockRes().res;
+
+    req.query = { state: "8945" };
+    await expect(github.ghExchangeAccessToken(req, res)).rejects.toBe(
+        config.apiErrors.github.argumentMissing
+    );
+
+    req.query = { code: "78946512" };
+    await expect(github.ghExchangeAccessToken(req, res)).rejects.toBe(
+        config.apiErrors.github.argumentMissing
+    );
+
+    req.query = { code: "132465798", state: "45" };
+    await expect(github.ghExchangeAccessToken(req, res)).rejects.toBe(
+        config.apiErrors.github.illegalState
+    );
+});
+
+test("Can exchange access token for session key", async () => {
+    const code = "abcdefghijklmnopqrstuvwxyz";
+
+    axiosMock.post.mockImplementation((url, body, conf) => {
+        expect(url).toBe("https://github.com/login/oauth/access_token");
+        expect(conf).toHaveProperty("headers.Accept", "application/json");
+        expect(body).toStrictEqual({
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_SECRET,
+            code: code as string,
+            redirect_uri:
+                github.getHome() + config.global.preferred + "/github/login",
+        });
+
+        return Promise.resolve({ data: { access_token: "some_token" } });
+    });
+
+    axiosMock.get.mockImplementation((url, conf) => {
+        expect(url).toBe("https://api.github.com/user");
+        expect(conf).toHaveProperty(
+            "headers.Authorization",
+            "token some_token"
+        );
+
+        return Promise.resolve({
+            data: { login: "@my_github", name: "my", id: 69 },
+        });
+    });
+
+    utilMock.redirect.mockImplementation(async (_, url) => {
+        expect(url).toBe(process.env.FRONTEND + "/login/abcd");
+        return Promise.resolve();
+    });
+
+    const req = getMockReq();
+    const res = getMockRes().res;
+    req.query = { code: code, state: github.genState() };
+    return expect(
+        github.ghExchangeAccessToken(req, res)
+    ).resolves.not.toThrow();
+});
+
+test("Can handle internet issues", async () => {
+    axiosMock.post.mockRejectedValue({ error: "can't connect to server" });
+
+    utilMock.redirect.mockImplementation(async (_, url) => {
+        expect(url).toBe(
+            process.env.FRONTEND +
+                "/login?loginError=" +
+                config.apiErrors.github.other.reason
+        );
+        return Promise.resolve();
+    });
+
+    const req = getMockReq();
+    const res = getMockRes().res;
+    req.query = { code: "code", state: github.genState() };
+    return expect(
+        github.ghExchangeAccessToken(req, res)
+    ).resolves.not.toThrow();
 });

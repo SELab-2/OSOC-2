@@ -20,7 +20,7 @@ export let states: string[] = [];
  *  Gets the home URL for the github callback.
  *  @returns The home URL.
  */
-function getHome(): string {
+export function getHome(): string {
     const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
     // check if dev or production
     console.log("Home is: " + root);
@@ -260,7 +260,10 @@ export function getRouter(): express.Router {
     router.get("/", async (_, rs) => await ghIdentity(rs));
     router.get(
         "/challenge",
-        async (req, res) => await ghExchangeAccessToken(req, res)
+        async (req, res) =>
+            await ghExchangeAccessToken(req, res).catch((e) =>
+                util.replyError(res, e)
+            )
     );
 
     return router;
