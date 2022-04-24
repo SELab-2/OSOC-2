@@ -295,12 +295,12 @@ export async function deleteProjectByPartner(partner: string) {
 
 /**
  *
- * @param projectNameFilter projectname that we are filtering on (or undefined if not filtering on name)
- * @param clientNameFilter clientname that we are filtering on (or undefined if not filtering on name)
+ * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
+ * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
- * @param projectNameSort asc or desc if we want to sort on projectname, undefined if we are not sorting on projectname
- * @param clientNameSort asc or desc if we want to sort on clientname, undefined if we are not sorting on clientname
+ * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
+ * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
  * @returns the filtered students with their person data and other filter fields in a promise
  */
