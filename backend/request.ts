@@ -616,11 +616,20 @@ export async function parseFormRequest(
     req: express.Request
 ): Promise<Requests.Form> {
     return hasFields(req, ["data"], types.neither).then(() => {
-        if (req.body.data.fields == undefined) {
+        if (
+            req.body.data.fields === undefined ||
+            req.body.data.fields === null
+        ) {
             return rejector();
         }
         for (const question of req.body.data.fields) {
-            if (question.key == undefined || question.value == undefined) {
+            console.log(question);
+            if (
+                question.key === undefined ||
+                question.key === null ||
+                question.value === undefined
+            ) {
+                console.log(question.value);
                 return rejector();
             }
         }
