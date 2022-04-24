@@ -25,7 +25,7 @@ import { io } from "../index";
  *  @param key The key of the question.
  *  @returns The question that corresponds with the given key.
  */
-function filterQuestion(
+export function filterQuestion(
     form: Requests.Form,
     key: string
 ): Responses.FormResponse<Requests.Question> {
@@ -490,18 +490,20 @@ function getEducations(form: Requests.Form): Promise<string[]> {
     if (
         !questionsExist ||
         questionCheckEducations.data?.value == null ||
-        questionCheckEducations.data.value.length === 0 ||
-        questionCheckEducations.data.value.length > 2
+        (questionCheckEducations.data.value as string[]).length === 0 ||
+        (questionCheckEducations.data.value as string[]).length > 2
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const educations: string[] = [];
 
-    for (let i = 0; i < questionCheckEducations.data.value.length; i++) {
+    const questionValue = questionCheckEducations.data.value as string[];
+
+    for (let i = 0; i < questionValue.length; i++) {
         if (questionCheckEducations.data.options != undefined) {
             const filteredOption = questionCheckEducations.data.options.filter(
-                (option) => option.id === questionCheckEducations.data?.value[i]
+                (option) => option.id === questionValue?.[i]
             );
             if (filteredOption.length !== 1) {
                 return Promise.reject(errors.cookArgumentError());
@@ -547,16 +549,19 @@ function getEducationLevel(form: Requests.Form): Promise<string> {
     if (
         !questionsExist ||
         questionCheckEducationLevel.data?.value == null ||
-        questionCheckEducationLevel.data.value.length !== 1
+        (questionCheckEducationLevel.data.value as string[]).length !== 1
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     let educationLevel;
 
+    const educationLevelValue = questionCheckEducationLevel.data
+        ?.value as string[];
+
     if (questionCheckEducationLevel.data.options != undefined) {
         const filteredOption = questionCheckEducationLevel.data.options.filter(
-            (option) => option.id === questionCheckEducationLevel.data?.value[0]
+            (option) => option.id === educationLevelValue?.[0]
         );
         if (filteredOption.length !== 1) {
             return Promise.reject(errors.cookArgumentError());
@@ -872,32 +877,23 @@ function getCV(form: Requests.Form): Promise<Responses.FormAttachmentResponse> {
         }
     }
 
+    const cvUploadValue = questionCVUpload.data?.value as Requests.FormValues[];
+
     if (questionCVUpload.data?.value != null) {
-        for (
-            let linkIndex = 0;
-            linkIndex < questionCVUpload.data?.value.length;
-            linkIndex++
-        ) {
+        for (let linkIndex = 0; linkIndex < cvUploadValue.length; linkIndex++) {
             if (
-                (questionCVUpload.data?.value[linkIndex] as Requests.FormValues)
-                    .url == undefined
+                (cvUploadValue[linkIndex] as Requests.FormValues).url ==
+                undefined
             ) {
                 return Promise.reject(errors.cookArgumentError());
             }
 
             if (
-                (
-                    questionCVUpload.data?.value[
-                        linkIndex
-                    ] as Requests.FormValues
-                ).url.trim() != ""
+                (cvUploadValue[linkIndex] as Requests.FormValues).url.trim() !=
+                ""
             ) {
                 links.push(
-                    (
-                        questionCVUpload.data?.value[
-                            linkIndex
-                        ] as Requests.FormValues
-                    ).url
+                    (cvUploadValue[linkIndex] as Requests.FormValues).url
                 );
                 types.push("CV_URL");
             }
@@ -947,35 +943,29 @@ function getPortfolio(
         }
     }
 
+    const portfolioUploadValue = questionPortfolioUpload.data
+        ?.value as Requests.FormValues[];
+
     if (questionPortfolioUpload.data?.value != null) {
         for (
             let linkIndex = 0;
-            linkIndex < questionPortfolioUpload.data?.value.length;
+            linkIndex < portfolioUploadValue.length;
             linkIndex++
         ) {
             if (
-                (
-                    questionPortfolioUpload.data?.value[
-                        linkIndex
-                    ] as Requests.FormValues
-                ).url == undefined
+                (portfolioUploadValue[linkIndex] as Requests.FormValues).url ==
+                undefined
             ) {
                 return Promise.reject(errors.cookArgumentError());
             }
 
             if (
                 (
-                    questionPortfolioUpload.data?.value[
-                        linkIndex
-                    ] as Requests.FormValues
+                    portfolioUploadValue[linkIndex] as Requests.FormValues
                 ).url.trim() != ""
             ) {
                 links.push(
-                    (
-                        questionPortfolioUpload.data?.value[
-                            linkIndex
-                        ] as Requests.FormValues
-                    ).url
+                    (portfolioUploadValue[linkIndex] as Requests.FormValues).url
                 );
                 types.push("PORTFOLIO_URL");
             }
@@ -1029,35 +1019,30 @@ function getMotivation(
         }
     }
 
+    const motivationUploadValue = questionMotivationUpload.data
+        ?.value as Requests.FormValues[];
+
     if (questionMotivationUpload.data?.value != null) {
         for (
             let linkIndex = 0;
-            linkIndex < questionMotivationUpload.data?.value.length;
+            linkIndex < motivationUploadValue.length;
             linkIndex++
         ) {
             if (
-                (
-                    questionMotivationUpload.data?.value[
-                        linkIndex
-                    ] as Requests.FormValues
-                ).url == undefined
+                (motivationUploadValue[linkIndex] as Requests.FormValues).url ==
+                undefined
             ) {
                 return Promise.reject(errors.cookArgumentError());
             }
 
             if (
                 (
-                    questionMotivationUpload.data?.value[
-                        linkIndex
-                    ] as Requests.FormValues
+                    motivationUploadValue[linkIndex] as Requests.FormValues
                 ).url.trim() != ""
             ) {
                 data.push(
-                    (
-                        questionMotivationUpload.data?.value[
-                            linkIndex
-                        ] as Requests.FormValues
-                    ).url
+                    (motivationUploadValue[linkIndex] as Requests.FormValues)
+                        .url
                 );
                 types.push("MOTIVATION_URL");
             }
@@ -1112,18 +1097,20 @@ function getAppliedRoles(form: Requests.Form): Promise<string[]> {
     if (
         !questionsExist ||
         questionAppliedRoles.data?.value == null ||
-        questionAppliedRoles.data.value.length === 0 ||
-        questionAppliedRoles.data.value.length > 2
+        (questionAppliedRoles.data.value as string[]).length === 0 ||
+        (questionAppliedRoles.data.value as string[]).length > 2
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    const appliedRolesValue = questionAppliedRoles.data?.value as string[];
+
     const appliedRoles: string[] = [];
 
-    for (let i = 0; i < questionAppliedRoles.data.value.length; i++) {
+    for (let i = 0; i < appliedRolesValue.length; i++) {
         if (questionAppliedRoles.data.options != undefined) {
             const filteredOption = questionAppliedRoles.data.options.filter(
-                (option) => option.id === questionAppliedRoles.data?.value[i]
+                (option) => option.id === appliedRolesValue?.[i]
             );
             if (filteredOption.length !== 1) {
                 return Promise.reject(errors.cookArgumentError());

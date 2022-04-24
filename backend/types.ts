@@ -819,7 +819,7 @@ export namespace Requests {
 
     export interface Question {
         key: string;
-        value: string | FormValues[];
+        value: string | string[] | boolean | number | FormValues[] | null;
         options?: Array<Option>;
     }
 
