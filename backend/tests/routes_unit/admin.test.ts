@@ -158,7 +158,6 @@ test("Can list all admins.", async () => {
 
     await expect(admin.listAdmins(req)).resolves.toStrictEqual({
         data: res,
-        sessionkey: "abcd",
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
     expectCall(reqMock.parseAdminAllRequest, req);
@@ -166,25 +165,15 @@ test("Can list all admins.", async () => {
     expectNoCall(utilMock.isAdmin);
 });
 
-test("Getting a single admin is deprecated.", async () => {
-    await expect(admin.getAdmin(getMockReq())).rejects.toStrictEqual({
-        http: 410,
-        reason: "Deprecated endpoint.",
-    });
-    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
-    expectNoCall(utilMock.checkSessionKey);
-});
-
 test("Can modify a single admin (1).", async () => {
     const req = getMockReq();
-    req.body = { id: 7, pass: "jeff", sessionkey: "abcd" };
-    const res = { data: { id: 7, name: "Jeffrey Jan" }, sessionkey: "abcd" };
+    req.body = { id: 7, sessionkey: "abcd" };
+    const res = { id: 7, name: "Jeffrey Jan" };
     await expect(admin.modAdmin(req)).resolves.toStrictEqual(res);
-    expectCall(utilMock.isAdmin, { id: 7, pass: "jeff", sessionkey: "abcd" });
+    expectCall(utilMock.isAdmin, { id: 7, sessionkey: "abcd" });
     expectCall(reqMock.parseUpdateAdminRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
-        password: "jeff",
         isAdmin: undefined,
         isCoach: undefined,
         accountStatus: undefined,
@@ -196,18 +185,16 @@ test("Can modify a single admin (2).", async () => {
     const req = getMockReq();
     req.body = {
         id: 7,
-        pass: "jeff",
         isAdmin: true,
         isCoach: false,
         sessionkey: "abcd",
     };
-    const res = { data: { id: 7, name: "Jeffrey Jan" }, sessionkey: "abcd" };
+    const res = { id: 7, name: "Jeffrey Jan" };
     await expect(admin.modAdmin(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseUpdateAdminRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
-        password: "jeff",
         isAdmin: true,
         isCoach: false,
         accountStatus: undefined,
@@ -218,7 +205,7 @@ test("Can modify a single admin (2).", async () => {
 test("Can delete admins", async () => {
     const req = getMockReq();
     req.body = { id: 1, sessionkey: "abcd" };
-    const res = { sessionkey: "abcd" };
+    const res = {};
 
     await expect(admin.deleteAdmin(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);

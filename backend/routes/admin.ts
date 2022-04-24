@@ -82,7 +82,7 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
  */
 export async function deleteAdmin(
     req: express.Request
-): Promise<Responses.Key> {
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
