@@ -1,36 +1,36 @@
 import { Osoc } from "../components/Osoc/Osoc";
-import { OsocEdition } from "../types/types";
+import { OsocEdition } from "../types";
 import { NextPage } from "next";
 import React, { useState } from "react";
 import styles from "../styles/users.module.css";
-import { OsocCreateFilter } from "../components/Osoc/OsocCreate";
+import { OsocCreateFilter } from "../components/Osoc/OsocFilter";
 
 /**
  * The `osoc edition` page, only accessible for admins
  * @constructor
  */
 const Osocs: NextPage = () => {
-    const [osoc_editions, setOsocs] = useState<Array<OsocEdition>>();
+    const [osocEditions, setEditions] = useState<Array<OsocEdition>>();
 
     const removeOsoc = (osoc: OsocEdition) => {
-        if (osoc_editions !== undefined) {
-            const index = osoc_editions.indexOf(osoc, 0);
+        if (osocEditions !== undefined) {
+            const index = osocEditions.indexOf(osoc, 0);
             if (index > -1) {
-                osoc_editions.splice(index, 1);
-                setOsocs([...osoc_editions]);
+                osocEditions.splice(index, 1);
+                setEditions([...osocEditions]);
             }
         }
     };
     const updateOsocEditions = (osocs: Array<OsocEdition>) => {
-        setOsocs(osocs);
+        setEditions(osocs);
     };
 
     return (
         <div className={styles.body}>
             <div>
                 <OsocCreateFilter updateOsoc={updateOsocEditions} />
-                {osoc_editions !== undefined
-                    ? osoc_editions.map((osoc) => {
+                {osocEditions !== undefined
+                    ? osocEditions.map((osoc) => {
                           return (
                               <Osoc
                                   osoc={osoc}

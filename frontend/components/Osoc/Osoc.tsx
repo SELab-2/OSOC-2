@@ -1,7 +1,7 @@
 import styles from "./Osoc.module.css";
 import React, { SyntheticEvent, useContext, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition } from "../../types/types";
+import { OsocEdition } from "../../types";
 
 export const Osoc: React.FC<{
     osoc: OsocEdition;

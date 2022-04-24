@@ -1,6 +1,6 @@
 import styles from "./OsocCreate.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, OsocEdition, Sort } from "../../types/types";
+import { getNextSort, OsocEdition, Sort } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 
@@ -10,8 +10,7 @@ export const OsocCreateFilter: React.FC<{
     const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
-    const { getSessionKey, setSessionKey, sessionKey } =
-        useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
 
     const router = useRouter();
@@ -77,9 +76,6 @@ export const OsocCreateFilter: React.FC<{
                 .catch((err) => {
                     console.log(err);
                 });
-            if (setSessionKey && response && response.sessionkey) {
-                setSessionKey(response.sessionkey);
-            }
             updateOsoc(response.data);
             isLoading(false);
         }
@@ -88,75 +84,35 @@ export const OsocCreateFilter: React.FC<{
     /**
      * Create the new osoc edition
      */
-    // const create = async () => {
-    //     const sessionKey = getSessionKey ? await getSessionKey() : "";
-    //     if (sessionKey !== "") {
-    //         const response = await fetch(
-    //             `${process.env.NEXT_PUBLIC_API_URL}/osoc/create` + osocCreate,
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                     Accept: "application/json",
-    //                     Authorization: `auth/osoc2 ${sessionKey}`,
-    //                 },
-    //             }
-    //         )
-    //             .then((response) => response.json())
-    //             .catch((err) => {
-    //                 console.log(err);
-    //             });
-    //         if (setSessionKey && response && response.sessionkey) {
-    //             setSessionKey(response.sessionkey);
-    //         }
-    //         updateOsoc(response.data);
-    //     }
-    // };
-
     const create = async () => {
-        const json_body = JSON.stringify({
-            year: osocCreate,
-        });
-        return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/osoc/create`, {
-            method: "POST",
-            body: json_body,
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: `auth/osoc2 ${sessionKey}`,
-            },
-        })
-            .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else {
-                    if (setSessionKey) {
-                        setSessionKey(json.sessionkey);
-                    }
-                    return json;
+        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        if (sessionKey !== "") {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create` + osocCreate,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        year: osocCreate,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                    },
                 }
-            })
-            .catch((err) => {
-                console.log(err);
-                return { success: false };
-            });
+            )
+                .then((response) => response.json())
+                .catch((err) => {
+                    console.log(err);
+                });
+            console.log(response);
+            updateOsoc(response.data);
+        }
     };
 
     return (
         <div className={styles.filter}>
             <form className={styles.form}>
-                {/* This shouldn't be a styles query probably */}
-                <div className={styles.query}>
-                    <input
-                        className={`input ${styles.input}`}
-                        type="text"
-                        placeholder="Year.."
-                        onChange={(e) => setOsocCreate(e.target.value)}
-                    />
-                    <button onClick={create}>Create</button>
-                </div>
-
                 <div className={styles.query}>
                     <div onClick={toggleYearSort}>
                         Year
@@ -180,6 +136,17 @@ export const OsocCreateFilter: React.FC<{
                         onChange={(e) => setYearFilter(e.target.value)}
                     />
                     <button onClick={searchPress}>Search</button>
+                </div>
+
+                {/* This shouldn't be a styles query probably */}
+                <div className={styles.query}>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Year.."
+                        onChange={(e) => setOsocCreate(e.target.value)}
+                    />
+                    <button onClick={create}>Create</button>
                 </div>
             </form>
         </div>

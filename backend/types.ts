@@ -520,14 +520,15 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList
-        extends Keyed<InternalTypes.OsocEdition[]> {}
+    export interface OsocEditionList {
+        data: InternalTypes.OsocEdition[];
+    }
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
      * data.
      */
-    export interface OsocEdition extends Keyed<InternalTypes.OsocEdition> {}
+    export interface OsocEdition extends InternalTypes.OsocEdition {}
 
     /**
      *
