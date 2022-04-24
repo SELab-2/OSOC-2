@@ -110,54 +110,32 @@ test("Can parse update login user requests", () => {
         isCoach: false,
         accountStatus: "PENDING",
     };
-    const valid2: T.Anything = {
-        isAdmin: false,
-        isCoach: false,
-        accountStatus: "PENDING",
-        pass: "mypass",
-    };
 
     const invalid1: T.Anything = { isCoach: false, accountStatus: "PENDING" };
     const invalid2: T.Anything = {
         isCoach: false,
         accountStatus: "PENDING",
-        pass: "mypass",
     };
     const invalid_sk: T.Anything = {
         isAdmin: false,
         isCoach: false,
         accountStatus: "PENDING",
-        pass: "mypass",
     };
 
-    const s = [valid1, valid2].map((x) => {
+    const s = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        if (!("pass" in x)) x.pass = undefined;
         return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
     });
 
-    const f = [invalid1, invalid2].map((x) => {
-        const r: express.Request = getMockReq();
-        r.body = { ...x };
-        r.params.id = id.toString();
-        setSessionKey(r, key);
-        x.id = id;
-        x.sessionkey = key;
-        return expect(Rq.parseUpdateCoachRequest(r)).rejects.toBe(
-            errors.cookArgumentError()
-        );
-    });
-
-    const s_ = [valid1, valid2].map((x) => {
+    const s_ = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         setSessionKey(r, key);
-        if (!("pass" in x)) x.pass = undefined;
         r.params.id = id.toString();
         x.id = id;
         x.sessionkey = key;
@@ -182,7 +160,7 @@ test("Can parse update login user requests", () => {
         }
     );
 
-    return Promise.all([s, f, s_, f_, f__].flat());
+    return Promise.all([s, s_, f_, f__].flat());
 });
 
 test("Can parse login request", () => {
@@ -215,8 +193,8 @@ test("Can parse update student request", () => {
     const dataV: T.Anything = {
         emailOrGithub: "ab@c.de",
         alumni: false,
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -245,8 +223,8 @@ test("Can parse update student request", () => {
 
     const failure2: T.Anything = {
         emailOrGithub: "ab@c.de",
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -411,15 +389,15 @@ test("Can parse final decision request", () => {
 
 test("Can parse coach access request", () => {
     const r1: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
         pass: "thisismypassword",
     };
 
     const r2: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
     };
 
@@ -741,7 +719,6 @@ test("Can parse update template request", () => {
     const ok2: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
     };
     const ok3: T.Anything = {
         name: "my-template",
@@ -751,24 +728,20 @@ test("Can parse update template request", () => {
     const ok4: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok5: T.Anything = {
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok6: T.Anything = {
         name: "my-template",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok7: T.Anything = {
         name: "my-template",
         content: "hello-there",
         subject: "I like C++",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
 
@@ -782,7 +755,7 @@ test("Can parse update template request", () => {
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        ["name", "content", "subject", "desc", "cc"].forEach((v) => {
+        ["name", "content", "subject", "cc"].forEach((v) => {
             if (!(v in x)) x[v] = undefined;
         });
 
@@ -820,4 +793,48 @@ test("Can parse update template request", () => {
     });
 
     return Promise.all([okays, fails1, fails2, fails3].flat());
+});
+
+test("Can parse self-modify requests", () => {
+    const key = "Im bobs secret key, dont tell anyone";
+    const v1: T.Anything = {};
+    const v2: T.Anything = { name: "BOBv2" };
+    const v3: T.Anything = { pass: { oldpass: "PASSv1", newpass: "PASSv2" } };
+
+    const i1: T.Anything = { name: "BOBv2", pass: "Nothing" };
+    const i2: T.Anything = { name: "BOBv2", pass: { oldpass: "PASSv1" } };
+    const i3: T.Anything = { name: "BOBv2", pass: { newpass: "PASSv2" } };
+
+    const valids = [v1, v2, v3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+        setSessionKey(req, key);
+        r.sessionkey = key;
+        ["name", "pass"].forEach((x) => {
+            if (!(x in r)) r[x] = undefined;
+        });
+
+        expect(Rq.parseUserModSelfRequest(req)).resolves.toStrictEqual(r);
+    });
+
+    const invalids = [i1, i2, i3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+        setSessionKey(req, key);
+
+        expect(Rq.parseUserModSelfRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    const unauths = [v1, v2, v3].map((r) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...r };
+
+        expect(Rq.parseUserModSelfRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([valids, invalids, unauths].flat());
 });

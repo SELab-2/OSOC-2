@@ -1,5 +1,5 @@
 import express from "express";
-import { InternalTypes, Responses } from "../types";
+import { Responses } from "../types";
 import * as rq from "../request";
 import * as util from "../utility";
 import * as ormRo from "../orm_functions/role";
@@ -16,11 +16,10 @@ async function listStudentRoles(
     return rq
         .parseRolesAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then((parsed) => {
+        .then(() => {
             return ormRo.getAllRoles().then((roles) =>
                 Promise.resolve({
                     data: roles,
-                    sessionkey: parsed.data.sessionkey,
                 })
             );
         });
@@ -34,16 +33,13 @@ async function listStudentRoles(
  */
 async function createStudentRole(
     req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+): Promise<Responses.PartialStudent> {
     return rq
         .parseStudentRoleRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (parsed) => {
             return ormRo.createRole(parsed.data.name).then((role) => {
-                return Promise.resolve({
-                    data: { name: role.name, id: role.role_id },
-                    sessionkey: parsed.data.sessionkey,
-                });
+                return Promise.resolve({ name: role.name, id: role.role_id });
             });
         });
 }

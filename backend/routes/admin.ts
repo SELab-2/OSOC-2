@@ -17,7 +17,7 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
     return rq
         .parseAdminAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormL
                 .searchAllAdminLoginUsers(true)
                 .then((obj) =>
@@ -38,7 +38,6 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
@@ -46,20 +45,11 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
 }
 
 /**
- *  Attempts to get all data for a certain admin in the system.
+ *  Attempts to update a certain admin in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getAdmin(req: express.Request): Promise<Responses.Admin> {
-    return rq
-        .parseSingleAdminRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() =>
-            Promise.reject({ http: 410, reason: "Deprecated endpoint." })
-        );
-}
-
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
@@ -68,7 +58,6 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
             return ormL
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: parsed.data.pass,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
@@ -76,14 +65,8 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
-                        },
+                        id: res.login_user_id,
+                        name: res.person.firstname + " " + res.person.lastname,
                     })
                 );
         });
@@ -95,7 +78,7 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
+async function deleteAdmin(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -103,16 +86,14 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Key> {
             return ormL.deleteLoginUserByPersonId(parsed.data.id).then(() => {
                 return ormP
                     .deletePersonById(parsed.data.id)
-                    .then(() =>
-                        Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                    );
+                    .then(() => Promise.resolve({}));
             });
         });
 }
 
 /**
  *  Gets the router for all `/admin/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/admin/`
+ *  @returns An Express.js {@link express.Router} routing all `/admin/`
  * endpoints.
  */
 export function getRouter(): express.Router {
@@ -120,10 +101,9 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/admin");
     util.route(router, "get", "/all", listAdmins);
-    util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
-    util.routeKeyOnly(router, "delete", "/:id", deleteAdmin);
+    util.route(router, "delete", "/:id", deleteAdmin);
 
     util.addAllInvalidVerbs(router, ["/", "/all", "/:id"]);
 

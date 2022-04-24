@@ -6,13 +6,19 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 
+/**
+ *  Attempts to list all followups in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function listFollowups(
     req: express.Request
 ): Promise<Responses.FollowupList> {
     return rq
         .parseFollowupAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then((checked) =>
+        .then(() =>
             ormOsoc
                 .getLatestOsoc()
                 .then((osoc) => util.getOrReject(osoc))
@@ -28,7 +34,6 @@ async function listFollowups(
                         )
                         .then((res) =>
                             Promise.resolve({
-                                sessionkey: checked.data.sessionkey,
                                 data: res,
                             })
                         )
@@ -36,6 +41,12 @@ async function listFollowups(
         );
 }
 
+/**
+ *  Attempts to get a single followup.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function getFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {
@@ -48,17 +59,20 @@ async function getFollowup(
                 .then((data) => util.getOrReject(data))
                 .then((ja) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            student: ja.student_id,
-                            application: ja.job_application_id,
-                            status: ja.email_status,
-                        },
+                        student: ja.student_id,
+                        application: ja.job_application_id,
+                        status: ja.email_status,
                     })
                 )
         );
 }
 
+/**
+ *  Attempts to update a single followup.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
 async function updateFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {
@@ -80,12 +94,9 @@ async function updateFollowup(
                 )
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: checked.data.sessionkey,
-                        data: {
-                            student: res.student_id,
-                            application: res.job_application_id,
-                            status: res.email_status,
-                        },
+                        student: res.student_id,
+                        application: res.job_application_id,
+                        status: res.email_status,
                     })
                 )
         );
