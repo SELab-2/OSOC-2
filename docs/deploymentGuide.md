@@ -42,9 +42,23 @@ We used the `.env.production`for production and `.env.development` for developme
 each of these files should contain following values:
 
 ```
-NEXT_PUBLIC_API_URL=<insert url to the backend here>
+NEXT_PUBLIC_API_URL=<insert URL to the backend here>
+NEXT_PUBLIC_WEBSOCKET_SERVER_URL=<insert URL to your domain here (without specific path to where the backend is on this domain)>
+NEXT_PUBLIC_WEBSOCKET_SERVER_PATH=<insert path from the root of your domain name to the socket.io URL>
 ```
-for development this url will probably be `http://localhost:xxxx`.
+for development the first and second URL will probably be `http://localhost:xxxx`.
+For production the second URL is probably almost the same as the first URL, the difference is probably that it's **without** `/api-osoc`at the end
+`NEXT_PUBLIC_WEBSOCKET_SERVER_PATH`should be the url to your backend starting from your domain name. With `/socket.io` appended to it.
+
+A small example:
+If the complete URL to the backend is `https://someDomain.com/api-osoc` then following values should be used:
+```
+NEXT_PUBLIC_API_URL=https://someDomain.com/api-osoc
+NEXT_PUBLIC_WEBSOCKET_SERVER_URL=https://someDomain.com
+NEXT_PUBLIC_WEBSOCKET_SERVER_PATH=/api-osoc/socket.io
+```
+Notice the `/socket.io` that is appened to `/api-osoc`!
+This is needed because the socket connection can be found back on the route `/socket.io` **INSIDE** the backend.
 
 ### Backend
 #### GitHub login

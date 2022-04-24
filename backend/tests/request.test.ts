@@ -132,18 +132,6 @@ test("Can parse update login user requests", () => {
         return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
     });
 
-    const f = [invalid1, invalid2].map((x) => {
-        const r: express.Request = getMockReq();
-        r.body = { ...x };
-        r.params.id = id.toString();
-        setSessionKey(r, key);
-        x.id = id;
-        x.sessionkey = key;
-        return expect(Rq.parseUpdateCoachRequest(r)).rejects.toBe(
-            errors.cookArgumentError()
-        );
-    });
-
     const s_ = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
@@ -172,7 +160,7 @@ test("Can parse update login user requests", () => {
         }
     );
 
-    return Promise.all([s, f, s_, f_, f__].flat());
+    return Promise.all([s, s_, f_, f__].flat());
 });
 
 test("Can parse login request", () => {
@@ -205,8 +193,8 @@ test("Can parse update student request", () => {
     const dataV: T.Anything = {
         emailOrGithub: "ab@c.de",
         alumni: false,
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -235,8 +223,8 @@ test("Can parse update student request", () => {
 
     const failure2: T.Anything = {
         emailOrGithub: "ab@c.de",
-        firstName: "ab",
-        lastName: "c",
+        firstName: "ab c",
+        lastName: "",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -401,15 +389,15 @@ test("Can parse final decision request", () => {
 
 test("Can parse coach access request", () => {
     const r1: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
         pass: "thisismypassword",
     };
 
     const r2: T.Anything = {
-        firstName: "Jeff",
-        lastName: "Georgette",
+        firstName: "Jeff Georgette",
+        lastName: "",
         email: "idonthavegithub@git.hub",
     };
 
@@ -731,7 +719,6 @@ test("Can parse update template request", () => {
     const ok2: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
     };
     const ok3: T.Anything = {
         name: "my-template",
@@ -741,24 +728,20 @@ test("Can parse update template request", () => {
     const ok4: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok5: T.Anything = {
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok6: T.Anything = {
         name: "my-template",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok7: T.Anything = {
         name: "my-template",
         content: "hello-there",
         subject: "I like C++",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
 
@@ -772,7 +755,7 @@ test("Can parse update template request", () => {
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        ["name", "content", "subject", "desc", "cc"].forEach((v) => {
+        ["name", "content", "subject", "cc"].forEach((v) => {
             if (!(v in x)) x[v] = undefined;
         });
 

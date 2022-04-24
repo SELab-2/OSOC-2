@@ -5,10 +5,11 @@ import CoachIconColor from "../../public/images/coach_icon_color.png";
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import React, { SyntheticEvent, useContext, useState } from "react";
+import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types/types";
+import { AccountStatus, LoginUser } from "../../types";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -19,8 +20,16 @@ export const User: React.FC<{
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
     const [status, setStatus] = useState<AccountStatus>(user.account_status);
-    const { sessionKey, setSessionKey } = useContext(SessionContext);
+    const { sessionKey } = useContext(SessionContext);
+    const { socket } = useSockets();
     const userId = user.login_user_id;
+
+    // needed for when an update is received via websockets
+    useEffect(() => {
+        setIsAdmin(user.is_admin);
+        setIsCoach(user.is_coach);
+        setStatus(user.account_status);
+    }, [user]);
 
     const setUserRole = async (
         route: string,
@@ -34,7 +43,7 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
-        return await fetch(
+        const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -54,9 +63,6 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 } else {
-                    if (setSessionKey) {
-                        setSessionKey(json.sessionkey);
-                    }
                     return json;
                 }
             })
@@ -64,6 +70,10 @@ export const User: React.FC<{
                 console.log(err);
                 return { success: false };
             });
+        if (res.success !== false) {
+            socket.emit("updateUser", userId);
+        }
+        return res;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
@@ -154,9 +164,6 @@ export const User: React.FC<{
             .then(async (json) => {
                 if (!json.success) {
                     return { success: false };
-                }
-                if (setSessionKey) {
-                    setSessionKey(json.sessionkey);
                 }
                 removeUser(user);
                 return json;

@@ -171,3 +171,18 @@ export interface OsocEdition {
 export interface ProjectCount {
     project: number;
 }
+
+/**
+ * types for socket.io when sending something from the server to the client
+ */
+export interface ServerToClientEvents {
+    formAdded: () => void;
+    loginUserUpdated: () => void;
+}
+
+/**
+ * types for socket.io when sending something from the client to the server
+ */
+export interface ClientToServerEvents {
+    updateUser: (loginUserId: number) => void;
+}

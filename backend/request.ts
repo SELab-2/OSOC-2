@@ -169,11 +169,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(
-        req,
-        ["isAdmin", "isCoach", "accountStatus"],
-        types.id
-    ).then(() => {
+    return hasFields(req, [], types.id).then(() => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
@@ -487,17 +483,14 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(
-        req,
-        ["firstName", "lastName", "email", "pass"],
-        types.neither
-    ).then(() =>
-        Promise.resolve({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: req.body.email,
-            pass: req.body.pass,
-        })
+    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
+        () =>
+            Promise.resolve({
+                firstName: req.body.firstName,
+                lastName: "",
+                email: req.body.email,
+                pass: req.body.pass,
+            })
     );
 }
 
@@ -630,14 +623,13 @@ export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
     return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, ["name", "desc", "subject", "cc", "content"]))
+        if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             name: maybe(req.body, "name"),
-            desc: maybe(req.body, "desc"),
             subject: maybe(req.body, "subject"),
             cc: maybe(req.body, "cc"),
             content: maybe(req.body, "content"),
@@ -654,15 +646,29 @@ export async function parseUpdateTemplateRequest(
 export async function parseFormRequest(
     req: express.Request
 ): Promise<Requests.Form> {
-    return hasFields(req, ["eventId", "createdAt", "data"], types.neither).then(
-        () => {
-            return Promise.resolve({
-                eventId: req.body.eventId,
-                createdAt: req.body.createdAt,
-                data: req.body.data,
-            });
+    return hasFields(req, ["data"], types.neither).then(() => {
+        if (
+            req.body.data.fields === undefined ||
+            req.body.data.fields === null
+        ) {
+            return rejector();
         }
-    );
+        for (const question of req.body.data.fields) {
+            console.log(question);
+            if (
+                question.key === undefined ||
+                question.key === null ||
+                question.value === undefined
+            ) {
+                console.log(question.value);
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            createdAt: maybe(req.body, "createdAt"),
+            data: req.body.data,
+        });
+    });
 }
 
 export async function parseRequestResetRequest(
@@ -829,6 +835,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /verify` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseVerifyRequest = parseKeyRequest;
 
 /**
  *  A request to `GET /student/<id>` only requires a session key and an ID
