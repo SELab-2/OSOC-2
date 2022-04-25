@@ -740,7 +740,6 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
-        // senderId: number;
         reason?: string;
     }
 
