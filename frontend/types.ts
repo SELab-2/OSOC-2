@@ -161,3 +161,17 @@ export interface LoginUser {
     password: string;
     account_status: AccountStatus;
 }
+
+/**
+ * types for socket.io when sending something from the server to the client
+ */
+export interface ServerToClientEvents {
+    loginUserUpdated: () => void;
+}
+
+/**
+ * types for socket.io when sending something from the client to the server
+ */
+export interface ClientToServerEvents {
+    updateUser: (loginUserId: number) => void;
+}

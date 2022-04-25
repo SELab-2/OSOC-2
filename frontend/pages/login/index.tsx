@@ -11,7 +11,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from "validator";
-import { AccountStatus } from "../../types/types";
+import { AccountStatus } from "../../types";
 
 const Index: NextPage = () => {
     const router = useRouter();

@@ -45,20 +45,11 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
 }
 
 /**
- *  Attempts to get all data for a certain admin in the system.
+ *  Attempts to update a certain admin in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getAdmin(req: express.Request): Promise<Responses.Admin> {
-    return rq
-        .parseSingleAdminRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() =>
-            Promise.reject({ http: 410, reason: "Deprecated endpoint." })
-        );
-}
-
 async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
@@ -67,7 +58,6 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
             return ormL
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: null,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
@@ -103,7 +93,7 @@ async function deleteAdmin(req: express.Request): Promise<Responses.Empty> {
 
 /**
  *  Gets the router for all `/admin/` related endpoints.
- *  @returns An Epress.js {@link express.Router} routing all `/admin/`
+ *  @returns An Express.js {@link express.Router} routing all `/admin/`
  * endpoints.
  */
 export function getRouter(): express.Router {
@@ -111,7 +101,6 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/admin");
     util.route(router, "get", "/all", listAdmins);
-    util.route(router, "get", "/:id", getAdmin);
 
     util.route(router, "post", "/:id", modAdmin);
     util.route(router, "delete", "/:id", deleteAdmin);

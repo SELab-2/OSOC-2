@@ -178,7 +178,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Empty> {
 }
 
 /**
- *  Attempts to get all drafted students in the system.
+ *  Attempts to get all drafted students in the system for a project.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -466,7 +466,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listProjects);
 
     util.route(router, "get", "/:id", getProject);
-    util.route(router, "post", "/:id", createProject);
+    util.route(router, "post", "/", createProject);
 
     util.route(router, "post", "/:id", modProject);
     util.route(router, "delete", "/:id", deleteProject);

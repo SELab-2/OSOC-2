@@ -132,18 +132,6 @@ test("Can parse update login user requests", () => {
         return expect(Rq.parseUpdateCoachRequest(r)).resolves.toStrictEqual(x);
     });
 
-    const f = [invalid1, invalid2].map((x) => {
-        const r: express.Request = getMockReq();
-        r.body = { ...x };
-        r.params.id = id.toString();
-        setSessionKey(r, key);
-        x.id = id;
-        x.sessionkey = key;
-        return expect(Rq.parseUpdateCoachRequest(r)).rejects.toBe(
-            errors.cookArgumentError()
-        );
-    });
-
     const s_ = [valid1].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
@@ -172,7 +160,7 @@ test("Can parse update login user requests", () => {
         }
     );
 
-    return Promise.all([s, f, s_, f_, f__].flat());
+    return Promise.all([s, s_, f_, f__].flat());
 });
 
 test("Can parse login request", () => {
@@ -303,17 +291,15 @@ test("Can parse update student request", () => {
 test("Can parse suggest student request", () => {
     const key = "my-session-key";
     const id = 9845;
-    const ys: T.Anything = { suggestion: "YES", senderId: 0 };
-    const mb: T.Anything = { suggestion: "MAYBE", senderId: 0 };
-    const no: T.Anything = { suggestion: "NO", senderId: 0 };
+    const ys: T.Anything = { suggestion: "YES" };
+    const mb: T.Anything = { suggestion: "MAYBE" };
+    const no: T.Anything = { suggestion: "NO" };
     const nr: T.Anything = {
         suggestion: "NO",
         reason: "I just don't like you",
-        senderId: 0,
     };
-    const i1: T.Anything = { suggestion: "TOMORROW", senderId: 0 };
-    const i2: T.Anything = { suggestion: "no", senderId: 0 }; // no caps
-    const i3: T.Anything = { senderId: 0 };
+    const i1: T.Anything = { suggestion: "TOMORROW" };
+    const i2: T.Anything = { suggestion: "no" }; // no caps
 
     const okays = [ys, mb, no, nr].map((x) => {
         const copy: T.Anything = { ...x };
@@ -333,7 +319,7 @@ test("Can parse suggest student request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const fails = [i1, i2, i3].map((x) => {
+    const fails = [i1, i2].map((x) => {
         const req: express.Request = getMockReq();
         req.params.id = id.toString();
         req.body = { ...x };
@@ -731,7 +717,6 @@ test("Can parse update template request", () => {
     const ok2: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
     };
     const ok3: T.Anything = {
         name: "my-template",
@@ -741,24 +726,20 @@ test("Can parse update template request", () => {
     const ok4: T.Anything = {
         name: "my-template",
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok5: T.Anything = {
         content: "hello-there",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok6: T.Anything = {
         name: "my-template",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
     const ok7: T.Anything = {
         name: "my-template",
         content: "hello-there",
         subject: "I like C++",
-        desc: "a description did you know that orcas have culture?",
         cc: "cc@gmail.com",
     };
 
@@ -772,7 +753,7 @@ test("Can parse update template request", () => {
         setSessionKey(r, key);
         x.id = id;
         x.sessionkey = key;
-        ["name", "content", "subject", "desc", "cc"].forEach((v) => {
+        ["name", "content", "subject", "cc"].forEach((v) => {
             if (!(v in x)) x[v] = undefined;
         });
 

@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
-import { Student } from "../types/types";
+import { Student } from "../types";
 import styles from "../styles/students.module.scss";
 
 const Students: NextPage = () => {
@@ -34,7 +34,6 @@ const Students: NextPage = () => {
 
     useEffect(() => {
         fetchStudents().then();
-        // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

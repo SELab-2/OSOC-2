@@ -22,7 +22,7 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
         .checkSessionKey(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID);
+        return Promise.reject(errors.cookInvalidID());
     }
     const loginUsers = await ormL.getAllLoginUsers();
 

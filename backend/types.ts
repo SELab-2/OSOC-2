@@ -740,7 +740,6 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
-        // senderId: number;
         reason?: string;
     }
 
@@ -805,8 +804,7 @@ export namespace Requests {
     }
 
     export interface Form {
-        eventId: string;
-        createdAt: string;
+        createdAt?: string;
         data: DataForm;
     }
 
@@ -825,11 +823,7 @@ export namespace Requests {
     }
 
     export interface FormValues {
-        id: string;
-        name: string;
         url: string;
-        mimeType: string;
-        size: number;
     }
 
     export interface Option {
@@ -888,6 +882,34 @@ export interface Email {
     to: string;
     subject: string;
     html: string;
+}
+
+/**
+ * types for socket.io when sending something from the server to the client
+ */
+export interface ServerToClientEvents {
+    loginUserUpdated: () => void;
+}
+
+/**
+ * types for socket.io when sending something from the client to the server
+ */
+export interface ClientToServerEvents {
+    updateUser: (loginUserId: number) => void;
+}
+
+/**
+ * types for communication between multiple socket.io servers.
+ * This is empty because we don't need (we have only 1 server)
+ */
+export interface InterServerEvents {}
+
+/**
+ * information about the socket.io socket
+ */
+export interface SocketData {
+    name: string;
+    age: number;
 }
 
 export enum Decision {
