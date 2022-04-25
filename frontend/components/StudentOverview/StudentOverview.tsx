@@ -34,7 +34,31 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
-        console.log("hallo");
+        if (getSessionKey !== undefined) {
+            getSessionKey().then(async (sessionKey) => {
+                if (sessionKey != "") {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const response = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `auth/osoc2 ${sessionKey}`,
+                                "Content-Type": "application/json",
+                                Accept: "application/json",
+                            },
+                            body: JSON.stringify({
+                                id: student.student.student_id,
+                                suggestion: "NO",
+                                senderId: 3,
+                            }),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .catch((error) => console.log(error));
+                }
+            });
+        }
     };
 
     useEffect(() => {
