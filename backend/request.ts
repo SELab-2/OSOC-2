@@ -253,14 +253,9 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion", "senderId"], types.id).then(() => {
+    return hasFields(req, ["suggestion"], types.id).then(() => {
         const sug: unknown = req.body.suggestion;
-        if (
-            sug != Decision.YES &&
-            sug != Decision.MAYBE &&
-            sug != Decision.NO &&
-            req.body.senderId != null
-        )
+        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
             return rejector();
 
         return Promise.resolve({
@@ -268,7 +263,6 @@ export async function parseSuggestStudentRequest(
             id: Number(req.params.id),
             suggestion: sug as InternalTypes.Suggestion,
             reason: maybe(req.body, "reason"),
-            senderId: Number(req.body.senderId),
         });
     });
 }
