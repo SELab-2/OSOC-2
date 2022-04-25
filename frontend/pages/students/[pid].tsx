@@ -3,14 +3,12 @@ import { useRouter } from "next/router";
 import SessionContext from "../../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { Student } from "../../types";
-import { useSockets } from "../../contexts/socketProvider";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 
 const Pid: NextPage = () => {
     const router = useRouter();
     const { getSessionKey } = useContext(SessionContext);
-    const [student, setStudent] = useState<Student[]>([]);
-    const { socket } = useSockets();
+    const [student, setStudent] = useState<Student>();
     const { pid } = router.query; // pid is the student id
 
     const fetchStudent = async () => {
@@ -38,19 +36,8 @@ const Pid: NextPage = () => {
 
     useEffect(() => {
         fetchStudent().then();
-        return () => {
-            socket.off("formAdded");
-        }; // disconnect from the socket on dismount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query]);
-
-    useEffect(() => {
-        socket.on("formAdded", () => {
-            fetchStudent().then();
-        });
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket]);
 
     return (
         <div>

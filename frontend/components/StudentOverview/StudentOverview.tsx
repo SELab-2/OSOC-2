@@ -1,13 +1,12 @@
-import { Display, Student } from "../../types/types";
+import { Display, Student, Evaluation } from "../../types";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
-import { Evaluation } from "../../types/types";
 
 export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
 }) => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,9 +26,6 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        if (setSessionKey) {
-                            setSessionKey(response.sessionkey);
-                        }
                         setEvaluations(response.data);
                     }
                 }
@@ -38,7 +34,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     };
 
     useEffect(() => {
-        //fetchEvals().then();
+        fetchEvals().then();
         console.log(evaluations);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

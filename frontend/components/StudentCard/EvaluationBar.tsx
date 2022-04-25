@@ -1,4 +1,4 @@
-import { Decision, Evaluation } from "../../types/types";
+import { Decision, Evaluation } from "../../types";
 import React from "react";
 import styles from "./EvaluationBar.module.scss";
 

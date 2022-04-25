@@ -2,14 +2,16 @@ import { NextPage } from "next";
 import SessionContext from "../../contexts/sessionProvider";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../../components/StudentCard/StudentCard";
-import { Display, Student } from "../../types/types";
+import { Display, Student } from "../../types";
 import styles from "../../styles/students.module.scss";
 import { useRouter } from "next/router";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Index: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
+    const { socket } = useSockets();
     const [students, setStudents] = useState<Student[]>([]);
     const router = useRouter();
     // the index of the selected student if the given id matches with one of the fetched students
@@ -36,9 +38,6 @@ const Index: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        if (setSessionKey) {
-                            setSessionKey(response.sessionkey);
-                        }
                         setStudents(response.data);
 
                         // A specific student was selected
@@ -73,9 +72,35 @@ const Index: NextPage = () => {
             setDisplay(Display.LIMITED);
         }
         fetchStudents(queryValue).then();
+        return () => {
+            socket.off("formAdded");
+        }; // disconnect from the socket on dismount
+
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query]);
+
+    useEffect(() => {
+        socket.on("formAdded", () => {
+            // We perform some magic here, because on first render the query parameters are always undefined
+            // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
+            const queryKey = "id";
+            let queryValue = Number(
+                router.query[queryKey] ||
+                    router.asPath.match(new RegExp(`[&?]${queryKey}=(.*)(&|$)`))
+            );
+            if (queryValue === undefined || queryValue === 0) {
+                queryValue = -1;
+                setDisplay(Display.FULL);
+                setSelectedStudent(-1);
+            } else {
+                setDisplay(Display.LIMITED);
+            }
+            fetchStudents(queryValue).then();
+        });
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket]);
 
     /**
      * Handles clicking on a student
