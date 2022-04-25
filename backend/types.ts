@@ -740,7 +740,6 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
-        // senderId: number;
         reason?: string;
     }
 
@@ -889,7 +888,6 @@ export interface Email {
  * types for socket.io when sending something from the server to the client
  */
 export interface ServerToClientEvents {
-    formAdded: () => void;
     loginUserUpdated: () => void;
 }
 
