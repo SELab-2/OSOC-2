@@ -289,27 +289,33 @@ async function createStudentConfirmation(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const student = await ormSt.getStudent(checkedSessionKey.data.id);
-    if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        const student = await ormSt.getStudent(checkedSessionKey.data.id);
+        if (student == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+            student.student_id
+        );
+        if (jobApplication == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.reply,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: true,
+        });
+
+        return Promise.resolve({});
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.reply,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: true,
-    });
-
-    return Promise.resolve({});
+    return Promise.reject(errors.cookInsufficientRights());
 }
 
 /**
