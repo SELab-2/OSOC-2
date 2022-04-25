@@ -1,9 +1,11 @@
-//import {getMockReq, getMockRes} from "@jest-mock/express";
+import { getMockReq } from "@jest-mock/express";
 
 import * as form_router from "../../routes/form";
 
-//import * as config from "../../routes/form_keys.json";
 import * as T from "../../types";
+import express from "express";
+import * as Rq from "../../request";
+import { errors } from "../../utility";
 /*import express from "express";
 import * as Rq from "../../request";
 import { errors } from "../../utility";*/
@@ -626,9 +628,18 @@ const form_obj: T.Requests.Form = {
     },
 };
 
-describe.each(keys)("All questions are present in the form", (a) => {
-    it(``, () => {
-        const res = form_router.filterQuestion(form_obj, a);
+test("Can parse form request", () => {
+    const req: express.Request = getMockReq();
+    req.body = {};
+
+    return expect(Rq.parseFormRequest(req)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+});
+
+describe.each(keys)("Questions present", (key) => {
+    it(`Question with key ${key} is present`, () => {
+        const res = form_router.filterQuestion(form_obj, key);
         expect(res.data).not.toBe(null);
     });
 });
