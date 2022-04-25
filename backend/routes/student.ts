@@ -193,6 +193,26 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    const osocYear = await ormOs.getLatestOsoc();
+
+    if (osocYear == null) {
+        return Promise.reject(errors.cookNoDataError());
+    }
+
+    console.log(await ormJo.getStudentEvaluationsTemp(student.student_id));
+
+    const suggestionsTotal = (
+        await ormJo.getStudentEvaluationsTemp(student.student_id)
+    ).filter(
+        (suggestion) =>
+            suggestion.osoc.year === osocYear.year &&
+            suggestion.evaluation.some(
+                (evaluation) =>
+                    evaluation.login_user.login_user_id ===
+                    checkedSessionKey.userId
+            )
+    );
+
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
         student.student_id
     );
@@ -200,13 +220,27 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.suggestion,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: false,
-    });
+    if (suggestionsTotal.length > 0) {
+        const suggestion = suggestionsTotal[0].evaluation.filter(
+            (evaluation) =>
+                evaluation.login_user.login_user_id === checkedSessionKey.userId
+        );
+
+        await ormEv.updateEvaluationForStudent({
+            evaluation_id: suggestion[0].evaluation_id,
+            loginUserId: checkedSessionKey.userId,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+        });
+    } else {
+        await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: false,
+        });
+    }
 
     return Promise.resolve({});
 }
@@ -230,13 +264,6 @@ async function getStudentSuggestions(
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
