@@ -609,15 +609,29 @@ export async function parseUpdateTemplateRequest(
 export async function parseFormRequest(
     req: express.Request
 ): Promise<Requests.Form> {
-    return hasFields(req, ["eventId", "createdAt", "data"], types.neither).then(
-        () => {
-            return Promise.resolve({
-                eventId: req.body.eventId,
-                createdAt: req.body.createdAt,
-                data: req.body.data,
-            });
+    return hasFields(req, ["data"], types.neither).then(() => {
+        if (
+            req.body.data.fields === undefined ||
+            req.body.data.fields === null
+        ) {
+            return rejector();
         }
-    );
+        for (const question of req.body.data.fields) {
+            console.log(question);
+            if (
+                question.key === undefined ||
+                question.key === null ||
+                question.value === undefined
+            ) {
+                console.log(question.value);
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            createdAt: maybe(req.body, "createdAt"),
+            data: req.body.data,
+        });
+    });
 }
 
 export async function parseRequestResetRequest(
