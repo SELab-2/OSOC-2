@@ -258,6 +258,7 @@ async function getStudentSuggestions(
     for (const suggestion of suggestionsTotal) {
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
+                evaluation_id: evaluation.evaluation_id,
                 senderFirstname: evaluation.login_user.person.firstname,
                 senderLastname: evaluation.login_user.person.lastname,
                 reason: evaluation.motivation,

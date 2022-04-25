@@ -1,4 +1,4 @@
-import { Display, Student, Evaluation } from "../../types";
+import { Display, Student, EvaluationCoach } from "../../types";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
@@ -7,9 +7,8 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
 }) => {
     const { getSessionKey } = useContext(SessionContext);
-    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fetchEvals = async () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
@@ -33,9 +32,13 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         }
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+        console.log("hallo");
+    };
+
     useEffect(() => {
         fetchEvals().then();
-        console.log(evaluations);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -43,9 +46,20 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         <div>
             <StudentCard student={student} display={Display.FULL} />
             <h1>Suggestions</h1>
-            {student.evaluations[0].evaluation.map((evaluation) => {
+            <button onClick={buttonHandler}>Suggest yes</button>
+            {evaluations.map((evaluation) => {
                 return (
-                    <p key={evaluation.evaluation_id}>{evaluation.decision}</p>
+                    <div key={evaluation.evaluation_id}>
+                        <p>
+                            {evaluation.decision}{" "}
+                            <strong>
+                                {evaluation.senderFirstname}{" "}
+                                {evaluation.senderLastname}
+                                {": "}
+                            </strong>
+                            {evaluation.reason}
+                        </p>
+                    </div>
                 );
             })}
         </div>

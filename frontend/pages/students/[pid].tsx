@@ -27,7 +27,7 @@ const Pid: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        setStudent(response.data);
+                        setStudent(response);
                     }
                 }
             });

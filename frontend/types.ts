@@ -72,6 +72,15 @@ export enum Decision {
     NO = "NO",
 }
 
+export interface EvaluationCoach {
+    evaluation_id: number;
+    senderFirstname: string;
+    senderLastname: string;
+    reason: string;
+    decision: string;
+    isFinal: boolean;
+}
+
 export interface Evaluation {
     evaluation_id: number;
     decision: Decision;
