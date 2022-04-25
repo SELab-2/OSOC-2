@@ -740,7 +740,6 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
-        // senderId: number;
         reason?: string;
     }
 
@@ -805,8 +804,7 @@ export namespace Requests {
     }
 
     export interface Form {
-        eventId: string;
-        createdAt: string;
+        createdAt?: string;
         data: DataForm;
     }
 
@@ -825,11 +823,7 @@ export namespace Requests {
     }
 
     export interface FormValues {
-        id: string;
-        name: string;
         url: string;
-        mimeType: string;
-        size: number;
     }
 
     export interface Option {
