@@ -369,10 +369,10 @@ export async function parseFilterStudentsRequest(
         alumniFilter: alumniFilter,
         coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
+        emailStatusFilter: maybe(req.body, "emailStatusFilter"),
         firstNameSort: maybe(req.body, "firstNameSort"),
         lastNameSort: maybe(req.body, "lastNameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        roleSort: maybe(req.body, "roleSort"),
         alumniSort: maybe(req.body, "alumniSort"),
     });
 }

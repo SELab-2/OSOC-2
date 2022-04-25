@@ -30,12 +30,11 @@ export const StudentFilter: React.FC<{
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [osocYear, setOsocYear] = useState<string>("");
+    const [emailNone, setEmailNone] = useState<boolean>(false);
+    const [emailDraft, setEmailDraft] = useState<boolean>(false);
     const [emailSent, setEmailSent] = useState<boolean>(false);
-    const [emailNotSent, setEmailNotSent] = useState<boolean>(false);
-    const [statusSentEmail, setStatusSentEmail] = useState<string>("");
-    const [emailAccepted, setEmailAccepted] = useState<boolean>(false);
-    const [emailDeclined, setEmailDeclined] = useState<boolean>(false);
-    const [emailPending, setEmailPending] = useState<boolean>(false);
+    const [emailFailed, setEmailFailed] = useState<boolean>(false);
+    const [emailScheduled, setEmailScheduled] = useState<boolean>(false);
     const [statusEmail, setStatusEmail] = useState<string>("");
 
     // Roles used in the dropdown
@@ -139,85 +138,69 @@ export const StudentFilter: React.FC<{
         setFilterMaybe(false);
     };
 
+    const toggleFilterEmailNone = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        if (!emailNone) {
+            setStatusEmail(() => "NONE");
+        } else {
+            setStatusEmail(() => "");
+        }
+        setEmailStatusAll(!emailNone, false, false, false, false);
+    };
+
+    const toggleEmailDraft = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        //This is because the call is async
+        if (!emailDraft) {
+            setStatusEmail(() => "DRAFT");
+        } else {
+            setStatusEmail(() => "");
+        }
+        setEmailStatusAll(false, !emailDraft, false, false, false);
+    };
+
     const toggleFilterEmailSent = async (e: SyntheticEvent) => {
         e.preventDefault();
         if (!emailSent) {
-            setStatusSentEmail(() => "SENT");
-        } else {
-            setStatusSentEmail(() => "");
-        }
-        setEmailSent((bool) => !bool);
-        setEmailNotSent(false);
-
-        setEmailStatusFalse();
-    };
-
-    const toggleFilterEmailNotSent = async (e: SyntheticEvent) => {
-        e.preventDefault();
-        if (!emailNotSent) {
-            setStatusSentEmail(() => "NOT SENT");
-        } else {
-            setStatusSentEmail(() => "");
-        }
-        setEmailNotSent((bool) => !bool);
-        setEmailSent(false);
-
-        setEmailStatusFalse();
-    };
-
-    const toggleEmailAccepted = async (e: SyntheticEvent) => {
-        e.preventDefault();
-        //This is because the call is async
-        if (!emailAccepted) {
-            setStatusEmail(() => "Accepted");
+            setStatusEmail(() => "SENT");
         } else {
             setStatusEmail(() => "");
         }
-        setEmailAccepted((bool) => !bool);
-        setEmailDeclined(false);
-        setEmailPending(false);
-
-        setEmailSentFalse();
+        setEmailStatusAll(false, false, !emailSent, false, false);
     };
 
-    const toggleEmailPending = async (e: SyntheticEvent) => {
+    const toggleEmailFailed = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailPending) {
-            setStatusEmail(() => "PENDING");
+        if (!emailFailed) {
+            setStatusEmail(() => "FAILED");
         } else {
             setStatusEmail(() => "");
         }
-        setEmailAccepted(false);
-        setEmailDeclined(false);
-        setEmailPending((bool) => !bool);
-
-        setEmailSentFalse();
+        setEmailStatusAll(false, false, false, !emailFailed, false);
     };
 
-    const toggleEmailDeclined = async (e: SyntheticEvent) => {
+    const toggleEmailScheduled = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailDeclined) {
-            setStatusEmail(() => "DECLINED");
+        if (!emailScheduled) {
+            setStatusEmail(() => "SCHEDULED");
         } else {
             setStatusEmail(() => "");
         }
-        setEmailAccepted(false);
-        setEmailDeclined((bool) => !bool);
-        setEmailPending(false);
-
-        setEmailSentFalse();
+        setEmailStatusAll(false, false, false, false, !emailScheduled);
     };
 
-    const setEmailSentFalse = () => {
-        setEmailNotSent(false);
-        setEmailSent(false);
-        setStatusSentEmail(() => "");
-    };
-    const setEmailStatusFalse = () => {
-        setEmailAccepted(false);
-        setEmailDeclined(false);
-        setEmailPending(false);
-        setStatusEmail(() => "");
+    const setEmailStatusAll = (
+        none: boolean,
+        draft: boolean,
+        sent: boolean,
+        failed: boolean,
+        scheduled: boolean
+    ) => {
+        setEmailNone(() => none);
+        setEmailDraft(() => draft);
+        setEmailSent(() => sent);
+        setEmailFailed(() => failed);
+        setEmailScheduled(() => scheduled);
     };
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -283,10 +266,11 @@ export const StudentFilter: React.FC<{
         if (statusFilter !== "") {
             filters.push(`statusFilter=${statusFilter}`);
         }
-        //TODO Query moet nog aangepast worden(nog niet klaar in de BE)
-        console.log(statusSentEmail);
-        console.log(statusEmail);
+        if (statusEmail !== "") {
+            filters.push(`emailStatusFilter=${statusEmail}`);
+        }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
+        console.log(query);
         await router.push(`/students${query}`);
 
         const sessionKey = getSessionKey ? await getSessionKey() : "";
@@ -508,17 +492,26 @@ export const StudentFilter: React.FC<{
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
+                            src={emailNone ? ForbiddenIconColor : ForbiddenIcon}
+                            width={30}
+                            height={30}
+                            alt={"Disabled"}
+                            onClick={toggleFilterEmailNone}
+                        />
+                        <p>NONE</p>
+                    </div>
+                    <div className={styles.buttonContainer}>
+                        <Image
+                            className={styles.buttonImage}
                             src={
-                                emailNotSent
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
+                                emailDraft ? ForbiddenIconColor : ForbiddenIcon
                             }
                             width={30}
                             height={30}
                             alt={"Disabled"}
-                            onClick={toggleFilterEmailNotSent}
+                            onClick={toggleEmailDraft}
                         />
-                        <p>NOT SENT</p>
+                        <p>DRAFT</p>
                     </div>
                     <div className={styles.buttonContainer}>
                         <Image
@@ -535,46 +528,29 @@ export const StudentFilter: React.FC<{
                         <Image
                             className={styles.buttonImage}
                             src={
-                                emailAccepted
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
+                                emailFailed ? ForbiddenIconColor : ForbiddenIcon
                             }
                             width={30}
                             height={30}
                             alt={"Disabled"}
-                            onClick={toggleEmailAccepted}
+                            onClick={toggleEmailFailed}
                         />
-                        <p>ACCEPTED</p>
+                        <p>FAILED</p>
                     </div>
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
                             src={
-                                emailPending
+                                emailScheduled
                                     ? ForbiddenIconColor
                                     : ForbiddenIcon
                             }
                             width={30}
                             height={30}
                             alt={"Disabled"}
-                            onClick={toggleEmailPending}
+                            onClick={toggleEmailScheduled}
                         />
-                        <p>PENDING</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                emailDeclined
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleEmailDeclined}
-                        />
-                        <p>REJECTED</p>
+                        <p>SCHEDULED</p>
                     </div>
                 </div>
 
