@@ -1854,15 +1854,6 @@
             }
           },
           {
-            "name": "senderId",
-            "in": "header",
-            "description": "The id of the login user.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "sessionkey",
             "in": "header",
             "description": "Your current session key.",
