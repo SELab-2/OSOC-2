@@ -199,8 +199,6 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookNoDataError());
     }
 
-    console.log(await ormJo.getStudentEvaluationsTemp(student.student_id));
-
     const suggestionsTotal = (
         await ormJo.getStudentEvaluationsTemp(student.student_id)
     ).filter(
