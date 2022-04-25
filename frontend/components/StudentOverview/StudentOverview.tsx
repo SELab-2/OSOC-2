@@ -33,7 +33,31 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     };
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const buttonHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const yesSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+        makeSuggestion("YES");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const maybeSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+        makeSuggestion("MAYBE");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const noSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+        makeSuggestion("NO");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const definitiveYES = (event: React.MouseEvent<HTMLButtonElement>) => {
+        makeDecision("YES");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const definitiveNO = (event: React.MouseEvent<HTMLButtonElement>) => {
+        makeDecision("NO");
+    };
+
+    const makeSuggestion = (suggestion: string) => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
                 if (sessionKey != "") {
@@ -49,8 +73,34 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                             },
                             body: JSON.stringify({
                                 id: student.student.student_id,
-                                suggestion: "NO",
-                                senderId: 3,
+                                suggestion: suggestion,
+                            }),
+                        }
+                    )
+                        .then((response) => response.json())
+                        .catch((error) => console.log(error));
+                }
+            });
+        }
+    };
+
+    const makeDecision = (reply: string) => {
+        if (getSessionKey !== undefined) {
+            getSessionKey().then(async (sessionKey) => {
+                if (sessionKey != "") {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const response = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
+                        {
+                            method: "POST",
+                            headers: {
+                                Authorization: `auth/osoc2 ${sessionKey}`,
+                                "Content-Type": "application/json",
+                                Accept: "application/json",
+                            },
+                            body: JSON.stringify({
+                                id: student.student.student_id,
+                                reply: reply,
                             }),
                         }
                     )
@@ -64,13 +114,17 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     useEffect(() => {
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [evaluations]);
 
     return (
         <div>
             <StudentCard student={student} display={Display.FULL} />
             <h1>Suggestions</h1>
-            <button onClick={buttonHandler}>Suggest yes</button>
+            <button onClick={yesSuggest}>Suggest yes</button>
+            <button onClick={maybeSuggest}>Suggest maybe</button>
+            <button onClick={noSuggest}>Suggest no</button>
+            <button onClick={definitiveYES}>DEFINITIVE YES</button>
+            <button onClick={definitiveNO}>DEFINITIVE NO</button>
             {evaluations.map((evaluation) => {
                 return (
                     <div key={evaluation.evaluation_id}>
@@ -81,7 +135,8 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                                 {evaluation.senderLastname}
                                 {": "}
                             </strong>
-                            {evaluation.reason}
+                            {evaluation.reason}{" "}
+                            {JSON.stringify(evaluation.isFinal)}
                         </p>
                     </div>
                 );
