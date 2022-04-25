@@ -2,6 +2,7 @@ import { Display, Student, EvaluationCoach } from "../../types";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
+import styles from "./StudentOverview.module.scss";
 
 export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
@@ -47,14 +48,16 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         makeSuggestion("NO");
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const definitiveYES = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const definitiveYes = () => {
         makeDecision("YES");
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const definitiveNO = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const definitiveNo = () => {
         makeDecision("NO");
+    };
+
+    const definitiveMaybe = () => {
+        makeDecision("MAYBE");
     };
 
     const makeSuggestion = (suggestion: string) => {
@@ -119,12 +122,20 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     return (
         <div>
             <StudentCard student={student} display={Display.FULL} />
-            <h1>Suggestions</h1>
-            <button onClick={yesSuggest}>Suggest yes</button>
-            <button onClick={maybeSuggest}>Suggest maybe</button>
-            <button onClick={noSuggest}>Suggest no</button>
-            <button onClick={definitiveYES}>DEFINITIVE YES</button>
-            <button onClick={definitiveNO}>DEFINITIVE NO</button>
+            <div className={styles.dropdown}>
+                <button className={styles.dropbtn}>Set status</button>
+                <div className={styles.dropdown_content}>
+                    <a onClick={definitiveYes}>YES</a>
+                    <a onClick={definitiveNo}>NO</a>
+                    <a onClick={definitiveMaybe}>MAYBE</a>
+                </div>
+            </div>
+            <div>
+                <h1>Suggestions</h1>
+                <button onClick={yesSuggest}>Suggest yes</button>
+                <button onClick={maybeSuggest}>Suggest maybe</button>
+                <button onClick={noSuggest}>Suggest no</button>
+            </div>
             {evaluations.map((evaluation) => {
                 return (
                     <div key={evaluation.evaluation_id}>
