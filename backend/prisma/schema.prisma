@@ -196,7 +196,7 @@ model template_email {
   content           String
   subject           String?
   cc                String?
-  login_user        login_user @relation(fields: [owner_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
+  login_user        login_user @relation(fields: [owner_id], references: [login_user_id], onDelete: SetNull, onUpdate: NoAction)
 
   @@unique([owner_id, name])
 }

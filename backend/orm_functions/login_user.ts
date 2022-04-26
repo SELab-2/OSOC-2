@@ -198,6 +198,12 @@ export async function deleteLoginUserByPersonId(personId: number) {
  * @param loginUserId the login user who's info we are deleting from the database
  */
 export async function deleteLoginUserFromDB(loginUserId: number) {
+    // Remove all the linked password reset
+    await prisma.password_reset.deleteMany({
+        where: {
+            login_user_id: loginUserId,
+        },
+    });
     // Remove all the linked project users
     await prisma.project_user.deleteMany({
         where: {

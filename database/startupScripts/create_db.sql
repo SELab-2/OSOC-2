@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS attachment(
 
 CREATE TABLE IF NOT EXISTS template_email(
    template_email_id      SERIAL      PRIMARY KEY,
-   owner_id               SERIAL      NOT NULL REFERENCES login_user(login_user_id),
+   owner_id               SERIAL      REFERENCES login_user(login_user_id) ON DELETE SET NULL,
    name                   TEXT        NOT NULL,
    content                TEXT        NOT NULL,
    subject                TEXT,
