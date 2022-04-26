@@ -33,18 +33,15 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const yesSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const yesSuggest = () => {
         makeSuggestion("YES");
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const maybeSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const maybeSuggest = () => {
         makeSuggestion("MAYBE");
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const noSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const noSuggest = () => {
         makeSuggestion("NO");
     };
 
@@ -137,20 +134,22 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                 <button onClick={noSuggest}>Suggest no</button>
             </div>
             {evaluations.map((evaluation) => {
-                return (
-                    <div key={evaluation.evaluation_id}>
-                        <p>
-                            {evaluation.decision}{" "}
-                            <strong>
-                                {evaluation.senderFirstname}{" "}
-                                {evaluation.senderLastname}
-                                {": "}
-                            </strong>
-                            {evaluation.reason}{" "}
-                            {JSON.stringify(evaluation.isFinal)}
-                        </p>
-                    </div>
-                );
+                if (!evaluation.isFinal) {
+                    return (
+                        <div key={evaluation.evaluation_id}>
+                            <p>
+                                {evaluation.decision}{" "}
+                                <strong>
+                                    {evaluation.senderFirstname}{" "}
+                                    {evaluation.senderLastname}
+                                    {": "}
+                                </strong>
+                                {evaluation.reason}{" "}
+                                {JSON.stringify(evaluation.isFinal)}
+                            </p>
+                        </div>
+                    );
+                }
             })}
         </div>
     );
