@@ -9,10 +9,11 @@ import { errors } from "../../utility";
 /*import express from "express";
 import * as Rq from "../../request";
 import { errors } from "../../utility";*/
-
 // setup mock for form
 //jest.mock("../../routes/form");
 //const formMock = form as jest.Mocked<typeof form>;
+import * as fs from "fs";
+import * as path from "path";
 
 const keys = [
     "question_mK177D",
@@ -53,6 +54,20 @@ const keys = [
     "question_nW599R",
     "question_waYNN2",
 ];
+
+function readDataTestForms(): T.Requests.Form[] {
+    return Object.values(
+        fs.readdirSync(path.join(__dirname, "/../../../testforms"))
+    )
+        .filter((filename) => filename.includes("testform"))
+        .map((filename) => {
+            const readFile = (path: string) => fs.readFileSync(path, "utf8");
+            const fileData = readFile(
+                path.join(__dirname, `/../../../testforms/${filename}`)
+            );
+            return JSON.parse(fileData);
+        });
+}
 
 const form_obj: T.Requests.Form = {
     createdAt: "2022-04-24T10:41:30.976Z",
@@ -629,37 +644,50 @@ const form_obj: T.Requests.Form = {
 };
 
 test("Can parse form request", () => {
+    const resultList: Promise<void>[] = [];
     const req: express.Request = getMockReq();
 
     req.body = {};
-    const i1 = expect(Rq.parseFormRequest(req)).rejects.toBe(
-        errors.cookArgumentError()
+    resultList.push(
+        expect(Rq.parseFormRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        )
     );
 
     const req2: express.Request = getMockReq();
     req2.body = { data: {} };
-    const i2 = expect(Rq.parseFormRequest(req2)).rejects.toBe(
-        errors.cookArgumentError()
+    resultList.push(
+        expect(Rq.parseFormRequest(req2)).rejects.toBe(
+            errors.cookArgumentError()
+        )
     );
 
     const req3: express.Request = getMockReq();
     req3.body = { data: { fields: [{ value: "value" }] } };
-    const i3 = expect(Rq.parseFormRequest(req3)).rejects.toBe(
-        errors.cookArgumentError()
+    resultList.push(
+        expect(Rq.parseFormRequest(req3)).rejects.toBe(
+            errors.cookArgumentError()
+        )
     );
 
-    const req4: express.Request = getMockReq();
-    req4.body = { ...form_obj };
-    const v1 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
-        "data",
-        form_obj.data
-    );
-    const v2 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
-        "createdAt",
-        form_obj.createdAt
-    );
+    readDataTestForms().forEach((data) => {
+        const req4: express.Request = getMockReq();
+        console.log(data);
+        req4.body = { ...data };
+        const v1 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
+            "data",
+            data.data
+        );
+        const v2 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
+            "createdAt",
+            data.createdAt
+        );
 
-    return Promise.all([i1, i2, i3, v1, v2]);
+        resultList.push(v1);
+        resultList.push(v2);
+    });
+
+    return Promise.all(resultList);
 });
 
 describe.each(keys)("Questions present", (key) => {
