@@ -310,15 +310,9 @@ export async function filterProjects(
     assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
-    clientNameSort: FilterSort,
-    fullyAssignedSort: FilterSort
+    clientNameSort: FilterSort
+    //fullyAssignedSort: FilterSort
 ) {
-    // const projects = await prisma.project_role.groupBy({
-    //     by: ["project_id"],
-    //     _sum: {
-    //         positions: true,
-    //     },
-    // });
     const projects = await prisma.project.findMany({
         include: {
             project_role: {
@@ -331,7 +325,7 @@ export async function filterProjects(
         },
     });
 
-    const filtered_projects = await prisma.project.findMany({
+    let filtered_projects = await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
@@ -372,20 +366,28 @@ export async function filterProjects(
     });
 
     if (fullyAssignedFilter && filtered_projects.length !== 0) {
-        return filtered_projects.filter((project) =>
-            (project.positions ==
-                projects.find(
-                    (elem) => elem._sum.positions === project.positions
-                )) ==
-            null
-                ? -1
-                : projects.find(
-                      (elem) => elem._sum.positions === project.positions
-                  )
-        );
+        filtered_projects = filtered_projects.filter((project) => {
+            const project_found = projects.find(
+                (elem) => elem.project_id === project.project_id
+            );
+
+            console.log(project_found);
+
+            if (project_found != undefined) {
+                let sum = 0;
+                for (const c of project_found.project_role) {
+                    sum += c._count.contract;
+                }
+                console.log(sum);
+                console.log(project.positions);
+                return project.positions === sum;
+            }
+
+            return false;
+        });
     }
 
-    if (fullyAssignedSort == "asc") {
+    /*if (fullyAssignedSort == "asc") {
         filtered_projects.sort(
             (x, y) =>
                 +(x.positions == projects[x.project_id]._sum.positions) -
@@ -399,6 +401,6 @@ export async function filterProjects(
                 +(y.positions == projects[y.project_id]._sum.positions)
         );
         filtered_projects.reverse();
-    }
+    }*/
     return filtered_projects;
 }

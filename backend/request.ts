@@ -510,6 +510,55 @@ export async function parseUpdateProjectRequest(
 }
 
 /**
+ *  Parses a request to `GET /project/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterProjectsRequest(
+    req: express.Request
+): Promise<Requests.ProjectFilter> {
+    for (const filter of [
+        maybe(req.body, "projectNameSort"),
+        maybe(req.body, "clientNameSort"),
+        maybe(req.body, "fullyAssignedSort"),
+    ]) {
+        if (filter != undefined && filter !== "asc" && filter !== "desc") {
+            return rejector();
+        }
+    }
+
+    let assignedCoachesFilterArray = maybe(
+        req.body,
+        "assignedCoachesFilterArray"
+    );
+    if ("assignedCoachesFilterArray" in req.body) {
+        if (typeof req.body.assignedCoachesFilterArray === "string") {
+            assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
+                .slice(1, -1)
+                .split(",")
+                .map((num: string) => Number(num));
+        }
+    }
+
+    let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
+    if ("fullyAssignedFilter" in req.body) {
+        fullyAssignedFilter = Boolean(req.body.fullyAssignedFilter);
+    }
+
+    return Promise.resolve({
+        sessionkey: getSessionKey(req),
+        projectNameFilter: maybe(req.body, "projectNameFilter"),
+        clientNameFilter: maybe(req.body, "clientNameFilter"),
+        assignedCoachesFilterArray: assignedCoachesFilterArray,
+        fullyAssignedFilter: fullyAssignedFilter,
+        projectNameSort: maybe(req.body, "projectNameSort"),
+        clientNameSort: maybe(req.body, "clientNameSort"),
+        fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
+    });
+}
+
+/**
  *  Parses a request to `POST /project/<id>/draft`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
