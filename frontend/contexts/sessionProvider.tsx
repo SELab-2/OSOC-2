@@ -106,6 +106,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     return "";
                 }
                 if (response.account_status === AccountStatus.PENDING) {
+                    verified = false;
                     router.push("/pending");
                     return "";
                 }
