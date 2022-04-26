@@ -301,7 +301,8 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterStudentsRequest(
     req: express.Request
 ): Promise<Requests.StudentFilter> {
-    let mail = undefined;
+    let mail = maybe(req.body, "emailFilter");
+    let roles = maybe(req.body, "roleFilter");
     if (
         ("emailFilter" in req.body &&
             !validator.default.isEmail(req.body.emailFilter)) ||
@@ -319,7 +320,9 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    console.log(mail);
+    if ("roleFilter" in req.body) {
+        roles = req.body.roleFilter.split(",");
+    }
 
     for (const filter of [
         maybe(req.body, "firstNameSort"),
@@ -333,19 +336,33 @@ export async function parseFilterStudentsRequest(
         }
     }
 
+    let osoc_year = new Date().getFullYear();
+    if ("osocYear" in req.body) {
+        osoc_year = Number(req.body.osocYear);
+    }
+
+    let alumniFilter = maybe(req.body, "alumniFilter");
+    if ("alumniFilter" in req.body) {
+        alumniFilter = Boolean(req.body.alumniFilter);
+    }
+    let coachFilter = maybe(req.body, "coachFilter");
+    if ("coachFilter" in req.body) {
+        coachFilter = Boolean(req.body.coachFilter);
+    }
     return Promise.resolve({
         sessionkey: getSessionKey(req),
+        osocYear: osoc_year,
         firstNameFilter: maybe(req.body, "firstNameFilter"),
         lastNameFilter: maybe(req.body, "lastNameFilter"),
         emailFilter: mail,
-        roleFilter: maybe(req.body, "roleFilter"),
-        alumniFilter: maybe(req.body, "alumniFilter"),
-        coachFilter: maybe(req.body, "coachFilter"),
+        roleFilter: roles,
+        alumniFilter: alumniFilter,
+        coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
+        emailStatusFilter: maybe(req.body, "emailStatusFilter"),
         firstNameSort: maybe(req.body, "firstNameSort"),
         lastNameSort: maybe(req.body, "lastNameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        roleSort: maybe(req.body, "roleSort"),
         alumniSort: maybe(req.body, "alumniSort"),
     });
 }

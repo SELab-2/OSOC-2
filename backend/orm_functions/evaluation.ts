@@ -24,7 +24,6 @@ export async function checkIfFinalEvaluationExists(jobApplicationId: number) {
     });
 }
 
-// TODO: check if this really works?
 /**
  *
  * @param evaluation: this has an object that contains all the information for a
@@ -81,6 +80,10 @@ export async function updateEvaluationForStudent(
     });
 }
 
+/**
+ * returns the loginUser with person data of the person that created the evaluation with given id
+ * @param evaluationId: id of the evaluation whose creator we are searching.
+ */
 export async function getLoginUserByEvaluationId(evaluationId: number) {
     return await prisma.evaluation.findUnique({
         where: { evaluation_id: evaluationId },
@@ -88,6 +91,13 @@ export async function getLoginUserByEvaluationId(evaluationId: number) {
     });
 }
 
+/**
+ * return all evaluations created by the user with userId, for student with studentID in osoc edition with given osocId
+ *
+ * @param userId: the creator of the evaluation
+ * @param studentId: the student about who the evaluation is
+ * @param osocId: the id of the osoc edition the evaluation belongs to
+ */
 export async function getEvaluationByPartiesFor(
     userId: number,
     studentId: number,
@@ -97,6 +107,21 @@ export async function getEvaluationByPartiesFor(
         where: {
             login_user_id: userId,
             job_application: { student_id: studentId, osoc_id: osocId },
+        },
+    });
+}
+
+/**
+ *
+ * @param jobApplicationId: the id of the jobApplication whose evaluations we want to delete
+ * @returns the number of deleted records in a promise
+ */
+export async function deleteEvaluationsByJobApplication(
+    jobApplicationId: number
+) {
+    return await prisma.evaluation.deleteMany({
+        where: {
+            job_application_id: jobApplicationId,
         },
     });
 }
