@@ -291,17 +291,15 @@ test("Can parse update student request", () => {
 test("Can parse suggest student request", () => {
     const key = "my-session-key";
     const id = 9845;
-    const ys: T.Anything = { suggestion: "YES", senderId: 0 };
-    const mb: T.Anything = { suggestion: "MAYBE", senderId: 0 };
-    const no: T.Anything = { suggestion: "NO", senderId: 0 };
+    const ys: T.Anything = { suggestion: "YES" };
+    const mb: T.Anything = { suggestion: "MAYBE" };
+    const no: T.Anything = { suggestion: "NO" };
     const nr: T.Anything = {
         suggestion: "NO",
         reason: "I just don't like you",
-        senderId: 0,
     };
-    const i1: T.Anything = { suggestion: "TOMORROW", senderId: 0 };
-    const i2: T.Anything = { suggestion: "no", senderId: 0 }; // no caps
-    const i3: T.Anything = { senderId: 0 };
+    const i1: T.Anything = { suggestion: "TOMORROW" };
+    const i2: T.Anything = { suggestion: "no" }; // no caps
 
     const okays = [ys, mb, no, nr].map((x) => {
         const copy: T.Anything = { ...x };
@@ -321,7 +319,7 @@ test("Can parse suggest student request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const fails = [i1, i2, i3].map((x) => {
+    const fails = [i1, i2].map((x) => {
         const req: express.Request = getMockReq();
         req.params.id = id.toString();
         req.body = { ...x };

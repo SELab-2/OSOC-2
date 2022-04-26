@@ -2,14 +2,13 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
+import { StudentFilter } from "../components/Filter/StudentFilter/StudentFilter";
 import { Student } from "../types";
 import styles from "../styles/students.module.scss";
-import { useSockets } from "../contexts/socketProvider";
 
 const Students: NextPage = () => {
     const { getSessionKey } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
-    const { socket } = useSockets();
 
     const fetchStudents = async () => {
         if (getSessionKey !== undefined) {
@@ -34,24 +33,18 @@ const Students: NextPage = () => {
         }
     };
 
+    const setFilteredStudents = (filteredStudents: Array<Student>) => {
+        setStudents([...filteredStudents]);
+    };
+
     useEffect(() => {
         fetchStudents().then();
-        return () => {
-            socket.off("formAdded");
-        }; // disconnect from the socket on dismount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        socket.on("formAdded", () => {
-            fetchStudents().then();
-        });
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket]);
-
     return (
         <div className={styles.students}>
+            <StudentFilter setFilteredStudents={setFilteredStudents} />
             {students.map((student) => {
                 return (
                     <StudentCard
