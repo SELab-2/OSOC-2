@@ -206,7 +206,7 @@ async function createStudentSuggestion(
             suggestion.osoc.year === osocYear.year &&
             suggestion.evaluation.some(
                 (evaluation) =>
-                    evaluation.login_user.login_user_id ===
+                    evaluation.login_user?.login_user_id ===
                     checkedSessionKey.userId
             )
     );
@@ -221,7 +221,8 @@ async function createStudentSuggestion(
     if (suggestionsTotal.length > 0) {
         const suggestion = suggestionsTotal[0].evaluation.filter(
             (evaluation) =>
-                evaluation.login_user.login_user_id === checkedSessionKey.userId
+                evaluation.login_user?.login_user_id ===
+                checkedSessionKey.userId
         );
 
         await ormEv.updateEvaluationForStudent({
@@ -283,8 +284,8 @@ async function getStudentSuggestions(
     for (const suggestion of suggestionsTotal) {
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
-                senderFirstname: evaluation.login_user.person.firstname,
-                senderLastname: evaluation.login_user.person.lastname,
+                senderFirstname: evaluation.login_user?.person.firstname,
+                senderLastname: evaluation.login_user?.person.lastname,
                 reason: evaluation.motivation,
                 decision: evaluation.decision,
                 isFinal: evaluation.is_final,
