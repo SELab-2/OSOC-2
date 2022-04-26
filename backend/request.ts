@@ -617,7 +617,6 @@ export async function parseFormRequest(
             return rejector();
         }
         for (const question of req.body.data.fields) {
-            console.log(question);
             if (
                 question.key === undefined ||
                 question.key === null ||
