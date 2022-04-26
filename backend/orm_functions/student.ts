@@ -9,7 +9,6 @@ import {
     FilterStringArray,
 } from "./orm_types";
 
-// TODO: how do we make sure there is no student for this person_id yet?
 /**
  *
  * @param student: student object with the needed information
@@ -125,8 +124,6 @@ export async function searchStudentByGender(gender: string) {
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param roleSort asc or desc if we are sorting on role, undefined if we are not sorting on role
  * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
- * @param coachSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
- * @param statusSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 // , coachSort: FilterSort, statusSort: FilterSort
