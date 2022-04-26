@@ -672,7 +672,6 @@ test("Can parse form request", () => {
 
     readDataTestForms().forEach((data) => {
         const req4: express.Request = getMockReq();
-        console.log(data);
         req4.body = { ...data };
         const v1 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
             "data",
