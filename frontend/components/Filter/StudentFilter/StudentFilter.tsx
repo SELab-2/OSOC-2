@@ -1,6 +1,13 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { EmailStatus, getNextSort, Role, Sort, Student } from "../../../types";
+import {
+    EmailStatus,
+    getNextSort,
+    Role,
+    Sort,
+    Student,
+    StudentStatus,
+} from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -23,12 +30,11 @@ export const StudentFilter: React.FC<{
     const [firstNameSort, setFirstNameSort] = useState<Sort>(Sort.NONE);
     const [lastNameSort, setLastNameSort] = useState<Sort>(Sort.NONE);
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE);
-    const [filterYes, setFilterYes] = useState<boolean>(false);
-    const [filterMaybe, setFilterMaybe] = useState<boolean>(false);
-    const [filterNo, setFilterNo] = useState<boolean>(false);
     const [alumni, setAlumni] = useState<boolean>(false);
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
-    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<StudentStatus>(
+        StudentStatus.EMPTY
+    );
     const [osocYear, setOsocYear] = useState<string>("");
     const [statusEmail, setStatusEmail] = useState<EmailStatus>(
         EmailStatus.EMPTY
@@ -98,38 +104,29 @@ export const StudentFilter: React.FC<{
     const toggleFilterYes = async (e: SyntheticEvent) => {
         e.preventDefault();
         //This is because the call is async
-        if (!filterYes) {
-            setStatusFilter(() => "YES");
+        if (statusFilter !== StudentStatus.YES) {
+            setStatusFilter(() => StudentStatus.YES);
         } else {
-            setStatusFilter(() => "");
+            setStatusFilter(() => StudentStatus.EMPTY);
         }
-        setFilterYes((bool) => !bool);
-        setFilterMaybe(false);
-        setFilterNo(false);
     };
 
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!filterMaybe) {
-            setStatusFilter(() => "MAYBE");
+        if (statusFilter !== StudentStatus.MAYBE) {
+            setStatusFilter(() => StudentStatus.MAYBE);
         } else {
-            setStatusFilter(() => "");
+            setStatusFilter(() => StudentStatus.EMPTY);
         }
-        setFilterMaybe((bool) => !bool);
-        setFilterYes(false);
-        setFilterNo(false);
     };
 
     const toggleFilterNo = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!filterNo) {
-            setStatusFilter(() => "NO");
+        if (statusFilter !== StudentStatus.NO) {
+            setStatusFilter(() => StudentStatus.NO);
         } else {
-            setStatusFilter(() => "");
+            setStatusFilter(() => StudentStatus.EMPTY);
         }
-        setFilterNo((bool) => !bool);
-        setFilterYes(false);
-        setFilterMaybe(false);
     };
 
     const toggleFilterEmailNone = async (e: SyntheticEvent) => {
@@ -239,10 +236,10 @@ export const StudentFilter: React.FC<{
                 `roleFilter=${Array.from(selectedRoles.values()).toString()}`
             );
         }
-        if (statusFilter !== "") {
+        if (statusFilter !== StudentStatus.EMPTY) {
             filters.push(`statusFilter=${statusFilter}`);
         }
-        if (statusEmail !== "") {
+        if (statusEmail !== EmailStatus.EMPTY) {
             filters.push(`emailStatusFilter=${statusEmail}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
@@ -427,7 +424,11 @@ export const StudentFilter: React.FC<{
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
-                            src={filterYes ? CheckIconColor : CheckIcon}
+                            src={
+                                statusFilter === StudentStatus.YES
+                                    ? CheckIconColor
+                                    : CheckIcon
+                            }
                             width={30}
                             height={30}
                             alt={"Disabled"}
@@ -440,7 +441,7 @@ export const StudentFilter: React.FC<{
                         <Image
                             className={styles.buttonImage}
                             src={
-                                filterMaybe
+                                statusFilter === StudentStatus.MAYBE
                                     ? ExclamationIconColor
                                     : ExclamationIcon
                             }
@@ -455,7 +456,11 @@ export const StudentFilter: React.FC<{
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
-                            src={filterNo ? ForbiddenIconColor : ForbiddenIcon}
+                            src={
+                                statusFilter === StudentStatus.NO
+                                    ? ForbiddenIconColor
+                                    : ForbiddenIcon
+                            }
                             width={30}
                             height={30}
                             alt={"Disabled"}

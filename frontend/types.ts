@@ -22,6 +22,14 @@ export enum EmailStatus {
     SCHEDULED = "SCHEDULED",
     EMPTY = "",
 }
+
+export enum StudentStatus {
+    EMPTY = "",
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
+}
+
 export const getNextFilterBoolean = (bool: FilterBoolean) => {
     if (bool == FilterBoolean.TRUE) {
         return FilterBoolean.FALSE;
