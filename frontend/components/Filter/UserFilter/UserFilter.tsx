@@ -1,20 +1,16 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import AdminIconColor from "../../../public/images/admin_icon_color.png";
-import AdminIcon from "../../../public/images/admin_icon.png";
-import CoachIconColor from "../../../public/images/coach_icon_color.png";
-import CoachIcon from "../../../public/images/coach_icon.png";
-import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
-import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import {
-    AccountStatus,
-    getNextSort,
-    LoginUser,
-    Sort,
-} from "../../../types/types";
-import SessionContext from "../../../contexts/sessionProvider";
+import AdminIconColor from "../../public/images/admin_icon_color.png";
+import AdminIcon from "../../public/images/admin_icon.png";
+import CoachIconColor from "../../public/images/coach_icon_color.png";
+import CoachIcon from "../../public/images/coach_icon.png";
+import ForbiddenIcon from "../../public/images/forbidden_icon.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import { AccountStatus, getNextSort, LoginUser, Sort } from "../../types";
+import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
     updateUsers: (users: Array<LoginUser>) => void;
@@ -28,10 +24,18 @@ export const UserFilter: React.FC<{
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(
         AccountStatus.NONE
     );
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-
     const router = useRouter();
+
+    const { socket } = useSockets();
+
+    useEffect(() => {
+        return () => {
+            socket.off("loginUserUpdated");
+        }; // disconnect from the socket on dismount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
@@ -41,7 +45,31 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
+
+    /**
+     * when the server notifies that a user has changed, we should re-fetch to get the latest changes
+     * we need the dependency array to make sure we use the latest version of the filter fields
+     */
+    useEffect(() => {
+        socket.off("loginUserUpdated"); // remove the earlier added listeners
+        // add new listener
+        socket.on("loginUserUpdated", () => {
+            if (loading) return;
+            search().then();
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        socket,
+        nameFilter,
+        nameSort,
+        emailFilter,
+        emailSort,
+        statusFilter,
+        coachFilter,
+        adminFilter,
+    ]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -151,9 +179,6 @@ export const UserFilter: React.FC<{
                 .catch((err) => {
                     console.log(err);
                 });
-            if (setSessionKey && response && response.sessionkey) {
-                setSessionKey(response.sessionkey);
-            }
             updateUsers(response.data);
             isLoading(false);
         }

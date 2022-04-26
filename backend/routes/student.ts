@@ -86,7 +86,6 @@ async function listStudents(
 
     return Promise.resolve({
         data: studentList,
-        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -144,13 +143,10 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
     }
 
     return Promise.resolve({
-        data: {
-            student: student,
-            jobApplication: jobApplication,
-            evaluations: evaluations,
-            roles: roles,
-        },
-        sessionkey: checkedSessionKey.data.sessionkey,
+        student: student,
+        jobApplication: jobApplication,
+        evaluations: evaluations,
+        roles: roles,
     });
 }
 
@@ -160,18 +156,18 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteStudent(req: express.Request): Promise<Responses.Key> {
+async function deleteStudent(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormSt.deleteStudent(parsed.data.id).then(() =>
-                ormP.deletePersonById(parsed.data.id).then(() =>
-                    Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                    })
-                )
-            );
+            return ormSt
+                .deleteStudent(parsed.data.id)
+                .then(() =>
+                    ormP
+                        .deletePersonById(parsed.data.id)
+                        .then(() => Promise.resolve({}))
+                );
         });
 }
 
@@ -183,7 +179,7 @@ async function deleteStudent(req: express.Request): Promise<Responses.Key> {
  */
 async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.Key> {
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -197,6 +193,24 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    const osocYear = await ormOs.getLatestOsoc();
+
+    if (osocYear == null) {
+        return Promise.reject(errors.cookNoDataError());
+    }
+
+    const suggestionsTotal = (
+        await ormJo.getStudentEvaluationsTemp(student.student_id)
+    ).filter(
+        (suggestion) =>
+            suggestion.osoc.year === osocYear.year &&
+            suggestion.evaluation.some(
+                (evaluation) =>
+                    evaluation.login_user.login_user_id ===
+                    checkedSessionKey.userId
+            )
+    );
+
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
         student.student_id
     );
@@ -204,19 +218,33 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.suggestion,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: false,
-    });
+    if (suggestionsTotal.length > 0) {
+        const suggestion = suggestionsTotal[0].evaluation.filter(
+            (evaluation) =>
+                evaluation.login_user.login_user_id === checkedSessionKey.userId
+        );
 
-    return Promise.resolve({ sessionkey: checkedSessionKey.data.sessionkey });
+        await ormEv.updateEvaluationForStudent({
+            evaluation_id: suggestion[0].evaluation_id,
+            loginUserId: checkedSessionKey.userId,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+        });
+    } else {
+        await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: false,
+        });
+    }
+
+    return Promise.resolve({});
 }
 
 /**
- *  Attempts to list all student suggestions in the system.
+ *  Attempts to list all suggestions for a certain student.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
@@ -234,13 +262,6 @@ async function getStudentSuggestions(
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
@@ -273,7 +294,6 @@ async function getStudentSuggestions(
 
     return Promise.resolve({
         data: suggestionsInfo,
-        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -285,7 +305,7 @@ async function getStudentSuggestions(
  */
 async function createStudentConfirmation(
     req: express.Request
-): Promise<Responses.Key> {
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -294,27 +314,33 @@ async function createStudentConfirmation(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const student = await ormSt.getStudent(checkedSessionKey.data.id);
-    if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        const student = await ormSt.getStudent(checkedSessionKey.data.id);
+        if (student == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+            student.student_id
+        );
+        if (jobApplication == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.reply,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: true,
+        });
+
+        return Promise.resolve({});
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.reply,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: true,
-    });
-
-    return Promise.resolve({ sessionkey: checkedSessionKey.data.sessionkey });
+    return Promise.reject(errors.cookInsufficientRights());
 }
 
 /**
@@ -396,7 +422,6 @@ async function filterStudents(
 
     return Promise.resolve({
         data: studentlist,
-        sessionkey: req.body.sessionkey,
     });
 }
 
@@ -412,18 +437,13 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterStudents);
     util.route(router, "get", "/all", listStudents);
     util.route(router, "get", "/:id", getStudent);
-    util.routeKeyOnly(router, "delete", "/:id", deleteStudent);
+    util.route(router, "delete", "/:id", deleteStudent);
 
-    util.routeKeyOnly(router, "post", "/:id/suggest", createStudentSuggestion);
+    util.route(router, "post", "/:id/suggest", createStudentSuggestion);
 
     util.route(router, "get", "/:id/suggest", getStudentSuggestions);
 
-    util.routeKeyOnly(
-        router,
-        "post",
-        "/:id/confirm",
-        createStudentConfirmation
-    );
+    util.route(router, "post", "/:id/confirm", createStudentConfirmation);
 
     util.addAllInvalidVerbs(router, [
         "/",

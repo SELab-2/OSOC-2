@@ -9,7 +9,6 @@ import {
     FilterStringArray,
 } from "./orm_types";
 
-// TODO: how do we make sure there is no student for this person_id yet?
 /**
  *
  * @param student: student object with the needed information

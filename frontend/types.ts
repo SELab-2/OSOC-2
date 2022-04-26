@@ -49,13 +49,6 @@ export enum AccountStatus {
  * A function that helps cycling through sorting methods
  * @param sort
  */
-
-export enum Decision {
-    YES = "YES",
-    MAYBE = "MAYBE",
-    NO = "NO",
-}
-
 export const getNextSort = (sort: Sort) => {
     if (sort == Sort.ASCENDING) {
         return Sort.DESCENDING;
@@ -67,6 +60,12 @@ export const getNextSort = (sort: Sort) => {
 
     return Sort.ASCENDING;
 };
+
+export enum Decision {
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
+}
 
 export interface Student {
     evaluations: [
@@ -166,4 +165,18 @@ export interface LoginUser {
 export interface Role {
     role_id: number;
     name: string;
+}
+
+/**
+ * types for socket.io when sending something from the server to the client
+ */
+export interface ServerToClientEvents {
+    loginUserUpdated: () => void;
+}
+
+/**
+ * types for socket.io when sending something from the client to the server
+ */
+export interface ClientToServerEvents {
+    updateUser: (loginUserId: number) => void;
 }
