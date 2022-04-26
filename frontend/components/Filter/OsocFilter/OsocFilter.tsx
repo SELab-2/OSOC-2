@@ -88,7 +88,7 @@ export const OsocCreateFilter: React.FC<{
         const sessionKey = getSessionKey ? await getSessionKey() : "";
         if (sessionKey !== "") {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create` + osocCreate,
+                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
                 {
                     method: "POST",
                     body: JSON.stringify({

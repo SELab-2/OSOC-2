@@ -20,7 +20,6 @@ async function createOsocEdition(
         .then(async (parsed) => {
             return ormO.createOsoc(parsed.data.year).then((osoc) =>
                 Promise.resolve({
-                    sessionkey: parsed.data.sessionkey,
                     data: {
                         id: osoc.osoc_id,
                         year: osoc.year,
@@ -50,7 +49,6 @@ async function listOsocEditions(
 
     return Promise.resolve({
         data: osocEditions,
-        sessionkey: checkedSessionKey.data.sessionkey,
     });
 }
 
@@ -78,7 +76,6 @@ async function filterYear(
 
     return Promise.resolve({
         data: osocs,
-        sessionkey: req.body.sessionkey,
     });
 }
 
