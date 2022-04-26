@@ -110,3 +110,18 @@ export async function getEvaluationByPartiesFor(
         },
     });
 }
+
+/**
+ *
+ * @param jobApplicationId: the id of the jobApplication whose evaluations we want to delete
+ * @returns the number of deleted records in a promise
+ */
+export async function deleteEvaluationsByJobApplication(
+    jobApplicationId: number
+) {
+    return await prisma.evaluation.deleteMany({
+        where: {
+            job_application_id: jobApplicationId,
+        },
+    });
+}
