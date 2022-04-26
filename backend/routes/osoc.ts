@@ -43,7 +43,7 @@ async function listOsocEditions(
         .checkSessionKey(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID);
+        return Promise.reject(errors.cookInvalidID());
     }
     const osocEditions = await ormO.getAllOsoc();
 
@@ -86,16 +86,14 @@ async function filterYear(
  */
 async function deleteOsocEditionRequest(
     req: express.Request
-): Promise<Responses.Key> {
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteOsocEditionRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormO.deleteOsocFromDB(parsed.data.id).then(() =>
-                Promise.resolve({
-                    sessionkey: parsed.data.sessionkey,
-                })
-            );
+            return ormO
+                .deleteOsocFromDB(parsed.data.id)
+                .then(() => Promise.resolve({}));
         });
 }
 
@@ -111,7 +109,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listOsocEditions);
     util.route(router, "get", "/filter", filterYear);
     util.route(router, "post", "/create", createOsocEdition);
-    util.routeKeyOnly(router, "delete", "/:id", deleteOsocEditionRequest);
+    util.route(router, "delete", "/:id", deleteOsocEditionRequest);
     util.addAllInvalidVerbs(router, ["/", "/all, /filter, /create, /:id"]);
 
     return router;

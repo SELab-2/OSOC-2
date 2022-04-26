@@ -301,13 +301,9 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
-    let year = undefined;
-    if ("yearFilter" in req.body && !parseInt(req.body.yearFilter)) {
-        return rejector();
-    } else {
-        if ("yearFilter" in req.body) {
-            year = parseInt(req.body.yearFilter);
-        }
+    let year = maybe(req.body, "yearFilter");
+    if ("yearFilter" in req.body) {
+        year = parseInt(req.body.yearFilter);
     }
 
     for (const filter of [maybe(req.body, "yearSort")]) {
@@ -786,6 +782,17 @@ export async function parseAcceptNewUserRequest(
     );
 }
 
+export async function parseNewOsocEditionRequest(
+    req: express.Request
+): Promise<Requests.OsocEdition> {
+    return hasFields(req, ["year"], types.neither).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            year: parseInt(req.body.year),
+        })
+    );
+}
+
 /**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
@@ -950,22 +957,3 @@ export const parseOsocAllRequest = parseKeyRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
-export async function parseNewOsocEditionRequest(
-    req: express.Request
-): Promise<Requests.OsocEdition> {
-    let year = 0;
-    if ("year" in req.body && !parseInt(req.body.year)) {
-        return rejector();
-    } else {
-        if ("year" in req.body) {
-            year = parseInt(req.body.year);
-        }
-    }
-
-    return hasFields(req, ["year"], types.key).then(() =>
-        Promise.resolve({
-            sessionkey: getSessionKey(req),
-            year: year,
-        })
-    );
-}
