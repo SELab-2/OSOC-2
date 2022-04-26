@@ -1,4 +1,4 @@
-import { decision_enum } from "@prisma/client";
+import { decision_enum, email_status_enum } from "@prisma/client";
 import prisma from "../prisma/prisma";
 import {
     CreateStudent,
@@ -9,7 +9,6 @@ import {
     FilterStringArray,
 } from "./orm_types";
 
-// TODO: how do we make sure there is no student for this person_id yet?
 /**
  *
  * @param student: student object with the needed information
@@ -158,17 +157,15 @@ export async function searchStudentByGender(gender: string) {
  * @param roleFilterArray role that we are filtering on (or undefined if not filtering on role)
  * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
  * @param coachFilter coach status that we are filtering on (or undefined if not filtering on coach status)
- * @param statusFilter status that we are filtering on (or undefined if not filtering on status)
+ * @param statusFilter decision status that we are filtering on (or undefined if not filtering on status)
+ * @param emailStatusFilter email status that we are filtering on (or undefined if not filtering on email status)
+ * @param osocYear: the osoc year the application belongs to (or undefined if not filtering on year)
  * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
  * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
- * @param roleSort asc or desc if we are sorting on role, undefined if we are not sorting on role
  * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
- * @param coachSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
- * @param statusSort asc or desc if we are sorting on coach status, undefined if we are not sorting on coach status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
-// , coachSort: FilterSort, statusSort: FilterSort
 export async function filterStudents(
     firstNameFilter: FilterString,
     lastNameFilter: FilterString,
@@ -177,29 +174,44 @@ export async function filterStudents(
     alumniFilter: FilterBoolean,
     coachFilter: FilterBoolean,
     statusFilter: decision_enum | undefined,
+    osocYear: number,
+    emailStatusFilter: email_status_enum | undefined,
     firstNameSort: FilterSort,
     lastNameSort: FilterSort,
     emailSort: FilterSort,
-    roleSort: FilterSort,
     alumniSort: FilterSort
 ) {
+    // manually create filter object for evaluation because evaluation doesn't need to exist
+    // and then the whole object needs to be undefined
+    let evaluationFilter;
+    if (statusFilter) {
+        evaluationFilter = {
+            some: {
+                decision: statusFilter,
+            },
+        };
+    } else {
+        evaluationFilter = undefined;
+    }
+
+    console.log(alumniFilter);
     return await prisma.student.findMany({
         where: {
             job_application: {
                 some: {
+                    email_status: emailStatusFilter,
                     student_coach: coachFilter,
+                    osoc: {
+                        year: osocYear,
+                    },
                     applied_role: {
-                        every: {
+                        some: {
                             role: {
                                 name: { in: roleFilterArray },
                             },
                         },
                     },
-                    evaluation: {
-                        some: {
-                            decision: statusFilter,
-                        },
-                    },
+                    evaluation: evaluationFilter,
                 },
             },
             person: {

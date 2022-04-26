@@ -135,12 +135,6 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
                 .getLoginUserById(code.login_user_id)
                 .then((user) => {
                     if (user == null) return Promise.reject();
-                    console.log(
-                        "Updating user " +
-                            JSON.stringify(user) +
-                            "'s  password to " +
-                            parsed.password
-                    );
                     return ormLU.updateLoginUser({
                         loginUserId: user.login_user_id,
                         isAdmin: user.is_admin,

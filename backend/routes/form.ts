@@ -46,8 +46,14 @@ function filterChosenOption(
 ): Responses.FormResponse<Requests.Option> {
     if (question.options != undefined) {
         const filteredOption = question.options.filter(
-            (option) => option.id === question.value
+            (option) =>
+                option.id != undefined &&
+                option.text != undefined &&
+                option.id === question.value
         );
+        if (filteredOption.length === 0) {
+            return { data: null };
+        }
         return { data: filteredOption[0] };
     }
     return { data: null };
@@ -1439,12 +1445,8 @@ async function addRolesToDatabase(
  */
 async function createForm(req: express.Request): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
-    if (
-        parsedRequest.data == null ||
-        parsedRequest.eventId == null ||
-        parsedRequest.createdAt == null
-    ) {
-        return Promise.reject(errors.cookInvalidID());
+    if (parsedRequest.data.fields == undefined) {
+        return Promise.reject(errors.cookArgumentError());
     }
 
     const questionInBelgium: Responses.FormResponse<Requests.Question> =
@@ -1507,7 +1509,6 @@ async function createForm(req: express.Request): Promise<Responses.Empty> {
         await addRolesToDatabase(roles, {
             id: addedJobApplicationToDatabase.id,
         });
-
         return Promise.resolve({});
     }
 

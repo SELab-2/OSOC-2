@@ -2,8 +2,9 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormLU from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { InternalTypes, Responses } from "../types";
+import { Responses } from "../types";
 import * as util from "../utility";
 
 /**
@@ -16,7 +17,7 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) =>
+        .then(async () =>
             ormLU
                 .searchAllCoachLoginUsers(true)
                 .then((obj) =>
@@ -34,29 +35,10 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
                 )
                 .then((obj) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: obj,
                     })
                 )
         );
-}
-
-/**
- *  Attempts to get all data for a certain coach in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function getCoach(req: express.Request): Promise<Responses.Coach> {
-    return rq
-        .parseSingleCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(() => {
-            return Promise.reject({
-                http: 410,
-                reason: "Deprecated endpoint.",
-            });
-        });
 }
 
 /**
@@ -65,9 +47,7 @@ async function getCoach(req: express.Request): Promise<Responses.Coach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(
-    req: express.Request
-): Promise<Responses.Keyed<InternalTypes.IdName>> {
+async function modCoach(req: express.Request): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -75,7 +55,6 @@ async function modCoach(
             return ormLU
                 .updateLoginUser({
                     loginUserId: parsed.data.id,
-                    password: null,
                     isAdmin: parsed.data.isAdmin,
                     isCoach: parsed.data.isCoach,
                     accountStatus: parsed.data
@@ -83,14 +62,8 @@ async function modCoach(
                 })
                 .then((res) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
-                        data: {
-                            id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
-                        },
+                        id: res.login_user_id,
+                        name: res.person.firstname + " " + res.person.lastname,
                     })
                 );
         });
@@ -102,16 +75,16 @@ async function modCoach(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteCoach(req: express.Request): Promise<Responses.Key> {
+async function deleteCoach(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormLU
-                .deleteLoginUserFromDB(parsed.data.id)
-                .then(() =>
-                    Promise.resolve({ sessionkey: parsed.data.sessionkey })
-                );
+            return ormLU.deleteLoginUserByPersonId(parsed.data.id).then(() => {
+                return ormP
+                    .deletePersonById(parsed.data.id)
+                    .then(() => Promise.resolve({}));
+            });
         });
 }
 
@@ -127,7 +100,7 @@ async function getCoachRequests(
     return rq
         .parseGetAllCoachRequestsRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
+        .then(async () => {
             return ormLU
                 .getAllLoginUsers()
                 .then((obj) =>
@@ -147,30 +120,9 @@ async function getCoachRequests(
                 )
                 .then((arr) =>
                     Promise.resolve({
-                        sessionkey: parsed.data.sessionkey,
                         data: arr,
                     })
                 );
-        });
-}
-
-/**
- *  Attempts to get the details of a coach request in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-async function getCoachRequest(
-    req: express.Request
-): Promise<Responses.Keyed<InternalTypes.CoachRequest>> {
-    return rq
-        .parseGetCoachRequestRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(() => {
-            return Promise.reject({
-                http: 410,
-                reason: "Deprecated endpoint.",
-            });
         });
 }
 
@@ -185,20 +137,11 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/all", listCoaches);
 
     util.route(router, "get", "/request", getCoachRequests);
-    util.route(router, "get", "/request/:id", getCoachRequest);
-
-    util.route(router, "get", "/:id", getCoach);
 
     util.route(router, "post", "/:id", modCoach);
-    util.routeKeyOnly(router, "delete", "/:id", deleteCoach);
+    util.route(router, "delete", "/:id", deleteCoach);
 
-    util.addAllInvalidVerbs(router, [
-        "/",
-        "/all",
-        "/:id",
-        "/request",
-        "/request/:id",
-    ]);
+    util.addAllInvalidVerbs(router, ["/", "/all", "/:id", "/request"]);
 
     return router;
 }

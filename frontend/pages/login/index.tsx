@@ -11,7 +11,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from "validator";
-import { AccountStatus } from "../../types/types";
+import { AccountStatus } from "../../types";
 
 const Index: NextPage = () => {
     const router = useRouter();
@@ -35,7 +35,8 @@ const Index: NextPage = () => {
                 setLoginBackendError(loginError);
             }
         }
-    }, [getSessionKey, router, router.query]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");

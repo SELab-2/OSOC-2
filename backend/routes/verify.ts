@@ -11,7 +11,7 @@ import * as util from "../utility";
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
-    const parsedRequest = await rq.parseUserAllRequest(req);
+    const parsedRequest = await rq.parseVerifyRequest(req);
     // verify works on PENDING accounts
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest, false)
@@ -36,7 +36,6 @@ async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    util.setupRedirect(router, "/verify");
     router.post("/", (req, res) =>
         util.respOrErrorNoReinject(res, verifyKey(req))
     );

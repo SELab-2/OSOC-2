@@ -1,7 +1,7 @@
 import prisma from "../../prisma/prisma";
 import {
     addSessionKey,
-    changeSessionKey,
+    refreshKey,
     checkSessionKey,
     removeAllKeysForUser,
 } from "../../orm_functions/session_key";
@@ -49,19 +49,14 @@ it("should return an error because the key doesn't exist", async () => {
 it("should overwrite the old key with the new key", async () => {
     const existing_keys = await prisma.session_keys.findMany();
 
-    const newkey = "newkey";
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 20);
-    const updated = await changeSessionKey(
-        existing_keys[0].session_key,
-        newkey,
-        futureDate
-    );
+    const updated = await refreshKey(existing_keys[0].session_key, futureDate);
     expect(updated).toHaveProperty(
         "login_user_id",
         existing_keys[0].login_user_id
     );
-    expect(updated).toHaveProperty("session_key", newkey);
+    expect(updated).toHaveProperty("session_key", existing_keys[0].session_key);
     expect(updated).toHaveProperty("valid_until", futureDate);
 
     const updated_keys = await prisma.session_keys.findMany({
@@ -73,10 +68,6 @@ it("should overwrite the old key with the new key", async () => {
     let updated_found = false;
     updated_keys.forEach((record) => {
         if (record.session_key === existing_keys[0].session_key) {
-            // should never get executed because old key should be overwritten
-            expect(false).toBeTruthy();
-        }
-        if (record.session_key === updated.session_key) {
             updated_found = true;
         }
     });
@@ -99,7 +90,7 @@ it("should delete all session keys of the user with given key", async () => {
         },
     });
 
-    const deleted = await removeAllKeysForUser("newkey");
+    const deleted = await removeAllKeysForUser("key");
     expect(deleted).toHaveProperty("count", 3);
     const remaining_keys = await prisma.session_keys.findMany();
     expect(remaining_keys.length).toEqual(1);
