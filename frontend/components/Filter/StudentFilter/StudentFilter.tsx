@@ -36,7 +36,7 @@ export const StudentFilter: React.FC<{
         StudentStatus.EMPTY
     );
     const [osocYear, setOsocYear] = useState<string>("");
-    const [statusEmail, setStatusEmail] = useState<EmailStatus>(
+    const [emailStatus, setEmailStatus] = useState<EmailStatus>(
         EmailStatus.EMPTY
     );
 
@@ -44,7 +44,8 @@ export const StudentFilter: React.FC<{
     const [roles, setRoles] = useState<Array<Role>>([]);
     // A set of active roles
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
-    const [dropdownActive, setDropdownActive] = useState<boolean>(false);
+    const [rolesActive, setRolesActive] = useState<boolean>(false);
+    const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
         const sessionKey =
@@ -84,6 +85,7 @@ export const StudentFilter: React.FC<{
         alumni,
         studentCoach,
         statusFilter,
+        emailStatus,
     ]);
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
@@ -129,49 +131,49 @@ export const StudentFilter: React.FC<{
         }
     };
 
-    const toggleFilterEmailNone = async (e: SyntheticEvent) => {
+    const toggleEmailNone = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (statusEmail !== EmailStatus.NONE) {
-            setStatusEmail(() => EmailStatus.NONE);
+        if (emailStatus !== EmailStatus.NONE) {
+            setEmailStatus(() => EmailStatus.NONE);
         } else {
-            setStatusEmail(() => EmailStatus.EMPTY);
+            setEmailStatus(() => EmailStatus.EMPTY);
         }
     };
 
     const toggleEmailDraft = async (e: SyntheticEvent) => {
         e.preventDefault();
         //This is because the call is async
-        if (statusEmail !== EmailStatus.DRAFT) {
-            setStatusEmail(() => EmailStatus.DRAFT);
+        if (emailStatus !== EmailStatus.DRAFT) {
+            setEmailStatus(() => EmailStatus.DRAFT);
         } else {
-            setStatusEmail(() => EmailStatus.EMPTY);
+            setEmailStatus(() => EmailStatus.EMPTY);
         }
     };
 
-    const toggleFilterEmailSent = async (e: SyntheticEvent) => {
+    const toggleEmailSent = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (statusEmail !== EmailStatus.SENT) {
-            setStatusEmail(() => EmailStatus.SENT);
+        if (emailStatus !== EmailStatus.SENT) {
+            setEmailStatus(() => EmailStatus.SENT);
         } else {
-            setStatusEmail(() => EmailStatus.EMPTY);
+            setEmailStatus(() => EmailStatus.EMPTY);
         }
     };
 
     const toggleEmailFailed = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (statusEmail !== EmailStatus.FAILED) {
-            setStatusEmail(() => EmailStatus.FAILED);
+        if (emailStatus !== EmailStatus.FAILED) {
+            setEmailStatus(() => EmailStatus.FAILED);
         } else {
-            setStatusEmail(() => EmailStatus.EMPTY);
+            setEmailStatus(() => EmailStatus.EMPTY);
         }
     };
 
     const toggleEmailScheduled = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (statusEmail !== EmailStatus.SCHEDULED) {
-            setStatusEmail(() => EmailStatus.SCHEDULED);
+        if (emailStatus !== EmailStatus.SCHEDULED) {
+            setEmailStatus(() => EmailStatus.SCHEDULED);
         } else {
-            setStatusEmail(() => EmailStatus.EMPTY);
+            setEmailStatus(() => EmailStatus.EMPTY);
         }
     };
 
@@ -193,7 +195,6 @@ export const StudentFilter: React.FC<{
             // Select role
             selectedRoles.add(role);
         }
-        console.log(selectedRoles);
         setSelectedRoles(new Set(selectedRoles));
     };
 
@@ -239,11 +240,10 @@ export const StudentFilter: React.FC<{
         if (statusFilter !== StudentStatus.EMPTY) {
             filters.push(`statusFilter=${statusFilter}`);
         }
-        if (statusEmail !== EmailStatus.EMPTY) {
-            filters.push(`emailStatusFilter=${statusEmail}`);
+        if (emailStatus !== EmailStatus.EMPTY) {
+            filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        console.log(query);
         await router.push(`/students${query}`);
 
         const sessionKey = getSessionKey ? await getSessionKey() : "";
@@ -270,7 +270,6 @@ export const StudentFilter: React.FC<{
                     console.log(err);
                     return { success: false };
                 });
-            console.log(response);
             setFilteredStudents(response.data);
         }
     };
@@ -373,16 +372,14 @@ export const StudentFilter: React.FC<{
                     Student Coach Only
                 </button>
 
-                <div
-                    className={`dropdown ${dropdownActive ? "is-active" : ""}`}
-                >
+                <div className={`dropdown ${rolesActive ? "is-active" : ""}`}>
                     <div
                         className={`dropdown-trigger ${
-                            dropdownActive || selectedRoles.size > 0
+                            rolesActive || selectedRoles.size > 0
                                 ? styles.active
                                 : styles.inactive
                         } ${styles.dropdownTrigger}`}
-                        onClick={() => setDropdownActive(!dropdownActive)}
+                        onClick={() => setRolesActive(!rolesActive)}
                     >
                         {selectedRoles.size > 0
                             ? selectedRoles.size === 1
@@ -391,9 +388,9 @@ export const StudentFilter: React.FC<{
                             : "No role selected"}
                         <div className={styles.triangleContainer}>
                             <div
-                                className={`${
-                                    dropdownActive ? styles.up : ""
-                                } ${styles.triangle}`}
+                                className={`${rolesActive ? styles.up : ""} ${
+                                    styles.triangle
+                                }`}
                             />
                         </div>
                     </div>
@@ -416,6 +413,102 @@ export const StudentFilter: React.FC<{
                                       </div>
                                   ))
                                 : null}
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    className={`dropdown ${
+                        emailStatusActive ? "is-active" : ""
+                    }`}
+                >
+                    <div
+                        className={`dropdown-trigger ${
+                            emailStatusActive ||
+                            emailStatus !== EmailStatus.EMPTY
+                                ? styles.active
+                                : styles.inactive
+                        } ${styles.dropdownTrigger}`}
+                        onClick={() => setEmailStatusActive(!emailStatusActive)}
+                    >
+                        {emailStatus === EmailStatus.EMPTY
+                            ? "No email selected"
+                            : emailStatus}
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    emailStatusActive ? styles.up : ""
+                                } ${styles.triangle}`}
+                            />
+                        </div>
+                    </div>
+                    <div className="dropdown-menu">
+                        <div className="dropdown-content">
+                            <div
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.NONE
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleEmailNone}
+                            >
+                                {EmailStatus.NONE}
+                            </div>
+                            <div
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.DRAFT
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleEmailDraft}
+                            >
+                                {EmailStatus.DRAFT}
+                            </div>
+                            <div
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.SENT
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleEmailSent}
+                            >
+                                {EmailStatus.SENT}
+                            </div>
+                            <div
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.FAILED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleEmailFailed}
+                            >
+                                {EmailStatus.FAILED}
+                            </div>
+                            <div
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.SCHEDULED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleEmailScheduled}
+                            >
+                                {EmailStatus.SCHEDULED}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -467,81 +560,6 @@ export const StudentFilter: React.FC<{
                             onClick={toggleFilterNo}
                         />
                         <p>NO</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                EmailStatus.NONE === statusEmail
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleFilterEmailNone}
-                        />
-                        <p>NONE</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                EmailStatus.DRAFT === statusEmail
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleEmailDraft}
-                        />
-                        <p>DRAFT</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                EmailStatus.SENT === statusEmail
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleFilterEmailSent}
-                        />
-                        <p>SENT</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                EmailStatus.FAILED === statusEmail
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleEmailFailed}
-                        />
-                        <p>FAILED</p>
-                    </div>
-                    <div className={styles.buttonContainer}>
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                EmailStatus.SCHEDULED === statusEmail
-                                    ? ForbiddenIconColor
-                                    : ForbiddenIcon
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Disabled"}
-                            onClick={toggleEmailScheduled}
-                        />
-                        <p>SCHEDULED</p>
                     </div>
                 </div>
 
