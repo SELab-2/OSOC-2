@@ -1,6 +1,6 @@
 /* Insert data into person table */
 INSERT INTO person(email, firstname, lastname)
-VALUES('Alice.student@gmail.com', 'Alice', 'Smith'),
+VALUES('alicestudent@gmail.com', 'Alice', 'Smith'),
 ('bob.admin@osoc.com', 'Bob', 'Jones'), ('Trudy@coach@gmail.com', 'Trudy', 'Taylor'),
 ('osoc2@mail.com', 'Osoc', 'TeamTwo');
 

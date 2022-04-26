@@ -2,6 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
+import { StudentFilter } from "../components/Filter/StudentFilter/StudentFilter";
 import { Student } from "../types";
 import styles from "../styles/students.module.scss";
 
@@ -32,6 +33,10 @@ const Students: NextPage = () => {
         }
     };
 
+    const setFilteredStudents = (filteredStudents: Array<Student>) => {
+        setStudents([...filteredStudents]);
+    };
+
     useEffect(() => {
         fetchStudents().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,6 +44,7 @@ const Students: NextPage = () => {
 
     return (
         <div className={styles.students}>
+            <StudentFilter setFilteredStudents={setFilteredStudents} />
             {students.map((student) => {
                 return (
                     <StudentCard
