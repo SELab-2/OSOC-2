@@ -310,7 +310,8 @@ export async function filterProjects(
     assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
-    clientNameSort: FilterSort
+    clientNameSort: FilterSort,
+    fullyAssignedSort: FilterSort
 ) {
     const projects = await prisma.project_role.groupBy({
         by: ["project_id"],
@@ -364,6 +365,22 @@ export async function filterProjects(
             (project) =>
                 project.positions == projects[project.project_id]._sum.positions
         );
+    }
+
+    if (fullyAssignedSort == "asc") {
+        filtered_projects.sort(
+            (x, y) =>
+                +(x.positions == projects[x.project_id]._sum.positions) -
+                +(y.positions == projects[y.project_id]._sum.positions)
+        );
+    }
+    if (fullyAssignedSort == "desc") {
+        filtered_projects.sort(
+            (x, y) =>
+                +(x.positions == projects[x.project_id]._sum.positions) -
+                +(y.positions == projects[y.project_id]._sum.positions)
+        );
+        filtered_projects.reverse();
     }
     return filtered_projects;
 }
