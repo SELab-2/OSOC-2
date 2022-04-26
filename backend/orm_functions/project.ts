@@ -325,15 +325,20 @@ export async function filterProjects(
         },
     });
 
+    let assignedCoachesArray = undefined;
+    if (assignedCoachesFilterArray !== undefined) {
+        assignedCoachesArray = {
+            some: {
+                login_user_id: { in: assignedCoachesFilterArray },
+            },
+        };
+    }
+
     const filtered_projects = await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
-            project_user: {
-                some: {
-                    login_user_id: { in: assignedCoachesFilterArray },
-                },
-            },
+            project_user: assignedCoachesArray,
         },
         orderBy: {
             name: projectNameSort,
@@ -363,11 +368,6 @@ export async function filterProjects(
         },
     });
 
-    console.log("projects");
-    console.log(projects);
-    console.log("filtered projects");
-    console.log(filtered_projects);
-
     if (
         fullyAssignedFilter != undefined &&
         fullyAssignedFilter &&
@@ -383,8 +383,6 @@ export async function filterProjects(
                 for (const c of project_found.project_role) {
                     sum += c._count.contract;
                 }
-                console.log(sum);
-                console.log(project.positions);
                 return project.positions === sum;
             }
 
@@ -416,8 +414,6 @@ export async function filterProjects(
                 const fullyAssignedX = x.positions === sum_x ? 1 : 0;
                 const fullyAssignedY = y.positions === sum_y ? 1 : 0;
 
-                console.log("filtered_projets");
-                console.log(filtered_projects);
                 return fullyAssignedX - fullyAssignedY;
             }
 

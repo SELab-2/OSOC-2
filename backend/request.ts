@@ -572,7 +572,6 @@ export async function parseFilterProjectsRequest(
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
         fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
-        // INSERT INTO project_role(project_id, role_id, positions) VALUES(2, 1, 3);
     });
 }
 
