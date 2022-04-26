@@ -7,10 +7,10 @@ import CoachIconColor from "../../public/images/coach_icon_color.png";
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
-import { AccountStatus, getNextSort, LoginUser, Sort } from "../../types";
-import SessionContext from "../../contexts/sessionProvider";
+import { AccountStatus, getNextSort, LoginUser, Sort } from "../../../types";
+import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
-import { useSockets } from "../../contexts/socketProvider";
+import { useSockets } from "../../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
     updateUsers: (users: Array<LoginUser>) => void;

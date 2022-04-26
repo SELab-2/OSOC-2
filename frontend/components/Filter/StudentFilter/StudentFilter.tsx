@@ -1,6 +1,6 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, Role, Sort, Student } from "../../../types/types";
+import { getNextSort, Role, Sort, Student } from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -14,7 +14,7 @@ import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
 }> = ({ setFilteredStudents }) => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
     const router = useRouter();
 
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
@@ -65,9 +65,6 @@ export const StudentFilter: React.FC<{
                 console.log(err);
                 return { success: false };
             });
-        if (setSessionKey) {
-            setSessionKey(responseRoles.sessionkey);
-        }
         setRoles(responseRoles.data);
     };
 
@@ -297,9 +294,7 @@ export const StudentFilter: React.FC<{
                     console.log(err);
                     return { success: false };
                 });
-            if (setSessionKey) {
-                setSessionKey(response.sessionkey);
-            }
+            console.log(response);
             setFilteredStudents(response.data);
         }
     };
