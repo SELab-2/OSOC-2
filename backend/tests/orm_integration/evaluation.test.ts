@@ -15,7 +15,7 @@ const evaluation1: UpdateEvaluationForStudent = {
     evaluation_id: 1,
     loginUserId: 1,
     decision: decision_enum.YES,
-    motivation: "Definetly unicorn, all in for it",
+    motivation: "Definitely unicorn, all in for it",
 };
 
 let jobApplicationId = 0;

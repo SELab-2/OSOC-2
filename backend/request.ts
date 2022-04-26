@@ -253,14 +253,9 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion", "senderId"], types.id).then(() => {
+    return hasFields(req, ["suggestion"], types.id).then(() => {
         const sug: unknown = req.body.suggestion;
-        if (
-            sug != Decision.YES &&
-            sug != Decision.MAYBE &&
-            sug != Decision.NO &&
-            req.body.senderId != null
-        )
+        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
             return rejector();
 
         return Promise.resolve({
@@ -268,7 +263,6 @@ export async function parseSuggestStudentRequest(
             id: Number(req.params.id),
             suggestion: sug as InternalTypes.Suggestion,
             reason: maybe(req.body, "reason"),
-            senderId: Number(req.body.senderId),
         });
     });
 }
@@ -615,15 +609,29 @@ export async function parseUpdateTemplateRequest(
 export async function parseFormRequest(
     req: express.Request
 ): Promise<Requests.Form> {
-    return hasFields(req, ["eventId", "createdAt", "data"], types.neither).then(
-        () => {
-            return Promise.resolve({
-                eventId: req.body.eventId,
-                createdAt: req.body.createdAt,
-                data: req.body.data,
-            });
+    return hasFields(req, ["data"], types.neither).then(() => {
+        if (
+            req.body.data.fields === undefined ||
+            req.body.data.fields === null
+        ) {
+            return rejector();
         }
-    );
+        for (const question of req.body.data.fields) {
+            console.log(question);
+            if (
+                question.key === undefined ||
+                question.key === null ||
+                question.value === undefined
+            ) {
+                console.log(question.value);
+                return rejector();
+            }
+        }
+        return Promise.resolve({
+            createdAt: maybe(req.body, "createdAt"),
+            data: req.body.data,
+        });
+    });
 }
 
 export async function parseRequestResetRequest(

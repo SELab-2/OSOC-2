@@ -96,6 +96,8 @@ async function setAccountStatus(
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
+    console.log("admin: " + is_admin.toString());
+    console.log("coach: " + is_coach.toString());
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -129,15 +131,17 @@ async function createUserAcceptance(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
+        .then(async (parsed) => {
+            console.log("admin: " + parsed.data.is_admin.toString());
+            console.log("coach: " + parsed.data.is_coach.toString());
+            return setAccountStatus(
                 parsed.data.id,
                 "ACTIVATED",
                 parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+                parsed.data.is_admin.toString().toLowerCase().trim() == "true",
+                parsed.data.is_coach.toString().toLowerCase().trim() == "true"
+            );
+        });
 }
 
 /**
