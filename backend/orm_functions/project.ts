@@ -313,10 +313,21 @@ export async function filterProjects(
     clientNameSort: FilterSort,
     fullyAssignedSort: FilterSort
 ) {
-    const projects = await prisma.project_role.groupBy({
-        by: ["project_id"],
-        _sum: {
-            positions: true,
+    // const projects = await prisma.project_role.groupBy({
+    //     by: ["project_id"],
+    //     _sum: {
+    //         positions: true,
+    //     },
+    // });
+    const projects = await prisma.project.findMany({
+        include: {
+            project_role: {
+                include: {
+                    _count: {
+                        select: { contract: true },
+                    },
+                },
+            },
         },
     });
 
