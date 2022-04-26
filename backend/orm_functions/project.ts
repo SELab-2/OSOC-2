@@ -310,8 +310,8 @@ export async function filterProjects(
     assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
-    clientNameSort: FilterSort
-    //fullyAssignedSort: FilterSort
+    clientNameSort: FilterSort,
+    fullyAssignedSort: FilterSort
 ) {
     const projects = await prisma.project.findMany({
         include: {
@@ -325,7 +325,7 @@ export async function filterProjects(
         },
     });
 
-    let filtered_projects = await prisma.project.findMany({
+    const filtered_projects = await prisma.project.findMany({
         where: {
             name: projectNameFilter,
             partner: clientNameFilter,
@@ -335,12 +335,10 @@ export async function filterProjects(
                 },
             },
         },
-        orderBy: [
-            {
-                name: projectNameSort,
-            },
-            { partner: clientNameSort },
-        ],
+        orderBy: {
+            name: projectNameSort,
+            partner: clientNameSort,
+        },
         include: {
             project_user: {
                 select: {
@@ -365,13 +363,20 @@ export async function filterProjects(
         },
     });
 
-    if (fullyAssignedFilter && filtered_projects.length !== 0) {
-        filtered_projects = filtered_projects.filter((project) => {
+    console.log("projects");
+    console.log(projects);
+    console.log("filtered projects");
+    console.log(filtered_projects);
+
+    if (
+        fullyAssignedFilter != undefined &&
+        fullyAssignedFilter &&
+        filtered_projects.length !== 0
+    ) {
+        return filtered_projects.filter((project) => {
             const project_found = projects.find(
                 (elem) => elem.project_id === project.project_id
             );
-
-            console.log(project_found);
 
             if (project_found != undefined) {
                 let sum = 0;
@@ -385,6 +390,43 @@ export async function filterProjects(
 
             return false;
         });
+    }
+
+    if (fullyAssignedSort == "desc" || fullyAssignedSort == "asc") {
+        filtered_projects.sort((x, y) => {
+            const project_x_found = projects.find(
+                (elem) => elem.project_id === x.project_id
+            );
+
+            const project_y_found = projects.find(
+                (elem) => elem.project_id === y.project_id
+            );
+
+            if (project_x_found != undefined && project_y_found != undefined) {
+                let sum_x = 0;
+                for (const c of project_x_found.project_role) {
+                    sum_x += c._count.contract;
+                }
+
+                let sum_y = 0;
+                for (const c of project_y_found.project_role) {
+                    sum_y += c._count.contract;
+                }
+
+                const fullyAssignedX = x.positions === sum_x ? 1 : 0;
+                const fullyAssignedY = y.positions === sum_y ? 1 : 0;
+
+                console.log("filtered_projets");
+                console.log(filtered_projects);
+                return fullyAssignedX - fullyAssignedY;
+            }
+
+            return 0;
+        });
+    }
+
+    if (fullyAssignedSort == "desc") {
+        filtered_projects.reverse();
     }
 
     /*if (fullyAssignedSort == "asc") {

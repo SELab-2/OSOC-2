@@ -477,8 +477,8 @@ async function filterProjects(
         checkedSessionKey.data.assignedCoachesFilterArray,
         checkedSessionKey.data.fullyAssignedFilter,
         checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort
-        //checkedSessionKey.data.fullyAssignedSort
+        checkedSessionKey.data.clientNameSort,
+        checkedSessionKey.data.fullyAssignedSort
     );
 
     const projectlist = [];

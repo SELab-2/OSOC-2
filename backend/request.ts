@@ -543,7 +543,7 @@ export async function parseFilterProjectsRequest(
 
     let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
-        fullyAssignedFilter = Boolean(req.body.fullyAssignedFilter);
+        fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
     }
 
     return Promise.resolve({
@@ -555,6 +555,7 @@ export async function parseFilterProjectsRequest(
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
         fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
+        // INSERT INTO project_role(project_id, role_id, positions) VALUES(2, 1, 3);
     });
 }
 
