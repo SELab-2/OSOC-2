@@ -630,11 +630,36 @@ const form_obj: T.Requests.Form = {
 
 test("Can parse form request", () => {
     const req: express.Request = getMockReq();
-    req.body = {};
 
-    return expect(Rq.parseFormRequest(req)).rejects.toBe(
+    req.body = {};
+    const i1 = expect(Rq.parseFormRequest(req)).rejects.toBe(
         errors.cookArgumentError()
     );
+
+    const req2: express.Request = getMockReq();
+    req2.body = { data: {} };
+    const i2 = expect(Rq.parseFormRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    const req3: express.Request = getMockReq();
+    req3.body = { data: { fields: [{ value: "value" }] } };
+    const i3 = expect(Rq.parseFormRequest(req3)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    const req4: express.Request = getMockReq();
+    req4.body = { ...form_obj };
+    const v1 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
+        "data",
+        form_obj.data
+    );
+    const v2 = expect(Rq.parseFormRequest(req4)).resolves.toHaveProperty(
+        "createdAt",
+        form_obj.createdAt
+    );
+
+    return Promise.all([i1, i2, i3, v1, v2]);
 });
 
 describe.each(keys)("Questions present", (key) => {
