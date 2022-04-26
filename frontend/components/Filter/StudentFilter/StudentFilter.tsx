@@ -1,6 +1,6 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, Role, Sort, Student } from "../../../types";
+import { EmailStatus, getNextSort, Role, Sort, Student } from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -30,12 +30,9 @@ export const StudentFilter: React.FC<{
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [osocYear, setOsocYear] = useState<string>("");
-    const [emailNone, setEmailNone] = useState<boolean>(false);
-    const [emailDraft, setEmailDraft] = useState<boolean>(false);
-    const [emailSent, setEmailSent] = useState<boolean>(false);
-    const [emailFailed, setEmailFailed] = useState<boolean>(false);
-    const [emailScheduled, setEmailScheduled] = useState<boolean>(false);
-    const [statusEmail, setStatusEmail] = useState<string>("");
+    const [statusEmail, setStatusEmail] = useState<EmailStatus>(
+        EmailStatus.EMPTY
+    );
 
     // Roles used in the dropdown
     const [roles, setRoles] = useState<Array<Role>>([]);
@@ -137,68 +134,50 @@ export const StudentFilter: React.FC<{
 
     const toggleFilterEmailNone = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailNone) {
-            setStatusEmail(() => "NONE");
+        if (statusEmail !== EmailStatus.NONE) {
+            setStatusEmail(() => EmailStatus.NONE);
         } else {
-            setStatusEmail(() => "");
+            setStatusEmail(() => EmailStatus.EMPTY);
         }
-        setEmailStatusAll(!emailNone, false, false, false, false);
     };
 
     const toggleEmailDraft = async (e: SyntheticEvent) => {
         e.preventDefault();
         //This is because the call is async
-        if (!emailDraft) {
-            setStatusEmail(() => "DRAFT");
+        if (statusEmail !== EmailStatus.DRAFT) {
+            setStatusEmail(() => EmailStatus.DRAFT);
         } else {
-            setStatusEmail(() => "");
+            setStatusEmail(() => EmailStatus.EMPTY);
         }
-        setEmailStatusAll(false, !emailDraft, false, false, false);
     };
 
     const toggleFilterEmailSent = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailSent) {
-            setStatusEmail(() => "SENT");
+        if (statusEmail !== EmailStatus.SENT) {
+            setStatusEmail(() => EmailStatus.SENT);
         } else {
-            setStatusEmail(() => "");
+            setStatusEmail(() => EmailStatus.EMPTY);
         }
-        setEmailStatusAll(false, false, !emailSent, false, false);
     };
 
     const toggleEmailFailed = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailFailed) {
-            setStatusEmail(() => "FAILED");
+        if (statusEmail !== EmailStatus.FAILED) {
+            setStatusEmail(() => EmailStatus.FAILED);
         } else {
-            setStatusEmail(() => "");
+            setStatusEmail(() => EmailStatus.EMPTY);
         }
-        setEmailStatusAll(false, false, false, !emailFailed, false);
     };
 
     const toggleEmailScheduled = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (!emailScheduled) {
-            setStatusEmail(() => "SCHEDULED");
+        if (statusEmail !== EmailStatus.SCHEDULED) {
+            setStatusEmail(() => EmailStatus.SCHEDULED);
         } else {
-            setStatusEmail(() => "");
+            setStatusEmail(() => EmailStatus.EMPTY);
         }
-        setEmailStatusAll(false, false, false, false, !emailScheduled);
     };
 
-    const setEmailStatusAll = (
-        none: boolean,
-        draft: boolean,
-        sent: boolean,
-        failed: boolean,
-        scheduled: boolean
-    ) => {
-        setEmailNone(() => none);
-        setEmailDraft(() => draft);
-        setEmailSent(() => sent);
-        setEmailFailed(() => failed);
-        setEmailScheduled(() => scheduled);
-    };
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
         setAlumni((prev) => !prev);
@@ -487,7 +466,11 @@ export const StudentFilter: React.FC<{
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
-                            src={emailNone ? ForbiddenIconColor : ForbiddenIcon}
+                            src={
+                                EmailStatus.NONE === statusEmail
+                                    ? ForbiddenIconColor
+                                    : ForbiddenIcon
+                            }
                             width={30}
                             height={30}
                             alt={"Disabled"}
@@ -499,7 +482,9 @@ export const StudentFilter: React.FC<{
                         <Image
                             className={styles.buttonImage}
                             src={
-                                emailDraft ? ForbiddenIconColor : ForbiddenIcon
+                                EmailStatus.DRAFT === statusEmail
+                                    ? ForbiddenIconColor
+                                    : ForbiddenIcon
                             }
                             width={30}
                             height={30}
@@ -511,7 +496,11 @@ export const StudentFilter: React.FC<{
                     <div className={styles.buttonContainer}>
                         <Image
                             className={styles.buttonImage}
-                            src={emailSent ? ForbiddenIconColor : ForbiddenIcon}
+                            src={
+                                EmailStatus.SENT === statusEmail
+                                    ? ForbiddenIconColor
+                                    : ForbiddenIcon
+                            }
                             width={30}
                             height={30}
                             alt={"Disabled"}
@@ -523,7 +512,9 @@ export const StudentFilter: React.FC<{
                         <Image
                             className={styles.buttonImage}
                             src={
-                                emailFailed ? ForbiddenIconColor : ForbiddenIcon
+                                EmailStatus.FAILED === statusEmail
+                                    ? ForbiddenIconColor
+                                    : ForbiddenIcon
                             }
                             width={30}
                             height={30}
@@ -536,7 +527,7 @@ export const StudentFilter: React.FC<{
                         <Image
                             className={styles.buttonImage}
                             src={
-                                emailScheduled
+                                EmailStatus.SCHEDULED === statusEmail
                                     ? ForbiddenIconColor
                                     : ForbiddenIcon
                             }

@@ -14,6 +14,14 @@ export enum FilterBoolean {
     NONE = "",
 }
 
+export enum EmailStatus {
+    NONE = "NONE",
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    FAILED = "FAILED",
+    SCHEDULED = "SCHEDULED",
+    EMPTY = "",
+}
 export const getNextFilterBoolean = (bool: FilterBoolean) => {
     if (bool == FilterBoolean.TRUE) {
         return FilterBoolean.FALSE;
