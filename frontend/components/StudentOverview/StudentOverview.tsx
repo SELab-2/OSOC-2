@@ -33,6 +33,11 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         }
     };
 
+    useEffect(() => {
+        fetchEvals().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const yesSuggest = () => {
         makeSuggestion("YES");
     };
@@ -111,11 +116,6 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         }
     };
 
-    useEffect(() => {
-        fetchEvals().then();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [evaluations]);
-
     return (
         <div>
             <StudentCard student={student} display={Display.FULL} />
@@ -126,6 +126,25 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                     <a onClick={definitiveNo}>NO</a>
                     <a onClick={definitiveMaybe}>MAYBE</a>
                 </div>
+            </div>
+            <div>
+                {evaluations.map((evaluation) => {
+                    if (evaluation.isFinal) {
+                        return (
+                            <div key={evaluation.evaluation_id}>
+                                <p>
+                                    {evaluation.decision}{" "}
+                                    <strong>
+                                        {evaluation.senderFirstname}{" "}
+                                        {evaluation.senderLastname}
+                                        {": "}
+                                    </strong>
+                                    {evaluation.reason}
+                                </p>
+                            </div>
+                        );
+                    }
+                })}
             </div>
             <div>
                 <h1>Suggestions</h1>
@@ -144,8 +163,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                                     {evaluation.senderLastname}
                                     {": "}
                                 </strong>
-                                {evaluation.reason}{" "}
-                                {JSON.stringify(evaluation.isFinal)}
+                                {evaluation.reason}
                             </p>
                         </div>
                     );
