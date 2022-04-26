@@ -215,16 +215,12 @@
 .studentButtonsContainer {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
 }
 
-.studentButtonsContainer button {
-    margin-inline: auto;
-}
-
-.studentButtonsContainer button:first-child {
-    margin-left: 0;
+.studentButtonsContainer button, .studentButtonsContainer div {
+    margin-right: auto;
 }
 
 .studentButtonsContainer button:last-child {
