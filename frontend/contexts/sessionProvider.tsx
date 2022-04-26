@@ -106,7 +106,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     return "";
                 }
                 if (response.account_status === AccountStatus.PENDING) {
-                    verified = false;
+                    verified = false; // needs to be false, otherwise the next request will think it's automatically true, even when it has an invalid key.
                     router.push("/pending");
                     return "";
                 }
