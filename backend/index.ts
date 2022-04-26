@@ -26,7 +26,7 @@ require("dotenv").config({
     path: path.join(__dirname, `./.env.${process.env.NODE_ENV}`),
 });
 
-export const io = new Server<
+const io = new Server<
     ClientToServerEvents,
     ServerToClientEvents,
     InterServerEvents,
