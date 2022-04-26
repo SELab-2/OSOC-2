@@ -9,6 +9,8 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import * as session_key from "./session_key.json";
+import { addSessionKey } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all students in the system.
@@ -74,8 +76,19 @@ async function createUserRequest(req: express.Request): Promise<Responses.Id> {
                 });
             })
             .then((user) => {
+                const key: string = util.generateKey();
+                const futureDate = new Date();
+                futureDate.setDate(
+                    futureDate.getDate() + session_key.valid_period
+                );
+                return addSessionKey(user.login_user_id, key, futureDate);
+            })
+            .then((user) => {
                 console.log("Attached a login user: " + user);
-                return Promise.resolve({ id: user.login_user_id });
+                return Promise.resolve({
+                    id: user.login_user_id,
+                    sessionkey: user.session_key,
+                });
             })
             .catch((e) => {
                 if ("code" in e && e.code == "P2002") {
@@ -96,8 +109,6 @@ async function setAccountStatus(
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
-    console.log("admin: " + is_admin.toString());
-    console.log("coach: " + is_coach.toString());
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -132,8 +143,6 @@ async function createUserAcceptance(
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            console.log("admin: " + parsed.data.is_admin.toString());
-            console.log("coach: " + parsed.data.is_coach.toString());
             return setAccountStatus(
                 parsed.data.id,
                 "ACTIVATED",
