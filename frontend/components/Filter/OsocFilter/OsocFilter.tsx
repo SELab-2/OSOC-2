@@ -1,7 +1,7 @@
-import styles from "./OsocCreate.module.css";
+import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, OsocEdition, Sort } from "../../types";
-import SessionContext from "../../contexts/sessionProvider";
+import { getNextSort, OsocEdition, Sort } from "../../../types";
+import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 
 export const OsocCreateFilter: React.FC<{
@@ -111,7 +111,7 @@ export const OsocCreateFilter: React.FC<{
     };
 
     return (
-        <div className={styles.filter}>
+        <div className={styles.osocfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
                     <div onClick={toggleYearSort}>

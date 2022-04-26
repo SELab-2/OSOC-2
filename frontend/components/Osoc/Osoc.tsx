@@ -9,7 +9,7 @@ export const Osoc: React.FC<{
 }> = ({ osoc, removeOsoc }) => {
     const [year] = useState<number>(osoc.year);
     const [projects] = useState<number>(osoc._count.project);
-    const { sessionKey, setSessionKey } = useContext(SessionContext);
+    const { sessionKey } = useContext(SessionContext);
     const osocId = osoc.osoc_id;
 
     const deleteOsoc = async (e: SyntheticEvent) => {
@@ -29,9 +29,6 @@ export const Osoc: React.FC<{
             .then(async (json) => {
                 if (!json.success) {
                     return { success: false };
-                }
-                if (setSessionKey) {
-                    setSessionKey(json.sessionkey);
                 }
                 removeOsoc(osoc);
                 return json;

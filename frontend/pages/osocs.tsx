@@ -3,7 +3,7 @@ import { OsocEdition } from "../types";
 import { NextPage } from "next";
 import React, { useState } from "react";
 import styles from "../styles/users.module.css";
-import { OsocCreateFilter } from "../components/Osoc/OsocFilter";
+import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
 
 /**
  * The `osoc edition` page, only accessible for admins
