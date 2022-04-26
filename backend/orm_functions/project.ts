@@ -326,16 +326,16 @@ export async function filterProjects(
             partner: clientNameFilter,
             project_user: {
                 some: {
-                    login_user: {
-                        login_user_id: { in: assignedCoachesFilterArray },
-                    },
+                    login_user_id: { in: assignedCoachesFilterArray },
                 },
             },
         },
-        orderBy: {
-            name: projectNameSort,
-            partner: clientNameSort,
-        },
+        orderBy: [
+            {
+                name: projectNameSort,
+            },
+            { partner: clientNameSort },
+        ],
         include: {
             project_user: {
                 select: {
@@ -360,10 +360,17 @@ export async function filterProjects(
         },
     });
 
-    if (fullyAssignedFilter) {
-        return filtered_projects.filter(
-            (project) =>
-                project.positions == projects[project.project_id]._sum.positions
+    if (fullyAssignedFilter && filtered_projects.length !== 0) {
+        return filtered_projects.filter((project) =>
+            (project.positions ==
+                projects.find(
+                    (elem) => elem._sum.positions === project.positions
+                )) ==
+            null
+                ? -1
+                : projects.find(
+                      (elem) => elem._sum.positions === project.positions
+                  )
         );
     }
 
