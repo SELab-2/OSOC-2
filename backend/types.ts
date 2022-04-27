@@ -430,23 +430,6 @@ export interface WithUserID<T> {
  */
 export namespace Responses {
     /**
-     *  A keyed type is a type holding a session key and a data field holding the
-     * template type.
-     *
-     * @template T The type to key.
-     */
-    export interface Keyed<T> {
-        /**
-         *  The session key.
-         */
-        sessionkey: InternalTypes.SessionKey;
-        /**
-         *  The actual data.
-         */
-        data: T;
-    }
-
-    /**
      *  A response consisting of only a session key.
      */
     export interface Key {
@@ -480,13 +463,23 @@ export namespace Responses {
     /**
      *  A partial student response is the keyed combination of their id and name.
      */
-    export interface PartialStudent extends Keyed<InternalTypes.IdName> {}
+    export interface PartialStudent extends InternalTypes.IdName {}
+
+    /**
+     *  A partial user response is the combination of their id and name.
+     */
+    export interface PartialUser extends InternalTypes.IdName {}
+
+    /**
+     *  A partial user response is the combination of their id and name.
+     */
+    export interface PartialCoach extends PartialUser {}
 
     /**
      *  A student response is the keyed version of the student and their associated
      * data.
      */
-    export interface Student extends Keyed<InternalTypes.Student> {}
+    export interface Student extends InternalTypes.Student {}
 
     /**
      *  A form-student.
@@ -514,12 +507,16 @@ export namespace Responses {
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
-    export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+    export interface StudentList {
+        data: InternalTypes.Student[];
+    }
 
     /**
      *
      */
-    export interface UserList extends Keyed<InternalTypes.User[]> {}
+    export interface UserList {
+        data: InternalTypes.User[];
+    }
 
     /**
      *
@@ -538,17 +535,20 @@ export namespace Responses {
      *  A student list response is the keyed version of an array of partial
      * students.
      */
-    export interface IdNameList extends Keyed<InternalTypes.IdName[]> {}
+    export interface IdNameList {
+        data: InternalTypes.IdName[];
+    }
 
     /**
      *  A student response is the keyed version of the student and their associated
      * data.
      */
-    export interface SuggestionInfo
-        extends Keyed<InternalTypes.SuggestionInfo[]> {}
+    export interface SuggestionInfo {
+        data: InternalTypes.SuggestionInfo[];
+    }
 
     /**
-     *  An empty response. Doesn't hold a session key (logout only).
+     *  An empty response. Doesn't hold a session key.
      */
     export interface Empty {}
 
@@ -556,12 +556,14 @@ export namespace Responses {
      *  A coach response is the keyed version of the coach and their associated
      * data.
      */
-    export interface Coach extends Keyed<InternalTypes.Coach> {}
+    export interface Coach extends InternalTypes.Coach {}
 
     /**
      *  A coach list response is the keyed version of a list of coaches
      */
-    export interface CoachList extends Keyed<InternalTypes.Coach[]> {}
+    export interface CoachList {
+        data: InternalTypes.Coach[];
+    }
 
     /**
      *  A person response is the keyed version of the person and their associated
@@ -589,61 +591,72 @@ export namespace Responses {
      *  An admin response is the keyed version of the admin and their associated
      * data.
      */
-    export interface Admin extends Keyed<InternalTypes.Admin> {}
+    export interface Admin extends InternalTypes.Admin {}
 
     /**
      *  An adminList response is the keyed version of a list of admins and their
      * associated data.
      */
-    export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
+    export interface AdminList {
+        data: InternalTypes.Admin[];
+    }
 
     /**
      *  A project response is the keyed version of the project and their associated
      * data.
      */
-    export interface Project extends Keyed<InternalTypes.Project> {}
+    export interface Project extends InternalTypes.Project {}
 
     /**
      *  A project list response is the keyed version of a list of projects
      */
-    export interface ProjectList extends Keyed<InternalTypes.Project[]> {}
+    export interface ProjectList {
+        data: InternalTypes.Project[];
+    }
 
     /**
      *  An admin list response is the keyed version of the list of admins.
      */
-    export interface AdminList extends Keyed<InternalTypes.Admin[]> {}
+    export interface AdminList {
+        data: InternalTypes.Admin[];
+    }
 
     /**
      *  A project drafted students response is the keyed version of the students and
      * the associated data of the project.
      */
     export interface ProjectDraftedStudents
-        extends Keyed<InternalTypes.ProjectDraftedStudents> {}
+        extends InternalTypes.ProjectDraftedStudents {}
 
     /**
      *  A project drafted students response is the keyed version of the students and
      * the associated data of the project.
      */
     export interface ModProjectStudent
-        extends Keyed<InternalTypes.ModProjectStudent> {}
+        extends InternalTypes.ModProjectStudent {}
 
     /**
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
-    export interface StudentList extends Keyed<InternalTypes.Student[]> {}
+    export interface StudentList {
+        data: InternalTypes.Student[];
+    }
     /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
-    export interface ConflictList extends Keyed<InternalTypes.Conflict[]> {}
+    export interface ConflictList {
+        data: InternalTypes.Conflict[];
+    }
 
-    export interface TemplateList
-        extends Keyed<InternalTypes.ShortTemplate[]> {}
-    export interface Template extends Keyed<InternalTypes.Template> {}
-    export interface SingleFollowup
-        extends Keyed<InternalTypes.FollowupStatus> {}
-    export interface FollowupList
-        extends Keyed<InternalTypes.FollowupStatus[]> {}
+    export interface TemplateList {
+        data: InternalTypes.ShortTemplate[];
+    }
+    export interface Template extends InternalTypes.Template {}
+    export interface SingleFollowup extends InternalTypes.FollowupStatus {}
+    export interface FollowupList {
+        data: InternalTypes.FollowupStatus[];
+    }
 
     /**
      *  @deprecated Either an API Error or a data value. Is deprecated in favor of
@@ -653,6 +666,7 @@ export namespace Responses {
 
     /**
      *  An API response is one of the previous response types.
+     *  @deprecated Not up to date
      */
     export type ApiResponse =
         | Empty
@@ -732,7 +746,6 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
-        // senderId: number;
         reason?: string;
     }
 
@@ -797,8 +810,7 @@ export namespace Requests {
     }
 
     export interface Form {
-        eventId: string;
-        createdAt: string;
+        createdAt?: string;
         data: DataForm;
     }
 
@@ -817,11 +829,7 @@ export namespace Requests {
     }
 
     export interface FormValues {
-        id: string;
-        name: string;
         url: string;
-        mimeType: string;
-        size: number;
     }
 
     export interface Option {
@@ -880,6 +888,34 @@ export interface Email {
     to: string;
     subject: string;
     html: string;
+}
+
+/**
+ * types for socket.io when sending something from the server to the client
+ */
+export interface ServerToClientEvents {
+    loginUserUpdated: () => void;
+}
+
+/**
+ * types for socket.io when sending something from the client to the server
+ */
+export interface ClientToServerEvents {
+    updateUser: (loginUserId: number) => void;
+}
+
+/**
+ * types for communication between multiple socket.io servers.
+ * This is empty because we don't need (we have only 1 server)
+ */
+export interface InterServerEvents {}
+
+/**
+ * information about the socket.io socket
+ */
+export interface SocketData {
+    name: string;
+    age: number;
 }
 
 export enum Decision {

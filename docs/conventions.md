@@ -3,7 +3,7 @@ This style guide is influenced by https://github.com/basarat/typescript-book/blo
 
 > An unofficial TypeScript Style Guide
 
-People have asked me for my opinions on this. Personally I don't enforce these a lot on my teams and projects but it does help to have these mentioned as a tiebreaker when someone feels the need to have such strong consistency. There are other things that I feel much more strongly about and those are covered in the [tips chapter](../tips/main.md) (e.g. type assertion is bad, property setters are bad) 🌹.
+People have asked me for my opinions on this. Personally I don't enforce these a lot on my teams and projects but it does help to have these mentioned as a tiebreaker when someone feels the need to have such strong consistency. There are other things that I feel much more strongly about and those are covered in the [tips chapter](https://github.com/basarat/typescript-book/blob/master/docs/tips/main.md) (e.g. type assertion is bad, property setters are bad) 🌹.
 
 Key Sections:
 
