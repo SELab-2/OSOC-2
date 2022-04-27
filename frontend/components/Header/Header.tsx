@@ -2,14 +2,14 @@ import styles from "./Header.module.css";
 import Image from "next/image";
 import LogoOsocColor from "../../public/images/logo-osoc-color.svg";
 import Link from "next/link";
-import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
+import React, { SyntheticEvent, useContext } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 
 export const Header: React.FC = () => {
     const {
         sessionKey,
-        getSessionKey,
+        isVerified,
         setSessionKey,
         isAdmin,
         setIsAdmin,
@@ -17,20 +17,6 @@ export const Header: React.FC = () => {
     } = useContext(SessionContext);
 
     const router = useRouter();
-    const [validUser, setValidUser] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (getSessionKey) {
-            getSessionKey().then(async (sessionKey) => {
-                if (sessionKey !== "") {
-                    setValidUser(true);
-                } else {
-                    setValidUser(false);
-                }
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const logIn = (e: SyntheticEvent) => {
         e.preventDefault();
@@ -84,24 +70,26 @@ export const Header: React.FC = () => {
                     router.pathname !== "/login" ? "" : styles.displayNone
                 }`}
             >
-                {validUser && !router.pathname.startsWith("/reset") ? (
+                {isVerified && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/students"}>Students</Link>
                 ) : null}
-                {validUser && !router.pathname.startsWith("/reset") ? (
+                {isVerified && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/projects"}>Projects</Link>
                 ) : null}
-                {validUser && !router.pathname.startsWith("/reset") ? (
+                {isVerified && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/osocs"}>Osoc Editions</Link>
                 ) : null}
                 {sessionKey !== "" &&
+                isVerified &&
                 isAdmin &&
                 !router.pathname.startsWith("/reset") ? (
                     <Link href={"/users"}>Manage Users</Link>
                 ) : null}
-                {router.pathname !== "/login" &&
+                {isVerified &&
+                router.pathname !== "/login" &&
                 !router.pathname.startsWith("/reset") ? (
                     <button onClick={logOut}>Log out</button>
-                ) : router.pathname.startsWith("/reset") ? (
+                ) : isVerified && router.pathname.startsWith("/reset") ? (
                     <button onClick={logIn}>Log in</button>
                 ) : null}
             </div>

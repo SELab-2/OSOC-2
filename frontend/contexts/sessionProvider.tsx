@@ -14,6 +14,8 @@ interface ISessionContext {
     setIsCoach?: (coach: boolean) => void;
     isAdmin: boolean;
     setIsAdmin?: (admin: boolean) => void;
+    /* Boolean that is true when the user has been verified */
+    isVerified: boolean;
 }
 
 // The default state the application is in
@@ -21,6 +23,7 @@ const defaultState = {
     sessionKey: "", // No user is logged in
     isCoach: false,
     isAdmin: false,
+    isVerified: false,
 };
 
 const SessionContext = createContext<ISessionContext>(defaultState);
@@ -39,6 +42,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     const [sessionKey, setSessionKeyState] = useState<string>("");
     const [isCoach, setIsCoachState] = useState<boolean>(false);
     const [isAdmin, setIsAdminState] = useState<boolean>(false);
+    const [isVerified, setIsVerified] = useState<boolean>(false);
 
     // Because `useEffect` can have a different order we need to check if the session id has already been verified
     let verified = false;
@@ -129,6 +133,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     return "";
                 }
                 setSessionKey(sessionKey);
+                setIsVerified(true);
                 return sessionKey;
             })
             .catch((error) => {
@@ -139,6 +144,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     router.push("/login");
                 }
                 setSessionKey("");
+                setIsVerified(true);
                 return "";
             });
     };
@@ -171,6 +177,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                 setIsCoach,
                 isAdmin,
                 setIsAdmin,
+                isVerified,
             }}
         >
             {children}
