@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import styles from "./Settings.module.scss";
-import { LoginUser } from "../../types/types";
+import { LoginUser } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import crypto from "crypto";
 

@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { UnderConstruction } from "../components/UnderConstruction/UnderConstruction";
-import { AccountStatus, LoginUser } from "../types/types";
+import { AccountStatus, LoginUser } from "../types";
 import { SettingsComponent } from "../components/Settings/SettingsComponent";
 
 const Settings: NextPage = () => {

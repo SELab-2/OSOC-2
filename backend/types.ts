@@ -501,7 +501,7 @@ export namespace Responses {
      *  A user response is the keyed version of the user and their associated
      * data.
      */
-    export interface User extends Keyed<InternalTypes.User> {}
+    export interface User extends InternalTypes.User {}
 
     /**
      *  A studentList response is the keyed version of a list of students and their
@@ -642,6 +642,7 @@ export namespace Responses {
     export interface StudentList {
         data: InternalTypes.Student[];
     }
+
     /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
@@ -652,8 +653,11 @@ export namespace Responses {
     export interface TemplateList {
         data: InternalTypes.ShortTemplate[];
     }
+
     export interface Template extends InternalTypes.Template {}
+
     export interface SingleFollowup extends InternalTypes.FollowupStatus {}
+
     export interface FollowupList {
         data: InternalTypes.FollowupStatus[];
     }
