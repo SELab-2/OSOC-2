@@ -18,7 +18,7 @@ export async function listAdmins(
 ): Promise<Responses.AdminList> {
     return rq
         .parseAdminAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async () =>
             ormL
                 .searchAllAdminLoginUsers(true)

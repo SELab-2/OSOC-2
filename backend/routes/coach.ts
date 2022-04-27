@@ -18,7 +18,7 @@ export async function listCoaches(
 ): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async () =>
             ormLU
                 .searchAllCoachLoginUsers(true)
@@ -54,7 +54,7 @@ export async function modCoach(
 ): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
             return ormLU
                 .updateLoginUser({

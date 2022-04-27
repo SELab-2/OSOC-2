@@ -404,13 +404,13 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
-    let isCoachFilter = maybe(req.body, "isCoachFilter");
+    let isCoachFilter = undefined;
     if ("isCoachFilter" in req.body) {
-        isCoachFilter = Boolean(req.body.isCoachFilter);
+        isCoachFilter = req.body.isCoachFilter === "true";
     }
-    let isAdminFilter = maybe(req.body, "isAdminFilter");
+    let isAdminFilter = undefined;
     if ("isAdminFilter" in req.body) {
-        isAdminFilter = Boolean(req.body.isAdminFilter);
+        isAdminFilter = req.body.isAdminFilter === "true";
     }
     if (
         "statusFilter" in req.body &&
@@ -427,8 +427,8 @@ export async function parseFilterUsersRequest(
             mail = validator.default
                 .normalizeEmail(req.body.emailFilter)
                 .toString();
-        } else {
-            mail = req.body.emailFilter;
+        } else if ("emailFilter" in req.body) {
+            mail = req.body.emailFilter as string;
         }
     }
 
