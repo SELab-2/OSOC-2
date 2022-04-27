@@ -6,6 +6,8 @@ import {
     removeContractsFromStudent,
     updateContract,
     contractsForStudent,
+    contractsByProject,
+    sortedContractsByOsocEdition,
 } from "../../orm_functions/contract";
 
 test("should create a contract", async () => {
@@ -110,4 +112,93 @@ test("should list all contracts of a student", async () => {
     prismaMock.contract.findMany.mockResolvedValue(returnContract);
 
     await expect(contractsForStudent(1)).resolves.toEqual(returnContract);
+});
+
+test("should list all contracts linked to a project", async () => {
+    const returnContract = [
+        {
+            student_id: 1,
+            project_role_id: 1,
+            information: "fake information",
+            created_by_login_user_id: 5,
+            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_id: 5,
+            project_role: {
+                project: {
+                    osoc_id: 1,
+                },
+                project_id: 1,
+            },
+            student: {
+                student_id: 1,
+                pronouns: "he",
+                nickname: "nick",
+                alumni: true,
+                gender: "M",
+                person_id: 1,
+                phone_number: "0452986104",
+            },
+        },
+    ];
+
+    prismaMock.contract.findMany.mockResolvedValue(returnContract);
+
+    await expect(contractsByProject(1)).resolves.toEqual(returnContract);
+});
+
+test("should list all contracts linked to an osoc edition", async () => {
+    const returnContract = [
+        {
+            student_id: 2,
+            project_role_id: 2,
+            information: "fake information",
+            created_by_login_user_id: 5,
+            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_id: 4,
+            project_role: {
+                project: {
+                    osoc_id: 1,
+                },
+                project_id: 1,
+            },
+            student: {
+                student_id: 2,
+                pronouns: "he",
+                nickname: "nick",
+                alumni: true,
+                gender: "M",
+                person_id: 1,
+                phone_number: "0452986104",
+            },
+        },
+        {
+            student_id: 1,
+            project_role_id: 1,
+            information: "fake information",
+            created_by_login_user_id: 5,
+            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_id: 5,
+            project_role: {
+                project: {
+                    osoc_id: 1,
+                },
+                project_id: 1,
+            },
+            student: {
+                student_id: 1,
+                pronouns: "he",
+                nickname: "nick",
+                alumni: true,
+                gender: "M",
+                person_id: 1,
+                phone_number: "0452986104",
+            },
+        },
+    ];
+
+    prismaMock.contract.findMany.mockResolvedValue(returnContract);
+
+    await expect(sortedContractsByOsocEdition(1)).resolves.toEqual(
+        returnContract
+    );
 });

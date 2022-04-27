@@ -5,6 +5,8 @@ import {
     removeContract,
     removeContractsFromStudent,
     contractsForStudent,
+    contractsByProject,
+    sortedContractsByOsocEdition,
 } from "../../orm_functions/contract";
 import { CreateContract, UpdateContract } from "../../orm_functions/orm_types";
 import { contract_status_enum } from "@prisma/client";
@@ -159,6 +161,65 @@ it("should list all contracts linked to a student", async () => {
             expect(contract).toHaveProperty("contract_id", contractId);
             expect(contract).toHaveProperty("project_role", projectRole);
             expect(contract).toHaveProperty("student", studentFound);
+        }
+    }
+});
+
+it("should list all contracts linked to a project", async () => {
+    const student = await prisma.student.findFirst();
+    const project_role = await prisma.project_role.findFirst();
+    const login_user = await prisma.login_user.findFirst();
+    if (student && project_role && login_user) {
+        const contract: CreateContract = {
+            studentId: student.student_id,
+            projectRoleId: project_role.project_role_id,
+            information: "Contract details",
+            loginUserId: login_user.login_user_id,
+            contractStatus: contract_status_enum.SENT,
+        };
+
+        await createContract(contract);
+        const all_contracts = await contractsByProject(project_role.project_id);
+
+        for (const contract of all_contracts) {
+            const contractId = contract.contract_id;
+            const projectRole = contract.project_role;
+            const studentFound = contract.student;
+            const contractStatus = contract.contract_status;
+
+            expect(contract).toHaveProperty("contract_id", contractId);
+            expect(contract).toHaveProperty("project_role", projectRole);
+            expect(contract).toHaveProperty("student", studentFound);
+            expect(contract).toHaveProperty("contract_status", contractStatus);
+        }
+    }
+});
+
+it("should list all contracts linked to an osoc year", async () => {
+    const student = await prisma.student.findFirst();
+    const project_role = await prisma.project_role.findFirst();
+    const login_user = await prisma.login_user.findFirst();
+    const osoc_year = await prisma.osoc.findFirst();
+    if (student && project_role && login_user && osoc_year) {
+        const contract: CreateContract = {
+            studentId: student.student_id,
+            projectRoleId: project_role.project_role_id,
+            information: "Contract details",
+            loginUserId: login_user.login_user_id,
+            contractStatus: contract_status_enum.SENT,
+        };
+
+        await createContract(contract);
+        const all_contracts = await sortedContractsByOsocEdition(
+            osoc_year.osoc_id
+        );
+
+        for (const contract of all_contracts) {
+            const projectRole = contract.project_role;
+            const studentId = contract.student_id;
+
+            expect(contract).toHaveProperty("project_role", projectRole);
+            expect(contract).toHaveProperty("student_id", studentId);
         }
     }
 });
