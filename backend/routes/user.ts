@@ -143,18 +143,29 @@ async function createUserAcceptance(
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            if (parsed.accountStatus === account_status_enum.PENDING) {
-                return setAccountStatus(
-                    parsed.data.id,
-                    "ACTIVATED",
-                    parsed.data.sessionkey,
-                    parsed.data.is_admin.toString().toLowerCase().trim() ===
-                        "true",
-                    parsed.data.is_coach.toString().toLowerCase().trim() ===
-                        "true"
-                );
-            }
-            return Promise.reject(errors.cookInvalidID());
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "ACTIVATED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
         });
 }
 
@@ -170,15 +181,31 @@ async function deleteUserRequest(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
-                parsed.data.id,
-                "DISABLED",
-                parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+        .then(async (parsed) => {
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "DISABLED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
+        });
 }
 
 /**
