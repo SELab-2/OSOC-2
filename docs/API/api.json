@@ -36,6 +36,10 @@
       "description": "Everything about the login."
     },
     {
+      "name": "osoc",
+      "description": "Everything about osoc editions."
+    },
+    {
       "name": "project",
       "description": "Everything about projects."
     },
@@ -844,6 +848,287 @@
           },
           "401": {
             "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Redirects towards GET /osoc/all.",
+        "operationId": "osoc",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /osoc/all"
+          }
+        }
+      }
+    },
+    "/osoc/all": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all osoc editions in the system.",
+        "operationId": "all_osoc_editions",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/create": {
+      "post": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to create a new osoc edition in the system.",
+        "operationId": "create_osoc_edition",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "header",
+            "description": "The osoc year.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the year and osoc_id of the newly created edition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "year": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/filter": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all filtered osoc editions in the system.",
+        "operationId": "filtered_osoc_editions",
+        "parameters": [
+          {
+            "name": "yearFilter",
+            "in": "header",
+            "description": "The year of the osoc edition.",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "yearSort",
+            "in": "header",
+            "description": "Sorting by year (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all filtered osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/<osoc-id>": {
+      "delete": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to delete an osoc edition.",
+        "operationId": "delete_osoc_edition",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The osoc edition id.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified osoc edition was removed. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."

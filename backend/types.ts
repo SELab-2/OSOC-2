@@ -291,6 +291,11 @@ export namespace InternalTypes {
     export interface User {}
 
     /**
+     *  Represents an osoc edition, with all associated data.
+     */
+    export interface OsocEdition {}
+
+    /**
      *  Represents a check of the key, holds the key aswell as boolean value.
      */
     export interface CheckKey {}
@@ -520,6 +525,19 @@ export namespace Responses {
     /**
      *
      */
+    export interface OsocEditionList {
+        data: InternalTypes.OsocEdition[];
+    }
+
+    /**
+     *  A osoc edition response is the keyed version of the osoc edition and their associated
+     * data.
+     */
+    export interface OsocEdition extends InternalTypes.OsocEdition {}
+
+    /**
+     *
+     */
     export interface FormAttachmentResponse {
         data: string[];
         types: type_enum[];
@@ -732,6 +750,12 @@ export namespace Requests {
     export interface StudentFilter extends KeyRequest {}
 
     export interface UserFilter extends KeyRequest {}
+
+    export interface OsocFilter extends KeyRequest {}
+
+    export interface OsocEdition extends KeyRequest {
+        year: number;
+    }
 
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;

@@ -99,8 +99,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
         })
             .then((response) => response.json())
             .then((response) => {
-                setIsAdmin(response.is_admin === true);
-                setIsCoach(response.is_coach === true);
+                setIsAdmin(response.is_admin);
+                setIsCoach(response.is_coach);
                 if (
                     !response.valid ||
                     response.account_status === AccountStatus.DISABLED

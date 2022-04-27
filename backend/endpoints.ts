@@ -7,6 +7,7 @@ import * as followup from "./routes/followup";
 import * as form from "./routes/form";
 import * as github from "./routes/github";
 import * as login from "./routes/login";
+import * as osoc from "./routes/osoc";
 import * as project from "./routes/project";
 import * as reset from "./routes/reset";
 import * as role from "./routes/role";
@@ -29,6 +30,7 @@ export function attach(app: express.Application): void {
         app.use(home + "/admin", admin.getRouter());
         app.use(home + "/project", project.getRouter());
         app.use(home + "/form", form.getRouter());
+        app.use(home + "/osoc", osoc.getRouter());
         app.use(home + "/reset", reset.getRouter());
         app.use(home + "/github", github.getRouter());
         app.use(home + "/user", user.getRouter());

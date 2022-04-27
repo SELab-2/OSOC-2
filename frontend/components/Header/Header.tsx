@@ -90,7 +90,10 @@ export const Header: React.FC = () => {
                 {validUser && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/projects"}>Projects</Link>
                 ) : null}
-                {validUser &&
+                {validUser && !router.pathname.startsWith("/reset") ? (
+                    <Link href={"/osocs"}>Osoc Editions</Link>
+                ) : null}
+                {sessionKey !== "" &&
                 isAdmin &&
                 !router.pathname.startsWith("/reset") ? (
                     <Link href={"/users"}>Manage Users</Link>

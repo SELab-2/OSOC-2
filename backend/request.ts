@@ -293,6 +293,33 @@ export async function parseGetSuggestionsStudentRequest(
 }
 
 /**
+ *  Parses a request to `GET /osoc/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterOsocsRequest(
+    req: express.Request
+): Promise<Requests.OsocFilter> {
+    let year = maybe(req.body, "yearFilter");
+    if ("yearFilter" in req.body) {
+        year = parseInt(req.body.yearFilter);
+    }
+
+    for (const filter of [maybe(req.body, "yearSort")]) {
+        if (filter != undefined && filter !== "asc" && filter !== "desc") {
+            return rejector();
+        }
+    }
+
+    return Promise.resolve({
+        sessionkey: getSessionKey(req),
+        yearFilter: year,
+        yearSort: maybe(req.body, "yearSort"),
+    });
+}
+
+/**
  *  Parses a request to `GET /student/filter`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -804,6 +831,17 @@ export async function parseAcceptNewUserRequest(
     );
 }
 
+export async function parseNewOsocEditionRequest(
+    req: express.Request
+): Promise<Requests.OsocEdition> {
+    return hasFields(req, ["year"], types.neither).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            year: parseInt(req.body.year),
+        })
+    );
+}
+
 /**
  *  A request to `DELETE /login/` only requires a session key
  * {@link parseKeyRequest}.
@@ -952,3 +990,19 @@ export const parseUpdateCoachRequest = parseUpdateLoginUser;
  * {@link parseUpdateLoginUser}.
  */
 export const parseUpdateAdminRequest = parseUpdateLoginUser;
+/**
+ *  A request to `GET /osoc/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseOsocAllRequest = parseKeyRequest;
+/**
+ *  Parses a request to `POST /osoc/`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+/**
+ *  A request to `DELETE /osoc/<id>` only requires a session key and an ID
+ * {@link parseKeyIdRequest}.
+ */
+export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
