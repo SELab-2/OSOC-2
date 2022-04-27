@@ -42,6 +42,16 @@ export const OsocCreateFilter: React.FC<{
     };
 
     /**
+     * Explicitly tell the frontend to execute the current query
+     * @param e
+     */
+    const createPress = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        if (loading) return;
+        create().then();
+    };
+
+    /**
      * Build and execute the query
      */
     const search = async () => {
@@ -86,6 +96,7 @@ export const OsocCreateFilter: React.FC<{
      */
     const create = async () => {
         const sessionKey = getSessionKey ? await getSessionKey() : "";
+        console.log(sessionKey);
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
@@ -146,7 +157,7 @@ export const OsocCreateFilter: React.FC<{
                         placeholder="Year.."
                         onChange={(e) => setOsocCreate(e.target.value)}
                     />
-                    <button onClick={create}>Create</button>
+                    <button onClick={createPress}>Create</button>
                 </div>
             </form>
         </div>
