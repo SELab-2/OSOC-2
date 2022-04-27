@@ -70,7 +70,12 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
         const sessionKey = fromStorage ? fromStorage : "";
 
         if (sessionKey === "") {
-            if (!router.pathname.startsWith("/login")) {
+            if (
+                !(
+                    router.pathname.startsWith("/login") ||
+                    router.pathname.startsWith("/reset")
+                )
+            ) {
                 router.push("/login").then();
             }
             return sessionKey;

@@ -705,7 +705,7 @@ export async function parseRequestResetRequest(
 ): Promise<Requests.ReqReset> {
     return hasFields(req, ["email"], types.neither).then(() =>
         Promise.resolve({
-            email: req.body.email,
+            email: validator.default.normalizeEmail(req.body.email).toString(),
         })
     );
 }
