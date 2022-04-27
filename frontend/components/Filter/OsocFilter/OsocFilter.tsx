@@ -95,6 +95,7 @@ export const OsocCreateFilter: React.FC<{
      * Create the new osoc edition
      */
     const create = async () => {
+        isLoading(true);
         const sessionKey = getSessionKey ? await getSessionKey() : "";
         console.log(sessionKey);
         if (sessionKey !== "") {
@@ -118,6 +119,7 @@ export const OsocCreateFilter: React.FC<{
                 });
             console.log(response);
             updateOsoc(response.data);
+            isLoading(false);
         }
     };
 
