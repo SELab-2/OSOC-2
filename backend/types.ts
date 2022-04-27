@@ -342,6 +342,11 @@ export namespace InternalTypes {
     }
 
     /**
+     *  Represents a project, with all associated data.
+     */
+    export interface ProjectFilter {}
+
+    /**
      *  Represents the drafted students of a project. Usually these will only
      * contain an id, name and list of students.
      */
@@ -609,6 +614,13 @@ export namespace Responses {
     }
 
     /**
+     *  A project filter list is a list of projects
+     */
+    export interface ProjectFilterList {
+        data: InternalTypes.ProjectFilter;
+    }
+
+    /**
      *  An admin list response is the keyed version of the list of admins.
      */
     export interface AdminList {
@@ -778,6 +790,8 @@ export namespace Requests {
         positions?: number;
         osocId?: number;
     }
+
+    export interface ProjectFilter extends KeyRequest {}
 
     export interface Draft extends IdRequest {
         studentId: number;
