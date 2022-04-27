@@ -14,6 +14,7 @@ export const Header: React.FC = () => {
         isAdmin,
         setIsAdmin,
         setIsCoach,
+        setIsVerified,
     } = useContext(SessionContext);
 
     const router = useRouter();
@@ -33,6 +34,9 @@ export const Header: React.FC = () => {
         }
         if (setIsCoach) {
             setIsCoach(false);
+        }
+        if (setIsVerified) {
+            setIsVerified(false);
         }
         router.push("/login").then(() => {
             // After being redirected to the login page, let the backend now that the user has logged out.
@@ -85,9 +89,10 @@ export const Header: React.FC = () => {
                 !router.pathname.startsWith("/reset") ? (
                     <Link href={"/users"}>Manage Users</Link>
                 ) : null}
-                {isVerified &&
-                router.pathname !== "/login" &&
-                !router.pathname.startsWith("/reset") ? (
+                {(isVerified &&
+                    router.pathname !== "/login" &&
+                    !router.pathname.startsWith("/reset")) ||
+                router.pathname.startsWith("/pending") ? (
                     <button onClick={logOut}>Log out</button>
                 ) : isVerified && router.pathname.startsWith("/reset") ? (
                     <button onClick={logIn}>Log in</button>

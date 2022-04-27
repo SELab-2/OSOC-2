@@ -16,6 +16,7 @@ interface ISessionContext {
     setIsAdmin?: (admin: boolean) => void;
     /* Boolean that is true when the user has been verified */
     isVerified: boolean;
+    setIsVerified?: (verified: boolean) => void;
 }
 
 // The default state the application is in
@@ -178,6 +179,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                 isAdmin,
                 setIsAdmin,
                 isVerified,
+                setIsVerified,
             }}
         >
             {children}
