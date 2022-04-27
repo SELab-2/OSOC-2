@@ -2579,7 +2579,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserId"
+                  "$ref": "#/components/schemas/RegisterResponse"
                 }
               }
             }
@@ -3783,11 +3783,14 @@
           "name": "Create_template"
         }
       },
-      "UserId": {
+      "RegisterResponse": {
         "type": "object",
         "properties": {
           "id": {
             "type": "number"
+          },
+          "sessionKey" : {
+            "type" : "string"
           }
         },
         "xml": {

@@ -42,6 +42,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
     // Because `useEffect` can have a different order we need to check if the session id has already been verified
     let verified = false;
+    let pendingChecked = false;
 
     /**
      * Everytime the page is reloaded we need to get the session from local storage
@@ -76,6 +77,12 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
             return sessionKey;
         }
 
+        // we already did a request, and we know we are pending (key is invalid) => go to pending
+        if (pendingChecked) {
+            router.push("/pending").then();
+            return "";
+        }
+
         // Avoid calling /verify twice
         // verified gets set to false every page reload
         if (verified) {
@@ -106,7 +113,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     return "";
                 }
                 if (response.account_status === AccountStatus.PENDING) {
-                    verified = false; // needs to be false, otherwise the next request will think it's automatically true, even when it has an invalid key.
+                    pendingChecked = true; // needs to be false, otherwise the next request will think it's automatically true, even when it has an invalid key.
                     router.push("/pending");
                     return "";
                 }
