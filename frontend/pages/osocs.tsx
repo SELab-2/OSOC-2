@@ -10,7 +10,7 @@ import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
  * @constructor
  */
 const Osocs: NextPage = () => {
-    const [osocEditions, setEditions] = useState<Array<OsocEdition>>();
+    const [osocEditions, setEditions] = useState<Array<OsocEdition>>([]);
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
