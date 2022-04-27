@@ -38,7 +38,6 @@ export function attach(app: express.Application): void {
         app.use(home + "/template", template.getRouter());
         app.use(home + "/followup", followup.getRouter());
         app.use(home + "/verify", verify.getRouter());
-        app.use(home + "/osoc", osoc.getRouter());
     });
 
     app.use(
