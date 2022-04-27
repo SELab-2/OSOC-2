@@ -21,7 +21,7 @@ import { addSessionKey } from "../orm_functions/session_key";
 async function listUsers(req: express.Request): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
+        .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -143,13 +143,29 @@ async function createUserAcceptance(
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return setAccountStatus(
-                parsed.data.id,
-                "ACTIVATED",
-                parsed.data.sessionkey,
-                parsed.data.is_admin.toString().toLowerCase().trim() == "true",
-                parsed.data.is_coach.toString().toLowerCase().trim() == "true"
-            );
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "ACTIVATED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
         });
 }
 
@@ -165,15 +181,31 @@ async function deleteUserRequest(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
-                parsed.data.id,
-                "DISABLED",
-                parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+        .then(async (parsed) => {
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "DISABLED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
+        });
 }
 
 /**
@@ -184,43 +216,41 @@ async function deleteUserRequest(
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function filterUsers(req: express.Request): Promise<Responses.UserList> {
-    const parsedRequest = await rq.parseFilterUsersRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const users = await ormLU.filterLoginUsers(
-        checkedSessionKey.data.nameFilter,
-        checkedSessionKey.data.emailFilter,
-        checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.isCoachFilter,
-        checkedSessionKey.data.isAdminFilter
-    );
-
-    users.map((val) => ({
-        person_data: {
-            id: val.person.person_id,
-            name: val.person.firstname,
-            email: val.person.email,
-            github: val.person.github,
-        },
-        coach: val.is_coach,
-        admin: val.is_admin,
-        activated: val.account_status as string,
-    }));
-
-    return Promise.resolve({ data: users });
+    return rq
+        .parseFilterUsersRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormLU
+                .filterLoginUsers(
+                    parsed.data.nameFilter,
+                    parsed.data.emailFilter,
+                    parsed.data.nameSort,
+                    parsed.data.emailSort,
+                    parsed.data.statusFilter,
+                    parsed.data.isCoachFilter,
+                    parsed.data.isAdminFilter
+                )
+                .then((users) => {
+                    users.map((val) => ({
+                        person_data: {
+                            id: val.person.person_id,
+                            name: val.person.firstname,
+                            email: val.person.email,
+                            github: val.person.github,
+                        },
+                        coach: val.is_coach,
+                        admin: val.is_admin,
+                        activated: val.account_status as string,
+                    }));
+                    return Promise.resolve({ data: users });
+                });
+        });
 }
 
 async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed, false))
+        .then((parsed) => util.isAdmin(parsed, false))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)

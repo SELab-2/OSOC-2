@@ -4,6 +4,7 @@ import {
     type_enum,
 } from "@prisma/client";
 import express from "express";
+import { FilterSort } from "./orm_functions/orm_types";
 
 /**
  *  Interface for API errors. Specifies an HTTP status code and error reason.
@@ -749,7 +750,16 @@ export namespace Requests {
 
     export interface StudentFilter extends KeyRequest {}
 
-    export interface UserFilter extends KeyRequest {}
+    export interface UserFilter extends KeyRequest {
+        sessionkey: string;
+        nameFilter?: string;
+        emailFilter?: string;
+        statusFilter?: account_status_enum;
+        nameSort?: FilterSort;
+        emailSort?: FilterSort;
+        isCoachFilter?: boolean;
+        isAdminFilter?: boolean;
+    }
 
     export interface OsocFilter extends KeyRequest {}
 
@@ -856,7 +866,7 @@ export namespace Requests {
 
     export interface Question {
         key: string;
-        value: string | FormValues[];
+        value: string | string[] | boolean | number | FormValues[] | null;
         options?: Array<Option>;
     }
 
