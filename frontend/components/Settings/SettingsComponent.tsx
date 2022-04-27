@@ -88,7 +88,6 @@ export const SettingsComponent: React.FC<{
             <text>new password</text>
             <input onChange={(e) => setNewPassword(e.target.value)} />
             <button onClick={changeUser}>Apply changes</button>
-            <button>Delete user</button>
         </div>
     );
 };
