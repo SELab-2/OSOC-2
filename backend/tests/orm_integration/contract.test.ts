@@ -4,6 +4,7 @@ import {
     updateContract,
     removeContract,
     removeContractsFromStudent,
+    contractsForStudent,
 } from "../../orm_functions/contract";
 import { CreateContract, UpdateContract } from "../../orm_functions/orm_types";
 import { contract_status_enum } from "@prisma/client";
@@ -132,4 +133,32 @@ it("should delete the contracts based upon student", async () => {
         students[0].student_id
     );
     expect(deleted_contracts).toHaveProperty("count", 1);
+});
+
+it("should list all contracts linked to a student", async () => {
+    const student = await prisma.student.findFirst();
+    const project_role = await prisma.project_role.findFirst();
+    const login_user = await prisma.login_user.findFirst();
+    if (student && project_role && login_user) {
+        const contract: CreateContract = {
+            studentId: student.student_id,
+            projectRoleId: project_role.project_role_id,
+            information: "Contract details",
+            loginUserId: login_user.login_user_id,
+            contractStatus: contract_status_enum.SENT,
+        };
+
+        await createContract(contract);
+        const all_contracts = await contractsForStudent(student.student_id);
+
+        for (const contract of all_contracts) {
+            const contractId = contract.contract_id;
+            const projectRole = contract.project_role;
+            const studentFound = contract.student;
+
+            expect(contract).toHaveProperty("contract_id", contractId);
+            expect(contract).toHaveProperty("project_role", projectRole);
+            expect(contract).toHaveProperty("student", studentFound);
+        }
+    }
 });
