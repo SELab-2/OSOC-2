@@ -639,7 +639,6 @@ export async function parseFormRequest(
                 question.key === null ||
                 question.value === undefined
             ) {
-                console.log(question.value);
                 return rejector();
             }
         }
