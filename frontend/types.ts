@@ -19,6 +19,22 @@ export enum FilterBoolean {
     NONE = "",
 }
 
+export enum EmailStatus {
+    NONE = "NONE",
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    FAILED = "FAILED",
+    SCHEDULED = "SCHEDULED",
+    EMPTY = "",
+}
+
+export enum StudentStatus {
+    EMPTY = "",
+    YES = "YES",
+    MAYBE = "MAYBE",
+    NO = "NO",
+}
+
 export const getNextFilterBoolean = (bool: FilterBoolean) => {
     if (bool == FilterBoolean.TRUE) {
         return FilterBoolean.FALSE;
@@ -174,6 +190,11 @@ export interface LoginUser {
     is_coach: boolean;
     password: string;
     account_status: AccountStatus;
+}
+
+export interface Role {
+    role_id: number;
+    name: string;
 }
 
 /**

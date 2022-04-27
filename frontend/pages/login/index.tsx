@@ -35,7 +35,6 @@ const Index: NextPage = () => {
                 setLoginBackendError(loginError);
             }
         }
-        // We do not want to reload the page when the router changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query]);
 

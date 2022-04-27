@@ -369,10 +369,11 @@ async function filterStudents(
         checkedSessionKey.data.alumniFilter,
         checkedSessionKey.data.coachFilter,
         checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.osocYear,
+        checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.firstNameSort,
         checkedSessionKey.data.lastNameSort,
         checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.roleSort,
         checkedSessionKey.data.alumniSort
     );
 

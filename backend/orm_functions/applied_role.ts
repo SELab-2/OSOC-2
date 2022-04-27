@@ -30,3 +30,18 @@ export async function getAppliedRolesByJobApplication(
     });
     return result;
 }
+
+/**
+ *
+ * @param jobApplicationId: the id of the jobApplication whose related applied roles we want to delete
+ * @returns the number of deleted records in a promise
+ */
+export async function deleteAppliedRolesByJobApplication(
+    jobApplicationId: number
+) {
+    return await prisma.applied_role.deleteMany({
+        where: {
+            job_application_id: jobApplicationId,
+        },
+    });
+}
