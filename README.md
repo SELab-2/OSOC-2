@@ -3,7 +3,7 @@
 ## Introduction 
 This repo is the osoc selection solution team 2 made for [Open Knowledge Belgium](https://openknowledge.be/).
 In order to create a selection tool, we created an [online platform](https://sel2-2.ugent.be/login) where coaches can assign students to projects.
-<br/>The tool is made with a variety of technologies, the main ones being PostGres, Prsima.js, Next.js and Express.js.
+<br/>The tool is made with a variety of technologies, the main ones being PostGres, Prisma.js, Next.js and Express.js.
 <br/>An extensive list of all the documentations can be found [here](docs/README.md).
 
 ## Team 2:
