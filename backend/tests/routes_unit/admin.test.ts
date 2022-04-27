@@ -7,7 +7,7 @@
 // -> if those stacks work, all failures work as well (because Promises).
 
 import { getMockReq } from "@jest-mock/express";
-import { login_user, person } from "@prisma/client";
+import { account_status_enum, login_user, person } from "@prisma/client";
 
 // setup mock for request
 import * as req from "../../request";
@@ -114,6 +114,22 @@ beforeEach(() => {
         if (v != 1 && v != 2) return Promise.reject();
         return Promise.resolve(v == 1 ? people[0].person : people[1].person);
     });
+    ormLMock.searchLoginUserByPerson.mockResolvedValue({
+        login_user_id: 1,
+        person_id: 1,
+        password: "test",
+        is_admin: true,
+        is_coach: true,
+        account_status: account_status_enum.ACTIVATED,
+        person: {
+            person_id: 1,
+            email: "test@email.com",
+            github: null,
+            firstname: "test",
+            lastname: "test",
+            github_id: null,
+        },
+    });
 });
 
 // reset
@@ -159,10 +175,10 @@ test("Can list all admins.", async () => {
     await expect(admin.listAdmins(req)).resolves.toStrictEqual({
         data: res,
     });
-    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
     expectCall(reqMock.parseAdminAllRequest, req);
     expectCall(ormL.searchAllAdminLoginUsers, true);
-    expectNoCall(utilMock.isAdmin);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
 });
 
 test("Can modify a single admin (1).", async () => {

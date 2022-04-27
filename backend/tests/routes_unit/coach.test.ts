@@ -7,7 +7,7 @@
 // -> if those stacks work, all failures work as well (because Promises).
 
 import { getMockReq } from "@jest-mock/express";
-import { login_user, person } from "@prisma/client";
+import { account_status_enum, login_user, person } from "@prisma/client";
 
 // setup mock for request
 import * as req from "../../request";
@@ -86,6 +86,22 @@ beforeEach(() => {
     reqMock.parseGetAllCoachRequestsRequest.mockResolvedValue({
         sessionkey: "abcd",
     });
+    ormLMock.searchLoginUserByPerson.mockResolvedValue({
+        login_user_id: 1,
+        person_id: 1,
+        password: "test",
+        is_admin: true,
+        is_coach: true,
+        account_status: account_status_enum.ACTIVATED,
+        person: {
+            person_id: 1,
+            email: "test@email.com",
+            github: null,
+            firstname: "test",
+            lastname: "test",
+            github_id: null,
+        },
+    });
 
     // mocks for utility
     utilMock.checkSessionKey.mockImplementation((v) =>
@@ -155,10 +171,6 @@ function expectCall<T, U>(func: T, val: U) {
     expect(func).toHaveBeenCalledWith(val);
 }
 
-function expectNoCall<T>(func: T) {
-    expect(func).toHaveBeenCalledTimes(0);
-}
-
 test("Can list all coaches", async () => {
     const req = getMockReq();
     const res = people.map((val) => ({
@@ -176,10 +188,10 @@ test("Can list all coaches", async () => {
     await expect(coach.listCoaches(req)).resolves.toStrictEqual({
         data: res,
     });
-    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
     expectCall(reqMock.parseCoachAllRequest, req);
     expectCall(ormL.searchAllCoachLoginUsers, true);
-    expectNoCall(utilMock.isAdmin);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
 });
 
 test("Can modify a single coach (1).", async () => {
@@ -187,10 +199,7 @@ test("Can modify a single coach (1).", async () => {
     req.body = { id: 7, sessionkey: "abcd" };
     const res = { id: 7, name: "Jeffrey Jan" };
     await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
-    expectCall(utilMock.checkSessionKey, {
-        id: 7,
-        sessionkey: "abcd",
-    });
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
     expectCall(reqMock.parseUpdateCoachRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
@@ -198,7 +207,7 @@ test("Can modify a single coach (1).", async () => {
         isCoach: undefined,
         accountStatus: undefined,
     });
-    expectNoCall(util.isAdmin);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
 });
 
 test("Can modify a single coach (2).", async () => {
@@ -211,7 +220,7 @@ test("Can modify a single coach (2).", async () => {
     };
     const res = { id: 7, name: "Jeffrey Jan" };
     await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
-    expectCall(utilMock.checkSessionKey, req.body);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
     expectCall(reqMock.parseUpdateCoachRequest, req);
     expectCall(ormLMock.updateLoginUser, {
         loginUserId: 7,
@@ -219,7 +228,7 @@ test("Can modify a single coach (2).", async () => {
         isCoach: false,
         accountStatus: undefined,
     });
-    expectNoCall(util.isAdmin);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
 });
 
 test("Can delete coaches", async () => {
@@ -227,6 +236,7 @@ test("Can delete coaches", async () => {
     req.body = { id: 1, sessionkey: "abcd" };
     const res = {};
 
+    console.log(req.body);
     await expect(coach.deleteCoach(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteCoachRequest, req);

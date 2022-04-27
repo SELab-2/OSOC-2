@@ -115,12 +115,6 @@ export async function deleteAdmin(
                         logUs !== null &&
                         logUs.login_user_id !== parsed.userId
                     ) {
-                        console.log(logUs.is_admin);
-                        console.log(logUs.is_coach);
-                        console.log(logUs.person);
-                        console.log(logUs.login_user_id);
-                        console.log(parsed.userId);
-                        console.log(parsed.data.id);
                         return ormL
                             .deleteLoginUserByPersonId(parsed.data.id)
                             .then(() => {
