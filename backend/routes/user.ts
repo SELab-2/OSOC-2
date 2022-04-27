@@ -203,6 +203,7 @@ async function deleteUserRequest(
                                 .trim() === "true"
                         );
                     }
+
                     return Promise.reject(errors.cookInvalidID());
                 });
         });
