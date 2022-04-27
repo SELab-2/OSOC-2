@@ -1,9 +1,11 @@
 import { NextPage } from "next";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
 import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
 import { LoginUser } from "../types";
+import SessionContext from "../contexts/sessionProvider";
+import { useRouter } from "next/router";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -11,6 +13,20 @@ import { LoginUser } from "../types";
  */
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
+
+    const { getSessionKey, isAdmin } = useContext(SessionContext);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (getSessionKey) {
+            getSessionKey().then(() => {
+                if (!isAdmin) {
+                    router.push("/students").then();
+                }
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
