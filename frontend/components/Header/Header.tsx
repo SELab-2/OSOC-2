@@ -29,7 +29,8 @@ export const Header: React.FC = () => {
                 }
             });
         }
-    }, [getSessionKey]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const logIn = (e: SyntheticEvent) => {
         e.preventDefault();
