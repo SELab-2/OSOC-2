@@ -336,8 +336,14 @@ export async function filterProjects(
 
     const filtered_projects = await prisma.project.findMany({
         where: {
-            name: projectNameFilter,
-            partner: clientNameFilter,
+            name: {
+                contains: projectNameFilter,
+                mode: "insensitive",
+            },
+            partner: {
+                contains: clientNameFilter,
+                mode: "insensitive",
+            },
             project_user: assignedCoachesArray,
         },
         orderBy: {
