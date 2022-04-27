@@ -3,12 +3,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "./StudentOverview.module.scss";
+import { Modal } from "../../components/Modal/Modal";
 
 export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
 }) => {
     const { getSessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
+    const [counter, setCounter] = useState(0);
+    // the counter is used to check if the evaluations data is updated because putting
+    // the evaluations variable in the useEffect hook causes an infinite loop
 
     const fetchEvals = async () => {
         if (getSessionKey !== undefined) {
@@ -27,6 +31,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         setEvaluations(response.data);
+                        console.log(response.data);
                     }
                 }
             });
@@ -36,7 +41,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     useEffect(() => {
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [counter]);
 
     const yesSuggest = () => {
         makeSuggestion("YES");
@@ -84,6 +89,9 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                     )
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
+                    if (response !== undefined && response.success) {
+                        setCounter(counter + 1);
+                    }
                 }
             });
         }
@@ -111,6 +119,9 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                     )
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
+                    if (response !== undefined && response.success) {
+                        setCounter(counter + 1);
+                    }
                 }
             });
         }
@@ -118,6 +129,13 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
 
     return (
         <div>
+            <Modal
+                visible={false}
+                handleClose={yesSuggest}
+                title={"This is the title"}
+            >
+                <p>Dit is een modal</p>
+            </Modal>
             <StudentCard student={student} display={Display.FULL} />
             <div className={styles.dropdown}>
                 <button className={styles.dropbtn}>Set status</button>
@@ -168,6 +186,15 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         </div>
                     );
                 }
+            })}
+            <h1>JobApplication</h1>
+            {student.jobApplication.attachment.map((attachement) => {
+                return (
+                    <div key={attachement.attachment_id}>
+                        <p>{attachement.type}</p>
+                        <p>{attachement.data}</p>
+                    </div>
+                );
             })}
         </div>
     );

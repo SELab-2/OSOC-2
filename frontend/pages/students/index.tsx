@@ -80,7 +80,7 @@ const Index: NextPage = () => {
 
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.query]);
+    }, []);
 
     /**
      * Handles clicking on a student
