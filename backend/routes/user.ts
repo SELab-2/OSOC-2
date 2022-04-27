@@ -143,13 +143,18 @@ async function createUserAcceptance(
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return setAccountStatus(
-                parsed.data.id,
-                "ACTIVATED",
-                parsed.data.sessionkey,
-                parsed.data.is_admin.toString().toLowerCase().trim() == "true",
-                parsed.data.is_coach.toString().toLowerCase().trim() == "true"
-            );
+            if (parsed.accountStatus === account_status_enum.PENDING) {
+                return setAccountStatus(
+                    parsed.data.id,
+                    "ACTIVATED",
+                    parsed.data.sessionkey,
+                    parsed.data.is_admin.toString().toLowerCase().trim() ===
+                        "true",
+                    parsed.data.is_coach.toString().toLowerCase().trim() ===
+                        "true"
+                );
+            }
+            return Promise.reject(errors.cookInvalidID());
         });
 }
 
