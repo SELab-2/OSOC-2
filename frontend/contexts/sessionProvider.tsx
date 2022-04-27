@@ -70,7 +70,13 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
         const sessionKey = fromStorage ? fromStorage : "";
 
         if (sessionKey === "") {
-            if (!router.pathname.startsWith("/login")) {
+            if (
+                !(
+                    router.pathname.startsWith("/login") ||
+                    router.pathname.startsWith("/reset") ||
+                    router.pathname.startsWith("/pending")
+                )
+            ) {
                 router.push("/login").then();
             }
             return sessionKey;
@@ -99,7 +105,12 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                     !response.valid ||
                     response.account_status === AccountStatus.DISABLED
                 ) {
-                    if (!router.pathname.startsWith("/login")) {
+                    if (
+                        !(
+                            router.pathname.startsWith("/login") ||
+                            router.pathname.startsWith("/pending")
+                        )
+                    ) {
                         router.push("/login");
                     }
                     setSessionKey("");
