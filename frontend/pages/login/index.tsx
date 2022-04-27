@@ -281,6 +281,9 @@ const Index: NextPage = () => {
                 });
 
             if (response.success) {
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey);
+                }
                 await router.push("/pending");
             }
         }
