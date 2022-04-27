@@ -7,6 +7,7 @@ import styles from "../../styles/students.module.scss";
 import { useRouter } from "next/router";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
+import { StudentFilter } from "../../components/Filter/StudentFilter/StudentFilter";
 
 const Index: NextPage = () => {
     const { getSessionKey } = useContext(SessionContext);
@@ -52,6 +53,12 @@ const Index: NextPage = () => {
                 }
             });
         }
+    };
+
+    const setFilteredStudents = (filteredStudents: Array<Student>) => {
+        setStudents([...filteredStudents]);
+        console.log([...filteredStudents]);
+        console.log(students);
     };
 
     useEffect(() => {
@@ -100,47 +107,51 @@ const Index: NextPage = () => {
     };
 
     return (
-        <div
-            className={`${styles.students} ${
-                display === Display.LIMITED ? styles.limited : ""
-            }`}
-        >
+        <div className={styles.student}>
+            <StudentFilter setFilteredStudents={setFilteredStudents} />
             <div
-                className={`${styles.studentCards} ${
+                className={`${styles.students} ${
                     display === Display.LIMITED ? styles.limited : ""
                 }`}
             >
-                {students.map((student, index) => {
-                    return (
-                        <div
-                            key={student.student.student_id}
-                            className={styles.card}
-                            onClick={(e) =>
-                                clickStudent(
-                                    e,
-                                    student.student.student_id,
-                                    index
-                                )
-                            }
-                        >
-                            <StudentCard
-                                student={student as Student}
-                                display={display}
-                            />
-                            {student.evaluations[0].evaluation.length > 0 ? (
-                                <EvaluationBar
-                                    evaluations={
-                                        student.evaluations[0].evaluation
-                                    }
+                <div
+                    className={`${styles.studentCards} ${
+                        display === Display.LIMITED ? styles.limited : ""
+                    }`}
+                >
+                    {students.map((student, index) => {
+                        return (
+                            <div
+                                key={student.student.student_id}
+                                className={styles.card}
+                                onClick={(e) =>
+                                    clickStudent(
+                                        e,
+                                        student.student.student_id,
+                                        index
+                                    )
+                                }
+                            >
+                                <StudentCard
+                                    student={student as Student}
+                                    display={display}
                                 />
-                            ) : null}
-                        </div>
-                    );
-                })}
+                                {student.evaluations[0].evaluation.length >
+                                0 ? (
+                                    <EvaluationBar
+                                        evaluations={
+                                            student.evaluations[0].evaluation
+                                        }
+                                    />
+                                ) : null}
+                            </div>
+                        );
+                    })}
+                </div>
+                {selectedStudent !== -1 ? (
+                    <StudentOverview student={students[selectedStudent]} />
+                ) : null}
             </div>
-            {selectedStudent !== -1 ? (
-                <StudentOverview student={students[selectedStudent]} />
-            ) : null}
         </div>
     );
 };
