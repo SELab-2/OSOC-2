@@ -23,6 +23,7 @@ export const User: React.FC<{
     const { sessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
+    const personId = user.person_id;
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -30,6 +31,12 @@ export const User: React.FC<{
         setIsCoach(user.is_coach);
         setStatus(user.account_status);
     }, [user]);
+
+    useEffect(() => {
+        if (!isAdmin && !isCoach) {
+            setStatus(AccountStatus.DISABLED);
+        }
+    }, [isAdmin, isCoach]);
 
     const setUserRole = async (
         route: string,
@@ -150,7 +157,7 @@ export const User: React.FC<{
         await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
-                userId.toString(),
+                personId.toString(),
             {
                 method: "DELETE",
                 headers: {
