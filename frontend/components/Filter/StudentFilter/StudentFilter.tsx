@@ -78,6 +78,7 @@ export const StudentFilter: React.FC<{
         } else {
             search().then();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         firstNameSort,
         lastNameSort,
