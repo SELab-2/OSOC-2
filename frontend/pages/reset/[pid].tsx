@@ -31,7 +31,7 @@ const Pid: NextPage = () => {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "applicatin",
+                    Accept: "application/json",
                 },
             }).then((response) => {
                 // The code is not valid
