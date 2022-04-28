@@ -58,6 +58,7 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             if (parsed.data.id !== parsed.userId) {
                 return ormL
@@ -107,6 +108,7 @@ export async function deleteAdmin(
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)

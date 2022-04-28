@@ -99,6 +99,7 @@ beforeEach(() => {
             is_coach: true,
         })
     );
+    utilMock.mutable.mockImplementation((v) => Promise.resolve(v));
 
     // mocks for orm
     ormLMock.searchAllAdminLoginUsers.mockResolvedValue(people);
@@ -141,6 +142,7 @@ afterEach(() => {
 
     utilMock.checkSessionKey.mockReset();
     utilMock.isAdmin.mockReset();
+    utilMock.mutable.mockReset();
 
     ormLMock.searchAllAdminLoginUsers.mockReset();
     ormLMock.deleteLoginUserByPersonId.mockReset();
@@ -195,6 +197,7 @@ test("Can modify a single admin (1).", async () => {
         accountStatus: undefined,
     });
     expectNoCall(util.checkSessionKey);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
 
 test("Can modify a single admin (2).", async () => {
@@ -216,6 +219,7 @@ test("Can modify a single admin (2).", async () => {
         accountStatus: undefined,
     });
     expectNoCall(util.checkSessionKey);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
 
 test("Can delete admins", async () => {
@@ -228,4 +232,5 @@ test("Can delete admins", async () => {
     expectCall(reqMock.parseDeleteAdminRequest, req);
     expectCall(ormLMock.deleteLoginUserByPersonId, req.body.id);
     expectCall(ormPMock.deletePersonById, req.body.id);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
