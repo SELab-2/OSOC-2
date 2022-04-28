@@ -18,7 +18,7 @@ import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
-    updateEvaluations: (
+    updateEvaluations?: (
         studentId: number,
         evalutations: EvaluationCoach[]
     ) => void;
@@ -65,7 +65,9 @@ export const StudentOverview: React.FC<{
      * Call the `updateEvalutations` callback when the evaluations change
      */
     useEffect(() => {
-        updateEvaluations(student.student.student_id, evaluations);
+        if (updateEvaluations !== undefined) {
+            updateEvaluations(student.student.student_id, evaluations);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evaluations]);
 
