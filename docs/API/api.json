@@ -3855,6 +3855,9 @@
                 },
                 "senderLastname": {
                   "type": "string"
+                },
+                "evaluationId": {
+                  "type": "number"
                 }
               }
             }
