@@ -12,9 +12,10 @@ import SessionContext from "../../contexts/sessionProvider";
 import styles from "./StudentOverview.module.scss";
 import { Modal } from "../Modal/Modal";
 
-export const StudentOverview: React.FC<{ student: Student }> = ({
-    student,
-}) => {
+export const StudentOverview: React.FC<{
+    student: Student;
+    updateEvaluation: (studentId: number, evalutation: EvaluationCoach) => void;
+}> = ({ student, updateEvaluation }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { getSessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
@@ -52,7 +53,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     useEffect(() => {
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [counter]);
 
     const makeSuggestion = () => {
         if (getSessionKey !== undefined) {
@@ -80,6 +81,13 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                     if (response !== undefined && response.success) {
                         setCounter(counter + 1);
                         setMotivation("");
+
+                        // TODO the backend should return the evaluation upon success
+                        const evaluation = response.data as EvaluationCoach;
+                        updateEvaluation(
+                            student.student.student_id,
+                            evaluation
+                        );
                     }
                 }
             });
@@ -169,8 +177,6 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     };
 
     const compareAttachments = (a1: Attachment, a2: Attachment) => {
-        console.log(a1.type);
-        console.log(a2.type);
         if (
             a1.type[0][0] === AttachmentType.MOTIVATION_STRING ||
             a1.type[0][0] === AttachmentType.MOTIVATION_URL

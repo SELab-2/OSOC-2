@@ -10,12 +10,14 @@ export const EvaluationBar: React.FC<{ evaluations: Evaluation[] }> = ({
     let maybeAmount = 0;
     let noAmount = 0;
     for (const evaluation of evaluations) {
-        if (evaluation.decision === Decision.YES) {
-            yesAmount++;
-        } else if (evaluation.decision === Decision.MAYBE) {
-            maybeAmount++;
-        } else if (evaluation.decision === Decision.NO) {
-            noAmount++;
+        if (!evaluation.is_final) {
+            if (evaluation.decision === Decision.YES) {
+                yesAmount++;
+            } else if (evaluation.decision === Decision.MAYBE) {
+                maybeAmount++;
+            } else if (evaluation.decision === Decision.NO) {
+                noAmount++;
+            }
         }
     }
     const totalAmount = yesAmount + maybeAmount + noAmount;

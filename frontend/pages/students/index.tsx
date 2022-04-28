@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import SessionContext from "../../contexts/sessionProvider";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../../components/StudentCard/StudentCard";
-import { Display, Student } from "../../types";
+import { Display, EvaluationCoach, Student } from "../../types";
 import styles from "../../styles/students.module.scss";
 import { useRouter } from "next/router";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
@@ -57,8 +57,6 @@ const Index: NextPage = () => {
 
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setStudents([...filteredStudents]);
-        console.log([...filteredStudents]);
-        console.log(students);
     };
 
     useEffect(() => {
@@ -106,6 +104,18 @@ const Index: NextPage = () => {
         router.push(`/students?id=${student_id}`).then();
     };
 
+    // Maps student id's to their index in the student list, so that we can update the infor
+    // of just one student
+    const id_to_index: Record<string, number> = {};
+    const updateStudentEvaluation = (
+        studentId: number,
+        evalutation: EvaluationCoach
+    ) => {
+        console.log(studentId);
+        console.log(evalutation);
+        return;
+    };
+
     return (
         <div>
             <div
@@ -118,8 +128,13 @@ const Index: NextPage = () => {
                         display === Display.LIMITED ? styles.limited : ""
                     }`}
                 >
-                    <StudentFilter setFilteredStudents={setFilteredStudents} />
+                    <StudentFilter
+                        display={display}
+                        setFilteredStudents={setFilteredStudents}
+                    />
                     {students.map((student, index) => {
+                        const id = student.student.student_id;
+                        id_to_index[id] = index;
                         return (
                             <div
                                 key={student.student.student_id}
@@ -149,7 +164,10 @@ const Index: NextPage = () => {
                     })}
                 </div>
                 {selectedStudent !== -1 ? (
-                    <StudentOverview student={students[selectedStudent]} />
+                    <StudentOverview
+                        updateEvaluation={updateStudentEvaluation}
+                        student={students[selectedStudent]}
+                    />
                 ) : null}
             </div>
         </div>
