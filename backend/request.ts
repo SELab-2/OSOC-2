@@ -329,7 +329,6 @@ export async function parseFilterOsocsRequest(
 export async function parseFilterStudentsRequest(
     req: express.Request
 ): Promise<Requests.StudentFilter> {
-    console.log(req.body);
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (

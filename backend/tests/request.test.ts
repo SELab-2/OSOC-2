@@ -418,7 +418,7 @@ test("Can parse filter osocs request", () => {
     return Promise.all([okays, fails].flat());
 });
 
-test.only("Can parse filter students request", () => {
+test("Can parse filter students request", () => {
     const key = "my-session-key";
 
     const nothing = {};
