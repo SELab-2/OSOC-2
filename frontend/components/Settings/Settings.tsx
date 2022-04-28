@@ -16,7 +16,7 @@ export const Settings: React.FC<{
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [applyError, setApplyError] = useState<string>("");
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
 
     /**
      * Gets called everytime the new password input field's value changes
@@ -94,8 +94,7 @@ export const Settings: React.FC<{
             setApplyError("");
         }
 
-        const sessionKey =
-            getSessionKey != undefined ? await getSessionKey() : "";
+        const sessionKey = getSession != undefined ? await getSession() : "";
         const encryptedOldPassword = crypto
             .createHash("sha256")
             .update(currPassword)

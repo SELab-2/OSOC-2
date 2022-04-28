@@ -5,7 +5,7 @@ import { AccountStatus, LoginUser } from "../types";
 import { Settings } from "../components/Settings/Settings";
 
 const SettingsPage: NextPage = () => {
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const defaultUser: LoginUser = {
         person: {
             person_id: -1,
@@ -25,8 +25,7 @@ const SettingsPage: NextPage = () => {
     const [user, setUser] = useState<LoginUser>(defaultUser);
 
     const fetchUser = async () => {
-        const sessionKey =
-            getSessionKey != undefined ? await getSessionKey() : "";
+        const sessionKey = getSession != undefined ? await getSession() : "";
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
             {

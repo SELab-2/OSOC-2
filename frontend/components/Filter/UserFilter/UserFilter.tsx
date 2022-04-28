@@ -24,7 +24,7 @@ export const UserFilter: React.FC<{
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(
         AccountStatus.NONE
     );
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
     const router = useRouter();
 
@@ -162,7 +162,7 @@ export const UserFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/users${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const sessionKey = getSession ? await getSession() : "";
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,

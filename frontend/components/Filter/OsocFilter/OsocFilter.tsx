@@ -10,7 +10,7 @@ export const OsocCreateFilter: React.FC<{
     const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
 
     const router = useRouter();
@@ -23,6 +23,7 @@ export const OsocCreateFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [yearSort]);
 
     const toggleYearSort = async (e: SyntheticEvent) => {
@@ -69,7 +70,7 @@ export const OsocCreateFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/osocs${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const sessionKey = getSession ? await getSession() : "";
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
@@ -96,7 +97,7 @@ export const OsocCreateFilter: React.FC<{
      */
     const create = async () => {
         isLoading(true);
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const sessionKey = getSession ? await getSession() : "";
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,

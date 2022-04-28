@@ -39,7 +39,7 @@ export const Header: React.FC = () => {
             setIsVerified(false);
         }
         router.push("/login").then(() => {
-            // After being redirected to the login page, let the backend now that the user has logged out.
+            // After being redirected to the login page, let the backend know that the user has logged out.
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: "DELETE",
                 headers: {

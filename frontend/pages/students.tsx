@@ -1,46 +1,25 @@
 import { NextPage } from "next";
-import SessionContext from "../contexts/sessionProvider";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
 import { StudentFilter } from "../components/Filter/StudentFilter/StudentFilter";
 import { Student } from "../types";
 import styles from "../styles/students.module.scss";
 
 const Students: NextPage = () => {
-    const { getSessionKey } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
 
-    const fetchStudents = async () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
-                if (sessionKey !== "") {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/all`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                            },
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        setStudents(response.data);
-                    }
-                }
-            });
-        }
-    };
-
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
+        console.log(filteredStudents);
         setStudents([...filteredStudents]);
     };
 
-    useEffect(() => {
-        fetchStudents().then();
+    useEffect(
+        () => {
+            return;
+        },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        [students]
+    );
 
     return (
         <div className={styles.students}>

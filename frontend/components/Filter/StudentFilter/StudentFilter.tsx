@@ -21,7 +21,7 @@ import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
 }> = ({ setFilteredStudents }) => {
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
@@ -48,8 +48,8 @@ export const StudentFilter: React.FC<{
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
-        const sessionKey =
-            getSessionKey != undefined ? await getSessionKey() : "";
+        const { sessionKey } =
+            getSession != undefined ? await getSession() : { sessionKey: "" };
         const responseRoles = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
             {
@@ -72,21 +72,25 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
-    useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then(() => search());
-        } else {
-            search().then();
-        }
-    }, [
-        firstNameSort,
-        lastNameSort,
-        emailSort,
-        alumni,
-        studentCoach,
-        statusFilter,
-        emailStatus,
-    ]);
+    useEffect(
+        () => {
+            if (roles.length === 0) {
+                fetchRoles().then(() => search());
+            } else {
+                search().then();
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [
+            firstNameSort,
+            lastNameSort,
+            emailSort,
+            alumni,
+            studentCoach,
+            statusFilter,
+            emailStatus,
+        ]
+    );
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -246,7 +250,9 @@ export const StudentFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/students${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
