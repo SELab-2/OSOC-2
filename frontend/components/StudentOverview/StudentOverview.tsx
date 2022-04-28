@@ -17,7 +17,7 @@ export const StudentOverview: React.FC<{
     updateEvaluation: (studentId: number, evalutation: EvaluationCoach) => void;
 }> = ({ student, updateEvaluation }) => {
     const myRef = React.createRef<HTMLInputElement>();
-    const { getSessionKey } = useContext(SessionContext);
+    const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
     const [counter, setCounter] = useState(0);
     // the counter is used to check if the evaluations data is updated because putting
@@ -28,8 +28,8 @@ export const StudentOverview: React.FC<{
     const [motivation, setMotivation] = useState("");
 
     const fetchEvals = async () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
+        if (getSession !== undefined) {
+            getSession().then(async ({ sessionKey }) => {
                 if (sessionKey != "") {
                     const response = await fetch(
                         `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
@@ -55,74 +55,63 @@ export const StudentOverview: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const makeSuggestion = () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
-                if (sessionKey != "") {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                                "Content-Type": "application/json",
-                                Accept: "application/json",
-                            },
-                            body: JSON.stringify({
-                                id: student.student.student_id,
-                                suggestion: decision,
-                                reason: motivation,
-                            }),
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        setCounter(counter + 1);
-                        setMotivation("");
-                        console.log(response);
-                        // TODO the backend should return the evaluation upon success
-                        const evaluation = response.data as EvaluationCoach;
-                        updateEvaluation(
-                            student.student.student_id,
-                            evaluation
-                        );
-                    }
+    const makeSuggestion = async () => {
+        if (sessionKey != "") {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify({
+                        id: student.student.student_id,
+                        suggestion: decision,
+                        reason: motivation,
+                    }),
                 }
-            });
+            )
+                .then((response) => response.json())
+                .catch((error) => console.log(error));
+            if (response !== undefined && response.success) {
+                setCounter(counter + 1);
+                setMotivation("");
+                console.log(response);
+                // TODO the backend should return the evaluation upon success
+                const evaluation = response.data as EvaluationCoach;
+                updateEvaluation(student.student.student_id, evaluation);
+            }
         }
     };
 
-    const makeDecision = () => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
-                if (sessionKey != "") {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                                "Content-Type": "application/json",
-                                Accept: "application/json",
-                            },
-                            body: JSON.stringify({
-                                id: student.student.student_id,
-                                reply: decision,
-                                reason: motivation,
-                            }),
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        setCounter(counter + 1);
-                        setMotivation("");
-                    }
+    const makeDecision = async () => {
+        if (sessionKey != "") {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify({
+                        id: student.student.student_id,
+                        reply: decision,
+                        reason: motivation,
+                    }),
                 }
-            });
+            )
+                .then((response) => response.json())
+                .catch((error) => console.log(error));
+            if (response !== undefined && response.success) {
+                setCounter(counter + 1);
+                setMotivation("");
+            }
         }
     };
 
@@ -144,9 +133,9 @@ export const StudentOverview: React.FC<{
     const handleConfirm = () => {
         setShowSuggestionField(false);
         if (suggestBool) {
-            makeSuggestion();
+            makeSuggestion().then();
         } else {
-            makeDecision();
+            makeDecision().then();
         }
     };
 

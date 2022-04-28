@@ -1,3 +1,10 @@
+/* The styling for a standalone student page */
+.studentPage {
+  width: clamp(18rem, 92vw, 60rem);
+  margin-inline: auto;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);
+}
+
 /* Dropdown Button */
 .dropbtn {
   background-color: #04AA6D;
