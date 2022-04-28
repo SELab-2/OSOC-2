@@ -18,7 +18,9 @@ import { errors } from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createProject(req: express.Request): Promise<Responses.Project> {
+export async function createProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseNewProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -52,7 +54,7 @@ async function createProject(req: express.Request): Promise<Responses.Project> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listProjects(
+export async function listProjects(
     req: express.Request
 ): Promise<Responses.ProjectList> {
     return rq
@@ -98,7 +100,9 @@ async function listProjects(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getProject(req: express.Request): Promise<Responses.Project> {
+export async function getProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseSingleProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -128,7 +132,9 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
         );
 }
 
-async function modProject(req: express.Request): Promise<Responses.Project> {
+export async function modProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseUpdateProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -165,7 +171,9 @@ async function modProject(req: express.Request): Promise<Responses.Project> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteProject(req: express.Request): Promise<Responses.Empty> {
+export async function deleteProject(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -183,7 +191,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getDraftedStudents(
+export async function getDraftedStudents(
     req: express.Request
 ): Promise<Responses.ProjectDraftedStudents> {
     return rq
@@ -207,7 +215,7 @@ async function getDraftedStudents(
         });
 }
 
-async function getFreeSpotsFor(
+export async function getFreeSpotsFor(
     role: string,
     project: number
 ): Promise<{ count: number; role: number }> {
@@ -242,7 +250,7 @@ async function getFreeSpotsFor(
         });
 }
 
-async function createProjectRoleFor(
+export async function createProjectRoleFor(
     project: number,
     role: string
 ): Promise<{ count: number; role: number }> {
@@ -265,7 +273,7 @@ async function createProjectRoleFor(
         );
 }
 
-async function modProjectStudent(
+export async function modProjectStudent(
     req: express.Request
 ): Promise<Responses.ModProjectStudent> {
     return rq
@@ -340,7 +348,9 @@ async function modProjectStudent(
         });
 }
 
-async function unAssignStudent(req: express.Request): Promise<Responses.Empty> {
+export async function unAssignStudent(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -403,7 +413,7 @@ async function unAssignStudent(req: express.Request): Promise<Responses.Empty> {
         });
 }
 
-async function getProjectConflicts(
+export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
     return rq
@@ -460,7 +470,7 @@ async function getProjectConflicts(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterProjects(
+export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);

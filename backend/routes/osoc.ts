@@ -11,7 +11,7 @@ import * as ormO from "../orm_functions/osoc";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createOsocEdition(
+export async function createOsocEdition(
     req: express.Request
 ): Promise<Responses.OsocEdition> {
     return rq
@@ -35,7 +35,7 @@ async function createOsocEdition(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listOsocEditions(
+export async function listOsocEditions(
     req: express.Request
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseOsocAllRequest(req);
@@ -58,7 +58,7 @@ async function listOsocEditions(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterYear(
+export async function filterYear(
     req: express.Request
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseFilterOsocsRequest(req);
@@ -84,7 +84,7 @@ async function filterYear(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteOsocEditionRequest(
+export async function deleteOsocEditionRequest(
     req: express.Request
 ): Promise<Responses.Empty> {
     return rq

@@ -331,19 +331,22 @@ export async function parseFilterStudentsRequest(
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
-        ("emailFilter" in req.body &&
-            !validator.default.isEmail(req.body.emailFilter)) ||
-        ("statusFilter" in req.body &&
-            req.body.statusFilter !== Decision.YES &&
-            req.body.statusFilter !== Decision.MAYBE &&
-            req.body.statusFilter !== Decision.NO)
+        "statusFilter" in req.body &&
+        req.body.statusFilter !== Decision.YES &&
+        req.body.statusFilter !== Decision.MAYBE &&
+        req.body.statusFilter !== Decision.NO
     ) {
         return rejector();
     } else {
-        if ("emailFilter" in req.body) {
+        if (
+            "emailFilter" in req.body &&
+            validator.default.isEmail(req.body.emailFilter)
+        ) {
             mail = validator.default
                 .normalizeEmail(req.body.emailFilter)
                 .toString();
+        } else if ("emailFilter" in req.body) {
+            mail = req.body.emailFilter as string;
         }
     }
 
@@ -900,6 +903,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  *  {@link parseKeyRequest}
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
+/**
+ *  A request to `GET /user/current` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseCurrentUserRequest = parseKeyRequest;
 /**
  *  A request to `GET /verify` only requires a session key
  * {@link parseKeyRequest}.

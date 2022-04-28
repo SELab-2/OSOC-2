@@ -8,6 +8,7 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import { removeAllKeysForLoginUserId } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all admins in the system.
@@ -58,6 +59,7 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             if (parsed.data.id !== parsed.userId) {
                 return ormL
@@ -107,6 +109,7 @@ export async function deleteAdmin(
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
@@ -115,13 +118,30 @@ export async function deleteAdmin(
                         logUs !== null &&
                         logUs.login_user_id !== parsed.userId
                     ) {
-                        return ormL
-                            .deleteLoginUserByPersonId(parsed.data.id)
+                        return removeAllKeysForLoginUserId(logUs.login_user_id)
                             .then(() => {
-                                return ormP
-                                    .deletePersonById(parsed.data.id)
-                                    .then(() => Promise.resolve({}));
-                            });
+                                return Promise.resolve({});
+                            })
+                            .then(() => {
+                                return ormL
+                                    .deleteLoginUserByPersonId(parsed.data.id)
+                                    .then(() => {
+                                        return ormP
+                                            .deletePersonById(parsed.data.id)
+                                            .then(() => Promise.resolve({}))
+                                            .catch(() =>
+                                                Promise.reject(
+                                                    errors.cookServerError()
+                                                )
+                                            );
+                                    })
+                                    .catch(() =>
+                                        Promise.reject(errors.cookServerError())
+                                    );
+                            })
+                            .catch(() =>
+                                Promise.reject(errors.cookServerError())
+                            );
                     }
                     return Promise.reject(errors.cookInvalidID());
                 });

@@ -23,7 +23,8 @@ const Pid: NextPage = () => {
             // redirect to /, root will then verify the session key
             router.push("/").then();
         }
-    });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
 
     return <></>;
 };
