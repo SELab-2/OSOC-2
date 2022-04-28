@@ -94,7 +94,8 @@ export const Settings: React.FC<{
             setApplyError("");
         }
 
-        const sessionKey = getSession != undefined ? await getSession() : "";
+        const { sessionKey } =
+            getSession != undefined ? await getSession() : { sessionKey: "" };
         const encryptedOldPassword = crypto
             .createHash("sha256")
             .update(currPassword)
@@ -133,11 +134,10 @@ export const Settings: React.FC<{
                 .then((response) => response.json())
                 .catch((err) => {
                     setApplyError(
-                        `Failed to apply changes. Please check all fields. ${response.reason}`
+                        "Something went wrong while trying to execute your request."
                     );
                     console.log(err);
                 });
-            console.log(response);
             if (response !== undefined) {
                 if (response.success) {
                     fetchUser();

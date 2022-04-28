@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { StudentCard } from "../components/StudentCard/StudentCard";
 import { StudentFilter } from "../components/Filter/StudentFilter/StudentFilter";
 import { Student } from "../types";
@@ -11,14 +11,6 @@ const Students: NextPage = () => {
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setStudents([...filteredStudents]);
     };
-
-    useEffect(
-        () => {
-            return;
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [students]
-    );
 
     return (
         <div className={styles.students}>
