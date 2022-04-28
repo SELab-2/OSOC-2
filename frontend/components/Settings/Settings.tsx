@@ -1,18 +1,99 @@
-import React, { useContext, useState } from "react";
+import React, { SyntheticEvent, useContext, useState } from "react";
 import { LoginUser } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import crypto from "crypto";
+import styles from "../../styles/login.module.scss";
+import isStrongPassword from "validator/lib/isStrongPassword";
 
 export const Settings: React.FC<{
     person: LoginUser;
     fetchUser: () => void;
-}> = (person, fetchUser) => {
+}> = ({ person, fetchUser }) => {
     const [newName, setNewName] = useState<string>("");
     const [currPassword, setCurrPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
+    const [currPasswordError, setCurrPasswordError] = useState<string>("");
+    const [newPasswordError, setNewPasswordError] = useState<string>("");
+    const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
+    const [applyError, setApplyError] = useState<string>("");
     const { getSessionKey } = useContext(SessionContext);
 
-    const changeUser = async () => {
+    /**
+     * Gets called everytime the new password input field's value changes
+     * Calculates the password score and set the corresponding error messages
+     * @param password
+     */
+    const updateNewPassword = (password: string) => {
+        const score = isStrongPassword(password, {
+            returnScore: true,
+        }) as unknown as number;
+        setNewPasswordScore(score);
+        setNewPasswordError("");
+        setNewPassword(password);
+    };
+
+    /**
+     * Converts the register password strength score to a textual representation
+     */
+    const scoreToText = () => {
+        if (newPasswordScore < 20) {
+            return "Weak";
+        }
+
+        if (newPasswordScore < 40) {
+            return "Moderate";
+        }
+
+        return "Strong";
+    };
+
+    /**
+     * Returns a style for the current password strength
+     */
+    const scoreToStyle = () => {
+        if (newPasswordScore < 20) {
+            return styles.weak;
+        }
+
+        if (newPasswordScore < 40) {
+            return styles.moderate;
+        }
+
+        return styles.strong;
+    };
+
+    const changeUser = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        // Some initial text field checks
+        let error = false;
+        if (currPassword === "" && newPassword !== "") {
+            setCurrPasswordError("Please provide your current password");
+            error = true;
+        } else {
+            setCurrPasswordError("");
+        }
+
+        if (currPassword !== "" && newPassword === "") {
+            setNewPasswordError("New password cannot be empty");
+            error = true;
+        } else if (currPassword !== "" && newPasswordScore < 20) {
+            setNewPasswordError("Please provide a secure enough password");
+            error = true;
+        } else {
+            setNewPasswordError("");
+        }
+
+        if (error) {
+            return;
+        }
+
+        if (currPassword === "" && newPassword === "" && newName === "") {
+            setApplyError("No input was given");
+            return;
+        } else {
+            setApplyError("");
+        }
+
         const sessionKey =
             getSessionKey != undefined ? await getSessionKey() : "";
         const encryptedOldPassword = crypto
@@ -52,27 +133,99 @@ export const Settings: React.FC<{
             )
                 .then((response) => response.json())
                 .catch((err) => {
+                    setApplyError(
+                        `Failed to apply changes. Please check all fields. ${response.reason}`
+                    );
                     console.log(err);
                 });
-            if (response !== undefined && response.succes) {
-                console.log(response);
+            console.log(response);
+            if (response !== undefined) {
+                if (response.success) {
+                    fetchUser();
+                    // TODO notify succes
+                } else {
+                    setApplyError(
+                        `Failed to apply changes. Please check all fields. ${response.reason}`
+                    );
+                }
             }
-            fetchUser();
         }
     };
 
     return (
-        <div>
-            <text>current name: {person.person.person.firstname}</text>
-            <br />
-            <text>new name</text>
-            <input onChange={(e) => setNewName(e.target.value)} />
+        <div className={styles.body}>
+            <form className={styles.form}>
+                <label className={styles.label}>
+                    Current Name: {person.person.firstname}
+                </label>
+                <label className={styles.label}>
+                    New Name
+                    <input onChange={(e) => setNewName(e.target.value)} />
+                </label>
 
-            <text>current password</text>
-            <input onChange={(e) => setCurrPassword(e.target.value)} />
-            <text>new password</text>
-            <input onChange={(e) => setNewPassword(e.target.value)} />
-            <button onClick={changeUser}>Apply changes</button>
+                <label className={styles.label}>
+                    Current Password
+                    <input
+                        type="password"
+                        onChange={(e) => setCurrPassword(e.target.value)}
+                    />
+                </label>
+                <p
+                    className={`${styles.textFieldError} ${
+                        currPasswordError !== "" ? styles.anim : ""
+                    }`}
+                >
+                    {currPasswordError}
+                </p>
+
+                <label className={styles.label}>
+                    New Password
+                    <input
+                        type="password"
+                        onChange={(e) => updateNewPassword(e.target.value)}
+                    />
+                </label>
+                {newPasswordError === "" && newPassword !== "" ? (
+                    <div
+                        className={styles.anim}
+                        style={{
+                            display: "inherit",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <p
+                            className={`${
+                                styles.textFieldError
+                            } ${scoreToStyle()}`}
+                        >
+                            Password strength:
+                        </p>
+                        <p
+                            className={`${
+                                styles.textFieldError
+                            } ${scoreToStyle()}`}
+                        >
+                            {scoreToText()}
+                        </p>
+                    </div>
+                ) : (
+                    <p
+                        className={`${styles.textFieldError} ${
+                            newPasswordError !== "" ? styles.anim : ""
+                        }`}
+                    >
+                        {newPasswordError}
+                    </p>
+                )}
+                <button onClick={changeUser}>Apply Changes</button>
+                <p
+                    className={`${styles.textFieldError} ${
+                        applyError !== "" ? styles.anim : ""
+                    }`}
+                >
+                    {applyError}
+                </p>
+            </form>
         </div>
     );
 };
