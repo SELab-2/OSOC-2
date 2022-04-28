@@ -391,8 +391,7 @@ export async function filterStudents(
         checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.firstNameSort,
         checkedSessionKey.data.lastNameSort,
-        checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.alumniSort
+        checkedSessionKey.data.emailSort
     );
 
     const studentlist = [];

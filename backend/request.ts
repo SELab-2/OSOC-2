@@ -359,7 +359,6 @@ export async function parseFilterStudentsRequest(
         maybe(req.body, "lastNameSort"),
         maybe(req.body, "emailSort"),
         maybe(req.body, "roleSort"),
-        maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();
@@ -393,7 +392,6 @@ export async function parseFilterStudentsRequest(
         firstNameSort: maybe(req.body, "firstNameSort"),
         lastNameSort: maybe(req.body, "lastNameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        alumniSort: maybe(req.body, "alumniSort"),
     });
 }
 
