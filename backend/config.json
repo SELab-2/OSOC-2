@@ -90,5 +90,10 @@
     "email": {
         "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
         "header": "OSOC2 Recovery Code"
+    },
+
+    "default_user": {
+      "person_id": 4,
+      "user_id": 3
     }
 }
