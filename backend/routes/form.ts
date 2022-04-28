@@ -1259,9 +1259,23 @@ async function addJobApplicationToDatabase(
         studentId
     );
 
-    /*if(latestJobApplication.osoc_id === formResponse.osocId) {
-        await ormJo.
-    }*/
+    if (
+        latestJobApplication !== null &&
+        latestJobApplication.osoc_id === formResponse.osocId
+    ) {
+        await ormAppRo.deleteAppliedRolesByJobApplication(
+            latestJobApplication.job_application_id
+        );
+        await ormAtt.deleteAllAttachmentsForApplication(
+            latestJobApplication.job_application_id
+        );
+        await ormJoSk.deleteSkillsByJobApplicationId(
+            latestJobApplication.job_application_id
+        );
+        await ormJo.deleteJobApplication(
+            latestJobApplication.job_application_id
+        );
+    }
 
     const jobApplication = await ormJo.createJobApplication({
         studentId: studentId,
