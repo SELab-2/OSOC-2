@@ -104,12 +104,19 @@ export interface Evaluation {
     is_final: boolean;
 }
 
-export enum Type {
+export enum AttachmentType {
     CV_URL = "CV_URL",
     PORTFOLIO_URL = "PORTFOLIO_URL",
     FILE_URL = "FILE_URL",
     MOTIVATION_STRING = "MOTIVATION_STRING",
     MOTIVATION_URL = "MOTIVATION_URL",
+}
+
+export interface Attachment {
+    job_application_id: number;
+    attachment_id: number;
+    data: string;
+    type: AttachmentType;
 }
 
 export interface Student {
@@ -130,14 +137,7 @@ export interface Student {
                 role_id: number;
             }
         ];
-        attachment: [
-            {
-                job_application_id: number;
-                attachment_id: number;
-                data: string;
-                type: Type;
-            }
-        ];
+        attachment: [Attachment];
         created_at: Date;
         edu_duration: string;
         edu_institute: string;

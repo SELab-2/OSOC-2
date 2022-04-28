@@ -1,4 +1,11 @@
-import { Display, Student, EvaluationCoach, Decision } from "../../types";
+import {
+    Display,
+    Student,
+    EvaluationCoach,
+    Decision,
+    AttachmentType,
+    Attachment,
+} from "../../types";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
@@ -146,6 +153,51 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         setShowSuggestionField(false);
     };
 
+    const getAttachmentType = (type: AttachmentType) => {
+        if (type[0] === AttachmentType.CV_URL) {
+            return "Curriculum";
+        } else if (
+            type[0] === AttachmentType.MOTIVATION_STRING ||
+            type[0] === AttachmentType.MOTIVATION_URL
+        ) {
+            return "Motivation";
+        } else if (type[0] === AttachmentType.PORTFOLIO_URL) {
+            return "Portfolio";
+        } else if (type[0] === AttachmentType.FILE_URL) {
+            return "Further Attachments";
+        }
+    };
+
+    const compareAttachments = (a1: Attachment, a2: Attachment) => {
+        console.log(a1.type);
+        console.log(a2.type);
+        if (
+            a1.type[0][0] === AttachmentType.MOTIVATION_STRING ||
+            a1.type[0][0] === AttachmentType.MOTIVATION_URL
+        ) {
+            return 1;
+        }
+        if (
+            a2.type[0][0] === AttachmentType.MOTIVATION_STRING ||
+            a2.type[0][0] === AttachmentType.MOTIVATION_URL
+        ) {
+            return -1;
+        }
+        if (a1.type[0][0] === AttachmentType.CV_URL) {
+            return 1;
+        }
+        if (a2.type[0][0] === AttachmentType.CV_URL) {
+            return -1;
+        }
+        if (a1.type[0][0] === AttachmentType.PORTFOLIO_URL) {
+            return 1;
+        }
+        if (a2.type[0][0] === AttachmentType.PORTFOLIO_URL) {
+            return -1;
+        }
+        return 0;
+    };
+
     return (
         <div>
             <Modal
@@ -224,14 +276,14 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                 }
             })}
             <h1>JobApplication</h1>
-            {student.jobApplication.attachment.map((attachement) => {
-                return (
-                    <div key={attachement.attachment_id}>
-                        <p>{attachement.type}</p>
-                        <p>{attachement.data}</p>
+            {student.jobApplication.attachment
+                .sort(compareAttachments)
+                .map((attachment) => (
+                    <div key={attachment.attachment_id}>
+                        <h1>{getAttachmentType(attachment.type)}</h1>
+                        <p>{attachment.data}</p>
                     </div>
-                );
-            })}
+                ))}
         </div>
     );
 };
