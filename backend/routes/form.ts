@@ -1263,15 +1263,17 @@ async function addJobApplicationToDatabase(
         latestJobApplication !== null &&
         latestJobApplication.osoc_id === formResponse.osocId
     ) {
-        await ormAppRo.deleteAppliedRolesByJobApplication(
-            latestJobApplication.job_application_id
-        );
-        await ormAtt.deleteAllAttachmentsForApplication(
-            latestJobApplication.job_application_id
-        );
-        await ormJoSk.deleteSkillsByJobApplicationId(
-            latestJobApplication.job_application_id
-        );
+        await Promise.all([
+            ormAppRo.deleteAppliedRolesByJobApplication(
+                latestJobApplication.job_application_id
+            ),
+            ormAtt.deleteAllAttachmentsForApplication(
+                latestJobApplication.job_application_id
+            ),
+            ormJoSk.deleteSkillsByJobApplicationId(
+                latestJobApplication.job_application_id
+            ),
+        ]);
         await ormJo.deleteJobApplication(
             latestJobApplication.job_application_id
         );
