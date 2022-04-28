@@ -4,16 +4,17 @@ import SessionContext from "../../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { Student } from "../../types";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
+import styles from "../../components/StudentOverview/StudentOverview.module.scss";
 
 const Pid: NextPage = () => {
     const router = useRouter();
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const [student, setStudent] = useState<Student>();
     const { pid } = router.query; // pid is the student id
 
     const fetchStudent = async () => {
-        if (getSessionKey !== undefined && pid !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
+        if (getSession !== undefined && pid !== undefined) {
+            getSession().then(async ({ sessionKey }) => {
                 if (sessionKey !== "") {
                     const response = await fetch(
                         `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`,
@@ -40,10 +41,14 @@ const Pid: NextPage = () => {
     }, [router.query]);
 
     return (
-        <div>
-            <p></p>
+        <div className={styles.studentPage}>
             {student !== undefined ? (
-                <StudentOverview student={student} />
+                <StudentOverview
+                    student={student}
+                    updateEvaluation={() => {
+                        return;
+                    }}
+                />
             ) : null}
         </div>
     );

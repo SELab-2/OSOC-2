@@ -3105,6 +3105,44 @@
             "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
+      },
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Gets the current user.",
+        "operationId": "get_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user gets his account information back."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
       }
     },
     "/user/filter": {
@@ -3890,9 +3928,6 @@
                 },
                 "senderLastname": {
                   "type": "string"
-                },
-                "evaluationId": {
-                  "type": "number"
                 }
               }
             }
