@@ -98,3 +98,16 @@ export async function deleteJobApplicationSkill(jobApplicationSkillId: number) {
         },
     });
 }
+
+/**
+ * deletes all jobApplicationSkills for the given JobApplicationId
+ * @param jobApplicationId: the id of the jobApplication whose skills we want to delete
+ * @returns the number of deleted records in a promise
+ */
+export async function deleteSkillsByJobApplicationId(jobApplicationId: number) {
+    return await prisma.job_application_skill.deleteMany({
+        where: {
+            job_application_id: jobApplicationId,
+        },
+    });
+}

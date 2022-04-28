@@ -6,6 +6,7 @@ import {
     getJobApplicationSkill,
     updateJobApplicationSkill,
     deleteJobApplicationSkill,
+    deleteSkillsByJobApplicationId,
 } from "../../orm_functions/job_application_skill";
 import {
     CreateJobApplicationSkill,
@@ -234,4 +235,48 @@ it("should delete the job application skill based upon id", async () => {
         "is_best",
         jobApplicationSkill2.is_best
     );
+});
+
+it("should delete all the skills for given jobApplicationId", async () => {
+    const [job_applications, languages] = await Promise.all([
+        prisma.job_application.findMany(),
+        prisma.language.findMany(),
+    ]);
+    await prisma.job_application_skill.createMany({
+        data: [
+            {
+                job_application_id: job_applications[1].job_application_id,
+                skill: "SQL",
+                language_id: languages[0].language_id,
+                level: 5,
+                is_preferred: false,
+                is_best: true,
+            },
+            {
+                job_application_id: job_applications[0].job_application_id,
+                skill: "Python",
+                language_id: languages[0].language_id,
+                level: 4,
+                is_preferred: false,
+                is_best: false,
+            },
+        ],
+    });
+
+    const found = await prisma.job_application_skill.findMany({
+        where: {
+            job_application_id: job_applications[0].job_application_id,
+        },
+    });
+
+    const deleted = await deleteSkillsByJobApplicationId(
+        job_applications[0].job_application_id
+    );
+    expect(deleted).toHaveProperty("count", found.length);
+    const searched = await prisma.job_application_skill.findMany({
+        where: {
+            job_application_id: 0,
+        },
+    });
+    expect(searched.length).toEqual(0);
 });
