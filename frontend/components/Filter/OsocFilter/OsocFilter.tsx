@@ -23,6 +23,7 @@ export const OsocCreateFilter: React.FC<{
     useEffect(() => {
         if (loading) return;
         search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [yearSort]);
 
     const toggleYearSort = async (e: SyntheticEvent) => {
