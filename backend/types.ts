@@ -965,3 +965,11 @@ export enum Decision {
     MAYBE = "MAYBE",
     NO = "NO",
 }
+
+export enum EmailStatus {
+    SCHEDULED = "SCHEDULED",
+    SENT = "SENT",
+    FAILED = "FAILED",
+    NONE = "NONE",
+    DRAFT = "DRAFT",
+}

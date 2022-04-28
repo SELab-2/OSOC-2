@@ -418,7 +418,129 @@ test("Can parse filter osocs request", () => {
     return Promise.all([okays, fails].flat());
 });
 
-// TODO test Rq.parseAcceptNewUserRequest
+test.only("Can parse filter students request", () => {
+    const key = "my-session-key";
+
+    const nothing = {};
+    const osocYear = { osocYear: 2022 };
+    const firstNameFilter = { firstNameFilter: "Firstname" };
+    const lastNameFilter = { lastNameFilter: "Lastname" };
+    const emailFilter = { emailFilter: "firstname.lastname@hotmail.com" };
+    const roleFilter = {
+        roleFilter: ["Frontend developer", "Backend developer"],
+    };
+    const alumniFilter = { alumniFilter: true };
+    const coachFilter = { coachFilter: true };
+    const statusFilter = { statusFilter: "YES" };
+    const emailStatusFilter = { emailStatusFilter: "SENT" };
+    const firstNameSort = { firstNameSort: "asc" };
+    const lastNameSort = { lastNameSort: "asc" };
+    const emailSort = { emailSort: "desc" };
+    const alumniSort = { alumniSort: "asc" };
+
+    const wrongEmail: T.Anything = { emailFilter: "email" };
+    const wrongStatus: T.Anything = { statusFilter: "yes" };
+    const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
+    const wrongFirstNameSort: T.Anything = { firstNameSort: "firstname" };
+    const wrongLastNameSort: T.Anything = { lastNameSort: "lastname" };
+    const wrongEmailSort: T.Anything = { emailSort: "email" };
+    const wrongAlumniSort: T.Anything = { alumniSort: "alumni" };
+
+    const okays = [
+        nothing,
+        osocYear,
+        firstNameFilter,
+        lastNameFilter,
+        emailFilter,
+        alumniFilter,
+        coachFilter,
+        statusFilter,
+        emailStatusFilter,
+        firstNameSort,
+        lastNameSort,
+        emailSort,
+        alumniSort,
+    ].map((x) => {
+        const copy: T.Anything = { ...x };
+        const req: express.Request = getMockReq();
+        req.body = x;
+        setSessionKey(req, key);
+        [
+            "firstNameFilter",
+            "lastNameFilter",
+            "emailFilter",
+            "roleFilter",
+            "alumniFilter",
+            "coachFilter",
+            "statusFilter",
+            "emailStatusFilter",
+            "firstNameSort",
+            "lastNameSort",
+            "emailSort",
+            "alumniSort",
+        ].forEach((x) => {
+            if (!(x in req.body)) {
+                copy[x] = undefined;
+            }
+        });
+        if (!("osocYear" in req.body)) {
+            copy["osocYear"] = new Date().getFullYear();
+        }
+        copy.sessionkey = key;
+        return expect(
+            Rq.parseFilterStudentsRequest(req)
+        ).resolves.toStrictEqual(copy);
+    });
+
+    const copy: T.Anything = { ...roleFilter };
+    const req: express.Request = getMockReq();
+    req.body = roleFilter;
+    setSessionKey(req, key);
+    [
+        "firstNameFilter",
+        "lastNameFilter",
+        "emailFilter",
+        "alumniFilter",
+        "coachFilter",
+        "statusFilter",
+        "emailStatusFilter",
+        "firstNameSort",
+        "lastNameSort",
+        "emailSort",
+        "alumniSort",
+    ].forEach((x) => {
+        if (!(x in req.body)) {
+            copy[x] = undefined;
+        }
+    });
+    if (!("osocYear" in req.body)) {
+        copy["osocYear"] = new Date().getFullYear();
+    }
+    copy.sessionkey = key;
+
+    const roleFilterOkay = expect(
+        Rq.parseFilterStudentsRequest(req)
+    ).resolves.toStrictEqual(copy);
+
+    const fails = [
+        wrongEmail,
+        wrongStatus,
+        wrongFirstNameSort,
+        wrongLastNameSort,
+        wrongEmailSort,
+        wrongAlumniSort,
+        wrongEmailStatus,
+    ].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseFilterStudentsRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails, [roleFilterOkay]].flat());
+});
 
 test("Can parse final decision request", () => {
     const key = "key";
