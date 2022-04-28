@@ -255,9 +255,8 @@ export const StudentFilter: React.FC<{
         if (emailStatus !== EmailStatus.EMPTY) {
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
-        console.log(router.query);
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        // await router.push(`/students${query}`);
+        await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()

@@ -11,6 +11,10 @@ import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "./StudentOverview.module.scss";
 import { Modal } from "../Modal/Modal";
+import CheckIconColor from "../../public/images/green_check_mark_color.png";
+import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -193,6 +197,12 @@ export const StudentOverview: React.FC<{
         return 0;
     };
 
+    const decision_to_image = {
+        [Decision.YES]: CheckIconColor,
+        [Decision.MAYBE]: ExclamationIconColor,
+        [Decision.NO]: ForbiddenIconColor,
+    };
+
     return (
         <div>
             <Modal
@@ -205,6 +215,7 @@ export const StudentOverview: React.FC<{
                     id="motivationField"
                     type="text"
                     name="motivation"
+                    className="input"
                     value={motivation}
                     placeholder="type your motivation..."
                     onKeyDown={(e) => handleEnterConfirm(e)}
@@ -214,82 +225,101 @@ export const StudentOverview: React.FC<{
                 <button onClick={handleConfirm}>CONFIRM</button>
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
-            <div className={styles.dropdown}>
-                <button className={styles.dropbtn}>Set status</button>
-                <div className={styles.dropdown_content}>
-                    <a onClick={() => enumDecision(Decision.YES)}>YES</a>
-                    <a onClick={() => enumDecision(Decision.NO)}>NO</a>
-                    <a onClick={() => enumDecision(Decision.MAYBE)}>MAYBE</a>
+
+            <div className={styles.body}>
+                <div className={styles.dropdown}>
+                    <button className={styles.dropbtn}>Set Status</button>
+                    <div className={styles.dropdownContent}>
+                        <a onClick={() => enumDecision(Decision.YES)}>YES</a>
+                        <a onClick={() => enumDecision(Decision.NO)}>NO</a>
+                        <a onClick={() => enumDecision(Decision.MAYBE)}>
+                            MAYBE
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div>
+                <div>
+                    {evaluations.map((evaluation) => {
+                        if (evaluation.isFinal) {
+                            return (
+                                <div key={evaluation.evaluation_id}>
+                                    <p>
+                                        {evaluation.decision}{" "}
+                                        <strong>
+                                            {evaluation.senderFirstname}{" "}
+                                            {evaluation.senderLastname}
+                                            {": "}
+                                        </strong>
+                                        {evaluation.reason}
+                                    </p>
+                                </div>
+                            );
+                        }
+                    })}
+                </div>
+                <div>
+                    <h2>Suggestions</h2>
+                    <button onClick={() => enumSuggest(Decision.YES)}>
+                        Suggest yes
+                    </button>
+                    <button onClick={() => enumSuggest(Decision.MAYBE)}>
+                        Suggest maybe
+                    </button>
+                    <button onClick={() => enumSuggest(Decision.NO)}>
+                        Suggest no
+                    </button>
+                </div>
                 {evaluations.map((evaluation) => {
-                    if (evaluation.isFinal) {
+                    if (!evaluation.isFinal) {
                         return (
-                            <div key={evaluation.evaluation_id}>
-                                <p>
-                                    {evaluation.decision}{" "}
-                                    <strong>
-                                        {evaluation.senderFirstname}{" "}
-                                        {evaluation.senderLastname}
-                                        {": "}
-                                    </strong>
-                                    {evaluation.reason}
-                                </p>
-                            </div>
-                        );
-                    }
-                })}
-            </div>
-            <div>
-                <h2>Suggestions</h2>
-                <button onClick={() => enumSuggest(Decision.YES)}>
-                    Suggest yes
-                </button>
-                <button onClick={() => enumSuggest(Decision.MAYBE)}>
-                    Suggest maybe
-                </button>
-                <button onClick={() => enumSuggest(Decision.NO)}>
-                    Suggest no
-                </button>
-            </div>
-            {evaluations.map((evaluation) => {
-                if (!evaluation.isFinal) {
-                    return (
-                        <div key={evaluation.evaluation_id}>
-                            <p>
-                                {evaluation.decision}{" "}
+                            <div
+                                className={styles.suggestion}
+                                key={evaluation.evaluation_id}
+                            >
+                                <Image
+                                    className={styles.buttonImage}
+                                    src={
+                                        decision_to_image[
+                                            evaluation.decision as Decision
+                                        ]
+                                    }
+                                    width={30}
+                                    height={30}
+                                    alt={"Suggestion"}
+                                />
+
                                 <strong>
                                     {evaluation.senderFirstname}{" "}
                                     {evaluation.senderLastname}
                                     {": "}
                                 </strong>
                                 {evaluation.reason}
-                            </p>
-                        </div>
-                    );
-                }
-            })}
-            <h2>JobApplication</h2>
-            {student.jobApplication.attachment
-                .sort(compareAttachments)
-                .map((attachment) => (
-                    <div key={attachment.attachment_id}>
-                        <h1>{getAttachmentType(attachment.type)}</h1>
-                        {attachment.type[0] ===
-                        AttachmentType.MOTIVATION_STRING ? (
-                            <p>{attachment.data}</p>
-                        ) : (
-                            <a>{attachment.data}</a>
-                        )}
-                    </div>
-                ))}
-            <h1>Fun fact</h1>
-            <p>{student.jobApplication.fun_fact}</p>
-            <h1>Responsabilities</h1>
-            <p>{student.jobApplication.responsibilities}</p>
-            <h1>Volunteer</h1>
-            <p>{student.jobApplication.student_volunteer_info}</p>
+                            </div>
+                        );
+                    }
+                })}
+                <h2>Job Application</h2>
+                <div className={styles.jobapplication}>
+                    {student.jobApplication.attachment
+                        .sort(compareAttachments)
+                        .map((attachment) => (
+                            <div key={attachment.attachment_id}>
+                                <h1>{getAttachmentType(attachment.type)}</h1>
+                                {attachment.type[0] ===
+                                AttachmentType.MOTIVATION_STRING ? (
+                                    <p>{attachment.data}</p>
+                                ) : (
+                                    <a>{attachment.data}</a>
+                                )}
+                            </div>
+                        ))}
+                    <h1>Fun fact</h1>
+                    <p>{student.jobApplication.fun_fact}</p>
+                    <h1>Responsabilities</h1>
+                    <p>{student.jobApplication.responsibilities}</p>
+                    <h1>Volunteer</h1>
+                    <p>{student.jobApplication.student_volunteer_info}</p>
+                </div>
+            </div>
         </div>
     );
 };
