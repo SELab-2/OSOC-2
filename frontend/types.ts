@@ -178,6 +178,16 @@ export interface LoginUser {
     account_status: AccountStatus;
 }
 
+export interface OsocEdition {
+    osoc_id: number;
+    year: number;
+    _count: ProjectCount;
+}
+
+export interface ProjectCount {
+    project: number;
+}
+
 export interface Role {
     role_id: number;
     name: string;

@@ -185,7 +185,7 @@ export const UserFilter: React.FC<{
     };
 
     return (
-        <div className={styles.filter}>
+        <div className={styles.userfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
                     <div onClick={toggleNameSort}>

@@ -293,6 +293,33 @@ export async function parseGetSuggestionsStudentRequest(
 }
 
 /**
+ *  Parses a request to `GET /osoc/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterOsocsRequest(
+    req: express.Request
+): Promise<Requests.OsocFilter> {
+    let year = maybe(req.body, "yearFilter");
+    if ("yearFilter" in req.body) {
+        year = parseInt(req.body.yearFilter);
+    }
+
+    for (const filter of [maybe(req.body, "yearSort")]) {
+        if (filter != undefined && filter !== "asc" && filter !== "desc") {
+            return rejector();
+        }
+    }
+
+    return Promise.resolve({
+        sessionkey: getSessionKey(req),
+        yearFilter: year,
+        yearSort: maybe(req.body, "yearSort"),
+    });
+}
+
+/**
  *  Parses a request to `GET /student/filter`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -304,19 +331,22 @@ export async function parseFilterStudentsRequest(
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
-        ("emailFilter" in req.body &&
-            !validator.default.isEmail(req.body.emailFilter)) ||
-        ("statusFilter" in req.body &&
-            req.body.statusFilter !== Decision.YES &&
-            req.body.statusFilter !== Decision.MAYBE &&
-            req.body.statusFilter !== Decision.NO)
+        "statusFilter" in req.body &&
+        req.body.statusFilter !== Decision.YES &&
+        req.body.statusFilter !== Decision.MAYBE &&
+        req.body.statusFilter !== Decision.NO
     ) {
         return rejector();
     } else {
-        if ("emailFilter" in req.body) {
+        if (
+            "emailFilter" in req.body &&
+            validator.default.isEmail(req.body.emailFilter)
+        ) {
             mail = validator.default
                 .normalizeEmail(req.body.emailFilter)
                 .toString();
+        } else if ("emailFilter" in req.body) {
+            mail = req.body.emailFilter as string;
         }
     }
 
@@ -377,13 +407,13 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
-    let isCoachFilter = maybe(req.body, "isCoachFilter");
+    let isCoachFilter = undefined;
     if ("isCoachFilter" in req.body) {
-        isCoachFilter = Boolean(req.body.isCoachFilter);
+        isCoachFilter = req.body.isCoachFilter === "true";
     }
-    let isAdminFilter = maybe(req.body, "isAdminFilter");
+    let isAdminFilter = undefined;
     if ("isAdminFilter" in req.body) {
-        isAdminFilter = Boolean(req.body.isAdminFilter);
+        isAdminFilter = req.body.isAdminFilter === "true";
     }
     if (
         "statusFilter" in req.body &&
@@ -400,8 +430,8 @@ export async function parseFilterUsersRequest(
             mail = validator.default
                 .normalizeEmail(req.body.emailFilter)
                 .toString();
-        } else {
-            mail = req.body.emailFilter;
+        } else if ("emailFilter" in req.body) {
+            mail = req.body.emailFilter as string;
         }
     }
 
@@ -527,6 +557,55 @@ export async function parseUpdateProjectRequest(
 }
 
 /**
+ *  Parses a request to `GET /project/filter`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseFilterProjectsRequest(
+    req: express.Request
+): Promise<Requests.ProjectFilter> {
+    for (const filter of [
+        maybe(req.body, "projectNameSort"),
+        maybe(req.body, "clientNameSort"),
+        maybe(req.body, "fullyAssignedSort"),
+    ]) {
+        if (filter != undefined && filter !== "asc" && filter !== "desc") {
+            return rejector();
+        }
+    }
+
+    let assignedCoachesFilterArray = maybe(
+        req.body,
+        "assignedCoachesFilterArray"
+    );
+    if ("assignedCoachesFilterArray" in req.body) {
+        if (typeof req.body.assignedCoachesFilterArray === "string") {
+            assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
+                .slice(1, -1)
+                .split(",")
+                .map((num: string) => Number(num));
+        }
+    }
+
+    let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
+    if ("fullyAssignedFilter" in req.body) {
+        fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
+    }
+
+    return Promise.resolve({
+        sessionkey: getSessionKey(req),
+        projectNameFilter: maybe(req.body, "projectNameFilter"),
+        clientNameFilter: maybe(req.body, "clientNameFilter"),
+        assignedCoachesFilterArray: assignedCoachesFilterArray,
+        fullyAssignedFilter: fullyAssignedFilter,
+        projectNameSort: maybe(req.body, "projectNameSort"),
+        clientNameSort: maybe(req.body, "clientNameSort"),
+        fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
+    });
+}
+
+/**
  *  Parses a request to `POST /project/<id>/draft`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -634,13 +713,11 @@ export async function parseFormRequest(
             return rejector();
         }
         for (const question of req.body.data.fields) {
-            console.log(question);
             if (
                 question.key === undefined ||
                 question.key === null ||
                 question.value === undefined
             ) {
-                console.log(question.value);
                 return rejector();
             }
         }
@@ -656,7 +733,7 @@ export async function parseRequestResetRequest(
 ): Promise<Requests.ReqReset> {
     return hasFields(req, ["email"], types.neither).then(() =>
         Promise.resolve({
-            email: req.body.email,
+            email: validator.default.normalizeEmail(req.body.email).toString(),
         })
     );
 }
@@ -751,6 +828,17 @@ export async function parseAcceptNewUserRequest(
             id: Number(req.params.id),
             is_admin: req.body.is_admin,
             is_coach: req.body.is_coach,
+        })
+    );
+}
+
+export async function parseNewOsocEditionRequest(
+    req: express.Request
+): Promise<Requests.OsocEdition> {
+    return hasFields(req, ["year"], types.neither).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            year: parseInt(req.body.year),
         })
     );
 }
@@ -908,3 +996,19 @@ export const parseUpdateCoachRequest = parseUpdateLoginUser;
  * {@link parseUpdateLoginUser}.
  */
 export const parseUpdateAdminRequest = parseUpdateLoginUser;
+/**
+ *  A request to `GET /osoc/all` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseOsocAllRequest = parseKeyRequest;
+/**
+ *  Parses a request to `POST /osoc/`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+/**
+ *  A request to `DELETE /osoc/<id>` only requires a session key and an ID
+ * {@link parseKeyIdRequest}.
+ */
+export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
