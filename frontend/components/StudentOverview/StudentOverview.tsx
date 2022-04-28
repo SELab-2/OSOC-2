@@ -256,18 +256,21 @@ export const StudentOverview: React.FC<{
                         }
                     })}
                 </div>
-                <div>
+                <div className={styles.suggestionheader}>
                     <h2>Suggestions</h2>
-                    <button onClick={() => enumSuggest(Decision.YES)}>
-                        Suggest yes
-                    </button>
-                    <button onClick={() => enumSuggest(Decision.MAYBE)}>
-                        Suggest maybe
-                    </button>
-                    <button onClick={() => enumSuggest(Decision.NO)}>
-                        Suggest no
-                    </button>
+                    <div className={styles.suggestionbuttons}>
+                        <button onClick={() => enumSuggest(Decision.YES)}>
+                            Suggest yes
+                        </button>
+                        <button onClick={() => enumSuggest(Decision.MAYBE)}>
+                            Suggest maybe
+                        </button>
+                        <button onClick={() => enumSuggest(Decision.NO)}>
+                            Suggest no
+                        </button>
+                    </div>
                 </div>
+
                 {evaluations.map((evaluation) => {
                     if (!evaluation.isFinal) {
                         return (

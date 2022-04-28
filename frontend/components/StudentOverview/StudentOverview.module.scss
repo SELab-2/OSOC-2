@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: flex-start;
 }
 
 /* Dropdown Button */
@@ -53,11 +54,43 @@
   background-color: var(--warning-100);
 }
 
+.suggestionheader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.suggestionbuttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.suggestionbuttons button {
+  font-weight: normal;
+}
+.suggestionbuttons button:hover {
+  background-color: var(--succes-150) !important;
+}
+/* Color per suggestion type */
+.suggestionbuttons button:nth-child(1) {
+  background-color: var(--succes-100);
+}
+.suggestionbuttons button:nth-child(2) {
+  background-color: var(--warning-100);
+}
+.suggestionbuttons button:nth-child(3) {
+  background-color: var(--error-100);
+}
+
+
+
+
+
 .suggestion {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
 
 .jobapplication {
   display: flex;
