@@ -9,6 +9,7 @@ import * as util from "../utility";
 import * as ormSe from "../orm_functions/session_key";
 import { errors } from "../utility";
 import * as ormL from "../orm_functions/login_user";
+import { removeAllKeysForLoginUserId } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -149,13 +150,30 @@ export async function deleteCoach(
                         logUs !== null &&
                         logUs.login_user_id !== parsed.userId
                     ) {
-                        return ormL
-                            .deleteLoginUserByPersonId(parsed.data.id)
+                        return removeAllKeysForLoginUserId(logUs.login_user_id)
                             .then(() => {
-                                return ormP
-                                    .deletePersonById(parsed.data.id)
-                                    .then(() => Promise.resolve({}));
-                            });
+                                return Promise.resolve({});
+                            })
+                            .then(() => {
+                                return ormL
+                                    .deleteLoginUserByPersonId(parsed.data.id)
+                                    .then(() => {
+                                        return ormP
+                                            .deletePersonById(parsed.data.id)
+                                            .then(() => Promise.resolve({}))
+                                            .catch(() =>
+                                                Promise.reject(
+                                                    errors.cookServerError()
+                                                )
+                                            );
+                                    })
+                                    .catch(() =>
+                                        Promise.reject(errors.cookServerError())
+                                    );
+                            })
+                            .catch(() =>
+                                Promise.reject(errors.cookServerError())
+                            );
                     }
                     return Promise.reject(errors.cookInvalidID());
                 });
