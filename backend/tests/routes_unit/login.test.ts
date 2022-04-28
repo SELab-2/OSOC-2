@@ -239,3 +239,16 @@ test("Can handle disabled accounts", async () => {
     expectNoCall(utilMock.generateKey);
     expectNoCall(session_keyMock.addSessionKey);
 });
+
+test("Can logout", async () => {
+    const rq = getMockReq();
+    rq.body = { sessionkey: "abcd" };
+    await expect(login.logout(rq)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseLogoutRequest, rq);
+    expect(util.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(util.checkSessionKey).toHaveBeenCalledWith(
+        { sessionkey: "abcd" },
+        false
+    );
+    expectCall(session_keyMock.removeAllKeysForUser, "abcd");
+});
