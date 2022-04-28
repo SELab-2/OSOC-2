@@ -16,7 +16,7 @@ export const Settings: React.FC<{
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [applyError, setApplyError] = useState<string>("");
-    const { getSession } = useContext(SessionContext);
+    const { getSession, setSessionKey } = useContext(SessionContext);
 
     /**
      * Gets called everytime the new password input field's value changes
@@ -138,8 +138,12 @@ export const Settings: React.FC<{
                     );
                     console.log(err);
                 });
+            console.log(response);
             if (response !== undefined) {
                 if (response.success) {
+                    if (setSessionKey) {
+                        setSessionKey(response.sessionkey);
+                    }
                     fetchUser();
                     // TODO notify succes
                 } else {
