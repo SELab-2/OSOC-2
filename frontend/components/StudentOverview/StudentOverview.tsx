@@ -252,19 +252,23 @@ export const StudentOverview: React.FC<{
                             </a>
                         </div>
                     </div>
-                    <Image
-                        className={styles.buttonImage}
-                        src={
-                            decision_to_image[
-                                student.evaluations[0].evaluation.filter(
-                                    (evaluation) => evaluation.is_final
-                                )[0].decision
-                            ]
-                        }
-                        width={30}
-                        height={30}
-                        alt={"Final Decision"}
-                    />
+                    {student.evaluations[0].evaluation.filter(
+                        (evaluation) => evaluation.is_final
+                    )[0] !== undefined ? (
+                        <Image
+                            className={styles.buttonImage}
+                            src={
+                                decision_to_image[
+                                    student.evaluations[0].evaluation.filter(
+                                        (evaluation) => evaluation.is_final
+                                    )[0].decision
+                                ]
+                            }
+                            width={30}
+                            height={30}
+                            alt={"Final Decision"}
+                        />
+                    ) : null}
                 </div>
 
                 <div>
