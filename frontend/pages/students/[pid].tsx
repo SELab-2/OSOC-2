@@ -37,7 +37,7 @@ const Pid: NextPage = () => {
     useEffect(() => {
         fetchStudent().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.query]);
+    }, []);
 
     return (
         <div>

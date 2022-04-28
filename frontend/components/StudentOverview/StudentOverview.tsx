@@ -53,7 +53,7 @@ export const StudentOverview: React.FC<{
     useEffect(() => {
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [counter]);
+    }, []);
 
     const makeSuggestion = () => {
         if (getSessionKey !== undefined) {
@@ -81,7 +81,7 @@ export const StudentOverview: React.FC<{
                     if (response !== undefined && response.success) {
                         setCounter(counter + 1);
                         setMotivation("");
-
+                        console.log(response);
                         // TODO the backend should return the evaluation upon success
                         const evaluation = response.data as EvaluationCoach;
                         updateEvaluation(
