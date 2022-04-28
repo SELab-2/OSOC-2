@@ -178,7 +178,7 @@ export function getRouter(): express.Router {
     router.get("/:id", (req, res) =>
         util.respOrErrorNoReinject(res, checkCode(req))
     );
-    util.routeKeyOnly(router, "post", "/:id", resetPassword);
+    util.route(router, "post", "/:id", resetPassword);
 
     util.addAllInvalidVerbs(router, ["/", "/:id"]);
 
