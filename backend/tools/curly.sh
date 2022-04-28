@@ -22,6 +22,15 @@ function main() {
     printf 'HTTP Verb? '
     read verb
 
+    printf 'Session key (leave blank to pass no session key)? '
+    read skey
+    skey=`printf "$skey" | xargs`
+    if [ -z ${skey//[:blank:]} ]; then
+      skey=''
+    else
+      skey="-H \"Authorization: auth/osoc2 $skey\""
+    fi
+
     echo 'You can now pass arguments. Use CTRL-D after you entered the last key-value pair.'
     args=''
     printf 'Key? '
@@ -30,6 +39,10 @@ function main() {
         read value
         if [[ $args = '' ]]; then
             args="\"$key\": \"$value\""
+        elif [[ ${value:0:1} = '{' ]]; then
+            # send JSON objects correctly
+            args="$args, \"$key\": $value"
+            echo "Will send '$value' as JSON-object"
         else
             args="$args, \"$key\": \"$value\""
         fi
@@ -38,7 +51,7 @@ function main() {
     echo ''
     args="'{ $args }'"
 
-    echo "Curl command: \`curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args -H \"Content-Type: application/json\"\`"
+    echo "Curl command: \`curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args $skey -H \"Content-Type: application/json\"\`"
     printf 'Send this curl command (yes/y/no/n/maybe)? '
     read ans
     while [ $ans != 'yes' ] && [ $ans != 'no' ] && [ $ans != 'maybe' ] && [ $ans != 'y' ] && [ $ans != 'n' ]; do
@@ -47,12 +60,12 @@ function main() {
     done
 
     if [ $ans = 'y' ] || [ $ans = 'yes' ]; then
-        /bin/sh -c "curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args -H \"Content-Type: application/json\""
+        /bin/sh -c "curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args $skey -H \"Content-Type: application/json\""
     elif [ $ans = 'maybe' ]; then
         printf 'Output file? '
         read f
         echo "#!/bin/sh" >f
-        echo curl -X "$verb" "http://localhost:4096$api$ep" -i -d $args -H "Content-Type: application/json" >>f
+        echo curl -X "$verb" "http://localhost:4096$api$ep" -i -d $args $skey -H "Content-Type: application/json" >>f
     fi
 }
 

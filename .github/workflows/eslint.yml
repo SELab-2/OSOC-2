@@ -4,9 +4,8 @@
 name: ESLint
 
 on:
-  # Run on every open pull request
+  # Run on every open pull request, default types are [opened, edited, reopened]
   pull_request:
-    types: [opened, edited, reopened, synchronize]
 
   # Should run on every push to main
   push:
@@ -14,17 +13,12 @@ on:
 
 jobs:
   ci:
-    runs-on: self-hosted
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 17.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 17.x
       - run: npm install
-      - run: eslint . --ext .js,.jsx,.ts,.tsx
+      - run: npm run eslint

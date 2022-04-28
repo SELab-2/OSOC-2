@@ -20,19 +20,62 @@
         },
         "nonExistent": {
             "http": 404,
-            "reason": "The endpoint requested ($url) does not exist."
+            "reason": "The endpoint requested (~url) does not exist."
         },
         "invalidVerb": {
             "http": 405,
-            "reason": "This HTTP verb ($verb) is not supported for this endpoint ($url)"
+            "reason": "This HTTP verb (~verb) is not supported for this endpoint (~url)"
         },
         "nonJSONRequest": {
             "http": 406,
-            "reason": "All endpoints only support JSON ($mime requested)."
+            "reason": "All endpoints only support JSON (~mime requested)."
         },
         "serverError": {
             "http": 500,
             "reason": "Something went wrong while trying to execute your request."
+        },
+        "noDataError": {
+            "http": 412,
+            "reason": "The data you requested does not exist (yet)."
+        },
+        "lockedRequest": {
+            "http": 423,
+            "reason": "Your account was deactivated. Please contact the webmaster."
+        },
+        "pendingAccount": {
+            "http": 424,
+            "reason": "Your account hasn't been activated yet. Please try again later."
+        },
+        "github": {
+            "argumentMissing": {
+                "http": 409,
+                "reason": "Something went wrong while authenticating with GitHub."
+            },
+            "illegalState": {
+                "http": 409,
+                "reason": "GitHub authentication endpoints are meant for GitHub authentication only. Thank you very much."
+            },
+            "other": {
+                "reason": "GitHub data requests failed. Please try again later."
+            }
+        },
+        "reset": {
+            "sendEmail": {
+                "http": 503,
+                "reason": "Failed to send the email. If you're certain that your email address is correct, then please contact the admin."
+            },
+            "invalidEmail": {
+                "http": 400,
+                "reason": "No such email is present. Please check your email."
+            },
+            "generateFailed": {
+                "http": 500,
+                "reason": "Failed to generate a reset key. Please try again later."
+            },
+            "resetFailed": {
+                "http": 400,
+                "reason": "Failed to update your password. Perhaps you used an invalid key?"
+            }
         }
     },
 
@@ -40,6 +83,13 @@
         "homes": [
             "", "/api-osoc"
         ],
-        "preferred": "/api-osoc"
+        "preferred": "/api-osoc",
+        "authScheme": "auth/osoc2",
+        "defaultUserId": 3
+    },
+
+    "email": {
+        "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
+        "header": "OSOC2 Recovery Code"
     }
 }

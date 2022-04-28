@@ -1,0 +1,98 @@
+.body {
+  padding: 1rem;
+}
+
+.card h2 {
+  font-size: large;
+  padding-block: 0;
+  padding-inline: 0.4rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.limited {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 620px) {
+  .grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .column {
+    margin-left: 0 !important;
+    border-right: none !important;
+  }
+}
+
+/*---------*/
+/* Columns */
+/*---------*/
+.column {
+  border-right: 0.1rem solid var(--neutral-200);
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+}
+.column:first-child {
+  padding-left: 0;
+}
+.column:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+.column a {
+  word-wrap: anywhere;
+}
+
+/*------------*/
+/* Categories */
+/*------------*/
+.categoryTitle {
+  font-weight: lighter;
+  font-size: x-small;
+  padding: 0.4rem;
+}
+
+.category {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/*--------*/
+/* GITHUB */
+/*--------*/
+.githubContainer {
+  display: flex;
+  background-color: black;
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  transition: all .2s ease-in-out;
+  margin-top: 0.5rem;
+  margin-inline: -0.2rem;
+  align-items: center;
+}
+
+.githubContainer:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+
+.githublogo {
+  width: 1.5rem;
+}
+
+.githublogo {
+  display: flex;
+}
+
+.github {
+  vertical-align: center;
+  margin-left: 1rem;
+  color: white;
+}

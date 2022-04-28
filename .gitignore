@@ -65,3 +65,12 @@ backend/.idea
 .env
 frontend/.env.development
 frontend/.env.production
+backend/prisma/.env
+backend/.env.development
+backend/.env.production
+# just in case a file get's copy pasted without the . in the beginning (discord removes this)
+frontend/env.development
+frontend/env.production
+backend/prisma/env
+backend/env.development
+backend/env.production

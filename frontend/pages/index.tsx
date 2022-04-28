@@ -1,25 +1,29 @@
-import type {NextPage} from 'next'
-import {useRouter} from "next/router";
-import { useSession } from "next-auth/react"
-import {useEffect} from "react";
+import type { NextPage } from "next";
+import { useContext, useEffect } from "react";
+import SessionContext from "../contexts/sessionProvider";
+import { useRouter } from "next/router";
 
+/**
+ * Checks if a user is logged in and redirects to the corresponding page
+ * Coaches have restricted acces to some pages / features
+ * @constructor
+ */
 const Home: NextPage = () => {
-
-    const router = useRouter()
-    const session = useSession()
+    const { getSession } = useContext(SessionContext);
+    const router = useRouter();
 
     useEffect(() => {
-        console.log(session)
-        // The user is logged in
-        if (session !== null && session.status === "authenticated") {
-            router.push("/students").then()
-        } else {
-            // The user is not logged in and will be redirected to /login
-            router.push("/login").then()
+        if (getSession) {
+            getSession().then(({ sessionKey }) => {
+                if (sessionKey !== "") {
+                    router.push("/students").then();
+                }
+            });
         }
-    })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    return (<></>)
-}
+    return <></>;
+};
 
 export default Home;

@@ -22,50 +22,89 @@ location /api-osoc/ {
 It's also a good idea to redirect `http` to `https`. We achieve this using [certbot](https://certbot.eff.org).  
 This is a simple utility that automatically can change your nginx config file to achieve this AND it creates and refreshes the needed TLS certificate.
 
-## Project configuration
+We also use this server to serve static images (used in the password reset mail).
+Following block in the nginx config file achieves this:
+```
+location /img/ {
+    gzip_static on;
+    alias <absolute-path-to-where-images-are-located>;
+}
+```
+To make this work you only have to place the logo somewhere on your server and fill in the absolute path to the **folder** where it is located after the `alias`-keyword
 
-### .env files
+## Project configuration
+### Frontend
+
+#### .env files
 Next.js supports multiple .env files that have different values depending on the running environment.  
 We used the `.env.production`for production and `.env.development` for development.
 
 each of these files should contain following values:
 
 ```
-NEXT_PUBLIC_API_URL=<insert url to the backend here>
-NEXTAUTH_URL=<insert url to the frontend here>
-NEXTAUTH_SECRET=<insert next authentication secret here>
-GITHUB_ID=<insert github client id here>
-GITHUB_SECRET=<insert github client secret here>
+NEXT_PUBLIC_API_URL=<insert URL to the backend here>
+NEXT_PUBLIC_WEBSOCKET_SERVER_URL=<insert URL to your domain here (without specific path to where the backend is on this domain)>
+NEXT_PUBLIC_WEBSOCKET_SERVER_PATH=<insert path from the root of your domain name to the socket.io URL>
+```
+for development the first and second URL will probably be `http://localhost:xxxx`.
+For production the second URL is probably almost the same as the first URL, the difference is probably that it's **without** `/api-osoc`at the end
+`NEXT_PUBLIC_WEBSOCKET_SERVER_PATH`should be the url to your backend starting from your domain name. With `/socket.io` appended to it.
+
+A small example:
+If the complete URL to the backend is `https://someDomain.com/api-osoc` then following values should be used:
+```
+NEXT_PUBLIC_API_URL=https://someDomain.com/api-osoc
+NEXT_PUBLIC_WEBSOCKET_SERVER_URL=https://someDomain.com
+NEXT_PUBLIC_WEBSOCKET_SERVER_PATH=/api-osoc/socket.io
+```
+Notice the `/socket.io` that is appened to `/api-osoc`!
+This is needed because the socket connection can be found back on the route `/socket.io` **INSIDE** the backend.
+
+### Backend
+#### GitHub login
+GitHub login relies on two configurations:
+ - One part is on GitHub's servers.
+ - The other part relies on .env files in the `/backend/` folder.
+
+##### GitHub part
+To enable GitHub login, we need a GitHub application. These are made by going to [GitHub's Developer Applications page](https://github.com/settings/developers). From there, you can click the `New OAuth App` button to create a new application.
+
+![Default settings](./gh-oauth-new-app.png)
+
+You can change the `Application name` to anything you'd like. Be sure to confirm that the `Homepage URL` is correct for your server. The `Application description` can be anything you like. The `Authorization callback URL` should be the `Homepage URL`.
+
+##### Local configuration part
+In the `/backend/` folder, add following lines to the `.env.production` and `.env.develoment` files (or create them in `/backend` if they don't exist);
+```
+GITHUB_CLIENT_ID="<Insert YOUR_CLIENT_ID here>"
+GITHUB_SECRET="<Insert YOUR_CLIENT_SECRET here>"
+GITHUB_AUTH_CALLBACK_URL="<Insert YOUR_AUTH_CALLBACK here>"
+FRONTEND="<Insert URL to your frontend here>"
 ```
 
-- for development the first 2 URLs will propably be `http://localhost:xxxx`.
-- For development the api url will probably end on `/api-osoc`if you chose the same route as described earlier in the nginx setup.
+Depending if you are using the development environment or production environment you'll use a different GitHub OAuth application with a different id, secret and callback.
+Copy-paste the values from your production OAuth app on GitHub to the `.env.production` file and for development to `.env.development`
 
-- The next-auth secret can be generated locally with following command:
+You should replace the values with these (see the screenshot below):
+ - `YOUR_CLIENT_ID` should be the value given as `Client ID` (the first red box in the screenshot).
+ - `YOUR_CLIENT_SECRET` should be the value given below `Client secrets` (the second red box in the screenshot). You can copy this value by clicking the button right next to it.
+ - `YOUR_AUTH_CALLBACK` should be the value you filled in for `Authorization callback URL` (from the previous step).
+ - The URL to the frontend is not a secret, but we use it here to make this url easily configurable
+![How to get the values](./gh-oauth-get-values.png)
+
+### Account recovery emails
+To send a "password forgotten" email, we use GMail. However, setting this up isn't exactly easy. Please follow along these [steps on medium.com](https://alexb72.medium.com/how-to-send-emails-using-a-nodemailer-gmail-and-oauth2-fe19d66451f9) until you have acquired all 4 codes (client ID, client secret, refresh token and access token).
+Once you have them add following lines to the `.env.production` and `.env.development` in `/backend`.
 ```
-openssl rand -base64 32
+GOOGLE_CLIENT_ID="<Insert your google client id here>"
+GOOGLE_CLIENT_SECRET="<Insert your google client secret here>"
+GOOGLE_REFRESH_TOKEN="<Insert your google refresh token here>"
+GOOGLE_ACCESS_TOKEN="<Insert your google access token here>"
 ```
-- The github id's and secrets are explained [later](#githubOAuth) in this document
+You might want to create 2 different email accounts for development and production, or you could use the same email account for both.
+Just copy-paste the secrets from the development email account to the `.env.development`file and for production to `.env.production`
 
-### GitHub login
-To make github login work it is needed that you make a github OAuth application.  
-You can create a new github OAuth app [here](https://github.com/settings/developers)
-
-U can recreate these settings:  
-![img.png](githubOath.png)
-
-the `Application name` can freely be chosen.
-in the `Homepage URL` field you should put the used domain name.
-in the `Authorization callback URL`you should replace the first part with your domain name. **Leave the second part of the url untouched (`/api/auth/callback/github`)!**  
-<br>
-<a name="githubOAuth"></a>
-Finally, we only need to update the client id and client secret in the `/frontend/.env.production` file.  
-Here you should paste the client ID of the GitHub OAuth application you just made in `GITHUB_ID`.  
-In this same file you also need to replace the value of `GITHUB_SECRET`.  
-This secret can be generated in the github OAuth application by pressing `Generate a new client secret`.
-
-If you want to run the application locally make another OAuth application and use as homepageUrl `http://localhost:3000`.  
-Repeat the same steps once more to change the `GITHUB_ID` and `GITHUB_SECRET` but now in the `/frontend/.env.development`.
+After that, everything should work out-of-the-box.
 
 ## How to deploy
 
@@ -82,6 +121,7 @@ A link with information to do this can also be found in the [Technical manual](/
 1. Install docker & docker-compose on your local machine, also add the server as a remote docker context (see [Technical manual](/docs/technicalManual.md))
 2. Make sure you have ssh access to the deployment server. This means that you should start a vpn if this is required for the ssh access,...
 3. deploy by executing the command `docker-compose --context remote-server up -d --build` in the root of the project on your local machine.
+4. Run ```sudo bash database_backup.sh``` to start the databse backup cron job.
 
 This last command will push the docker containers to the deployment server via ssh and start the containers.
 
@@ -97,4 +137,3 @@ Listing all the images can be done with `docker images`, then you can delete the
 - `docker rmi "imageId"`
 
 Now you can deploy the new version as described in [Deployment](#deployment)
-
