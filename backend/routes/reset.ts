@@ -123,6 +123,10 @@ export async function checkCode(
         .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
 }
 
+function setSessionKey(req: express.Request, key: string): void {
+    req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 /**
  * Route that will reset the password when the code and password are valid.
  * Use route `/reset/:id` with a 'POST' request with body of form
@@ -167,6 +171,10 @@ export async function resetPassword(
                         .then(() =>
                             Promise.resolve({ sessionkey: key.session_key })
                         );
+                })
+                .then((v) => {
+                    setSessionKey(req, v.sessionkey);
+                    return v;
                 })
                 .catch(() =>
                     Promise.reject(config.apiErrors.reset.resetFailed)
