@@ -18,7 +18,7 @@ import * as ormP from "../orm_functions/person";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudents(
+export async function listStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseStudentAllRequest(req);
@@ -95,7 +95,9 @@ async function listStudents(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudent(req: express.Request): Promise<Responses.Student> {
+export async function getStudent(
+    req: express.Request
+): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -156,7 +158,9 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteStudent(req: express.Request): Promise<Responses.Empty> {
+export async function deleteStudent(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -177,7 +181,7 @@ async function deleteStudent(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentSuggestion(
+export async function createStudentSuggestion(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
@@ -249,7 +253,7 @@ async function createStudentSuggestion(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudentSuggestions(
+export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.SuggestionInfo> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
@@ -303,7 +307,7 @@ async function getStudentSuggestions(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentConfirmation(
+export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
@@ -349,7 +353,7 @@ async function createStudentConfirmation(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterStudents(
+export async function filterStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
