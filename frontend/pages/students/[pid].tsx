@@ -43,12 +43,7 @@ const Pid: NextPage = () => {
     return (
         <div className={styles.studentPage}>
             {student !== undefined ? (
-                <StudentOverview
-                    student={student}
-                    updateEvaluation={() => {
-                        return;
-                    }}
-                />
+                <StudentOverview student={student} />
             ) : null}
         </div>
     );
