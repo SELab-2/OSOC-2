@@ -1,5 +1,5 @@
 import { Display, Student, EvaluationCoach, Decision } from "../../types";
-import React, { useContext, useEffect, useState } from "react";
+import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "./StudentOverview.module.scss";
@@ -8,11 +8,16 @@ import { Modal } from "../../components/Modal/Modal";
 export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
 }) => {
+    const myRef = React.createRef<HTMLInputElement>();
     const { getSessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
     const [counter, setCounter] = useState(0);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
+    const [showSuggestionField, setShowSuggestionField] = useState(false);
+    const [decision, setDecision] = useState<Decision>(Decision.YES);
+    const [suggestBool, setSuggestBool] = useState(true);
+    const [motivation, setMotivation] = useState("");
 
     const fetchEvals = async () => {
         if (getSessionKey !== undefined) {
@@ -31,7 +36,6 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         setEvaluations(response.data);
-                        console.log(response.data);
                     }
                 }
             });
@@ -43,19 +47,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [counter]);
 
-    const closer = () => {
-        console.log("close");
-    };
-
-    const enumSuggest = (dec: Decision) => {
-        makeSuggestion(dec);
-    };
-
-    const enumDecision = (dec: Decision) => {
-        makeDecision(dec);
-    };
-
-    const makeSuggestion = (suggestion: Decision) => {
+    const makeSuggestion = () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
                 if (sessionKey != "") {
@@ -71,7 +63,8 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                             },
                             body: JSON.stringify({
                                 id: student.student.student_id,
-                                suggestion: suggestion,
+                                suggestion: decision,
+                                reason: motivation,
                             }),
                         }
                     )
@@ -79,13 +72,14 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         setCounter(counter + 1);
+                        setMotivation("");
                     }
                 }
             });
         }
     };
 
-    const makeDecision = (reply: Decision) => {
+    const makeDecision = () => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
                 if (sessionKey != "") {
@@ -101,7 +95,8 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                             },
                             body: JSON.stringify({
                                 id: student.student.student_id,
-                                reply: reply,
+                                reply: decision,
+                                reason: motivation,
                             }),
                         }
                     )
@@ -109,20 +104,67 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         setCounter(counter + 1);
+                        setMotivation("");
                     }
                 }
             });
         }
     };
 
+    const enumSuggest = (dec: Decision) => {
+        setShowSuggestionField(true);
+        setDecision(dec);
+        setSuggestBool(true);
+        if (myRef.current !== null) {
+            myRef.current.focus();
+        }
+    };
+
+    const enumDecision = (dec: Decision) => {
+        setShowSuggestionField(true);
+        setDecision(dec);
+        setSuggestBool(false);
+    };
+
+    const handleConfirm = () => {
+        setShowSuggestionField(false);
+        if (suggestBool) {
+            makeSuggestion();
+        } else {
+            makeDecision();
+        }
+    };
+
+    const handleEnterConfirm = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            handleConfirm();
+        }
+    };
+
+    const closer = (e: SyntheticEvent) => {
+        e.preventDefault();
+        setShowSuggestionField(false);
+    };
+
     return (
         <div>
             <Modal
-                visible={false}
+                visible={showSuggestionField}
                 handleClose={closer}
-                title={"This is the title"}
+                title={"Please fill in you motivation (optional)"}
             >
-                <p>Dit is een modal</p>
+                <input
+                    ref={myRef}
+                    id="motivationField"
+                    type="text"
+                    name="motivation"
+                    value={motivation}
+                    placeholder="type your motivation..."
+                    onKeyDown={(e) => handleEnterConfirm(e)}
+                    onChange={(e) => setMotivation(e.target.value)}
+                />
+
+                <button onClick={handleConfirm}>CONFIRM</button>
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
             <div className={styles.dropdown}>
