@@ -41,7 +41,7 @@ export function filterQuestion(
  *  @param question The question.
  *  @returns The option that corresponds with the given answer.
  */
-function filterChosenOption(
+export function filterChosenOption(
     question: Requests.Question
 ): Responses.FormResponse<Requests.Option> {
     if (question.options != undefined) {
@@ -65,7 +65,7 @@ function filterChosenOption(
  *  @param word the word we are searching for in the answer.
  *  @returns True if the question options contain the word, else false.
  */
-function checkWordInAnswer(
+export function checkWordInAnswer(
     question: Requests.Question,
     word: string
 ): Responses.FormResponse<boolean> {
@@ -76,7 +76,7 @@ function checkWordInAnswer(
         : { data: null };
 }
 
-function checkQuestionsExist(
+export function checkQuestionsExist(
     questions: Responses.FormResponse<Requests.Question>[]
 ): boolean {
     const checkErrorInForm: Responses.FormResponse<Requests.Question>[] =
@@ -93,7 +93,7 @@ function checkQuestionsExist(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getBirthName(form: Requests.Form): Promise<string> {
+export function getBirthName(form: Requests.Form): Promise<string> {
     const questionBirthName: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.birthName);
     const questionsExist: boolean = checkQuestionsExist([questionBirthName]);
@@ -110,7 +110,7 @@ function getBirthName(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getLastName(form: Requests.Form): Promise<string> {
+export function getLastName(form: Requests.Form): Promise<string> {
     const questionLastName: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.lastName);
     const questionsExist: boolean = checkQuestionsExist([questionLastName]);
@@ -127,7 +127,7 @@ function getLastName(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEmail(form: Requests.Form): Promise<string> {
+export function getEmail(form: Requests.Form): Promise<string> {
     const questionEmail: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.emailAddress);
     const questionsExist: boolean = checkQuestionsExist([questionEmail]);
@@ -152,7 +152,7 @@ function getEmail(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToPerson(
+export async function jsonToPerson(
     form: Requests.Form
 ): Promise<Responses.FormPerson> {
     const birthName = await getBirthName(form);
@@ -175,7 +175,7 @@ async function jsonToPerson(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPronouns(form: Requests.Form): Promise<string | null> {
+export function getPronouns(form: Requests.Form): Promise<string | null> {
     const questionPronouns: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.addPronouns);
     const questionPreferredPronouns: Responses.FormResponse<Requests.Question> =
@@ -238,7 +238,7 @@ function getPronouns(form: Requests.Form): Promise<string | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getGender(form: Requests.Form): Promise<string> {
+export function getGender(form: Requests.Form): Promise<string> {
     const questionGender: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.gender);
     const questionsExist: boolean = checkQuestionsExist([questionGender]);
@@ -262,7 +262,7 @@ function getGender(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPhoneNumber(form: Requests.Form): Promise<string> {
+export function getPhoneNumber(form: Requests.Form): Promise<string> {
     const questionPhoneNumber: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.phoneNumber);
     const questionsExist: boolean = checkQuestionsExist([questionPhoneNumber]);
@@ -279,7 +279,7 @@ function getPhoneNumber(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getNickname(form: Requests.Form): Promise<string | null> {
+export function getNickname(form: Requests.Form): Promise<string | null> {
     const questionCheckNickname: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.nickname);
     const questionEnterNickname: Responses.FormResponse<Requests.Question> =
@@ -311,7 +311,7 @@ function getNickname(form: Requests.Form): Promise<string | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getAlumni(form: Requests.Form): Promise<boolean> {
+export function getAlumni(form: Requests.Form): Promise<boolean> {
     const questionCheckAlumni: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.alumni);
 
@@ -339,7 +339,7 @@ function getAlumni(form: Requests.Form): Promise<boolean> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToStudent(
+export async function jsonToStudent(
     form: Requests.Form
 ): Promise<Responses.FormStudent> {
     const pronouns = await getPronouns(form);
@@ -366,7 +366,9 @@ async function jsonToStudent(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getResponsibilities(form: Requests.Form): Promise<string | null> {
+export function getResponsibilities(
+    form: Requests.Form
+): Promise<string | null> {
     const questionCheckResponsibilities: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.responsibilities);
 
@@ -391,7 +393,7 @@ function getResponsibilities(form: Requests.Form): Promise<string | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getFunFact(form: Requests.Form): Promise<string> {
+export function getFunFact(form: Requests.Form): Promise<string> {
     const questionFunFact: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.funFact);
 
@@ -410,7 +412,7 @@ function getFunFact(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getVolunteerInfo(form: Requests.Form): Promise<string> {
+export function getVolunteerInfo(form: Requests.Form): Promise<string> {
     const questionCheckVolunteerInfo: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.volunteerInfo);
 
@@ -442,7 +444,7 @@ function getVolunteerInfo(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function isStudentCoach(
+export function isStudentCoach(
     form: Requests.Form,
     hasAlreadyParticipated: boolean
 ): Promise<boolean | null> {
@@ -478,7 +480,7 @@ function isStudentCoach(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducations(form: Requests.Form): Promise<string[]> {
+export function getEducations(form: Requests.Form): Promise<string[]> {
     const questionCheckEducations: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.edus);
 
@@ -537,7 +539,7 @@ function getEducations(form: Requests.Form): Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationLevel(form: Requests.Form): Promise<string> {
+export function getEducationLevel(form: Requests.Form): Promise<string> {
     const questionCheckEducationLevel: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.eduLevel);
 
@@ -596,7 +598,9 @@ function getEducationLevel(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationDuration(form: Requests.Form): Promise<number | null> {
+export function getEducationDuration(
+    form: Requests.Form
+): Promise<number | null> {
     const questionEducationDuration: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.eduDuration);
 
@@ -621,7 +625,7 @@ function getEducationDuration(form: Requests.Form): Promise<number | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationYear(form: Requests.Form): Promise<string | null> {
+export function getEducationYear(form: Requests.Form): Promise<string | null> {
     const questionEducationYear: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.eduYear);
 
@@ -646,7 +650,9 @@ function getEducationYear(form: Requests.Form): Promise<string | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEducationUniversity(form: Requests.Form): Promise<string | null> {
+export function getEducationUniversity(
+    form: Requests.Form
+): Promise<string | null> {
     const questionEducationUniversity: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.eduInstitute);
 
@@ -672,7 +678,7 @@ function getEducationUniversity(form: Requests.Form): Promise<string | null> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToJobApplication(
+export async function jsonToJobApplication(
     form: Requests.Form,
     hasAlreadyTakenPart: boolean
 ): Promise<Responses.FormJobApplication> {
@@ -721,7 +727,7 @@ async function jsonToJobApplication(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getMostFluentLanguage(form: Requests.Form): Promise<string> {
+export function getMostFluentLanguage(form: Requests.Form): Promise<string> {
     const questionMostFluentLanguage: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.mostFluentLanguage);
 
@@ -767,7 +773,7 @@ function getMostFluentLanguage(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getEnglishLevel(form: Requests.Form): Promise<number> {
+export function getEnglishLevel(form: Requests.Form): Promise<number> {
     const questionEnglishLevel: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.englishLevel);
 
@@ -803,7 +809,7 @@ function getEnglishLevel(form: Requests.Form): Promise<number> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getBestSkill(form: Requests.Form): Promise<string> {
+export function getBestSkill(form: Requests.Form): Promise<string> {
     const questionBestSkill: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.bestSkill);
 
@@ -822,7 +828,7 @@ function getBestSkill(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToSkills(
+export async function jsonToSkills(
     form: Requests.Form
 ): Promise<Responses.FormJobApplicationSkill> {
     const most_fluent_language = await getMostFluentLanguage(form);
@@ -845,7 +851,9 @@ async function jsonToSkills(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getCV(form: Requests.Form): Promise<Responses.FormAttachmentResponse> {
+export function getCV(
+    form: Requests.Form
+): Promise<Responses.FormAttachmentResponse> {
     const questionCVUpload: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.cvUpload);
     const questionCVLink: Responses.FormResponse<Requests.Question> =
@@ -908,7 +916,7 @@ function getCV(form: Requests.Form): Promise<Responses.FormAttachmentResponse> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getPortfolio(
+export function getPortfolio(
     form: Requests.Form
 ): Promise<Responses.FormAttachmentResponse> {
     const questionPortfolioUpload: Responses.FormResponse<Requests.Question> =
@@ -980,7 +988,7 @@ function getPortfolio(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getMotivation(
+export function getMotivation(
     form: Requests.Form
 ): Promise<Responses.FormAttachmentResponse> {
     const questionMotivationUpload: Responses.FormResponse<Requests.Question> =
@@ -1064,7 +1072,7 @@ function getMotivation(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToAttachments(
+export async function jsonToAttachments(
     form: Requests.Form
 ): Promise<Responses.FormAttachment> {
     const cv_links = await getCV(form);
@@ -1087,7 +1095,7 @@ async function jsonToAttachments(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-function getAppliedRoles(form: Requests.Form): Promise<string[]> {
+export function getAppliedRoles(form: Requests.Form): Promise<string[]> {
     const questionAppliedRoles: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.appliedRole);
 
@@ -1144,7 +1152,9 @@ function getAppliedRoles(form: Requests.Form): Promise<string[]> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function jsonToRoles(form: Requests.Form): Promise<Responses.FormRoles> {
+export async function jsonToRoles(
+    form: Requests.Form
+): Promise<Responses.FormRoles> {
     const roles = await getAppliedRoles(form);
 
     return Promise.resolve({ roles: roles });
@@ -1156,7 +1166,7 @@ async function jsonToRoles(form: Requests.Form): Promise<Responses.FormRoles> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addPersonToDatabase(
+export async function addPersonToDatabase(
     formResponse: Responses.FormPerson
 ): Promise<Responses.Id> {
     const allPersons = await ormP.getAllPersons();
@@ -1195,7 +1205,7 @@ async function addPersonToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addStudentToDatabase(
+export async function addStudentToDatabase(
     formResponse: Responses.FormStudent,
     personId: Responses.Id
 ): Promise<Responses.Id_alumni> {
@@ -1249,7 +1259,7 @@ async function addStudentToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addJobApplicationToDatabase(
+export async function addJobApplicationToDatabase(
     formResponse: Responses.FormJobApplication,
     student_id: Responses.Id
 ): Promise<Responses.Id> {
@@ -1308,7 +1318,7 @@ async function addJobApplicationToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addSkillsToDatabase(
+export async function addSkillsToDatabase(
     formResponse: Responses.FormJobApplicationSkill,
     job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
@@ -1375,7 +1385,7 @@ async function addSkillsToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addAttachmentsToDatabase(
+export async function addAttachmentsToDatabase(
     formResponse: Responses.FormAttachment,
     job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
@@ -1415,7 +1425,7 @@ async function addAttachmentsToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function addRolesToDatabase(
+export async function addRolesToDatabase(
     formResponse: Responses.FormRoles,
     job_applicationId: Responses.Id
 ): Promise<Responses.Empty> {
@@ -1454,7 +1464,9 @@ async function addRolesToDatabase(
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createForm(req: express.Request): Promise<Responses.Empty> {
+export async function createForm(
+    req: express.Request
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
     if (parsedRequest.data.fields == undefined) {
         return Promise.reject(errors.cookArgumentError());

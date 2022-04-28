@@ -21,7 +21,7 @@ function orDefault<T>(v: T | undefined, def: T): T {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function login(req: express.Request): Promise<Responses.Login> {
+export async function login(req: express.Request): Promise<Responses.Login> {
     console.log("Calling login endpoint " + JSON.stringify(req.body));
     return parseLoginRequest(req).then((parsed) =>
         getPasswordPersonByEmail(parsed.name).then(async (pass) => {
@@ -64,7 +64,7 @@ async function login(req: express.Request): Promise<Responses.Login> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function logout(req: express.Request): Promise<Responses.Empty> {
+export async function logout(req: express.Request): Promise<Responses.Empty> {
     return parseLogoutRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false)) // logout can with pending account
         .then(async (checked) => {
