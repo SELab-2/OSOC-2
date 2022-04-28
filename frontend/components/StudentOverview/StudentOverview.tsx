@@ -247,7 +247,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                 })}
             </div>
             <div>
-                <h1>Suggestions</h1>
+                <h2>Suggestions</h2>
                 <button onClick={() => enumSuggest(Decision.YES)}>
                     Suggest yes
                 </button>
@@ -275,7 +275,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                     );
                 }
             })}
-            <h1>JobApplication</h1>
+            <h2>JobApplication</h2>
             {student.jobApplication.attachment
                 .sort(compareAttachments)
                 .map((attachment) => (
@@ -289,6 +289,12 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                         )}
                     </div>
                 ))}
+            <h1>Fun fact</h1>
+            <p>{student.jobApplication.fun_fact}</p>
+            <h1>Responsabilities</h1>
+            <p>{student.jobApplication.responsibilities}</p>
+            <h1>Volunteer</h1>
+            <p>{student.jobApplication.student_volunteer_info}</p>
         </div>
     );
 };
