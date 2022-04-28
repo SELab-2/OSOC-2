@@ -10,7 +10,11 @@ import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as session_key from "./session_key.json";
-import { addSessionKey } from "../orm_functions/session_key";
+import {
+    addSessionKey,
+    removeAllKeysForUser,
+} from "../orm_functions/session_key";
+import * as config from "../config.json";
 
 /**
  *  Attempts to list all students in the system.
@@ -255,13 +259,16 @@ export async function filterUsers(
         });
 }
 
+function setSessionKey(req: express.Request, key: string): void {
+    req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 export async function userModSelf(
     req: express.Request
-): Promise<Responses.Empty> {
+): Promise<Responses.Key> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
-        .then((parsed) => util.mutable(parsed, parsed.userId))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
@@ -293,7 +300,24 @@ export async function userModSelf(
                     }
                     return Promise.resolve();
                 })
-                .then(() => Promise.resolve({}));
+                .then(() => Promise.resolve(checked));
+        })
+        .then((checked) => {
+            if (checked.data.pass == undefined) {
+                return Promise.resolve({ sessionkey: checked.data.sessionkey });
+            }
+            return removeAllKeysForUser(checked.data.sessionkey)
+                .then(() => {
+                    const key = util.generateKey();
+                    const time = new Date(Date.now());
+                    time.setDate(time.getDate() + session_key.valid_period);
+                    return addSessionKey(checked.userId, key, time);
+                })
+                .then((v) => {
+                    setSessionKey(req, v.session_key);
+                    return v;
+                })
+                .then((v) => Promise.resolve({ sessionkey: v.session_key }));
         });
 }
 
