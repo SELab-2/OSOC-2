@@ -2167,7 +2167,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The data list contains info about all suggestions.",
+            "description": "This contains info about a suggestion.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2343,6 +2343,21 @@
             }
           },
           {
+            "name": "emailStatusFilter",
+            "in": "header",
+            "description": "The email status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "FAILED",
+                "NONE",
+                "SCHEDULED",
+                "SENT"
+              ]
+            }
+          },
+          {
             "name": "firstNameFilter",
             "in": "header",
             "description": "The firstname filter.",
@@ -2385,14 +2400,6 @@
               "items": {
                 "type": "string"
               }
-            }
-          },
-          {
-            "name": "roleSort",
-            "in": "header",
-            "description": "Sorting by role (asc or desc).",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -3042,6 +3049,41 @@
       }
     },
     "/user/self": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Gets the current user.",
+        "operationId": "get_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user gets his account information back."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
       "post": {
         "tags": [
           "user"
@@ -3088,44 +3130,6 @@
         "responses": {
           "200": {
             "description": "The user associated with the session key has been modified. The response is an empty object."
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "412": {
-            "description": "The data you requested does not exist (yet)."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "description": "Gets the current user.",
-        "operationId": "get_current_user_request",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The user gets his account information back."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
