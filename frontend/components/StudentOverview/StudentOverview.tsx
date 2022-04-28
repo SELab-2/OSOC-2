@@ -281,7 +281,12 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
                 .map((attachment) => (
                     <div key={attachment.attachment_id}>
                         <h1>{getAttachmentType(attachment.type)}</h1>
-                        <p>{attachment.data}</p>
+                        {attachment.type[0] ===
+                        AttachmentType.MOTIVATION_STRING ? (
+                            <p>{attachment.data}</p>
+                        ) : (
+                            <a>{attachment.data}</a>
+                        )}
                     </div>
                 ))}
         </div>
