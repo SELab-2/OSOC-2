@@ -9,6 +9,7 @@ import {
     FollowupType,
     InternalTypes,
     Requests,
+    EmailStatus,
 } from "./types";
 import { errors, getSessionKey } from "./utility";
 
@@ -336,7 +337,13 @@ export async function parseFilterStudentsRequest(
         ("statusFilter" in req.body &&
             req.body.statusFilter !== Decision.YES &&
             req.body.statusFilter !== Decision.MAYBE &&
-            req.body.statusFilter !== Decision.NO)
+            req.body.statusFilter !== Decision.NO) ||
+        ("emailStatusFilter" in req.body &&
+            req.body.emailStatusFilter !== EmailStatus.NONE &&
+            req.body.emailStatusFilter !== EmailStatus.SENT &&
+            req.body.emailStatusFilter !== EmailStatus.DRAFT &&
+            req.body.emailStatusFilter !== EmailStatus.FAILED &&
+            req.body.emailStatusFilter !== EmailStatus.SCHEDULED)
     ) {
         return rejector();
     } else {
@@ -347,7 +354,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    if ("roleFilter" in req.body) {
+    if ("roleFilter" in req.body && typeof req.body.roleFilter === "string") {
         roles = req.body.roleFilter.split(",");
     }
 
@@ -355,7 +362,6 @@ export async function parseFilterStudentsRequest(
         maybe(req.body, "firstNameSort"),
         maybe(req.body, "lastNameSort"),
         maybe(req.body, "emailSort"),
-        maybe(req.body, "roleSort"),
         maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
@@ -369,12 +375,15 @@ export async function parseFilterStudentsRequest(
     }
 
     let alumniFilter = maybe(req.body, "alumniFilter");
-    if ("alumniFilter" in req.body) {
-        alumniFilter = Boolean(req.body.alumniFilter);
+    if (
+        "alumniFilter" in req.body &&
+        typeof req.body.alumniFilter === "string"
+    ) {
+        alumniFilter = req.body.alumniFilter === "true";
     }
     let coachFilter = maybe(req.body, "coachFilter");
-    if ("coachFilter" in req.body) {
-        coachFilter = Boolean(req.body.coachFilter);
+    if ("coachFilter" in req.body && typeof req.body.coachFilter === "string") {
+        coachFilter = req.body.coachFilter === "true";
     }
     return Promise.resolve({
         sessionkey: getSessionKey(req),
