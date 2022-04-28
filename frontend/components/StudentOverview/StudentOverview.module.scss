@@ -1,0 +1,111 @@
+/* The styling for a standalone student page */
+.studentPage {
+  width: clamp(18rem, 92vw, 60rem);
+  margin-inline: auto;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);
+}
+
+.body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+/* Dropdown Button */
+.dropbtn {
+  background-color: var(--succes-100);
+  padding: 1rem;
+  width: 8rem;
+  transition-duration: 0.2s;
+}
+
+.dropbtn, .dropdownContent {
+  width: 8rem;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdownContent {
+  display: none;
+  position: absolute;
+  background-color: var(--neutral-150);
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdownContent a {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdownContent a:hover {
+  background-color: var(--neutral-200);
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdownContent {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+  background-color: var(--warning-100);
+}
+
+.suggestionheader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.suggestionbuttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.suggestionbuttons button {
+  font-weight: normal;
+}
+.suggestionbuttons button:hover {
+  background-color: var(--succes-150) !important;
+}
+/* Color per suggestion type */
+.suggestionbuttons button:nth-child(1) {
+  background-color: var(--succes-100);
+}
+.suggestionbuttons button:nth-child(2) {
+  background-color: var(--warning-100);
+}
+.suggestionbuttons button:nth-child(3) {
+  background-color: var(--error-100);
+}
+
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+.jobapplication {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.jobapplication div a {
+  font-weight: lighter;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.finaldecision {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
