@@ -59,7 +59,7 @@ const Index: NextPage = () => {
         setStudents([...filteredStudents]);
     };
 
-    useEffect(() => {
+    const getSelectedStudent = () => {
         // We perform some magic here, because on first render the query parameters are always undefined
         // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
         const queryKey = "id";
@@ -74,8 +74,12 @@ const Index: NextPage = () => {
         } else {
             setDisplay(Display.LIMITED);
         }
-        fetchStudents(queryValue).then();
+        return queryValue;
+    };
 
+    useEffect(() => {
+        const queryValue = getSelectedStudent();
+        fetchStudents(queryValue).then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -169,7 +173,8 @@ const Index: NextPage = () => {
                         );
                     })}
                 </div>
-                {selectedStudent !== -1 ? (
+                {selectedStudent !== -1 &&
+                students[selectedStudent] !== undefined ? (
                     <StudentOverview
                         updateEvaluations={updateStudentEvaluation}
                         student={students[selectedStudent]}

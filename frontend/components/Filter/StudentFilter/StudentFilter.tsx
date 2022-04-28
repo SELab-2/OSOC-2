@@ -256,7 +256,8 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/students${query}`);
+        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
+        // await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()
