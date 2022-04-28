@@ -79,6 +79,7 @@ export const StudentFilter: React.FC<{
         if (router.query.toString() === "/students") {
             search().then();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query]);
 
     useEffect(
