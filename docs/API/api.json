@@ -3332,7 +3332,19 @@
         ],
         "responses": {
           "200": {
-            "description": "The user associated with the session key has been modified. The response is an empty object."
+            "description": "The user associated with the session key has been modified. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
