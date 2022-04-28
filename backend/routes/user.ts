@@ -269,7 +269,6 @@ export async function userModSelf(
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
-        .then((parsed) => util.mutable(parsed, parsed.userId))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
