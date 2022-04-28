@@ -1,0 +1,40 @@
+/* The suggestions progressbar */
+.progressbar {
+  height: 0.8rem;
+  display: flex;
+  margin-top: 1rem;
+}
+
+/* The progressbar exists of 3 progressbars, yes maybe and no */
+.no {
+  background-color: var(--error-100);
+  border-bottom-left-radius: 0.5rem;
+}
+.maybe {
+  background-color: var(--warning-100);
+}
+.yes {
+  background-color: var(--succes-100);
+  border-bottom-right-radius: 0.5rem;
+}
+
+.none {
+  display: none
+}
+
+/* The numbers showing the amount of each suggestion type */
+.progressbar div p {
+  text-align: center;
+  transform: translate(0, -1.4rem);
+  font-weight: bold;
+  font-size: small;
+}
+.no p {
+  color: var(--error-100);
+}
+.maybe p {
+  color: var(--warning-100);
+}
+.yes p {
+  color: var(--succes-100);
+}

@@ -5,6 +5,7 @@ import * as ormJo from "../orm_functions/job_application";
 import * as ormLa from "../orm_functions/language";
 import * as ormRo from "../orm_functions/role";
 import * as ormSt from "../orm_functions/student";
+import * as ormLU from "../orm_functions/login_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses } from "../types";
@@ -183,7 +184,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.Empty> {
+): Promise<Responses.EvaluationCoach> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -222,20 +223,21 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    let newEvaluation;
     if (suggestionsTotal.length > 0) {
         const suggestion = suggestionsTotal[0].evaluation.filter(
             (evaluation) =>
                 evaluation.login_user.login_user_id === checkedSessionKey.userId
         );
 
-        await ormEv.updateEvaluationForStudent({
+        newEvaluation = await ormEv.updateEvaluationForStudent({
             evaluation_id: suggestion[0].evaluation_id,
             loginUserId: checkedSessionKey.userId,
             decision: checkedSessionKey.data.suggestion,
             motivation: checkedSessionKey.data.reason,
         });
     } else {
-        await ormEv.createEvaluationForStudent({
+        newEvaluation = await ormEv.createEvaluationForStudent({
             loginUserId: checkedSessionKey.userId,
             jobApplicationId: jobApplication.job_application_id,
             decision: checkedSessionKey.data.suggestion,
@@ -244,7 +246,19 @@ export async function createStudentSuggestion(
         });
     }
 
-    return Promise.resolve({});
+    const loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
+    if (loginUser === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    return Promise.resolve({
+        evaluation_id: newEvaluation.evaluation_id,
+        senderFirstname: loginUser.person.firstname,
+        senderLastname: loginUser.person.lastname,
+        reason: newEvaluation.motivation,
+        decision: newEvaluation.decision,
+        isFinal: newEvaluation.is_final,
+    });
 }
 
 /**
@@ -287,6 +301,7 @@ export async function getStudentSuggestions(
     for (const suggestion of suggestionsTotal) {
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
+                evaluation_id: evaluation.evaluation_id,
                 senderFirstname: evaluation.login_user.person.firstname,
                 senderLastname: evaluation.login_user.person.lastname,
                 reason: evaluation.motivation,

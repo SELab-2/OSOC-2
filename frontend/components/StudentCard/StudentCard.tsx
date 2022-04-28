@@ -1,5 +1,5 @@
 import React from "react";
-import { Decision, Student } from "../../types";
+import { Display, Student } from "../../types";
 import styles from "./StudentCard.module.scss";
 import { Role } from "../Labels/Roles";
 import { Study } from "../Labels/Studies";
@@ -8,91 +8,45 @@ import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 import { LanguageAndSkill } from "../Labels/LanguageAndSkill";
 
-export const StudentCard: React.FC<{ student: Student }> = ({ student }) => {
-    // Count evaluations
-    const evaluations = student.evaluations[0].evaluation;
-    let yesAmount = 0;
-    let maybeAmount = 0;
-    let noAmount = 0;
-    for (const evaluation of evaluations) {
-        if (evaluation.decision === Decision.YES) {
-            yesAmount++;
-        } else if (evaluation.decision === Decision.MAYBE) {
-            maybeAmount++;
-        } else if (evaluation.decision === Decision.NO) {
-            noAmount++;
-        }
-    }
-    const totalAmount = yesAmount + maybeAmount + noAmount;
-
-    // We build the dynamic styles here
-    const noStyle = {
-        width: `${(noAmount * 100) / totalAmount}%`,
-        borderBottomRightRadius: "0",
-    };
-    // Both corners should be rounded
-    if (maybeAmount === 0 && yesAmount === 0) {
-        noStyle.borderBottomRightRadius = "0.5rem";
-    }
-    const maybeStyle = {
-        width: `${(maybeAmount * 100) / totalAmount}%`,
-        borderBottomRightRadius: "0",
-        borderBottomLeftRadius: "0",
-    };
-    // Left corner should be rounded
-    if (noAmount === 0) {
-        maybeStyle.borderBottomLeftRadius = "0.5rem";
-    }
-    // Right corner should be rounded
-    if (yesAmount === 0) {
-        maybeStyle.borderBottomRightRadius = "0.5rem";
-    }
-
-    const yesStyle = {
-        width: `${(yesAmount * 100) / totalAmount}%`,
-        borderBottomLeftRadius: "0",
-    };
-    // Both corners should be rounded
-    if (noAmount === 0 && maybeAmount === 0) {
-        yesStyle.borderBottomLeftRadius = "0.5rem";
-    }
-
+export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
+    student,
+    display,
+}) => {
     return (
-        <div className={styles.card}>
+        <div className={styles.body}>
+            <h2>
+                {" "}
+                {`${student.student.person.firstname} ${student.student.person.lastname}`}
+            </h2>
             <div
-                className={styles.body}
-                style={{
-                    paddingBottom: `${totalAmount === 0 ? "0.5rem" : "2rem"}`,
-                }}
+                className={`${
+                    display === Display.FULL ? styles.grid : styles.limited
+                }`}
             >
-                <h2>
-                    {" "}
-                    {`${student.student.person.firstname} ${student.student.person.lastname}`}
-                </h2>
-                <div className={styles.grid}>
-                    <div className={styles.column}>
-                        <h6 className={styles.categoryTitle}>
-                            SKILLS AND LANGUAGES
-                        </h6>
-                        <div className={styles.category}>
-                            {student.jobApplication.job_application_skill.map(
-                                (language, index) => {
-                                    return (
-                                        <LanguageAndSkill
-                                            key={index}
-                                            language={language.skill}
-                                        />
-                                    );
-                                }
-                            )}
-                        </div>
-                        <h6 className={styles.categoryTitle}>ROLES</h6>
-                        <div className={styles.category}>
-                            {student.roles.map((role, index) => (
-                                <Role key={index} role={role} />
-                            ))}
-                        </div>
+                <div className={styles.column}>
+                    <h6 className={styles.categoryTitle}>
+                        SKILLS AND LANGUAGES
+                    </h6>
+                    <div className={styles.category}>
+                        {student.jobApplication.job_application_skill.map(
+                            (language, index) => {
+                                return (
+                                    <LanguageAndSkill
+                                        key={index}
+                                        language={language.skill}
+                                    />
+                                );
+                            }
+                        )}
                     </div>
+                    <h6 className={styles.categoryTitle}>ROLES</h6>
+                    <div className={styles.category}>
+                        {student.roles.map((role, index) => (
+                            <Role key={index} role={role} />
+                        ))}
+                    </div>
+                </div>
+                {display !== Display.LIMITED ? (
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>{"DIPLOMA"}</h6>
                         <div className={styles.category}>
@@ -111,6 +65,8 @@ export const StudentCard: React.FC<{ student: Student }> = ({ student }) => {
                             ))}
                         </div>
                     </div>
+                ) : null}
+                {display !== Display.LIMITED ? (
                     <div className={styles.column}>
                         <h6 className={styles.categoryTitle}>EMAIL</h6>
                         <a href={`mailto:${student.student.person.email}`}>
@@ -138,24 +94,7 @@ export const StudentCard: React.FC<{ student: Student }> = ({ student }) => {
                             </a>
                         ) : null}
                     </div>
-                </div>
-            </div>
-            <div className={styles.progressbar}>
-                <div style={noStyle} className={styles.no}>
-                    <p className={noAmount === 0 ? styles.none : ""}>
-                        {noAmount}
-                    </p>
-                </div>
-                <div style={maybeStyle} className={styles.maybe}>
-                    <p className={maybeAmount === 0 ? styles.none : ""}>
-                        {maybeAmount}
-                    </p>
-                </div>
-                <div style={yesStyle} className={styles.yes}>
-                    <p className={yesAmount === 0 ? styles.none : ""}>
-                        {yesAmount}
-                    </p>
-                </div>
+                ) : null}
             </div>
         </div>
     );
