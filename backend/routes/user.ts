@@ -250,7 +250,7 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
 async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
-        .then((parsed) => util.isAdmin(parsed, false))
+        .then((parsed) => util.checkSessionKey(parsed, false))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
@@ -266,8 +266,6 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
                 .then((user) =>
                     ormLU.updateLoginUser({
                         loginUserId: checked.userId,
-                        isAdmin: user.is_admin,
-                        isCoach: user.is_coach,
                         accountStatus: user.account_status,
                         password: checked.data.pass?.newpass,
                     })
