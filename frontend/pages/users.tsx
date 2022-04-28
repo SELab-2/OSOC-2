@@ -14,14 +14,14 @@ import { useRouter } from "next/router";
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
 
-    const { getSessionKey, isAdmin } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
     useEffect(() => {
-        if (getSessionKey) {
-            getSessionKey().then(() => {
+        if (getSession) {
+            getSession().then(({ isAdmin }) => {
                 if (!isAdmin) {
-                    router.push("/students").then();
+                    router.push("/").then();
                 }
             });
         }
