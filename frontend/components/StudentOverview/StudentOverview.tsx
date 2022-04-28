@@ -239,16 +239,34 @@ export const StudentOverview: React.FC<{
             <StudentCard student={student} display={Display.FULL} />
 
             <div className={styles.body}>
-                <div className={styles.dropdown}>
-                    <button className={styles.dropbtn}>Set Status</button>
-                    <div className={styles.dropdownContent}>
-                        <a onClick={() => enumDecision(Decision.YES)}>YES</a>
-                        <a onClick={() => enumDecision(Decision.NO)}>NO</a>
-                        <a onClick={() => enumDecision(Decision.MAYBE)}>
-                            MAYBE
-                        </a>
+                <div className={styles.finaldecision}>
+                    <div className={styles.dropdown}>
+                        <button className={styles.dropbtn}>Set Status</button>
+                        <div className={styles.dropdownContent}>
+                            <a onClick={() => enumDecision(Decision.YES)}>
+                                YES
+                            </a>
+                            <a onClick={() => enumDecision(Decision.NO)}>NO</a>
+                            <a onClick={() => enumDecision(Decision.MAYBE)}>
+                                MAYBE
+                            </a>
+                        </div>
                     </div>
+                    <Image
+                        className={styles.buttonImage}
+                        src={
+                            decision_to_image[
+                                student.evaluations[0].evaluation.filter(
+                                    (evaluation) => evaluation.is_final
+                                )[0].decision
+                            ]
+                        }
+                        width={30}
+                        height={30}
+                        alt={"Final Decision"}
+                    />
                 </div>
+
                 <div>
                     {evaluations.map((evaluation) => {
                         if (evaluation.isFinal) {
