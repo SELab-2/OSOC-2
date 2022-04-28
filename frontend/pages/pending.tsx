@@ -9,11 +9,11 @@ import { useRouter } from "next/router";
  */
 const Pending: NextPage = () => {
     const router = useRouter();
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     // check if user is logged in, if the user is logged in, redirect away from this page
     useEffect(() => {
-        if (getSessionKey) {
-            getSessionKey().then((sessionKey) => {
+        if (getSession) {
+            getSession().then(({ sessionKey }) => {
                 // The user is already logged in, redirect the user
                 if (sessionKey != "") {
                     router.push("/students").then();

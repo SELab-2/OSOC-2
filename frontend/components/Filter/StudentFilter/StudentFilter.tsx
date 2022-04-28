@@ -23,7 +23,7 @@ export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
     display: Display;
 }> = ({ setFilteredStudents, display }) => {
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
@@ -50,8 +50,8 @@ export const StudentFilter: React.FC<{
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
-        const sessionKey =
-            getSessionKey != undefined ? await getSessionKey() : "";
+        const { sessionKey } =
+            getSession != undefined ? await getSession() : { sessionKey: "" };
         const responseRoles = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
             {
@@ -74,12 +74,21 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
+    /**
+     * Load data on initial page load
+     */
     useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then(() => search());
-        } else {
+        if (router.query.toString() === "/students") {
             search().then();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
+
+    useEffect(() => {
+        if (roles.length === 0) {
+            fetchRoles().then();
+        }
+        search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         firstNameSort,
@@ -250,7 +259,9 @@ export const StudentFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         // await router.push(`/students${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
