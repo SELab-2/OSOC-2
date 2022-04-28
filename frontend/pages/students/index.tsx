@@ -107,13 +107,19 @@ const Index: NextPage = () => {
     // Maps student id's to their index in the student list, so that we can update the infor
     // of just one student
     const id_to_index: Record<string, number> = {};
+
+    /**
+     * Callback that the student overview uses to update a student's suggestion list
+     * @param studentId
+     * @param evalutationsCoach
+     */
     const updateStudentEvaluation = (
         studentId: number,
-        evalutation: EvaluationCoach
+        evalutationsCoach: EvaluationCoach[]
     ) => {
         console.log(studentId);
-        console.log(evalutation);
-        return;
+        console.log(evalutationsCoach);
+        // TODO
     };
 
     return (
@@ -165,7 +171,7 @@ const Index: NextPage = () => {
                 </div>
                 {selectedStudent !== -1 ? (
                     <StudentOverview
-                        updateEvaluation={updateStudentEvaluation}
+                        updateEvaluations={updateStudentEvaluation}
                         student={students[selectedStudent]}
                     />
                 ) : null}

@@ -93,7 +93,7 @@ export interface EvaluationCoach {
     senderFirstname: string;
     senderLastname: string;
     reason: string;
-    decision: string;
+    decision: Decision;
     isFinal: boolean;
 }
 

@@ -18,12 +18,14 @@ import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
-    updateEvaluation: (studentId: number, evalutation: EvaluationCoach) => void;
-}> = ({ student, updateEvaluation }) => {
+    updateEvaluations: (
+        studentId: number,
+        evalutations: EvaluationCoach[]
+    ) => void;
+}> = ({ student, updateEvaluations }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
-    const [counter, setCounter] = useState(0);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
     const [showSuggestionField, setShowSuggestionField] = useState(false);
@@ -59,6 +61,14 @@ export const StudentOverview: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /**
+     * Call the `updateEvalutations` callback when the evaluations change
+     */
+    useEffect(() => {
+        updateEvaluations(student.student.student_id, evaluations);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [evaluations]);
+
     const makeSuggestion = async () => {
         if (sessionKey != "") {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -81,12 +91,12 @@ export const StudentOverview: React.FC<{
                 .then((response) => response.json())
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
-                setCounter(counter + 1);
                 setMotivation("");
-                console.log(response);
-                // TODO the backend should return the evaluation upon success
-                const evaluation = response.data as EvaluationCoach;
-                updateEvaluation(student.student.student_id, evaluation);
+                const evaluation = response as EvaluationCoach;
+                // The creation was succesfull, we can update the evaluation bar
+                if (evaluation !== undefined) {
+                    fetchEvals().then();
+                }
             }
         }
     };
@@ -113,7 +123,6 @@ export const StudentOverview: React.FC<{
                 .then((response) => response.json())
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
-                setCounter(counter + 1);
                 setMotivation("");
             }
         }
@@ -210,19 +219,20 @@ export const StudentOverview: React.FC<{
                 handleClose={closer}
                 title={"Please fill in you motivation (optional)"}
             >
-                <input
-                    ref={myRef}
-                    id="motivationField"
-                    type="text"
-                    name="motivation"
-                    className="input"
-                    value={motivation}
-                    placeholder="type your motivation..."
-                    onKeyDown={(e) => handleEnterConfirm(e)}
-                    onChange={(e) => setMotivation(e.target.value)}
-                />
+                <div className={styles.modalContent}>
+                    <input
+                        ref={myRef}
+                        type="text"
+                        name="motivation"
+                        className="input"
+                        value={motivation}
+                        placeholder="type your motivation..."
+                        onKeyDown={(e) => handleEnterConfirm(e)}
+                        onChange={(e) => setMotivation(e.target.value)}
+                    />
 
-                <button onClick={handleConfirm}>CONFIRM</button>
+                    <button onClick={handleConfirm}>CONFIRM</button>
+                </div>
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
 
@@ -292,8 +302,7 @@ export const StudentOverview: React.FC<{
 
                                 <strong>
                                     {evaluation.senderFirstname}{" "}
-                                    {evaluation.senderLastname}
-                                    {": "}
+                                    {evaluation.senderLastname}:
                                 </strong>
                                 {evaluation.reason}
                             </div>

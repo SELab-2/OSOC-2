@@ -81,10 +81,6 @@
   background-color: var(--error-100);
 }
 
-
-
-
-
 .suggestion {
   display: flex;
   align-items: center;
@@ -100,4 +96,10 @@
 
 .jobapplication div a {
   font-weight: lighter;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
