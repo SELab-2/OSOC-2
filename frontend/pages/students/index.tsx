@@ -107,8 +107,7 @@ const Index: NextPage = () => {
     };
 
     return (
-        <div className={styles.student}>
-            <StudentFilter setFilteredStudents={setFilteredStudents} />
+        <div>
             <div
                 className={`${styles.students} ${
                     display === Display.LIMITED ? styles.limited : ""
@@ -119,6 +118,7 @@ const Index: NextPage = () => {
                         display === Display.LIMITED ? styles.limited : ""
                     }`}
                 >
+                    <StudentFilter setFilteredStudents={setFilteredStudents} />
                     {students.map((student, index) => {
                         return (
                             <div

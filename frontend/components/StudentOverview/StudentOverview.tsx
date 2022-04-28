@@ -10,7 +10,7 @@ import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "./StudentOverview.module.scss";
-import { Modal } from "../../components/Modal/Modal";
+import { Modal } from "../Modal/Modal";
 
 export const StudentOverview: React.FC<{ student: Student }> = ({
     student,
@@ -52,7 +52,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
     useEffect(() => {
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [counter]);
+    }, []);
 
     const makeSuggestion = () => {
         if (getSessionKey !== undefined) {
