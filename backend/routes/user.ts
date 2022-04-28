@@ -6,7 +6,7 @@ import * as ormLU from "../orm_functions/login_user";
 import * as ormL from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { Responses } from "../types";
+import { Responses, UserIdType } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as session_key from "./session_key.json";
@@ -142,6 +142,9 @@ async function createUserAcceptance(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) =>
+            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
+        )
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
@@ -181,6 +184,9 @@ async function deleteUserRequest(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) =>
+            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
+        )
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
@@ -251,6 +257,9 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.isAdmin(parsed, false))
+        .then((parsed) =>
+            util.mutable(parsed, parsed.userId, UserIdType.LOGINUSER)
+        )
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)

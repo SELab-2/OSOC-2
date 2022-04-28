@@ -8,6 +8,7 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import { UserIdType } from "../types";
 
 /**
  *  Attempts to list all admins in the system.
@@ -58,6 +59,9 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) =>
+            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
+        )
         .then(async (parsed) => {
             if (parsed.data.id !== parsed.userId) {
                 return ormL
@@ -107,6 +111,9 @@ export async function deleteAdmin(
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) =>
+            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
+        )
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
