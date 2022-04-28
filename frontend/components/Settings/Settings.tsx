@@ -1,22 +1,20 @@
 import React, { useContext, useState } from "react";
-import styles from "./Settings.module.scss";
 import { LoginUser } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import crypto from "crypto";
 
-export const SettingsComponent: React.FC<{
+export const Settings: React.FC<{
     person: LoginUser;
     fetchUser: () => void;
-}> = ({ person, fetchUser }) => {
+}> = (person, fetchUser) => {
     const [newName, setNewName] = useState<string>("");
     const [currPassword, setCurrPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+    const { getSessionKey } = useContext(SessionContext);
 
     const changeUser = async () => {
         const sessionKey =
             getSessionKey != undefined ? await getSessionKey() : "";
-        let body = "";
         const encryptedOldPassword = crypto
             .createHash("sha256")
             .update(currPassword)
@@ -25,39 +23,26 @@ export const SettingsComponent: React.FC<{
             .createHash("sha256")
             .update(newPassword)
             .digest("hex");
-        if (newName !== "" && (currPassword === "" || newPassword === "")) {
-            body = JSON.stringify({ name: newName });
-        } else if (
-            newName === "" &&
-            currPassword !== "" &&
-            newPassword !== ""
-        ) {
-            body = JSON.stringify({
-                pass: {
-                    oldpass: encryptedOldPassword,
-                    newpass: encryptedNewPassword,
-                },
-            });
-        } else if (
-            newName !== "" &&
-            currPassword !== "" &&
-            newPassword !== ""
-        ) {
-            body = JSON.stringify({
-                name: newName,
-                pass: {
-                    oldpass: encryptedOldPassword,
-                    newpass: encryptedNewPassword,
-                },
-            });
+
+        // We dynamically build the body
+        const body: Record<string, unknown> = {};
+        if (newName !== "") {
+            body.name = newName;
         }
 
-        if (body !== "") {
+        if (currPassword !== "" && newPassword !== "") {
+            body.pass = {
+                oldpass: encryptedOldPassword,
+                newpass: encryptedNewPassword,
+            };
+        }
+
+        if (body !== {}) {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
                 {
                     method: "POST",
-                    body: body,
+                    body: JSON.stringify(body),
                     headers: {
                         Authorization: `auth/osoc2 ${sessionKey}`,
                         "Content-Type": "application/json",
@@ -69,16 +54,16 @@ export const SettingsComponent: React.FC<{
                 .catch((err) => {
                     console.log(err);
                 });
-            if (setSessionKey && response && response.sessionkey) {
-                setSessionKey(response.sessionkey);
+            if (response !== undefined && response.succes) {
+                console.log(response);
             }
             fetchUser();
         }
     };
 
     return (
-        <div className={styles.settings}>
-            <text>current name: {person.person.firstname}</text>
+        <div>
+            <text>current name: {person.person.person.firstname}</text>
             <br />
             <text>new name</text>
             <input onChange={(e) => setNewName(e.target.value)} />

@@ -1,12 +1,11 @@
 import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
-import { UnderConstruction } from "../components/UnderConstruction/UnderConstruction";
 import { AccountStatus, LoginUser } from "../types";
-import { SettingsComponent } from "../components/Settings/SettingsComponent";
+import { Settings } from "../components/Settings/Settings";
 
-const Settings: NextPage = () => {
-    const { getSessionKey, setSessionKey } = useContext(SessionContext);
+const SettingsPage: NextPage = () => {
+    const { getSessionKey } = useContext(SessionContext);
     const defaultUser: LoginUser = {
         person: {
             person_id: -1,
@@ -28,7 +27,6 @@ const Settings: NextPage = () => {
     const fetchUser = async () => {
         const sessionKey =
             getSessionKey != undefined ? await getSessionKey() : "";
-        console.log(sessionKey);
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
             {
@@ -40,11 +38,7 @@ const Settings: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
-        console.log(response);
         if (response !== undefined && response.success) {
-            if (setSessionKey) {
-                setSessionKey(response.sessionkey);
-            }
             setUser(response.data.login_user);
         }
     };
@@ -57,10 +51,9 @@ const Settings: NextPage = () => {
 
     return (
         <div>
-            <SettingsComponent person={user} fetchUser={fetchUser} />
-            <UnderConstruction />
+            <Settings person={user} fetchUser={fetchUser} />
         </div>
     );
 };
 
-export default Settings;
+export default SettingsPage;
