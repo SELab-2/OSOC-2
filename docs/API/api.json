@@ -1839,6 +1839,9 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -1950,6 +1953,9 @@
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -2055,6 +2061,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -2089,6 +2101,7 @@
             "name": "year",
             "in": "header",
             "description": "The osoc year.",
+            "required": false,
             "schema": {
               "type": "number"
             }
@@ -2160,6 +2173,7 @@
             "name": "reason",
             "in": "header",
             "description": "The motivation for the suggestion.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2173,19 +2187,6 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "evaluation_id": {
-                      "type": "number"
-                    },
-                    "senderFirstname": {
-                      "type": "string"
-                    },
-                    "senderLastname": {
-                      "type": "string"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "nullable": true
-                    },
                     "decision": {
                       "type": "string",
                       "enum": [
@@ -2194,8 +2195,21 @@
                         "NO"
                       ]
                     },
+                    "evaluation_id": {
+                      "type": "number"
+                    },
                     "isFinal": {
                       "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "senderFirstname": {
+                      "type": "string"
+                    },
+                    "senderLastname": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2583,6 +2597,9 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -2679,6 +2696,7 @@
             "name": "cc",
             "in": "header",
             "description": "The copy field of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2687,6 +2705,7 @@
             "name": "content",
             "in": "header",
             "description": "The content of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2695,6 +2714,7 @@
             "name": "name",
             "in": "header",
             "description": "The name of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2703,6 +2723,7 @@
             "name": "subject",
             "in": "header",
             "description": "The subject of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2841,8 +2862,14 @@
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -2880,19 +2907,19 @@
             }
           },
           {
-            "name": "lastname",
+            "name": "pass",
             "in": "header",
-            "description": "The lastname of the user.",
+            "description": "The password of the user.",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "pass",
+            "name": "lastname",
             "in": "header",
-            "description": "The password of the user.",
-            "required": true,
+            "description": "The lastname of the user.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2982,6 +3009,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -3031,7 +3064,14 @@
         ],
         "responses": {
           "200": {
-            "description": "The specified user request was denied. The response is an empty object."
+            "description": "The specified user request was denied. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -3044,6 +3084,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -3068,7 +3114,78 @@
         ],
         "responses": {
           "200": {
-            "description": "The user gets his account information back."
+            "description": "The user gets his account information back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "login_user": {
+                          "type": "object",
+                          "properties": {
+                            "account_status": {
+                              "type": "string",
+                              "enum": [
+                                "ACTIVATED",
+                                "DISABLED",
+                                "PENDING"
+                              ]
+                            },
+                            "is_admin": {
+                              "type": "boolean"
+                            },
+                            "is_coach": {
+                              "type": "boolean"
+                            },
+                            "login_user_id": {
+                              "type": "number"
+                            },
+                            "password": {
+                              "type": "string"
+                            },
+                            "person": {
+                              "type": "object",
+                              "properties": {
+                                "email": {
+                                  "type": "string"
+                                },
+                                "firstname": {
+                                  "type": "string"
+                                },
+                                "github": {
+                                  "type": "string"
+                                },
+                                "github_id": {
+                                  "type": "string"
+                                },
+                                "lastname": {
+                                  "type": "string"
+                                },
+                                "person_id": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "person_id": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -3076,11 +3193,11 @@
           "401": {
             "description": "The user has to log in first."
           },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
+          "412": {
+            "description": "The data you requested does not exist (yet)."
           }
         }
       },
@@ -3130,6 +3247,9 @@
         "responses": {
           "200": {
             "description": "The user associated with the session key has been modified. The response is an empty object."
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -3261,6 +3381,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -3305,6 +3428,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
@@ -3920,6 +4046,9 @@
                     "MAYBE",
                     "NO"
                   ]
+                },
+                "evaluation_id": {
+                  "type": "number"
                 },
                 "isFinal": {
                   "type": "boolean"
