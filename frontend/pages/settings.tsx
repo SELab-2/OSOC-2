@@ -3,9 +3,12 @@ import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
 import { AccountStatus, LoginUser } from "../types";
 import { Settings } from "../components/Settings/Settings";
+import { useRouter } from "next/router";
 
 const SettingsPage: NextPage = () => {
     const { getSession } = useContext(SessionContext);
+    const router = useRouter();
+
     const defaultUser: LoginUser = {
         person: {
             person_id: -1,
@@ -25,7 +28,8 @@ const SettingsPage: NextPage = () => {
     const [user, setUser] = useState<LoginUser>(defaultUser);
 
     const fetchUser = async () => {
-        const sessionKey = getSession != undefined ? await getSession() : "";
+        const { sessionKey } =
+            getSession !== undefined ? await getSession() : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
             {
@@ -43,7 +47,15 @@ const SettingsPage: NextPage = () => {
     };
 
     useEffect(() => {
-        fetchUser().then();
+        if (getSession !== undefined) {
+            getSession().then(({ sessionKey }) => {
+                if (sessionKey === "") {
+                    router.push("/login").then();
+                } else {
+                    fetchUser().then();
+                }
+            });
+        }
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
