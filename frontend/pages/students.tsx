@@ -9,7 +9,6 @@ const Students: NextPage = () => {
     const [students, setStudents] = useState<Student[]>([]);
 
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
-        console.log(filteredStudents);
         setStudents([...filteredStudents]);
     };
 

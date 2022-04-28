@@ -72,13 +72,21 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
+    /**
+     * Load data on initial page load
+     */
+    useEffect(() => {
+        if (router.query.toString() === "/students") {
+            search().then();
+        }
+    }, [router.query]);
+
     useEffect(
         () => {
             if (roles.length === 0) {
-                fetchRoles().then(() => search());
-            } else {
-                search().then();
+                fetchRoles().then();
             }
+            search().then();
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [
@@ -267,7 +275,6 @@ export const StudentFilter: React.FC<{
             )
                 .then((response) => response.json())
                 .then((json) => {
-                    console.log(json);
                     if (!json.success) {
                         return { success: false };
                     } else return json;

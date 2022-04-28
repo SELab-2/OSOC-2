@@ -70,7 +70,9 @@ export const OsocCreateFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/osocs${query}`);
 
-        const sessionKey = getSession ? await getSession() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,

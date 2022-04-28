@@ -162,7 +162,9 @@ export const UserFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/users${query}`);
 
-        const sessionKey = getSession ? await getSession() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
@@ -180,8 +182,8 @@ export const UserFilter: React.FC<{
                     console.log(err);
                 });
             updateUsers(response.data);
-            isLoading(false);
         }
+        isLoading(false);
     };
 
     return (

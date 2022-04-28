@@ -84,7 +84,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
             ) {
                 router.push("/login").then();
             }
-            return { sessionKey: "", isAdmin: isAdmin, isCoach: isCoach };
+            return {
+                sessionKey: sessionKey,
+                isAdmin: isAdmin,
+                isCoach: isCoach,
+            };
         }
 
         // we already did a request, and we know we are pending (key is invalid) => go to pending
@@ -96,7 +100,11 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
         // Avoid calling /verify twice
         // verified gets set to false every page reload
         if (verified) {
-            return { sessionKey: "", isAdmin: isAdmin, isCoach: isCoach };
+            return {
+                sessionKey: sessionKey,
+                isAdmin: isAdmin,
+                isCoach: isCoach,
+            };
         }
 
         verified = true;
