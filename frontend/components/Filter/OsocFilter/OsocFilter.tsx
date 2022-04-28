@@ -99,7 +99,9 @@ export const OsocCreateFilter: React.FC<{
      */
     const create = async () => {
         isLoading(true);
-        const sessionKey = getSession ? await getSession() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
