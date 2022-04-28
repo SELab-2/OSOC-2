@@ -104,6 +104,14 @@ export interface Evaluation {
     is_final: boolean;
 }
 
+export enum Type {
+    CV_URL = "CV_URL",
+    PORTFOLIO_URL = "PORTFOLIO_URL",
+    FILE_URL = "FILE_URL",
+    MOTIVATION_STRING = "MOTIVATION_STRING",
+    MOTIVATION_URL = "MOTIVATION_URL",
+}
+
 export interface Student {
     evaluations: [
         {
@@ -127,7 +135,7 @@ export interface Student {
                 job_application_id: number;
                 attachment_id: number;
                 data: string;
-                type: string; // TODO -- possibly an enum
+                type: Type;
             }
         ];
         created_at: Date;
@@ -136,7 +144,7 @@ export interface Student {
         edu_level: string;
         edu_year: string;
         edus: [string];
-        email_status: string; // TODO -- make an enum, i don't know the exact values
+        email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
         job_application_skill: [
