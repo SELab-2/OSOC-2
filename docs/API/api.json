@@ -2167,7 +2167,40 @@
         ],
         "responses": {
           "200": {
-            "description": "The specified student was marked as suggested. The response is an empty object."
+            "description": "The data list contains info about all suggestions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "senderFirstname": {
+                      "type": "string"
+                    },
+                    "senderLastname": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "YES",
+                        "MAYBE",
+                        "NO"
+                      ]
+                    },
+                    "isFinal": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -3841,7 +3874,9 @@
                 "decision": {
                   "type": "string",
                   "enum": [
-                    "MAYBE"
+                    "YES",
+                    "MAYBE",
+                    "NO"
                   ]
                 },
                 "isFinal": {
@@ -4077,8 +4112,8 @@
           "id": {
             "type": "number"
           },
-          "sessionKey" : {
-            "type" : "string"
+          "sessionKey": {
+            "type": "string"
           }
         },
         "xml": {
