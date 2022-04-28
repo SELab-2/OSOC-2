@@ -516,7 +516,7 @@ export function queryToBody(req: express.Request) {
 }
 
 export function mutable<T>(obj: T, targetid: number): Promise<T> {
-    if (targetid == config.global.defaultUserId)
+    if (targetid === config.global.defaultUserId)
         return Promise.reject(errors.cookInvalidID());
     return Promise.resolve(obj);
 }
