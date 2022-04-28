@@ -167,11 +167,14 @@ test("Can parse login request", () => {
     const valid: express.Request = getMockReq();
     const noname: express.Request = getMockReq();
     const nopass: express.Request = getMockReq();
+    const unvalid: express.Request = getMockReq();
 
     valid.body.name = "Alice.STUDENT@hotmail.be";
     valid.body.pass = "Pass #1";
     noname.body.pass = "Pass #2";
     nopass.body.name = "Name.2@email.be";
+    unvalid.body.pass = "Pass #2";
+    unvalid.body.name = "Name.email.be";
 
     // TODO
     return Promise.all([
@@ -183,6 +186,9 @@ test("Can parse login request", () => {
             errors.cookArgumentError()
         ),
         expect(Rq.parseLoginRequest(nopass)).rejects.toBe(
+            errors.cookArgumentError()
+        ),
+        expect(Rq.parseLoginRequest(unvalid)).rejects.toBe(
             errors.cookArgumentError()
         ),
     ]);
@@ -332,8 +338,87 @@ test("Can parse suggest student request", () => {
     return Promise.all([okays, fails].flat());
 });
 
+test("Can parse get suggestions request", () => {
+    const key = "my-session-key";
+    const id = 9845;
+
+    const noYear: T.Anything = {};
+    const year: T.Anything = { year: 2022 };
+
+    const i1: T.Anything = { year: 2022 };
+
+    const okays = [noYear, year].map((x) => {
+        const copy: T.Anything = { ...x };
+        copy.id = id;
+        const req: express.Request = getMockReq();
+        req.params.id = id.toString();
+        req.body = x;
+        setSessionKey(req, key);
+        copy.sessionkey = key;
+        return expect(
+            Rq.parseGetSuggestionsStudentRequest(req)
+        ).resolves.toStrictEqual(copy);
+    });
+
+    const fails = [i1].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseSuggestStudentRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails].flat());
+});
+
+test("Can parse filter osocs request", () => {
+    const key = "my-session-key";
+
+    const nothing = {};
+    const yearFilterOnly = { yearFilter: 2022 };
+    const yearSortOnly1 = { yearSort: "asc" };
+    const yearSortOnly2 = { yearSort: "desc" };
+    const yearFilterAndSort = { yearFilter: 2022, yearSort: "asc" };
+
+    const i1: T.Anything = { yearSort: "sort" };
+    const i2: T.Anything = { yearFilter: 2022, yearSort: "sort" };
+
+    const okays = [
+        nothing,
+        yearFilterOnly,
+        yearSortOnly1,
+        yearSortOnly2,
+        yearFilterAndSort,
+    ].map((x) => {
+        const copy: T.Anything = { ...x };
+        const req: express.Request = getMockReq();
+        req.body = x;
+        setSessionKey(req, key);
+        ["yearFilter", "yearSort"].forEach((x) => {
+            if (!(x in req.body)) {
+                copy[x] = undefined;
+            }
+        });
+        copy.sessionkey = key;
+        return expect(Rq.parseFilterOsocsRequest(req)).resolves.toStrictEqual(
+            copy
+        );
+    });
+
+    const fails = [i1, i2].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseFilterOsocsRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails].flat());
+});
+
 // TODO test Rq.parseAcceptNewUserRequest
-// TODO test Rq.parseGetSuggestionsStudentRequest
 
 test("Can parse final decision request", () => {
     const key = "key";
