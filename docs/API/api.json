@@ -123,6 +123,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -205,6 +208,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -251,6 +257,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -306,8 +318,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -391,6 +409,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -437,6 +458,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -500,11 +527,20 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -546,8 +582,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "412": {
             "description": "The data you requested does not exist (yet)."
@@ -604,6 +646,9 @@
           },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "412": {
             "description": "The data you requested does not exist (yet)."
@@ -677,6 +722,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -927,6 +978,9 @@
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
@@ -1233,6 +1287,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1266,8 +1326,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1327,6 +1393,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1418,6 +1490,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1462,6 +1540,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1587,6 +1671,12 @@
           },
           "409": {
             "description": "That role doesn't exist."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1674,6 +1764,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
@@ -2167,40 +2260,7 @@
         ],
         "responses": {
           "200": {
-            "description": "This contains info about a suggestion.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "evaluation_id": {
-                      "type": "number"
-                    },
-                    "senderFirstname": {
-                      "type": "string"
-                    },
-                    "senderLastname": {
-                      "type": "string"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "decision": {
-                      "type": "string",
-                      "enum": [
-                        "YES",
-                        "MAYBE",
-                        "NO"
-                      ]
-                    },
-                    "isFinal": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "The specified student was marked as suggested. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2343,21 +2403,6 @@
             }
           },
           {
-            "name": "emailStatusFilter",
-            "in": "header",
-            "description": "The email status filter.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "DRAFT",
-                "FAILED",
-                "NONE",
-                "SCHEDULED",
-                "SENT"
-              ]
-            }
-          },
-          {
             "name": "firstNameFilter",
             "in": "header",
             "description": "The firstname filter.",
@@ -2400,6 +2445,14 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          {
+            "name": "roleSort",
+            "in": "header",
+            "description": "Sorting by role (asc or desc).",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3049,41 +3102,6 @@
       }
     },
     "/user/self": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "description": "Gets the current user.",
-        "operationId": "get_current_user_request",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The user gets his account information back."
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      },
       "post": {
         "tags": [
           "user"
@@ -3916,9 +3934,7 @@
                 "decision": {
                   "type": "string",
                   "enum": [
-                    "YES",
-                    "MAYBE",
-                    "NO"
+                    "MAYBE"
                   ]
                 },
                 "isFinal": {
