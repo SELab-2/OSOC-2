@@ -9,12 +9,12 @@ import { useRouter } from "next/router";
  * @constructor
  */
 const Home: NextPage = () => {
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
     useEffect(() => {
-        if (getSessionKey) {
-            getSessionKey().then((sessionKey) => {
+        if (getSession) {
+            getSession().then(({ sessionKey }) => {
                 if (sessionKey !== "") {
                     router.push("/students").then();
                 }
