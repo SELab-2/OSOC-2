@@ -438,7 +438,6 @@ test("Can parse filter students request", () => {
     const emailSort = { emailSort: "desc" };
     const alumniSort = { alumniSort: "asc" };
 
-    const wrongEmail: T.Anything = { emailFilter: "email" };
     const wrongStatus: T.Anything = { statusFilter: "yes" };
     const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
     const wrongFirstNameSort: T.Anything = { firstNameSort: "firstname" };
@@ -523,7 +522,6 @@ test("Can parse filter students request", () => {
     ).resolves.toStrictEqual(copy);
 
     const fails = [
-        wrongEmail,
         wrongStatus,
         wrongFirstNameSort,
         wrongLastNameSort,

@@ -357,7 +357,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    if ("roleFilter" in req.body) {
+    if ("roleFilter" in req.body && typeof req.body.roleFilter === "string") {
         roles = req.body.roleFilter.split(",");
     }
 
@@ -365,7 +365,6 @@ export async function parseFilterStudentsRequest(
         maybe(req.body, "firstNameSort"),
         maybe(req.body, "lastNameSort"),
         maybe(req.body, "emailSort"),
-        maybe(req.body, "roleSort"),
         maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
