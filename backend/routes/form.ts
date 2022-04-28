@@ -1255,6 +1255,30 @@ async function addJobApplicationToDatabase(
 ): Promise<Responses.Id> {
     const studentId = student_id.id;
 
+    const latestJobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        studentId
+    );
+
+    if (
+        latestJobApplication !== null &&
+        latestJobApplication.osoc_id === formResponse.osocId
+    ) {
+        await Promise.all([
+            ormAppRo.deleteAppliedRolesByJobApplication(
+                latestJobApplication.job_application_id
+            ),
+            ormAtt.deleteAllAttachmentsForApplication(
+                latestJobApplication.job_application_id
+            ),
+            ormJoSk.deleteSkillsByJobApplicationId(
+                latestJobApplication.job_application_id
+            ),
+        ]);
+        await ormJo.deleteJobApplication(
+            latestJobApplication.job_application_id
+        );
+    }
+
     const jobApplication = await ormJo.createJobApplication({
         studentId: studentId,
         responsibilities: formResponse.responsibilities,

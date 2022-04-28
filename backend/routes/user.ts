@@ -142,6 +142,7 @@ async function createUserAcceptance(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
@@ -181,6 +182,7 @@ async function deleteUserRequest(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)
@@ -251,6 +253,7 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
+        .then((parsed) => util.mutable(parsed, parsed.userId))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)

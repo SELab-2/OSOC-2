@@ -965,3 +965,10 @@ test("utility.setupRedirect sets up a single redirect", async () => {
         getInvalidVerbEndpointError("post", "/")
     );
 });
+
+test("utility.mutable should check if a user is mutable", async () => {
+    expect(util.mutable("str", config.global.defaultUserId)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+    expect(util.mutable("str", 845321)).resolves.toBe("str");
+});
