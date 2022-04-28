@@ -1,4 +1,4 @@
-import { Display, Student, EvaluationCoach } from "../../types";
+import { Display, Student, EvaluationCoach, Decision } from "../../types";
 import React, { useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
 import SessionContext from "../../contexts/sessionProvider";
@@ -43,31 +43,19 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [counter]);
 
-    const yesSuggest = () => {
-        makeSuggestion("YES");
+    const closer = () => {
+        console.log("close");
     };
 
-    const maybeSuggest = () => {
-        makeSuggestion("MAYBE");
+    const enumSuggest = (dec: Decision) => {
+        makeSuggestion(dec);
     };
 
-    const noSuggest = () => {
-        makeSuggestion("NO");
+    const enumDecision = (dec: Decision) => {
+        makeDecision(dec);
     };
 
-    const definitiveYes = () => {
-        makeDecision("YES");
-    };
-
-    const definitiveNo = () => {
-        makeDecision("NO");
-    };
-
-    const definitiveMaybe = () => {
-        makeDecision("MAYBE");
-    };
-
-    const makeSuggestion = (suggestion: string) => {
+    const makeSuggestion = (suggestion: Decision) => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
                 if (sessionKey != "") {
@@ -97,7 +85,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         }
     };
 
-    const makeDecision = (reply: string) => {
+    const makeDecision = (reply: Decision) => {
         if (getSessionKey !== undefined) {
             getSessionKey().then(async (sessionKey) => {
                 if (sessionKey != "") {
@@ -131,7 +119,7 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
         <div>
             <Modal
                 visible={false}
-                handleClose={yesSuggest}
+                handleClose={closer}
                 title={"This is the title"}
             >
                 <p>Dit is een modal</p>
@@ -140,9 +128,9 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
             <div className={styles.dropdown}>
                 <button className={styles.dropbtn}>Set status</button>
                 <div className={styles.dropdown_content}>
-                    <a onClick={definitiveYes}>YES</a>
-                    <a onClick={definitiveNo}>NO</a>
-                    <a onClick={definitiveMaybe}>MAYBE</a>
+                    <a onClick={() => enumDecision(Decision.YES)}>YES</a>
+                    <a onClick={() => enumDecision(Decision.NO)}>NO</a>
+                    <a onClick={() => enumDecision(Decision.MAYBE)}>MAYBE</a>
                 </div>
             </div>
             <div>
@@ -166,9 +154,15 @@ export const StudentOverview: React.FC<{ student: Student }> = ({
             </div>
             <div>
                 <h1>Suggestions</h1>
-                <button onClick={yesSuggest}>Suggest yes</button>
-                <button onClick={maybeSuggest}>Suggest maybe</button>
-                <button onClick={noSuggest}>Suggest no</button>
+                <button onClick={() => enumSuggest(Decision.YES)}>
+                    Suggest yes
+                </button>
+                <button onClick={() => enumSuggest(Decision.MAYBE)}>
+                    Suggest maybe
+                </button>
+                <button onClick={() => enumSuggest(Decision.NO)}>
+                    Suggest no
+                </button>
             </div>
             {evaluations.map((evaluation) => {
                 if (!evaluation.isFinal) {
