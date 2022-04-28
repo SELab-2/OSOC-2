@@ -1255,6 +1255,14 @@ async function addJobApplicationToDatabase(
 ): Promise<Responses.Id> {
     const studentId = student_id.id;
 
+    const latestJobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        studentId
+    );
+
+    /*if(latestJobApplication.osoc_id === formResponse.osocId) {
+        await ormJo.
+    }*/
+
     const jobApplication = await ormJo.createJobApplication({
         studentId: studentId,
         responsibilities: formResponse.responsibilities,
