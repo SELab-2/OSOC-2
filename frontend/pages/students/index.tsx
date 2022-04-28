@@ -10,7 +10,7 @@ import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
 import { StudentFilter } from "../../components/Filter/StudentFilter/StudentFilter";
 
 const Index: NextPage = () => {
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     const router = useRouter();
     // the index of the selected student if the given id matches with one of the fetched students
@@ -22,8 +22,8 @@ const Index: NextPage = () => {
      * @param id
      */
     const fetchStudents = async (id: number) => {
-        if (getSessionKey !== undefined) {
-            getSessionKey().then(async (sessionKey) => {
+        if (getSession !== undefined) {
+            getSession().then(async ({ sessionKey }) => {
                 if (sessionKey != "" && id > -2) {
                     const response = await fetch(
                         `${process.env.NEXT_PUBLIC_API_URL}/student/all`,
