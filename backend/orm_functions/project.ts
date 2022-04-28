@@ -295,12 +295,12 @@ export async function deleteProjectByPartner(partner: string) {
 
 /**
  *
- * @param projectNameFilter projectname that we are filtering on (or undefined if not filtering on name)
- * @param clientNameFilter clientname that we are filtering on (or undefined if not filtering on name)
+ * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
+ * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
- * @param projectNameSort asc or desc if we want to sort on projectname, undefined if we are not sorting on projectname
- * @param clientNameSort asc or desc if we want to sort on clientname, undefined if we are not sorting on clientname
+ * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
+ * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
  * @returns the filtered students with their person data and other filter fields in a promise
  */
@@ -310,26 +310,41 @@ export async function filterProjects(
     assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
-    clientNameSort: FilterSort
+    clientNameSort: FilterSort,
+    fullyAssignedSort: FilterSort
 ) {
-    const projects = await prisma.project_role.groupBy({
-        by: ["project_id"],
-        _sum: {
-            positions: true,
-        },
-    });
-
-    const filtered_projects = await prisma.project.findMany({
-        where: {
-            name: projectNameFilter,
-            partner: clientNameFilter,
-            project_user: {
-                some: {
-                    login_user: {
-                        login_user_id: { in: assignedCoachesFilterArray },
+    const projects = await prisma.project.findMany({
+        include: {
+            project_role: {
+                include: {
+                    _count: {
+                        select: { contract: true },
                     },
                 },
             },
+        },
+    });
+
+    let assignedCoachesArray = undefined;
+    if (assignedCoachesFilterArray !== undefined) {
+        assignedCoachesArray = {
+            some: {
+                login_user_id: { in: assignedCoachesFilterArray },
+            },
+        };
+    }
+
+    const filtered_projects = await prisma.project.findMany({
+        where: {
+            name: {
+                contains: projectNameFilter,
+                mode: "insensitive",
+            },
+            partner: {
+                contains: clientNameFilter,
+                mode: "insensitive",
+            },
+            project_user: assignedCoachesArray,
         },
         orderBy: {
             name: projectNameSort,
@@ -359,11 +374,77 @@ export async function filterProjects(
         },
     });
 
-    if (fullyAssignedFilter) {
-        return filtered_projects.filter(
-            (project) =>
-                project.positions == projects[project.project_id]._sum.positions
+    if (
+        fullyAssignedFilter != undefined &&
+        fullyAssignedFilter &&
+        filtered_projects.length !== 0
+    ) {
+        return filtered_projects.filter((project) => {
+            const project_found = projects.find(
+                (elem) => elem.project_id === project.project_id
+            );
+
+            if (project_found != undefined) {
+                let sum = 0;
+                for (const c of project_found.project_role) {
+                    sum += c._count.contract;
+                }
+                return project.positions === sum;
+            }
+
+            return false;
+        });
+    }
+
+    if (fullyAssignedSort == "desc" || fullyAssignedSort == "asc") {
+        filtered_projects.sort((x, y) => {
+            const project_x_found = projects.find(
+                (elem) => elem.project_id === x.project_id
+            );
+
+            const project_y_found = projects.find(
+                (elem) => elem.project_id === y.project_id
+            );
+
+            if (project_x_found != undefined && project_y_found != undefined) {
+                let sum_x = 0;
+                for (const c of project_x_found.project_role) {
+                    sum_x += c._count.contract;
+                }
+
+                let sum_y = 0;
+                for (const c of project_y_found.project_role) {
+                    sum_y += c._count.contract;
+                }
+
+                const fullyAssignedX = x.positions === sum_x ? 1 : 0;
+                const fullyAssignedY = y.positions === sum_y ? 1 : 0;
+
+                return fullyAssignedX - fullyAssignedY;
+            }
+
+            return 0;
+        });
+    }
+
+    if (fullyAssignedSort == "desc") {
+        filtered_projects.reverse();
+    }
+
+    /*if (fullyAssignedSort == "asc") {
+        filtered_projects.sort(
+            (x, y) =>
+                +(x.positions == projects[x.project_id]._sum.positions) -
+                +(y.positions == projects[y.project_id]._sum.positions)
         );
     }
+    if (fullyAssignedSort == "desc") {
+        filtered_projects.sort(
+            (x, y) =>
+                +(x.positions == projects[x.project_id]._sum.positions) -
+                +(y.positions == projects[y.project_id]._sum.positions)
+        );
+        filtered_projects.reverse();
+    }*/
     return filtered_projects;
 }

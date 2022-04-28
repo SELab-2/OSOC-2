@@ -9,6 +9,8 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import * as session_key from "./session_key.json";
+import { addSessionKey } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all students in the system.
@@ -19,7 +21,7 @@ import { errors } from "../utility";
 async function listUsers(req: express.Request): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
+        .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -74,8 +76,19 @@ async function createUserRequest(req: express.Request): Promise<Responses.Id> {
                 });
             })
             .then((user) => {
+                const key: string = util.generateKey();
+                const futureDate = new Date();
+                futureDate.setDate(
+                    futureDate.getDate() + session_key.valid_period
+                );
+                return addSessionKey(user.login_user_id, key, futureDate);
+            })
+            .then((user) => {
                 console.log("Attached a login user: " + user);
-                return Promise.resolve({ id: user.login_user_id });
+                return Promise.resolve({
+                    id: user.login_user_id,
+                    sessionkey: user.session_key,
+                });
             })
             .catch((e) => {
                 if ("code" in e && e.code == "P2002") {
@@ -96,8 +109,6 @@ async function setAccountStatus(
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
-    console.log("admin: " + is_admin.toString());
-    console.log("coach: " + is_coach.toString());
     return ormLU
         .searchLoginUserByPerson(person_id)
         .then((obj) =>
@@ -132,15 +143,29 @@ async function createUserAcceptance(
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            console.log("admin: " + parsed.data.is_admin.toString());
-            console.log("coach: " + parsed.data.is_coach.toString());
-            return setAccountStatus(
-                parsed.data.id,
-                "ACTIVATED",
-                parsed.data.sessionkey,
-                parsed.data.is_admin.toString().toLowerCase().trim() == "true",
-                parsed.data.is_coach.toString().toLowerCase().trim() == "true"
-            );
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "ACTIVATED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
         });
 }
 
@@ -156,15 +181,31 @@ async function deleteUserRequest(
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
-                parsed.data.id,
-                "DISABLED",
-                parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+        .then(async (parsed) => {
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "DISABLED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
+        });
 }
 
 /**
@@ -175,43 +216,41 @@ async function deleteUserRequest(
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 async function filterUsers(req: express.Request): Promise<Responses.UserList> {
-    const parsedRequest = await rq.parseFilterUsersRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const users = await ormLU.filterLoginUsers(
-        checkedSessionKey.data.nameFilter,
-        checkedSessionKey.data.emailFilter,
-        checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.isCoachFilter,
-        checkedSessionKey.data.isAdminFilter
-    );
-
-    users.map((val) => ({
-        person_data: {
-            id: val.person.person_id,
-            name: val.person.firstname,
-            email: val.person.email,
-            github: val.person.github,
-        },
-        coach: val.is_coach,
-        admin: val.is_admin,
-        activated: val.account_status as string,
-    }));
-
-    return Promise.resolve({ data: users });
+    return rq
+        .parseFilterUsersRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormLU
+                .filterLoginUsers(
+                    parsed.data.nameFilter,
+                    parsed.data.emailFilter,
+                    parsed.data.nameSort,
+                    parsed.data.emailSort,
+                    parsed.data.statusFilter,
+                    parsed.data.isCoachFilter,
+                    parsed.data.isAdminFilter
+                )
+                .then((users) => {
+                    users.map((val) => ({
+                        person_data: {
+                            id: val.person.person_id,
+                            name: val.person.firstname,
+                            email: val.person.email,
+                            github: val.person.github,
+                        },
+                        coach: val.is_coach,
+                        admin: val.is_admin,
+                        activated: val.account_status as string,
+                    }));
+                    return Promise.resolve({ data: users });
+                });
+        });
 }
 
 async function userModSelf(req: express.Request): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed, false))
+        .then((parsed) => util.isAdmin(parsed, false))
         .then((checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
