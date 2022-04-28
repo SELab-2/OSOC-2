@@ -18,7 +18,9 @@ import { addSessionKey } from "../orm_functions/session_key";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listUsers(req: express.Request): Promise<Responses.UserList> {
+export async function listUsers(
+    req: express.Request
+): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util
         .isAdmin(parsedRequest)
@@ -51,7 +53,9 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserRequest(req: express.Request): Promise<Responses.Id> {
+export async function createUserRequest(
+    req: express.Request
+): Promise<Responses.Id> {
     return rq.parseRequestUserRequest(req).then(async (parsed) => {
         if (parsed.pass == undefined) {
             console.log(" -> WARNING user request without password");
@@ -102,7 +106,7 @@ async function createUserRequest(req: express.Request): Promise<Responses.Id> {
     });
 }
 
-async function setAccountStatus(
+export async function setAccountStatus(
     person_id: number,
     stat: account_status_enum,
     key: string,
@@ -136,7 +140,7 @@ async function setAccountStatus(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserAcceptance(
+export async function createUserAcceptance(
     req: express.Request
 ): Promise<Responses.PartialUser> {
     return rq
@@ -176,7 +180,7 @@ async function createUserAcceptance(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteUserRequest(
+export async function deleteUserRequest(
     req: express.Request
 ): Promise<Responses.PartialUser> {
     return rq
@@ -217,7 +221,9 @@ async function deleteUserRequest(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterUsers(req: express.Request): Promise<Responses.UserList> {
+export async function filterUsers(
+    req: express.Request
+): Promise<Responses.UserList> {
     return rq
         .parseFilterUsersRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -249,7 +255,9 @@ async function filterUsers(req: express.Request): Promise<Responses.UserList> {
         });
 }
 
-async function userModSelf(req: express.Request): Promise<Responses.Empty> {
+export async function userModSelf(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
@@ -295,7 +303,9 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCurrentUser(req: express.Request): Promise<Responses.User> {
+export async function getCurrentUser(
+    req: express.Request
+): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
 
     const checkedSessionKey = await util
