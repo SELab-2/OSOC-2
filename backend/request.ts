@@ -913,6 +913,11 @@ export const parseTemplateListRequest = parseKeyRequest;
  */
 export const parseProjectConflictsRequest = parseKeyRequest;
 /**
+ *  A request to `GET /user/current` only requires a session key
+ * {@link parseKeyRequest}.
+ */
+export const parseCurrentUserRequest = parseKeyRequest;
+/**
  *  A request to `GET /verify` only requires a session key
  * {@link parseKeyRequest}.
  */
