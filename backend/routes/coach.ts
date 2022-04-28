@@ -4,7 +4,7 @@ import express from "express";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { Responses, UserIdType } from "../types";
+import { Responses } from "../types";
 import * as util from "../utility";
 import * as ormSe from "../orm_functions/session_key";
 import { errors } from "../utility";
@@ -58,9 +58,7 @@ export async function modCoach(
     return rq
         .parseUpdateCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) =>
-            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
-        )
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             if (parsed.data.id !== parsed.userId) {
                 return ormLU
@@ -109,9 +107,7 @@ export async function deleteCoach(
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) =>
-            util.mutable(parsed, parsed.data.id, UserIdType.LOGINUSER)
-        )
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
                 .searchLoginUserByPerson(parsed.data.id)

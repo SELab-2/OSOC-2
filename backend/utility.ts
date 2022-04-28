@@ -19,7 +19,6 @@ import {
     Table,
     Verb,
     WithUserID,
-    UserIdType,
 } from "./types";
 
 /**
@@ -516,20 +515,8 @@ export function queryToBody(req: express.Request) {
     return req;
 }
 
-export function mutable<T>(
-    obj: T,
-    targetid: number,
-    idtype: UserIdType
-): Promise<T> {
-    if (
-        idtype == UserIdType.PERSON &&
-        targetid == config.default_user.person_id
-    )
-        return Promise.reject(errors.cookInvalidID());
-    if (
-        idtype == UserIdType.LOGINUSER &&
-        targetid == config.default_user.user_id
-    )
+export function mutable<T>(obj: T, targetid: number): Promise<T> {
+    if (targetid == config.global.defaultUserId)
         return Promise.reject(errors.cookInvalidID());
     return Promise.resolve(obj);
 }

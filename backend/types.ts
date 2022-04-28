@@ -965,8 +965,3 @@ export enum Decision {
     MAYBE = "MAYBE",
     NO = "NO",
 }
-
-export enum UserIdType {
-    PERSON = "PERSON",
-    LOGINUSER = "LOGINUSER",
-}

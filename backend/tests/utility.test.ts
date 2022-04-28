@@ -36,7 +36,6 @@ import * as config from "../config.json";
 import { ApiError, Anything } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import { UserIdType } from "../types";
 
 interface Req {
     url: string;
@@ -968,14 +967,8 @@ test("utility.setupRedirect sets up a single redirect", async () => {
 });
 
 test("utility.mutable should check if a user is mutable", async () => {
-    expect(
-        util.mutable("str", config.default_user.person_id, UserIdType.PERSON)
-    ).rejects.toBe(errors.cookInvalidID());
-    expect(
-        util.mutable("str", config.default_user.user_id, UserIdType.LOGINUSER)
-    ).rejects.toBe(errors.cookInvalidID());
-    expect(util.mutable("str", 845321, UserIdType.PERSON)).resolves.toBe("str");
-    expect(util.mutable("str", 845321, UserIdType.LOGINUSER)).resolves.toBe(
-        "str"
+    expect(util.mutable("str", config.global.defaultUserId)).rejects.toBe(
+        errors.cookInvalidID()
     );
+    expect(util.mutable("str", 845321)).resolves.toBe("str");
 });

@@ -84,16 +84,12 @@
             "", "/api-osoc"
         ],
         "preferred": "/api-osoc",
-        "authScheme": "auth/osoc2"
+        "authScheme": "auth/osoc2",
+        "defaultUserId": 3
     },
 
     "email": {
         "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
         "header": "OSOC2 Recovery Code"
-    },
-
-    "default_user": {
-      "person_id": 4,
-      "user_id": 3
     }
 }
