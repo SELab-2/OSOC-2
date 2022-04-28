@@ -1087,3 +1087,10 @@ test("utility.queryToBody can handle empty query", () => {
     expect(req.body).toStrictEqual({ key: "othervalue" });
     expect(req.query).toStrictEqual({});
 });
+
+test("utility.mutable should check if a user is mutable", async () => {
+    expect(util.mutable("str", config.global.defaultUserId)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+    expect(util.mutable("str", 845321)).resolves.toBe("str");
+});
