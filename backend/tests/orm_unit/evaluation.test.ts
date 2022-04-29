@@ -3,6 +3,7 @@ import { decision_enum } from "@prisma/client";
 import {
     checkIfFinalEvaluationExists,
     createEvaluationForStudent,
+    getEvaluationByPartiesFor,
     getLoginUserByEvaluationId,
     updateEvaluationForStudent,
 } from "../../orm_functions/evaluation";
@@ -121,4 +122,31 @@ test("should return the loginUser with his info that made this evaluation", asyn
     };
     prismaMock.evaluation.findUnique.mockResolvedValue(result);
     await expect(getLoginUserByEvaluationId(7)).resolves.toEqual(result);
+});
+
+test("should return all evaluations created by a user for a student in an osoc edition", async () => {
+    const evaluations = [
+        {
+            evaluation_id: 1,
+            login_user_id: 1,
+            decision: decision_enum.YES,
+            motivation: "Definitely unicorn, all in for it",
+            is_final: true,
+            job_application_id: 1,
+        },
+        {
+            evaluation_id: 2,
+            login_user_id: 1,
+            decision: decision_enum.MAYBE,
+            motivation: "Definitely unicorn, all in for it",
+            is_final: false,
+            job_application_id: 1,
+        },
+    ];
+
+    prismaMock.evaluation.findMany.mockResolvedValue(evaluations);
+
+    await expect(getEvaluationByPartiesFor(1, 1, 1)).resolves.toEqual(
+        evaluations
+    );
 });
