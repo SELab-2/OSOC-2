@@ -3,6 +3,7 @@ import { decision_enum } from "@prisma/client";
 import {
     checkIfFinalEvaluationExists,
     createEvaluationForStudent,
+    deleteEvaluationsByJobApplication,
     getEvaluationByPartiesFor,
     getLoginUserByEvaluationId,
     updateEvaluationForStudent,
@@ -148,5 +149,15 @@ test("should return all evaluations created by a user for a student in an osoc e
 
     await expect(getEvaluationByPartiesFor(1, 1, 1)).resolves.toEqual(
         evaluations
+    );
+});
+
+it("should delete evaluations by a job application", async () => {
+    const numberOfDeletions = { count: 5 };
+
+    prismaMock.evaluation.deleteMany.mockResolvedValue(numberOfDeletions);
+
+    await expect(deleteEvaluationsByJobApplication(1)).resolves.toEqual(
+        numberOfDeletions
     );
 });

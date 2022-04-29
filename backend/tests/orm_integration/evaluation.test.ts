@@ -8,6 +8,7 @@ import {
     updateEvaluationForStudent,
     getLoginUserByEvaluationId,
     getEvaluationByPartiesFor,
+    deleteEvaluationsByJobApplication,
 } from "../../orm_functions/evaluation";
 import prisma from "../../prisma/prisma";
 import { decision_enum } from "@prisma/client";
@@ -139,4 +140,9 @@ it("should return all evaluations created by a user for a student in an osoc edi
             evaluation.login_user_id
         );
     }
+});
+
+it("should delete evaluations by a job application", async () => {
+    const numberOfDeletions = await deleteEvaluationsByJobApplication(1);
+    expect(numberOfDeletions).toHaveProperty("count", numberOfDeletions.count);
 });
