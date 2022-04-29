@@ -2,6 +2,7 @@
 import express from "express";
 
 import * as ormP from "../orm_functions/person";
+import * as ormLU from "../orm_functions/login_user";
 import * as ormSt from "../orm_functions/student";
 import * as ormOs from "../orm_functions/osoc";
 import * as ormJo from "../orm_functions/job_application";
@@ -127,7 +128,7 @@ export function getLastName(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-export function getEmail(form: Requests.Form): Promise<string> {
+export async function getEmail(form: Requests.Form): Promise<string> {
     const questionEmail: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.emailAddress);
     const questionsExist: boolean = checkQuestionsExist([questionEmail]);
@@ -137,6 +138,21 @@ export function getEmail(form: Requests.Form): Promise<string> {
         !validator.default.isEmail(questionEmail.data.value as string)
     ) {
         return Promise.reject(errors.cookArgumentError());
+    }
+
+    const normalizedEmail = validator.default
+        .normalizeEmail(questionEmail.data.value as string)
+        .toString();
+
+    const personFound = await ormP.searchPersonByLogin(normalizedEmail);
+    if (personFound.length !== 0) {
+        const loginUserFound = await ormLU.searchLoginUserByPerson(
+            personFound[0].person_id
+        );
+
+        if (loginUserFound !== null) {
+            return Promise.reject(errors.cookInsufficientRights());
+        }
     }
 
     return Promise.resolve(
