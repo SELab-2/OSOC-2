@@ -62,12 +62,7 @@ export async function filterYear(
     req: express.Request
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseFilterOsocsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const osocs = await ormO.filterOsocs(
         checkedSessionKey.data.yearFilter,
