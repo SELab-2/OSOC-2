@@ -1,5 +1,6 @@
 import {
     account_status_enum,
+    decision_enum,
     email_status_enum,
     type_enum,
 } from "@prisma/client";
@@ -768,6 +769,22 @@ export namespace Requests {
     export interface UserPwd extends KeyRequest {
         pass?: { newpass: string; oldpass: string };
         name?: string;
+    }
+
+    export interface StudentFilterParameters {
+        osocYear?: number;
+        firstNameFilter?: string;
+        lastNameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[] | string;
+        alumniFilter?: boolean | string;
+        coachFilter?: boolean | string;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        firstNameSort?: string;
+        lastNameSort?: string;
+        emailSort?: string;
+        alumniSort?: string;
     }
 
     export interface StudentFilter extends KeyRequest {}

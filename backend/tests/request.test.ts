@@ -422,27 +422,53 @@ test("Can parse filter students request", () => {
     const key = "my-session-key";
 
     const nothing = {};
-    const osocYear = { osocYear: 2022 };
-    const firstNameFilter = { firstNameFilter: "Firstname" };
-    const lastNameFilter = { lastNameFilter: "Lastname" };
-    const emailFilterGoodEmail = {
+    const osocYear: T.Requests.StudentFilterParameters = { osocYear: 2022 };
+    const firstNameFilter: T.Requests.StudentFilterParameters = {
+        firstNameFilter: "Firstname",
+    };
+    const lastNameFilter: T.Requests.StudentFilterParameters = {
+        lastNameFilter: "Lastname",
+    };
+    const emailFilterGoodEmail: T.Requests.StudentFilterParameters = {
         emailFilter: "firstname.lastname@hotmail.com",
     };
-    const emailFilterBadEmail = { emailFilter: "email" };
-    const roleFilterList = {
+    const emailFilterBadEmail: T.Requests.StudentFilterParameters = {
+        emailFilter: "email",
+    };
+    const roleFilterList: T.Requests.StudentFilterParameters = {
         roleFilter: ["Frontend developer", "Backend developer"],
     };
-    const roleFilterString = {
+    const roleFilterString: T.Requests.StudentFilterParameters = {
         roleFilter: "Frontend developer,Backend developer",
     };
-    const alumniFilter = { alumniFilter: true };
-    const coachFilter = { coachFilter: true };
-    const statusFilter = { statusFilter: "YES" };
-    const emailStatusFilter = { emailStatusFilter: "SENT" };
-    const firstNameSort = { firstNameSort: "asc" };
-    const lastNameSort = { lastNameSort: "asc" };
-    const emailSort = { emailSort: "desc" };
-    const alumniSort = { alumniSort: "asc" };
+    const alumniFilterBoolean: T.Requests.StudentFilterParameters = {
+        alumniFilter: true,
+    };
+    const alumniFilterString: T.Requests.StudentFilterParameters = {
+        alumniFilter: "true",
+    };
+    const coachFilterBoolean: T.Requests.StudentFilterParameters = {
+        coachFilter: true,
+    };
+    const coachFilterString: T.Requests.StudentFilterParameters = {
+        coachFilter: "true",
+    };
+    const statusFilter: T.Requests.StudentFilterParameters = {
+        statusFilter: "YES",
+    };
+    const emailStatusFilter: T.Requests.StudentFilterParameters = {
+        emailStatusFilter: "SENT",
+    };
+    const firstNameSort: T.Requests.StudentFilterParameters = {
+        firstNameSort: "asc",
+    };
+    const lastNameSort: T.Requests.StudentFilterParameters = {
+        lastNameSort: "asc",
+    };
+    const emailSort: T.Requests.StudentFilterParameters = { emailSort: "desc" };
+    const alumniSort: T.Requests.StudentFilterParameters = {
+        alumniSort: "asc",
+    };
 
     const wrongStatus: T.Anything = { statusFilter: "yes" };
     const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
@@ -459,8 +485,8 @@ test("Can parse filter students request", () => {
         emailFilterGoodEmail,
         emailFilterBadEmail,
         roleFilterList,
-        alumniFilter,
-        coachFilter,
+        alumniFilterBoolean,
+        coachFilterBoolean,
         statusFilter,
         emailStatusFilter,
         firstNameSort,
@@ -499,35 +525,41 @@ test("Can parse filter students request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const copy: T.Anything = { ...roleFilterList };
-    const req: express.Request = getMockReq();
-    req.body = roleFilterString;
-    setSessionKey(req, key);
-    [
-        "firstNameFilter",
-        "lastNameFilter",
-        "emailFilter",
-        "alumniFilter",
-        "coachFilter",
-        "statusFilter",
-        "emailStatusFilter",
-        "firstNameSort",
-        "lastNameSort",
-        "emailSort",
-        "alumniSort",
-    ].forEach((x) => {
-        if (!(x in req.body)) {
-            copy[x] = undefined;
+    const okays2 = [
+        [roleFilterString, roleFilterList],
+        [alumniFilterString, alumniFilterBoolean],
+        [coachFilterString, coachFilterBoolean],
+    ].map((x) => {
+        const copy: T.Anything = { ...x[1] };
+        const req: express.Request = getMockReq();
+        req.body = x[0];
+        setSessionKey(req, key);
+        [
+            "firstNameFilter",
+            "lastNameFilter",
+            "emailFilter",
+            "roleFilter",
+            "alumniFilter",
+            "coachFilter",
+            "statusFilter",
+            "emailStatusFilter",
+            "firstNameSort",
+            "lastNameSort",
+            "emailSort",
+            "alumniSort",
+        ].forEach((x) => {
+            if (!(x in req.body)) {
+                copy[x] = undefined;
+            }
+        });
+        if (!("osocYear" in req.body)) {
+            copy["osocYear"] = new Date().getFullYear();
         }
+        copy.sessionkey = key;
+        return expect(
+            Rq.parseFilterStudentsRequest(req)
+        ).resolves.toStrictEqual(copy);
     });
-    if (!("osocYear" in req.body)) {
-        copy["osocYear"] = new Date().getFullYear();
-    }
-    copy.sessionkey = key;
-
-    const roleFilterOkay = expect(
-        Rq.parseFilterStudentsRequest(req)
-    ).resolves.toStrictEqual(copy);
 
     const fails = [
         wrongStatus,
@@ -545,7 +577,7 @@ test("Can parse filter students request", () => {
         );
     });
 
-    return Promise.all([okays, fails, [roleFilterOkay]].flat());
+    return Promise.all([okays, okays2, fails].flat());
 });
 
 test("Can parse final decision request", () => {
