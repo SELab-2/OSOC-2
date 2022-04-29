@@ -1197,26 +1197,6 @@ test("Can parse update template request", () => {
     return Promise.all([okays, fails1, fails2, fails3].flat());
 });
 
-test("Can parse check reset code requests", () => {
-    const v1: { id: number } = { id: 0 };
-
-    const req: express.Request = getMockReq();
-    req.params.id = v1.id.toString();
-    req.body = { ...v1 };
-
-    const valid = expect(
-        Rq.parseCheckResetCodeRequest(req)
-    ).resolves.toStrictEqual({ code: v1.id.toString() });
-
-    const req2: express.Request = getMockReq();
-
-    const invalid = expect(Rq.parseCheckResetCodeRequest(req2)).rejects.toBe(
-        errors.cookArgumentError()
-    );
-
-    return Promise.all([valid, invalid]);
-});
-
 test("Can parse reset requests", () => {
     const v1: T.Anything = { email: "bob.student@gmail.com" };
 
@@ -1231,6 +1211,178 @@ test("Can parse reset requests", () => {
     ).resolves.toStrictEqual(normalizedEmail);
 
     return Promise.all([valid]);
+});
+
+test("Can parse check reset code requests", () => {
+    const id = 0;
+
+    const req: express.Request = getMockReq();
+    req.params.id = id.toString();
+
+    const valid = expect(
+        Rq.parseCheckResetCodeRequest(req)
+    ).resolves.toStrictEqual({ code: id.toString() });
+
+    const req2: express.Request = getMockReq();
+
+    const invalid = expect(Rq.parseCheckResetCodeRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse reset password requests", () => {
+    const id = 0;
+    const password: { password: string } = { password: "pass" };
+
+    const req: express.Request = getMockReq();
+    req.params.id = id.toString();
+    req.body = { ...password };
+
+    const valid = expect(
+        Rq.parseResetPasswordRequest(req)
+    ).resolves.toStrictEqual({
+        code: id.toString(),
+        password: password.password,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...password };
+
+    const invalid1 = expect(Rq.parseResetPasswordRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    const req3: express.Request = getMockReq();
+    req2.params.id = id.toString();
+
+    const invalid2 = expect(Rq.parseCheckResetCodeRequest(req3)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid1, invalid2]);
+});
+
+test("Can parse student role request", () => {
+    const key = "my-key-arrived-but";
+
+    const name: T.Anything = { name: "name" };
+    const noName: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...name };
+    setSessionKey(req, key);
+    name.sessionkey = key;
+    const valid = expect(
+        Rq.parseStudentRoleRequest(req)
+    ).resolves.toStrictEqual(name);
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noName };
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseStudentRoleRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse remove assignee request", () => {
+    const key = "my-key-arrived-but";
+    const id = 987465327465;
+
+    const studentId: T.Anything = { student: 1 };
+    const noStudentId: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...studentId };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    studentId.id = id;
+    studentId.sessionkey = key;
+
+    const valid = expect(
+        Rq.parseRemoveAssigneeRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: studentId.sessionkey,
+        studentId: studentId.student,
+        id: studentId.id,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noStudentId };
+    req2.params.id = id.toString();
+    setSessionKey(req2, key);
+    studentId.id = id;
+    studentId.sessionkey = key;
+
+    const invalid = expect(Rq.parseRemoveAssigneeRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse accept new user request", () => {
+    const key = "my-key-arrived-but";
+    const id = 987465327465;
+
+    const v1: T.Anything = { is_admin: true, is_coach: true };
+
+    const i1: T.Anything = { is_admin: true };
+    const i2: T.Anything = { is_coach: true };
+    const i3: T.Anything = {};
+
+    const req1: express.Request = getMockReq();
+    req1.body = { ...v1 };
+    req1.params.id = id.toString();
+    setSessionKey(req1, key);
+    v1.id = id;
+    v1.sessionkey = key;
+
+    const valid = expect(
+        Rq.parseAcceptNewUserRequest(req1)
+    ).resolves.toStrictEqual(v1);
+
+    const invalids = [i1, i2, i3].map((invalid) => {
+        const req2: express.Request = getMockReq();
+        req2.body = { ...invalid };
+        req2.params.id = id.toString();
+        setSessionKey(req2, key);
+        invalid.id = id;
+        invalid.sessionkey = key;
+
+        return expect(Rq.parseAcceptNewUserRequest(req2)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([[valid], invalids].flat());
+});
+
+test("Can parse new osoc edition request", () => {
+    const key = "my-key-arrived-but";
+
+    const year: T.Anything = { year: 2022 };
+    const noYear: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...year };
+    setSessionKey(req, key);
+    year.sessionkey = key;
+    const valid = expect(
+        Rq.parseNewOsocEditionRequest(req)
+    ).resolves.toStrictEqual(year);
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noYear };
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseNewOsocEditionRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
 });
 
 test("Can parse self-modify requests", () => {
