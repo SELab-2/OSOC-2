@@ -342,7 +342,13 @@ export async function parseFilterStudentsRequest(
             req.body.emailStatusFilter !== EmailStatus.SENT &&
             req.body.emailStatusFilter !== EmailStatus.DRAFT &&
             req.body.emailStatusFilter !== EmailStatus.FAILED &&
-            req.body.emailStatusFilter !== EmailStatus.SCHEDULED)
+            req.body.emailStatusFilter !== EmailStatus.SCHEDULED) ||
+        ("alumniFilter" in req.body &&
+            req.body.alumniFilter.toString() !== "true" &&
+            req.body.alumniFilter.toString() !== "false") ||
+        ("coachFilter" in req.body &&
+            req.body.coachFilter.toString() !== "true" &&
+            req.body.coachFilter.toString() !== "false")
     ) {
         return rejector();
     } else {
@@ -379,15 +385,12 @@ export async function parseFilterStudentsRequest(
     }
 
     let alumniFilter = maybe(req.body, "alumniFilter");
-    if (
-        "alumniFilter" in req.body &&
-        typeof req.body.alumniFilter === "string"
-    ) {
-        alumniFilter = req.body.alumniFilter === "true";
+    if ("alumniFilter" in req.body) {
+        alumniFilter = req.body.alumniFilter.toString() === "true";
     }
     let coachFilter = maybe(req.body, "coachFilter");
-    if ("coachFilter" in req.body && typeof req.body.coachFilter === "string") {
-        coachFilter = req.body.coachFilter === "true";
+    if ("coachFilter" in req.body) {
+        coachFilter = req.body.coachFilter.toString() === "true";
     }
     return Promise.resolve({
         sessionkey: getSessionKey(req),
@@ -419,17 +422,23 @@ export async function parseFilterUsersRequest(
     let mail = undefined;
     let isCoachFilter = undefined;
     if ("isCoachFilter" in req.body) {
-        isCoachFilter = req.body.isCoachFilter === "true";
+        isCoachFilter = req.body.isCoachFilter.toString() === "true";
     }
     let isAdminFilter = undefined;
     if ("isAdminFilter" in req.body) {
-        isAdminFilter = req.body.isAdminFilter === "true";
+        isAdminFilter = req.body.isAdminFilter.toString() === "true";
     }
     if (
-        "statusFilter" in req.body &&
-        req.body.statusFilter !== "ACTIVATED" &&
-        req.body.statusFilter !== "PENDING" &&
-        req.body.statusFilter !== "DISABLED"
+        ("statusFilter" in req.body &&
+            req.body.statusFilter !== "ACTIVATED" &&
+            req.body.statusFilter !== "PENDING" &&
+            req.body.statusFilter !== "DISABLED") ||
+        ("isCoachFilter" in req.body &&
+            req.body.isCoachFilter.toString() !== "true" &&
+            req.body.isCoachFilter.toString() !== "false") ||
+        ("isAdminFilter" in req.body &&
+            req.body.isAdminFilter.toString() !== "true" &&
+            req.body.isAdminFilter.toString() !== "false")
     ) {
         return rejector();
     } else {
@@ -591,15 +600,25 @@ export async function parseFilterProjectsRequest(
     );
     if ("assignedCoachesFilterArray" in req.body) {
         if (typeof req.body.assignedCoachesFilterArray === "string") {
+            console.log(
+                req.body.assignedCoachesFilterArray
+                    .split(",")
+                    .map((num: string) => parseInt(num))
+            );
             assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
-                .slice(1, -1)
                 .split(",")
-                .map((num: string) => Number(num));
+                .map((num: string) => parseInt(num));
         }
     }
 
     let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
+        if (
+            req.body.fullyAssignedFilter.toString() !== "true" &&
+            req.body.fullyAssignedFilter.toString() !== "false"
+        ) {
+            return rejector();
+        }
         fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
     }
 
@@ -741,11 +760,12 @@ export async function parseFormRequest(
 export async function parseRequestResetRequest(
     req: express.Request
 ): Promise<Requests.ReqReset> {
-    return hasFields(req, ["email"], types.neither).then(() =>
-        Promise.resolve({
+    return hasFields(req, ["email"], types.neither).then(() => {
+        console.log(validator.default.normalizeEmail("no").toString());
+        return Promise.resolve({
             email: validator.default.normalizeEmail(req.body.email).toString(),
-        })
-    );
+        });
+    });
 }
 
 export async function parseCheckResetCodeRequest(

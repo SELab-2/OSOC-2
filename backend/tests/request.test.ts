@@ -476,56 +476,25 @@ test("Can parse filter students request", () => {
     const wrongLastNameSort: T.Anything = { lastNameSort: "lastname" };
     const wrongEmailSort: T.Anything = { emailSort: "email" };
     const wrongAlumniSort: T.Anything = { alumniSort: "alumni" };
+    const wrongAlumniFilter: T.Anything = { alumniFilter: "is_admin filter" };
+    const wrongCoachFilter: T.Anything = { coachFilter: "is_coach filter" };
 
     const okays = [
-        nothing,
-        osocYear,
-        firstNameFilter,
-        lastNameFilter,
-        emailFilterGoodEmail,
-        emailFilterBadEmail,
-        roleFilterList,
-        alumniFilterBoolean,
-        coachFilterBoolean,
-        statusFilter,
-        emailStatusFilter,
-        firstNameSort,
-        lastNameSort,
-        emailSort,
-        alumniSort,
-    ].map((x) => {
-        const copy: T.Anything = { ...x };
-        const req: express.Request = getMockReq();
-        req.body = x;
-        setSessionKey(req, key);
-        [
-            "firstNameFilter",
-            "lastNameFilter",
-            "emailFilter",
-            "roleFilter",
-            "alumniFilter",
-            "coachFilter",
-            "statusFilter",
-            "emailStatusFilter",
-            "firstNameSort",
-            "lastNameSort",
-            "emailSort",
-            "alumniSort",
-        ].forEach((x) => {
-            if (!(x in req.body)) {
-                copy[x] = undefined;
-            }
-        });
-        if (!("osocYear" in req.body)) {
-            copy["osocYear"] = new Date().getFullYear();
-        }
-        copy.sessionkey = key;
-        return expect(
-            Rq.parseFilterStudentsRequest(req)
-        ).resolves.toStrictEqual(copy);
-    });
-
-    const okays2 = [
+        [nothing, nothing],
+        [osocYear, osocYear],
+        [firstNameFilter, firstNameFilter],
+        [lastNameFilter, lastNameFilter],
+        [emailFilterGoodEmail, emailFilterGoodEmail],
+        [emailFilterBadEmail, emailFilterBadEmail],
+        [roleFilterList, roleFilterList],
+        [alumniFilterBoolean, alumniFilterBoolean],
+        [coachFilterBoolean, coachFilterBoolean],
+        [statusFilter, statusFilter],
+        [emailStatusFilter, emailStatusFilter],
+        [firstNameSort, firstNameSort],
+        [lastNameSort, lastNameSort],
+        [emailSort, emailSort],
+        [alumniSort, alumniSort],
         [roleFilterString, roleFilterList],
         [alumniFilterString, alumniFilterBoolean],
         [coachFilterString, coachFilterBoolean],
@@ -568,6 +537,8 @@ test("Can parse filter students request", () => {
         wrongEmailSort,
         wrongAlumniSort,
         wrongEmailStatus,
+        wrongAlumniFilter,
+        wrongCoachFilter,
     ].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
@@ -577,7 +548,195 @@ test("Can parse filter students request", () => {
         );
     });
 
-    return Promise.all([okays, okays2, fails].flat());
+    return Promise.all([okays, fails].flat());
+});
+
+test("Can parse filter users request", () => {
+    const key = "my-session-key";
+
+    const nothing = {};
+    const emailFilterGoodEmail = {
+        emailFilter: "firstname.lastname@hotmail.com",
+    };
+    const emailFilterBadEmail = {
+        emailFilter: "email",
+    };
+    const isAdminFilterBoolean = {
+        isAdminFilter: true,
+    };
+    const isAdminFilterString = {
+        isAdminFilter: "true",
+    };
+    const isCoachFilterBoolean = {
+        isCoachFilter: true,
+    };
+    const isCoachFilterString = {
+        coachFilter: "true",
+    };
+    const statusFilter = {
+        statusFilter: "ACTIVATED",
+    };
+    const nameFilter = {
+        nameFilter: "Name",
+    };
+    const nameSort = {
+        nameSort: "asc",
+    };
+    const emailSort = {
+        emailSort: "asc",
+    };
+
+    const wrongStatus: T.Anything = { statusFilter: "status" };
+    const wrongIsAdmin: T.Anything = { isAdminFilter: "is_admin filter" };
+    const wrongIsCoach: T.Anything = { isCoachFilter: "is_coach filter" };
+    const wrongNameSort: T.Anything = { nameSort: "lastname" };
+    const wrongEmailSort: T.Anything = { emailSort: "email" };
+
+    const okays = [
+        [nothing, nothing],
+        [isAdminFilterString, isAdminFilterBoolean],
+        [isCoachFilterString, isCoachFilterBoolean],
+        [nameFilter, nameFilter],
+        [emailFilterGoodEmail, emailFilterGoodEmail],
+        [emailFilterBadEmail, emailFilterBadEmail],
+        [nameSort, nameSort],
+        [statusFilter, statusFilter],
+        [emailSort, emailSort],
+    ].map((x) => {
+        const copy: T.Anything = { ...x[1] };
+        const req: express.Request = getMockReq();
+        req.body = x[0];
+        setSessionKey(req, key);
+        [
+            "isAdminFilter",
+            "isCoachFilter",
+            "nameFilter",
+            "emailFilter",
+            "nameSort",
+            "statusFilter",
+            "emailSort",
+        ].forEach((x) => {
+            if (!(x in req.body)) {
+                copy[x] = undefined;
+            }
+        });
+        copy.sessionkey = key;
+        return expect(Rq.parseFilterUsersRequest(req)).resolves.toStrictEqual(
+            copy
+        );
+    });
+
+    const fails = [
+        wrongStatus,
+        wrongIsAdmin,
+        wrongIsCoach,
+        wrongNameSort,
+        wrongEmailSort,
+    ].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseFilterUsersRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails].flat());
+});
+
+test("Can parse filter projects request", () => {
+    const key = "my-session-key";
+
+    const nothing = {};
+    const projectNameFilter = {
+        projectNameFilter: "Project name",
+    };
+    const clientNameFilter = {
+        clientNameFilter: "Client name",
+    };
+    const assignedCoachesFilterArray = {
+        assignedCoachesFilterArray: [1, 2],
+    };
+    const assignedCoachesFilterString = {
+        assignedCoachesFilterArray: "1,2",
+    };
+    const fullyAssignedFilterString = {
+        fullyAssignedFilter: "true",
+    };
+    const fullyAssignedFilterBoolean = {
+        fullyAssignedFilter: true,
+    };
+    const projectNameSort = {
+        projectNameSort: "asc",
+    };
+    const clientNameSort = {
+        clientNameSort: "asc",
+    };
+    const fullyAssignedSort = {
+        fullyAssignedSort: "desc",
+    };
+
+    const wrongFullyAssignedFilter: T.Anything = {
+        fullyAssignedFilter: "Fully assigned filter",
+    };
+    const wrongProjectNameSort: T.Anything = {
+        projectNameSort: "Project name sort",
+    };
+    const wrongClientNameSort: T.Anything = {
+        clientNameSort: "Client name sort",
+    };
+    const wrongFullyAssignedSort: T.Anything = {
+        fullyAssignedSort: "Fully assigned sort",
+    };
+
+    const okays = [
+        [nothing, nothing],
+        [fullyAssignedFilterString, fullyAssignedFilterBoolean],
+        [assignedCoachesFilterString, assignedCoachesFilterArray],
+        [projectNameFilter, projectNameFilter],
+        [clientNameFilter, clientNameFilter],
+        [projectNameSort, projectNameSort],
+        [clientNameSort, clientNameSort],
+        [fullyAssignedSort, fullyAssignedSort],
+    ].map((x) => {
+        const copy: T.Anything = { ...x[1] };
+        const req: express.Request = getMockReq();
+        req.body = x[0];
+        setSessionKey(req, key);
+        [
+            "projectNameFilter",
+            "clientNameFilter",
+            "assignedCoachesFilterArray",
+            "fullyAssignedFilter",
+            "projectNameSort",
+            "clientNameSort",
+            "fullyAssignedSort",
+        ].forEach((x) => {
+            if (!(x in req.body)) {
+                copy[x] = undefined;
+            }
+        });
+        copy.sessionkey = key;
+        return expect(
+            Rq.parseFilterProjectsRequest(req)
+        ).resolves.toStrictEqual(copy);
+    });
+
+    const fails = [
+        wrongFullyAssignedFilter,
+        wrongProjectNameSort,
+        wrongClientNameSort,
+        wrongFullyAssignedSort,
+    ].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseFilterProjectsRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails].flat());
 });
 
 test("Can parse final decision request", () => {
@@ -1036,6 +1195,42 @@ test("Can parse update template request", () => {
     });
 
     return Promise.all([okays, fails1, fails2, fails3].flat());
+});
+
+test("Can parse check reset code requests", () => {
+    const v1: { id: number } = { id: 0 };
+
+    const req: express.Request = getMockReq();
+    req.params.id = v1.id.toString();
+    req.body = { ...v1 };
+
+    const valid = expect(
+        Rq.parseCheckResetCodeRequest(req)
+    ).resolves.toStrictEqual({ code: v1.id.toString() });
+
+    const req2: express.Request = getMockReq();
+
+    const invalid = expect(Rq.parseCheckResetCodeRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse reset requests", () => {
+    const v1: T.Anything = { email: "bob.student@gmail.com" };
+
+    const req: express.Request = getMockReq();
+    req.body = { ...v1 };
+    const normalizedEmail: { email: string } = {
+        email: "bobstudent@gmail.com",
+    };
+
+    const valid = expect(
+        Rq.parseRequestResetRequest(req)
+    ).resolves.toStrictEqual(normalizedEmail);
+
+    return Promise.all([valid]);
 });
 
 test("Can parse self-modify requests", () => {
