@@ -10,7 +10,7 @@ import * as ormRo from "../orm_functions/role";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudentRoles(
+export async function listStudentRoles(
     req: express.Request
 ): Promise<Responses.StudentList> {
     return rq
@@ -31,7 +31,7 @@ async function listStudentRoles(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentRole(
+export async function createStudentRole(
     req: express.Request
 ): Promise<Responses.PartialStudent> {
     return rq
