@@ -3,6 +3,7 @@ import express from "express";
 import * as validator from "validator";
 
 import * as config from "./config.json";
+import { FilterSort } from "./orm_functions/orm_types";
 import {
     Anything,
     Decision,
@@ -302,7 +303,7 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
-    let year = maybe(req.body, "yearFilter");
+    let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
         year = parseInt(req.body.yearFilter);
     }
@@ -316,7 +317,7 @@ export async function parseFilterOsocsRequest(
     return Promise.resolve({
         sessionkey: getSessionKey(req),
         yearFilter: year,
-        yearSort: maybe(req.body, "yearSort"),
+        yearSort: maybe<FilterSort>(req.body, "yearSort"),
     });
 }
 

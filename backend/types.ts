@@ -783,7 +783,10 @@ export namespace Requests {
         isAdminFilter?: boolean;
     }
 
-    export interface OsocFilter extends KeyRequest {}
+    export interface OsocFilter extends KeyRequest {
+        yearFilter?: number;
+        yearSort?: FilterSort;
+    }
 
     export interface OsocEdition extends KeyRequest {
         year: number;
