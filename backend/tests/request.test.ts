@@ -425,9 +425,15 @@ test("Can parse filter students request", () => {
     const osocYear = { osocYear: 2022 };
     const firstNameFilter = { firstNameFilter: "Firstname" };
     const lastNameFilter = { lastNameFilter: "Lastname" };
-    const emailFilter = { emailFilter: "firstname.lastname@hotmail.com" };
-    const roleFilter = {
+    const emailFilterGoodEmail = {
+        emailFilter: "firstname.lastname@hotmail.com",
+    };
+    const emailFilterBadEmail = { emailFilter: "email" };
+    const roleFilterList = {
         roleFilter: ["Frontend developer", "Backend developer"],
+    };
+    const roleFilterString = {
+        roleFilter: "Frontend developer,Backend developer",
     };
     const alumniFilter = { alumniFilter: true };
     const coachFilter = { coachFilter: true };
@@ -450,7 +456,9 @@ test("Can parse filter students request", () => {
         osocYear,
         firstNameFilter,
         lastNameFilter,
-        emailFilter,
+        emailFilterGoodEmail,
+        emailFilterBadEmail,
+        roleFilterList,
         alumniFilter,
         coachFilter,
         statusFilter,
@@ -491,9 +499,9 @@ test("Can parse filter students request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const copy: T.Anything = { ...roleFilter };
+    const copy: T.Anything = { ...roleFilterList };
     const req: express.Request = getMockReq();
-    req.body = roleFilter;
+    req.body = roleFilterString;
     setSessionKey(req, key);
     [
         "firstNameFilter",
