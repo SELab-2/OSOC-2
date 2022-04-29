@@ -1,6 +1,7 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import {
+    Display,
     EmailStatus,
     getNextSort,
     Role,
@@ -20,7 +21,8 @@ import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
-}> = ({ setFilteredStudents }) => {
+    display: Display;
+}> = ({ setFilteredStudents, display }) => {
     const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
@@ -82,24 +84,21 @@ export const StudentFilter: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.query]);
 
-    useEffect(
-        () => {
-            if (roles.length === 0) {
-                fetchRoles().then();
-            }
-            search().then();
-        },
+    useEffect(() => {
+        if (roles.length === 0) {
+            fetchRoles().then();
+        }
+        search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [
-            firstNameSort,
-            lastNameSort,
-            emailSort,
-            alumni,
-            studentCoach,
-            statusFilter,
-            emailStatus,
-        ]
-    );
+    }, [
+        firstNameSort,
+        lastNameSort,
+        emailSort,
+        alumni,
+        studentCoach,
+        statusFilter,
+        emailStatus,
+    ]);
 
     const toggleFirstNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -257,7 +256,8 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/students${query}`);
+        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
+        // await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()
@@ -290,83 +290,98 @@ export const StudentFilter: React.FC<{
 
     return (
         <div className={styles.studentfilter}>
-            <div className={styles.query}>
-                <div onClick={toggleFirstNameSort}>
-                    Firstname
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                firstNameSort === Sort.ASCENDING
-                                    ? styles.up
-                                    : ""
-                            } ${
-                                firstNameSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+            <div
+                className={`${
+                    display === Display.LIMITED
+                        ? styles.contents
+                        : styles.studentfilterinputs
+                }`}
+            >
+                <div className={styles.query}>
+                    <div onClick={toggleFirstNameSort}>
+                        Firstname
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    firstNameSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    firstNameSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setFirstNameFilter(e.target.value)}
+                    />
                 </div>
 
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setFirstNameFilter(e.target.value)}
-                />
-
-                <div onClick={toggleLastNameSort}>
-                    Lastname
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                lastNameSort === Sort.ASCENDING ? styles.up : ""
-                            } ${
-                                lastNameSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+                <div className={styles.query}>
+                    <div onClick={toggleLastNameSort}>
+                        Lastname
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    lastNameSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    lastNameSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setLastNameFilter(e.target.value)}
+                    />
                 </div>
 
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setLastNameFilter(e.target.value)}
-                />
-            </div>
-
-            <div className={styles.query}>
-                <div onClick={toggleEmailSort}>
-                    Email
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                emailSort === Sort.ASCENDING ? styles.up : ""
-                            } ${
-                                emailSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+                <div className={styles.query}>
+                    <div onClick={toggleEmailSort}>
+                        Email
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    emailSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    emailSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setEmailFilter(e.target.value)}
+                    />
                 </div>
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setEmailFilter(e.target.value)}
-                />
-                Osoc edition
-                {/* Maybe dropdown */}
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="2022"
-                    onChange={(e) => setOsocYear(e.target.value)}
-                />
+
+                <div className={styles.query}>
+                    Osoc edition
+                    {/* Maybe dropdown */}
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setOsocYear(e.target.value)}
+                    />
+                </div>
             </div>
 
             <div className={styles.studentButtonsContainer}>

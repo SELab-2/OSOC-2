@@ -10,7 +10,7 @@ const notOwnerError: ApiError = {
     reason: "You can only modify/delete templates you own.",
 };
 
-async function getAllTemplates(
+export async function getAllTemplates(
     req: express.Request
 ): Promise<Responses.TemplateList> {
     return rq
@@ -34,7 +34,7 @@ async function getAllTemplates(
         );
 }
 
-async function getSingleTemplate(
+export async function getSingleTemplate(
     req: express.Request
 ): Promise<Responses.Template> {
     return rq
@@ -55,7 +55,7 @@ async function getSingleTemplate(
         );
 }
 
-async function createTemplate(
+export async function createTemplate(
     req: express.Request
 ): Promise<Responses.Template> {
     return rq
@@ -83,7 +83,7 @@ async function createTemplate(
         );
 }
 
-async function updateTemplate(
+export async function updateTemplate(
     req: express.Request
 ): Promise<Responses.Template> {
     return rq
@@ -122,7 +122,9 @@ async function updateTemplate(
         });
 }
 
-async function deleteTemplate(req: express.Request): Promise<Responses.Empty> {
+export async function deleteTemplate(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteTemplateRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))

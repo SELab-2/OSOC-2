@@ -675,6 +675,18 @@ export namespace Responses {
     }
 
     /**
+     *  An EvaluationCoach response.
+     */
+    export interface EvaluationCoach {
+        evaluation_id: number;
+        senderFirstname: string;
+        senderLastname: string;
+        reason: string | null;
+        decision: InternalTypes.Suggestion;
+        isFinal: boolean;
+    }
+
+    /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
     export interface ConflictList {
