@@ -343,9 +343,14 @@ export async function parseFilterStudentsRequest(
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
-        ("statusFilter" in req.body && !(req.body.statusFilter as Decision)) ||
+        ("statusFilter" in req.body &&
+            !Object.values(Decision).includes(
+                req.body.statusFilter as unknown as Decision
+            )) ||
         ("emailStatusFilter" in req.body &&
-            !(req.body.emailStatusFilter as EmailStatus)) ||
+            !Object.values(EmailStatus).includes(
+                req.body.emailStatusFilter as unknown as EmailStatus
+            )) ||
         ("alumniFilter" in req.body &&
             !checkStringBoolean(req.body.alumniFilter.toString())) ||
         ("coachFilter" in req.body &&
@@ -421,9 +426,12 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
+
     if (
         ("statusFilter" in req.body &&
-            !(req.body.statusFilter as AccountStatus)) ||
+            !Object.values(AccountStatus).includes(
+                req.body.statusFilter as unknown as AccountStatus
+            )) ||
         ("isCoachFilter" in req.body &&
             !checkStringBoolean(req.body.isCoachFilter.toString())) ||
         ("isAdminFilter" in req.body &&

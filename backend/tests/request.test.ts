@@ -470,7 +470,7 @@ test("Can parse filter students request", () => {
         alumniSort: "asc",
     };
 
-    const wrongStatus: T.Anything = { statusFilter: "yes" };
+    const wrongStatus: T.Anything = { statusFilter: "damn" };
     const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
     const wrongFirstNameSort: T.Anything = { firstNameSort: "firstname" };
     const wrongLastNameSort: T.Anything = { lastNameSort: "lastname" };
@@ -571,7 +571,7 @@ test("Can parse filter users request", () => {
         isCoachFilter: true,
     };
     const isCoachFilterString = {
-        coachFilter: "true",
+        isCoachFilter: "true",
     };
     const statusFilter = {
         statusFilter: "ACTIVATED",
@@ -1200,17 +1200,26 @@ test("Can parse update template request", () => {
 test("Can parse reset requests", () => {
     const v1: T.Anything = { email: "bob.student@gmail.com" };
 
-    const req: express.Request = getMockReq();
-    req.body = { ...v1 };
+    const req1: express.Request = getMockReq();
+    req1.body = { ...v1 };
     const normalizedEmail: { email: string } = {
         email: "bobstudent@gmail.com",
     };
 
     const valid = expect(
-        Rq.parseRequestResetRequest(req)
+        Rq.parseRequestResetRequest(req1)
     ).resolves.toStrictEqual(normalizedEmail);
 
-    return Promise.all([valid]);
+    const i1: T.Anything = { email: "bob" };
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...i1 };
+
+    const invalid = expect(Rq.parseRequestResetRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
 });
 
 test("Can parse check reset code requests", () => {
