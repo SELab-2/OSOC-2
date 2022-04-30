@@ -6,6 +6,7 @@ import {
 import {
     createJobApplicationSkill,
     deleteJobApplicationSkill,
+    deleteSkillsByJobApplicationId,
     getAllJobApplicationSkill,
     getAllJobApplicationSkillByJobApplication,
     getJobApplicationSkill,
@@ -99,4 +100,10 @@ test("should update the job application skill and return the updated record", as
 test("should delete the jobApplication skill with the given ID and return the deleted record", async () => {
     prismaMock.job_application_skill.delete.mockResolvedValue(returnValue);
     await expect(deleteJobApplicationSkill(0)).resolves.toEqual(returnValue);
+});
+
+test("should delete all jobApplications with given jobApplicationId", async () => {
+    const returnVal = { count: 3 };
+    prismaMock.job_application_skill.deleteMany.mockResolvedValue(returnVal);
+    await expect(deleteSkillsByJobApplicationId(9)).resolves.toEqual(returnVal);
 });

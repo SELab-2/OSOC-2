@@ -2,7 +2,7 @@
 .triangleContainer {
     position: relative;
     height: 100%;
-    width: 2em;
+    width: 1em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,13 +55,40 @@
     transform: translate(33%, 0);
 }
 
-.filter {
+/* The filter container */
+.userfilter, .studentfilter, .osocfilter {
     background-color: var(--neutral-150);
-    padding: 0.5rem 0.2rem;
     border-radius: 0.5rem;
-    margin-inline: -0.2rem
 }
-/* The form containing the name and email filters */
+
+.userfilter {
+    margin-inline: -0.2rem;
+    padding: 0.5rem 0.2rem;
+}
+
+.studentfilter {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.studentfilterinputs {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+}
+
+.contents {
+    display: contents;
+}
+
+.studentfilter div, .osocfilter div, .userfilter div {
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+/* The form containing the filters */
 .form {
     display: grid;
     grid-gap: 2rem;
@@ -70,7 +97,7 @@
     padding: 0.5rem;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 800px) {
     .form {
         display: flex;
         flex-wrap: wrap;
@@ -78,20 +105,24 @@
     }
 
     .query {
+        width: 100%;
         flex-wrap: wrap;
+    }
+
+    .studentfilterinputs {
+        display: contents;
     }
 }
 
 /* The query and the label for the query */
-.form .query, .query div {
+.form .query, .query div, .query {
     display: flex;
     align-items: center;
 }
 
 .query {
-    width: 100%;
     justify-content: space-between;
-    gap: 1rem;
+    min-width: 10rem;
 }
 
 .query div {
@@ -122,8 +153,8 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
-    width: 100%;
 }
+
 .buttonContainer {
     margin-inline: auto;
     transition: 0.2s;
@@ -148,8 +179,8 @@
     margin-inline: 0.5rem;
 }
 
-/* Pending status filter */
-.pendingButton {
+/* Filters that act like checkboxes */
+.inactive {
     background-color: transparent;
     border-radius: 0.4rem;
     border: 0.1rem solid rgba(10, 8, 57, 0.25);
@@ -159,22 +190,60 @@
     font-size: large;
 }
 
-.pendingButton:hover {
+.inactive:hover {
     background-color: inherit;
     box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
-.pendingActive {
+.active {
     background-color: var(--neutral-100);
-    border: none;
     color: var(--primary-100);
     font-weight: normal;
     transition-duration: 0.2s;
+    border: 0.1rem solid transparent;
     border-radius: 0.4rem;
     font-size: large;
 }
 
-.pendingActive:hover {
+.active:hover {
     background-color: var(--neutral-100);
     box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.dropdownTrigger {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    padding-inline: 0.8rem;
+}
+
+
+.dropdownItem:hover {
+    background-color: var(--neutral-150);
+}
+
+.selected {
+    background-color: var(--succes-100);
+}
+
+.studentButtonsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.studentButtonsContainer button, .studentButtonsContainer div {
+    margin-right: auto;
+}
+
+.studentButtonsContainer button:last-child {
+    margin-right: 0;
+}
+
+.studentButtons {
+    display: flex;
+    gap: 1rem !important;
+    justify-content: space-between;
 }

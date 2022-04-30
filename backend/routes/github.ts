@@ -14,13 +14,13 @@ import * as session_key from "./session_key.json";
 
 // holds states that are currently active. States are required to validate
 // github callbacks.
-let states: string[] = [];
+export let states: string[] = [];
 
 /**
  *  Gets the home URL for the github callback.
  *  @returns The home URL.
  */
-function getHome(): string {
+export function getHome(): string {
     const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
     // check if dev or production
     console.log("Home is: " + root);
@@ -33,7 +33,7 @@ function getHome(): string {
  *
  *  @returns The new state.
  */
-function genState(): string {
+export function genState(): string {
     const state = crypto.randomBytes(64).join("");
     states.push(state);
     return state;
@@ -46,7 +46,7 @@ function genState(): string {
  *  @param state The state to check.
  *  @returns True if the state is valid, otherwise false.
  */
-function checkState(state: string) {
+export function checkState(state: string) {
     if (!states.includes(state)) {
         return false;
     }
@@ -65,7 +65,7 @@ function checkState(state: string) {
  * `/github/challenge` on our server. This function only generates a new state,
  * makes it valid and then redirects.
  */
-function ghIdentity(resp: express.Response): void {
+export function ghIdentity(resp: express.Response): Promise<void> {
     let url = "https://github.com/login/oauth/authorize?";
     url += "client_id=" + process.env.GITHUB_CLIENT_ID; // add client id
     url += "&allow_signup=true"; // allow users to sign up to github itself
@@ -76,7 +76,7 @@ function ghIdentity(resp: express.Response): void {
         );
     url += "&state=" + genState();
     console.log("--- REDIRECTING TO GITHUB AT " + url + " ---");
-    util.redirect(resp, url);
+    return util.redirect(resp, url);
 }
 
 /**
@@ -84,7 +84,7 @@ function ghIdentity(resp: express.Response): void {
  * access token. This function first asks an access token, then checks if a
  * a user exists in our system and if not, creates one.
  */
-async function ghExchangeAccessToken(
+export async function ghExchangeAccessToken(
     req: express.Request,
     res: express.Response
 ): Promise<void> {
@@ -141,7 +141,7 @@ async function ghExchangeAccessToken(
  *  Checks if all required fields are available. We need (at least) a `login`,
  * `name` and `id` in the request.
  */
-function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
+export function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
     if ("login" in data && "name" in data && "id" in data) {
         return Promise.resolve({
             login: data.login as string,
@@ -152,13 +152,13 @@ function parseGHLogin(data: Anything): Promise<Requests.GHLogin> {
             id: (data.id as number).toString(),
         });
     }
-    return Promise.reject();
+    return Promise.reject({});
 }
 
 /**
  *  Checks if we need to update a GitHub user's name and/or handle.
  */
-function githubNameChange(
+export function githubNameChange(
     login: Requests.GHLogin,
     person: {
         github: string | null;
@@ -184,7 +184,7 @@ function githubNameChange(
  * is created. If the user exists, we check if we need to update their name
  * and/or GitHub handle.
  */
-async function ghSignupOrLogin(
+export async function ghSignupOrLogin(
     login: Requests.GHLogin
 ): Promise<Responses.Login> {
     return ormP
@@ -240,7 +240,7 @@ async function ghSignupOrLogin(
         .then((data) => util.getOrReject(data))
         .then(async (loginuser) => {
             const key: string = util.generateKey();
-            const futureDate = new Date();
+            const futureDate = new Date(Date.now());
             futureDate.setDate(futureDate.getDate() + session_key.valid_period);
             return ormSK
                 .addSessionKey(loginuser.login_user_id, key, futureDate)
@@ -257,10 +257,13 @@ async function ghSignupOrLogin(
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    router.get("/", (_, rs) => ghIdentity(rs));
+    router.get("/", async (_, rs) => await ghIdentity(rs));
     router.get(
         "/challenge",
-        async (req, res) => await ghExchangeAccessToken(req, res)
+        async (req, res) =>
+            await ghExchangeAccessToken(req, res).catch((e) =>
+                util.replyError(res, e)
+            )
     );
 
     return router;

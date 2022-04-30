@@ -5,6 +5,7 @@ import * as ormJo from "../orm_functions/job_application";
 import * as ormLa from "../orm_functions/language";
 import * as ormRo from "../orm_functions/role";
 import * as ormSt from "../orm_functions/student";
+import * as ormLU from "../orm_functions/login_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses } from "../types";
@@ -18,7 +19,7 @@ import * as ormP from "../orm_functions/person";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudents(
+export async function listStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseStudentAllRequest(req);
@@ -95,7 +96,9 @@ async function listStudents(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudent(req: express.Request): Promise<Responses.Student> {
+export async function getStudent(
+    req: express.Request
+): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -156,7 +159,9 @@ async function getStudent(req: express.Request): Promise<Responses.Student> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteStudent(req: express.Request): Promise<Responses.Empty> {
+export async function deleteStudent(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -177,9 +182,9 @@ async function deleteStudent(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentSuggestion(
+export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.Empty> {
+): Promise<Responses.EvaluationCoach> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -193,6 +198,24 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    const osocYear = await ormOs.getLatestOsoc();
+
+    if (osocYear == null) {
+        return Promise.reject(errors.cookNoDataError());
+    }
+
+    const suggestionsTotal = (
+        await ormJo.getStudentEvaluationsTemp(student.student_id)
+    ).filter(
+        (suggestion) =>
+            suggestion.osoc.year === osocYear.year &&
+            suggestion.evaluation.some(
+                (evaluation) =>
+                    evaluation.login_user.login_user_id ===
+                    checkedSessionKey.userId
+            )
+    );
+
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
         student.student_id
     );
@@ -200,15 +223,42 @@ async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.suggestion,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: false,
-    });
+    let newEvaluation;
+    if (suggestionsTotal.length > 0) {
+        const suggestion = suggestionsTotal[0].evaluation.filter(
+            (evaluation) =>
+                evaluation.login_user.login_user_id === checkedSessionKey.userId
+        );
 
-    return Promise.resolve({});
+        newEvaluation = await ormEv.updateEvaluationForStudent({
+            evaluation_id: suggestion[0].evaluation_id,
+            loginUserId: checkedSessionKey.userId,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+        });
+    } else {
+        newEvaluation = await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.suggestion,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: false,
+        });
+    }
+
+    const loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
+    if (loginUser === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    return Promise.resolve({
+        evaluation_id: newEvaluation.evaluation_id,
+        senderFirstname: loginUser.person.firstname,
+        senderLastname: loginUser.person.lastname,
+        reason: newEvaluation.motivation,
+        decision: newEvaluation.decision,
+        isFinal: newEvaluation.is_final,
+    });
 }
 
 /**
@@ -217,7 +267,7 @@ async function createStudentSuggestion(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getStudentSuggestions(
+export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.SuggestionInfo> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
@@ -230,13 +280,6 @@ async function getStudentSuggestions(
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
@@ -258,6 +301,7 @@ async function getStudentSuggestions(
     for (const suggestion of suggestionsTotal) {
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
+                evaluation_id: evaluation.evaluation_id,
                 senderFirstname: evaluation.login_user.person.firstname,
                 senderLastname: evaluation.login_user.person.lastname,
                 reason: evaluation.motivation,
@@ -278,7 +322,7 @@ async function getStudentSuggestions(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentConfirmation(
+export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
@@ -289,27 +333,33 @@ async function createStudentConfirmation(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const student = await ormSt.getStudent(checkedSessionKey.data.id);
-    if (student == null) {
-        return Promise.reject(errors.cookInvalidID());
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        const student = await ormSt.getStudent(checkedSessionKey.data.id);
+        if (student == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+            student.student_id
+        );
+        if (jobApplication == null) {
+            return Promise.reject(errors.cookInvalidID());
+        }
+
+        await ormEv.createEvaluationForStudent({
+            loginUserId: checkedSessionKey.userId,
+            jobApplicationId: jobApplication.job_application_id,
+            decision: checkedSessionKey.data.reply,
+            motivation: checkedSessionKey.data.reason,
+            isFinal: true,
+        });
+
+        return Promise.resolve({});
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    await ormEv.createEvaluationForStudent({
-        loginUserId: checkedSessionKey.userId,
-        jobApplicationId: jobApplication.job_application_id,
-        decision: checkedSessionKey.data.reply,
-        motivation: checkedSessionKey.data.reason,
-        isFinal: true,
-    });
-
-    return Promise.resolve({});
+    return Promise.reject(errors.cookInsufficientRights());
 }
 
 /**
@@ -318,7 +368,7 @@ async function createStudentConfirmation(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterStudents(
+export async function filterStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
@@ -337,11 +387,11 @@ async function filterStudents(
         checkedSessionKey.data.alumniFilter,
         checkedSessionKey.data.coachFilter,
         checkedSessionKey.data.statusFilter,
+        checkedSessionKey.data.osocYear,
+        checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.firstNameSort,
         checkedSessionKey.data.lastNameSort,
-        checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.roleSort,
-        checkedSessionKey.data.alumniSort
+        checkedSessionKey.data.emailSort
     );
 
     const studentlist = [];

@@ -1,16 +1,16 @@
-import styles from "./UserFilter.module.css";
+import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import AdminIconColor from "../../public/images/admin_icon_color.png";
-import AdminIcon from "../../public/images/admin_icon.png";
-import CoachIconColor from "../../public/images/coach_icon_color.png";
-import CoachIcon from "../../public/images/coach_icon.png";
-import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
-import { AccountStatus, getNextSort, LoginUser, Sort } from "../../types";
-import SessionContext from "../../contexts/sessionProvider";
+import AdminIconColor from "../../../public/images/admin_icon_color.png";
+import AdminIcon from "../../../public/images/admin_icon.png";
+import CoachIconColor from "../../../public/images/coach_icon_color.png";
+import CoachIcon from "../../../public/images/coach_icon.png";
+import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
+import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
+import { AccountStatus, getNextSort, LoginUser, Sort } from "../../../types";
+import SessionContext from "../../../contexts/sessionProvider";
 import { useRouter } from "next/router";
-import { useSockets } from "../../contexts/socketProvider";
+import { useSockets } from "../../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
     updateUsers: (users: Array<LoginUser>) => void;
@@ -24,7 +24,7 @@ export const UserFilter: React.FC<{
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(
         AccountStatus.NONE
     );
-    const { getSessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
     const router = useRouter();
 
@@ -162,7 +162,9 @@ export const UserFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/users${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
@@ -180,12 +182,12 @@ export const UserFilter: React.FC<{
                     console.log(err);
                 });
             updateUsers(response.data);
-            isLoading(false);
         }
+        isLoading(false);
     };
 
     return (
-        <div className={styles.filter}>
+        <div className={styles.userfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
                     <div onClick={toggleNameSort}>

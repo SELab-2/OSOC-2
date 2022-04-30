@@ -9,6 +9,12 @@ import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import * as session_key from "./session_key.json";
+import {
+    addSessionKey,
+    removeAllKeysForUser,
+} from "../orm_functions/session_key";
+import * as config from "../config.json";
 
 /**
  *  Attempts to list all students in the system.
@@ -16,10 +22,12 @@ import { errors } from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listUsers(req: express.Request): Promise<Responses.UserList> {
+export async function listUsers(
+    req: express.Request
+): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
     const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
+        .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -49,47 +57,72 @@ async function listUsers(req: express.Request): Promise<Responses.UserList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserRequest(req: express.Request): Promise<Responses.Id> {
-    return rq.parseRequestUserRequest(req).then(async (parsed) => {
-        if (parsed.pass == undefined) {
-            console.log(" -> WARNING user request without password");
-            return Promise.reject(util.errors.cookArgumentError());
-        }
-        return ormP
-            .createPerson({
-                firstname: parsed.firstName,
-                lastname: "",
-                email: validator.default
-                    .normalizeEmail(parsed.email)
-                    .toString(),
-            })
-            .then((person) => {
-                console.log("Created a person: " + person);
-                return ormLU.createLoginUser({
-                    personId: person.person_id,
-                    password: parsed.pass,
-                    isAdmin: false,
-                    isCoach: true,
-                    accountStatus: "PENDING",
-                });
-            })
-            .then((user) => {
-                console.log("Attached a login user: " + user);
-                return Promise.resolve({ id: user.login_user_id });
-            })
-            .catch((e) => {
-                if ("code" in e && e.code == "P2002") {
-                    return Promise.reject({
-                        http: 400,
-                        reason: "Can't register the same email address twice.",
-                    });
-                }
-                return Promise.reject(e);
+export async function createUserRequest(
+    req: express.Request
+): Promise<Responses.Id> {
+    const parsedRequest = await rq.parseRequestUserRequest(req);
+    if (parsedRequest.pass == undefined) {
+        console.log(" -> WARNING user request without password");
+        return Promise.reject(util.errors.cookArgumentError());
+    }
+
+    const foundPerson = await ormP.searchPersonByLogin(
+        validator.default.normalizeEmail(parsedRequest.email).toString()
+    );
+
+    let person;
+
+    if (foundPerson.length !== 0) {
+        const foundLoginUser = await ormLU.searchLoginUserByPerson(
+            foundPerson[0].person_id
+        );
+        if (foundLoginUser !== null) {
+            return Promise.reject({
+                http: 400,
+                reason: "Can't register the same email address twice.",
             });
+        }
+
+        person = await ormP.updatePerson({
+            personId: foundPerson[0].person_id,
+            firstname: parsedRequest.firstName,
+            lastname: "",
+        });
+    } else {
+        person = await ormP.createPerson({
+            firstname: parsedRequest.firstName,
+            lastname: "",
+            email: validator.default
+                .normalizeEmail(parsedRequest.email)
+                .toString(),
+        });
+    }
+
+    const loginUser = await ormLU.createLoginUser({
+        personId: person.person_id,
+        password: parsedRequest.pass,
+        isAdmin: false,
+        isCoach: true,
+        accountStatus: "PENDING",
+    });
+
+    const key: string = util.generateKey();
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+    const addedKey = await addSessionKey(
+        loginUser.login_user_id,
+        key,
+        futureDate
+    );
+
+    console.log("Attached a login user: " + loginUser);
+    return Promise.resolve({
+        id: addedKey.login_user_id,
+        sessionkey: addedKey.session_key,
     });
 }
 
-async function setAccountStatus(
+export async function setAccountStatus(
     person_id: number,
     stat: account_status_enum,
     key: string,
@@ -123,21 +156,38 @@ async function setAccountStatus(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createUserAcceptance(
+export async function createUserAcceptance(
     req: express.Request
 ): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
-                parsed.data.id,
-                "ACTIVATED",
-                parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
+        .then(async (parsed) => {
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "ACTIVATED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
+        });
 }
 
 /**
@@ -146,21 +196,39 @@ async function createUserAcceptance(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteUserRequest(
+export async function deleteUserRequest(
     req: express.Request
 ): Promise<Responses.PartialUser> {
     return rq
         .parseAcceptNewUserRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) =>
-            setAccountStatus(
-                parsed.data.id,
-                "DISABLED",
-                parsed.data.sessionkey,
-                Boolean(parsed.data.is_admin),
-                Boolean(parsed.data.is_coach)
-            )
-        );
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
+        .then(async (parsed) => {
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.account_status === account_status_enum.PENDING
+                    ) {
+                        return setAccountStatus(
+                            parsed.data.id,
+                            "DISABLED",
+                            parsed.data.sessionkey,
+                            parsed.data.is_admin
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true",
+                            parsed.data.is_coach
+                                .toString()
+                                .toLowerCase()
+                                .trim() === "true"
+                        );
+                    }
+
+                    return Promise.reject(errors.cookInvalidID());
+                });
+        });
 }
 
 /**
@@ -170,41 +238,47 @@ async function deleteUserRequest(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function filterUsers(req: express.Request): Promise<Responses.UserList> {
-    const parsedRequest = await rq.parseFilterUsersRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const users = await ormLU.filterLoginUsers(
-        checkedSessionKey.data.nameFilter,
-        checkedSessionKey.data.emailFilter,
-        checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort,
-        checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.isCoachFilter,
-        checkedSessionKey.data.isAdminFilter
-    );
-
-    users.map((val) => ({
-        person_data: {
-            id: val.person.person_id,
-            name: val.person.firstname,
-            email: val.person.email,
-            github: val.person.github,
-        },
-        coach: val.is_coach,
-        admin: val.is_admin,
-        activated: val.account_status as string,
-    }));
-
-    return Promise.resolve({ data: users });
+export async function filterUsers(
+    req: express.Request
+): Promise<Responses.UserList> {
+    return rq
+        .parseFilterUsersRequest(req)
+        .then((parsed) => util.isAdmin(parsed))
+        .then(async (parsed) => {
+            return ormLU
+                .filterLoginUsers(
+                    parsed.data.nameFilter,
+                    parsed.data.emailFilter,
+                    parsed.data.nameSort,
+                    parsed.data.emailSort,
+                    parsed.data.statusFilter,
+                    parsed.data.isCoachFilter,
+                    parsed.data.isAdminFilter
+                )
+                .then((users) => {
+                    users.map((val) => ({
+                        person_data: {
+                            id: val.person.person_id,
+                            name: val.person.firstname,
+                            email: val.person.email,
+                            github: val.person.github,
+                        },
+                        coach: val.is_coach,
+                        admin: val.is_admin,
+                        activated: val.account_status as string,
+                    }));
+                    return Promise.resolve({ data: users });
+                });
+        });
 }
 
-async function userModSelf(req: express.Request): Promise<Responses.Empty> {
+function setSessionKey(req: express.Request, key: string): void {
+    req.headers.authorization = config.global.authScheme + " " + key;
+}
+
+export async function userModSelf(
+    req: express.Request
+): Promise<Responses.Key> {
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
@@ -223,8 +297,6 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
                 .then((user) =>
                     ormLU.updateLoginUser({
                         loginUserId: checked.userId,
-                        isAdmin: user.is_admin,
-                        isCoach: user.is_coach,
                         accountStatus: user.account_status,
                         password: checked.data.pass?.newpass,
                     })
@@ -241,10 +313,60 @@ async function userModSelf(req: express.Request): Promise<Responses.Empty> {
                     }
                     return Promise.resolve();
                 })
-                .then(() => Promise.resolve({}));
+                .then(() => Promise.resolve(checked));
+        })
+        .then((checked) => {
+            if (checked.data.pass == undefined) {
+                return Promise.resolve({ sessionkey: checked.data.sessionkey });
+            }
+            return removeAllKeysForUser(checked.data.sessionkey)
+                .then(() => {
+                    const key = util.generateKey();
+                    const time = new Date(Date.now());
+                    time.setDate(time.getDate() + session_key.valid_period);
+                    return addSessionKey(checked.userId, key, time);
+                })
+                .then((v) => {
+                    setSessionKey(req, v.session_key);
+                    return v;
+                })
+                .then((v) => Promise.resolve({ sessionkey: v.session_key }));
         });
 }
 
+/**
+ *  Attempts to get all data for a certain student in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function getCurrentUser(
+    req: express.Request
+): Promise<Responses.User> {
+    const parsedRequest = await rq.parseCurrentUserRequest(req);
+
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const login_user = await ormL
+        .getLoginUserById(checkedSessionKey.userId)
+        .then((obj) => util.getOrReject(obj));
+    login_user.password = null;
+
+    return Promise.resolve({
+        data: {
+            login_user: login_user,
+        },
+        sessionkey: checkedSessionKey.data.sessionkey,
+    }).then((obj) => {
+        console.log(JSON.stringify(obj));
+        return Promise.resolve(obj);
+    });
+}
 /**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
@@ -257,6 +379,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/filter", filterUsers);
     util.route(router, "get", "/all", listUsers);
 
+    util.route(router, "get", "/self", getCurrentUser);
     util.route(router, "post", "/self", userModSelf);
 
     router.post("/request", (req, res) =>

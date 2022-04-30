@@ -15,13 +15,13 @@ import { AccountStatus } from "../../types";
 
 const Index: NextPage = () => {
     const router = useRouter();
-    const { getSessionKey, setSessionKey, setIsAdmin, setIsCoach } =
+    const { getSession, setSessionKey, setIsAdmin, setIsCoach } =
         useContext(SessionContext);
 
     // Sets an error message when the `loginError` query paramater is present
     useEffect(() => {
-        if (getSessionKey) {
-            getSessionKey().then((sessionKey) => {
+        if (getSession) {
+            getSession().then(({ sessionKey }) => {
                 // The user is already logged in, redirect the user
                 if (sessionKey != "") {
                     router.push("/students").then();
@@ -35,7 +35,8 @@ const Index: NextPage = () => {
                 setLoginBackendError(loginError);
             }
         }
-    }, [getSessionKey, router, router.query]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
 
     // Index field values with corresponding error messages
     const [loginEmail, setLoginEmail] = useState<string>("");
@@ -280,6 +281,9 @@ const Index: NextPage = () => {
                 });
 
             if (response.success) {
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey);
+                }
                 await router.push("/pending");
             }
         }

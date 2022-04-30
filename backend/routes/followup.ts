@@ -12,7 +12,7 @@ import * as util from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listFollowups(
+export async function listFollowups(
     req: express.Request
 ): Promise<Responses.FollowupList> {
     return rq
@@ -47,7 +47,7 @@ async function listFollowups(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getFollowup(
+export async function getFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {
     return rq
@@ -73,7 +73,7 @@ async function getFollowup(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function updateFollowup(
+export async function updateFollowup(
     req: express.Request
 ): Promise<Responses.SingleFollowup> {
     return rq
@@ -82,10 +82,7 @@ async function updateFollowup(
         .then((checked) =>
             ormJA
                 .getLatestJobApplicationOfStudent(checked.data.id)
-                .then((ja) => {
-                    if (ja == null) return Promise.reject();
-                    return Promise.resolve(ja);
-                })
+                .then((ja) => util.getOrReject(ja))
                 .then((ja) =>
                     ormJA.changeEmailStatusOfJobApplication(
                         ja.job_application_id,
