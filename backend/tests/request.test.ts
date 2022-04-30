@@ -466,16 +466,12 @@ test("Can parse filter students request", () => {
         lastNameSort: "asc",
     };
     const emailSort: T.Requests.StudentFilterParameters = { emailSort: "desc" };
-    const alumniSort: T.Requests.StudentFilterParameters = {
-        alumniSort: "asc",
-    };
 
     const wrongStatus: T.Anything = { statusFilter: "damn" };
     const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
     const wrongFirstNameSort: T.Anything = { firstNameSort: "firstname" };
     const wrongLastNameSort: T.Anything = { lastNameSort: "lastname" };
     const wrongEmailSort: T.Anything = { emailSort: "email" };
-    const wrongAlumniSort: T.Anything = { alumniSort: "alumni" };
     const wrongAlumniFilter: T.Anything = { alumniFilter: "is_admin filter" };
     const wrongCoachFilter: T.Anything = { coachFilter: "is_coach filter" };
 
@@ -494,7 +490,6 @@ test("Can parse filter students request", () => {
         [firstNameSort, firstNameSort],
         [lastNameSort, lastNameSort],
         [emailSort, emailSort],
-        [alumniSort, alumniSort],
         [roleFilterString, roleFilterList],
         [alumniFilterString, alumniFilterBoolean],
         [coachFilterString, coachFilterBoolean],
@@ -515,7 +510,6 @@ test("Can parse filter students request", () => {
             "firstNameSort",
             "lastNameSort",
             "emailSort",
-            "alumniSort",
         ].forEach((x) => {
             if (!(x in req.body)) {
                 copy[x] = undefined;
@@ -535,7 +529,6 @@ test("Can parse filter students request", () => {
         wrongFirstNameSort,
         wrongLastNameSort,
         wrongEmailSort,
-        wrongAlumniSort,
         wrongEmailStatus,
         wrongAlumniFilter,
         wrongCoachFilter,

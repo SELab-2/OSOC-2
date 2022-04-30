@@ -378,7 +378,6 @@ export async function parseFilterStudentsRequest(
         maybe(req.body, "firstNameSort"),
         maybe(req.body, "lastNameSort"),
         maybe(req.body, "emailSort"),
-        maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();

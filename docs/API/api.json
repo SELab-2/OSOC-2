@@ -2427,14 +2427,6 @@
             }
           },
           {
-            "name": "alumniSort",
-            "in": "header",
-            "description": "Sorting by alumni (asc or desc).",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "coachFilter",
             "in": "header",
             "description": "The student-coach filter.",
