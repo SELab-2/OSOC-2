@@ -7,6 +7,8 @@ import {
     checkIfFinalEvaluationExists,
     updateEvaluationForStudent,
     getLoginUserByEvaluationId,
+    getEvaluationByPartiesFor,
+    deleteEvaluationsByJobApplication,
 } from "../../orm_functions/evaluation";
 import prisma from "../../prisma/prisma";
 import { decision_enum } from "@prisma/client";
@@ -117,4 +119,30 @@ it("should update evaluation based upon evaluation id", async () => {
         "is_final",
         createdEvaluation.isFinal
     );
+});
+
+it("should return all evaluations created by a user for a student in an osoc edition", async () => {
+    const evaluations = await getEvaluationByPartiesFor(1, 1, 1);
+    for (const evaluation of evaluations) {
+        expect(evaluation).toHaveProperty("decision", evaluation.decision);
+        expect(evaluation).toHaveProperty("motivation", evaluation.motivation);
+        expect(evaluation).toHaveProperty("is_final", evaluation.is_final);
+        expect(evaluation).toHaveProperty(
+            "evaluation_id",
+            evaluation.evaluation_id
+        );
+        expect(evaluation).toHaveProperty(
+            "job_application_id",
+            evaluation.job_application_id
+        );
+        expect(evaluation).toHaveProperty(
+            "login_user_id",
+            evaluation.login_user_id
+        );
+    }
+});
+
+it("should delete evaluations by a job application", async () => {
+    const numberOfDeletions = await deleteEvaluationsByJobApplication(1);
+    expect(numberOfDeletions).toHaveProperty("count", numberOfDeletions.count);
 });

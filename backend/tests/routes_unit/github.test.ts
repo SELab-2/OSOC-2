@@ -382,3 +382,12 @@ test("Can handle internet issues", async () => {
         github.ghExchangeAccessToken(req, res)
     ).resolves.not.toThrow();
 });
+
+test("Can handle database failures", async () => {
+    ormPMock.getPasswordPersonByGithub.mockReset();
+    ormPMock.getPasswordPersonByGithub.mockRejectedValue({ some: "error" });
+
+    await expect(
+        github.ghSignupOrLogin({ login: "", name: "", id: "" })
+    ).rejects.toStrictEqual({ some: "error" });
+});

@@ -468,7 +468,69 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on invalid session key", async () => {
+test("utility.checkSessionKey fails on valid session key (disabled)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            firstname: "Bob",
+            lastname: "Test",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on valid session key (disabled, false)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            firstname: "Bob",
+            lastname: "Test",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj, false)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on invalid session key (1)", async () => {
     session_keyMock.checkSessionKey.mockReset();
     session_keyMock.checkSessionKey.mockRejectedValue(new Error());
 
@@ -480,6 +542,33 @@ test("utility.checkSessionKey fails on invalid session key", async () => {
 
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on invalid session key (2)", async () => {
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue(null);
+
+    await expect(
+        util.checkSessionKey({
+            sessionkey: "key",
+        })
+    ).rejects.toStrictEqual(util.errors.cookUnauthenticated());
+
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on non-existent users", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue(null);
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456,
+    });
+
+    return expect(
+        util.checkSessionKey({ sessionkey: "123" }, false)
+    ).rejects.toStrictEqual(errors.cookUnauthenticated());
 });
 
 test(
@@ -964,6 +1053,39 @@ test("utility.setupRedirect sets up a single redirect", async () => {
         res3,
         getInvalidVerbEndpointError("post", "/")
     );
+});
+
+test("utility.queryToBody copies queries to body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = {};
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody: query has priority over body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody can handle empty query", () => {
+    const req = getMockReq();
+    const query = {};
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual({ key: "othervalue" });
+    expect(req.query).toStrictEqual({});
 });
 
 test("utility.mutable should check if a user is mutable", async () => {
