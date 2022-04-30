@@ -1008,6 +1008,12 @@ export enum Decision {
     NO = "NO",
 }
 
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    DISABLED = "DISABLED",
+}
+
 export enum EmailStatus {
     SCHEDULED = "SCHEDULED",
     SENT = "SENT",

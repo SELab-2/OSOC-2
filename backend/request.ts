@@ -11,6 +11,7 @@ import {
     InternalTypes,
     Requests,
     EmailStatus,
+    AccountStatus,
 } from "./types";
 import { errors, getSessionKey } from "./utility";
 
@@ -38,6 +39,15 @@ const types: RequestTypes = {
     key: "Key",
     id: "Id",
 };
+
+/**
+ *  Rejects a promise with an argument error.
+ *  @template T The type the promise would resolve to.
+ *  @returns A Promise rejecting with an Argument Error.
+ */
+function checkStringBoolean(value: string): boolean {
+    return value === "true" || value === "false";
+}
 
 /**
  *  Rejects a promise with an argument error.
@@ -333,22 +343,13 @@ export async function parseFilterStudentsRequest(
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
-        ("statusFilter" in req.body &&
-            req.body.statusFilter !== Decision.YES &&
-            req.body.statusFilter !== Decision.MAYBE &&
-            req.body.statusFilter !== Decision.NO) ||
+        ("statusFilter" in req.body && !(req.body.statusFilter as Decision)) ||
         ("emailStatusFilter" in req.body &&
-            req.body.emailStatusFilter !== EmailStatus.NONE &&
-            req.body.emailStatusFilter !== EmailStatus.SENT &&
-            req.body.emailStatusFilter !== EmailStatus.DRAFT &&
-            req.body.emailStatusFilter !== EmailStatus.FAILED &&
-            req.body.emailStatusFilter !== EmailStatus.SCHEDULED) ||
+            !(req.body.emailStatusFilter as EmailStatus)) ||
         ("alumniFilter" in req.body &&
-            req.body.alumniFilter.toString() !== "true" &&
-            req.body.alumniFilter.toString() !== "false") ||
+            !checkStringBoolean(req.body.alumniFilter.toString())) ||
         ("coachFilter" in req.body &&
-            req.body.coachFilter.toString() !== "true" &&
-            req.body.coachFilter.toString() !== "false")
+            !checkStringBoolean(req.body.coachFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -420,25 +421,13 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
-    let isCoachFilter = undefined;
-    if ("isCoachFilter" in req.body) {
-        isCoachFilter = req.body.isCoachFilter.toString() === "true";
-    }
-    let isAdminFilter = undefined;
-    if ("isAdminFilter" in req.body) {
-        isAdminFilter = req.body.isAdminFilter.toString() === "true";
-    }
     if (
         ("statusFilter" in req.body &&
-            req.body.statusFilter !== "ACTIVATED" &&
-            req.body.statusFilter !== "PENDING" &&
-            req.body.statusFilter !== "DISABLED") ||
+            !(req.body.statusFilter as AccountStatus)) ||
         ("isCoachFilter" in req.body &&
-            req.body.isCoachFilter.toString() !== "true" &&
-            req.body.isCoachFilter.toString() !== "false") ||
+            !checkStringBoolean(req.body.isCoachFilter.toString())) ||
         ("isAdminFilter" in req.body &&
-            req.body.isAdminFilter.toString() !== "true" &&
-            req.body.isAdminFilter.toString() !== "false")
+            !checkStringBoolean(req.body.isAdminFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -452,6 +441,15 @@ export async function parseFilterUsersRequest(
         } else if ("emailFilter" in req.body) {
             mail = req.body.emailFilter as string;
         }
+    }
+
+    let isCoachFilter = undefined;
+    if ("isCoachFilter" in req.body) {
+        isCoachFilter = req.body.isCoachFilter.toString() === "true";
+    }
+    let isAdminFilter = undefined;
+    if ("isAdminFilter" in req.body) {
+        isAdminFilter = req.body.isAdminFilter.toString() === "true";
     }
 
     for (const filter of [
@@ -613,10 +611,7 @@ export async function parseFilterProjectsRequest(
 
     let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
-        if (
-            req.body.fullyAssignedFilter.toString() !== "true" &&
-            req.body.fullyAssignedFilter.toString() !== "false"
-        ) {
+        if (!checkStringBoolean(req.body.fullyAssignedFilter.toString())) {
             return rejector();
         }
         fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
@@ -761,7 +756,6 @@ export async function parseRequestResetRequest(
     req: express.Request
 ): Promise<Requests.ReqReset> {
     return hasFields(req, ["email"], types.neither).then(() => {
-        console.log(validator.default.normalizeEmail("no").toString());
         return Promise.resolve({
             email: validator.default.normalizeEmail(req.body.email).toString(),
         });
