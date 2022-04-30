@@ -1,5 +1,9 @@
 import { prismaMock } from "./singleton";
-import { CreateProject, UpdateProject } from "../../orm_functions/orm_types";
+import {
+    FilterProjects,
+    UpdateProject,
+    CreateProject,
+} from "../../orm_functions/orm_types";
 import {
     createProject,
     getProjectByName,
@@ -20,6 +24,7 @@ import {
     deleteProjectByOsocEdition,
     deleteProjectByPartner,
     getProjectById,
+    filterProjects,
 } from "../../orm_functions/project";
 
 const returnValue = {
@@ -31,6 +36,45 @@ const returnValue = {
     end_date: new Date("2022-08-31"),
     positions: 10,
     description: "",
+};
+
+const filteredProject1: FilterProjects = {
+    project_id: 1,
+    name: "project 1",
+    osoc_id: 1,
+    partner: "partner 1",
+    start_date: new Date("2022-08-13"),
+    end_date: new Date("2022-08-15"),
+    positions: 8,
+    description: "description 1",
+    project_role: [
+        {
+            positions: 3,
+            role: {
+                name: "Front-end developer",
+            },
+        },
+        {
+            positions: 5,
+            role: {
+                name: "Back-end developer",
+            },
+        },
+    ],
+    project_user: [
+        {
+            login_user: {
+                login_user_id: 1,
+                is_coach: true,
+            },
+        },
+        {
+            login_user: {
+                login_user_id: 2,
+                is_coach: true,
+            },
+        },
+    ],
 };
 
 test("should create a project in the db with the given object, returns the new record", async () => {
@@ -166,3 +210,73 @@ test("should delete all the projects with the given partner name and return the 
     prismaMock.project.deleteMany.mockResolvedValue(count);
     await expect(deleteProjectByPartner("UGent")).resolves.toEqual(count);
 });
+
+test("should return all filtered projects by name", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    await expect(
+        filterProjects(
+            "project 1",
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined
+        )
+    ).resolves.toEqual([filteredProject1]);
+});
+
+test("should return all filtered projects by partner", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    await expect(
+        filterProjects(
+            undefined,
+            "partner 1",
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined
+        )
+    ).resolves.toEqual([filteredProject1]);
+});
+
+test("should return all filtered projects by assigned coaches", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    await expect(
+        filterProjects(
+            undefined,
+            undefined,
+            [1],
+            undefined,
+            undefined,
+            undefined,
+            undefined
+        )
+    ).resolves.toEqual([filteredProject1]);
+});
+
+/*test.only("should return all filtered projects by fully assigned status", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    prismaMock.contract.findMany.mockResolvedValue([
+        {
+            contract_id: 1,
+            student_id: 1,
+            project_role_id: 1,
+            information: "info",
+            created_by_login_user_id: 1,
+            contract_status: "APPROVED",
+        },
+    ]);
+    await expect(
+        filterProjects(
+            undefined,
+            undefined,
+            undefined,
+            true,
+            undefined,
+            undefined,
+            undefined
+        )
+    ).resolves.toEqual([filteredProject1]);
+});*/

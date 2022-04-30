@@ -1,4 +1,8 @@
-import { CreateProject, UpdateProject } from "../../orm_functions/orm_types";
+import {
+    CreateProject,
+    FilterProjects,
+    UpdateProject,
+} from "../../orm_functions/orm_types";
 import { getOsocByYear } from "../../orm_functions/osoc";
 import {
     createProject,
@@ -18,6 +22,7 @@ import {
     deleteProjectByPartner,
     getProjectsLessPositions,
     getProjectsMorePositions,
+    filterProjects,
 } from "../../orm_functions/project";
 
 const project1: CreateProject = {
@@ -37,6 +42,45 @@ const project2: UpdateProject = {
     startDate: new Date("2022-08-13"),
     endDate: new Date("2022-08-15"),
     positions: 8,
+};
+
+const filteredProject1: FilterProjects = {
+    project_id: 1,
+    name: "project 1",
+    osoc_id: 1,
+    partner: "partner 1",
+    start_date: new Date("2022-08-13"),
+    end_date: new Date("2022-08-15"),
+    positions: 8,
+    description: "description 1",
+    project_role: [
+        {
+            positions: 3,
+            role: {
+                name: "Front-end developer",
+            },
+        },
+        {
+            positions: 5,
+            role: {
+                name: "Back-end developer",
+            },
+        },
+    ],
+    project_user: [
+        {
+            login_user: {
+                login_user_id: 1,
+                is_coach: true,
+            },
+        },
+        {
+            login_user: {
+                login_user_id: 2,
+                is_coach: true,
+            },
+        },
+    ],
 };
 
 it("should create 1 new project where osoc is 2022", async () => {
@@ -324,5 +368,52 @@ it("should delete the project based upon osoc id", async () => {
     if (osoc) {
         const deleted_project = await deleteProjectByOsocEdition(osoc.osoc_id);
         expect(deleted_project).toHaveProperty("count", 1);
+    }
+});
+
+it("should return the filtered projects", async () => {
+    let sumRoles = 0;
+    for (const role of filteredProject1.project_role) {
+        sumRoles += role.positions;
+    }
+
+    const filtered_projects = await filterProjects(
+        filteredProject1.name,
+        filteredProject1.partner,
+        filteredProject1.project_user.map(
+            (user) => user.login_user.login_user_id
+        ),
+        filteredProject1.positions === sumRoles,
+        "asc",
+        "desc",
+        "asc"
+    );
+
+    for (const project of filtered_projects) {
+        expect(project).toHaveProperty("name", filteredProject1.name);
+        expect(project).toHaveProperty("partner", filteredProject1.partner);
+        expect(project).toHaveProperty("positions", filteredProject1.positions);
+        expect(project).toHaveProperty(
+            "description",
+            filteredProject1.description
+        );
+        expect(project).toHaveProperty(
+            "project_id",
+            filteredProject1.project_id
+        );
+        expect(project).toHaveProperty("osoc_id", filteredProject1.osoc_id);
+        expect(project).toHaveProperty(
+            "project_role",
+            filteredProject1.project_role
+        );
+        expect(project).toHaveProperty("end_date", filteredProject1.end_date);
+        expect(project).toHaveProperty(
+            "start_date",
+            filteredProject1.start_date
+        );
+        expect(project).toHaveProperty(
+            "project_user",
+            filteredProject1.project_user
+        );
     }
 });

@@ -407,6 +407,81 @@ export interface UpdateProject {
 }
 
 /**
+ * interface for the filtered projects
+ */
+export interface FilterProjects {
+    /**
+     * the id of the project
+     */
+    project_id: number;
+    /**
+     * the name of the project
+     */
+    name: string;
+    /**
+     * the id of the osoc edition this project belongs to
+     */
+    osoc_id: number;
+    /**
+     * the partner of this project
+     */
+    partner: string;
+    /**
+     * the start date of the project
+     */
+    start_date: Date;
+    /**
+     * the end date of the project
+     */
+    end_date: Date;
+    /**
+     * the amount of people who need to assigned to the project
+     */
+    positions: number;
+    /**
+     * the description of this project
+     */
+    description: string;
+    /**
+     * the roles of this project
+     */
+    project_role: FilterProjectsRole[];
+    /**
+     * the users who belong to this project
+     */
+    project_user: FilterProjectsLoginUser[];
+}
+
+/**
+ * interface for the filtered roles
+ */
+export interface FilterProjectsRole {
+    /**
+     * the number of positions for this role
+     */
+    positions: number;
+    /**
+     * the role name
+     */
+    role: {
+        name: string;
+    };
+}
+
+/**
+ * interface for the filtered login users
+ */
+export interface FilterProjectsLoginUser {
+    /**
+     * the login user
+     */
+    login_user: {
+        login_user_id: number;
+        is_coach: boolean;
+    };
+}
+
+/**
  * interface for the object needed to create a project
  */
 export interface CreateProjectRole {

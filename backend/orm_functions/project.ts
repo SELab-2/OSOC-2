@@ -346,10 +346,7 @@ export async function filterProjects(
             },
             project_user: assignedCoachesArray,
         },
-        orderBy: {
-            name: projectNameSort,
-            partner: clientNameSort,
-        },
+        orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
         include: {
             project_user: {
                 select: {
@@ -430,21 +427,5 @@ export async function filterProjects(
     if (fullyAssignedSort == "desc") {
         filtered_projects.reverse();
     }
-
-    /*if (fullyAssignedSort == "asc") {
-        filtered_projects.sort(
-            (x, y) =>
-                +(x.positions == projects[x.project_id]._sum.positions) -
-                +(y.positions == projects[y.project_id]._sum.positions)
-        );
-    }
-    if (fullyAssignedSort == "desc") {
-        filtered_projects.sort(
-            (x, y) =>
-                +(x.positions == projects[x.project_id]._sum.positions) -
-                +(y.positions == projects[y.project_id]._sum.positions)
-        );
-        filtered_projects.reverse();
-    }*/
     return filtered_projects;
 }
