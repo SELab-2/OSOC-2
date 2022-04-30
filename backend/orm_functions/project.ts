@@ -371,60 +371,60 @@ export async function filterProjects(
         },
     });
 
+    if (filtered_projects.length === 0) {
+        return filtered_projects;
+    }
+
     if (
         fullyAssignedFilter != undefined &&
         fullyAssignedFilter &&
         filtered_projects.length !== 0
     ) {
         return filtered_projects.filter((project) => {
-            const project_found = projects.find(
+            const project_found = projects.filter(
                 (elem) => elem.project_id === project.project_id
             );
 
-            if (project_found != undefined) {
-                let sum = 0;
-                for (const c of project_found.project_role) {
-                    sum += c._count.contract;
-                }
-                return project.positions === sum;
+            let sum = 0;
+            for (const c of project_found[0].project_role) {
+                sum += c._count.contract;
             }
 
-            return false;
+            return project.positions === sum;
         });
     }
 
-    if (fullyAssignedSort == "desc" || fullyAssignedSort == "asc") {
+    if (fullyAssignedSort === "desc" || fullyAssignedSort === "asc") {
         filtered_projects.sort((x, y) => {
-            const project_x_found = projects.find(
+            const project_x_found = projects.filter(
                 (elem) => elem.project_id === x.project_id
             );
 
-            const project_y_found = projects.find(
+            const project_y_found = projects.filter(
                 (elem) => elem.project_id === y.project_id
             );
 
-            if (project_x_found != undefined && project_y_found != undefined) {
-                let sum_x = 0;
-                for (const c of project_x_found.project_role) {
-                    sum_x += c._count.contract;
-                }
-
-                let sum_y = 0;
-                for (const c of project_y_found.project_role) {
-                    sum_y += c._count.contract;
-                }
-
-                const fullyAssignedX = x.positions === sum_x ? 1 : 0;
-                const fullyAssignedY = y.positions === sum_y ? 1 : 0;
-
-                return fullyAssignedX - fullyAssignedY;
+            let sum_x = 0;
+            for (const c of project_x_found[0].project_role) {
+                sum_x += c._count.contract;
             }
 
-            return 0;
+            let sum_y = 0;
+            for (const c of project_y_found[0].project_role) {
+                sum_y += c._count.contract;
+            }
+
+            const fullyAssignedX = x.positions === sum_x ? 1 : 0;
+            const fullyAssignedY = y.positions === sum_y ? 1 : 0;
+
+            console.log(fullyAssignedX);
+            console.log(fullyAssignedY);
+
+            return fullyAssignedX - fullyAssignedY;
         });
     }
 
-    if (fullyAssignedSort == "desc") {
+    if (fullyAssignedSort === "desc") {
         filtered_projects.reverse();
     }
     return filtered_projects;

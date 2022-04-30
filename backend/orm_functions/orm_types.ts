@@ -466,6 +466,9 @@ export interface FilterProjectsRole {
     role: {
         name: string;
     };
+    _count: {
+        contract: number;
+    };
 }
 
 /**

@@ -59,11 +59,17 @@ const filteredProject1: FilterProjects = {
             role: {
                 name: "Front-end developer",
             },
+            _count: {
+                contract: 3,
+            },
         },
         {
             positions: 5,
             role: {
                 name: "Back-end developer",
+            },
+            _count: {
+                contract: 3,
             },
         },
     ],
