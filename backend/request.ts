@@ -756,9 +756,15 @@ export async function parseRequestResetRequest(
     req: express.Request
 ): Promise<Requests.ReqReset> {
     return hasFields(req, ["email"], types.neither).then(() => {
-        return Promise.resolve({
-            email: validator.default.normalizeEmail(req.body.email).toString(),
-        });
+        if (validator.default.isEmail(req.body.email)) {
+            return Promise.resolve({
+                email: validator.default
+                    .normalizeEmail(req.body.email)
+                    .toString(),
+            });
+        }
+
+        return Promise.reject(errors.cookArgumentError());
     });
 }
 
