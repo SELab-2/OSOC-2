@@ -184,7 +184,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.EvaluationCoach> {
+): Promise<Responses.SuggestionInfo> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -252,12 +252,14 @@ export async function createStudentSuggestion(
     }
 
     return Promise.resolve({
-        evaluation_id: newEvaluation.evaluation_id,
-        senderFirstname: loginUser.person.firstname,
-        senderLastname: loginUser.person.lastname,
-        reason: newEvaluation.motivation,
-        decision: newEvaluation.decision,
-        isFinal: newEvaluation.is_final,
+        data: {
+            evaluation_id: newEvaluation.evaluation_id,
+            senderFirstname: loginUser.person.firstname,
+            senderLastname: loginUser.person.lastname,
+            reason: newEvaluation.motivation,
+            decision: newEvaluation.decision,
+            isFinal: newEvaluation.is_final,
+        },
     });
 }
 
@@ -269,7 +271,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.SuggestionInfo> {
+): Promise<Responses.SuggestionInfoList> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
