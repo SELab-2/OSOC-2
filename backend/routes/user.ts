@@ -15,6 +15,7 @@ import {
     removeAllKeysForUser,
 } from "../orm_functions/session_key";
 import * as config from "../config.json";
+import * as bcrypt from "bcrypt";
 
 /**
  *  Attempts to list all students in the system.
@@ -73,11 +74,16 @@ export async function createUserRequest(
                     .normalizeEmail(parsed.email)
                     .toString(),
             })
-            .then((person) => {
+            .then(async (person) => {
+                const hash = await bcrypt.hash(
+                    parsed.pass,
+                    config.encryption.encryptionRounds
+                );
+
                 console.log("Created a person: " + person);
                 return ormLU.createLoginUser({
                     personId: person.person_id,
-                    password: parsed.pass,
+                    password: hash,
                     isAdmin: false,
                     isCoach: true,
                     accountStatus: "PENDING",
@@ -273,21 +279,36 @@ export async function userModSelf(
             return ormLU
                 .getLoginUserById(checked.userId)
                 .then((user) => util.getOrReject(user))
-                .then((user) => {
-                    if (
-                        checked.data.pass != undefined &&
-                        user.password != checked.data.pass.oldpass
-                    )
-                        return Promise.reject();
+                .then(async (user) => {
+                    if (checked.data.pass != undefined) {
+                        let valid = true;
+                        if (checked.data.pass.oldpass) {
+                            valid = await bcrypt.compare(
+                                checked.data.pass.oldpass,
+                                user?.password || ""
+                            );
+                        }
+                        if (!valid) {
+                            return Promise.reject();
+                        }
+                    }
                     return Promise.resolve(user);
                 })
-                .then((user) =>
-                    ormLU.updateLoginUser({
-                        loginUserId: checked.userId,
-                        accountStatus: user.account_status,
-                        password: checked.data.pass?.newpass,
-                    })
-                )
+                .then(async (user) => {
+                    if (checked.data.pass?.newpass !== undefined) {
+                        const hash = await bcrypt.hash(
+                            checked.data.pass.newpass,
+                            config.encryption.encryptionRounds
+                        );
+                        return ormLU.updateLoginUser({
+                            loginUserId: checked.userId,
+                            accountStatus: user.account_status,
+                            password: hash,
+                        });
+                    } else {
+                        return Promise.resolve(user);
+                    }
+                })
                 .then((user) => Promise.resolve(user.person))
                 .then((person) => {
                     if (checked.data.name != undefined) {

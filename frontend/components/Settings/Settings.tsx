@@ -1,7 +1,6 @@
 import React, { SyntheticEvent, useContext, useState } from "react";
 import { LoginUser } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
-import crypto from "crypto";
 import styles from "../../styles/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
@@ -96,14 +95,6 @@ export const Settings: React.FC<{
 
         const { sessionKey } =
             getSession != undefined ? await getSession() : { sessionKey: "" };
-        const encryptedOldPassword = crypto
-            .createHash("sha256")
-            .update(currPassword)
-            .digest("hex");
-        const encryptedNewPassword = crypto
-            .createHash("sha256")
-            .update(newPassword)
-            .digest("hex");
 
         // We dynamically build the body
         const body: Record<string, unknown> = {};
@@ -113,8 +104,8 @@ export const Settings: React.FC<{
 
         if (currPassword !== "" && newPassword !== "") {
             body.pass = {
-                oldpass: encryptedOldPassword,
-                newpass: encryptedNewPassword,
+                oldpass: currPassword,
+                newpass: newPassword,
             };
         }
 
@@ -138,7 +129,6 @@ export const Settings: React.FC<{
                     );
                     console.log(err);
                 });
-            console.log(response);
             if (response !== undefined) {
                 if (response.success) {
                     if (setSessionKey) {

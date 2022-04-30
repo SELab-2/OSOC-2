@@ -11,9 +11,9 @@ VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'),
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), 'Bob4life', TRUE, FALSE , 'ACTIVATED'),
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), 'TrudyRulesAll777', FALSE, TRUE, 'PENDING'),
-((SELECT person_id FROM person WHERE email = 'osoc2@mail.com'), '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', TRUE, FALSE, 'ACTIVATED');
+VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), '$2b$08$ffQO2UCEFHUHcn9d.XHHg.hFKn7oF5AOW82J.hsOqq8gV0TzMEuzq', TRUE, FALSE , 'ACTIVATED'),
+((SELECT person_id FROM person WHERE firstname = 'Trudy'), '$2b$08$XDDmyKZnWsai9wVAW7r.GOOv7pGKa7oHLlBhVAqTmPgiscMzynpVq', FALSE, TRUE, 'PENDING'),
+((SELECT person_id FROM person WHERE email = 'osoc2@mail.com'), '$2b$08$MCblaKGOOBV7NpiW62GEc.km732o6XWDJxU6SfU3NMENxMuCWFlJq', TRUE, FALSE, 'ACTIVATED');
 
 /* Insert data into osoc table */
 INSERT INTO osoc(year)VALUES(2022);
