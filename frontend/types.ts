@@ -120,14 +120,12 @@ export interface Attachment {
 }
 
 export interface Student {
-    evaluations: [
-        {
-            evaluation: [Evaluation];
-            osoc: {
-                year: number;
-            };
-        }
-    ];
+    evaluation: {
+        evaluations: [Evaluation];
+        osoc: {
+            year: number;
+        };
+    };
 
     jobApplication: {
         applied_role: [
