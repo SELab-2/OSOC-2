@@ -60,53 +60,65 @@ export async function listUsers(
 export async function createUserRequest(
     req: express.Request
 ): Promise<Responses.Id> {
-    return rq.parseRequestUserRequest(req).then(async (parsed) => {
-        if (parsed.pass == undefined) {
-            console.log(" -> WARNING user request without password");
-            return Promise.reject(util.errors.cookArgumentError());
-        }
-        return ormP
-            .createPerson({
-                firstname: parsed.firstName,
-                lastname: "",
-                email: validator.default
-                    .normalizeEmail(parsed.email)
-                    .toString(),
-            })
-            .then((person) => {
-                console.log("Created a person: " + person);
-                return ormLU.createLoginUser({
-                    personId: person.person_id,
-                    password: parsed.pass,
-                    isAdmin: false,
-                    isCoach: true,
-                    accountStatus: "PENDING",
-                });
-            })
-            .then((user) => {
-                const key: string = util.generateKey();
-                const futureDate = new Date();
-                futureDate.setDate(
-                    futureDate.getDate() + session_key.valid_period
-                );
-                return addSessionKey(user.login_user_id, key, futureDate);
-            })
-            .then((user) => {
-                console.log("Attached a login user: " + user);
-                return Promise.resolve({
-                    id: user.login_user_id,
-                    sessionkey: user.session_key,
-                });
-            })
-            .catch((e) => {
-                if ("code" in e && e.code == "P2002") {
-                    return Promise.reject({
-                        http: 400,
-                        reason: "Can't register the same email address twice.",
-                    });
-                }
-                return Promise.reject(e);
+    const parsedRequest = await rq.parseRequestUserRequest(req);
+    if (parsedRequest.pass == undefined) {
+        console.log(" -> WARNING user request without password");
+        return Promise.reject(util.errors.cookArgumentError());
+    }
+
+    const foundPerson = await ormP.searchPersonByLogin(
+        validator.default.normalizeEmail(parsedRequest.email).toString()
+    );
+
+    let person;
+
+    if (foundPerson.length !== 0) {
+        const foundLoginUser = await ormLU.searchLoginUserByPerson(
+            foundPerson[0].person_id
+        );
+        if (foundLoginUser !== null) {
+            return Promise.reject({
+                http: 400,
+                reason: "Can't register the same email address twice.",
             });
+        }
+
+        person = await ormP.updatePerson({
+            personId: foundPerson[0].person_id,
+            firstname: parsedRequest.firstName,
+            lastname: "",
+        });
+    } else {
+        person = await ormP.createPerson({
+            firstname: parsedRequest.firstName,
+            lastname: "",
+            email: validator.default
+                .normalizeEmail(parsedRequest.email)
+                .toString(),
+        });
+    }
+
+    const loginUser = await ormLU.createLoginUser({
+        personId: person.person_id,
+        password: parsedRequest.pass,
+        isAdmin: false,
+        isCoach: true,
+        accountStatus: "PENDING",
+    });
+
+    const key: string = util.generateKey();
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+    const addedKey = await addSessionKey(
+        loginUser.login_user_id,
+        key,
+        futureDate
+    );
+
+    console.log("Attached a login user: " + loginUser);
+    return Promise.resolve({
+        id: addedKey.login_user_id,
+        sessionkey: addedKey.session_key,
     });
 }
 

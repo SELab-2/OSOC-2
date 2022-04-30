@@ -412,7 +412,6 @@ export async function parseFilterStudentsRequest(
         firstNameSort: maybe(req.body, "firstNameSort"),
         lastNameSort: maybe(req.body, "lastNameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        alumniSort: maybe(req.body, "alumniSort"),
     });
 }
 

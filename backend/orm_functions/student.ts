@@ -124,7 +124,6 @@ export async function searchStudentByGender(gender: string) {
  * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
  * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
- * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
@@ -139,8 +138,7 @@ export async function filterStudents(
     emailStatusFilter: email_status_enum | undefined,
     firstNameSort: FilterSort,
     lastNameSort: FilterSort,
-    emailSort: FilterSort,
-    alumniSort: FilterSort
+    emailSort: FilterSort
 ) {
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
@@ -155,7 +153,6 @@ export async function filterStudents(
         evaluationFilter = undefined;
     }
 
-    console.log(alumniFilter);
     return await prisma.student.findMany({
         where: {
             job_application: {
@@ -191,14 +188,11 @@ export async function filterStudents(
             },
             alumni: alumniFilter,
         },
-        orderBy: {
-            person: {
-                firstname: firstNameSort,
-                lastname: lastNameSort,
-                email: emailSort,
-            },
-            alumni: alumniSort,
-        },
+        orderBy: [
+            { person: { firstname: firstNameSort } },
+            { person: { email: emailSort } },
+            { person: { lastname: lastNameSort } },
+        ],
         include: {
             person: true,
             job_application: {
