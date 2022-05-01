@@ -10,6 +10,7 @@ import {
     getStudentEvaluationsFinal,
     getStudentEvaluationsTemp,
     getStudentEvaluationsTotal,
+    getEvaluationsByYearForStudent,
 } from "../../orm_functions/job_application";
 import prisma from "../../prisma/prisma";
 import { decision_enum, email_status_enum } from "@prisma/client";
@@ -524,4 +525,17 @@ it("should return all job applications of a year", async () => {
 
     // only 3 applications for the given osoc edition
     expect(found.length).toEqual(3);
+});
+
+it("should return the job application of a student in the (specified) year", async () => {
+    const found = await getEvaluationsByYearForStudent(1, 2022);
+
+    if (found !== null) {
+        found.evaluation.forEach((ev) => {
+            expect(ev).toHaveProperty("decision");
+            expect(ev).toHaveProperty("evaluation_id");
+            expect(ev).toHaveProperty("is_final");
+            expect(ev).toHaveProperty("motivation");
+        });
+    }
 });
