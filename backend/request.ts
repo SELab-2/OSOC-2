@@ -305,6 +305,31 @@ export async function parseGetSuggestionsStudentRequest(
 }
 
 /**
+ *  Parses a request to `GET /student/<id>`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseSingleStudentRequest(
+    req: express.Request
+): Promise<Requests.YearId> {
+    return hasFields(req, [], types.id).then(() => {
+        if ("year" in req.body) {
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                year: Number(req.body.year),
+            });
+        } else {
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+            });
+        }
+    });
+}
+
+/**
  *  Parses a request to `GET /osoc/filter`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -949,12 +974,6 @@ export const parseCurrentUserRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseVerifyRequest = parseKeyRequest;
-
-/**
- *  A request to `GET /student/<id>` only requires a session key and an ID
- * {@link parseKeyIdRequest}.
- */
-export const parseSingleStudentRequest = parseKeyIdRequest;
 /**
  *  A request to `DELETE /student/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.
