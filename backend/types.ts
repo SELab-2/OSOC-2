@@ -92,7 +92,32 @@ export namespace InternalTypes {
      */
     export type Suggestion = "YES" | "MAYBE" | "NO";
 
-    export interface SuggestionInfo {}
+    export interface SuggestionInfo {
+        /**
+         *  The evaluation id.
+         */
+        evaluation_id: number;
+        /**
+         *  The firstname of the login user.
+         */
+        senderFirstname: string;
+        /**
+         *  The lastname of the login user.
+         */
+        senderLastname: string;
+        /**
+         *  The reason why the decision was made.
+         */
+        reason: string | null;
+        /**
+         *  The ID.
+         */
+        decision: decision_enum;
+        /**
+         *  The ID.
+         */
+        isFinal: boolean;
+    }
 
     /**
      *  Represents a response that only contains an ID.
@@ -565,10 +590,18 @@ export namespace Responses {
     }
 
     /**
-     *  A student response is the keyed version of the student and their associated
+     *  The suggestion info
      * data.
      */
     export interface SuggestionInfo {
+        data: InternalTypes.SuggestionInfo;
+    }
+
+    /**
+     *  A list of suggestion info
+     * data.
+     */
+    export interface SuggestionInfoList {
         data: InternalTypes.SuggestionInfo[];
     }
 
