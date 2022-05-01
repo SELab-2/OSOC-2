@@ -11,10 +11,6 @@ import * as util from "../utility";
 import * as bcrypt from "bcrypt";
 import * as session_key from "./session_key.json";
 
-function orDefault<T>(v: T | undefined, def: T): T {
-    return v == undefined || false ? def : v;
-}
-
 /**
  *  Attempts to log a user into the system.
  *  @param req The Express.js request to extract all required data from.
@@ -54,7 +50,7 @@ export async function login(req: express.Request): Promise<Responses.Login> {
                 });
             }
             const key: string = util.generateKey();
-            const futureDate = new Date();
+            const futureDate = new Date(Date.now());
             futureDate.setDate(futureDate.getDate() + session_key.valid_period);
             return addSessionKey(
                 pass.login_user.login_user_id,
@@ -62,8 +58,8 @@ export async function login(req: express.Request): Promise<Responses.Login> {
                 futureDate
             ).then((ins) => ({
                 sessionkey: ins.session_key,
-                is_admin: orDefault(pass?.login_user?.is_admin, false),
-                is_coach: orDefault(pass?.login_user?.is_coach, false),
+                is_admin: util.getOrDefault(pass?.login_user?.is_admin, false),
+                is_coach: util.getOrDefault(pass?.login_user?.is_coach, false),
                 account_status: pass?.login_user?.account_status,
             }));
         })

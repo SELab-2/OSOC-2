@@ -61,58 +61,70 @@ export async function listUsers(
 export async function createUserRequest(
     req: express.Request
 ): Promise<Responses.Id> {
-    return rq.parseRequestUserRequest(req).then(async (parsed) => {
-        if (parsed.pass == undefined) {
-            console.log(" -> WARNING user request without password");
-            return Promise.reject(util.errors.cookArgumentError());
-        }
-        return ormP
-            .createPerson({
-                firstname: parsed.firstName,
-                lastname: "",
-                email: validator.default
-                    .normalizeEmail(parsed.email)
-                    .toString(),
-            })
-            .then(async (person) => {
-                const hash = await bcrypt.hash(
-                    parsed.pass,
-                    config.encryption.encryptionRounds
-                );
+    const parsedRequest = await rq.parseRequestUserRequest(req);
+    if (parsedRequest.pass == undefined) {
+        console.log(" -> WARNING user request without password");
+        return Promise.reject(util.errors.cookArgumentError());
+    }
 
-                console.log("Created a person: " + person);
-                return ormLU.createLoginUser({
-                    personId: person.person_id,
-                    password: hash,
-                    isAdmin: false,
-                    isCoach: true,
-                    accountStatus: "PENDING",
-                });
-            })
-            .then((user) => {
-                const key: string = util.generateKey();
-                const futureDate = new Date();
-                futureDate.setDate(
-                    futureDate.getDate() + session_key.valid_period
-                );
-                return addSessionKey(user.login_user_id, key, futureDate);
-            })
-            .then((user) => {
-                console.log("Attached a login user: " + user);
-                return Promise.resolve({
-                    id: user.login_user_id,
-                    sessionkey: user.session_key,
-                });
-            })
-            .catch((e) => {
-                if ("code" in e && e.code == "P2002") {
-                    return Promise.reject({
-                        http: 400,
-                        reason: "Can't register the same email address twice.",
-                    });
-                }
-                return Promise.reject(e);
+    const foundPerson = await ormP.searchPersonByLogin(
+        validator.default.normalizeEmail(parsedRequest.email).toString()
+    );
+
+    let person;
+
+    if (foundPerson.length !== 0) {
+        const foundLoginUser = await ormLU.searchLoginUserByPerson(
+            foundPerson[0].person_id
+        );
+        if (foundLoginUser !== null) {
+            return Promise.reject({
+                http: 400,
+                reason: "Can't register the same email address twice.",
             });
+        }
+
+        person = await ormP.updatePerson({
+            personId: foundPerson[0].person_id,
+            firstname: parsedRequest.firstName,
+            lastname: "",
+        });
+    } else {
+        person = await ormP.createPerson({
+            firstname: parsedRequest.firstName,
+            lastname: "",
+            email: validator.default
+                .normalizeEmail(parsedRequest.email)
+                .toString(),
+        });
+    }
+
+    const hash = await bcrypt.hash(
+        parsedRequest.pass,
+        config.encryption.encryptionRounds
+    );
+
+    const loginUser = await ormLU.createLoginUser({
+        personId: person.person_id,
+        password: hash,
+        isAdmin: false,
+        isCoach: true,
+        accountStatus: "PENDING",
+    });
+
+    const key: string = util.generateKey();
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+    const addedKey = await addSessionKey(
+        loginUser.login_user_id,
+        key,
+        futureDate
+    );
+
+    console.log("Attached a login user: " + loginUser);
+    return Promise.resolve({
+        id: addedKey.login_user_id,
+        sessionkey: addedKey.session_key,
     });
 }
 
@@ -279,36 +291,21 @@ export async function userModSelf(
             return ormLU
                 .getLoginUserById(checked.userId)
                 .then((user) => util.getOrReject(user))
-                .then(async (user) => {
-                    if (checked.data.pass != undefined) {
-                        let valid = true;
-                        if (checked.data.pass.oldpass) {
-                            valid = await bcrypt.compare(
-                                checked.data.pass.oldpass,
-                                user?.password || ""
-                            );
-                        }
-                        if (!valid) {
-                            return Promise.reject();
-                        }
-                    }
+                .then((user) => {
+                    if (
+                        checked.data.pass != undefined &&
+                        user.password != checked.data.pass.oldpass
+                    )
+                        return Promise.reject();
                     return Promise.resolve(user);
                 })
-                .then(async (user) => {
-                    if (checked.data.pass?.newpass !== undefined) {
-                        const hash = await bcrypt.hash(
-                            checked.data.pass.newpass,
-                            config.encryption.encryptionRounds
-                        );
-                        return ormLU.updateLoginUser({
-                            loginUserId: checked.userId,
-                            accountStatus: user.account_status,
-                            password: hash,
-                        });
-                    } else {
-                        return Promise.resolve(user);
-                    }
-                })
+                .then((user) =>
+                    ormLU.updateLoginUser({
+                        loginUserId: checked.userId,
+                        accountStatus: user.account_status,
+                        password: checked.data.pass?.newpass,
+                    })
+                )
                 .then((user) => Promise.resolve(user.person))
                 .then((person) => {
                     if (checked.data.name != undefined) {

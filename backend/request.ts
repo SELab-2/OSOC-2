@@ -3,12 +3,15 @@ import express from "express";
 import * as validator from "validator";
 
 import * as config from "./config.json";
+import { FilterSort } from "./orm_functions/orm_types";
 import {
     Anything,
     Decision,
     FollowupType,
     InternalTypes,
     Requests,
+    EmailStatus,
+    AccountStatus,
 } from "./types";
 import { errors, getSessionKey } from "./utility";
 
@@ -36,6 +39,15 @@ const types: RequestTypes = {
     key: "Key",
     id: "Id",
 };
+
+/**
+ *  Rejects a promise with an argument error.
+ *  @template T The type the promise would resolve to.
+ *  @returns A Promise rejecting with an Argument Error.
+ */
+function checkStringBoolean(value: string): boolean {
+    return value === "true" || value === "false";
+}
 
 /**
  *  Rejects a promise with an argument error.
@@ -301,7 +313,7 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
-    let year = maybe(req.body, "yearFilter");
+    let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
         year = parseInt(req.body.yearFilter);
     }
@@ -315,7 +327,7 @@ export async function parseFilterOsocsRequest(
     return Promise.resolve({
         sessionkey: getSessionKey(req),
         yearFilter: year,
-        yearSort: maybe(req.body, "yearSort"),
+        yearSort: maybe<FilterSort>(req.body, "yearSort"),
     });
 }
 
@@ -331,10 +343,18 @@ export async function parseFilterStudentsRequest(
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
-        "statusFilter" in req.body &&
-        req.body.statusFilter !== Decision.YES &&
-        req.body.statusFilter !== Decision.MAYBE &&
-        req.body.statusFilter !== Decision.NO
+        ("statusFilter" in req.body &&
+            !Object.values(Decision).includes(
+                req.body.statusFilter as unknown as Decision
+            )) ||
+        ("emailStatusFilter" in req.body &&
+            !Object.values(EmailStatus).includes(
+                req.body.emailStatusFilter as unknown as EmailStatus
+            )) ||
+        ("alumniFilter" in req.body &&
+            !checkStringBoolean(req.body.alumniFilter.toString())) ||
+        ("coachFilter" in req.body &&
+            !checkStringBoolean(req.body.coachFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -350,7 +370,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    if ("roleFilter" in req.body) {
+    if ("roleFilter" in req.body && typeof req.body.roleFilter === "string") {
         roles = req.body.roleFilter.split(",");
     }
 
@@ -358,8 +378,6 @@ export async function parseFilterStudentsRequest(
         maybe(req.body, "firstNameSort"),
         maybe(req.body, "lastNameSort"),
         maybe(req.body, "emailSort"),
-        maybe(req.body, "roleSort"),
-        maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();
@@ -373,11 +391,11 @@ export async function parseFilterStudentsRequest(
 
     let alumniFilter = maybe(req.body, "alumniFilter");
     if ("alumniFilter" in req.body) {
-        alumniFilter = Boolean(req.body.alumniFilter);
+        alumniFilter = req.body.alumniFilter.toString() === "true";
     }
     let coachFilter = maybe(req.body, "coachFilter");
     if ("coachFilter" in req.body) {
-        coachFilter = Boolean(req.body.coachFilter);
+        coachFilter = req.body.coachFilter.toString() === "true";
     }
     return Promise.resolve({
         sessionkey: getSessionKey(req),
@@ -393,7 +411,6 @@ export async function parseFilterStudentsRequest(
         firstNameSort: maybe(req.body, "firstNameSort"),
         lastNameSort: maybe(req.body, "lastNameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        alumniSort: maybe(req.body, "alumniSort"),
     });
 }
 
@@ -407,19 +424,16 @@ export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
     let mail = undefined;
-    let isCoachFilter = undefined;
-    if ("isCoachFilter" in req.body) {
-        isCoachFilter = req.body.isCoachFilter === "true";
-    }
-    let isAdminFilter = undefined;
-    if ("isAdminFilter" in req.body) {
-        isAdminFilter = req.body.isAdminFilter === "true";
-    }
+
     if (
-        "statusFilter" in req.body &&
-        req.body.statusFilter !== "ACTIVATED" &&
-        req.body.statusFilter !== "PENDING" &&
-        req.body.statusFilter !== "DISABLED"
+        ("statusFilter" in req.body &&
+            !Object.values(AccountStatus).includes(
+                req.body.statusFilter as unknown as AccountStatus
+            )) ||
+        ("isCoachFilter" in req.body &&
+            !checkStringBoolean(req.body.isCoachFilter.toString())) ||
+        ("isAdminFilter" in req.body &&
+            !checkStringBoolean(req.body.isAdminFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -433,6 +447,15 @@ export async function parseFilterUsersRequest(
         } else if ("emailFilter" in req.body) {
             mail = req.body.emailFilter as string;
         }
+    }
+
+    let isCoachFilter = undefined;
+    if ("isCoachFilter" in req.body) {
+        isCoachFilter = req.body.isCoachFilter.toString() === "true";
+    }
+    let isAdminFilter = undefined;
+    if ("isAdminFilter" in req.body) {
+        isAdminFilter = req.body.isAdminFilter.toString() === "true";
     }
 
     for (const filter of [
@@ -581,15 +604,22 @@ export async function parseFilterProjectsRequest(
     );
     if ("assignedCoachesFilterArray" in req.body) {
         if (typeof req.body.assignedCoachesFilterArray === "string") {
+            console.log(
+                req.body.assignedCoachesFilterArray
+                    .split(",")
+                    .map((num: string) => parseInt(num))
+            );
             assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
-                .slice(1, -1)
                 .split(",")
-                .map((num: string) => Number(num));
+                .map((num: string) => parseInt(num));
         }
     }
 
     let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
+        if (!checkStringBoolean(req.body.fullyAssignedFilter.toString())) {
+            return rejector();
+        }
         fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
     }
 
@@ -731,11 +761,17 @@ export async function parseFormRequest(
 export async function parseRequestResetRequest(
     req: express.Request
 ): Promise<Requests.ReqReset> {
-    return hasFields(req, ["email"], types.neither).then(() =>
-        Promise.resolve({
-            email: validator.default.normalizeEmail(req.body.email).toString(),
-        })
-    );
+    return hasFields(req, ["email"], types.neither).then(() => {
+        if (validator.default.isEmail(req.body.email)) {
+            return Promise.resolve({
+                email: validator.default
+                    .normalizeEmail(req.body.email)
+                    .toString(),
+            });
+        }
+
+        return Promise.reject(errors.cookArgumentError());
+    });
 }
 
 export async function parseCheckResetCodeRequest(
