@@ -20,7 +20,7 @@ import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
-    setFilteredStudents: (user: Array<Student>) => void;
+    setFilteredStudents: (user: Array<Student>, index: number) => void;
     display: Display;
 }> = ({ setFilteredStudents, display }) => {
     const { getSession } = useContext(SessionContext);
@@ -75,20 +75,40 @@ export const StudentFilter: React.FC<{
     };
 
     /**
-     * Load data on initial page load
+     * Special function to get the id query value out of the url
      */
-    useEffect(() => {
-        if (router.query.toString() === "/students") {
-            search().then();
+    const getSelectedStudent = (): number => {
+        const queryKey = "id";
+        let queryValue = router.query[queryKey];
+        if (queryValue === undefined) {
+            // We perform some magic here, because on first render the query parameters are always undefined
+            // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
+            const regex = router.asPath.match(
+                new RegExp(`[&?]${queryKey}=(.*)(&|$)`)
+            );
+            if (regex !== null) {
+                queryValue = regex[1];
+            }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.query]);
 
-    useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then();
+        console.log(queryValue);
+        if (queryValue === undefined) {
+            return -1;
+        } else {
+            return Number(queryValue);
         }
-        search().then();
+    };
+
+    // Load roles on page render
+    useEffect(() => {
+        fetchRoles().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Execute search
+    useEffect(() => {
+        const queryValue = getSelectedStudent();
+        search(queryValue).then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         firstNameSort,
@@ -212,11 +232,15 @@ export const StudentFilter: React.FC<{
 
     const searchPress = (e: SyntheticEvent) => {
         e.preventDefault();
-        search().then();
+        search(getSelectedStudent()).then();
     };
 
-    const search = async () => {
+    const search = async (id: number) => {
         const filters = [];
+
+        if (id > -1) {
+            filters.push(`id=${id}`);
+        }
         if (firstNameFilter !== "") {
             filters.push(`firstNameFilter=${firstNameFilter}`);
         }
@@ -256,8 +280,7 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
-        // await router.push(`/students${query}`);
+        await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()
@@ -284,7 +307,17 @@ export const StudentFilter: React.FC<{
                     console.log(err);
                     return { success: false };
                 });
-            setFilteredStudents(response.data);
+
+            // We find the student which has the same id as the argument
+            let selectedStudent = -1;
+            let i = 0;
+            while (i < response.data.length && selectedStudent === -1) {
+                if (response.data[i].student.student_id === id) {
+                    selectedStudent = i;
+                }
+                i++;
+            }
+            setFilteredStudents(response.data, selectedStudent);
         }
     };
 

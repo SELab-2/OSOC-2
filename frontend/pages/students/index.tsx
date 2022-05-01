@@ -1,6 +1,5 @@
 import { NextPage } from "next";
-import SessionContext from "../../contexts/sessionProvider";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StudentCard } from "../../components/StudentCard/StudentCard";
 import { Display, EvaluationCoach, Student } from "../../types";
 import styles from "../../styles/students.module.scss";
@@ -10,7 +9,6 @@ import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
 import { StudentFilter } from "../../components/Filter/StudentFilter/StudentFilter";
 
 const Index: NextPage = () => {
-    const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     const router = useRouter();
     // the index of the selected student if the given id matches with one of the fetched students
@@ -18,71 +16,23 @@ const Index: NextPage = () => {
     const [display, setDisplay] = useState<Display>(Display.FULL);
 
     /**
-     * Fetches the student and selects a student if the query parameter is set
-     * @param id
+     * Updates the list of students and sets the selected student
+     * @param filteredStudents
+     * @param selectedStudent
      */
-    const fetchStudents = async (id: number) => {
-        if (getSession !== undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                if (sessionKey != "" && id > -2) {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/all`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                            },
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        setStudents(response.data);
-
-                        // A specific student was selected
-                        if (id > -1) {
-                            for (let i = 0; i < response.data.length; i++) {
-                                if (
-                                    id === response.data[i].student.student_id
-                                ) {
-                                    setSelectedStudent(i);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    };
-
-    const setFilteredStudents = (filteredStudents: Array<Student>) => {
+    const setFilteredStudents = (
+        filteredStudents: Array<Student>,
+        selectedStudent: number
+    ) => {
+        setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
-    };
-
-    const getSelectedStudent = () => {
-        // We perform some magic here, because on first render the query parameters are always undefined
-        // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
-        const queryKey = "id";
-        let queryValue = Number(
-            router.query[queryKey] ||
-                router.asPath.match(new RegExp(`[&?]${queryKey}=(.*)(&|$)`))
-        );
-        if (queryValue === undefined || queryValue === 0) {
-            queryValue = -1;
+        console.log(filteredStudents);
+        if (selectedStudent < 0) {
             setDisplay(Display.FULL);
-            setSelectedStudent(-1);
         } else {
             setDisplay(Display.LIMITED);
         }
-        return queryValue;
     };
-
-    useEffect(() => {
-        const queryValue = getSelectedStudent();
-        fetchStudents(queryValue).then();
-        // We do not want to reload the data when the data changes
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     /**
      * Handles clicking on a student
