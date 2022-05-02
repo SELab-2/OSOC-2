@@ -1,5 +1,5 @@
 import React from "react";
-import { Project } from "../../types/types";
+import { Project } from "../../types";
 import styles from "./ProjectCard.module.css";
 
 export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {

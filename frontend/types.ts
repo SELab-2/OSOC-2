@@ -98,10 +98,20 @@ export interface EvaluationCoach {
 }
 
 export interface Evaluation {
-    evaluation_id: number;
     decision: Decision;
-    motivation: string;
+    evaluation_id: number;
     is_final: boolean;
+    login_user: {
+        login_user_id: number;
+        person: {
+            email: string;
+            firstname: string;
+            github: string;
+            lastname: string;
+            person_id: number;
+        };
+    };
+    motivation: string;
 }
 
 export enum AttachmentType {
@@ -115,8 +125,18 @@ export enum AttachmentType {
 export interface Attachment {
     job_application_id: number;
     attachment_id: number;
-    data: string;
-    type: AttachmentType;
+    data: [string];
+    type: [AttachmentType];
+}
+
+export interface JobApplicationSkill {
+    is_best: boolean;
+    is_preferred: boolean;
+    job_application_id: number;
+    job_application_skill_id: number;
+    language_id: number;
+    level: number;
+    skill: string;
 }
 
 export interface Student {
@@ -147,17 +167,7 @@ export interface Student {
         email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
-        job_application_skill: [
-            {
-                is_best: boolean;
-                is_preferred: boolean;
-                job_application_id: number;
-                job_application_skill_id: number;
-                language_id: number;
-                level: number;
-                skill: string;
-            }
-        ];
+        job_application_skill: [JobApplicationSkill];
         osoc_id: number;
         responsibilities: string;
         student_coach: boolean;
@@ -176,10 +186,11 @@ export interface Student {
             firstname: string;
             lastname: string;
             github: string;
+            github_id: string;
         };
         person_id: number;
         phone_number: string;
-        pronouns: [string];
+        pronouns: string;
         student_id: number;
     };
 }
@@ -229,13 +240,46 @@ export interface ClientToServerEvents {
     updateUser: (loginUserId: number) => void;
 }
 
-export interface Project {
-    project: {
-        end_date: Date;
-        id: number;
-        name: string;
-        partner: string;
-        positions: number;
-        start_date: Date;
+export interface ProjectPerson {
+    email: string;
+    firstname: string;
+    github: string;
+    github_id: string;
+    lastname: string;
+    person_id: number;
+}
+
+export interface ProjectLoginUser {
+    login_user: {
+        is_admin: boolean;
+        is_coach: boolean;
+        login_user_id: number;
+        person: ProjectPerson;
     };
+}
+
+export interface ProjectRole {
+    positions: number;
+    project_id: number;
+    project_role_id: number;
+    role_id: number;
+}
+
+export interface ProjectStudent {
+    contract_id: number;
+    contract_status: string; // TODO: Make ENUM for this
+    project_role: ProjectRole;
+    student: [Student];
+}
+
+export interface Project {
+    coaches: [ProjectLoginUser];
+    end_date: string;
+    id: number;
+    name: string;
+    osoc_id: number;
+    partner: string;
+    positions: number;
+    start_date: string;
+    students: [ProjectStudent];
 }
