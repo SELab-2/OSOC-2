@@ -85,7 +85,7 @@ export const Settings: React.FC<{
             setNewPasswordError("Please provide a secure enough password");
             error = true;
         } else if (newPassword !== retypePassword) {
-            setNewPasswordError("The provided passwords must be the same");
+            setNewPasswordError("Passwords do not match");
             error = true;
         } else {
             setNewPasswordError("");
