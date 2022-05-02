@@ -1,109 +1,113 @@
-import { contract_status_enum, decision_enum, email_status_enum, account_status_enum } from "@prisma/client"
-
+import {
+    contract_status_enum,
+    decision_enum,
+    email_status_enum,
+    account_status_enum,
+} from "@prisma/client";
 
 /**
  * interface for the object needed to create a person
  */
- export interface CreatePerson {
+export interface CreatePerson {
     /**
      * the person's firstname
      */
-    firstname : string,
+    firstname: string;
     /**
      * the person's lastname
      */
-    lastname : string,
+    lastname: string;
 
     /**
      * the person's github account, only one of github/email can be used
      */
-     github? : string,
-     /**
+    github?: string;
+    /**
      * the person's email, may not be null if github is null
      */
-     email? : string,
-     /**
-      *  the person's github id, if github is used
-      */
-     github_id?: string
+    email?: string;
+    /**
+     *  the person's github id, if github is used
+     */
+    github_id?: string;
 }
 
 /**
  * interface for the object needed to update a person's data
  */
- export interface UpdatePerson {
+export interface UpdatePerson {
     /**
      * the person who's info we are updating
      */
-    personId: number,
+    personId: number;
     /**
      * undefined if unchanged or new firstname
      */
-    firstname?: string,
+    firstname?: string;
     /**
      * undefined if unchanged or the new lastname
      */
-    lastname?: string,
+    lastname?: string;
     /**
      * undefined if unchanged or the new github
      */
-    github?: string | null,
+    github?: string | null;
     /**
      * undefined if unchanged or the new email
      */
-    email?: string | null,
+    email?: string | null;
 }
 
 /**
  * interface for the object needed to create a login user
  */
- export interface CreateLoginUser {
+export interface CreateLoginUser {
     /**
      * the person_id of the person the login user will be associated with
      */
-    personId: number,
+    personId: number;
     /**
      * the password hash of the login user if email is used
      */
-    password?: string | null,
+    password?: string | null;
     /**
      * true if the login user is an admin in the osoc system, otherwise false
      */
-    isAdmin: boolean,
+    isAdmin: boolean;
     /**
      * true if the login user is a coach in the osoc system, otherwise false
      */
-    isCoach: boolean,
+    isCoach: boolean;
     /**
      * the status of the account we are trying to create
      */
-    accountStatus: account_status_enum
+    accountStatus: account_status_enum;
 }
 
 /**
  * interface for the object needed to update a login user's data
  */
- export interface UpdateLoginUser {
+export interface UpdateLoginUser {
     /**
      * the login user who's info we are updating
      */
-    loginUserId: number,
+    loginUserId: number;
     /**
      * undefined if unchanged or the new password
      */
-    password?: string | null,
+    password?: string | null;
     /**
-     * undefined if unchanged or the new boolean value that indicates if this login user is an admin 
+     * undefined if unchanged or the new boolean value that indicates if this login user is an admin
      */
-    isAdmin: boolean,
+    isAdmin?: boolean;
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is a coach
      */
-    isCoach: boolean,
+    isCoach?: boolean;
     /**
      * undefined if unchanged or the new account status that indicates the login user status
      */
-    accountStatus: account_status_enum
+    accountStatus: account_status_enum;
 }
 
 /**
@@ -113,27 +117,27 @@ export interface CreateStudent {
     /**
      * the person_id of the person the student will be associated with
      */
-    personId?: number,
+    personId?: number;
     /**
      * the person's gender
      */
-    gender : string,
+    gender: string;
     /**
      * the pronouns the student wants to be addressed with
      */
-    pronouns?: string | null,
+    pronouns?: string | null;
     /**
      * student's phone number
      */
-    phoneNumber: string,
+    phoneNumber: string;
     /**
      * student's nickname
      */
-    nickname?: string | null,
+    nickname?: string | null;
     /**
      * true if the student is an alumni in the osoc system, otherwise false
      */
-    alumni: boolean
+    alumni: boolean;
 }
 
 /**
@@ -143,27 +147,27 @@ export interface UpdateStudent {
     /**
      * the student who's info we are updating
      */
-    studentId: number,
+    studentId: number;
     /**
      * undefined if unchanged or the new gender
      */
-    gender?: string,
+    gender?: string;
     /**
      * undefined if unchanged or new list of pronouns
      */
-    pronouns?: string | null,
+    pronouns?: string | null;
     /**
      * undefined if unchanged or the new phone number
      */
-    phoneNumber?: string,
+    phoneNumber?: string;
     /**
      * undefined if unchanged or the new nickname
      */
-    nickname?: string | null,
+    nickname?: string | null;
     /**
-     * undefined if unchanged or the new boolean value that indicates if this student is an alumni 
+     * undefined if unchanged or the new boolean value that indicates if this student is an alumni
      */
-    alumni?: boolean
+    alumni?: boolean;
 }
 
 /**
@@ -173,23 +177,23 @@ export interface CreateEvaluationForStudent {
     /**
      * loginUserId of the loginUser that creates this evaluation
      */
-    loginUserId: number,
+    loginUserId: number;
     /**
      * the jobApplication about that the evaluation is about
      */
-    jobApplicationId: number,
+    jobApplicationId: number;
     /**
      * the decision that is made (yes, maybe, no)
      */
-    decision: decision_enum,
+    decision: decision_enum;
     /**
      * motivation for the made decision
      */
-    motivation?: string | null,
+    motivation?: string | null;
     /**
      * is this evaluation final, or not
      */
-    isFinal: boolean
+    isFinal: boolean;
 }
 
 /**
@@ -199,19 +203,19 @@ export interface UpdateEvaluationForStudent {
     /**
      * the evaluation that we are updating
      */
-    evaluation_id: number,
+    evaluation_id: number;
     /**
      * loginUserId of the loginUser that creates this evaluation
      */
-     loginUserId: number,
-     /**
-      * the decision that is made (yes, maybe, no)
-      */
-     decision?: decision_enum,
-     /**
-      * motivation for the made decision
-      */
-     motivation?: string | null,
+    loginUserId: number;
+    /**
+     * the decision that is made (yes, maybe, no)
+     */
+    decision?: decision_enum;
+    /**
+     * motivation for the made decision
+     */
+    motivation?: string | null;
 }
 
 /**
@@ -221,23 +225,23 @@ export interface CreateContract {
     /**
      * the student that receives the contract
      */
-    studentId: number,
+    studentId: number;
     /**
      * the role for which the contract is
      */
-    projectRoleId: number,
+    projectRoleId: number;
     /**
      * extra information
      */
-    information?: string | null,
+    information?: string | null;
     /**
      * the loginUser that created this contract
      */
-    loginUserId: number,
+    loginUserId: number;
     /**
      * status of the contract (draft, approved, cancelled,...)
      */
-    contractStatus: contract_status_enum
+    contractStatus: contract_status_enum;
 }
 
 /**
@@ -247,23 +251,23 @@ export interface UpdateContract {
     /**
      * the contract we are changing
      */
-    contractId: number,
+    contractId: number;
     /**
      * id of the login user that is making these changes
      */
-    loginUserId: number,
+    loginUserId: number;
     /**
      * optional information
      */
-    information?: string | null,
+    information?: string | null;
     /**
      * status of the contract (draft, approved, cancelled,...)
      */
-    contractStatus?: contract_status_enum,
+    contractStatus?: contract_status_enum;
     /**
      * updated role (id) for the student
      */
-    projectRoleId?: number
+    projectRoleId?: number;
 }
 
 /**
@@ -273,69 +277,69 @@ export interface CreateJobApplication {
     /**
      * the student who's application this is
      */
-    studentId: number,
+    studentId: number;
     /**
      * the responsibilities the students has during the summer that might keep him from working for osoc
      */
-    responsibilities?: string | null,
+    responsibilities?: string | null;
     /**
      * a fun fact about the student
      */
-    funFact: string,
+    funFact: string;
     /**
      * string that has info if the student is available to work, and if he wants to work as volunteer for free or not
      */
-    studentVolunteerInfo: string,
+    studentVolunteerInfo: string;
     /**
      * boolean that indicates if the student is a student-coach or not
      */
-    studentCoach: boolean,
+    studentCoach: boolean;
     /**
      * id of the osoc edition this job application is for
      */
-    osocId: number,
+    osocId: number;
     /**
      * information about the educations of the student
      */
-    edus: string[],
+    edus: string[];
     /**
      * information about the education level of the student
      */
-    eduLevel: string,
+    eduLevel: string;
     /**
      * how long this student has been studying for
      */
-    eduDuration: number | null,
+    eduDuration: number | null;
     /**
      * expected graduation year
      */
-    eduYear: string | null,
+    eduYear: string | null;
     /**
      * institute the student is studying at
      */
-    eduInstitute: string | null,
+    eduInstitute: string | null;
     /**
      * information about a confirmation email for the evaluation
      */
-    emailStatus: email_status_enum,
+    emailStatus: email_status_enum;
     /**
      * keeps track of when we received this application (used to pick the latest one)
      */
-    createdAt: string // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
+    createdAt: string; // this has to be a timezone formatted string: eg '2022-03-14 23:10:00+01'
 }
 
 /**
  * interface for the object needed in updateOsoc
  */
- export interface UpdateOsoc {
+export interface UpdateOsoc {
     /**
      * the osoc edition we are changing
      */
-    osocId: number,
+    osocId: number;
     /**
      * the year we want to set
      */
-    year: number
+    year: number;
 }
 
 /**
@@ -345,27 +349,27 @@ export interface CreateProject {
     /**
      * the name of the project
      */
-    name: string,
+    name: string;
     /**
      * the id of the osoc edition this project belongs to
      */
-    osocId: number,
+    osocId: number;
     /**
      * the partner for who this project is made
      */
-    partner: string,
+    partner: string;
     /**
      * the start date of the project
      */
-    startDate: Date,
+    startDate: Date;
     /**
      * the end date of the project
      */
-     endDate: Date,
+    endDate: Date;
     /**
      * the amount of people who need to assigned to the project
      */
-    positions: number
+    positions: number;
 }
 
 /**
@@ -375,49 +379,49 @@ export interface UpdateProject {
     /**
      * the project we are updating
      */
-    projectId: number,
+    projectId: number;
     /**
      * undefined if unchanged or new project name
      */
-    name?: string,
+    name?: string;
     /**
      * undefined if unchanged or the new osoc id
      */
-    osocId?: number,
+    osocId?: number;
     /**
      * undefined if unchanged or the new partner of the project
      */
-    partner?: string,
+    partner?: string;
     /**
      * undefined if unchanged or the new start date of the project
      */
-    startDate?: Date
+    startDate?: Date;
     /**
      * undefined if unchanged or the new end date of the project
      */
-    endDate?: Date,
+    endDate?: Date;
     /**
      * undefined if unchanged or the new number of positions of the project
      */
-    positions?: number
+    positions?: number;
 }
 
 /**
  * interface for the object needed to create a project
  */
- export interface CreateProjectRole {
+export interface CreateProjectRole {
     /**
      * the id of the project this role belongs to
      */
-    projectId: number,
+    projectId: number;
     /**
      * the id of the role this project role represents
      */
-    roleId: number,
+    roleId: number;
     /**
      * the number of positions that are needed for this role
      */
-    positions: number
+    positions: number;
 }
 
 /**
@@ -427,77 +431,77 @@ export interface UpdateProjectRole {
     /**
      * the project we are updating
      */
-    projectRoleId: number,
+    projectRoleId: number;
     /**
      * undefined if unchanged or the new project id
      */
-    projectId: number,
+    projectId: number;
     /**
      * undefined if unchanged or the new role id
      */
-    roleId: number,
+    roleId: number;
     /**
      * undefined if unchanged or the new number of positions for this role in the project
      */
-    positions: number
+    positions: number;
 }
 
 /**
  * interface for the object needed in updateRole
  */
- export interface UpdateRole {
+export interface UpdateRole {
     /**
      * the role object we are changing
      */
-    roleId: number,
+    roleId: number;
     /**
      * the name we want to set
      */
-    name: string
+    name: string;
 }
 
 /**
  * interface for the object needed in updateRole
  */
- export interface UpdateLanguage {
+export interface UpdateLanguage {
     /**
      * the language object we are changing
      */
-    languageId: number,
+    languageId: number;
     /**
      * the name we want to set
      */
-    name: string
+    name: string;
 }
 
 /**
  * interface for the object needed to create a project
  */
- export interface CreateJobApplicationSkill {
+export interface CreateJobApplicationSkill {
     /**
      * the jobapplicaton id to which the skill is linked
      */
-    jobApplicationId: number,
+    jobApplicationId: number;
     /**
      * the skill of this job application
      */
-    skill: string | null,
+    skill: string | null;
     /**
      * the language id to which this skill is linked
      */
-    languageId: number | null,
+    languageId: number | null;
     /**
      * the level of the skill of the applicant
      */
-    level: number | null,
+    level: number | null;
     /**
      * true if this skill is the preffered skill of the applicant
      */
-    isPreferred: boolean,
+    isPreferred: boolean;
     /**
      * true if this skill is the best skill of the applicant
      */
-    isBest: boolean
+    isBest: boolean;
 }
 
 /**
@@ -507,100 +511,99 @@ export interface UpdateJobApplicationSkill {
     /**
      * the jobapplicaton we are updating
      */
-    JobApplicationSkillId: number,
+    JobApplicationSkillId: number;
     /**
      * undefined if unchanged or new job application
      */
-    JobApplicationId: number,
+    JobApplicationId: number;
     /**
      * undefined if unchanged or the new skill
      */
-    skill: string | null,
+    skill: string | null;
     /**
      * undefined if unchanged or the new language of the job application skill
      */
-    languageId: number | null,
+    languageId: number | null;
     /**
      * undefined if unchanged or the new level
      */
-    level: number
+    level: number;
     /**
      * undefined if unchanged or the new preffered status
      */
-    isPreferred: boolean,
+    isPreferred: boolean;
     /**
      * undefined if unchanged or the new is best status
      */
-    is_best: boolean
+    is_best: boolean;
 }
 
 export interface AddStudentToProject {
     /**
      * the id of the loginsuer that wants to add a student to the project
      */
-    loginUserId: number,
+    loginUserId: number;
     /**
      * the id of the student that will be added to the project
      */
-    studentId: number,
+    studentId: number;
     /**
      * the id of the project that the student will be added to
      */
-    projectId: number,
+    projectId: number;
     /**
      * the name of the role the student will be added for
      */
-    roleName: string,
+    roleName: string;
     /**
      * extra information
      */
-    information?: string | null,
-
+    information?: string | null;
 }
 
 /**
  * interface for the object needed to create a project user
  */
- export interface CreateProjectUser {
+export interface CreateProjectUser {
     /**
      * the id of the project this user belongs to
      */
-    projectId: number,
+    projectId: number;
     /**
      * the id of the login user this user belongs to
      */
-    loginUserId: number,
+    loginUserId: number;
 }
 
 /**
  * interface for the object needed to create an applied role
  */
- export interface CreateAppliedRole {
+export interface CreateAppliedRole {
     /**
      * the id of the job application this applied role belongs to
      */
-    jobApplicationId: number,
+    jobApplicationId: number;
     /**
      * the id of the role this applied role belongs to
      */
-    roleId: number,
+    roleId: number;
 }
 
 export interface CreateTemplate {
-    ownerId: number,
-    name: string,
-    content: string,
-    subject?: string,
-    cc?: string
+    ownerId: number;
+    name: string;
+    content: string;
+    subject?: string;
+    cc?: string;
 }
 
 export interface UpdateTemplate {
-    templateId: number,
-    ownerId?: number,
-    name?: string,
-    content?: string,
-    subject?: string,
-    cc?: string,
+    templateId: number;
+    ownerId?: number;
+    name?: string;
+    content?: string;
+    subject?: string;
+    cc?: string;
 }
 
 /**
@@ -614,12 +617,21 @@ export type FilterSort = "asc" | "desc" | undefined;
 export type FilterString = string | undefined;
 
 /**
+ * type to use in a filter query for numbers
+ */
+export type FilterNumber = number | undefined;
+
+/**
+ * type to use in a filter query for array of numbers
+ */
+export type FilterNumberArray = number[] | undefined;
+
+/*
  * type to use in a filter query for array of strings
  */
- export type FilterStringArray = string[] | undefined;
+export type FilterStringArray = string[] | undefined;
 
 /**
  * type to use in a filter query for booleans
  */
- export type FilterBoolean = boolean | undefined;
-
+export type FilterBoolean = boolean | undefined;

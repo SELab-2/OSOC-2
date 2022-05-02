@@ -1,4 +1,4 @@
-import prisma from '../prisma/prisma';
+import prisma from "../prisma/prisma";
 
 /**
  * adds session key to loginUser
@@ -8,13 +8,17 @@ import prisma from '../prisma/prisma';
  * @param date
  * @returns the new record in the database in a promise
  */
-export async function addSessionKey(loginUserId: number, key: string, date: Date) {
+export async function addSessionKey(
+    loginUserId: number,
+    key: string,
+    date: Date
+) {
     return await prisma.session_keys.create({
         data: {
             login_user_id: loginUserId,
             session_key: key,
-            valid_until: date
-        }
+            valid_until: date,
+        },
     });
 }
 
@@ -27,33 +31,28 @@ export async function addSessionKey(loginUserId: number, key: string, date: Date
 export async function checkSessionKey(key: string) {
     return await prisma.session_keys.findFirst({
         where: {
-            AND: [
-                {session_key: key},
-                {valid_until: {gte: new Date()}}
-            ]
+            AND: [{ session_key: key }, { valid_until: { gte: new Date() } }],
         },
         select: {
-            login_user_id: true
-        }
+            login_user_id: true,
+        },
     });
 }
 
 /**
  *
  * @param key: the old key we want to overwrite
- * @param newkey: the key that we use to replace the old key
  * @param date
  * @returns the updated record in a promise
  */
-export async function changeSessionKey(key: string, newkey: string, date: Date) {
+export async function refreshKey(key: string, date: Date) {
     return await prisma.session_keys.update({
         where: {
-            session_key: key
+            session_key: key,
         },
         data: {
-            session_key: newkey,
-            valid_until: date
-        }
+            valid_until: date,
+        },
     });
 }
 
@@ -64,18 +63,28 @@ export async function changeSessionKey(key: string, newkey: string, date: Date) 
  * @returns the number of deleted records in a promise
  */
 export async function removeAllKeysForUser(key: string) {
-    return await checkSessionKey(key).then(
-        uid => {
-            if (uid != null) {                
-                return prisma.session_keys.deleteMany({
-                    where: {
-                        login_user_id: uid.login_user_id
-                    }
-                })
-            }
-            else {
-                return {count: 0};
-            }
+    return await checkSessionKey(key).then((uid) => {
+        if (uid != null) {
+            return prisma.session_keys.deleteMany({
+                where: {
+                    login_user_id: uid.login_user_id,
+                },
+            });
+        } else {
+            return { count: 0 };
         }
-    );
+    });
+}
+
+/**
+ *
+ * @param loginUserId the id of the loginUser whose session keys we want to remove
+ * @returns a promise with the number of deleted records
+ */
+export async function removeAllKeysForLoginUserId(loginUserId: number) {
+    return await prisma.session_keys.deleteMany({
+        where: {
+            login_user_id: loginUserId,
+        },
+    });
 }

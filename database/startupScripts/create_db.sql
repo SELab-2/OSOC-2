@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS login_user(
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,
     CONSTRAINT admin_or_coach_not_null CHECK (is_admin IS NOT NULL OR is_coach IS NOT NULL),
-    CONSTRAINT admin_or_coach_true CHECK (is_admin IS TRUE or is_coach IS TRUE),
     CONSTRAINT password_not_null CHECK (get_email_used(person_id, "password"))
 );
 
@@ -211,5 +210,8 @@ CREATE EXTENSION pg_cron;
 -- Delete old session keys every day at at 23:59 (GMT)
 SELECT cron.schedule('59 23 * * *', $$DELETE FROM session_key WHERE valid_date < now()$$);
 
--- Vacuum every day at 01:30 (GMT), this phiscally removes deleted and obsolete tuples
+-- Delete expired password reset links every day at 23:59 (GMT)
+SELECT cron.schedule('59 23 * * *', $$DELETE FROM password_reset WHERE valid_until < now()$$);
+
+-- Vacuum every day at 01:30 (GMT), this physically removes deleted and obsolete tuples
 SELECT cron.schedule('30 1 * * *', 'VACUUM');

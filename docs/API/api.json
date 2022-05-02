@@ -1,70 +1,878 @@
 {
-  "swagger": "2.0",
+  "openapi": "3.0.1",
   "info": {
-    "description": "An overview of API endpoints, verbs and their uses. Note: this is still in-progress and will change over time.",
-    "version": "2.0.0",
-    "title": "OSOC - API"
+    "title": "OSOC - API",
+    "description": "An overview of API endpoints.",
+    "version": "2.0.0"
   },
+  "servers": [
+    {
+      "url": "https://sel2-2.ugent.be/api-osoc"
+    }
+  ],
   "tags": [
     {
-      "name": "login",
-      "description": "Everything about the login."
-    },
-    {
-      "name": "student",
-      "description": "Everything about students."
+      "name": "admin",
+      "description": "Everything about admins."
     },
     {
       "name": "coach",
       "description": "Everything about coaches."
     },
     {
-      "name": "admin",
-      "description": "Everything about admins."
+      "name": "followup",
+      "description": "Everything about followups."
+    },
+    {
+      "name": "form",
+      "description": "Everything about the form."
+    },
+    {
+      "name": "github",
+      "description": "Everything about the login with github."
+    },
+    {
+      "name": "login",
+      "description": "Everything about the login."
+    },
+    {
+      "name": "osoc",
+      "description": "Everything about osoc editions."
     },
     {
       "name": "project",
       "description": "Everything about projects."
     },
     {
-      "name": "followup",
-      "description": "Everything about followups."
+      "name": "reset",
+      "description": "Everything about resetting a password."
+    },
+    {
+      "name": "role",
+      "description": "Everything about roles."
+    },
+    {
+      "name": "student",
+      "description": "Everything about students."
+    },
+    {
+      "name": "template",
+      "description": "Everything about sending emails."
+    },
+    {
+      "name": "user",
+      "description": "Everything about users."
+    },
+    {
+      "name": "verify",
+      "description": "Everything about verifying the session keys."
     }
   ],
-  "schemes": [
-    "https",
-    "http"
-  ],
   "paths": {
+    "/admin": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Redirects towards GET /admin/all.",
+        "operationId": "admin",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /admin/all"
+          }
+        }
+      }
+    },
+    "/admin/all": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Returns a list of all the admins in the system.",
+        "operationId": "all_admins",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all admins.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/admin/<admin-id>": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Attempts to update the admin in the system.",
+        "operationId": "update_admin",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountStatus",
+            "in": "header",
+            "description": "Shows the status of the account.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVATED",
+                "DISABLED",
+                "PENDING"
+              ]
+            }
+          },
+          {
+            "name": "isAdmin",
+            "in": "header",
+            "description": "True if the user is an admin, else False.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isCoach",
+            "in": "header",
+            "description": "True if the user is a coach, else False.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the id and name of the modified login user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyLoginUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "admin"
+        ],
+        "description": "Removes the given admin from the system.",
+        "operationId": "admin_id_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified admin was removed. The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/coach": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Redirects towards GET /coach/all.",
+        "operationId": "coach",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /coach/all"
+          }
+        }
+      }
+    },
+    "/coach/all": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Returns a list of all the coaches in the system.",
+        "operationId": "all_coaches",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all coaches.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/coach/<coach-id>": {
+      "post": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Attempts to modify the coach in the system.",
+        "operationId": "modify_coach",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountStatus",
+            "in": "header",
+            "description": "Shows the status of the account.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVATED",
+                "DISABLED",
+                "PENDING"
+              ]
+            }
+          },
+          {
+            "name": "isAdmin",
+            "in": "header",
+            "description": "True if the user is an admin, else False.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isCoach",
+            "in": "header",
+            "description": "True if the user is a coach, else False.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the id and name of the modified login user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyLoginUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Removes the given coach from the system.",
+        "operationId": "coach_id_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified coach was removed. The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/coach/request": {
+      "get": {
+        "tags": [
+          "coach"
+        ],
+        "description": "Lists all coach requests.",
+        "operationId": "all_coach_requests",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all coach requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "activated": {
+                            "type": "string"
+                          },
+                          "admin": {
+                            "type": "boolean"
+                          },
+                          "coach": {
+                            "type": "boolean"
+                          },
+                          "person_data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "number"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/followup/all": {
+      "get": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Returns a list of all the followups in the system.",
+        "operationId": "all_followups",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all followups in the system.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Followup"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/followup/<followup-id>": {
+      "get": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Lists all details about the followup with the given id.",
+        "operationId": "followup_id_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the followup.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains info of the followup.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Followup"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "followup"
+        ],
+        "description": "Attempts to update a followup with the given id and type.",
+        "operationId": "followup_id_post",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the followup.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "header",
+            "description": "The email status.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "FAILED",
+                "NONE",
+                "SCHEDULED",
+                "SENT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains info of the followup.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Followup"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/form": {
+      "post": {
+        "tags": [
+          "form"
+        ],
+        "description": "Attempts to create a new form in the database.",
+        "operationId": "create_form",
+        "parameters": [
+          {
+            "name": "createdAt",
+            "in": "header",
+            "description": "The date when this form was created.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "data",
+            "in": "header",
+            "description": "The data of the form.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "This is actually an object with the data."
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "header",
+            "description": "The event id.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          }
+        }
+      }
+    },
+    "/github": {
+      "get": {
+        "tags": [
+          "github"
+        ],
+        "description": "Attempts to authorize a user using GitHub OAuth. Upon success, redirects to our own frontend with a newly generated session key.",
+        "operationId": "github",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 towards another url"
+          }
+        }
+      }
+    },
+    "/github/challenge": {
+      "get": {
+        "tags": [
+          "github"
+        ],
+        "description": "Should not be used from outside code. Is only used as a GitHub OAuth redirect URL.",
+        "operationId": "github_challenge",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "header",
+            "description": "The code for the post request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "header",
+            "description": "The state.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is empty."
+          },
+          "409": {
+            "description": "Something went wrong while authenticating with GitHub."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
           "login"
         ],
-        "description": "Attempts to log a user in into the system",
+        "description": "Attempts to log a user in into the system.",
         "operationId": "login",
         "parameters": [
           {
-            "in": "header",
-            "name": "password",
-            "description": "The hashed password of the user to log in.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "email",
+            "in": "header",
             "description": "The email of the user to log in.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "header",
+            "description": "The hashed password of the user to log in.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Login"
+            "description": "The response contains info about this user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Login"
+                }
+              }
             }
+          },
+          "409": {
+            "description": "Invalid e-mail or password."
           }
         }
       },
@@ -76,16 +884,1118 @@
         "operationId": "logout",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "The session key of the user to log out.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Logged out."
+            "description": "The user was logged out. The response is an empty object."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Redirects towards GET /osoc/all.",
+        "operationId": "osoc",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /osoc/all"
+          }
+        }
+      }
+    },
+    "/osoc/all": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all osoc editions in the system.",
+        "operationId": "all_osoc_editions",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/create": {
+      "post": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to create a new osoc edition in the system.",
+        "operationId": "create_osoc_edition",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "header",
+            "description": "The osoc year.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the year and osoc_id of the newly created edition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "year": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/filter": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all filtered osoc editions in the system.",
+        "operationId": "filtered_osoc_editions",
+        "parameters": [
+          {
+            "name": "yearFilter",
+            "in": "header",
+            "description": "The year of the osoc edition.",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "yearSort",
+            "in": "header",
+            "description": "Sorting by year (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all filtered osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/<osoc-id>": {
+      "delete": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to delete an osoc edition.",
+        "operationId": "delete_osoc_edition",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The osoc edition id.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified osoc edition was removed. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Redirects towards GET /project/all.",
+        "operationId": "project",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /project/all"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Attempts to insert a new project into the system.",
+        "operationId": "create_project",
+        "parameters": [
+          {
+            "name": "end_date",
+            "in": "header",
+            "description": "The end date of this project.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "header",
+            "description": "The name of the project.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "osocId",
+            "in": "header",
+            "description": "The id of the osoc .",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "partner",
+            "in": "header",
+            "description": "The partner's name of this project.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "positions",
+            "in": "header",
+            "description": "The amount of positions for the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "header",
+            "description": "The start date of this project.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains info about the newly created project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project/all": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Returns a list of all projects in the system.",
+        "operationId": "all_projects",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all projects.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/All_projects"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project/<project-id>": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Returns the selected project from the system.",
+        "operationId": "get_project_id",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The coaches list contains info about all coaches who supervise this project. The students list contains info about all students who contribute to the project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project_Students_Coaches"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Attempts to modify the project in the system.",
+        "operationId": "modify_project",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "header",
+            "description": "The end date of this project.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "header",
+            "description": "The name of the project.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partner",
+            "in": "header",
+            "description": "The partner's name of this project.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "positions",
+            "in": "header",
+            "description": "The amount of positions for the project.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "start",
+            "in": "header",
+            "description": "The start date of this project.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the new info.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Modify_project"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "project"
+        ],
+        "description": "Attempts to remove the project from the system.",
+        "operationId": "project_id_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified project was removed. The response is an empty object."
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project/<project-id>/draft": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Lists all drafted students of the selected project.",
+        "operationId": "all_students_project",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The students list contains info about all drafted students of this project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Drafted_students_project"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "description": "Add the student to the selected project.",
+        "operationId": "add_student_to_project",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "The selected role for this student.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "studentId",
+            "in": "header",
+            "description": "The id of the selected student.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the role of the student if the student contributes to the project.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Draft_student_project"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "The selected student is not assigned to this project."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "409": {
+            "description": "That role doesn't exist."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project/<project-id>/assignee": {
+      "delete": {
+        "tags": [
+          "project"
+        ],
+        "description": "Removes the student from the project.",
+        "operationId": "project_student_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the project.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "student",
+            "in": "header",
+            "description": "The id of the student.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified student was removed from the project. The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/project/conflicts": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "description": "Returns a list of all project conflicts.",
+        "operationId": "project_conflicts",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains the conflicting projects for the student with id 'student'.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project_conflicts"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/reset": {
+      "post": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Handles a password reset request.",
+        "operationId": "reset_request",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "header",
+            "description": "The email address.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "503": {
+            "description": "Failed to send the email. If you're certain that your email address is correct, then please contact the admin."
+          }
+        }
+      }
+    },
+    "/reset/<reset-id>": {
+      "get": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Checks if a reset code is valid.",
+        "operationId": "reset_check_code",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The code.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The response is an empty object."
+          },
+          "400": {
+            "description": "Failed to update your password. Perhaps you used an invalid key?"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reset"
+        ],
+        "description": "Resets the password if the code and password are valid.",
+        "operationId": "password_reset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The code.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "header",
+            "description": "The new password.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          }
+        }
+      }
+    },
+    "/role": {
+      "get": {
+        "tags": [
+          "role"
+        ],
+        "description": "Redirects towards GET /role/all.",
+        "operationId": "role",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /role/all"
+          }
+        }
+      }
+    },
+    "/role/all": {
+      "get": {
+        "tags": [
+          "role"
+        ],
+        "description": "Returns a list of all roles in the system.",
+        "operationId": "all_roles",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info about all roles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/All_roles"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/role/create": {
+      "post": {
+        "tags": [
+          "role"
+        ],
+        "description": "Attempts to create a role in the system.",
+        "operationId": "create_role",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "header",
+            "description": "The name of the role.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The response contains the name of the newly created role.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_role"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -109,23 +2019,44 @@
         "tags": [
           "student"
         ],
-        "description": "Lists all students in the system.",
+        "description": "Returns a list of all students in the system.",
         "operationId": "all_students",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllStudents"
+            "description": "The data list contains info about all students.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudents"
+                }
+              }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -139,19 +2070,49 @@
         "operationId": "student_id_get",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "description": "The id from the student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\". The 'student.labels' field can be an empty array. The 'student.sollicitation field can be an empty omitted (undefined) if the student has not yet submitted a sollicitation. The 'student.project' field can be omitted (undefined) if the student has not een assigned to a project yet.",
-            "schema": {
-              "$ref": "#/definitions/Student_Id"
+            "description": "The response contains all info about this student.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Student"
+                }
+              }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -163,65 +2124,205 @@
         "operationId": "student_id_delete",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key. - Student ID is parsed from the URL.",
+            "description": "The id of the student.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
+            "description": "The specified student was removed. The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     },
     "/student/<student-id>/suggest": {
-      "post": {
+      "get": {
         "tags": [
           "student"
         ],
-        "description": "Login user suggest if the student is suitable for OSOC.",
-        "operationId": "suggest_student",
+        "description": "Returns a list of all suggestions about this student.",
+        "operationId": "get_student_suggestions",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
+            "description": "The id of the student.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
+            "name": "year",
             "in": "header",
-            "name": "suggestion",
-            "description": "The suggestion for the student.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "reason",
-            "description": "The motivation for the suggestion.",
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "login user id",
-            "description": "The id of the one that made the suggestion.",
-            "required": true,
-            "type": "string"
+            "description": "The osoc year.",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "The suggestion field contains all updated fields. If no field is updated, an Argument error is thrown.",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "description": "The data list contains info about all suggestions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudentSuggestions"
+                }
+              }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "student"
+        ],
+        "description": "A login user suggests if the student is suitable for OSOC.",
+        "operationId": "suggest_student",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the student.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "suggestion",
+            "in": "header",
+            "description": "The suggestion for the student.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "header",
+            "description": "The motivation for the suggestion.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "This contains info about a suggestion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "YES",
+                        "MAYBE",
+                        "NO"
+                      ]
+                    },
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "isFinal": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "senderFirstname": {
+                      "type": "string"
+                    },
+                    "senderLastname": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -235,640 +2336,1165 @@
         "operationId": "confirm_student",
         "parameters": [
           {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "suggestion",
-            "description": "The suggestion for the student.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "motivation",
-            "description": "The motivation for the suggestion.",
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "login user id",
-            "description": "The id of the one that made the confirmation.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The confirmation field contains all updated fields. If no field is updated, an Argument error is thrown.",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      }
-    },
-    "/role/all": {
-      "get": {
-        "tags": [
-          "student"
-        ],
-        "description": "Get all the roles a student can be in OSOC",
-        "operationId": "Get_all_roles",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/AllRoles"
-            }
-          }
-        }
-      }
-    },
-    "/role/create": {
-      "post": {
-        "tags": [
-          "student"
-        ],
-        "description": "Creates a role in ",
-        "operationId": "Create_role",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "role name",
-            "description": "The name of your role",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      }
-    },
-    "/project": {
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Attempts to insert a new project into the system.",
-        "operationId": "create_project",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "name",
-            "description": "The name of the project",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "partner",
-            "description": "The partner's name of this project",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "start_date",
-            "description": "The start date of this project",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "end_date",
-            "description": "The end date of this project",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "positions",
-            "description": "The amount of positions for the project",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "osocId",
-            "description": "The id of the osoc event",
-            "required": true,
-            "type": "number"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/CreateProject"
-            }
-          }
-        }
-      }
-    },
-    "/project/all": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Lists all projects in the system.",
-        "operationId": "all_projects",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/All_projects"
-            }
-          }
-        }
-      }
-    },
-    "/project/<project-id>": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Get the selected project from the system.",
-        "operationId": "get_project_id",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "project_id",
-            "description": "The unique id of the project.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/CreateProject"
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Updates the project in the system.",
-        "operationId": "update_project",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "name",
-            "description": "The name of the project",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "osoc_id",
-            "description": "The id of the osoc edition this project is connected to",
-            "required": false,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "partner",
-            "description": "The partner's name of this project",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "start_date",
-            "description": "The start date of this project",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "end_date",
-            "description": "The end date of this project",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "positions",
-            "description": "The amount of positions for the project",
-            "required": false,
-            "type": "number"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The project field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/CreateProject"
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "project"
-        ],
-        "description": "Removes the given project from the system.",
-        "operationId": "project_id_delete",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
             "name": "id",
-            "description": "The id of the project.",
-            "required": true,
-            "type": "number"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
-            }
-          }
-        }
-      }
-    },
-    "/project/<project-id>/draft": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Lists all students for the selected project.",
-        "operationId": "all_students_project",
-        "parameters": [
-          {
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "description": "The id of the student.",
             "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllStudents"
+              "type": "string"
             }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Add the selected students for the selected project.",
-        "operationId": "add_students_to_project",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
           },
           {
+            "name": "sessionkey",
             "in": "header",
-            "name": "students",
-            "description": "The ids of the selected students.",
+            "description": "Your current session key.",
             "required": true,
-            "type": "array",
-            "items": {
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "header",
+            "description": "The reason for the suggestion.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reply",
+            "in": "header",
+            "description": "The suggestion for the student.",
+            "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\"."
+            "description": "The specified student was confirmed to be added or not. The response is an empty object."
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     },
-    "/coach/all": {
+    "/student/filter": {
       "get": {
         "tags": [
-          "coach"
+          "student"
         ],
-        "description": "Lists all the coaches that are in the system.",
-        "operationId": "all_coaches",
+        "description": "Filters the students with one or more filters.",
+        "operationId": "filter_students",
         "parameters": [
           {
+            "name": "osocYear",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "description": "The year of the osoc edition.",
             "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/AllLoginUser"
+              "type": "number"
             }
-          }
-        }
-      }
-    },
-    "/coach/<coach-id>": {
-      "get": {
-        "tags": [
-          "coach"
-        ],
-        "description": "Get the selected coach from the system.",
-        "operationId": "get_coach_id",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
-            "required": true,
-            "type": "string"
           },
           {
+            "name": "sessionkey",
             "in": "header",
-            "name": "coach_id",
-            "description": "The unique id of the coach.",
+            "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "alumniFilter",
+            "in": "header",
+            "description": "The alumni filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coachFilter",
+            "in": "header",
+            "description": "The student-coach filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailFilter",
+            "in": "header",
+            "description": "The email filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailSort",
+            "in": "header",
+            "description": "Sorting by email (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailStatusFilter",
+            "in": "header",
+            "description": "The email status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "FAILED",
+                "NONE",
+                "SCHEDULED",
+                "SENT"
+              ]
+            }
+          },
+          {
+            "name": "firstNameFilter",
+            "in": "header",
+            "description": "The firstname filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstNameSort",
+            "in": "header",
+            "description": "Sorting by firstname (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastNameFilter",
+            "in": "header",
+            "description": "The lastname filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastNameSort",
+            "in": "header",
+            "description": "Sorting by lastname (asc or desc).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleFilter",
+            "in": "header",
+            "description": "The role filter.",
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "statusFilter",
+            "in": "header",
+            "description": "The status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAYBE",
+                "NO",
+                "YES"
+              ]
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/LoginUserSession"
+            "description": "The data list contains info about all filtered students.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllStudents"
+                }
+              }
             }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/template": {
+      "get": {
+        "tags": [
+          "template"
+        ],
+        "description": "Redirects towards GET /template/all.",
+        "operationId": "template",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /template/all"
           }
         }
       },
       "post": {
         "tags": [
-          "coach"
+          "template"
         ],
-        "description": "Updates the coach in the system.",
-        "operationId": "update_coach",
+        "description": "Creates a new template.",
+        "operationId": "create_template",
         "parameters": [
           {
+            "name": "content",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "description": "The content of the template.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
-            "in": "header",
             "name": "name",
-            "description": "The name of the project.",
-            "type": "string"
-          },
-          {
             "in": "header",
-            "name": "isCoach",
-            "description": "Shows the user is a coach.",
+            "description": "The name of the template.",
             "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "isAdmin",
-            "description": "Shows if the user is a coach.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "accountStatus",
-            "description": "Shows the status of the account.",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The login user field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
             "schema": {
-              "$ref": "#/definitions/Sessionkey"
+              "type": "string"
             }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "coach"
-        ],
-        "description": "Removes the given coach from the system.",
-        "operationId": "coach_id_delete",
-        "parameters": [
+          },
           {
-            "in": "header",
             "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "in": "header",
+            "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cc",
+            "in": "header",
+            "description": "The copy field of the template.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
+            "in": "header",
+            "description": "The subject of the template.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a sessionkey for the next action.",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "description": "The data object contains info about the newly created template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_template"
+                }
+              }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     },
-    "/admin/all": {
+    "/template/all": {
       "get": {
         "tags": [
-          "admin"
+          "template"
         ],
-        "description": "Lists all the users that have a login in the system.",
-        "operationId": "all_login_users",
+        "description": "Returns a list of all templates in the system.",
+        "operationId": "all_templates",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllLoginUser"
+            "description": "The data list contains info about all templates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "owner": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     },
-    "/admin/<admin-id>": {
+    "/template/<template-id>": {
       "get": {
         "tags": [
-          "admin"
+          "template"
         ],
-        "description": "Get the selected admin from the system.",
-        "operationId": "get_admin_id",
+        "description": "Gets a single template with the given id.",
+        "operationId": "get_template",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key.",
+            "description": "The id of the template.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "number"
+            }
           },
           {
+            "name": "sessionkey",
             "in": "header",
-            "name": "login_user_id",
-            "description": "The unique id of the admin.",
+            "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/LoginUserSession"
+            "description": "The data object contains info about this template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Template"
+                }
+              }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
       "post": {
         "tags": [
-          "admin"
+          "template"
         ],
-        "description": "Updates the admin in the system.",
-        "operationId": "update_admin",
+        "description": "Attempts to modify a template.",
+        "operationId": "modify_template",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
+            "description": "The id of the template.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           },
           {
+            "name": "cc",
             "in": "header",
+            "description": "The copy field of the template.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "content",
+            "in": "header",
+            "description": "The content of the template.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "name",
-            "description": "The name of the project.",
-            "type": "string"
+            "in": "header",
+            "description": "The name of the template.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           },
           {
+            "name": "subject",
             "in": "header",
-            "name": "isCoach",
-            "description": "Shows the user is a coach.",
-            "required": true,
-            "type": "number"
-          },
-          {
-            "in": "header",
-            "name": "isAdmin",
-            "description": "Shows if the user is a coach.",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "header",
-            "name": "accountStatus",
-            "description": "Shows the status of the account",
-            "required": true,
-            "type": "string"
+            "description": "The subject of the template.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "The admin field contains all updated fields. If no field is updated, an Argument error is thrown. Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/Sessionkey"
+            "description": "The data object contains the new info of this template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Create_template"
+                }
+              }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
       "delete": {
         "tags": [
-          "admin"
+          "template"
         ],
-        "description": "Removes the given admin from the system.",
-        "operationId": "admin_id_delete",
+        "description": "Attempts to delete a template.",
+        "operationId": "delete_template",
         "parameters": [
           {
+            "name": "id",
             "in": "header",
-            "name": "sessionkey",
-            "description": "Your current session key. - Project ID is parsed from the URL.",
+            "description": "The id of the template.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a sessionkey for the next action.",
+            "description": "The specified template was removed. The response is an empty object."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Redirects towards GET /user/all.",
+        "operationId": "user",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /user/all"
+          }
+        }
+      }
+    },
+    "/user/all": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Returns a list of all users in the system.",
+        "operationId": "all_users",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
             "schema": {
-              "$ref": "#/definitions/Sessionkey"
+              "type": "string"
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info about all users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/user/request": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Creates a new user request.",
+        "operationId": "create_user_request",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "header",
+            "description": "The email of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstname",
+            "in": "header",
+            "description": "The firstname of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "header",
+            "description": "The password of the user.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastname",
+            "in": "header",
+            "description": "The lastname of the user.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The id is the id of the new user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          }
+        }
+      }
+    },
+    "/user/request/<user-id>": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to accept a new user.",
+        "operationId": "accept_user_request",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the new user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_admin",
+            "in": "header",
+            "description": "True if the new user is an admin, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_coach",
+            "in": "header",
+            "description": "True if the new user is a coach, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the id and name of the new user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to delete a user request.",
+        "operationId": "delete_user_request",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The id of the new user.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_admin",
+            "in": "header",
+            "description": "True if the new user is an admin, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_coach",
+            "in": "header",
+            "description": "True if the new user is a coach, else false.",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified user request was denied. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/user/self": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Gets the current user.",
+        "operationId": "get_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user gets his account information back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "login_user": {
+                          "type": "object",
+                          "properties": {
+                            "account_status": {
+                              "type": "string",
+                              "enum": [
+                                "ACTIVATED",
+                                "DISABLED",
+                                "PENDING"
+                              ]
+                            },
+                            "is_admin": {
+                              "type": "boolean"
+                            },
+                            "is_coach": {
+                              "type": "boolean"
+                            },
+                            "login_user_id": {
+                              "type": "number"
+                            },
+                            "password": {
+                              "type": "string"
+                            },
+                            "person": {
+                              "type": "object",
+                              "properties": {
+                                "email": {
+                                  "type": "string"
+                                },
+                                "firstname": {
+                                  "type": "string"
+                                },
+                                "github": {
+                                  "type": "string"
+                                },
+                                "github_id": {
+                                  "type": "string"
+                                },
+                                "lastname": {
+                                  "type": "string"
+                                },
+                                "person_id": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "person_id": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to modify the data of the current user.",
+        "operationId": "modify_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "header",
+            "description": "The name of the user.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "header",
+            "description": "The old and new password.",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newpass": {
+                  "type": "string"
+                },
+                "oldpass": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user associated with the session key has been modified. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/user/filter": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Attempts to filter the users.",
+        "operationId": "filter_users",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailFilter",
+            "in": "header",
+            "description": "The email filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "emailSort",
+            "in": "header",
+            "description": "Sorting by email (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isAdminFilter",
+            "in": "header",
+            "description": "True if the users are admins, else false.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "iscoachFilter",
+            "in": "header",
+            "description": "True if the users are coaches, else false.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nameFilter",
+            "in": "header",
+            "description": "The name filter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nameSort",
+            "in": "header",
+            "description": "Sorting by name (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "statusFilter",
+            "in": "header",
+            "description": "The status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAYBE",
+                "FALSE",
+                "TRUE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains the info about the filtered students.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LoginUser"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -878,797 +3504,943 @@
         "tags": [
           "verify"
         ],
-        "description": "Redirects towards GET /verify/all.",
+        "description": "Attempts to verify if the session key is valid.",
         "operationId": "verify",
-        "responses": {
-          "303": {
-            "description": "http HTTP/2 303 See Location: /verify/all"
-          }
-        }
-      }
-    },
-    "/verify/all": {
-      "get": {
-        "tags": [
-          "verify"
-        ],
-        "description": "Attempts to verify if the session key is valid",
-        "operationId": "all_verify",
         "parameters": [
           {
-            "in": "header",
             "name": "sessionkey",
+            "in": "header",
             "description": "Your current session key.",
             "required": true,
-            "type": "string"
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
-            "schema": {
-              "$ref": "#/definitions/AllVerify"
+            "description": "The response contains the data of the verification.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/Verify"
+                    },
+                    {
+                      "$ref": "#/components/schemas/VerifyValid"
+                    }
+                  ]
+                }
+              }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     }
   },
-  "definitions": {
-    "Sessionkey": {
-      "type": "object",
-      "properties": {
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Sessionkey"
-      }
-    },
-    "Login": {
-      "type": "object",
-      "properties": {
-        "sessionkey": {
-          "type": "string"
-        },
-        "is_admin": {
-          "type": "boolean"
-        },
-        "is_coach": {
-          "type": "boolean"
-        }
-      }
-    },
-    "NameId": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "NameId"
-      }
-    },
-    "NameIdList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/NameId"
-      },
-      "xml": {
-        "name": "NameIdList"
-      }
-    },
-    "CreateStudent": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/NameId"
-        },
-        "sessionkey": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "CreateStudent"
-      }
-    },
-    "AllStudents": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "student": {
-              "type": "object",
-              "properties": {
-                "person": {
-                  "$ref": "#/definitions/Person"
-                },
-                "student_id": {
-                  "type": "number"
-                },
-                "gender": {
-                  "type": "string"
-                },
-                "pronouns": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "phone_number": {
-                  "type": "string"
-                },
-                "nickname": {
-                  "type": "string"
-                },
-                "alumni": {
-                  "type": "boolean"
-                }
-              }
-            },
-            "languages": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "evaluations": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AllStudentEvaluations"
-              }
-            },
-            "jobApplication": {
-              "type": "object",
-              "properties": {
-                "job_application_id": {
-                  "type": "number"
-                },
-                "edus": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "default": "Informatics"
-                  }
-                },
-                "created_at": {
-                  "type": "string",
-                  "example": "2022-03-14 23:10:00+01"
-                },
-                "edu_duration": {
-                  "type": "number",
-                  "default": 5
-                },
-                "edu_institute": {
-                  "type": "string",
-                  "default": "Ghent university"
-                },
-                "edu_level": {
-                  "type": "string",
-                  "default": "Third bachelors degree"
-                },
-                "edu_year": {
-                  "type": "number",
-                  "default": 3
-                },
-                "email_status": {
-                  "type": "string",
-                  "enum": [
-                    "SCHEDULED",
-                    "SENT",
-                    "FAILED",
-                    "NONE",
-                    "DRAFT"
-                  ],
-                  "default": "NONE"
-                },
-                "fun_fact": {
-                  "type": "string",
-                  "default": "I like basketball."
-                },
-                "osoc_id": {
-                  "type": "number"
-                },
-                "responsibilities": {
-                  "type": "string",
-                  "default": "I play basketball from 5pm until 7pm."
-                },
-                "student_coach": {
-                  "type": "boolean"
-                },
-                "student_id": {
-                  "type": "number"
-                },
-                "student_volunteer_info": {
-                  "type": "string",
-                  "default": "Yes, I can work with a student employment agreement in Belgium."
-                },
-                "attachment": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Attachment"
-                  }
-                },
-                "job_application_skill": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/JobApplicationSkill"
-                  }
-                },
-                "applied_role": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/AppliedRole"
-                  }
-                }
-              }
-            },
-            "roles": {
-              "type": "array",
-              "items": {
+  "components": {
+    "schemas": {
+      "LoginUser": {
+        "type": "object",
+        "properties": {
+          "activated": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
+          },
+          "admin": {
+            "type": "boolean"
+          },
+          "coach": {
+            "type": "boolean"
+          },
+          "person_data": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "nullable": true
+              },
+              "github": {
+                "type": "string",
+                "nullable": true,
+                "default": null
+              },
+              "id": {
+                "type": "number"
+              },
+              "name": {
                 "type": "string"
               }
             }
           }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "LoginUser"
         }
       },
-      "xml": {
-        "name": "AllStudents"
-      }
-    },
-    "AllStudentEvaluations": {
-      "type": "object",
-      "properties": {
-        "evaluation": {
-          "items": {
-            "$ref": "#/definitions/Evaluation"
-          }
-        },
-        "osoc": {
-          "items": {
-            "$ref": "#/definitions/Osoc"
-          }
-        }
-      }
-    },
-    "Evaluation": {
-      "type": "object",
-      "properties": {
-        "evaluation_id": {
-          "type": "number"
-        },
-        "decision": {
-          "type": "string",
-          "enum": [
-            "YES",
-            "MAYBE",
-            "NO"
-          ]
-        },
-        "motivation": {
-          "type": "string"
-        },
-        "is_final": {
-          "type": "boolean"
-        }
-      }
-    },
-    "Osoc": {
-      "type": "object",
-      "properties": {
-        "year": {
-          "type": "number"
-        }
-      }
-    },
-    "Person": {
-      "type": "object",
-      "properties": {
-        "person_id": {
-          "type": "number"
-        },
-        "email": {
-          "type": "string"
-        },
-        "firstname": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "github": {
-          "type": "string"
-        }
-      }
-    },
-    "Attachment": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "attachment_id": {
-          "type": "number"
-        },
-        "data": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "CV_URL",
-            "PORTFOLIO_URL",
-            "FILE_URL",
-            "MOTIVATION_STRING",
-            "MOTIVATION_URL"
-          ]
-        }
-      },
-      "xml": {
-        "name": "Attachment"
-      }
-    },
-    "JobApplicationSkill": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "job_application_skill_id": {
-          "type": "number"
-        },
-        "skill": {
-          "type": "string"
-        },
-        "is_best": {
-          "type": "boolean"
-        },
-        "language_id": {
-          "type": "number"
-        },
-        "is_preferred": {
-          "type": "boolean"
-        },
-        "level": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
-    "AppliedRole": {
-      "type": "object",
-      "properties": {
-        "job_application_id": {
-          "type": "number"
-        },
-        "applied_role_id": {
-          "type": "number"
-        },
-        "role_id": {
-          "type": "number"
-        }
-      },
-      "xml": {
-        "name": "JobApplicationSkill"
-      }
-    },
-    "Student_Id_contract": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "info": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Student_Id_contract"
-      }
-    },
-    "Student_Id_project": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "contract": {
-          "$ref": "#/definitions/Student_Id_contract"
-        },
-        "roles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "xml": {
-        "name": "Student_Id_project"
-      }
-    },
-    "Student_Id_data": {
-      "type": "object",
-      "properties": {
-        "firstname": {
-          "type": "string"
-        },
-        "lastname": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        },
-        "pronouns": {
-          "type": "array",
-          "items": {
+      "Login": {
+        "type": "object",
+        "properties": {
+          "account_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "PENDING",
+              "DISABLED"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_coach": {
+            "type": "boolean"
+          },
+          "sessionkey": {
             "type": "string"
           }
         },
-        "phoneNumber": {
-          "type": "string"
-        },
-        "nickname": {
-          "type": "string"
-        },
-        "alumni": {
-          "type": "boolean"
-        },
-        "languages": {
-          "type": "array",
-          "items": {
+        "xml": {
+          "name": "Login"
+        }
+      },
+      "ModifyLoginUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
             "type": "string"
           }
         },
-        "evaluations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/AllStudentEvaluations"
+        "xml": {
+          "name": "ModifyLoginUser"
+        }
+      },
+      "Followup": {
+        "type": "object",
+        "properties": {
+          "application": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "FAILED",
+              "NONE",
+              "SCHEDULED",
+              "SENT"
+            ]
+          },
+          "student": {
+            "type": "number"
           }
         },
-        "jobApplication": {
+        "xml": {
+          "name": "Followup"
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "end_date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "osoc_id": {
+            "type": "number"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "start_date": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Project"
+        }
+      },
+      "Project_coach": {
+        "type": "object",
+        "properties": {
+          "login_user": {
+            "type": "object",
+            "properties": {
+              "is_admin": {
+                "type": "boolean"
+              },
+              "is_coach": {
+                "type": "boolean"
+              },
+              "login_user_id": {
+                "type": "number"
+              },
+              "person": {
+                "$ref": "#/components/schemas/Person"
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "Project_coach"
+        }
+      },
+      "Project_students": {
+        "type": "array",
+        "xml": {
+          "name": "Project_students"
+        },
+        "items": {
           "type": "object",
           "properties": {
-            "job_application_id": {
+            "contract_id": {
               "type": "number"
             },
-            "edus": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "default": "Informatics"
-              }
-            },
-            "created_at": {
-              "type": "string",
-              "example": "2022-03-14 23:10:00+01"
-            },
-            "edu_duration": {
-              "type": "number",
-              "default": 5
-            },
-            "edu_institute": {
-              "type": "string",
-              "default": "Ghent university"
-            },
-            "edu_level": {
-              "type": "string",
-              "default": "Third bachelors degree"
-            },
-            "edu_year": {
-              "type": "number",
-              "default": 3
-            },
-            "email_status": {
+            "contract_status": {
               "type": "string",
               "enum": [
-                "SCHEDULED",
+                "APPROVED",
+                "CANCELLED",
+                "DRAFT",
                 "SENT",
-                "FAILED",
-                "NONE",
-                "DRAFT"
-              ],
-              "default": "NONE"
+                "SIGNED",
+                "WAIT_APPROVAL"
+              ]
             },
-            "fun_fact": {
-              "type": "string",
-              "default": "I like basketball."
-            },
-            "osoc_id": {
-              "type": "number"
-            },
-            "responsibilities": {
-              "type": "string",
-              "default": "I play basketball from 5pm until 7pm."
-            },
-            "student_coach": {
-              "type": "boolean"
-            },
-            "student_id": {
-              "type": "number"
-            },
-            "student_volunteer_info": {
-              "type": "string",
-              "default": "Yes, I can work with a student employment agreement in Belgium."
-            },
-            "attachment": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attachment"
+            "project_role": {
+              "type": "object",
+              "properties": {
+                "positions": {
+                  "type": "number"
+                },
+                "project_id": {
+                  "type": "number"
+                },
+                "project_role_id": {
+                  "type": "number"
+                },
+                "role_id": {
+                  "type": "number"
+                }
               }
             },
-            "job_application_skill": {
+            "student": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/JobApplicationSkill"
+                "$ref": "#/components/schemas/Student"
               }
-            },
-            "applied_role": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/AppliedRole"
+            }
+          }
+        }
+      },
+      "Project_coaches": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Project_coach"
+        }
+      },
+      "Project_Students_Coaches": {
+        "type": "object",
+        "properties": {
+          "coaches": {
+            "$ref": "#/components/schemas/Project_coaches"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "osoc_id": {
+            "type": "number"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "students": {
+            "$ref": "#/components/schemas/Project_students"
+          }
+        },
+        "xml": {
+          "name": "Project_Students_Coaches"
+        }
+      },
+      "Project_list": {
+        "type": "array",
+        "xml": {
+          "name": "ProjectList"
+        },
+        "items": {
+          "$ref": "#/components/schemas/Project_Students_Coaches"
+        }
+      },
+      "All_projects": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Project_list"
+          }
+        },
+        "xml": {
+          "name": "Allprojects"
+        }
+      },
+      "Modify_project": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "end_date": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "number"
+          },
+          "osoc_id": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "Modify_project"
+        }
+      },
+      "Drafted_students_project": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "students": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "APPROVED",
+                    "CANCELLED",
+                    "DRAFT",
+                    "SENT",
+                    "SIGNED",
+                    "WAIT_APPROVAL"
+                  ]
+                },
+                "student": {
+                  "$ref": "#/components/schemas/Student"
+                }
               }
             }
           }
         },
-        "roles": {
-          "type": "array",
-          "items": {
+        "xml": {
+          "name": "Drafted_students_project"
+        }
+      },
+      "Draft_student_project": {
+        "type": "object",
+        "properties": {
+          "drafted": {
+            "type": "boolean"
+          },
+          "role": {
             "type": "string"
           }
+        },
+        "xml": {
+          "name": "Draft_student_project"
         }
       },
-      "xml": {
-        "name": "Student_Id_data"
-      }
-    },
-    "Student_Id": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Student_Id_data"
+      "Project_conflicts": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "projects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "student": {
+                  "type": "number"
+                }
+              }
+            }
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Project_conflicts"
         }
       },
-      "xml": {
-        "name": "Student_Id"
-      }
-    },
-    "Project": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "number"
+      "All_roles": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "role_id": {
+                  "type": "number"
+                }
+              }
+            }
+          }
         },
-        "name": {
-          "type": "string"
-        },
-        "partner": {
-          "type": "string"
-        },
-        "start_date": {
-          "type": "string"
-        },
-        "end_date": {
-          "type": "string"
-        },
-        "positions": {
-          "type": "number"
-        },
-        "osoc_id": {
-          "type": "number"
+        "xml": {
+          "name": "All_roles"
         }
       },
-      "xml": {
-        "name": "Project"
-      }
-    },
-    "CreateProject": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Project"
+      "Create_role": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Create_role"
         }
       },
-      "xml": {
-        "name": "CreateProject"
-      }
-    },
-    "Project_list": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Project"
-      },
-      "xml": {
-        "name": "ProjectList"
-      }
-    },
-    "All_projects": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Project_list"
+      "Student": {
+        "type": "object",
+        "properties": {
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllStudentEvaluations"
+            }
+          },
+          "jobApplication": {
+            "type": "object",
+            "properties": {
+              "applied_role": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AppliedRole"
+                }
+              },
+              "attachment": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "example": "This is actually a date: 2022-03-14 23:10:00+01"
+              },
+              "edus": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "default": "Informatics"
+                }
+              },
+              "edu_duration": {
+                "type": "number"
+              },
+              "edu_institute": {
+                "type": "string",
+                "default": "Ghent university"
+              },
+              "edu_level": {
+                "type": "string",
+                "default": "Third bachelors degree"
+              },
+              "edu_year": {
+                "type": "string",
+                "default": "3"
+              },
+              "email_status": {
+                "type": "string",
+                "default": "NONE",
+                "enum": [
+                  "DRAFT",
+                  "FAILED",
+                  "NONE",
+                  "SCHEDULED",
+                  "SENT"
+                ]
+              },
+              "fun_fact": {
+                "type": "string",
+                "default": "I like basketball."
+              },
+              "job_application_id": {
+                "type": "number"
+              },
+              "job_application_skill": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JobApplicationSkill"
+                }
+              },
+              "osoc_id": {
+                "type": "number"
+              },
+              "responsibilities": {
+                "type": "string",
+                "default": "I play basketball from 5pm until 7pm."
+              },
+              "student_coach": {
+                "type": "boolean"
+              },
+              "student_id": {
+                "type": "number"
+              },
+              "student_volunteer_info": {
+                "type": "string",
+                "default": "Yes, I can work with a student employment agreement in Belgium."
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "student": {
+            "type": "object",
+            "properties": {
+              "alumni": {
+                "type": "boolean"
+              },
+              "gender": {
+                "type": "string"
+              },
+              "nickname": {
+                "type": "string",
+                "nullable": true
+              },
+              "person": {
+                "$ref": "#/components/schemas/Person"
+              },
+              "person_id": {
+                "type": "number"
+              },
+              "phone_number": {
+                "type": "string"
+              },
+              "pronouns": {
+                "type": "string",
+                "nullable": true
+              },
+              "student_id": {
+                "type": "number"
+              }
+            }
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Student"
         }
       },
-      "xml": {
-        "name": "Allprojects"
-      }
-    },
-    "Project_session": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/Project"
+      "AllStudents": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Student"
+            }
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "AllStudents"
         }
       },
-      "xml": {
-        "name": "Project_session"
-      }
-    },
-    "LoginUser": {
-      "type": "object",
-      "properties": {
-        "person_data": {
-          "$ref": "#/definitions/NameId"
+      "AllStudentEvaluations": {
+        "type": "object",
+        "properties": {
+          "evaluation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evaluation"
+            }
+          },
+          "osoc": {
+            "type": "object",
+            "properties": {
+              "year": {
+                "type": "number"
+              }
+            }
+          }
         },
-        "coach": {
-          "type": "boolean"
-        },
-        "admin": {
-          "type": "boolean"
-        },
-        "activated": {
-          "type": "string"
+        "xml": {
+          "name": "AllStudentEvaluations"
         }
       },
-      "xml": {
-        "name": "LoginUser"
-      }
-    },
-    "LoginUserSession": {
-      "type": "object",
-      "properties": {
-        "login person_data": {
-          "$ref": "#/definitions/LoginUser"
+      "AllStudentSuggestions": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "decision": {
+                  "type": "string",
+                  "enum": [
+                    "MAYBE"
+                  ]
+                },
+                "evaluation_id": {
+                  "type": "number"
+                },
+                "isFinal": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "senderFirstname": {
+                  "type": "string"
+                },
+                "senderLastname": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         },
-        "sessionkey": {
-          "$ref": "#/definitions/Sessionkey"
+        "xml": {
+          "name": "AllStudentSuggestions"
         }
       },
-      "xml": {
-        "name": "LoginUser"
-      }
-    },
-    "LoginUserList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/LoginUser"
-      },
-      "xml": {
-        "name": "LoginUserList"
-      }
-    },
-    "AllLoginUser": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/LoginUserList"
+      "Evaluation": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "MAYBE"
+            ]
+          },
+          "evaluation_id": {
+            "type": "number"
+          },
+          "is_final": {
+            "type": "boolean"
+          },
+          "login_user": {
+            "type": "object",
+            "properties": {
+              "login_user_id": {
+                "type": "number"
+              },
+              "person": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "github": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "person_id": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "motivation": {
+            "type": "string"
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "Evaluation"
         }
       },
-      "xml": {
-        "name": "AllLoginUser"
-      }
-    },
-    "AllVerify": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "type": "boolean"
+      "Person": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "github": {
+            "type": "string",
+            "nullable": true
+          },
+          "github_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "person_id": {
+            "type": "number"
+          }
         },
-        "sessionkey": {
-          "type": "string"
-        }
-      }
-    },
-    "Suggestion": {
-      "type": "object",
-      "properties": {
-        "motivation": {
-          "type": "string"
-        },
-        "suggestion": {
-          "type": "string"
-        },
-        "loginuserid": {
-          "type": "number"
-        },
-        "jobapplicationid": {
-          "type": "number"
+        "xml": {
+          "name": "Person"
         }
       },
-      "xml": {
-        "name": "Suggestion"
-      }
-    },
-    "Confirmation": {
-      "type": "object",
-      "properties": {
-        "motivation": {
-          "type": "string"
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "attachment_id": {
+            "type": "number"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CV_URL",
+                "FILE_URL",
+                "MOTIVATION_STRING",
+                "MOTIVATION_URL",
+                "PORTFOLIO_URL"
+              ]
+            }
+          }
         },
-        "confirmation": {
-          "type": "string"
-        },
-        "loginuserid": {
-          "type": "number"
-        },
-        "jobapplicationid": {
-          "type": "number"
+        "xml": {
+          "name": "Attachment"
         }
       },
-      "xml": {
-        "name": "confirmation"
-      }
-    },
-    "Role": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
+      "JobApplicationSkill": {
+        "type": "object",
+        "properties": {
+          "is_best": {
+            "type": "boolean"
+          },
+          "is_preferred": {
+            "type": "boolean"
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "job_application_skill_id": {
+            "type": "number"
+          },
+          "language_id": {
+            "type": "number"
+          },
+          "level": {
+            "type": "number"
+          },
+          "skill": {
+            "type": "string"
+          }
         },
-        "id": {
-          "type": "number"
+        "xml": {
+          "name": "JobApplicationSkill"
         }
       },
-      "xml": {
-        "name": "role"
-      }
-    },
-    "RoleList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Role"
-      },
-      "xml": {
-        "name": "RoleList"
-      }
-    },
-    "AllRoles": {
-      "type": "object",
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/RoleList"
+      "AppliedRole": {
+        "type": "object",
+        "properties": {
+          "applied_role_id": {
+            "type": "number"
+          },
+          "job_application_id": {
+            "type": "number"
+          },
+          "role_id": {
+            "type": "number"
+          }
         },
-        "sessionkey": {
-          "type": "string"
+        "xml": {
+          "name": "JobApplicationSkill"
         }
       },
-      "xml": {
-        "name": "AllRoles"
+      "Template": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "number"
+          }
+        },
+        "xml": {
+          "name": "Template"
+        }
+      },
+      "Create_template": {
+        "type": "object",
+        "properties": {
+          "cc": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "number"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "Create_template"
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "sessionKey": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "UserId"
+        }
+      },
+      "UserIdName": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "UserIdName"
+        }
+      },
+      "Verify": {
+        "required": [
+          "valid"
+        ],
+        "type": "object",
+        "properties": {
+          "account_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_coach": {
+            "type": "boolean"
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "xml": {
+          "name": "Verify"
+        }
+      },
+      "VerifyValid": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }

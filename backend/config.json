@@ -49,7 +49,7 @@
         "github": {
             "argumentMissing": {
                 "http": 409,
-                "reason": "Something whent wrong while authenticating with GitHub."
+                "reason": "Something went wrong while authenticating with GitHub."
             },
             "illegalState": {
                 "http": 409,
@@ -84,7 +84,8 @@
             "", "/api-osoc"
         ],
         "preferred": "/api-osoc",
-        "authScheme": "auth/osoc2"
+        "authScheme": "auth/osoc2",
+        "defaultUserId": 3
     },
 
     "email": {

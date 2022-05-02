@@ -1,5 +1,5 @@
 import express from "express";
-import {InternalTypes, Responses} from "../types";
+import { Responses } from "../types";
 import * as rq from "../request";
 import * as util from "../utility";
 import * as ormRo from "../orm_functions/role";
@@ -10,12 +10,18 @@ import * as ormRo from "../orm_functions/role";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listStudentRoles(req: express.Request): Promise<Responses.StudentList> {
-    return rq.parseRolesAllRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(parsed => {
-            return ormRo.getAllRoles().then(
-                (roles) => Promise.resolve({data : roles, sessionkey : parsed.data.sessionkey}));
+export async function listStudentRoles(
+    req: express.Request
+): Promise<Responses.StudentList> {
+    return rq
+        .parseRolesAllRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(() => {
+            return ormRo.getAllRoles().then((roles) =>
+                Promise.resolve({
+                    data: roles,
+                })
+            );
         });
 }
 
@@ -25,15 +31,16 @@ async function listStudentRoles(req: express.Request): Promise<Responses.Student
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createStudentRole(req: express.Request): Promise<Responses.Keyed<InternalTypes.IdName>> {
-    return rq.parseStudentRoleRequest(req)
-        .then(parsed => util.checkSessionKey(parsed))
-        .then(async parsed => {
-            return ormRo.createRole(parsed.data.name)
-                .then(role => {return Promise.resolve({
-                    data : {name : role.name, id : role.role_id},
-                    sessionkey : parsed.data.sessionkey
-                })});
+export async function createStudentRole(
+    req: express.Request
+): Promise<Responses.PartialStudent> {
+    return rq
+        .parseStudentRoleRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (parsed) => {
+            return ormRo.createRole(parsed.data.name).then((role) => {
+                return Promise.resolve({ name: role.name, id: role.role_id });
+            });
         });
 }
 
@@ -45,13 +52,13 @@ async function createStudentRole(req: express.Request): Promise<Responses.Keyed<
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    util.setupRedirect(router, '/role');
+    util.setupRedirect(router, "/role");
 
     util.route(router, "get", "/all", listStudentRoles);
 
     util.route(router, "post", "/create", createStudentRole);
 
-    util.addAllInvalidVerbs(router, [ "/", "/all", "/create" ]);
+    util.addAllInvalidVerbs(router, ["/", "/all", "/create"]);
 
     return router;
 }

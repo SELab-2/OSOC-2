@@ -1,10 +1,10 @@
-import {prismaMock} from "./singleton";
-import {type_enum} from "@prisma/client";
+import { prismaMock } from "./singleton";
+import { type_enum } from "@prisma/client";
 import {
     createAttachment,
     deleteAllAttachmentsForApplication,
     deleteAttachment,
-    getAttachmentById
+    getAttachmentById,
 } from "../../orm_functions/attachment";
 
 test("should create a new attachment", async () => {
@@ -12,14 +12,18 @@ test("should create a new attachment", async () => {
         attachment_id: 1,
         job_application_id: 1,
         data: ["www.testurl.com"],
-        type: [type_enum.FILE_URL]
-    }
+        type: [type_enum.FILE_URL],
+    };
 
     prismaMock.attachment.create.mockResolvedValue(attachment);
 
-    await expect(createAttachment(attachment.job_application_id, attachment.data, attachment.type))
-        .resolves
-        .toEqual(attachment);
+    await expect(
+        createAttachment(
+            attachment.job_application_id,
+            attachment.data,
+            attachment.type
+        )
+    ).resolves.toEqual(attachment);
 });
 
 test("should delete the attachment with the given id", async () => {
@@ -29,8 +33,8 @@ test("should delete the attachment with the given id", async () => {
         attachment_id: 2,
         job_application_id: 1,
         data: ["www.testurl.com"],
-        type: [type_enum.FILE_URL]
-    }
+        type: [type_enum.FILE_URL],
+    };
 
     prismaMock.attachment.delete.mockResolvedValue(attachment);
 
@@ -38,8 +42,7 @@ test("should delete the attachment with the given id", async () => {
 });
 
 test("should delete all attachments of a job application", async () => {
-
-    const count = { count: 5}
+    const count = { count: 5 };
 
     prismaMock.attachment.deleteMany.mockResolvedValue(count);
     await expect(deleteAllAttachmentsForApplication(1)).resolves.toEqual(count);
@@ -50,8 +53,8 @@ test("should return the found attachment", async () => {
         attachment_id: 2,
         job_application_id: 1,
         data: ["www.testurl.com"],
-        type: [type_enum.FILE_URL]
-    }
+        type: [type_enum.FILE_URL],
+    };
 
     prismaMock.attachment.findUnique.mockResolvedValue(attachment);
 

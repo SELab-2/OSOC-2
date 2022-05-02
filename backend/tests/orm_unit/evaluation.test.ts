@@ -1,13 +1,17 @@
-import {prismaMock} from "./singleton";
-import {decision_enum} from "@prisma/client";
+import { prismaMock } from "./singleton";
+import { decision_enum } from "@prisma/client";
 import {
     checkIfFinalEvaluationExists,
     createEvaluationForStudent,
+    deleteEvaluationsByJobApplication,
+    getEvaluationByPartiesFor,
     getLoginUserByEvaluationId,
-    updateEvaluationForStudent
+    updateEvaluationForStudent,
 } from "../../orm_functions/evaluation";
-import {CreateEvaluationForStudent, UpdateEvaluationForStudent} from "../../orm_functions/orm_types";
-
+import {
+    CreateEvaluationForStudent,
+    UpdateEvaluationForStudent,
+} from "../../orm_functions/orm_types";
 
 test("should return a final evaluation if it exists", async () => {
     const jobApplicationId = 5;
@@ -17,21 +21,23 @@ test("should return a final evaluation if it exists", async () => {
         job_application_id: 0,
         decision: decision_enum.MAYBE,
         motivation: null,
-        is_final: true
-    }
+        is_final: true,
+    };
     prismaMock.evaluation.findFirst.mockResolvedValue(result);
 
-    await expect(checkIfFinalEvaluationExists(jobApplicationId)).resolves.toEqual(result)
+    await expect(
+        checkIfFinalEvaluationExists(jobApplicationId)
+    ).resolves.toEqual(result);
 });
 
 test("should create an evaluation for a student", async () => {
-   const evaluation: CreateEvaluationForStudent = {
-       decision: decision_enum.MAYBE,
-       isFinal: false,
-       jobApplicationId: 0,
-       loginUserId: 0,
-       motivation: undefined
-   }
+    const evaluation: CreateEvaluationForStudent = {
+        decision: decision_enum.MAYBE,
+        isFinal: false,
+        jobApplicationId: 0,
+        loginUserId: 0,
+        motivation: undefined,
+    };
 
     const response = {
         evaluation_id: 0,
@@ -39,11 +45,13 @@ test("should create an evaluation for a student", async () => {
         job_application_id: evaluation.jobApplicationId,
         decision: evaluation.decision,
         motivation: "test",
-        is_final: evaluation.isFinal
-    }
+        is_final: evaluation.isFinal,
+    };
 
-   prismaMock.evaluation.create.mockResolvedValue(response);
-   await expect(createEvaluationForStudent(evaluation)).resolves.toEqual(response);
+    prismaMock.evaluation.create.mockResolvedValue(response);
+    await expect(createEvaluationForStudent(evaluation)).resolves.toEqual(
+        response
+    );
 });
 
 test("should update the final evaluation that already exists", async () => {
@@ -52,8 +60,8 @@ test("should update the final evaluation that already exists", async () => {
         isFinal: true,
         jobApplicationId: 0,
         loginUserId: 0,
-        motivation: undefined
-    }
+        motivation: undefined,
+    };
 
     const response = {
         evaluation_id: 0,
@@ -61,8 +69,8 @@ test("should update the final evaluation that already exists", async () => {
         job_application_id: evaluationFinal.jobApplicationId,
         decision: evaluationFinal.decision,
         motivation: "test",
-        is_final: evaluationFinal.isFinal
-    }
+        is_final: evaluationFinal.isFinal,
+    };
 
     const existingEvaluation = {
         evaluation_id: 0,
@@ -70,12 +78,14 @@ test("should update the final evaluation that already exists", async () => {
         job_application_id: 1,
         decision: decision_enum.NO,
         motivation: "test",
-        is_final: true
-    }
+        is_final: true,
+    };
     prismaMock.evaluation.findFirst.mockResolvedValue(existingEvaluation);
     prismaMock.evaluation.create.mockResolvedValue(response);
     prismaMock.evaluation.update.mockResolvedValue(response);
-    await expect(createEvaluationForStudent(evaluationFinal)).resolves.toEqual(response)
+    await expect(createEvaluationForStudent(evaluationFinal)).resolves.toEqual(
+        response
+    );
 });
 
 test("should update the evaluation", async () => {
@@ -83,8 +93,8 @@ test("should update the evaluation", async () => {
         decision: decision_enum.NO,
         evaluation_id: 0,
         loginUserId: 0,
-        motivation: "undefined"
-    }
+        motivation: "undefined",
+    };
 
     const response = {
         evaluation_id: 0,
@@ -92,24 +102,62 @@ test("should update the evaluation", async () => {
         job_application_id: 1,
         decision: decision_enum.NO,
         motivation: "test",
-        is_final: true
-    }
+        is_final: true,
+    };
 
     prismaMock.evaluation.update.mockResolvedValue(response);
 
-    await expect(updateEvaluationForStudent(evaluation)).resolves.toEqual(response);
-})
+    await expect(updateEvaluationForStudent(evaluation)).resolves.toEqual(
+        response
+    );
+});
 
 test("should return the loginUser with his info that made this evaluation", async () => {
-
     const result = {
         evaluation_id: 7,
         login_user_id: 0,
         job_application_id: 0,
         decision: decision_enum.MAYBE,
         motivation: null,
-        is_final: true
-    }
+        is_final: true,
+    };
     prismaMock.evaluation.findUnique.mockResolvedValue(result);
     await expect(getLoginUserByEvaluationId(7)).resolves.toEqual(result);
+});
+
+test("should return all evaluations created by a user for a student in an osoc edition", async () => {
+    const evaluations = [
+        {
+            evaluation_id: 1,
+            login_user_id: 1,
+            decision: decision_enum.YES,
+            motivation: "Definitely unicorn, all in for it",
+            is_final: true,
+            job_application_id: 1,
+        },
+        {
+            evaluation_id: 2,
+            login_user_id: 1,
+            decision: decision_enum.MAYBE,
+            motivation: "Definitely unicorn, all in for it",
+            is_final: false,
+            job_application_id: 1,
+        },
+    ];
+
+    prismaMock.evaluation.findMany.mockResolvedValue(evaluations);
+
+    await expect(getEvaluationByPartiesFor(1, 1, 1)).resolves.toEqual(
+        evaluations
+    );
+});
+
+it("should delete evaluations by a job application", async () => {
+    const numberOfDeletions = { count: 5 };
+
+    prismaMock.evaluation.deleteMany.mockResolvedValue(numberOfDeletions);
+
+    await expect(deleteEvaluationsByJobApplication(1)).resolves.toEqual(
+        numberOfDeletions
+    );
 });

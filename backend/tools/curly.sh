@@ -39,6 +39,10 @@ function main() {
         read value
         if [[ $args = '' ]]; then
             args="\"$key\": \"$value\""
+        elif [[ ${value:0:1} = '{' ]]; then
+            # send JSON objects correctly
+            args="$args, \"$key\": $value"
+            echo "Will send '$value' as JSON-object"
         else
             args="$args, \"$key\": \"$value\""
         fi
