@@ -1,7 +1,3 @@
-/**
- * Projects overview page
- * TODO
- */
 import { NextPage } from "next";
 import { useContext, useEffect, useState } from "react";
 import SessionContext from "../contexts/sessionProvider";
