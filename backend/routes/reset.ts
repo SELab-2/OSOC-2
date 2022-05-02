@@ -68,7 +68,9 @@ export async function sendMail(mail: Email) {
  * sent. If not returns an error. Route: `/reset`
  * @param req Request body should be of form { email: string }
  */
-async function requestReset(req: express.Request): Promise<Responses.Empty> {
+export async function requestReset(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq.parseRequestResetRequest(req).then((parsed) =>
         ormP.getPasswordPersonByEmail(parsed.email).then(async (person) => {
             if (person == null || person.login_user == null) {
@@ -106,7 +108,9 @@ async function requestReset(req: express.Request): Promise<Responses.Empty> {
  * Use route `/reset/:id` with a 'GET' request.
  * @param req
  */
-async function checkCode(req: express.Request): Promise<Responses.Empty> {
+export async function checkCode(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseCheckResetCodeRequest(req)
         .then((parsed) => ormPR.findResetByCode(parsed.code))
@@ -119,13 +123,19 @@ async function checkCode(req: express.Request): Promise<Responses.Empty> {
         .catch(() => Promise.reject(config.apiErrors.reset.resetFailed));
 }
 
+function setSessionKey(req: express.Request, key: string): void {
+    req.headers.authorization = config.global.authScheme + " " + key;
+}
+
 /**
  * Route that will reset the password when the code and password are valid.
  * Use route `/reset/:id` with a 'POST' request with body of form
  * { password: string }
  * @param req
  */
-async function resetPassword(req: express.Request): Promise<Responses.Key> {
+export async function resetPassword(
+    req: express.Request
+): Promise<Responses.Key> {
     return rq.parseResetPasswordRequest(req).then((parsed) =>
         ormPR.findResetByCode(parsed.code).then(async (code) => {
             if (code == null || code.valid_until < new Date(Date.now()))
@@ -162,6 +172,10 @@ async function resetPassword(req: express.Request): Promise<Responses.Key> {
                             Promise.resolve({ sessionkey: key.session_key })
                         );
                 })
+                .then((v) => {
+                    setSessionKey(req, v.sessionkey);
+                    return v;
+                })
                 .catch(() =>
                     Promise.reject(config.apiErrors.reset.resetFailed)
                 );
@@ -178,7 +192,7 @@ export function getRouter(): express.Router {
     router.get("/:id", (req, res) =>
         util.respOrErrorNoReinject(res, checkCode(req))
     );
-    util.routeKeyOnly(router, "post", "/:id", resetPassword);
+    util.route(router, "post", "/:id", resetPassword);
 
     util.addAllInvalidVerbs(router, ["/", "/:id"]);
 
@@ -189,7 +203,7 @@ export function getRouter(): express.Router {
  * Returns the html body for the email with the reset code applied.
  * @param resetID The ID that validates the password reset.
  */
-function createEmail(resetID: string) {
+export function createEmail(resetID: string) {
     return `<!DOCTYPE html>
         <html lang="en">
         <head>

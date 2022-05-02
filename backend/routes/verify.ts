@@ -10,7 +10,9 @@ import * as util from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function verifyKey(req: express.Request): Promise<Responses.VerifyKey> {
+export async function verifyKey(
+    req: express.Request
+): Promise<Responses.VerifyKey> {
     const parsedRequest = await rq.parseVerifyRequest(req);
     // verify works on PENDING accounts
     const checkedSessionKey = await util

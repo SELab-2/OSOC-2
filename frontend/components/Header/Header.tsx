@@ -7,8 +7,15 @@ import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
 
 export const Header: React.FC = () => {
-    const { sessionKey, setSessionKey, isAdmin, setIsAdmin, setIsCoach } =
-        useContext(SessionContext);
+    const {
+        sessionKey,
+        isVerified,
+        setSessionKey,
+        isAdmin,
+        setIsAdmin,
+        setIsCoach,
+        setIsVerified,
+    } = useContext(SessionContext);
 
     const router = useRouter();
 
@@ -28,8 +35,11 @@ export const Header: React.FC = () => {
         if (setIsCoach) {
             setIsCoach(false);
         }
+        if (setIsVerified) {
+            setIsVerified(false);
+        }
         router.push("/login").then(() => {
-            // After being redirected to the login page, let the backend now that the user has logged out.
+            // After being redirected to the login page, let the backend know that the user has logged out.
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: "DELETE",
                 headers: {
@@ -64,21 +74,32 @@ export const Header: React.FC = () => {
                     router.pathname !== "/login" ? "" : styles.displayNone
                 }`}
             >
-                {sessionKey !== "" && !router.pathname.startsWith("/reset") ? (
+                {isVerified && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/students"}>Students</Link>
                 ) : null}
-                {sessionKey !== "" && !router.pathname.startsWith("/reset") ? (
+                {isVerified && !router.pathname.startsWith("/reset") ? (
                     <Link href={"/projects"}>Projects</Link>
                 ) : null}
+                {isVerified && !router.pathname.startsWith("/reset") ? (
+                    <Link href={"/osocs"}>Osoc Editions</Link>
+                ) : null}
                 {sessionKey !== "" &&
+                isVerified &&
                 isAdmin &&
                 !router.pathname.startsWith("/reset") ? (
                     <Link href={"/users"}>Manage Users</Link>
                 ) : null}
-                {router.pathname !== "/login" &&
+                {isVerified &&
+                router.pathname !== "/login" &&
                 !router.pathname.startsWith("/reset") ? (
+                    <Link href={"/settings"}>Settings</Link>
+                ) : null}
+                {(isVerified &&
+                    router.pathname !== "/login" &&
+                    !router.pathname.startsWith("/reset")) ||
+                router.pathname.startsWith("/pending") ? (
                     <button onClick={logOut}>Log out</button>
-                ) : router.pathname.startsWith("/reset") ? (
+                ) : isVerified && router.pathname.startsWith("/reset") ? (
                     <button onClick={logIn}>Log in</button>
                 ) : null}
             </div>

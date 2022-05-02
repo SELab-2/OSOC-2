@@ -2,6 +2,11 @@
  * File to store all types, interfaces, enums... that are used across multiple files
  */
 
+export enum Display {
+    LIMITED,
+    FULL,
+}
+
 export enum Sort {
     ASCENDING = "asc",
     DESCENDING = "desc",
@@ -83,17 +88,41 @@ export enum Decision {
     NO = "NO",
 }
 
+export interface EvaluationCoach {
+    evaluation_id: number;
+    senderFirstname: string;
+    senderLastname: string;
+    reason: string;
+    decision: Decision;
+    isFinal: boolean;
+}
+
+export interface Evaluation {
+    evaluation_id: number;
+    decision: Decision;
+    motivation: string;
+    is_final: boolean;
+}
+
+export enum AttachmentType {
+    CV_URL = "CV_URL",
+    PORTFOLIO_URL = "PORTFOLIO_URL",
+    FILE_URL = "FILE_URL",
+    MOTIVATION_STRING = "MOTIVATION_STRING",
+    MOTIVATION_URL = "MOTIVATION_URL",
+}
+
+export interface Attachment {
+    job_application_id: number;
+    attachment_id: number;
+    data: string;
+    type: AttachmentType;
+}
+
 export interface Student {
     evaluations: [
         {
-            evaluation: [
-                {
-                    evaluation_id: number;
-                    decision: Decision;
-                    motivation: string;
-                    is_final: boolean;
-                }
-            ];
+            evaluation: [Evaluation];
             osoc: {
                 year: number;
             };
@@ -108,21 +137,14 @@ export interface Student {
                 role_id: number;
             }
         ];
-        attachment: [
-            {
-                job_application_id: number;
-                attachment_id: number;
-                data: string;
-                type: string; // TODO -- possibly an enum
-            }
-        ];
+        attachment: [Attachment];
         created_at: Date;
         edu_duration: string;
         edu_institute: string;
         edu_level: string;
         edu_year: string;
         edus: [string];
-        email_status: string; // TODO -- make an enum, i don't know the exact values
+        email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
         job_application_skill: [
@@ -169,13 +191,23 @@ export interface LoginUser {
         firstname: string;
         lastname: string;
         github: string;
+        github_id: number;
     };
     login_user_id: number;
     person_id: number;
     is_admin: boolean;
     is_coach: boolean;
-    password: string;
     account_status: AccountStatus;
+}
+
+export interface OsocEdition {
+    osoc_id: number;
+    year: number;
+    _count: ProjectCount;
+}
+
+export interface ProjectCount {
+    project: number;
 }
 
 export interface Role {

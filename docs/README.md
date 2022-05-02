@@ -7,7 +7,7 @@ This folder contains all the required documentations:
 - [Sequence Diagram](Sequence%20Diagram)
 - [Component Diagram](Component%20Diagram)
 - [Technical Manual](technicalManual.md)
-- [User Manual](user_manual.md)
+- [User Manual](User%20Manual.pdf)
 - [API Manual](API)
 - [Programming Conventions](conventions.md)
 - [How to contribute](contribute.md)

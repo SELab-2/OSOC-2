@@ -99,11 +99,11 @@ export interface UpdateLoginUser {
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is an admin
      */
-    isAdmin: boolean;
+    isAdmin?: boolean;
     /**
      * undefined if unchanged or the new boolean value that indicates if this login user is a coach
      */
-    isCoach: boolean;
+    isCoach?: boolean;
     /**
      * undefined if unchanged or the new account status that indicates the login user status
      */
@@ -615,6 +615,11 @@ export type FilterSort = "asc" | "desc" | undefined;
  * type to use in a filter query for strings
  */
 export type FilterString = string | undefined;
+
+/**
+ * type to use in a filter query for numbers
+ */
+export type FilterNumber = number | undefined;
 
 /**
  * type to use in a filter query for array of numbers

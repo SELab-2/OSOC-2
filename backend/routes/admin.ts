@@ -2,9 +2,13 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormL from "../orm_functions/login_user";
+import * as ormP from "../orm_functions/person";
+import * as ormSe from "../orm_functions/session_key";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
+import { errors } from "../utility";
+import { removeAllKeysForLoginUserId } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all admins in the system.
@@ -12,10 +16,12 @@ import * as util from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
+export async function listAdmins(
+    req: express.Request
+): Promise<Responses.AdminList> {
     return rq
         .parseAdminAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async () =>
             ormL
                 .searchAllAdminLoginUsers(true)
@@ -49,25 +55,45 @@ async function listAdmins(req: express.Request): Promise<Responses.AdminList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modAdmin(req: express.Request): Promise<Responses.Admin> {
+export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
     return rq
         .parseUpdateAdminRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
-                .updateLoginUser({
-                    loginUserId: parsed.data.id,
-                    isAdmin: parsed.data.isAdmin,
-                    isCoach: parsed.data.isCoach,
-                    accountStatus: parsed.data
-                        .accountStatus as account_status_enum,
-                })
-                .then((res) =>
-                    Promise.resolve({
-                        id: res.login_user_id,
-                        name: res.person.firstname + " " + res.person.lastname,
+            if (parsed.data.id !== parsed.userId) {
+                return ormL
+                    .updateLoginUser({
+                        loginUserId: parsed.data.id,
+                        isAdmin: parsed.data.isAdmin,
+                        isCoach: parsed.data.isCoach,
+                        accountStatus: parsed.data
+                            .accountStatus as account_status_enum,
                     })
-                );
+                    .then(async (res) => {
+                        console.log(res.is_admin);
+                        console.log(res.is_coach);
+                        if (!res.is_admin && !res.is_coach) {
+                            await ormL.updateLoginUser({
+                                loginUserId: res.login_user_id,
+                                isAdmin: false,
+                                isCoach: false,
+                                accountStatus: account_status_enum.DISABLED,
+                            });
+                            await ormSe.removeAllKeysForLoginUserId(
+                                res.login_user_id
+                            );
+                        }
+                        return Promise.resolve({
+                            id: res.login_user_id,
+                            name:
+                                res.person.firstname +
+                                " " +
+                                res.person.lastname,
+                        });
+                    });
+            }
+            return Promise.reject(errors.cookInvalidID());
         });
 }
 
@@ -77,14 +103,48 @@ async function modAdmin(req: express.Request): Promise<Responses.Admin> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteAdmin(req: express.Request): Promise<Responses.Empty> {
+export async function deleteAdmin(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteAdminRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
             return ormL
-                .deleteLoginUserFromDB(parsed.data.id)
-                .then(() => Promise.resolve({}));
+                .searchLoginUserByPerson(parsed.data.id)
+                .then(async (logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.login_user_id !== parsed.userId
+                    ) {
+                        return removeAllKeysForLoginUserId(logUs.login_user_id)
+                            .then(() => {
+                                return Promise.resolve({});
+                            })
+                            .then(async () => {
+                                return ormL
+                                    .deleteLoginUserByPersonId(parsed.data.id)
+                                    .then(async () => {
+                                        return ormP
+                                            .deletePersonById(parsed.data.id)
+                                            .then(() => Promise.resolve({}))
+                                            .catch(() =>
+                                                Promise.reject(
+                                                    errors.cookServerError()
+                                                )
+                                            );
+                                    })
+                                    .catch(() =>
+                                        Promise.reject(errors.cookServerError())
+                                    );
+                            })
+                            .catch(() =>
+                                Promise.reject(errors.cookServerError())
+                            );
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
         });
 }
 
