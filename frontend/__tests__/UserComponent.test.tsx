@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom";
 import { User } from "../components/User/User";
 import { AccountStatus, LoginUser } from "../types";
+import "@testing-library/jest-dom";
 
 const removeUser = (user: LoginUser) => {
     console.log(user);
@@ -19,12 +20,12 @@ describe("User component tests", () => {
                 firstname: "aa",
                 lastname: "aga",
                 github: "",
+                github_id: 0,
             },
             login_user_id: 1,
             person_id: 1,
             is_admin: true,
             is_coach: true,
-            password: "pass",
             account_status: AccountStatus.ACTIVATED,
         };
         ReactDOM.render(
