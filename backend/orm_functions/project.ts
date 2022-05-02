@@ -417,9 +417,6 @@ export async function filterProjects(
             const fullyAssignedX = x.positions === sum_x ? 1 : 0;
             const fullyAssignedY = y.positions === sum_y ? 1 : 0;
 
-            console.log(fullyAssignedX);
-            console.log(fullyAssignedY);
-
             return fullyAssignedX - fullyAssignedY;
         });
     }
