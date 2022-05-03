@@ -200,8 +200,8 @@ export async function modProject(
         osocId: checkedId.osocId,
     });
 
-    if (checkedId.addRoles !== undefined) {
-        for (const changeRolePositions of checkedId.addRoles.roles) {
+    if (checkedId.modifyRoles !== undefined) {
+        for (const changeRolePositions of checkedId.modifyRoles.roles) {
             const foundRole = await ormRole.getRole(changeRolePositions.id);
             if (foundRole !== null) {
                 await ormPrRole.updateProjectRole({

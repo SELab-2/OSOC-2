@@ -887,7 +887,7 @@ test("Can parse update project request", () => {
         start: Date.now(),
         end: Date.now(),
         positions: 69,
-        addRoles: {
+        modifyRoles: {
             roles: [
                 {
                     id: 5,
@@ -944,7 +944,7 @@ test("Can parse update project request", () => {
     d3.id = id;
     d3.sessionkey = key;
     d3.end = undefined;
-    d3.addRoles = undefined;
+    d3.modifyRoles = undefined;
     d3.deleteRoles = undefined;
     d4.id = id;
 

@@ -569,7 +569,7 @@ export async function parseUpdateProjectRequest(
         "start",
         "end",
         "positions",
-        "addRoles",
+        "modifyRoles",
         "deleteRoles",
     ];
 
@@ -584,7 +584,7 @@ export async function parseUpdateProjectRequest(
             start: maybe(req.body, "start"),
             end: maybe(req.body, "end"),
             positions: maybe(req.body, "positions"),
-            addRoles: maybe(req.body, "addRoles"),
+            modifyRoles: maybe(req.body, "modifyRoles"),
             deleteRoles: maybe(req.body, "deleteRoles"),
         });
     });
