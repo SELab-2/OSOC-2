@@ -108,19 +108,9 @@ export async function deleteCoach(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
-                .searchLoginUserByPerson(parsed.data.id)
-                .then((logUs) => {
-                    if (
-                        logUs !== null &&
-                        logUs.login_user_id !== parsed.userId
-                    ) {
-                        return ormLU
-                            .deleteLoginUserFromDB(parsed.data.id)
-                            .then(() => Promise.resolve({}));
-                    }
-                    return Promise.reject(errors.cookInvalidID());
-                });
+            return ormLU
+                .deleteLoginUserFromDB(parsed.data.id)
+                .then(() => Promise.resolve({}));
         });
 }
 

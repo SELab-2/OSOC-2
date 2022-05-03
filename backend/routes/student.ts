@@ -247,8 +247,11 @@ export async function createStudentSuggestion(
         });
     }
 
-    const loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
-    if (loginUser === null) {
+    let loginUser;
+    if (newEvaluation.login_user_id) {
+        loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
+    }
+    if (loginUser === null || loginUser === undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
