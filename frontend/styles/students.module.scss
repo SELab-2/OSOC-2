@@ -1,9 +1,7 @@
 .students {
   width: clamp(18rem, 94vw, 60rem);
-  padding-inline: 2vw;
   margin-inline: auto;
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
-
 }
 
 .students.limited {
@@ -18,9 +16,41 @@
   flex-direction: column;
   gap: 1.5rem;
   max-height: 75rem;
-  padding: 2vw;
-  overflow: scroll;
+  overflow-y: scroll;
+  padding: 2rem;
 }
+
+/* Adds drop shadown on scroll */
+.studentCards {
+  background:
+          /* Shadow Cover TOP */
+          linear-gradient(
+                          white 30%,
+                          transparent
+          ) center top,
+            /* Shadow Cover BOTTOM */
+          linear-gradient(
+                          transparent,
+                          white 70%
+          ) center bottom,
+            /* Shadow TOP */
+          radial-gradient(
+                          farthest-side at 50% 0,
+                          rgba(0, 0, 0, 0.2),
+                          transparent
+          ) center top,
+            /* Shadow BOTTOM */
+          radial-gradient(
+                          farthest-side at 50% 100%,
+                          rgba(0, 0, 0, 0.2),
+                          transparent
+          ) center bottom;
+
+  background-repeat: no-repeat;
+  background-size: 100% 4rem;
+  background-attachment: local, local, scroll, scroll;
+}
+
 
 .studentCards.limited {
   max-width: 20rem;
