@@ -184,10 +184,10 @@ export const User: React.FC<{
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p data-test={"userName"}>{name}</p>
+                <p data-testid={"userName"}>{name}</p>
                 {status === AccountStatus.PENDING ? (
                     <button
-                        data-test={"pendingButton"}
+                        data-testid={"pendingButton"}
                         className={styles.pending}
                         onClick={activateUser}
                     >
@@ -196,16 +196,16 @@ export const User: React.FC<{
                 ) : null}
             </div>
 
-            <p data-test={"userEmail"}>{email}</p>
+            <p data-testid={"userEmail"}>{email}</p>
             <div className={styles.buttons}>
                 <div
-                    data-test={"buttonIsAdmin"}
+                    data-testid={"buttonIsAdmin"}
                     className={styles.buttonContainer}
                     onClick={toggleIsAdmin}
                 >
                     <div className={styles.button}>
                         <Image
-                            data-test={"imageIsAdmin"}
+                            data-testid={"imageIsAdmin"}
                             className={styles.buttonImage}
                             width={30}
                             height={30}
@@ -215,13 +215,13 @@ export const User: React.FC<{
                     </div>
                 </div>
                 <div
-                    data-test={"buttonIsCoach"}
+                    data-testid={"buttonIsCoach"}
                     className={styles.buttonContainer}
                     onClick={toggleIsCoach}
                 >
                     <div className={styles.button}>
                         <Image
-                            data-test={"imageIsCoach"}
+                            data-testid={"imageIsCoach"}
                             className={styles.buttonImage}
                             src={isCoach ? CoachIconColor : CoachIcon}
                             width={30}
@@ -231,13 +231,13 @@ export const User: React.FC<{
                     </div>
                 </div>
                 <div
-                    data-test={"buttonStatus"}
+                    data-testid={"buttonStatus"}
                     className={styles.buttonContainer}
                     onClick={toggleStatus}
                 >
                     <div className={styles.button}>
                         <Image
-                            data-test={"imageStatus"}
+                            data-testid={"imageStatus"}
                             className={styles.buttonImage}
                             src={
                                 status === AccountStatus.DISABLED
@@ -246,13 +246,17 @@ export const User: React.FC<{
                             }
                             width={30}
                             height={30}
-                            alt={"Disabled"}
+                            alt={
+                                status === AccountStatus.DISABLED
+                                    ? "Person is disabled"
+                                    : "Person is not disabled"
+                            }
                         />
                     </div>
                 </div>
             </div>
             <button
-                data-test={"buttonDelete"}
+                data-testid={"buttonDelete"}
                 className={`delete ${styles.delete}`}
                 onClick={deleteUser}
             />
