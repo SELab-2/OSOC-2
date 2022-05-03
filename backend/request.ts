@@ -538,7 +538,7 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId"],
+        ["name", "partner", "start", "end", "positions", "osocId", "roles"],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -549,6 +549,7 @@ export async function parseNewProjectRequest(
             end: req.body.end,
             osocId: req.body.osocId,
             positions: req.body.positions,
+            roles: req.body.roles,
         })
     );
 }
@@ -562,7 +563,15 @@ export async function parseNewProjectRequest(
 export async function parseUpdateProjectRequest(
     req: express.Request
 ): Promise<Requests.ModProject> {
-    const options = ["name", "partner", "start", "end", "positions"];
+    const options = [
+        "name",
+        "partner",
+        "start",
+        "end",
+        "positions",
+        "add_roles",
+        "delete_roles",
+    ];
 
     return hasFields(req, [], types.id).then(() => {
         if (!atLeastOneField(req, options)) return rejector();
@@ -575,6 +584,8 @@ export async function parseUpdateProjectRequest(
             start: maybe(req.body, "start"),
             end: maybe(req.body, "end"),
             positions: maybe(req.body, "positions"),
+            addRoles: maybe(req.body, "add_roles"),
+            deleteRoles: maybe(req.body, "delete_roles"),
         });
     });
 }
