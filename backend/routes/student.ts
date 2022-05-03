@@ -414,6 +414,16 @@ export async function filterStudents(
 
     const studentlist = [];
 
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.osocYear === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
     for (const student of students) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
@@ -430,16 +440,6 @@ export async function filterStudents(
             } else {
                 return Promise.reject(errors.cookInvalidID());
             }
-        }
-
-        let year = new Date().getFullYear();
-        if (checkedSessionKey.data.osocYear === undefined) {
-            const latestOsocYear = await ormOs.getLatestOsoc();
-            if (latestOsocYear !== null) {
-                year = latestOsocYear.year;
-            }
-        } else {
-            year = checkedSessionKey.data.year;
         }
 
         const evaluations = await ormJo.getEvaluationsByYearForStudent(
