@@ -4136,10 +4136,37 @@
       "StudentInfo": {
         "type": "object",
         "properties": {
-          "evaluations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AllStudentEvaluations"
+          "evaluation": {
+            "type": "object",
+            "properties": {
+              "evaluations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "MAYBE",
+                        "NO",
+                        "Yes"
+                      ]
+                    },
+                    "is_final": {
+                      "type": "boolean"
+                    },
+                    "motivation": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "osoc": {
+                "type": "number"
+              }
             }
           },
           "jobApplication": {
@@ -4282,28 +4309,6 @@
           "name": "AllStudents"
         }
       },
-      "AllStudentEvaluations": {
-        "type": "object",
-        "properties": {
-          "evaluation": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Evaluation"
-            }
-          },
-          "osoc": {
-            "type": "object",
-            "properties": {
-              "year": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "xml": {
-          "name": "AllStudentEvaluations"
-        }
-      },
       "AllStudentSuggestions": {
         "type": "object",
         "properties": {
@@ -4339,57 +4344,6 @@
         },
         "xml": {
           "name": "AllStudentSuggestions"
-        }
-      },
-      "Evaluation": {
-        "type": "object",
-        "properties": {
-          "decision": {
-            "type": "string",
-            "enum": [
-              "MAYBE"
-            ]
-          },
-          "evaluation_id": {
-            "type": "number"
-          },
-          "is_final": {
-            "type": "boolean"
-          },
-          "login_user": {
-            "type": "object",
-            "properties": {
-              "login_user_id": {
-                "type": "number"
-              },
-              "person": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string"
-                  },
-                  "firstname": {
-                    "type": "string"
-                  },
-                  "github": {
-                    "type": "string"
-                  },
-                  "lastname": {
-                    "type": "string"
-                  },
-                  "person_id": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          "motivation": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Evaluation"
         }
       },
       "Person": {
