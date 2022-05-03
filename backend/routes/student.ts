@@ -432,8 +432,19 @@ export async function filterStudents(
             }
         }
 
-        const evaluations = await ormJo.getStudentEvaluationsTotal(
-            student.student_id
+        let year = new Date().getFullYear();
+        if (checkedSessionKey.data.osocYear === undefined) {
+            const latestOsocYear = await ormOs.getLatestOsoc();
+            if (latestOsocYear !== null) {
+                year = latestOsocYear.year;
+            }
+        } else {
+            year = checkedSessionKey.data.year;
+        }
+
+        const evaluations = await ormJo.getEvaluationsByYearForStudent(
+            student.student_id,
+            year
         );
 
         for (const job_application_skill of jobApplication.job_application_skill) {
@@ -451,7 +462,12 @@ export async function filterStudents(
         studentlist.push({
             student: student,
             jobApplication: jobApplication,
-            evaluations: evaluations,
+            evaluation: {
+                evaluations: evaluations !== null ? evaluations.evaluation : [],
+                osoc: {
+                    year: year,
+                },
+            },
             roles: roles,
         });
     }
