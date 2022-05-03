@@ -4,4 +4,5 @@ module.exports = {
     testEnvironment: "node",
     setupFiles: ["./tests/tests-setup.ts"],
     setupFilesAfterEnv: ["./tests/orm_integration/integration_setup.ts"],
+    testSequencer: "./tests/jest_sequencer.js",
 };
