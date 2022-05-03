@@ -22,7 +22,8 @@ export const StudentOverview: React.FC<{
         studentId: number,
         evalutations: EvaluationCoach[]
     ) => void;
-}> = ({ student, updateEvaluations }) => {
+    clearSelection: () => void;
+}> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
@@ -214,6 +215,10 @@ export const StudentOverview: React.FC<{
         [Decision.NO]: ForbiddenIconColor,
     };
 
+    const close = () => {
+        clearSelection();
+    };
+
     return (
         <div>
             <Modal
@@ -237,6 +242,10 @@ export const StudentOverview: React.FC<{
                 </div>
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
+            <div
+                className={`delete is-large ${styles.close}`}
+                onClick={close}
+            />
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>

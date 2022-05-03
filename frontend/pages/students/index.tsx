@@ -1,29 +1,23 @@
 import { NextPage } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StudentCard } from "../../components/StudentCard/StudentCard";
 import { Display, EvaluationCoach, Student } from "../../types";
 import styles from "../../styles/students.module.scss";
-import { useRouter } from "next/router";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
 import { StudentFilter } from "../../components/Filter/StudentFilter/StudentFilter";
 
 const Index: NextPage = () => {
     const [students, setStudents] = useState<Student[]>([]);
-    const router = useRouter();
     // the index of the selected student if the given id matches with one of the fetched students
     const [selectedStudent, setSelectedStudent] = useState<number>(-1);
     const [display, setDisplay] = useState<Display>(Display.FULL);
 
     /**
-     * Updates the list of students and sets the selected student
+     * Updates the list of students and sets the selected student index
      * @param filteredStudents
-     * @param selectedStudent
      */
-    const setFilteredStudents = (
-        filteredStudents: Array<Student>,
-        selectedStudent: number
-    ) => {
+    const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
         console.log(filteredStudents);
@@ -32,6 +26,35 @@ const Index: NextPage = () => {
         } else {
             setDisplay(Display.LIMITED);
         }
+    };
+
+    /**
+     * We add a listener for keypresses
+     */
+    useEffect(() => {
+        document.body.addEventListener("keydown", handleKeyPress);
+        return () => {
+            document.body.removeEventListener("keydown", handleKeyPress);
+        };
+    }, []);
+
+    /**
+     * Closes the student overview if escape is pressed
+     * @param e
+     */
+    const handleKeyPress = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+            setDisplay(Display.FULL);
+            setSelectedStudent(-1);
+        }
+    };
+
+    /**
+     * Clears the current selection
+     */
+    const clearSelection = () => {
+        setDisplay(Display.FULL);
+        setSelectedStudent(-1);
     };
 
     /**
@@ -55,7 +78,6 @@ const Index: NextPage = () => {
         }
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
-        router.push(`/students?id=${student_id}`).then();
     };
 
     // Maps student id's to their index in the student list, so that we can update the infor
@@ -83,15 +105,15 @@ const Index: NextPage = () => {
                     display === Display.LIMITED ? styles.limited : ""
                 }`}
             >
+                <StudentFilter
+                    display={display}
+                    setFilteredStudents={setFilteredStudents}
+                />
                 <div
                     className={`${styles.studentCards} ${
                         display === Display.LIMITED ? styles.limited : ""
                     }`}
                 >
-                    <StudentFilter
-                        display={display}
-                        setFilteredStudents={setFilteredStudents}
-                    />
                     {students.map((student, index) => {
                         const id = student.student.student_id;
                         id_to_index[id] = index;
@@ -128,6 +150,7 @@ const Index: NextPage = () => {
                     <StudentOverview
                         updateEvaluations={updateStudentEvaluation}
                         student={students[selectedStudent]}
+                        clearSelection={clearSelection}
                     />
                 ) : null}
             </div>
