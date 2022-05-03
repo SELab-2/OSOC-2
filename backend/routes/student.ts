@@ -168,9 +168,9 @@ export async function deleteStudent(
         .then(async (parsed) => {
             return ormSt
                 .deleteStudent(parsed.data.id)
-                .then(() =>
+                .then((student) =>
                     ormP
-                        .deletePersonById(parsed.data.id)
+                        .deletePersonById(student.person_id)
                         .then(() => Promise.resolve({}))
                 );
         });
