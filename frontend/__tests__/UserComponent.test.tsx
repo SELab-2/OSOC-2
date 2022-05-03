@@ -2,7 +2,7 @@ import { User } from "../components/User/User";
 import { AccountStatus, LoginUser } from "../types";
 import "@testing-library/jest-dom";
 import fetchMock from "jest-fetch-mock";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 
 fetchMock.enableMocks();
 
@@ -51,7 +51,7 @@ describe("User component tests", () => {
         fetchMock.resetMocks();
     });
 
-    test("Test for valid login person", () => {
+    test("Test for valid login person", async () => {
         render(<User user={userAdminCoach} removeUser={removeUser} />);
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
@@ -65,14 +65,9 @@ describe("User component tests", () => {
         expect(screen.getByTestId("userEmail")!.firstChild!.nodeValue).toBe(
             userAdminCoach.person.email
         );
-        fetchMock.mockOnce(
-            JSON.stringify({ id: -1, name: "testTest", success: true })
-        );
 
         expect(screen.getByTestId("buttonIsAdmin")).toBeInTheDocument();
         expect(screen.getByTestId("imageIsAdmin")).toBeInTheDocument();
-        fireEvent.click(screen.getByTestId("buttonIsAdmin"));
-        expect(screen.getByTestId("buttonIsAdmin").onclick).toBeCalledTimes(1);
 
         expect(screen.getByTestId("buttonStatus")).toBeInTheDocument();
         expect(screen.getByTestId("imageStatus")).toBeInTheDocument();
@@ -80,15 +75,14 @@ describe("User component tests", () => {
             screen.getByAltText("Person is not disabled")
         ).toBeInTheDocument();
 
-        const mockedStatusbuttonClick = jest.fn();
-        fireEvent.click(screen.getByTestId("buttonStatus"));
-        expect(mockedStatusbuttonClick).toBeCalledTimes(1);
+        fetchMock.mockOnce(
+            JSON.stringify({ id: -1, name: "testTest", success: true })
+        );
+        await act(async () => {
+            screen.getByTestId("buttonStatus").click();
+        });
 
-        //TODO
-        expect(screen.queryByAltText("Person is disabled")).toBeNull();
-        expect(
-            screen.getByAltText("Person is not disabled")
-        ).not.toBeInTheDocument();
+        expect(screen.getByAltText("Person is disabled")).toBeInTheDocument();
     });
 
     test("Test for invalid person", () => {
