@@ -114,6 +114,7 @@ const Index: NextPage = () => {
                         display === Display.LIMITED ? styles.limited : ""
                     }`}
                 >
+                    <div className={styles.topShadowCaster} />
                     {students.map((student, index) => {
                         const id = student.student.student_id;
                         id_to_index[id] = index;
@@ -143,6 +144,7 @@ const Index: NextPage = () => {
                             </div>
                         );
                     })}
+                    <div className={styles.bottomShadowCaster} />
                 </div>
                 {selectedStudent !== -1 &&
                 students[selectedStudent] !== undefined ? (

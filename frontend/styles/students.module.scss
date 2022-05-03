@@ -2,6 +2,7 @@
   width: clamp(18rem, 94vw, 60rem);
   margin-inline: auto;
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
+  position: relative;
 }
 
 .students.limited {
@@ -17,40 +18,9 @@
   gap: 1.5rem;
   max-height: 75rem;
   overflow-y: scroll;
-  padding: 2rem;
+  padding-block: 4rem;
+  padding-inline: 2rem;
 }
-
-/* Adds drop shadown on scroll */
-.studentCards {
-  background:
-          /* Shadow Cover TOP */
-          linear-gradient(
-                          white 30%,
-                          transparent
-          ) center top,
-            /* Shadow Cover BOTTOM */
-          linear-gradient(
-                          transparent,
-                          white 70%
-          ) center bottom,
-            /* Shadow TOP */
-          radial-gradient(
-                          farthest-side at 50% 0,
-                          rgba(0, 0, 0, 0.2),
-                          transparent
-          ) center top,
-            /* Shadow BOTTOM */
-          radial-gradient(
-                          farthest-side at 50% 100%,
-                          rgba(0, 0, 0, 0.2),
-                          transparent
-          ) center bottom;
-
-  background-repeat: no-repeat;
-  background-size: 100% 4rem;
-  background-attachment: local, local, scroll, scroll;
-}
-
 
 .studentCards.limited {
   max-width: 20rem;
@@ -64,5 +34,26 @@
   flex-direction: column;
   cursor: pointer;
   width: 100%;
+}
+
+.topShadowCaster {
+  background: linear-gradient(180deg, var(--neutral-100), transparent);
+  min-height: 3rem;
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+  margin-block: -4rem;
+  margin-inline: -2rem;
+}
+
+.bottomShadowCaster {
+  background: linear-gradient(0deg, var(--neutral-100), transparent);
+  min-height: 3rem;
+  width: 100%;
+  position: absolute;
+  top: 100%;
+  z-index: 1;
+  margin-top: -2rem;
+  margin-inline: -2rem;
 }
 
