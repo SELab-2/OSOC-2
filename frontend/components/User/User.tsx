@@ -31,6 +31,12 @@ export const User: React.FC<{
         setStatus(user.account_status);
     }, [user]);
 
+    useEffect(() => {
+        if (!isAdmin && !isCoach) {
+            setStatus(AccountStatus.DISABLED);
+        }
+    }, [isAdmin, isCoach]);
+
     const setUserRole = async (
         route: string,
         changed_val: string,

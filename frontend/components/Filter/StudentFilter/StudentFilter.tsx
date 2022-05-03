@@ -1,6 +1,7 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import {
+    Display,
     EmailStatus,
     getNextSort,
     Role,
@@ -20,8 +21,9 @@ import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
-}> = ({ setFilteredStudents }) => {
-    const { getSessionKey } = useContext(SessionContext);
+    display: Display;
+}> = ({ setFilteredStudents, display }) => {
+    const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
     const [firstNameFilter, setFirstNameFilter] = useState<string>("");
@@ -48,8 +50,8 @@ export const StudentFilter: React.FC<{
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
-        const sessionKey =
-            getSessionKey != undefined ? await getSessionKey() : "";
+        const { sessionKey } =
+            getSession != undefined ? await getSession() : { sessionKey: "" };
         const responseRoles = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
             {
@@ -72,12 +74,22 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
+    /**
+     * Load data on initial page load
+     */
     useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then(() => search());
-        } else {
+        if (router.query.toString() === "/students") {
             search().then();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query]);
+
+    useEffect(() => {
+        if (roles.length === 0) {
+            fetchRoles().then();
+        }
+        search().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         firstNameSort,
         lastNameSort,
@@ -244,9 +256,12 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/students${query}`);
+        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
+        // await router.push(`/students${query}`);
 
-        const sessionKey = getSessionKey ? await getSessionKey() : "";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         if (sessionKey !== "") {
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
@@ -261,7 +276,6 @@ export const StudentFilter: React.FC<{
             )
                 .then((response) => response.json())
                 .then((json) => {
-                    console.log(json);
                     if (!json.success) {
                         return { success: false };
                     } else return json;
@@ -276,83 +290,98 @@ export const StudentFilter: React.FC<{
 
     return (
         <div className={styles.studentfilter}>
-            <div className={styles.query}>
-                <div onClick={toggleFirstNameSort}>
-                    Firstname
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                firstNameSort === Sort.ASCENDING
-                                    ? styles.up
-                                    : ""
-                            } ${
-                                firstNameSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+            <div
+                className={`${
+                    display === Display.LIMITED
+                        ? styles.contents
+                        : styles.studentfilterinputs
+                }`}
+            >
+                <div className={styles.query}>
+                    <div onClick={toggleFirstNameSort}>
+                        Firstname
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    firstNameSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    firstNameSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setFirstNameFilter(e.target.value)}
+                    />
                 </div>
 
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setFirstNameFilter(e.target.value)}
-                />
-
-                <div onClick={toggleLastNameSort}>
-                    Lastname
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                lastNameSort === Sort.ASCENDING ? styles.up : ""
-                            } ${
-                                lastNameSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+                <div className={styles.query}>
+                    <div onClick={toggleLastNameSort}>
+                        Lastname
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    lastNameSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    lastNameSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setLastNameFilter(e.target.value)}
+                    />
                 </div>
 
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setLastNameFilter(e.target.value)}
-                />
-            </div>
-
-            <div className={styles.query}>
-                <div onClick={toggleEmailSort}>
-                    Email
-                    <div className={styles.triangleContainer}>
-                        <div
-                            className={`${
-                                emailSort === Sort.ASCENDING ? styles.up : ""
-                            } ${
-                                emailSort === Sort.NONE
-                                    ? styles.dot
-                                    : styles.triangle
-                            }`}
-                        />
+                <div className={styles.query}>
+                    <div onClick={toggleEmailSort}>
+                        Email
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${
+                                    emailSort === Sort.ASCENDING
+                                        ? styles.up
+                                        : ""
+                                } ${
+                                    emailSort === Sort.NONE
+                                        ? styles.dot
+                                        : styles.triangle
+                                }`}
+                            />
+                        </div>
                     </div>
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setEmailFilter(e.target.value)}
+                    />
                 </div>
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="Search.."
-                    onChange={(e) => setEmailFilter(e.target.value)}
-                />
-                Osoc edition
-                {/* Maybe dropdown */}
-                <input
-                    className={`input ${styles.input}`}
-                    type="text"
-                    placeholder="2022"
-                    onChange={(e) => setOsocYear(e.target.value)}
-                />
+
+                <div className={styles.query}>
+                    Osoc edition
+                    {/* Maybe dropdown */}
+                    <input
+                        className={`input ${styles.input}`}
+                        type="text"
+                        placeholder="Search.."
+                        onChange={(e) => setOsocYear(e.target.value)}
+                    />
+                </div>
             </div>
 
             <div className={styles.studentButtonsContainer}>

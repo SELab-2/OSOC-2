@@ -29,6 +29,7 @@ export async function addSessionKey(
  * @returns the loginUser associated with the key in a promise if the keys is valid otherwise an error in a promise
  */
 export async function checkSessionKey(key: string) {
+    console.log("key: " + key);
     return await prisma.session_keys.findFirst({
         where: {
             AND: [{ session_key: key }, { valid_until: { gte: new Date() } }],

@@ -84,7 +84,8 @@
             "", "/api-osoc"
         ],
         "preferred": "/api-osoc",
-        "authScheme": "auth/osoc2"
+        "authScheme": "auth/osoc2",
+        "defaultUserId": 3
     },
 
     "email": {

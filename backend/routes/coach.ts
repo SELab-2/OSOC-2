@@ -5,6 +5,9 @@ import * as ormLU from "../orm_functions/login_user";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
+import * as ormSe from "../orm_functions/session_key";
+import { errors } from "../utility";
+import * as ormL from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -12,10 +15,12 @@ import * as util from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
+export async function listCoaches(
+    req: express.Request
+): Promise<Responses.CoachList> {
     return rq
         .parseCoachAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async () =>
             ormLU
                 .searchAllCoachLoginUsers(true)
@@ -46,25 +51,46 @@ async function listCoaches(req: express.Request): Promise<Responses.CoachList> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function modCoach(req: express.Request): Promise<Responses.PartialCoach> {
+export async function modCoach(
+    req: express.Request
+): Promise<Responses.PartialCoach> {
     return rq
         .parseUpdateCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormLU
-                .updateLoginUser({
-                    loginUserId: parsed.data.id,
-                    isAdmin: parsed.data.isAdmin,
-                    isCoach: parsed.data.isCoach,
-                    accountStatus: parsed.data
-                        .accountStatus as account_status_enum,
-                })
-                .then((res) =>
-                    Promise.resolve({
-                        id: res.login_user_id,
-                        name: res.person.firstname + " " + res.person.lastname,
+            if (parsed.data.id !== parsed.userId) {
+                return ormLU
+                    .updateLoginUser({
+                        loginUserId: parsed.data.id,
+                        isAdmin: parsed.data.isAdmin,
+                        isCoach: parsed.data.isCoach,
+                        accountStatus: parsed.data
+                            .accountStatus as account_status_enum,
                     })
-                );
+                    .then(async (res) => {
+                        if (!res.is_admin && !res.is_coach) {
+                            await ormSe.removeAllKeysForLoginUserId(
+                                res.login_user_id
+                            );
+                            await ormL.updateLoginUser({
+                                loginUserId: res.login_user_id,
+                                isAdmin: false,
+                                isCoach: false,
+                                accountStatus: account_status_enum.DISABLED,
+                            });
+                        }
+                        return Promise.resolve({
+                            id: res.login_user_id,
+                            name:
+                                res.person.firstname +
+                                " " +
+                                res.person.lastname,
+                        });
+                    });
+            } else {
+                return Promise.reject(errors.cookInvalidID());
+            }
         });
 }
 
@@ -74,14 +100,27 @@ async function modCoach(req: express.Request): Promise<Responses.PartialCoach> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteCoach(req: express.Request): Promise<Responses.Empty> {
+export async function deleteCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteCoachRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormLU
-                .deleteLoginUserFromDB(parsed.data.id)
-                .then(() => Promise.resolve({}));
+            return ormL
+                .searchLoginUserByPerson(parsed.data.id)
+                .then((logUs) => {
+                    if (
+                        logUs !== null &&
+                        logUs.login_user_id !== parsed.userId
+                    ) {
+                        return ormLU
+                            .deleteLoginUserFromDB(parsed.data.id)
+                            .then(() => Promise.resolve({}));
+                    }
+                    return Promise.reject(errors.cookInvalidID());
+                });
         });
 }
 
@@ -91,7 +130,7 @@ async function deleteCoach(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getCoachRequests(
+export async function getCoachRequests(
     req: express.Request
 ): Promise<Responses.CoachList> {
     return rq

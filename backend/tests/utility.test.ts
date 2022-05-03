@@ -5,12 +5,28 @@ import { mockDeep } from "jest-mock-extended";
 import * as session_key from "../orm_functions/session_key";
 import * as sessionKey from "../routes/session_key.json";
 
+import {
+    expectRouter,
+    expectRouterThrow,
+    getInvalidEndpointError,
+    getInvalidVerbEndpointError,
+    getMockRouter,
+} from "./mocking/mocks";
+
 jest.mock("../orm_functions/session_key");
 const session_keyMock = session_key as jest.Mocked<typeof session_key>;
 
 import * as login_user from "../orm_functions/login_user";
 jest.mock("../orm_functions/login_user");
 const login_userMock = login_user as jest.Mocked<typeof login_user>;
+
+import * as student from "../orm_functions/student";
+jest.mock("../orm_functions/student");
+const studentMock = student as jest.Mocked<typeof student>;
+
+import * as project from "../orm_functions/project";
+jest.mock("../orm_functions/project");
+const projectMock = project as jest.Mocked<typeof project>;
 
 import * as crypto from "crypto";
 jest.mock("crypto");
@@ -452,7 +468,69 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on invalid session key", async () => {
+test("utility.checkSessionKey fails on valid session key (disabled)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            firstname: "Bob",
+            lastname: "Test",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on valid session key (disabled, false)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            firstname: "Bob",
+            lastname: "Test",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj, false)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on invalid session key (1)", async () => {
     session_keyMock.checkSessionKey.mockReset();
     session_keyMock.checkSessionKey.mockRejectedValue(new Error());
 
@@ -464,6 +542,33 @@ test("utility.checkSessionKey fails on invalid session key", async () => {
 
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on invalid session key (2)", async () => {
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue(null);
+
+    await expect(
+        util.checkSessionKey({
+            sessionkey: "key",
+        })
+    ).rejects.toStrictEqual(util.errors.cookUnauthenticated());
+
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey fails on non-existent users", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue(null);
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456,
+    });
+
+    return expect(
+        util.checkSessionKey({ sessionkey: "123" }, false)
+    ).rejects.toStrictEqual(errors.cookUnauthenticated());
 });
 
 test(
@@ -691,4 +796,301 @@ test("utility.getOrDefault returns the correct values", () => {
     expect(util.getOrDefault(null, 1)).toBe(1);
     expect(util.getOrDefault(undefined, "hello")).toBe("hello");
     expect(util.getOrDefault(27, 59)).toBe(27);
+});
+
+test("utility.getOrReject behaves correctly", () => {
+    return Promise.all([
+        expect(util.getOrReject("hello")).resolves.toBe("hello"),
+        expect(util.getOrReject<string>(null)).rejects.toBe(
+            util.errors.cookNoDataError()
+        ),
+        expect(util.getOrReject<string>(undefined)).rejects.toBe(
+            util.errors.cookNoDataError()
+        ),
+    ]);
+});
+
+test("utility.addInvalidVerbs adds callbacks", () => {
+    const router = getMockRouter();
+    util.addInvalidVerbs(router, "/test");
+
+    const prm = ["get", "delete", "post"].map((x) => {
+        const req = getMockReq();
+        req.method = x;
+        req.path = "/test";
+        const res = getMockRes();
+        Promise.resolve()
+            .then(() => router(req, res.res))
+            .then(() => {
+                const err = util.errors.cookInvalidVerb(req);
+                expect(res.res.status).toHaveBeenCalledWith(err.http);
+                expect(res.res.send).toHaveBeenCalledWith({
+                    success: false,
+                    reason: err.reason,
+                });
+            });
+    });
+
+    return Promise.all([prm]);
+});
+
+test("utility.addAllInvalidVerbs adds multiple callbacks", () => {
+    const router = getMockRouter();
+    const eps = ["/", "/test", "/test2"];
+    util.addAllInvalidVerbs(router, eps);
+
+    const prm = ["get", "delete", "post"]
+        .map((v) =>
+            eps.map((e) => {
+                const req = getMockReq();
+                const res = getMockRes().res;
+                req.method = v;
+                req.path = e;
+
+                const err = util.errors.cookInvalidVerb(req);
+                Promise.resolve()
+                    .then(() => router(req, res))
+                    .then(() => {
+                        expect(res.status).toHaveBeenCalledWith(err.http);
+                        expect(res.send).toHaveBeenCalledWith({
+                            success: false,
+                            reason: err.reason,
+                        });
+                    });
+            })
+        )
+        .flat();
+    return Promise.all(prm);
+});
+
+test("utility.route installs exactly one route", async () => {
+    const router = getMockRouter();
+    const cb = () => {
+        console.log("RETURNING");
+        return Promise.resolve({ sessionkey: "abcd", data: {} });
+    };
+    const path = "/";
+    const verb = "get";
+
+    util.route(router, verb, path, cb);
+
+    // correct
+    const req1 = getMockReq();
+    const res1 = getMockRes().res;
+    req1.path = path;
+    req1.method = verb;
+
+    // shouldn't throw
+    await Promise.resolve()
+        .then(() => router(req1, res1))
+        .then(() => {
+            expect(res1.status).toHaveBeenCalledWith(500);
+        });
+
+    // incorrect ep
+    const req2 = getMockReq();
+    const res2 = getMockRes().res;
+    req2.path = "/test";
+    req2.method = "get";
+    expect(
+        Promise.resolve().then(() => router(req2, res2))
+    ).rejects.toStrictEqual(getInvalidEndpointError("/test"));
+
+    // incorrect verb/ep
+    const req3 = getMockReq();
+    const res3 = getMockRes().res;
+    req3.path = path;
+    req3.method = "post";
+    expect(
+        Promise.resolve().then(() => router(req3, res3))
+    ).rejects.toStrictEqual(getInvalidVerbEndpointError("post", "/"));
+});
+
+test("utility.routeKeyOnly installs exactly one route", async () => {
+    const router = getMockRouter();
+    const cb = () => {
+        console.log("RETURNING");
+        return Promise.resolve({ sessionkey: "abcd", data: {} });
+    };
+    const path = "/";
+    const verb = "get";
+
+    util.routeKeyOnly(router, verb, path, cb);
+
+    // correct
+    const req1 = getMockReq();
+    const res1 = getMockRes().res;
+    req1.path = path;
+    req1.method = verb;
+
+    // shouldn't throw
+    await Promise.resolve()
+        .then(() => router(req1, res1))
+        .then(() => {
+            expect(res1.status).toHaveBeenCalledWith(200);
+        });
+
+    // incorrect ep
+    const req2 = getMockReq();
+    const res2 = getMockRes().res;
+    req2.path = "/test";
+    req2.method = "get";
+    expect(
+        Promise.resolve().then(() => router(req2, res2))
+    ).rejects.toStrictEqual(getInvalidEndpointError("/test"));
+
+    // incorrect verb/ep
+    const req3 = getMockReq();
+    const res3 = getMockRes().res;
+    req3.path = path;
+    req3.method = "post";
+    expect(
+        Promise.resolve().then(() => router(req3, res3))
+    ).rejects.toStrictEqual(getInvalidVerbEndpointError("post", "/"));
+});
+
+test("utility.isValidID checks IDs", async () => {
+    studentMock.getStudent.mockReset();
+    projectMock.getProjectById.mockReset();
+
+    studentMock.getStudent.mockImplementation((id) => {
+        if (id == 1) {
+            return Promise.resolve({
+                student_id: 1,
+                person_id: 5,
+                gender: "Apache Attack Helicopter",
+                pronouns: "vroom/vroom/vroom",
+                phone_number: "0469 420 420",
+                nickname: "jeff",
+                alumni: false,
+                person: {
+                    person_id: 5,
+                    email: null,
+                    github: null,
+                    github_id: null,
+                    firstname: "jeffrey",
+                    lastname: "jan",
+                },
+            });
+        }
+        return Promise.resolve(null);
+    });
+
+    projectMock.getProjectById.mockImplementation((id) => {
+        if (id == 1) {
+            return Promise.resolve({
+                project_id: 5,
+                name: "Jeff's Battle Bots",
+                osoc_id: 516645164126546,
+                partner: "Jeff Himself",
+                description: "Nothing special and definitely nothing illegal",
+                start_date: new Date(Date.now()),
+                end_date: new Date(Date.now()),
+                positions: 42069,
+            });
+        }
+        return Promise.resolve(null);
+    });
+
+    const err = util.errors.cookInvalidID();
+
+    return Promise.all([
+        expect(
+            util.isValidID({ id: 1, sessionkey: "" }, "student")
+        ).resolves.toStrictEqual({ id: 1, sessionkey: "" }),
+        expect(
+            util.isValidID({ id: 1, sessionkey: "" }, "project")
+        ).resolves.toStrictEqual({ id: 1, sessionkey: "" }),
+        expect(
+            util.isValidID({ id: 2, sessionkey: "" }, "student")
+        ).rejects.toStrictEqual(err),
+        expect(
+            util.isValidID({ id: 2, sessionkey: "" }, "project")
+        ).rejects.toStrictEqual(err),
+    ]);
+});
+
+test("utility.setupRedirect sets up a single redirect", async () => {
+    const router = getMockRouter();
+    util.setupRedirect(router, "");
+
+    // valid
+    const req1 = getMockReq();
+    const res1 = getMockRes().res;
+    req1.path = "/";
+    req1.method = "get";
+    // Promise.resolve().then(() => router(req1, res1)).then(() => {
+    await expectRouter(router, "/", "get", req1, res1);
+    expect(res1.status).toHaveBeenCalledWith(303);
+    expect(res1.header).toHaveBeenCalledWith({ Location: "/api-osoc/all" });
+    expect(res1.send).toHaveBeenCalled();
+    // });
+
+    // incorrect ep
+    const req2 = getMockReq();
+    const res2 = getMockRes().res;
+    req2.path = "/test";
+    req2.method = "get";
+    await expectRouterThrow(
+        router,
+        "/test",
+        "get",
+        req2,
+        res2,
+        getInvalidEndpointError("/test")
+    );
+
+    // incorrect verb/ep
+    const req3 = getMockReq();
+    const res3 = getMockRes().res;
+    req3.path = "/";
+    req3.method = "post";
+    await expectRouterThrow(
+        router,
+        "/",
+        "post",
+        req3,
+        res3,
+        getInvalidVerbEndpointError("post", "/")
+    );
+});
+
+test("utility.queryToBody copies queries to body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = {};
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody: query has priority over body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody can handle empty query", () => {
+    const req = getMockReq();
+    const query = {};
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual({ key: "othervalue" });
+    expect(req.query).toStrictEqual({});
+});
+
+test("utility.mutable should check if a user is mutable", async () => {
+    expect(util.mutable("str", config.global.defaultUserId)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+    expect(util.mutable("str", 845321)).resolves.toBe("str");
 });

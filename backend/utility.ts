@@ -292,6 +292,7 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(
         .checkSessionKey(obj.sessionkey)
         .then(async (uid) => {
             if (uid) {
+                console.log("uid: " + uid.login_user_id);
                 return ormLoUs
                     .getLoginUserById(uid.login_user_id)
                     .then((login_user) => {
@@ -442,6 +443,9 @@ export function routeKeyOnly(
     callback: RouteCallback<Responses.Key>
 ): void {
     console.log("[WARNING]: routeKeyOnly is deprecated. Use route instead.");
+    console.log("Stack trace:");
+    console.log("------------");
+    console.log(new Error().stack);
     router[verb](path, (req: express.Request, res: express.Response) =>
         respOrErrorNoReinject(
             res,
@@ -464,7 +468,7 @@ export async function isValidID<T extends Requests.IdRequest>(
         project: (await ormPr.getProjectById(obj.id)) != null,
     };
 
-    return table in returnObj && returnObj[table] != null
+    return table in returnObj && returnObj[table] != null && returnObj[table]
         ? Promise.resolve(obj)
         : Promise.reject(errors.cookInvalidID());
 }
@@ -510,4 +514,11 @@ export function queryToBody(req: express.Request) {
         req.body[key] = req.query[key];
     }
     return req;
+}
+
+export function mutable<T>(obj: T, targetid: number): Promise<T> {
+    console.log(targetid);
+    if (targetid === config.global.defaultUserId)
+        return Promise.reject(errors.cookInvalidID());
+    return Promise.resolve(obj);
 }

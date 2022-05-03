@@ -1,9 +1,11 @@
 import {
     account_status_enum,
+    decision_enum,
     email_status_enum,
     type_enum,
 } from "@prisma/client";
 import express from "express";
+import { FilterSort } from "./orm_functions/orm_types";
 
 /**
  *  Interface for API errors. Specifies an HTTP status code and error reason.
@@ -291,6 +293,11 @@ export namespace InternalTypes {
     export interface User {}
 
     /**
+     *  Represents an osoc edition, with all associated data.
+     */
+    export interface OsocEdition {}
+
+    /**
      *  Represents a check of the key, holds the key aswell as boolean value.
      */
     export interface CheckKey {}
@@ -340,6 +347,11 @@ export namespace InternalTypes {
         end_date: string;
         positions: number;
     }
+
+    /**
+     *  Represents a project, with all associated data.
+     */
+    export interface ProjectFilter {}
 
     /**
      *  Represents the drafted students of a project. Usually these will only
@@ -498,6 +510,12 @@ export namespace Responses {
     export interface FormAttachment extends InternalTypes.FormAttachment {}
 
     /**
+     *  A user response is the keyed version of the user and their associated
+     * data.
+     */
+    export interface User extends InternalTypes.User {}
+
+    /**
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
@@ -511,6 +529,19 @@ export namespace Responses {
     export interface UserList {
         data: InternalTypes.User[];
     }
+
+    /**
+     *
+     */
+    export interface OsocEditionList {
+        data: InternalTypes.OsocEdition[];
+    }
+
+    /**
+     *  A osoc edition response is the keyed version of the osoc edition and their associated
+     * data.
+     */
+    export interface OsocEdition extends InternalTypes.OsocEdition {}
 
     /**
      *
@@ -609,6 +640,13 @@ export namespace Responses {
     }
 
     /**
+     *  A project filter list is a list of projects
+     */
+    export interface ProjectFilterList {
+        data: InternalTypes.ProjectFilter;
+    }
+
+    /**
      *  An admin list response is the keyed version of the list of admins.
      */
     export interface AdminList {
@@ -636,6 +674,19 @@ export namespace Responses {
     export interface StudentList {
         data: InternalTypes.Student[];
     }
+
+    /**
+     *  An EvaluationCoach response.
+     */
+    export interface EvaluationCoach {
+        evaluation_id: number;
+        senderFirstname: string;
+        senderLastname: string;
+        reason: string | null;
+        decision: InternalTypes.Suggestion;
+        isFinal: boolean;
+    }
+
     /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
@@ -646,8 +697,11 @@ export namespace Responses {
     export interface TemplateList {
         data: InternalTypes.ShortTemplate[];
     }
+
     export interface Template extends InternalTypes.Template {}
+
     export interface SingleFollowup extends InternalTypes.FollowupStatus {}
+
     export interface FollowupList {
         data: InternalTypes.FollowupStatus[];
     }
@@ -717,9 +771,43 @@ export namespace Requests {
         name?: string;
     }
 
+    export interface StudentFilterParameters {
+        osocYear?: number;
+        firstNameFilter?: string;
+        lastNameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[] | string;
+        alumniFilter?: boolean | string;
+        coachFilter?: boolean | string;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        firstNameSort?: string;
+        lastNameSort?: string;
+        emailSort?: string;
+        alumniSort?: string;
+    }
+
     export interface StudentFilter extends KeyRequest {}
 
-    export interface UserFilter extends KeyRequest {}
+    export interface UserFilter extends KeyRequest {
+        sessionkey: string;
+        nameFilter?: string;
+        emailFilter?: string;
+        statusFilter?: account_status_enum;
+        nameSort?: FilterSort;
+        emailSort?: FilterSort;
+        isCoachFilter?: boolean;
+        isAdminFilter?: boolean;
+    }
+
+    export interface OsocFilter extends KeyRequest {
+        yearFilter?: number;
+        yearSort?: FilterSort;
+    }
+
+    export interface OsocEdition extends KeyRequest {
+        year: number;
+    }
 
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;
@@ -779,6 +867,8 @@ export namespace Requests {
         osocId?: number;
     }
 
+    export interface ProjectFilter extends KeyRequest {}
+
     export interface Draft extends IdRequest {
         studentId: number;
         role: string;
@@ -818,7 +908,7 @@ export namespace Requests {
 
     export interface Question {
         key: string;
-        value: string | FormValues[];
+        value: string | string[] | boolean | number | FormValues[] | null;
         options?: Array<Option>;
     }
 
@@ -916,4 +1006,18 @@ export enum Decision {
     YES = "YES",
     MAYBE = "MAYBE",
     NO = "NO",
+}
+
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    DISABLED = "DISABLED",
+}
+
+export enum EmailStatus {
+    SCHEDULED = "SCHEDULED",
+    SENT = "SENT",
+    FAILED = "FAILED",
+    NONE = "NONE",
+    DRAFT = "DRAFT",
 }

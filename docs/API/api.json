@@ -36,6 +36,10 @@
       "description": "Everything about the login."
     },
     {
+      "name": "osoc",
+      "description": "Everything about osoc editions."
+    },
+    {
       "name": "project",
       "description": "Everything about projects."
     },
@@ -119,6 +123,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -201,6 +208,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -247,6 +257,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -302,8 +318,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -387,6 +409,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -433,6 +458,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -496,11 +527,20 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -542,8 +582,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "412": {
             "description": "The data you requested does not exist (yet)."
@@ -600,6 +646,9 @@
           },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "412": {
             "description": "The data you requested does not exist (yet)."
@@ -673,6 +722,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -854,6 +909,290 @@
         }
       }
     },
+    "/osoc": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Redirects towards GET /osoc/all.",
+        "operationId": "osoc",
+        "responses": {
+          "303": {
+            "description": "http HTTP/2 303 See Location: /osoc/all"
+          }
+        }
+      }
+    },
+    "/osoc/all": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all osoc editions in the system.",
+        "operationId": "all_osoc_editions",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/create": {
+      "post": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to create a new osoc edition in the system.",
+        "operationId": "create_osoc_edition",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "header",
+            "description": "The osoc year.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data object contains the year and osoc_id of the newly created edition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "year": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/filter": {
+      "get": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Returns a list of all filtered osoc editions in the system.",
+        "operationId": "filtered_osoc_editions",
+        "parameters": [
+          {
+            "name": "yearFilter",
+            "in": "header",
+            "description": "The year of the osoc edition.",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "yearSort",
+            "in": "header",
+            "description": "Sorting by year (asc or desc).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The data list contains info of all filtered osoc editions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "osoc_id": {
+                            "type": "number"
+                          },
+                          "year": {
+                            "type": "number"
+                          },
+                          "_count": {
+                            "type": "object",
+                            "properties": {
+                              "project": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
+    "/osoc/<osoc-id>": {
+      "delete": {
+        "tags": [
+          "osoc"
+        ],
+        "description": "Attempts to delete an osoc edition.",
+        "operationId": "delete_osoc_edition",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "header",
+            "description": "The osoc edition id.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The specified osoc edition was removed. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
+          }
+        }
+      }
+    },
     "/project": {
       "get": {
         "tags": [
@@ -948,6 +1287,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -981,8 +1326,14 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1042,6 +1393,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1133,6 +1490,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -1177,6 +1540,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1302,6 +1671,12 @@
           },
           "409": {
             "description": "That role doesn't exist."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1389,6 +1764,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
@@ -1554,6 +1932,9 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -1665,6 +2046,9 @@
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -1770,6 +2154,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
@@ -1804,6 +2194,7 @@
             "name": "year",
             "in": "header",
             "description": "The osoc year.",
+            "required": false,
             "schema": {
               "type": "number"
             }
@@ -1875,6 +2266,7 @@
             "name": "reason",
             "in": "header",
             "description": "The motivation for the suggestion.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1882,7 +2274,40 @@
         ],
         "responses": {
           "200": {
-            "description": "The specified student was marked as suggested. The response is an empty object."
+            "description": "This contains info about a suggestion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "YES",
+                        "MAYBE",
+                        "NO"
+                      ]
+                    },
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "isFinal": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "senderFirstname": {
+                      "type": "string"
+                    },
+                    "senderLastname": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -1976,6 +2401,15 @@
         "operationId": "filter_students",
         "parameters": [
           {
+            "name": "osocYear",
+            "in": "header",
+            "description": "The year of the osoc edition.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "sessionkey",
             "in": "header",
             "description": "Your current session key.",
@@ -1989,14 +2423,6 @@
             "in": "header",
             "description": "The alumni filter.",
             "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "alumniSort",
-            "in": "header",
-            "description": "Sorting by alumni (asc or desc).",
-            "schema": {
               "type": "string"
             }
           },
@@ -2005,7 +2431,7 @@
             "in": "header",
             "description": "The student-coach filter.",
             "schema": {
-              "type": "boolean"
+              "type": "string"
             }
           },
           {
@@ -2022,6 +2448,21 @@
             "description": "Sorting by email (asc or desc).",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "emailStatusFilter",
+            "in": "header",
+            "description": "The email status filter.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "FAILED",
+                "NONE",
+                "SCHEDULED",
+                "SENT"
+              ]
             }
           },
           {
@@ -2070,14 +2511,6 @@
             }
           },
           {
-            "name": "roleSort",
-            "in": "header",
-            "description": "Sorting by role (asc or desc).",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "statusFilter",
             "in": "header",
             "description": "The status filter.",
@@ -2085,8 +2518,8 @@
               "type": "string",
               "enum": [
                 "MAYBE",
-                "FALSE",
-                "TRUE"
+                "NO",
+                "YES"
               ]
             }
           }
@@ -2258,6 +2691,9 @@
               }
             }
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
           },
@@ -2354,6 +2790,7 @@
             "name": "cc",
             "in": "header",
             "description": "The copy field of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2362,6 +2799,7 @@
             "name": "content",
             "in": "header",
             "description": "The content of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2370,6 +2808,7 @@
             "name": "name",
             "in": "header",
             "description": "The name of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2378,6 +2817,7 @@
             "name": "subject",
             "in": "header",
             "description": "The subject of the template.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2516,8 +2956,14 @@
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -2555,19 +3001,19 @@
             }
           },
           {
-            "name": "lastname",
+            "name": "pass",
             "in": "header",
-            "description": "The lastname of the user.",
+            "description": "The password of the user.",
             "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "pass",
+            "name": "lastname",
             "in": "header",
-            "description": "The password of the user.",
-            "required": true,
+            "description": "The lastname of the user.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2579,7 +3025,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserId"
+                  "$ref": "#/components/schemas/RegisterResponse"
                 }
               }
             }
@@ -2657,6 +3103,12 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       },
@@ -2706,7 +3158,14 @@
         ],
         "responses": {
           "200": {
-            "description": "The specified user request was denied. The response is an empty object."
+            "description": "The specified user request was denied. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserIdName"
+                }
+              }
+            }
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2719,11 +3178,123 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "423": {
+            "description": "Your account was deactivated. Please contact the webmaster."
+          },
+          "424": {
+            "description": "Your account hasn't been activated yet. Please try again later."
           }
         }
       }
     },
     "/user/self": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "description": "Gets the current user.",
+        "operationId": "get_current_user_request",
+        "parameters": [
+          {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user gets his account information back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "login_user": {
+                          "type": "object",
+                          "properties": {
+                            "account_status": {
+                              "type": "string",
+                              "enum": [
+                                "ACTIVATED",
+                                "DISABLED",
+                                "PENDING"
+                              ]
+                            },
+                            "is_admin": {
+                              "type": "boolean"
+                            },
+                            "is_coach": {
+                              "type": "boolean"
+                            },
+                            "login_user_id": {
+                              "type": "number"
+                            },
+                            "password": {
+                              "type": "string"
+                            },
+                            "person": {
+                              "type": "object",
+                              "properties": {
+                                "email": {
+                                  "type": "string"
+                                },
+                                "firstname": {
+                                  "type": "string"
+                                },
+                                "github": {
+                                  "type": "string"
+                                },
+                                "github_id": {
+                                  "type": "string"
+                                },
+                                "lastname": {
+                                  "type": "string"
+                                },
+                                "person_id": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "person_id": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
+          },
+          "401": {
+            "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          }
+        }
+      },
       "post": {
         "tags": [
           "user"
@@ -2769,7 +3340,22 @@
         ],
         "responses": {
           "200": {
-            "description": "The user associated with the session key has been modified. The response is an empty object."
+            "description": "The user associated with the session key has been modified. The response is an empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionkey": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
           "400": {
             "description": "One of the arguments is incorrect or not present."
@@ -2830,7 +3416,7 @@
             "description": "True if the users are admins, else false.",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "string"
             }
           },
           {
@@ -2839,7 +3425,7 @@
             "description": "True if the users are coaches, else false.",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "string"
             }
           },
           {
@@ -2901,6 +3487,9 @@
           "401": {
             "description": "The user has to log in first."
           },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -2945,6 +3534,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
@@ -3559,6 +4151,9 @@
                     "MAYBE"
                   ]
                 },
+                "evaluation_id": {
+                  "type": "number"
+                },
                 "isFinal": {
                   "type": "boolean"
                 },
@@ -3783,11 +4378,14 @@
           "name": "Create_template"
         }
       },
-      "UserId": {
+      "RegisterResponse": {
         "type": "object",
         "properties": {
           "id": {
             "type": "number"
+          },
+          "sessionKey": {
+            "type": "string"
           }
         },
         "xml": {

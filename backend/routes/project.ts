@@ -18,7 +18,9 @@ import { errors } from "../utility";
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function createProject(req: express.Request): Promise<Responses.Project> {
+export async function createProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseNewProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -27,10 +29,10 @@ async function createProject(req: express.Request): Promise<Responses.Project> {
                 .createProject({
                     name: parsed.data.name,
                     partner: parsed.data.partner,
-                    startDate: parsed.data.start,
-                    endDate: parsed.data.end,
-                    positions: parsed.data.positions,
-                    osocId: parsed.data.osocId,
+                    startDate: new Date(parsed.data.start),
+                    endDate: new Date(parsed.data.end),
+                    positions: Number(parsed.data.positions),
+                    osocId: Number(parsed.data.osocId),
                 })
                 .then((project) =>
                     Promise.resolve({
@@ -52,7 +54,7 @@ async function createProject(req: express.Request): Promise<Responses.Project> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function listProjects(
+export async function listProjects(
     req: express.Request
 ): Promise<Responses.ProjectList> {
     return rq
@@ -98,7 +100,9 @@ async function listProjects(
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getProject(req: express.Request): Promise<Responses.Project> {
+export async function getProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseSingleProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -128,7 +132,9 @@ async function getProject(req: express.Request): Promise<Responses.Project> {
         );
 }
 
-async function modProject(req: express.Request): Promise<Responses.Project> {
+export async function modProject(
+    req: express.Request
+): Promise<Responses.Project> {
     return rq
         .parseUpdateProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -165,7 +171,9 @@ async function modProject(req: express.Request): Promise<Responses.Project> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function deleteProject(req: express.Request): Promise<Responses.Empty> {
+export async function deleteProject(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
@@ -183,7 +191,7 @@ async function deleteProject(req: express.Request): Promise<Responses.Empty> {
  *  @returns See the API documentation. Successes are passed using
  * `Promise.resolve`, failures using `Promise.reject`.
  */
-async function getDraftedStudents(
+export async function getDraftedStudents(
     req: express.Request
 ): Promise<Responses.ProjectDraftedStudents> {
     return rq
@@ -207,7 +215,7 @@ async function getDraftedStudents(
         });
 }
 
-async function getFreeSpotsFor(
+export async function getFreeSpotsFor(
     role: string,
     project: number
 ): Promise<{ count: number; role: number }> {
@@ -242,7 +250,7 @@ async function getFreeSpotsFor(
         });
 }
 
-async function createProjectRoleFor(
+export async function createProjectRoleFor(
     project: number,
     role: string
 ): Promise<{ count: number; role: number }> {
@@ -265,7 +273,7 @@ async function createProjectRoleFor(
         );
 }
 
-async function modProjectStudent(
+export async function modProjectStudent(
     req: express.Request
 ): Promise<Responses.ModProjectStudent> {
     return rq
@@ -340,7 +348,9 @@ async function modProjectStudent(
         });
 }
 
-async function unAssignStudent(req: express.Request): Promise<Responses.Empty> {
+export async function unAssignStudent(
+    req: express.Request
+): Promise<Responses.Empty> {
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -403,7 +413,7 @@ async function unAssignStudent(req: express.Request): Promise<Responses.Empty> {
         });
 }
 
-async function getProjectConflicts(
+export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
     return rq
@@ -455,6 +465,57 @@ async function getProjectConflicts(
 }
 
 /**
+ *  Attempts to filter projects in the system by name, client, coaches or fully assigned.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function filterProjects(
+    req: express.Request
+): Promise<Responses.ProjectFilterList> {
+    const parsedRequest = await rq.parseFilterProjectsRequest(req);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const projects = await ormPr.filterProjects(
+        checkedSessionKey.data.projectNameFilter,
+        checkedSessionKey.data.clientNameFilter,
+        checkedSessionKey.data.assignedCoachesFilterArray,
+        checkedSessionKey.data.fullyAssignedFilter,
+        checkedSessionKey.data.projectNameSort,
+        checkedSessionKey.data.clientNameSort,
+        checkedSessionKey.data.fullyAssignedSort
+    );
+
+    const projectlist = [];
+
+    for (const project of projects) {
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+        const users = await ormPU.getUsersFor(project.project_id);
+
+        projectlist.push({
+            id: project.project_id,
+            name: project.name,
+            partner: project.partner,
+            start_date: project.start_date,
+            end_data: project.end_date,
+            positions: project.positions,
+            osoc_id: project.osoc_id,
+            contracts: contracts,
+            coaches: users,
+        });
+    }
+
+    return Promise.resolve({
+        data: projectlist,
+    });
+}
+
+/**
  *  Gets the router for all `/coaches/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/coaches/`
  * endpoints.
@@ -463,6 +524,7 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
     util.setupRedirect(router, "/project");
+    util.route(router, "get", "/filter", filterProjects);
     util.route(router, "get", "/all", listProjects);
 
     util.route(router, "get", "/:id", getProject);
