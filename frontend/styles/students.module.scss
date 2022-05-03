@@ -1,7 +1,9 @@
 .students {
-  width: clamp(18rem, 92vw, 60rem);
+  width: clamp(18rem, 94vw, 60rem);
+  padding-inline: 2vw;
   margin-inline: auto;
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
+
 }
 
 .students.limited {
@@ -15,6 +17,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  max-height: 75rem;
+  padding: 2vw;
+  overflow: scroll;
 }
 
 .studentCards.limited {

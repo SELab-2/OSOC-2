@@ -20,7 +20,7 @@ import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
-    setFilteredStudents: (user: Array<Student>, index: number) => void;
+    setFilteredStudents: (user: Array<Student>) => void;
     display: Display;
 }> = ({ setFilteredStudents, display }) => {
     const { getSession } = useContext(SessionContext);
@@ -74,31 +74,6 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
-    /**
-     * Special function to get the id query value out of the url
-     */
-    const getSelectedStudent = (): number => {
-        const queryKey = "id";
-        let queryValue = router.query[queryKey];
-        if (queryValue === undefined) {
-            // We perform some magic here, because on first render the query parameters are always undefined
-            // https://github.com/vercel/next.js/discussions/11484#discussioncomment-60563
-            const regex = router.asPath.match(
-                new RegExp(`[&?]${queryKey}=(.*)(&|$)`)
-            );
-            if (regex !== null) {
-                queryValue = regex[1];
-            }
-        }
-
-        console.log(queryValue);
-        if (queryValue === undefined) {
-            return -1;
-        } else {
-            return Number(queryValue);
-        }
-    };
-
     // Load roles on page render
     useEffect(() => {
         fetchRoles().then();
@@ -107,8 +82,7 @@ export const StudentFilter: React.FC<{
 
     // Execute search
     useEffect(() => {
-        const queryValue = getSelectedStudent();
-        search(queryValue).then();
+        search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         firstNameSort,
@@ -232,15 +206,12 @@ export const StudentFilter: React.FC<{
 
     const searchPress = (e: SyntheticEvent) => {
         e.preventDefault();
-        search(getSelectedStudent()).then();
+        search().then();
     };
 
-    const search = async (id: number) => {
+    const search = async () => {
         const filters = [];
 
-        if (id > -1) {
-            filters.push(`id=${id}`);
-        }
         if (firstNameFilter !== "") {
             filters.push(`firstNameFilter=${firstNameFilter}`);
         }
@@ -307,17 +278,7 @@ export const StudentFilter: React.FC<{
                     console.log(err);
                     return { success: false };
                 });
-
-            // We find the student which has the same id as the argument
-            let selectedStudent = -1;
-            let i = 0;
-            while (i < response.data.length && selectedStudent === -1) {
-                if (response.data[i].student.student_id === id) {
-                    selectedStudent = i;
-                }
-                i++;
-            }
-            setFilteredStudents(response.data, selectedStudent);
+            setFilteredStudents(response.data);
         }
     };
 

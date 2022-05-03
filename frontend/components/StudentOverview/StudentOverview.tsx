@@ -22,7 +22,8 @@ export const StudentOverview: React.FC<{
         studentId: number,
         evalutations: EvaluationCoach[]
     ) => void;
-}> = ({ student, updateEvaluations }) => {
+    clearSelection?: () => void;
+}> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
@@ -214,6 +215,12 @@ export const StudentOverview: React.FC<{
         [Decision.NO]: ForbiddenIconColor,
     };
 
+    const close = () => {
+        if (clearSelection !== undefined) {
+            clearSelection();
+        }
+    };
+
     return (
         <div>
             <Modal
@@ -238,6 +245,13 @@ export const StudentOverview: React.FC<{
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
 
+            {clearSelection !== undefined ? (
+                <div
+                    className={`delete is-large ${styles.close}`}
+                    onClick={close}
+                />
+            ) : null}
+
             <div className={styles.body}>
                 <div className={styles.finaldecision}>
                     <div className={styles.dropdown}>
@@ -252,14 +266,14 @@ export const StudentOverview: React.FC<{
                             </a>
                         </div>
                     </div>
-                    {student.evaluations[0].evaluation.filter(
+                    {student.evaluation.evaluations.filter(
                         (evaluation) => evaluation.is_final
                     )[0] !== undefined ? (
                         <Image
                             className={styles.buttonImage}
                             src={
                                 decision_to_image[
-                                    student.evaluations[0].evaluation.filter(
+                                    student.evaluation.evaluations.filter(
                                         (evaluation) => evaluation.is_final
                                     )[0].decision
                                 ]
