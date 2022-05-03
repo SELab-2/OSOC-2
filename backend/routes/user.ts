@@ -115,7 +115,6 @@ export async function createUserRequest(
         futureDate
     );
 
-    console.log("Attached a login user: " + loginUser);
     return Promise.resolve({
         id: addedKey.login_user_id,
         sessionkey: addedKey.session_key,
@@ -142,7 +141,6 @@ export async function setAccountStatus(
                   })
         )
         .then((res) => {
-            console.log(res.person.firstname);
             return Promise.resolve({
                 id: res.person_id,
                 name: res.person.firstname + " " + res.person.lastname,

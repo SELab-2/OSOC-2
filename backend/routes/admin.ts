@@ -69,8 +69,6 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                             .accountStatus as account_status_enum,
                     })
                     .then(async (res) => {
-                        console.log(res.is_admin);
-                        console.log(res.is_coach);
                         if (!res.is_admin && !res.is_coach) {
                             await ormL.updateLoginUser({
                                 loginUserId: res.login_user_id,
