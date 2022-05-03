@@ -22,7 +22,7 @@ export const StudentOverview: React.FC<{
         studentId: number,
         evalutations: EvaluationCoach[]
     ) => void;
-    clearSelection: () => void;
+    clearSelection?: () => void;
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
@@ -216,7 +216,9 @@ export const StudentOverview: React.FC<{
     };
 
     const close = () => {
-        clearSelection();
+        if (clearSelection !== undefined) {
+            clearSelection();
+        }
     };
 
     return (
@@ -242,10 +244,13 @@ export const StudentOverview: React.FC<{
                 </div>
             </Modal>
             <StudentCard student={student} display={Display.FULL} />
-            <div
-                className={`delete is-large ${styles.close}`}
-                onClick={close}
-            />
+
+            {clearSelection !== undefined ? (
+                <div
+                    className={`delete is-large ${styles.close}`}
+                    onClick={close}
+                />
+            ) : null}
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>
@@ -261,14 +266,14 @@ export const StudentOverview: React.FC<{
                             </a>
                         </div>
                     </div>
-                    {student.evaluations[0].evaluation.filter(
+                    {student.evaluation.evaluations.filter(
                         (evaluation) => evaluation.is_final
                     )[0] !== undefined ? (
                         <Image
                             className={styles.buttonImage}
                             src={
                                 decision_to_image[
-                                    student.evaluations[0].evaluation.filter(
+                                    student.evaluation.evaluations.filter(
                                         (evaluation) => evaluation.is_final
                                     )[0].decision
                                 ]

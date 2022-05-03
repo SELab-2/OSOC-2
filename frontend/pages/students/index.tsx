@@ -133,11 +133,10 @@ const Index: NextPage = () => {
                                     student={student as Student}
                                     display={display}
                                 />
-                                {student.evaluations[0].evaluation.length >
-                                0 ? (
+                                {student.evaluation.evaluations.length > 0 ? (
                                     <EvaluationBar
                                         evaluations={
-                                            student.evaluations[0].evaluation
+                                            student.evaluation.evaluations
                                         }
                                     />
                                 ) : null}
