@@ -90,7 +90,7 @@ model language {
 model login_user {
   login_user_id  Int                 @id @default(autoincrement())
   person_id      Int                 @unique @default(autoincrement())
-  password       String?
+  password       String?             @db.VarChar(60)
   is_admin       Boolean
   is_coach       Boolean
   account_status account_status_enum

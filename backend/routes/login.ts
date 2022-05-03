@@ -8,7 +8,7 @@ import {
 import { parseLoginRequest, parseLogoutRequest } from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
-
+import * as bcrypt from "bcrypt";
 import * as session_key from "./session_key.json";
 
 /**
@@ -20,11 +20,24 @@ import * as session_key from "./session_key.json";
 export async function login(req: express.Request): Promise<Responses.Login> {
     return parseLoginRequest(req).then((parsed) =>
         getPasswordPersonByEmail(parsed.name).then(async (pass) => {
+            // check if all the fields are filled in (== not null or undefined)
             if (
                 pass == null ||
                 pass.login_user == null ||
-                pass?.login_user?.password != parsed.pass
+                pass.login_user.password == null
             ) {
+                return Promise.reject({
+                    http: 409,
+                    reason: "Invalid e-mail or password.",
+                });
+            }
+
+            // check if the passwords match!
+            const valid = await bcrypt.compare(
+                parsed.pass,
+                pass.login_user.password
+            );
+            if (!valid) {
                 return Promise.reject({
                     http: 409,
                     reason: "Invalid e-mail or password.",
