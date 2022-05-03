@@ -11,6 +11,7 @@ export const Settings: React.FC<{
     const [newName, setNewName] = useState<string>("");
     const [currPassword, setCurrPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
+    const [retypePassword, setRetypePassword] = useState<string>("");
     const [currPasswordError, setCurrPasswordError] = useState<string>("");
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
@@ -29,6 +30,10 @@ export const Settings: React.FC<{
         setNewPasswordScore(score);
         setNewPasswordError("");
         setNewPassword(password);
+    };
+
+    const updateRetypePass = (password: string) => {
+        setRetypePassword(password);
     };
 
     /**
@@ -77,6 +82,9 @@ export const Settings: React.FC<{
             error = true;
         } else if (currPassword !== "" && newPasswordScore < 20) {
             setNewPasswordError("Please provide a secure enough password");
+            error = true;
+        } else if (newPassword !== retypePassword) {
+            setNewPasswordError("Passwords do not match");
             error = true;
         } else {
             setNewPasswordError("");
@@ -210,6 +218,13 @@ export const Settings: React.FC<{
                         {newPasswordError}
                     </p>
                 )}
+                <label className={styles.label}>
+                    Retype New Password
+                    <input
+                        type="password"
+                        onChange={(e) => updateRetypePass(e.target.value)}
+                    />
+                </label>
                 <button onClick={changeUser}>Apply Changes</button>
                 <p
                     className={`${styles.textFieldError} ${
