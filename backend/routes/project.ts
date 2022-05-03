@@ -215,8 +215,8 @@ export async function modProject(
     }
 
     if (checkedId.deleteRoles !== undefined) {
-        for (const deleteRole of checkedId.deleteRoles.roles) {
-            await ormPrRole.deleteProjectRole(deleteRole.id);
+        for (const deleteRoleId of checkedId.deleteRoles.roles) {
+            await ormPrRole.deleteProjectRole(deleteRoleId);
         }
     }
 
