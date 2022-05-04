@@ -168,9 +168,9 @@ export async function deleteStudent(
         .then(async (parsed) => {
             return ormSt
                 .deleteStudent(parsed.data.id)
-                .then(() =>
+                .then((student) =>
                     ormP
-                        .deletePersonById(parsed.data.id)
+                        .deletePersonById(student.person_id)
                         .then(() => Promise.resolve({}))
                 );
         });
@@ -211,7 +211,7 @@ export async function createStudentSuggestion(
             suggestion.osoc.year === osocYear.year &&
             suggestion.evaluation.some(
                 (evaluation) =>
-                    evaluation.login_user.login_user_id ===
+                    evaluation.login_user?.login_user_id ===
                     checkedSessionKey.userId
             )
     );
@@ -227,7 +227,8 @@ export async function createStudentSuggestion(
     if (suggestionsTotal.length > 0) {
         const suggestion = suggestionsTotal[0].evaluation.filter(
             (evaluation) =>
-                evaluation.login_user.login_user_id === checkedSessionKey.userId
+                evaluation.login_user?.login_user_id ===
+                checkedSessionKey.userId
         );
 
         newEvaluation = await ormEv.updateEvaluationForStudent({
@@ -246,8 +247,11 @@ export async function createStudentSuggestion(
         });
     }
 
-    const loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
-    if (loginUser === null) {
+    let loginUser;
+    if (newEvaluation.login_user_id) {
+        loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
+    }
+    if (loginUser === null || loginUser === undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
@@ -302,8 +306,8 @@ export async function getStudentSuggestions(
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
                 evaluation_id: evaluation.evaluation_id,
-                senderFirstname: evaluation.login_user.person.firstname,
-                senderLastname: evaluation.login_user.person.lastname,
+                senderFirstname: evaluation.login_user?.person.firstname,
+                senderLastname: evaluation.login_user?.person.lastname,
                 reason: evaluation.motivation,
                 decision: evaluation.decision,
                 isFinal: evaluation.is_final,
