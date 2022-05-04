@@ -6,9 +6,14 @@
 }
 
 .students.limited {
-  width: clamp(18rem, 92vw, 100rem);
-  display: flex;
+  width: clamp(18rem, 94vw, 120rem);
+  display: grid;
+  grid-template-columns: 1fr 3fr;
   gap: 2rem;
+}
+
+.students > div {
+  position: relative;
 }
 
 /* The style for the list of students */
@@ -22,9 +27,6 @@
   padding-inline: 2rem;
 }
 
-.studentCards.limited {
-  max-width: 20rem;
-}
 
 /* The actual card as a container */
 .card {
@@ -37,19 +39,17 @@
 }
 
 .topShadowCaster, .bottomShadowCaster {
-  margin-inline: -2rem;
+  margin-inline: auto;
   min-height: 3rem;
   width: 100%;
-  position: absolute;
   z-index: 1;
+  position: absolute;
 }
 .topShadowCaster {
   background: linear-gradient(180deg, var(--neutral-100), transparent);
-  margin-top: -4rem;
 }
 .bottomShadowCaster {
   background: linear-gradient(0deg, var(--neutral-100), transparent);
   margin-top: -2rem;
   top: 100%;
 }
-
