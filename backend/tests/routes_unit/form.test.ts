@@ -14,9 +14,9 @@ import { errors } from "../../utility";*/
 //const formMock = form as jest.Mocked<typeof form>;
 import * as fs from "fs";
 import * as path from "path";
-/*import { Requests, Responses } from "../../types";
+//import { Requests, Responses } from "../../types";
 import * as config from "../../routes/form_keys.json";
-import {
+/*import {
     checkQuestionsExist,
     checkWordInAnswer,
     filterQuestion,
@@ -169,6 +169,38 @@ describe.each(keys)("Questions present", (key) => {
         it(`Question with key ${key} is present`, () => {
             const res = form_router.filterQuestion(form, key);
             expect(res.data).not.toBe(null);
+        });
+    });
+});
+
+describe.each([
+    config.liveInBelgium,
+    config.volunteerInfo,
+    config.workInJuly,
+    config.nickname,
+    config.gender,
+    config.addPronouns,
+    config.preferredPronouns,
+    config.mostFluentLanguage,
+    config.englishLevel,
+    config.edus,
+    config.eduLevel,
+    config.appliedRole,
+    config.alumni,
+    config.studentCoach,
+])("Options present", (key) => {
+    readDataTestForms().forEach((form) => {
+        it(`The options of the question with key ${key} are present`, () => {
+            const question = form_router.filterQuestion(form, key);
+            if (question.data !== null) {
+                const option = form_router.filterChosenOption(question.data);
+                if (question.data.value === null) {
+                    expect(option.data).toBe(null);
+                } else {
+                    expect(option.data).toHaveProperty("id");
+                    expect(option.data).toHaveProperty("text");
+                }
+            }
         });
     });
 });
