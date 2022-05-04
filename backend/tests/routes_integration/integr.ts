@@ -2,6 +2,8 @@ import * as supertest from "supertest";
 import * as server from "../../server";
 import * as ogConf from "../../config.json";
 import { Verb, Anything, ApiError } from "../../types";
+import { errors, generateKey } from "../../utility";
+import prisma from "../../prisma/prisma";
 
 export interface Config {
     auth: { enable: boolean; type: string; value: string };
@@ -14,7 +16,7 @@ export interface RequestParams {
 
 export interface Data {
     request?: RequestParams;
-    body?: Anything;
+    body?: unknown;
 }
 
 export interface Response {
@@ -27,11 +29,22 @@ export const conf: Config = {
     accept: { enable: true, value: "application/json" },
 };
 
-export function keyConf(key: string): Config {
-    return { ...conf, auth: { ...conf.auth, value: key } };
+export function keyConf(
+    key: string,
+    og: Config = conf,
+    correctType = false
+): Config {
+    const val = { ...og, auth: { ...conf.auth, value: key } };
+    if (correctType) val.auth.type = ogConf.global.authScheme;
+    return val;
 }
 
-export function endpoint(verb: Verb, ep: string, data: Data, config?: Config) {
+export function endpoint(
+    verb: Verb,
+    ep: string,
+    data: Data,
+    config: Config = conf
+) {
     if (config == undefined) {
         config = conf;
     }
@@ -66,10 +79,15 @@ export function endpoint(verb: Verb, ep: string, data: Data, config?: Config) {
     return intermediate.send();
 }
 
-export async function expectResponse(req: supertest.Test, data: Response) {
+export async function expectHttp(req: supertest.Test, code: number) {
     const res = await req;
-    expect(res.statusCode).toBe(data.code);
-    expect(res.body).toStrictEqual(data.data);
+    expect(res.statusCode).toBe(code);
+    return res.body;
+}
+
+export async function expectResponse(req: supertest.Test, data: Response) {
+    const body = await expectHttp(req, data.code);
+    expect(body).toStrictEqual(data.data);
 }
 
 export async function expectApiError(req: supertest.Test, err: ApiError) {
@@ -77,4 +95,49 @@ export async function expectApiError(req: supertest.Test, err: ApiError) {
         code: err.http,
         data: { success: false, reason: err.reason },
     });
+}
+
+export async function runNoSessionKey(
+    verb: Verb,
+    ep: string,
+    data: Data[],
+    config: Config = conf
+) {
+    const updConf: Config = {
+        ...config,
+        auth: { enable: false, type: "", value: "" },
+    };
+
+    await Promise.all(
+        data.map(async (sub) => {
+            const req = endpoint(verb, ep, sub, updConf);
+            await expectApiError(req, errors.cookUnauthenticated());
+        })
+    );
+}
+
+export async function runInvalidSessionKey(
+    verb: Verb,
+    ep: string,
+    data: Data[],
+    config: Config = conf
+) {
+    await Promise.all(
+        data.map(async (sub) => {
+            let key = "";
+            let found = false;
+            do {
+                // generate unused key (shouldn't usually take more than one try)
+                key = generateKey();
+                const tmp = await prisma.session_keys.findUnique({
+                    where: { session_key: key },
+                });
+                found = tmp != null;
+            } while (found);
+
+            const withKey = keyConf(key, config, true);
+            const req = endpoint(verb, ep, sub, withKey);
+            await expectApiError(req, errors.cookUnauthenticated());
+        })
+    );
 }

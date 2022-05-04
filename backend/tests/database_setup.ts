@@ -3,6 +3,11 @@ import prisma from "../prisma/prisma";
 import * as config from "../config.json";
 import * as bcrypt from "bcrypt";
 
+export interface OGNamePass {
+    name: string;
+    pass: string;
+}
+
 export function personData() {
     return [
         {
@@ -345,8 +350,12 @@ export function passResetsData(users: dbtypes.login_user[]) {
     ];
 }
 
-export async function hashAllPasswords() {
-    const users = await prisma.login_user.findMany();
+export async function hashAllPasswords(): Promise<OGNamePass[]> {
+    const users = await prisma.login_user.findMany({
+        include: { person: true },
+    });
+    const ogs = users.map((x) => ({ name: x.person.email, pass: x.password }));
+
     await Promise.all(
         users.map(async (user) => {
             if (user.password == null) return;
@@ -358,9 +367,15 @@ export async function hashAllPasswords() {
                 where: { login_user_id: user.login_user_id },
                 data: { password: newpass },
             });
-            return Promise.resolve();
         })
     );
+
+    return ogs.flatMap((x) => {
+        const xn = x.name;
+        const xp = x.pass; // trick ts compiler
+        if (xn != null && xp != null) return [{ name: xn, pass: xp }];
+        return [];
+    });
 }
 
 export async function teardown() {
