@@ -263,6 +263,9 @@ export interface ProjectRole {
     project_id: number;
     project_role_id: number;
     role_id: number;
+    role: {
+        name: string;
+    };
 }
 
 export interface Contract {

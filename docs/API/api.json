@@ -3839,6 +3839,14 @@
                 },
                 "role_id": {
                   "type": "number"
+                },
+                "role": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             },
