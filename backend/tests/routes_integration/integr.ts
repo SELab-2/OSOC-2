@@ -14,9 +14,9 @@ export interface RequestParams {
     [key: string]: string;
 }
 
-export interface Data {
+export interface Data<T extends string | object | undefined> {
     request?: RequestParams;
-    body?: unknown;
+    body?: T;
 }
 
 export interface Response {
@@ -39,10 +39,10 @@ export function keyConf(
     return val;
 }
 
-export function endpoint(
+export function endpoint<T extends string | object | undefined>(
     verb: Verb,
     ep: string,
-    data: Data,
+    data: Data<T>,
     config: Config = conf
 ) {
     if (config == undefined) {
@@ -97,10 +97,10 @@ export async function expectApiError(req: supertest.Test, err: ApiError) {
     });
 }
 
-export async function runNoSessionKey(
+export async function runNoSessionKey<T extends string | object | undefined>(
     verb: Verb,
     ep: string,
-    data: Data[],
+    data: Data<T>[],
     config: Config = conf
 ) {
     const updConf: Config = {
@@ -116,12 +116,9 @@ export async function runNoSessionKey(
     );
 }
 
-export async function runInvalidSessionKey(
-    verb: Verb,
-    ep: string,
-    data: Data[],
-    config: Config = conf
-) {
+export async function runInvalidSessionKey<
+    T extends string | object | undefined
+>(verb: Verb, ep: string, data: Data<T>[], config: Config = conf) {
     await Promise.all(
         data.map(async (sub) => {
             let key = "";
