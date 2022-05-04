@@ -265,11 +265,11 @@ export interface ProjectRole {
     role_id: number;
 }
 
-export interface ProjectStudent {
+export interface Contract {
     contract_id: number;
     contract_status: string; // TODO: Make ENUM for this
     project_role: ProjectRole;
-    student: [Student];
+    students: [Student];
 }
 
 export interface Project {
@@ -281,5 +281,11 @@ export interface Project {
     partner: string;
     positions: number;
     start_date: string;
-    students: [ProjectStudent];
+    contracts: [Contract];
+    roles: [
+        {
+            name: string;
+            positions: number;
+        }
+    ];
 }

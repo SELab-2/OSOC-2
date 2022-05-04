@@ -16,6 +16,16 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
                     </p>
                 );
             })}
+            <br></br>
+            <h1>Roles</h1>
+            {project.roles.map((role) => {
+                return <p key={role.name}>{role.name}</p>;
+            })}
+            <br></br>
+            <h1>Assignees</h1>
+            {project.contracts.map((contract) => {
+                return <p key={contract.project_role.project_role_id}>hello</p>;
+            })}
         </div>
     );
 };
