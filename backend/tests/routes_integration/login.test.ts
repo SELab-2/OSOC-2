@@ -1,5 +1,7 @@
 import * as helpers from "./integr";
 import { errors } from "../../utility";
+import * as db from "../database_setup";
+import "../integration_setup";
 
 describe("POST /login endpoint", () => {
     const loginConfig = {
@@ -24,3 +26,5 @@ describe("POST /login endpoint", () => {
         );
     });
 });
+
+beforeAll(async () => await db.hashAllPasswords());

@@ -21,6 +21,8 @@ const attachment2 = {
     type: ["PORTFOLIO_URL"],
 };
 
+import "../integration_setup";
+
 it("should create 1 new attachment linked to a job application", async () => {
     const job_application = await prisma.job_application.findFirst();
     if (job_application) {

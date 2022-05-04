@@ -2,7 +2,6 @@ import * as supertest from "supertest";
 import * as server from "../../server";
 import * as ogConf from "../../config.json";
 import { Verb, Anything, ApiError } from "../../types";
-import * as db from "../database_setup";
 
 export interface Config {
     auth: { enable: boolean; type: string; value: string };
@@ -79,5 +78,3 @@ export async function expectApiError(req: supertest.Test, err: ApiError) {
         data: { success: false, reason: err.reason },
     });
 }
-
-beforeAll(async () => await db.hashAllPasswords());

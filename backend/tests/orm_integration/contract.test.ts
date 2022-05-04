@@ -11,6 +11,8 @@ import {
 import { CreateContract, UpdateContract } from "../../orm_functions/orm_types";
 import { contract_status_enum } from "@prisma/client";
 
+import "../integration_setup";
+
 const contract1: UpdateContract = {
     contractId: 0,
     information: "Contract details",
