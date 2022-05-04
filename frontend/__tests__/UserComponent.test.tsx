@@ -6,9 +6,7 @@ import { act, render, screen } from "@testing-library/react";
 
 fetchMock.enableMocks();
 
-const removeUser = (user: LoginUser) => {
-    console.log(user);
-};
+const removeUser = jest.fn();
 
 describe("User component tests", () => {
     let userAdminCoach: LoginUser;
@@ -164,11 +162,8 @@ describe("User component tests", () => {
         render(<User user={userAdminCoach} removeUser={removeUser} />);
         expect(screen.getByTestId("buttonDelete")).toBeInTheDocument();
         await act(async () => {
-            //TODO deze mock moet nog vervangen worden
-            fetchMock.mockOnce(
-                JSON.stringify({ id: -1, name: "testTest", success: true })
-            );
-            screen.getByTestId("buttonStatus").click();
+            fetchMock.mockOnce(JSON.stringify({ success: true }));
+            screen.getByTestId("buttonDelete").click();
         });
     });
 

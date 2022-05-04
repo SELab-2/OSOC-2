@@ -161,7 +161,7 @@ export const User: React.FC<{
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
                 userId.toString(),
@@ -175,18 +175,16 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                }
-                console.log(json);
-                removeUser(user);
-                return json;
-            })
             .catch((err) => {
                 console.log(err);
                 return { success: false };
             });
+        if (response.success) {
+            removeUser(user);
+            return response;
+        } else {
+            return { success: false };
+        }
     };
 
     return (
