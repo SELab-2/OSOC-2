@@ -111,6 +111,10 @@ beforeEach(() => {
         if (v != 1 && v != 2) return Promise.reject();
         return Promise.resolve(v == 1 ? people[0] : people[1]);
     });
+    ormLMock.deleteLoginUserFromDB.mockImplementation((id) => {
+        if (id !== 1 && id !== 2) return Promise.reject();
+        return Promise.resolve();
+    });
     ormPMock.deletePersonById.mockImplementation((v) => {
         if (v != 1 && v != 2) return Promise.reject();
         return Promise.resolve(v == 1 ? people[0].person : people[1].person);
@@ -146,6 +150,7 @@ afterEach(() => {
 
     ormLMock.searchAllAdminLoginUsers.mockReset();
     ormLMock.deleteLoginUserByPersonId.mockReset();
+    ormLMock.deleteLoginUserFromDB.mockReset();
     ormLMock.updateLoginUser.mockReset();
     ormPMock.deletePersonById.mockReset();
 });
@@ -230,7 +235,6 @@ test("Can delete admins", async () => {
     await expect(admin.deleteAdmin(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteAdminRequest, req);
-    expectCall(ormLMock.deleteLoginUserByPersonId, req.body.id);
-    expectCall(ormPMock.deletePersonById, req.body.id);
+    expectCall(ormLMock.deleteLoginUserFromDB, req.body.id);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });

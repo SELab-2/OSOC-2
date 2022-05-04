@@ -35,6 +35,11 @@ import * as person from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
 const personMock = person as jest.Mocked<typeof person>;
 
+// setup mocks for bcrypt
+import * as bcrypt from "bcrypt";
+jest.mock("bcrypt");
+const bcryptMock = bcrypt as jest.Mocked<typeof bcrypt>;
+
 import * as login from "../../routes/login";
 import * as skconf from "../../routes/session_key.json";
 
@@ -112,6 +117,8 @@ beforeEach(() => {
         Promise.resolve(v.body)
     );
 
+    bcryptMock.compare.mockImplementation((x, y) => x == y);
+
     personMock.getPasswordPersonByEmail.mockImplementation((mail) => {
         if (mail == users[0].email)
             return Promise.resolve({ login_user: users[0].user });
@@ -150,6 +157,8 @@ beforeEach(() => {
 afterEach(() => {
     reqMock.parseLoginRequest.mockReset();
     reqMock.parseLogoutRequest.mockReset();
+
+    bcryptMock.compare.mockReset();
 
     personMock.getPasswordPersonByEmail.mockReset();
 

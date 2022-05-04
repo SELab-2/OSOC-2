@@ -2,13 +2,11 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormL from "../orm_functions/login_user";
-import * as ormP from "../orm_functions/person";
 import * as ormSe from "../orm_functions/session_key";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import { removeAllKeysForLoginUserId } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all admins in the system.
@@ -71,8 +69,6 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                             .accountStatus as account_status_enum,
                     })
                     .then(async (res) => {
-                        console.log(res.is_admin);
-                        console.log(res.is_coach);
                         if (!res.is_admin && !res.is_coach) {
                             await ormL.updateLoginUser({
                                 loginUserId: res.login_user_id,
@@ -111,40 +107,17 @@ export async function deleteAdmin(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
-                .searchLoginUserByPerson(parsed.data.id)
-                .then((logUs) => {
-                    if (
-                        logUs !== null &&
-                        logUs.login_user_id !== parsed.userId
-                    ) {
-                        return removeAllKeysForLoginUserId(logUs.login_user_id)
-                            .then(() => {
-                                return Promise.resolve({});
-                            })
-                            .then(() => {
-                                return ormL
-                                    .deleteLoginUserByPersonId(parsed.data.id)
-                                    .then(() => {
-                                        return ormP
-                                            .deletePersonById(parsed.data.id)
-                                            .then(() => Promise.resolve({}))
-                                            .catch(() =>
-                                                Promise.reject(
-                                                    errors.cookServerError()
-                                                )
-                                            );
-                                    })
-                                    .catch(() =>
-                                        Promise.reject(errors.cookServerError())
-                                    );
-                            })
-                            .catch(() =>
-                                Promise.reject(errors.cookServerError())
-                            );
-                    }
-                    return Promise.reject(errors.cookInvalidID());
-                });
+            // only try to delete the loginUser IF the userId exists and if we are not trying to delete ourselves
+            if (
+                parsed.data.id !== null &&
+                parsed.data.id !== undefined &&
+                parsed.data.id !== parsed.userId
+            ) {
+                return ormL
+                    .deleteLoginUserFromDB(parsed.data.id)
+                    .then(() => Promise.resolve({}));
+            }
+            return Promise.reject(errors.cookInvalidID());
         });
 }
 

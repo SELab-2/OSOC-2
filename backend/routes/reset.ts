@@ -11,6 +11,7 @@ import * as rq from "../request";
 import { Email, Responses } from "../types";
 import * as util from "../utility";
 import * as session_key from "./session_key.json";
+import * as bcrypt from "bcrypt";
 
 export async function sendMail(mail: Email) {
     const oauthclient = new gapi.Auth.OAuth2Client(
@@ -141,6 +142,12 @@ export async function resetPassword(
             if (code == null || code.valid_until < new Date(Date.now()))
                 return Promise.reject(util.errors.cookArgumentError());
 
+            // calculate the hash of the new password
+            const hash = await bcrypt.hash(
+                parsed.password,
+                config.encryption.encryptionRounds
+            );
+
             return ormLU
                 .getLoginUserById(code.login_user_id)
                 .then((user) => {
@@ -150,7 +157,7 @@ export async function resetPassword(
                         isAdmin: user.is_admin,
                         isCoach: user.is_coach,
                         accountStatus: user?.account_status,
-                        password: parsed.password,
+                        password: hash,
                     });
                 })
                 .then((user) => {
