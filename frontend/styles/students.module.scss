@@ -27,6 +27,19 @@
   padding-inline: 2rem;
 }
 
+@media (max-width: 620px) {
+  .students.limited {
+    display: flex;
+    flex-direction: column;
+
+    /* Scroll horizontal on small screens to still show the student overview not too far down */
+    .studentCards {
+      flex-direction: row;
+      overflow-y: hidden;
+      overflow-x: scroll;
+    }
+  }
+}
 
 /* The actual card as a container */
 .card {
