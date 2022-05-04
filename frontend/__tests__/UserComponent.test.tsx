@@ -92,6 +92,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsAdmin").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(
             screen.getByAltText("Person is not an admin")
         ).toBeInTheDocument();
@@ -100,6 +101,7 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonIsAdmin").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(
             screen.getByAltText("Person is not an admin")
         ).toBeInTheDocument();
@@ -116,6 +118,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsCoach").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(
             screen.getByAltText("Person is not a coach")
         ).toBeInTheDocument();
@@ -124,6 +127,7 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonIsCoach").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(
             screen.getByAltText("Person is not a coach")
         ).toBeInTheDocument();
@@ -143,6 +147,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonStatus").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(screen.getByAltText("Person is disabled")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not a coach")
@@ -155,6 +160,7 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonStatus").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is disabled")).toBeInTheDocument();
     });
 
@@ -165,6 +171,7 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: true }));
             screen.getByTestId("buttonDelete").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     test("Test for invalid person", async () => {
@@ -176,6 +183,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("pendingButton").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(screen.queryByTestId("pendingButton")).not.toBeInTheDocument();
     });
 
@@ -191,6 +199,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsAdmin").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is an admin")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")
@@ -209,6 +218,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsCoach").click();
         });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is a coach")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")
