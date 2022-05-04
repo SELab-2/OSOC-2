@@ -293,7 +293,7 @@ export async function modProjectStudent(
                 .contractsByProject(parsed.data.id)
                 .then((arr) =>
                     arr.filter(
-                        (v) => v.student.student_id == parsed.data.studentId
+                        (v) => v.student?.student_id == parsed.data.studentId
                     )
                 )
                 .then((arr) => {
@@ -379,7 +379,7 @@ export async function unAssignStudent(
                         await ormEv
                             .getEvaluationByPartiesFor(
                                 checked.userId,
-                                contr.student.student_id,
+                                contr.student?.student_id,
                                 contr.project_role.project.osoc_id
                             )
                             .then((evl) => {
@@ -434,7 +434,7 @@ export async function getProjectConflicts(
                     for (let i = 1; i < contracts.length; i++) {
                         if (contracts[i].student_id == latestid) {
                             const idStr: string =
-                                contracts[i].student_id.toString();
+                                contracts[i].student_id?.toString() || "";
                             if (!(idStr in res)) {
                                 res[idStr] = [contracts[i - 1], contracts[i]];
                             } else {

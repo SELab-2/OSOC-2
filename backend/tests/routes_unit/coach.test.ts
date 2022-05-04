@@ -103,6 +103,11 @@ beforeEach(() => {
         },
     });
 
+    ormLMock.deleteLoginUserFromDB.mockImplementation((id) => {
+        if (id !== 1 && id !== 2) return Promise.reject();
+        return Promise.resolve();
+    });
+
     // mocks for utility
     utilMock.checkSessionKey.mockImplementation((v) =>
         Promise.resolve({
@@ -164,6 +169,8 @@ afterEach(() => {
     ormLMock.getAllLoginUsers.mockReset();
     ormLMock.searchAllCoachLoginUsers.mockReset();
     ormLMock.deleteLoginUserByPersonId.mockReset();
+    ormLMock.deleteLoginUserFromDB.mockReset();
+
     ormLMock.updateLoginUser.mockReset();
     ormPMock.deletePersonById.mockReset();
 });
@@ -240,11 +247,9 @@ test("Can delete coaches", async () => {
     req.body = { id: 1, sessionkey: "abcd" };
     const res = {};
 
-    console.log(req.body);
     await expect(coach.deleteCoach(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteCoachRequest, req);
-    expectCall(ormLMock.deleteLoginUserByPersonId, req.body.id);
-    expectCall(ormPMock.deletePersonById, req.body.id);
+    expectCall(ormLMock.deleteLoginUserFromDB, req.body.id);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });

@@ -100,7 +100,7 @@ export async function getLoginUserByEvaluationId(evaluationId: number) {
  */
 export async function getEvaluationByPartiesFor(
     userId: number,
-    studentId: number,
+    studentId: number | undefined,
     osocId: number
 ) {
     return await prisma.evaluation.findMany({

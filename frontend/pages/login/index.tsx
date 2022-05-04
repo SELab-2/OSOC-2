@@ -6,7 +6,6 @@ import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { useRouter } from "next/router";
 
-import * as crypto from "crypto";
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
@@ -96,18 +95,12 @@ const Index: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            // We encrypt the password before sending it to the backend api
-            const encryptedPassword = crypto
-                .createHash("sha256")
-                .update(loginPassword)
-                .digest("hex");
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/login`,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        pass: encryptedPassword,
+                        pass: loginPassword,
                         name: loginEmail,
                     }),
                     headers: {
@@ -243,10 +236,6 @@ const Index: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            const encryptedPassword = crypto
-                .createHash("sha256")
-                .update(registerPassword)
-                .digest("hex");
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/request`,
                 {
@@ -254,7 +243,7 @@ const Index: NextPage = () => {
                     body: JSON.stringify({
                         firstName: registerName.trim(),
                         email: registerEmail,
-                        pass: encryptedPassword,
+                        pass: registerPassword,
                     }),
                     headers: {
                         "Content-Type": "application/json",
