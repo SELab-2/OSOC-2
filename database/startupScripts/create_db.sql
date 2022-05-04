@@ -82,7 +82,7 @@ CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE', 'D
 
 CREATE TABLE IF NOT EXISTS job_application (
     job_application_id        SERIAL               PRIMARY KEY,
-    student_id                SERIAL               NOT NULL REFERENCES student(student_id),
+    student_id                INT                  REFERENCES student(student_id) ON DELETE SET NULL,
     student_volunteer_info    TEXT                 NOT NULL,
     responsibilities          TEXT,
     fun_fact                  TEXT                 NOT NULL,
@@ -103,7 +103,7 @@ CREATE TYPE decision_enum AS ENUM ('YES', 'NO', 'MAYBE');
 
 CREATE TABLE IF NOT EXISTS evaluation (
     evaluation_id         SERIAL           PRIMARY KEY,
-    login_user_id         SERIAL           NOT NULL REFERENCES login_user(login_user_id),
+    login_user_id         INT              REFERENCES login_user(login_user_id)  ON DELETE SET NULL,
     job_application_id    SERIAL           NOT NULL REFERENCES job_application(job_application_id),
     decision              decision_enum    NOT NULL,
     motivation            TEXT,
@@ -152,10 +152,10 @@ CREATE TYPE contract_status_enum AS ENUM ('DRAFT', 'APPROVED', 'CANCELLED', 'WAI
 
 CREATE TABLE IF NOT EXISTS contract(
    contract_id                 SERIAL                  PRIMARY KEY,
-   student_id                  SERIAL                  NOT NULL REFERENCES student (student_id),
+   student_id                  INT                     REFERENCES student (student_id) ON DELETE SET NULL,
    project_role_id             SERIAL                  NOT NULL REFERENCES project_role (project_role_id),
    information                 TEXT,
-   created_by_login_user_id    SERIAL                  NOT NULL REFERENCES login_user (login_user_id),
+   created_by_login_user_id    INT                  REFERENCES login_user (login_user_id)  ON DELETE SET NULL,
    contract_status             contract_status_enum    NOT NULL
 );
 
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS attachment(
 
 CREATE TABLE IF NOT EXISTS template_email(
    template_email_id      SERIAL      PRIMARY KEY,
-   owner_id               SERIAL      NOT NULL REFERENCES login_user(login_user_id),
+   owner_id               INT         REFERENCES login_user(login_user_id) ON DELETE SET NULL,
    name                   TEXT        NOT NULL,
    content                TEXT        NOT NULL,
    subject                TEXT,

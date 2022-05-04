@@ -2,14 +2,12 @@ import { account_status_enum } from "@prisma/client";
 import express from "express";
 
 import * as ormLU from "../orm_functions/login_user";
-import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
 import * as ormSe from "../orm_functions/session_key";
 import { errors } from "../utility";
 import * as ormL from "../orm_functions/login_user";
-import { removeAllKeysForLoginUserId } from "../orm_functions/session_key";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -110,40 +108,9 @@ export async function deleteCoach(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
-                .searchLoginUserByPerson(parsed.data.id)
-                .then((logUs) => {
-                    if (
-                        logUs !== null &&
-                        logUs.login_user_id !== parsed.userId
-                    ) {
-                        return removeAllKeysForLoginUserId(logUs.login_user_id)
-                            .then(() => {
-                                return Promise.resolve({});
-                            })
-                            .then(() => {
-                                return ormL
-                                    .deleteLoginUserByPersonId(parsed.data.id)
-                                    .then(() => {
-                                        return ormP
-                                            .deletePersonById(parsed.data.id)
-                                            .then(() => Promise.resolve({}))
-                                            .catch(() =>
-                                                Promise.reject(
-                                                    errors.cookServerError()
-                                                )
-                                            );
-                                    })
-                                    .catch(() =>
-                                        Promise.reject(errors.cookServerError())
-                                    );
-                            })
-                            .catch(() =>
-                                Promise.reject(errors.cookServerError())
-                            );
-                    }
-                    return Promise.reject(errors.cookInvalidID());
-                });
+            return ormLU
+                .deleteLoginUserFromDB(parsed.data.id)
+                .then(() => Promise.resolve({}));
         });
 }
 
