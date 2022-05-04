@@ -46,7 +46,7 @@ CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED');
 CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
-    "password"         TEXT     NULL,
+    "password"       VARCHAR(60)     NULL,
     is_admin         BOOLEAN NOT NULL,
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,

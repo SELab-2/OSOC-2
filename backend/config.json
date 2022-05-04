@@ -91,5 +91,9 @@
     "email": {
         "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
         "header": "OSOC2 Recovery Code"
+    },
+
+    "encryption": {
+        "encryptionRounds": 8
     }
 }

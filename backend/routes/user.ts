@@ -15,6 +15,7 @@ import {
     removeAllKeysForUser,
 } from "../orm_functions/session_key";
 import * as config from "../config.json";
+import * as bcrypt from "bcrypt";
 
 /**
  *  Attempts to list all students in the system.
@@ -98,9 +99,14 @@ export async function createUserRequest(
         });
     }
 
+    const hash = await bcrypt.hash(
+        parsedRequest.pass,
+        config.encryption.encryptionRounds
+    );
+
     const loginUser = await ormLU.createLoginUser({
         personId: person.person_id,
-        password: parsedRequest.pass,
+        password: hash,
         isAdmin: false,
         isCoach: true,
         accountStatus: "PENDING",
@@ -223,7 +229,6 @@ export async function deleteUserRequest(
                                 .trim() === "true"
                         );
                     }
-
                     return Promise.reject(errors.cookInvalidID());
                 });
         });
@@ -284,21 +289,49 @@ export async function userModSelf(
             return ormLU
                 .getLoginUserById(checked.userId)
                 .then((user) => util.getOrReject(user))
-                .then((user) => {
+                .then(async (user) => {
+                    // only change the password if an old and new password is given
+                    let valid = true;
                     if (
-                        checked.data.pass != undefined &&
-                        user.password != checked.data.pass.oldpass
-                    )
+                        checked.data.pass !== null &&
+                        checked.data.pass !== undefined &&
+                        user.password
+                    ) {
+                        valid = await bcrypt.compare(
+                            checked.data.pass?.oldpass,
+                            user.password
+                        );
+                    }
+                    // the old password to compare to was not as expected => return error
+                    if (!valid) {
                         return Promise.reject();
+                    }
                     return Promise.resolve(user);
                 })
-                .then((user) =>
-                    ormLU.updateLoginUser({
-                        loginUserId: checked.userId,
-                        accountStatus: user.account_status,
-                        password: checked.data.pass?.newpass,
-                    })
-                )
+                .then(async (user) => {
+                    if (
+                        checked.data.pass !== null &&
+                        checked.data.pass !== undefined
+                    ) {
+                        if (
+                            checked.data.pass.oldpass !== undefined &&
+                            checked.data.pass.oldpass !== null &&
+                            checked.data.pass.newpass === undefined &&
+                            checked.data.pass.newpass === null
+                        ) {
+                            return Promise.reject(errors.cookArgumentError());
+                        }
+                        return ormLU.updateLoginUser({
+                            loginUserId: checked.userId,
+                            accountStatus: user.account_status,
+                            password: await bcrypt.hash(
+                                checked.data.pass?.newpass,
+                                config.encryption.encryptionRounds
+                            ),
+                        });
+                    }
+                    return Promise.resolve(user);
+                })
                 .then((user) => Promise.resolve(user.person))
                 .then((person) => {
                     if (checked.data.name != undefined) {
