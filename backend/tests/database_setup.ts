@@ -39,7 +39,6 @@ export function personData() {
 }
 
 export function loginuserData(people: dbtypes.person[]) {
-    // console.log(people);
     return [
         {
             person_id: people[0].person_id,

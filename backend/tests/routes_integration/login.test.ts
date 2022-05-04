@@ -4,12 +4,19 @@ import * as db from "../database_setup";
 import prisma from "../../prisma/prisma";
 import "../integration_setup";
 import { ApiError, StringDict } from "../../types";
+import * as config from "../../config.json";
+import * as bcrypt from "bcrypt";
+import { account_status_enum } from "@prisma/client";
 
 let ogPasswords: db.OGNamePass[] = [];
 
 const credError: ApiError = {
     http: 409,
     reason: "Invalid e-mail or password.",
+};
+const disabledError: ApiError = {
+    http: 409,
+    reason: "Account is disabled.",
 };
 
 describe("POST /login endpoint", () => {
@@ -83,6 +90,55 @@ describe("POST /login endpoint", () => {
         );
 
         expect(new Set(keys.map((x) => x.key)).size).toBe(keys.length); // all keys are unique
+
+        await Promise.all(
+            keys.map(async (v) => {
+                const res = await prisma.session_keys.findUnique({
+                    where: {
+                        session_key: v.key,
+                    },
+                    select: {
+                        login_user: { select: { person: true } },
+                    },
+                });
+
+                expect(res).not.toBeNull(); // existence
+                expect(res?.login_user.person.email).toBe(v.name); // match email
+            })
+        );
+    });
+
+    test("  -> with disabled account", async () => {
+        // set up disabled account
+        const pass = "imapassword";
+        const hash = await bcrypt.hash(
+            pass,
+            config.encryption.encryptionRounds
+        );
+        const user = {
+            password: hash,
+            is_admin: false,
+            is_coach: false,
+            account_status: "DISABLED" as account_status_enum,
+        };
+        const person = {
+            email: "person@person.com",
+            firstname: "person",
+            lastname: "person",
+        };
+        await prisma.person.create({ data: person }).then((p) => {
+            const u = { ...user, person_id: p.person_id };
+            return prisma.login_user.create({ data: u });
+        });
+
+        // call ep
+        const req = helpers.endpoint(
+            "post",
+            "/login",
+            { body: { name: person.email, pass: pass } },
+            loginConfig
+        );
+        await helpers.expectApiError(req, disabledError);
     });
 });
 
