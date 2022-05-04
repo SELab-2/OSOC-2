@@ -34,7 +34,7 @@ export const User: React.FC<{
 
     useEffect(() => {
         if (!isAdmin && !isCoach) {
-            setStatus(AccountStatus.DISABLED);
+            setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
 
@@ -93,7 +93,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsAdmin(!isAdmin);
+            setIsAdmin((isAdmin) => !isAdmin);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -107,7 +110,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsCoach(!isCoach);
+            setIsCoach((isCoach) => !isCoach);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -122,7 +128,9 @@ export const User: React.FC<{
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.DISABLED);
+                setStatus(() => AccountStatus.DISABLED);
+                setIsAdmin(() => false);
+                setIsCoach(() => false);
             }
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
@@ -133,7 +141,7 @@ export const User: React.FC<{
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.ACTIVATED);
+                setStatus(() => AccountStatus.ACTIVATED);
             }
         }
     };
@@ -172,6 +180,7 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 }
+                console.log(json);
                 removeUser(user);
                 return json;
             })
@@ -210,7 +219,11 @@ export const User: React.FC<{
                             width={30}
                             height={30}
                             src={isAdmin ? AdminIconColor : AdminIcon}
-                            alt={"Admin"}
+                            alt={
+                                isAdmin
+                                    ? "Person is an admin"
+                                    : "Person is not an admin"
+                            }
                         />
                     </div>
                 </div>
@@ -226,7 +239,11 @@ export const User: React.FC<{
                             src={isCoach ? CoachIconColor : CoachIcon}
                             width={30}
                             height={30}
-                            alt={"Coach"}
+                            alt={
+                                isCoach
+                                    ? "Person is a coach"
+                                    : "Person is not a coach"
+                            }
                         />
                     </div>
                 </div>
