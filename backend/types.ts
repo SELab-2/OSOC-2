@@ -413,7 +413,7 @@ export namespace InternalTypes {
 
     export interface ShortTemplate {
         id: number;
-        owner: number;
+        owner: number | null;
         name: string;
     }
 
@@ -422,7 +422,7 @@ export namespace InternalTypes {
     }
 
     export interface FollowupStatus {
-        student: number;
+        student: number | null;
         status: email_status_enum;
         application: number;
     }

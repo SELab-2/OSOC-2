@@ -23,7 +23,6 @@ export const User: React.FC<{
     const { sessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
-    const personId = user.person_id;
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -157,7 +156,7 @@ export const User: React.FC<{
         await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
-                personId.toString(),
+                userId.toString(),
             {
                 method: "DELETE",
                 headers: {
