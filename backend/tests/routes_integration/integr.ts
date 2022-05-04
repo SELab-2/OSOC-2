@@ -138,3 +138,17 @@ export async function runInvalidSessionKey<
         })
     );
 }
+
+const realLog = console.log.bind(global.console);
+const logStub = jest.fn(() => {
+    /* does nothing, NOTHING! */
+});
+
+// disable console.log because it's annoying
+beforeAll(() => {
+    global.console.log = logStub;
+});
+
+afterAll(() => {
+    global.console.log = realLog;
+});

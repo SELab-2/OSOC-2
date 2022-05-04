@@ -100,18 +100,6 @@ export function getSessionKey(req: express.Request): string {
 }
 
 /**
- *  Promise-based debugging function. Logs the data, then passes it through
- * (using `Promise.resolve`).
- *
- *  @param data The data to log and pass through.
- *  @returns A `Promise<typeof data>` resolving with the given data.
- */
-export function debug(data: unknown): Promise<typeof data> {
-    console.log(data);
-    return Promise.resolve(data);
-}
-
-/**
  *  Finishes a promise chain by sending a response.
  *  @param resp The Express.js response.
  *  @param status The HTTP status.
@@ -220,7 +208,6 @@ export async function respOrErrorNoReinject(
 
     return prom
         .then((data) => {
-            console.log(data);
             return Promise.resolve(data);
         })
         .then(
@@ -228,7 +215,6 @@ export async function respOrErrorNoReinject(
                 replySuccess(res, data as typeof data)
         )
         .catch((err: unknown): Promise<void> => {
-            console.log(err);
             if (isError(err as Anything))
                 return replyError(res, err as ApiError);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
@@ -292,7 +278,6 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(
         .checkSessionKey(obj.sessionkey)
         .then(async (uid) => {
             if (uid) {
-                console.log("uid: " + uid.login_user_id);
                 return ormLoUs
                     .getLoginUserById(uid.login_user_id)
                     .then((login_user) => {
@@ -428,35 +413,6 @@ export function route<T extends Responses.ApiResponse>(
 }
 
 /**
- *  Contains all boilerplate to install a route with a path and HTTP verb for a
- * route that returns only an updated session key.
- *  @param router The router to install to.
- *  @param verb The HTTP verb.
- *  @param path The (relative) route path.
- *  @param callback The function which will respond.
- *  @deprecated Use route instead.
- */
-export function routeKeyOnly(
-    router: express.Router,
-    verb: Verb,
-    path: string,
-    callback: RouteCallback<Responses.Key>
-): void {
-    console.log("[WARNING]: routeKeyOnly is deprecated. Use route instead.");
-    console.log("Stack trace:");
-    console.log("------------");
-    console.log(new Error().stack);
-    router[verb](path, (req: express.Request, res: express.Response) =>
-        respOrErrorNoReinject(
-            res,
-            callback(req)
-                .then((toupd) => refreshKey(toupd.sessionkey))
-                .then(() => Promise.resolve({}))
-        )
-    );
-}
-
-/**
  *  Checks whether the object contains a valid ID.
  */
 export async function isValidID<T extends Requests.IdRequest>(
@@ -517,7 +473,6 @@ export function queryToBody(req: express.Request) {
 }
 
 export function mutable<T>(obj: T, targetid: number): Promise<T> {
-    console.log(targetid);
     if (targetid === config.global.defaultUserId)
         return Promise.reject(errors.cookInvalidID());
     return Promise.resolve(obj);

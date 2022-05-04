@@ -806,9 +806,6 @@ test("Can parse coach access request", () => {
     const req3: express.Request = getMockReq();
     req3.body = {};
 
-    console.log(Rq.parseRequestUserRequest(req1));
-    console.log(r1);
-
     const prom1: Promise<void> = expect(
         Rq.parseRequestUserRequest(req1)
     ).resolves.toStrictEqual(r1);
