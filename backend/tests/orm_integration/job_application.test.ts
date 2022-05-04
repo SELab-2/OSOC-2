@@ -23,7 +23,7 @@ import { CreateJobApplication } from "../../orm_functions/orm_types";
 function job_application_check(
     expected: {
         job_application_id?: number;
-        student_id: number;
+        student_id: number | null;
         student_volunteer_info: string;
         responsibilities: string | null;
         fun_fact: string | null;
@@ -36,10 +36,10 @@ function job_application_check(
         edu_year: string | null;
         created_at: Date;
         email_status: email_status_enum;
-    },
+    } | null,
     found: {
         job_application_id: number;
-        student_id: number;
+        student_id: number | null;
         student_volunteer_info: string;
         responsibilities: string | null;
         fun_fact: string | null;
@@ -54,6 +54,18 @@ function job_application_check(
         email_status: email_status_enum;
     }
 ) {
+    if (expected == null) {
+        expect("SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
+    if (found.student_id == null) {
+        expect("FOUND STUDENT ID SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
+    if (expected.student_id == null) {
+        expect("EXPECTED STUDENT ID SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
     expect(found).toHaveProperty("student_id", expected.student_id);
     expect(found).toHaveProperty(
         "student_volunteer_info",
@@ -115,19 +127,19 @@ it("should return all student evaluations for the student with given id", async 
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "firstname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "lastname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }
@@ -168,19 +180,19 @@ it("should return all final student evaluations for the student with given id", 
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "firstname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "lastname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }
@@ -222,19 +234,19 @@ it("should return all suggestion evaluations for the student with given id", asy
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "firstname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "lastname"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }

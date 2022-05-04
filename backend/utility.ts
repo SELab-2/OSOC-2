@@ -292,6 +292,7 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(
         .checkSessionKey(obj.sessionkey)
         .then(async (uid) => {
             if (uid) {
+                console.log("uid: " + uid.login_user_id);
                 return ormLoUs
                     .getLoginUserById(uid.login_user_id)
                     .then((login_user) => {
@@ -516,6 +517,7 @@ export function queryToBody(req: express.Request) {
 }
 
 export function mutable<T>(obj: T, targetid: number): Promise<T> {
+    console.log(targetid);
     if (targetid === config.global.defaultUserId)
         return Promise.reject(errors.cookInvalidID());
     return Promise.resolve(obj);

@@ -13,7 +13,6 @@
   "dependencies": {
     "@types/jest": "^27.4.1",
     "bulma": "^0.9.3",
-    "crypto-js": "^4.1.1",
     "next": "12.1.6",
     "jest-environment-jsdom": "^28.0.2",
     "jest-fetch-mock": "^3.0.3",
