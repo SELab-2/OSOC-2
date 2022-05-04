@@ -2,7 +2,7 @@ import * as supertest from "supertest";
 import * as server from "../../server";
 import * as ogConf from "../../config.json";
 import { Verb, Anything, ApiError } from "../../types";
-import prisma from "../../prisma/prisma";
+import * as db from "../database_setup";
 
 export interface Config {
     auth: { enable: boolean; type: string; value: string };
@@ -80,17 +80,4 @@ export async function expectApiError(req: supertest.Test, err: ApiError) {
     });
 }
 
-beforeAll(async () => {
-    // we want FULL control
-    await prisma.person.deleteMany();
-    await prisma.login_user.deleteMany();
-    await prisma.osoc.deleteMany();
-    await prisma.project.deleteMany();
-    await prisma.job_application.deleteMany();
-    await prisma.evaluation.deleteMany();
-    await prisma.role.deleteMany();
-    await prisma.language.deleteMany();
-    await prisma.attachment.deleteMany();
-    await prisma.session_keys.deleteMany();
-    await prisma.password_reset.deleteMany();
-});
+beforeAll(async () => await db.hashAllPasswords());
