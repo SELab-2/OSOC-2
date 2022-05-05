@@ -9,7 +9,13 @@
 .close {
   position: relative;
   left: 90%;
-  top: -11.5rem;
+  top: 3rem;
+}
+
+@media (max-width: 620px) {
+  .close {
+
+  }
 }
 
 .body {

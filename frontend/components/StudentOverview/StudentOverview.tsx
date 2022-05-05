@@ -243,14 +243,13 @@ export const StudentOverview: React.FC<{
                     <button onClick={handleConfirm}>CONFIRM</button>
                 </div>
             </Modal>
-            <StudentCard student={student} display={Display.FULL} />
-
             {clearSelection !== undefined ? (
                 <div
                     className={`delete is-large ${styles.close}`}
                     onClick={close}
                 />
             ) : null}
+            <StudentCard student={student} display={Display.FULL} />
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>
