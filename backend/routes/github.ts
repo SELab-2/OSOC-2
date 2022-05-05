@@ -22,8 +22,6 @@ export let states: string[] = [];
  */
 export function getHome(): string {
     const root = `${process.env.GITHUB_AUTH_CALLBACK_URL}`;
-    // check if dev or production
-    console.log("Home is: " + root);
     return root;
 }
 
@@ -75,7 +73,6 @@ export function ghIdentity(resp: express.Response): Promise<void> {
             getHome() + config.global.preferred + "/github/challenge"
         );
     url += "&state=" + genState();
-    console.log("--- REDIRECTING TO GITHUB AT " + url + " ---");
     return util.redirect(resp, url);
 }
 
@@ -126,7 +123,7 @@ export async function ghExchangeAccessToken(
             )
         )
         .catch((err) => {
-            console.log("GITHUB ERROR " + err);
+            console.log("GITHUB ERROR " + JSON.stringify(err));
             util.redirect(
                 res,
                 process.env.FRONTEND +
