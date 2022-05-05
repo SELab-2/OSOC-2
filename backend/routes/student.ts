@@ -274,6 +274,8 @@ export async function createStudentSuggestion(
 export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.SuggestionInfo> {
+    // not implementing pagination as we don't expect the number of suggestions
+    // for any student to be > 50 (2 * page size); which is kind of a minimum...
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)

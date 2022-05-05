@@ -285,7 +285,7 @@ export async function userModSelf(
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
-        .then((checked) => {
+        .then(async (checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
                 .then((user) => util.getOrReject(user))
@@ -333,7 +333,7 @@ export async function userModSelf(
                     return Promise.resolve(user);
                 })
                 .then((user) => Promise.resolve(user.person))
-                .then((person) => {
+                .then(async (person) => {
                     if (checked.data.name != undefined) {
                         return ormP
                             .updatePerson({
@@ -346,7 +346,7 @@ export async function userModSelf(
                 })
                 .then(() => Promise.resolve(checked));
         })
-        .then((checked) => {
+        .then(async (checked) => {
             if (checked.data.pass == undefined) {
                 return Promise.resolve({ sessionkey: checked.data.sessionkey });
             }

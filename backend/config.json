@@ -84,7 +84,8 @@
         "preferred": "/api-osoc",
         "authScheme": "auth/osoc2",
         "defaultUserId": 3,
-        "port": 4096
+        "port": 4096,
+        "pageSize": 25
     },
 
     "email": {

@@ -735,8 +735,9 @@ export namespace Responses {
 }
 
 export namespace Requests {
-    export interface Paginable {
-        currentPage?: number;
+    export interface PaginableRequest extends KeyRequest {
+        currentPage: number;
+        pageSize: number; // will be filled in by the parser using the config
     }
 
     export interface Login {

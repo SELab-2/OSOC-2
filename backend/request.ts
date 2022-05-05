@@ -148,6 +148,22 @@ async function parseKeyRequest(
     );
 }
 
+async function parsePaginationRequest(
+    req: express.Request
+): Promise<Requests.PaginableRequest> {
+    return parseKeyRequest(req).then((parsed) => {
+        let currentPage = 0;
+        if ("currentPage" in req.body) {
+            currentPage = Number(req.body.currentPage);
+        }
+        return {
+            ...parsed,
+            currentPage: currentPage,
+            pageSize: config.global.pageSize,
+        };
+    });
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
@@ -306,6 +322,7 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
+    const authenticated = await parseKeyRequest(req); // enforce authentication
     let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
         year = parseInt(req.body.yearFilter);
@@ -318,7 +335,7 @@ export async function parseFilterOsocsRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...authenticated,
         yearFilter: year,
         yearSort: maybe<FilterSort>(req.body, "yearSort"),
     });
@@ -333,6 +350,8 @@ export async function parseFilterOsocsRequest(
 export async function parseFilterStudentsRequest(
     req: express.Request
 ): Promise<Requests.StudentFilter> {
+    const paged = await parsePaginationRequest(req); // ensure authentication
+
     let mail = maybe(req.body, "emailFilter");
     let roles = maybe(req.body, "roleFilter");
     if (
@@ -391,7 +410,7 @@ export async function parseFilterStudentsRequest(
         coachFilter = req.body.coachFilter.toString() === "true";
     }
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paged,
         osocYear: osoc_year,
         firstNameFilter: maybe(req.body, "firstNameFilter"),
         lastNameFilter: maybe(req.body, "lastNameFilter"),
@@ -416,6 +435,7 @@ export async function parseFilterStudentsRequest(
 export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     let mail = undefined;
 
     if (
@@ -461,7 +481,7 @@ export async function parseFilterUsersRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         statusFilter: maybe(req.body, "statusFilter"),
@@ -581,6 +601,7 @@ export async function parseUpdateProjectRequest(
 export async function parseFilterProjectsRequest(
     req: express.Request
 ): Promise<Requests.ProjectFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     for (const filter of [
         maybe(req.body, "projectNameSort"),
         maybe(req.body, "clientNameSort"),
@@ -612,7 +633,7 @@ export async function parseFilterProjectsRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         projectNameFilter: maybe(req.body, "projectNameFilter"),
         clientNameFilter: maybe(req.body, "clientNameFilter"),
         assignedCoachesFilterArray: assignedCoachesFilterArray,
@@ -873,11 +894,6 @@ export async function parseNewOsocEditionRequest(
  */
 export const parseLogoutRequest = parseKeyRequest;
 /**
- *  A request to `GET /student/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseStudentAllRequest = parseKeyRequest;
-/**
  *  A request to `GET /roles/all` only requires a session key
  * {@link parseKeyRequest}.
  */
@@ -897,16 +913,6 @@ export const parseGetAllCoachRequestsRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseAdminAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /user/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseUserAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /project/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseProjectAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /project/conflicts` only requires a session key
  * {@link parseKeyRequest}.
@@ -1036,3 +1042,22 @@ export const parseOsocAllRequest = parseKeyRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
+
+/**
+ *  A request to `GET /user/all` only requires a session key and optionally the
+ * current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseUserAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /project/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseProjectAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /student/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseStudentAllRequest = parsePaginationRequest;

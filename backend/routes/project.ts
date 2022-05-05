@@ -416,6 +416,8 @@ export async function unAssignStudent(
 export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
+    // not implementing pagination as we don't expect the number of conflicts
+    // to be > 50 (2 * page size); which is kind of a minimum...
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))

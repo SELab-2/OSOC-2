@@ -16,7 +16,7 @@ export async function listStudentRoles(
     return rq
         .parseRolesAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(() => {
+        .then(async () => {
             return ormRo.getAllRoles().then((roles) =>
                 Promise.resolve({
                     data: roles,
