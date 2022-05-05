@@ -254,6 +254,7 @@ export const StudentOverview: React.FC<{
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>
+                    <h2>Status</h2>
                     <div className={styles.dropdown}>
                         <button className={styles.dropbtn}>Set Status</button>
                         <div className={styles.dropdownContent}>
@@ -266,32 +267,31 @@ export const StudentOverview: React.FC<{
                             </a>
                         </div>
                     </div>
-                    {student.evaluation.evaluations.filter(
-                        (evaluation) => evaluation.is_final
-                    )[0] !== undefined ? (
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                decision_to_image[
-                                    student.evaluation.evaluations.filter(
-                                        (evaluation) => evaluation.is_final
-                                    )[0].decision
-                                ]
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Final Decision"}
-                        />
-                    ) : null}
                 </div>
 
                 <div>
                     {evaluations.map((evaluation) => {
                         if (evaluation.isFinal) {
                             return (
-                                <div key={evaluation.evaluation_id}>
+                                <div
+                                    className={styles.suggestion}
+                                    key={evaluation.evaluation_id}
+                                >
+                                    <Image
+                                        className={styles.buttonImage}
+                                        src={
+                                            decision_to_image[
+                                                student.evaluation.evaluations.filter(
+                                                    (evaluation) =>
+                                                        evaluation.is_final
+                                                )[0].decision
+                                            ]
+                                        }
+                                        width={30}
+                                        height={30}
+                                        alt={"Final Decision"}
+                                    />
                                     <p>
-                                        {evaluation.decision}{" "}
                                         <strong>
                                             {evaluation.senderFirstname}{" "}
                                             {evaluation.senderLastname}

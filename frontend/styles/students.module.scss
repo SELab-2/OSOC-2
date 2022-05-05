@@ -12,10 +12,6 @@
   gap: 2rem;
 }
 
-.students > div {
-  position: relative;
-}
-
 /* The style for the list of students */
 .studentCards {
   display: flex;
@@ -25,9 +21,13 @@
   overflow-y: scroll;
   padding-block: 4rem;
   padding-inline: 2rem;
+  align-items: flex-start;
 }
 
 @media (max-width: 620px) {
+  .students {
+    gap: 1rem !important;
+  }
   .students.limited {
     display: flex;
     flex-direction: column;
@@ -37,7 +37,33 @@
       flex-direction: row;
       overflow-y: hidden;
       overflow-x: scroll;
+      padding-block: 1rem;
     }
+  }
+
+  .scrollView {
+    display: flex;
+    position: relative;
+  }
+
+  .topShadowCaster, .bottomShadowCaster {
+    margin-inline: auto;
+    width: 3rem !important;
+    height: 100%;
+    z-index: 1;
+    position: absolute;
+  }
+
+  .topShadowCaster {
+    margin-left: -1rem !important;
+    background: linear-gradient(90deg, var(--neutral-100), transparent) !important;
+  }
+  .bottomShadowCaster {
+    background: linear-gradient(-90deg, var(--neutral-100), transparent) !important;
+    margin-top: 0 !important;
+    margin-right: -1rem !important;
+    right: 0;
+    top: 0 !important;
   }
 }
 

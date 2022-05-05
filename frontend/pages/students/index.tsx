@@ -110,44 +110,49 @@ const Index: NextPage = () => {
                         display={display}
                         setFilteredStudents={setFilteredStudents}
                     />
-                    <div className={styles.topShadowCaster} />
-                    <div
-                        className={`${styles.studentCards} ${
-                            display === Display.LIMITED ? styles.limited : ""
-                        }`}
-                    >
-                        {students.map((student, index) => {
-                            const id = student.student.student_id;
-                            id_to_index[id] = index;
-                            return (
-                                <div
-                                    key={student.student.student_id}
-                                    className={styles.card}
-                                    onClick={(e) =>
-                                        clickStudent(
-                                            e,
-                                            student.student.student_id,
-                                            index
-                                        )
-                                    }
-                                >
-                                    <StudentCard
-                                        student={student as Student}
-                                        display={display}
-                                    />
-                                    {student.evaluation.evaluations.length >
-                                    0 ? (
-                                        <EvaluationBar
-                                            evaluations={
-                                                student.evaluation.evaluations
-                                            }
+                    <div className={styles.scrollView}>
+                        <div className={styles.topShadowCaster} />
+                        <div
+                            className={`${styles.studentCards} ${
+                                display === Display.LIMITED
+                                    ? styles.limited
+                                    : ""
+                            }`}
+                        >
+                            {students.map((student, index) => {
+                                const id = student.student.student_id;
+                                id_to_index[id] = index;
+                                return (
+                                    <div
+                                        key={student.student.student_id}
+                                        className={styles.card}
+                                        onClick={(e) =>
+                                            clickStudent(
+                                                e,
+                                                student.student.student_id,
+                                                index
+                                            )
+                                        }
+                                    >
+                                        <StudentCard
+                                            student={student as Student}
+                                            display={display}
                                         />
-                                    ) : null}
-                                </div>
-                            );
-                        })}
+                                        {student.evaluation.evaluations.length >
+                                        0 ? (
+                                            <EvaluationBar
+                                                evaluations={
+                                                    student.evaluation
+                                                        .evaluations
+                                                }
+                                            />
+                                        ) : null}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className={styles.bottomShadowCaster} />
                     </div>
-                    <div className={styles.bottomShadowCaster} />
                 </div>
                 {selectedStudent !== -1 &&
                 students[selectedStudent] !== undefined ? (
