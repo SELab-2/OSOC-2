@@ -222,6 +222,7 @@ export interface ServerToClientEvents {
     loginUserUpdated: () => void;
     loginUserActivated: () => void;
     loginUserDisabled: () => void;
+    registrationReceived: () => void;
 }
 
 /**
@@ -231,4 +232,5 @@ export interface ClientToServerEvents {
     updateRoleUser: () => void;
     activateUser: () => void;
     disableUser: () => void;
+    submitRegistration: () => void;
 }

@@ -2,9 +2,10 @@ import styles from "./Header.module.css";
 import Image from "next/image";
 import LogoOsocColor from "../../public/images/logo-osoc-color.svg";
 import Link from "next/link";
-import React, { SyntheticEvent, useContext } from "react";
+import React, { SyntheticEvent, useContext, useEffect } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { useRouter } from "next/router";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const Header: React.FC = () => {
     const {
@@ -17,12 +18,29 @@ export const Header: React.FC = () => {
         setIsVerified,
     } = useContext(SessionContext);
 
+    const { getSession } = useContext(SessionContext);
+
+    const { socket } = useSockets();
+
     const router = useRouter();
 
     const logIn = (e: SyntheticEvent) => {
         e.preventDefault();
         router.push("/login").then();
     };
+
+    useEffect(() => {
+        socket.off("loginUserDisabled"); // remove old listeners
+
+        // when receiving that a loginUser was disabled => fetch from the server to check if session key is still valid
+        // getSession wil redirect automatically to /login if the key is invalid
+        socket.on("loginUserDisabled", () => {
+            if (getSession) {
+                getSession().then();
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [getSession]);
 
     const logOut = (e: SyntheticEvent) => {
         e.preventDefault();

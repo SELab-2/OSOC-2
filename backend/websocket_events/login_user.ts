@@ -30,13 +30,17 @@ export function registerLoginUserHandlers(
         socket.broadcast.emit("loginUserUpdated");
     };
     const loginUserActivated = () => {
-        console.log("activated user!");
         socket.broadcast.emit("loginUserActivated");
     };
     const loginUserDisabled = () => {
+        console.log("a user was disabled");
         socket.broadcast.emit("loginUserDisabled");
+    };
+    const newRegister = () => {
+        socket.broadcast.emit("registrationReceived");
     };
     socket.on("updateRoleUser", loginUserRoleUpdated);
     socket.on("activateUser", loginUserActivated);
     socket.on("disableUser", loginUserDisabled);
+    socket.on("submitRegistration", newRegister);
 }

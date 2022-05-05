@@ -80,6 +80,7 @@ export const User: React.FC<{
             if (changed_val === "activated") {
                 socket.emit("activateUser");
             } else if (changed_val === "disabled") {
+                console.log("disabledThere");
                 socket.emit("disableUser");
             } else {
                 // other changes are changes to the enum roles
@@ -122,7 +123,7 @@ export const User: React.FC<{
         if (status === AccountStatus.ACTIVATED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
+                "disabled", // the account is still on activated => we disable the account
                 isAdmin,
                 isCoach,
                 AccountStatus.DISABLED
@@ -133,7 +134,7 @@ export const User: React.FC<{
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
                 "coach",
-                "disabled",
+                "activated", // the account is still on disabled => we enable the account
                 isAdmin,
                 isCoach,
                 AccountStatus.ACTIVATED
