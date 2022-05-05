@@ -349,14 +349,10 @@ test("should return all filtered projects sorted by the fully assigned status", 
         )
     ).resolves.toEqual([filteredProject1, filteredProject2]);
 
-    console.log(filteredProject1.project_role);
-
     prismaMock.project.findMany.mockResolvedValue([
         filteredProject1,
         filteredProject2,
     ]);
-
-    console.log(filteredProject1.project_role);
 
     await expect(
         filterProjects(

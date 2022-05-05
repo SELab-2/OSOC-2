@@ -20,6 +20,8 @@ const person5: CreatePerson = {
     lastname: "second name",
 };
 
+import "../integration_setup";
+
 it("should create 1 new person where github is null", async () => {
     const person0: CreatePerson = {
         email: "test@email.be",
