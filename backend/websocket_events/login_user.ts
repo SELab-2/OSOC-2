@@ -33,7 +33,6 @@ export function registerLoginUserHandlers(
         socket.broadcast.emit("loginUserActivated");
     };
     const loginUserDisabled = () => {
-        console.log("a user was disabled");
         socket.broadcast.emit("loginUserDisabled");
     };
     const newRegister = () => {
