@@ -3,6 +3,11 @@
   min-width: 14rem;
 }
 
+.body > header {
+  display: flex;
+  justify-content: space-between;
+}
+
 .card h2 {
   font-size: large;
   padding-block: 0;

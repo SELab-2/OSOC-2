@@ -20,7 +20,6 @@ const Index: NextPage = () => {
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
-        console.log(filteredStudents);
         if (selectedStudent < 0) {
             setDisplay(Display.FULL);
         } else {
@@ -93,14 +92,11 @@ const Index: NextPage = () => {
         studentId: number,
         evalutationsCoach: Evaluation[]
     ) => {
-        console.log(studentId);
-        console.log(evalutationsCoach);
         if (selectedStudent !== -1) {
             students[selectedStudent].evaluation.evaluations =
                 evalutationsCoach;
         }
         setStudents([...students]);
-        // TODO
     };
 
     return (

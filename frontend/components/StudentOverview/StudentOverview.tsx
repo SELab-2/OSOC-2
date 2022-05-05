@@ -262,7 +262,9 @@ export const StudentOverview: React.FC<{
                     onClick={close}
                 />
             ) : null}
-            <StudentCard student={student} display={Display.FULL} />
+            <div className={styles.studentCard}>
+                <StudentCard student={student} display={Display.FULL} />
+            </div>
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>

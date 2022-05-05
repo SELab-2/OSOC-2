@@ -1,5 +1,5 @@
 import React from "react";
-import { Display, Student } from "../../types";
+import { Decision, Display, Student } from "../../types";
 import styles from "./StudentCard.module.scss";
 import { Role } from "../Labels/Roles";
 import { Study } from "../Labels/Studies";
@@ -7,17 +7,42 @@ import { Diploma } from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 import { LanguageAndSkill } from "../Labels/LanguageAndSkill";
+import CheckIconColor from "../../public/images/green_check_mark_color.png";
+import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 
 export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
     student,
     display,
 }) => {
+    const decision_to_image = {
+        [Decision.YES]: CheckIconColor,
+        [Decision.MAYBE]: ExclamationIconColor,
+        [Decision.NO]: ForbiddenIconColor,
+    };
+
     return (
         <div className={styles.body}>
-            <h2>
-                {" "}
-                {`${student.student.person.firstname} ${student.student.person.lastname}`}
-            </h2>
+            <header>
+                <h2>
+                    {" "}
+                    {`${student.student.person.firstname} ${student.student.person.lastname}`}
+                </h2>
+                {student.evaluation.evaluations.map((evaluation) => {
+                    if (evaluation.is_final) {
+                        return (
+                            <Image
+                                className={styles.buttonImage}
+                                src={decision_to_image[evaluation.decision]}
+                                width={30}
+                                height={30}
+                                alt={"Final Decision"}
+                            />
+                        );
+                    }
+                })}
+            </header>
+
             <div
                 className={`${
                     display === Display.FULL ? styles.grid : styles.limited
