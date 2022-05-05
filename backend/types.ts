@@ -100,11 +100,11 @@ export namespace InternalTypes {
         /**
          *  The firstname of the login user.
          */
-        senderFirstname: string;
+        senderFirstname: string | undefined;
         /**
          *  The lastname of the login user.
          */
-        senderLastname: string;
+        senderLastname: string | undefined;
         /**
          *  The reason why the decision was made.
          */
