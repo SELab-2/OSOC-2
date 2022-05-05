@@ -735,6 +735,10 @@ export namespace Responses {
 }
 
 export namespace Requests {
+    export interface Paginable {
+        currentPage?: number;
+    }
+
     export interface Login {
         name: string;
         pass: string;

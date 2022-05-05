@@ -1,6 +1,4 @@
 {
-    "port": 4096,
-
     "apiErrors": {
         "invalidID": {
             "http": 204,
@@ -85,7 +83,8 @@
         ],
         "preferred": "/api-osoc",
         "authScheme": "auth/osoc2",
-        "defaultUserId": 3
+        "defaultUserId": 3,
+        "port": 4096
     },
 
     "email": {
