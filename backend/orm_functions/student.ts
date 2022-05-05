@@ -186,6 +186,7 @@ export async function filterStudents(
         evaluationFilter = {
             some: {
                 decision: statusFilter,
+                is_final: true,
             },
         };
     } else {
