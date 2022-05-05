@@ -26,9 +26,17 @@ export function registerLoginUserHandlers(
         SocketData
     >
 ) {
-    const loginUserUpdated = (loginUserId: number) => {
+    const loginUserRoleUpdated = () => {
         socket.broadcast.emit("loginUserUpdated");
-        console.log("updated user:" + loginUserId);
     };
-    socket.on("updateUser", loginUserUpdated);
+    const loginUserActivated = () => {
+        console.log("activated user!");
+        socket.broadcast.emit("loginUserActivated");
+    };
+    const loginUserDisabled = () => {
+        socket.broadcast.emit("loginUserDisabled");
+    };
+    socket.on("updateRoleUser", loginUserRoleUpdated);
+    socket.on("activateUser", loginUserActivated);
+    socket.on("disableUser", loginUserDisabled);
 }

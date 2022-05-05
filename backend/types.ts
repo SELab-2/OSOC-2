@@ -979,13 +979,17 @@ export interface Email {
  */
 export interface ServerToClientEvents {
     loginUserUpdated: () => void;
+    loginUserActivated: () => void;
+    loginUserDisabled: () => void;
 }
 
 /**
  * types for socket.io when sending something from the client to the server
  */
 export interface ClientToServerEvents {
-    updateUser: (loginUserId: number) => void;
+    updateRoleUser: () => void;
+    activateUser: () => void;
+    disableUser: () => void;
 }
 
 /**

@@ -77,7 +77,14 @@ export const User: React.FC<{
                 return { success: false };
             });
         if (res.success !== false) {
-            socket.emit("updateUser", userId);
+            if (changed_val === "activated") {
+                socket.emit("activateUser");
+            } else if (changed_val === "disabled") {
+                socket.emit("disableUser");
+            } else {
+                // other changes are changes to the enum roles
+                socket.emit("updateRoleUser");
+            }
         }
         return res;
     };
@@ -126,7 +133,7 @@ export const User: React.FC<{
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
+                "disabled",
                 isAdmin,
                 isCoach,
                 AccountStatus.ACTIVATED
@@ -141,7 +148,7 @@ export const User: React.FC<{
         e.preventDefault();
         const response = await setUserRole(
             "coach",
-            "enum",
+            "activated",
             isAdmin,
             isCoach,
             AccountStatus.ACTIVATED
