@@ -5,6 +5,7 @@ import {
     Decision,
     AttachmentType,
     Attachment,
+    Evaluation,
 } from "../../types";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -18,10 +19,7 @@ import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
-    updateEvaluations?: (
-        studentId: number,
-        evalutations: EvaluationCoach[]
-    ) => void;
+    updateEvaluations?: (studentId: number, evalutations: Evaluation[]) => void;
     clearSelection?: () => void;
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
@@ -67,7 +65,17 @@ export const StudentOverview: React.FC<{
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
-            updateEvaluations(student.student.student_id, evaluations);
+            const newEvals: Evaluation[] = [];
+            evaluations.forEach((evaluation) => {
+                const newEval: Evaluation = {
+                    evaluation_id: evaluation.evaluation_id,
+                    decision: evaluation.decision,
+                    motivation: evaluation.reason,
+                    is_final: evaluation.isFinal,
+                };
+                newEvals.push(newEval);
+            });
+            updateEvaluations(student.student.student_id, newEvals);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evaluations]);
@@ -127,6 +135,11 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
+                const evaluation = response as EvaluationCoach;
+                // The creation was succesfull, we can update the evaluation bar
+                if (evaluation !== undefined) {
+                    fetchEvals().then();
+                }
             }
         }
     };
@@ -226,7 +239,7 @@ export const StudentOverview: React.FC<{
             <Modal
                 visible={showSuggestionField}
                 handleClose={closer}
-                title={"Please fill in you motivation (optional)"}
+                title={"Please fill in your motivation (optional)"}
             >
                 <div className={styles.modalContent}>
                     <input
@@ -280,10 +293,7 @@ export const StudentOverview: React.FC<{
                                         className={styles.buttonImage}
                                         src={
                                             decision_to_image[
-                                                student.evaluation.evaluations.filter(
-                                                    (evaluation) =>
-                                                        evaluation.is_final
-                                                )[0].decision
+                                                evaluation.decision
                                             ]
                                         }
                                         width={30}

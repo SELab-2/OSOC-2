@@ -121,7 +121,7 @@ export interface Attachment {
 
 export interface Student {
     evaluation: {
-        evaluations: [Evaluation];
+        evaluations: Evaluation[];
         osoc: {
             year: number;
         };

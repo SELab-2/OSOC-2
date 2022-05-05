@@ -24,6 +24,10 @@
   align-items: flex-start;
 }
 
+.scrollView {
+  position: relative;
+}
+
 @media (max-width: 620px) {
   .students {
     gap: 1rem !important;
@@ -43,7 +47,6 @@
 
   .scrollView {
     display: flex;
-    position: relative;
   }
 
   .topShadowCaster, .bottomShadowCaster {

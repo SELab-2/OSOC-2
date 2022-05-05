@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import React, { useEffect, useState } from "react";
 import { StudentCard } from "../../components/StudentCard/StudentCard";
-import { Display, EvaluationCoach, Student } from "../../types";
+import { Display, Evaluation, Student } from "../../types";
 import styles from "../../styles/students.module.scss";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import { EvaluationBar } from "../../components/StudentCard/EvaluationBar";
@@ -91,10 +91,15 @@ const Index: NextPage = () => {
      */
     const updateStudentEvaluation = (
         studentId: number,
-        evalutationsCoach: EvaluationCoach[]
+        evalutationsCoach: Evaluation[]
     ) => {
         console.log(studentId);
         console.log(evalutationsCoach);
+        if (selectedStudent !== -1) {
+            students[selectedStudent].evaluation.evaluations =
+                evalutationsCoach;
+        }
+        setStudents([...students]);
         // TODO
     };
 
