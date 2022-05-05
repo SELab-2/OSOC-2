@@ -1,4 +1,5 @@
 import prisma from "../prisma/prisma";
+import { Prisma } from "@prisma/client";
 import {
     CreateProject,
     UpdateProject,
@@ -6,6 +7,7 @@ import {
     FilterSort,
     FilterBoolean,
     FilterNumberArray,
+    DBPagination,
 } from "./orm_types";
 
 /**
@@ -294,7 +296,7 @@ export async function deleteProjectByPartner(partner: string) {
 }
 
 /**
- *
+ * @param page current page and page size
  * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
@@ -305,6 +307,7 @@ export async function deleteProjectByPartner(partner: string) {
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(
+    page: DBPagination,
     projectNameFilter: FilterString,
     clientNameFilter: FilterString,
     assignedCoachesFilterArray: FilterNumberArray,
@@ -334,18 +337,26 @@ export async function filterProjects(
         };
     }
 
-    const filtered_projects = await prisma.project.findMany({
-        where: {
-            name: {
-                contains: projectNameFilter,
-                mode: "insensitive",
-            },
-            partner: {
-                contains: clientNameFilter,
-                mode: "insensitive",
-            },
-            project_user: assignedCoachesArray,
+    const actualFilter: Prisma.projectWhereInput = {
+        name: {
+            contains: projectNameFilter,
+            mode: "insensitive",
         },
+        partner: {
+            contains: clientNameFilter,
+            mode: "insensitive",
+        },
+        project_user: assignedCoachesArray,
+    };
+
+    // const count = await prisma.project.count({
+    //   where: actualFilter
+    // });
+
+    const filtered_projects = await prisma.project.findMany({
+        skip: page.currentPage * page.pageSize,
+        take: page.pageSize,
+        where: actualFilter,
         orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
         include: {
             project_user: {
