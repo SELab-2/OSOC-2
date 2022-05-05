@@ -69,13 +69,6 @@ function rejector<T>(): Promise<T> {
 function anyHasFields(obj: Anything, fields: string[]): boolean {
     for (const f of fields) {
         if (!(f in obj)) {
-            console.log(
-                "!!! Missing argument " +
-                    f +
-                    " in `" +
-                    JSON.stringify(obj) +
-                    "`!!!"
-            );
             return false;
         }
     }
@@ -629,11 +622,6 @@ export async function parseFilterProjectsRequest(
     );
     if ("assignedCoachesFilterArray" in req.body) {
         if (typeof req.body.assignedCoachesFilterArray === "string") {
-            console.log(
-                req.body.assignedCoachesFilterArray
-                    .split(",")
-                    .map((num: string) => parseInt(num))
-            );
             assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
                 .split(",")
                 .map((num: string) => parseInt(num));

@@ -16,6 +16,8 @@ import prisma from "../../prisma/prisma";
 import { decision_enum, email_status_enum } from "@prisma/client";
 import { CreateJobApplication } from "../../orm_functions/orm_types";
 
+import "../integration_setup";
+
 /**
  * aid function to compare most fields of the expected job application and the found job application
  * @param expected the application we expect as response from the database

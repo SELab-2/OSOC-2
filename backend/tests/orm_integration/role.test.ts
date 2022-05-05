@@ -21,6 +21,8 @@ const role2: UpdateRole = {
     name: "Web Designer",
 };
 
+import "../integration_setup";
+
 it("should create 1 new role where", async () => {
     const created__role = await createRole("Data Scientist");
     role1.roleId = created__role.role_id;

@@ -13,6 +13,8 @@ import {
 import prisma from "../../prisma/prisma";
 import { decision_enum } from "@prisma/client";
 
+import "../integration_setup";
+
 const evaluation1: UpdateEvaluationForStudent = {
     evaluation_id: 1,
     loginUserId: 1,

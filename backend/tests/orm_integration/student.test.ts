@@ -27,6 +27,8 @@ const student2: UpdateStudent = {
     alumni: true,
 };
 
+import "../integration_setup";
+
 it("should create 1 new student", async () => {
     const person = await prisma.person.findMany();
     if (person) {
