@@ -442,6 +442,15 @@ export interface WithUserID<T> {
  */
 export namespace Responses {
     /**
+     *  A paginable response holds, besides a data array, also the current page
+     * number and the total number of objects in the database
+     */
+    export interface Paginable<T> {
+        pagination: { page: number; count: number };
+        data: T[];
+    }
+
+    /**
      *  A response consisting of only a session key.
      */
     export interface Key {
@@ -458,8 +467,7 @@ export namespace Responses {
     /**
      *  A response consisting of and id and boolean.
      */
-    export interface Id_alumni {
-        id: number;
+    export interface Id_alumni extends Id {
         hasAlreadyTakenPart: boolean;
     }
 
@@ -519,16 +527,12 @@ export namespace Responses {
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
-    export interface StudentList {
-        data: InternalTypes.Student[];
-    }
+    export interface StudentList extends Paginable<InternalTypes.Student> {}
 
     /**
      *
      */
-    export interface UserList {
-        data: InternalTypes.User[];
-    }
+    export interface UserList extends Paginable<InternalTypes.User> {}
 
     /**
      *
@@ -635,16 +639,13 @@ export namespace Responses {
     /**
      *  A project list response is the keyed version of a list of projects
      */
-    export interface ProjectList {
-        data: InternalTypes.Project[];
-    }
+    export interface ProjectList extends Paginable<InternalTypes.Project> {}
 
     /**
      *  A project filter list is a list of projects
      */
-    export interface ProjectFilterList {
-        data: InternalTypes.ProjectFilter;
-    }
+    export interface ProjectFilterList
+        extends Paginable<InternalTypes.ProjectFilter> {}
 
     /**
      *  An admin list response is the keyed version of the list of admins.
