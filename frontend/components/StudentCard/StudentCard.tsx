@@ -32,6 +32,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                     if (evaluation.is_final) {
                         return (
                             <Image
+                                key={evaluation.evaluation_id}
                                 className={styles.buttonImage}
                                 src={decision_to_image[evaluation.decision]}
                                 width={30}

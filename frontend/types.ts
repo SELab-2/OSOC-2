@@ -115,7 +115,7 @@ export enum AttachmentType {
 export interface Attachment {
     job_application_id: number;
     attachment_id: number;
-    data: string;
+    data: string[];
     type: AttachmentType;
 }
 

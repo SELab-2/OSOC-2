@@ -366,11 +366,17 @@ export const StudentOverview: React.FC<{
                             <div key={attachment.attachment_id}>
                                 <h1>{getAttachmentType(attachment.type)}</h1>
                                 {attachment.type[0] ===
-                                AttachmentType.MOTIVATION_STRING ? (
-                                    <p>{attachment.data}</p>
-                                ) : (
-                                    <a>{attachment.data}</a>
-                                )}
+                                AttachmentType.MOTIVATION_STRING
+                                    ? attachment.data.map((data, index) => {
+                                          return <p key={index}>{data}</p>;
+                                      })
+                                    : attachment.data.map((data, index) => {
+                                          return (
+                                              <a key={index} href={data}>
+                                                  {data}
+                                              </a>
+                                          );
+                                      })}
                             </div>
                         ))}
                     <h1>Fun fact</h1>
