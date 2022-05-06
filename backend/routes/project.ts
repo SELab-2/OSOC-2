@@ -60,37 +60,24 @@ export async function listProjects(
     return rq
         .parseProjectAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () =>
-            ormPr
-                .getAllProjects()
-                .then((obj) =>
-                    Promise.all(
-                        obj.map(async (val) => {
-                            const students = await ormCtr.contractsByProject(
-                                val.project_id
-                            );
-                            const users = await ormPU.getUsersFor(
-                                val.project_id
-                            );
-                            return Promise.resolve({
-                                id: Number(val.project_id),
-                                name: val.name,
-                                partner: val.partner,
-                                start_date: val.start_date.toString(),
-                                end_date: val.end_date.toString(),
-                                positions: val.positions,
-                                osoc_id: val.osoc_id,
-                                students: students,
-                                coaches: users,
-                            });
-                        })
-                    )
-                )
-                .then((obj) =>
-                    Promise.resolve({
-                        data: obj,
-                    })
-                )
+        .then(async (parsed) =>
+            ormPr.filterProjects({
+                currentPage: parsed.data.currentPage,
+                pageSize: parsed.data.pageSize,
+            })
+        )
+        .then((obj) =>
+            Promise.resolve({
+                pagination: obj.pagination,
+                data: obj.data.map((proj) => ({
+                    id: proj.project_id,
+                    name: proj.name,
+                    partner: proj.partner,
+                    start_date: proj.start_date.toString(),
+                    end_date: proj.end_date.toString(),
+                    positions: proj.positions,
+                })),
+            })
         );
 }
 
@@ -476,26 +463,28 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
+    const checked = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
+    if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const projects = await ormPr.filterProjects(
-        checkedSessionKey.data.projectNameFilter,
-        checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
-        checkedSessionKey.data.fullyAssignedFilter,
-        checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort
+        {
+            currentPage: checked.data.currentPage,
+            pageSize: checked.data.pageSize,
+        },
+        checked.data.projectNameFilter,
+        checked.data.clientNameFilter,
+        checked.data.assignedCoachesFilterArray,
+        checked.data.fullyAssignedFilter,
+        checked.data.projectNameSort,
+        checked.data.clientNameSort
     );
 
     const projectlist = [];
 
-    for (const project of projects) {
+    for (const project of projects.data) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
         const users = await ormPU.getUsersFor(project.project_id);
 
@@ -513,6 +502,7 @@ export async function filterProjects(
     }
 
     return Promise.resolve({
+        pagination: projects.pagination,
         data: projectlist,
     });
 }

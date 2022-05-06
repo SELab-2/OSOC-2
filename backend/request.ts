@@ -352,8 +352,8 @@ export async function parseFilterStudentsRequest(
 ): Promise<Requests.StudentFilter> {
     const paged = await parsePaginationRequest(req); // ensure authentication
 
-    let mail = maybe(req.body, "emailFilter");
-    let roles = maybe(req.body, "roleFilter");
+    let mail = maybe<string>(req.body, "emailFilter");
+    let roles: string[] = []; // = maybe(req.body, "roleFilter");
     if (
         ("statusFilter" in req.body &&
             !Object.values(Decision).includes(
@@ -401,11 +401,11 @@ export async function parseFilterStudentsRequest(
         osoc_year = Number(req.body.osocYear);
     }
 
-    let alumniFilter = maybe(req.body, "alumniFilter");
+    let alumniFilter: boolean | undefined = undefined;
     if ("alumniFilter" in req.body) {
         alumniFilter = req.body.alumniFilter.toString() === "true";
     }
-    let coachFilter = maybe(req.body, "coachFilter");
+    let coachFilter: boolean | undefined = undefined;
     if ("coachFilter" in req.body) {
         coachFilter = req.body.coachFilter.toString() === "true";
     }
@@ -612,7 +612,7 @@ export async function parseFilterProjectsRequest(
         }
     }
 
-    let assignedCoachesFilterArray = maybe(
+    let assignedCoachesFilterArray = maybe<number[]>(
         req.body,
         "assignedCoachesFilterArray"
     );
@@ -624,7 +624,7 @@ export async function parseFilterProjectsRequest(
         }
     }
 
-    let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
+    let fullyAssignedFilter = maybe<boolean>(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
         if (!checkStringBoolean(req.body.fullyAssignedFilter.toString())) {
             return rejector();
@@ -640,7 +640,6 @@ export async function parseFilterProjectsRequest(
         fullyAssignedFilter: fullyAssignedFilter,
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
-        fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
     });
 }
 

@@ -1,4 +1,4 @@
-import { decision_enum, email_status_enum } from "@prisma/client";
+import { decision_enum, email_status_enum, Prisma } from "@prisma/client";
 import prisma from "../prisma/prisma";
 import {
     CreateStudent,
@@ -7,6 +7,7 @@ import {
     FilterBoolean,
     UpdateStudent,
     FilterStringArray,
+    DBPagination,
 } from "./orm_types";
 
 /**
@@ -166,18 +167,19 @@ export async function searchStudentByGender(gender: string) {
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
-    firstNameFilter: FilterString,
-    lastNameFilter: FilterString,
-    emailFilter: FilterString,
-    roleFilterArray: FilterStringArray,
-    alumniFilter: FilterBoolean,
-    coachFilter: FilterBoolean,
-    statusFilter: decision_enum | undefined,
-    osocYear: number,
-    emailStatusFilter: email_status_enum | undefined,
-    firstNameSort: FilterSort,
-    lastNameSort: FilterSort,
-    emailSort: FilterSort
+    pagination: DBPagination,
+    firstNameFilter: FilterString = undefined,
+    lastNameFilter: FilterString = undefined,
+    emailFilter: FilterString = undefined,
+    roleFilterArray: FilterStringArray = undefined,
+    alumniFilter: FilterBoolean = undefined,
+    coachFilter: FilterBoolean = undefined,
+    statusFilter: decision_enum | undefined = undefined,
+    osocYear: number | undefined = undefined,
+    emailStatusFilter: email_status_enum | undefined = undefined,
+    firstNameSort: FilterSort = undefined,
+    lastNameSort: FilterSort = undefined,
+    emailSort: FilterSort = undefined
 ) {
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
@@ -192,41 +194,46 @@ export async function filterStudents(
         evaluationFilter = undefined;
     }
 
-    return await prisma.student.findMany({
-        where: {
-            job_application: {
-                some: {
-                    email_status: emailStatusFilter,
-                    student_coach: coachFilter,
-                    osoc: {
-                        year: osocYear,
-                    },
-                    applied_role: {
-                        some: {
-                            role: {
-                                name: { in: roleFilterArray },
-                            },
+    const filter: Prisma.studentWhereInput = {
+        job_application: {
+            some: {
+                email_status: emailStatusFilter,
+                student_coach: coachFilter,
+                osoc: {
+                    year: osocYear,
+                },
+                applied_role: {
+                    some: {
+                        role: {
+                            name: { in: roleFilterArray },
                         },
                     },
-                    evaluation: evaluationFilter,
                 },
+                evaluation: evaluationFilter,
             },
-            person: {
-                firstname: {
-                    contains: firstNameFilter,
-                    mode: "insensitive",
-                },
-                lastname: {
-                    contains: lastNameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
-            },
-            alumni: alumniFilter,
         },
+        person: {
+            firstname: {
+                contains: firstNameFilter,
+                mode: "insensitive",
+            },
+            lastname: {
+                contains: lastNameFilter,
+                mode: "insensitive",
+            },
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
+        },
+        alumni: alumniFilter,
+    };
+
+    const count = await prisma.student.count({ where: filter });
+    const data = await prisma.student.findMany({
+        where: filter,
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
         orderBy: [
             { person: { firstname: firstNameSort } },
             { person: { email: emailSort } },
@@ -255,4 +262,9 @@ export async function filterStudents(
             },
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }

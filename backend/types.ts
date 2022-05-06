@@ -104,6 +104,11 @@ export namespace InternalTypes {
         id: number;
     }
 
+    export interface Role {
+        role_id: number;
+        name: string;
+    }
+
     /**
      *  Represents a partial type response. Usually these will only contain a name
      * and an ID.
@@ -534,6 +539,10 @@ export namespace Responses {
      */
     export interface UserList extends Paginable<InternalTypes.User> {}
 
+    export interface RoleList {
+        data: InternalTypes.Role[];
+    }
+
     /**
      *
      */
@@ -793,9 +802,23 @@ export namespace Requests {
         alumniSort?: string;
     }
 
-    export interface StudentFilter extends KeyRequest {}
+    export interface StudentFilter extends PaginableRequest {
+        osocYear?: number;
+        firstNameFilter?: string;
+        lastNameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[];
+        alumniFilter?: boolean;
+        coachFilter?: boolean;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        firstNameSort?: FilterSort;
+        lastNameSort?: FilterSort;
+        emailSort?: FilterSort;
+        alumniSort?: FilterSort;
+    }
 
-    export interface UserFilter extends KeyRequest {
+    export interface UserFilter extends PaginableRequest {
         sessionkey: string;
         nameFilter?: string;
         emailFilter?: string;
@@ -873,7 +896,14 @@ export namespace Requests {
         osocId?: number;
     }
 
-    export interface ProjectFilter extends KeyRequest {}
+    export interface ProjectFilter extends PaginableRequest {
+        projectNameFilter?: string;
+        clientNameFilter?: string;
+        assignedCoachesFilterArray?: number[];
+        fullyAssignedFilter?: boolean;
+        projectNameSort?: FilterSort;
+        clientNameSort?: FilterSort;
+    }
 
     export interface Draft extends IdRequest {
         studentId: number;
