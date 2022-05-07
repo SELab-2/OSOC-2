@@ -347,9 +347,19 @@ export async function filterProjects(
         project_user: assignedCoachesArray,
     };
 
+    // create the orderby object
+    let sortObject;
+    if (projectNameSort === undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: projectNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort === undefined) {
+        sortObject = [{ partner: clientNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: projectNameSort }, { partner: clientNameSort }];
+    }
+
     let filtered_projects = await prisma.project.findMany({
         where: actualFilter,
-        orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
+        orderBy: sortObject,
         include: {
             project_user: {
                 select: {
