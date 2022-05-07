@@ -214,6 +214,7 @@ export const Settings: React.FC<{
                             Password strength:
                         </p>
                         <p
+                            data-testid={"newPassScoreError"}
                             className={`${
                                 styles.textFieldError
                             } ${scoreToStyle()}`}
@@ -223,6 +224,7 @@ export const Settings: React.FC<{
                     </div>
                 ) : (
                     <p
+                        data-testid={"newPassError"}
                         className={`${styles.textFieldError} ${
                             newPasswordError !== "" ? styles.anim : ""
                         }`}

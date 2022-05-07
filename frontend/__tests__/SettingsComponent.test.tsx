@@ -66,8 +66,14 @@ describe("User component tests", () => {
         expect(screen.getByTestId("pErrorPassword")).toBeInTheDocument();
     });
 
-    test("test user input", async () => {
+    test("test user input username", async () => {
         render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("pErrorPassword").textContent !== "").toBe(
+            true
+        );
         await act(async () => {
             fetchMock.mockOnce(JSON.stringify({ success: true }));
             await fireEvent.type(
@@ -79,5 +85,105 @@ describe("User component tests", () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
         fetchMock.mockClear();
         await fireEvent.clear(screen.getByTestId("inputNewName"));
+    });
+
+    test("test user current pass", async () => {
+        render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            await fireEvent.type(
+                screen.getByTestId("inputCurrentPassword"),
+                "huidigpass"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("newPassError").textContent !== "").toBe(
+            true
+        );
+    });
+
+    test("test user new pass", async () => {
+        render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            await fireEvent.type(
+                screen.getByTestId("inputNewPassword"),
+                "huidignew"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("newPassError").textContent !== "").toBe(
+            true
+        );
+    });
+
+    test("test user retype pass", async () => {
+        render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            await fireEvent.type(
+                screen.getByTestId("inputRetypeNewPassword"),
+                "huidignew"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("newPassError").textContent !== "").toBe(
+            true
+        );
+    });
+
+    test("test user new not equal retype pass", async () => {
+        render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            await fireEvent.type(
+                screen.getByTestId("inputNewPassword"),
+                "huidignew1"
+            );
+            await fireEvent.type(
+                screen.getByTestId("inputRetypeNewPassword"),
+                "huidignew2"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("errorCurrPass").textContent !== "").toBe(
+            true
+        );
+        expect(screen.getByTestId("newPassError").textContent !== "").toBe(
+            true
+        );
+        await act(async () => {
+            await fireEvent.type(
+                screen.getByTestId("inputCurrentPassword"),
+                "huidigpass"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("errorCurrPass").textContent === "").toBe(
+            true
+        );
+        expect(screen.getByTestId("newPassError").textContent !== "").toBe(
+            true
+        );
+    });
+
+    test("test user all fields filled correctly", async () => {
+        render(<Settings person={userAdminCoach} fetchUser={fetchUser} />);
+        await act(async () => {
+            fetchMock.mockOnce(JSON.stringify({ success: true }));
+            await fireEvent.type(
+                screen.getByTestId("inputCurrentPassword"),
+                "huidigpass"
+            );
+            await fireEvent.type(
+                screen.getByTestId("inputNewPassword"),
+                "huidignew1"
+            );
+            await fireEvent.type(
+                screen.getByTestId("inputRetypeNewPassword"),
+                "huidignew1"
+            );
+            screen.getByTestId("confirmButton").click();
+        });
+        expect(screen.getByTestId("errorCurrPass").textContent === "").toBe(
+            true
+        );
+        expect(screen.queryByTestId("newPassError")).not.toBeInTheDocument();
     });
 });
