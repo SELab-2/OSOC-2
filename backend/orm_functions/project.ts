@@ -349,7 +349,7 @@ export async function filterProjects(
 
     let filtered_projects = await prisma.project.findMany({
         where: actualFilter,
-        orderBy: { name: projectNameSort, partner: clientNameSort },
+        orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
         include: {
             project_user: {
                 select: {

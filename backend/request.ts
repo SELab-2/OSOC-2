@@ -353,7 +353,7 @@ export async function parseFilterStudentsRequest(
     const paged = await parsePaginationRequest(req); // ensure authentication
 
     let mail = maybe<string>(req.body, "emailFilter");
-    let roles: string[] = []; // = maybe(req.body, "roleFilter");
+    let roles: string[] | undefined = undefined; // = maybe(req.body, "roleFilter");
     if (
         ("statusFilter" in req.body &&
             !Object.values(Decision).includes(
@@ -382,8 +382,10 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    if ("roleFilter" in req.body && typeof req.body.roleFilter === "string") {
-        roles = req.body.roleFilter.split(",");
+    if ("roleFilter" in req.body) {
+        if (typeof req.body.roleFilter === "string")
+            roles = req.body.roleFilter.split(",");
+        else roles = req.body.roleFilter as string[];
     }
 
     for (const filter of [

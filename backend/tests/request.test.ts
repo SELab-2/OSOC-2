@@ -557,13 +557,13 @@ test("Can parse filter students request", () => {
             "firstNameFilter",
             "lastNameFilter",
             "emailFilter",
-            "roleFilter",
             "alumniFilter",
             "coachFilter",
             "statusFilter",
             "emailStatusFilter",
             "firstNameSort",
             "lastNameSort",
+            "roleFilter",
             "emailSort",
         ].forEach((v) => {
             if (!(v in req.body)) {
@@ -770,9 +770,6 @@ test("Can parse filter projects request", () => {
     const clientNameSort = {
         clientNameSort: "asc",
     };
-    const fullyAssignedSort = {
-        fullyAssignedSort: "desc",
-    };
 
     const wrongFullyAssignedFilter: T.Anything = {
         fullyAssignedFilter: "Fully assigned filter",
@@ -783,9 +780,6 @@ test("Can parse filter projects request", () => {
     const wrongClientNameSort: T.Anything = {
         clientNameSort: "Client name sort",
     };
-    const wrongFullyAssignedSort: T.Anything = {
-        fullyAssignedSort: "Fully assigned sort",
-    };
 
     const okays = [
         [nothing, nothing],
@@ -795,7 +789,6 @@ test("Can parse filter projects request", () => {
         [clientNameFilter, clientNameFilter],
         [projectNameSort, projectNameSort],
         [clientNameSort, clientNameSort],
-        [fullyAssignedSort, fullyAssignedSort],
     ].map((x) => {
         const copy: T.Anything = { ...x[1] };
         const req: express.Request = getMockReq();
@@ -808,7 +801,6 @@ test("Can parse filter projects request", () => {
             "fullyAssignedFilter",
             "projectNameSort",
             "clientNameSort",
-            "fullyAssignedSort",
         ].forEach((x) => {
             if (!(x in req.body)) {
                 copy[x] = undefined;
@@ -826,7 +818,6 @@ test("Can parse filter projects request", () => {
         wrongFullyAssignedFilter,
         wrongProjectNameSort,
         wrongClientNameSort,
-        wrongFullyAssignedSort,
     ].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
@@ -844,7 +835,6 @@ test("Can parse filter projects request", () => {
         clientNameFilter,
         projectNameSort,
         clientNameSort,
-        fullyAssignedSort,
     ].map((body) => {
         const req: express.Request = getMockReq();
         req.body = { ...body };
