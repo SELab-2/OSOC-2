@@ -9,6 +9,8 @@ import {
 const newReset = "5444024619724212170969914212450321";
 const date = new Date("2022-07-13");
 
+import "../integration_setup";
+
 it("should create a new password resety for the given login user", async () => {
     const loginUser = await prisma.login_user.findFirst();
 
