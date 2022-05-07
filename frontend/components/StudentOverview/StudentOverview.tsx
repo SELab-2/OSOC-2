@@ -379,12 +379,18 @@ export const StudentOverview: React.FC<{
                                       })}
                             </div>
                         ))}
-                    <h1>Fun fact</h1>
-                    <p>{student.jobApplication.fun_fact}</p>
-                    <h1>Responsabilities</h1>
-                    <p>{student.jobApplication.responsibilities}</p>
-                    <h1>Volunteer</h1>
-                    <p>{student.jobApplication.student_volunteer_info}</p>
+                    <div>
+                        <h1>Fun fact</h1>
+                        <p>{student.jobApplication.fun_fact}</p>
+                    </div>
+                    <div>
+                        <h1>Responsabilities</h1>
+                        <p>{student.jobApplication.responsibilities}</p>
+                    </div>
+                    <div>
+                        <h1>Volunteer</h1>
+                        <p>{student.jobApplication.student_volunteer_info}</p>
+                    </div>
                 </div>
             </div>
         </div>

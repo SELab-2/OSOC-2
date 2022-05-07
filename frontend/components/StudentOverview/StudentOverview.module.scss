@@ -113,6 +113,10 @@
   gap: 1rem;
 }
 
+.jobapplication div {
+  display: flex;
+  flex-direction: column;
+}
 .jobapplication div a {
   font-weight: lighter;
 }
