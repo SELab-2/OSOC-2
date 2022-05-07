@@ -10,8 +10,7 @@ export const OsocCreateFilter: React.FC<{
     const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
-    const { getSession } = useContext(SessionContext);
-    const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
+    const { sessionKey } = useContext(SessionContext);
 
     const router = useRouter();
 
@@ -21,14 +20,12 @@ export const OsocCreateFilter: React.FC<{
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
-        if (loading) return;
         search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [yearSort]);
 
     const toggleYearSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setYearSort(getNextSort(yearSort));
     };
 
@@ -38,7 +35,6 @@ export const OsocCreateFilter: React.FC<{
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         search().then();
     };
 
@@ -48,7 +44,6 @@ export const OsocCreateFilter: React.FC<{
      */
     const createPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         create().then();
     };
 
@@ -56,7 +51,6 @@ export const OsocCreateFilter: React.FC<{
      * Build and execute the query
      */
     const search = async () => {
-        isLoading(true);
         const filters = [];
 
         if (yearFilter !== "") {
@@ -70,67 +64,55 @@ export const OsocCreateFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/osocs${query}`);
 
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            updateOsoc(response.data);
-            isLoading(false);
-        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((err) => {
+                console.log(err);
+            });
+        updateOsoc(response.data);
     };
 
     /**
      * Create the new osoc edition
      */
     const create = async () => {
-        isLoading(true);
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        year: osocCreate,
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            console.log(response);
-            search().then();
-        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    year: osocCreate,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((err) => {
+                console.log(err);
+            });
+        console.log(response);
+        search().then();
     };
 
     return (
         <div className={styles.osocfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
-                    <div onClick={toggleYearSort}>
+                    <div data-testid={"yearSorter"} onClick={toggleYearSort}>
                         Year
                         <div className={styles.triangleContainer}>
                             <div
@@ -146,23 +128,29 @@ export const OsocCreateFilter: React.FC<{
                     </div>
 
                     <input
+                        data-testid={"yearFilter"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Year.."
                         onChange={(e) => setYearFilter(e.target.value)}
                     />
-                    <button onClick={searchPress}>Search</button>
+                    <button data-testid={"searchButton"} onClick={searchPress}>
+                        Search
+                    </button>
                 </div>
 
                 {/* This shouldn't be a styles query probably */}
                 <div className={styles.query}>
                     <input
+                        data-testid={"yearInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Year.."
                         onChange={(e) => setOsocCreate(e.target.value)}
                     />
-                    <button onClick={createPress}>Create</button>
+                    <button data-testid={"createButton"} onClick={createPress}>
+                        Create
+                    </button>
                 </div>
             </form>
         </div>
