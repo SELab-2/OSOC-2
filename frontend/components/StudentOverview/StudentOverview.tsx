@@ -56,9 +56,10 @@ export const StudentOverview: React.FC<{
     };
 
     useEffect(() => {
+        setEvaluations([]);
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [student]);
 
     /**
      * Call the `updateEvalutations` callback when the evaluations change

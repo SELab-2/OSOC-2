@@ -139,8 +139,9 @@ const Index: NextPage = () => {
                                             student={student as Student}
                                             display={display}
                                         />
-                                        {student.evaluation.evaluations.length >
-                                        0 ? (
+                                        {student.evaluation.evaluations.filter(
+                                            (evaluation) => !evaluation.is_final
+                                        ).length > 0 ? (
                                             <EvaluationBar
                                                 evaluations={
                                                     student.evaluation
