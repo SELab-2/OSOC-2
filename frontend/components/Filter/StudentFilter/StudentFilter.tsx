@@ -210,6 +210,8 @@ export const StudentFilter: React.FC<{
     };
 
     const search = async () => {
+        setEmailStatusActive(false);
+        setRolesActive(false);
         const filters = [];
 
         if (firstNameFilter !== "") {
