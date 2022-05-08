@@ -5,6 +5,7 @@ import {
     deletePersonById,
     getAllPersons,
     getPasswordPersonByEmail,
+    getPasswordPersonByGithub,
     searchPersonByLogin,
     searchPersonByName,
     updatePerson,
@@ -38,6 +39,13 @@ test("should return all people in the db", async () => {
 test("should return the HASHED password of the given email", async () => {
     prismaMock.person.findUnique.mockResolvedValue(returnValue);
     await expect(getPasswordPersonByEmail("email@mail.com")).resolves.toEqual(
+        returnValue
+    );
+});
+
+test("should return the password of the user with given github", async () => {
+    prismaMock.person.findUnique.mockResolvedValue(returnValue);
+    await expect(getPasswordPersonByGithub("github name")).resolves.toEqual(
         returnValue
     );
 });
