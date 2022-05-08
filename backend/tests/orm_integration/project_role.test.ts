@@ -28,6 +28,8 @@ const projectRole2: UpdateProjectRole = {
     positions: 3,
 };
 
+import "../integration_setup";
+
 it("should create 1 new project role with role developer", async () => {
     const projects = await getAllProjects();
     const role = await getRolesByName("Developer");

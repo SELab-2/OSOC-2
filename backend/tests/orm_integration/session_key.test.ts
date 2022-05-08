@@ -6,6 +6,8 @@ import {
     removeAllKeysForUser,
 } from "../../orm_functions/session_key";
 
+import "../integration_setup";
+
 it("should create a new session key for the given login user", async () => {
     const loginUsers = await prisma.login_user.findMany();
 

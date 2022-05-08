@@ -89,6 +89,8 @@ const filteredProject1: FilterProjects = {
     ],
 };
 
+import "../integration_setup";
+
 it("should create 1 new project where osoc is 2022", async () => {
     const osoc = await getOsocByYear(2022);
     if (osoc) {
