@@ -144,7 +144,7 @@ test("ghIdentity correctly redirects", async () => {
         "state=";
     utilMock.redirect.mockReset();
     utilMock.redirect.mockImplementation(async (_, url) => {
-        await expect(url).toBe(exp + github.states[0]);
+        expect(url).toBe(exp + github.states[0]);
     });
 
     await github.ghIdentity(getMockRes().res);
@@ -219,7 +219,12 @@ test("Can detect if name changes are required", () => {
 
 test("Can login if the account exists", async () => {
     const input = { login: "@my_github", name: "my", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -235,7 +240,12 @@ test("Can login if the account exists", async () => {
 
 test("Can login if the account exists and update username", async () => {
     const input = { login: "@my_github", name: "alo", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -256,7 +266,12 @@ test("Can login if the account exists and update username", async () => {
 
 test("Can login if the account exists and update github handle", async () => {
     const input = { login: "@jefke", name: "my", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -277,7 +292,12 @@ test("Can login if the account exists and update github handle", async () => {
 
 test("Can register if account doesn't exist", async () => {
     const input = { login: "@jefke", name: "my", id: "-69" };
-    const output = { sessionkey: "abcd", is_admin: false, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: false,
+        is_coach: true,
+        is_signup: true,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -325,6 +345,9 @@ test("Can exchange access token for session key", async () => {
     const code = "abcdefghijklmnopqrstuvwxyz";
 
     axiosMock.post.mockImplementation((url, body, conf) => {
+        console.log(
+            "POST request to " + url + " with config " + JSON.stringify(conf)
+        );
         expect(url).toBe("https://github.com/login/oauth/access_token");
         expect(conf).toHaveProperty("headers.Accept", "application/json");
         expect(body).toStrictEqual({
@@ -339,6 +362,9 @@ test("Can exchange access token for session key", async () => {
     });
 
     axiosMock.get.mockImplementation((url, conf) => {
+        console.log(
+            "GET request to " + url + " with config " + JSON.stringify(conf)
+        );
         expect(url).toBe("https://api.github.com/user");
         expect(conf).toHaveProperty(
             "headers.Authorization",
@@ -351,7 +377,7 @@ test("Can exchange access token for session key", async () => {
     });
 
     utilMock.redirect.mockImplementation(async (_, url) => {
-        expect(url).toBe(process.env.FRONTEND + "/login/abcd");
+        expect(url).toBe(process.env.FRONTEND + "/login/abcd?is_signup=false");
         return Promise.resolve();
     });
 
