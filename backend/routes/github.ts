@@ -119,7 +119,11 @@ export async function ghExchangeAccessToken(
         .then((result) =>
             util.redirect(
                 res,
-                process.env.FRONTEND + "/login/" + result.sessionkey
+                process.env.FRONTEND +
+                    "/login/" +
+                    result.sessionkey +
+                    "?is_signup=" +
+                    result.is_signup
             )
         )
         .catch((err) => {
@@ -183,7 +187,8 @@ export function githubNameChange(
  */
 export async function ghSignupOrLogin(
     login: Requests.GHLogin
-): Promise<Responses.Login> {
+): Promise<Responses.GithubLogin> {
+    let isSignup = false;
     return ormP
         .getPasswordPersonByGithub(login.id)
         .then(async (person) => {
@@ -206,6 +211,7 @@ export async function ghSignupOrLogin(
         })
         .catch(async (error) => {
             if ("is_not_existent" in error && error.is_not_existent) {
+                isSignup = true;
                 return ormP
                     .createPerson({
                         github: login.login,
@@ -246,6 +252,7 @@ export async function ghSignupOrLogin(
                         sessionkey: newkey.session_key,
                         is_admin: loginuser.is_admin,
                         is_coach: loginuser.is_coach,
+                        is_signup: isSignup,
                     })
                 );
         });
