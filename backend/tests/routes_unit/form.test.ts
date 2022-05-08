@@ -19,7 +19,7 @@ import * as config from "../../routes/form_keys.json";
 /*import {
     checkQuestionsExist,
     checkWordInAnswer,
-    filterQuestion,
+    filterQuestion, getBirthName,
 } from "../../routes/form";*/
 
 const keys = [
@@ -76,11 +76,9 @@ function readDataTestForms(): T.Requests.Form[] {
         });
 }
 
-/*function checkIfFirstQuestionsAreValid(
-    form: T.Requests.Form
-): Promise<boolean> {
+/*function checkIfFirstQuestionsAreValid(form: T.Requests.Form): boolean | null {
     if (form.data.fields == undefined) {
-        return Promise.reject(errors.cookArgumentError());
+        return null;
     }
 
     const questionInBelgium: Responses.FormResponse<Requests.Question> =
@@ -97,7 +95,7 @@ function readDataTestForms(): T.Requests.Form[] {
         questionInBelgium.data?.value == null ||
         questionCanWorkEnough.data?.value == null
     ) {
-        return Promise.reject(errors.cookArgumentError());
+        return null;
     }
 
     const wordInAnswerInBelgium: Responses.FormResponse<boolean> =
@@ -109,13 +107,10 @@ function readDataTestForms(): T.Requests.Form[] {
         wordInAnswerInBelgium.data == null ||
         wordInAnswerCanWorkEnough.data == null
     ) {
-        return Promise.resolve(false);
+        return false;
     }
 
-    if (wordInAnswerInBelgium.data && wordInAnswerCanWorkEnough.data) {
-        return Promise.resolve(true);
-    }
-    return Promise.resolve(false);
+    return wordInAnswerInBelgium.data && wordInAnswerCanWorkEnough.data;
 }*/
 
 test("Can parse form request", () => {
@@ -204,3 +199,14 @@ describe.each([
         });
     });
 });
+
+/*test("Can get birth name", () => {
+    readDataTestForms().forEach((form) => {
+        const check = checkIfFirstQuestionsAreValid(form);
+        if (check !== null) {
+            expect(getBirthName(form).then((name) => typeof name);
+
+            expect(getBirthName(form)).resolves.toHaveBeenCalledTimes(1);
+        }
+    });
+});*/
