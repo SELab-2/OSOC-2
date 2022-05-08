@@ -48,11 +48,9 @@ export function genState(redirect: string): string {
  */
 export function checkState(state: string): string | false {
     if (!(state in states)) {
-        // if (!states.includes(state)) {
         return false;
     }
 
-    // states = states.filter((x) => x != state);
     const frontend = states[state];
     delete states[state];
     return frontend;
@@ -76,7 +74,6 @@ export function ghIdentity(
         "callback" in req.body
             ? (req.body.callback as string)
             : (process.env.FRONTEND as string);
-    console.log("Client requested frontend " + frontend);
     let url = "https://github.com/login/oauth/authorize?";
     url += "client_id=" + process.env.GITHUB_CLIENT_ID; // add client id
     url += "&allow_signup=true"; // allow users to sign up to github itself
@@ -138,7 +135,6 @@ export async function ghExchangeAccessToken(
                 result.sessionkey +
                 "?is_signup=" +
                 result.is_signup;
-            console.log("Redirecting towards FE " + url);
             return util.redirect(res, url);
         })
         .catch((err) => {

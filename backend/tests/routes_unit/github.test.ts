@@ -347,9 +347,6 @@ test("Can exchange access token for session key", async () => {
     const code = "abcdefghijklmnopqrstuvwxyz";
 
     axiosMock.post.mockImplementation((url, body, conf) => {
-        console.log(
-            "POST request to " + url + " with config " + JSON.stringify(conf)
-        );
         expect(url).toBe("https://github.com/login/oauth/access_token");
         expect(conf).toHaveProperty("headers.Accept", "application/json");
         expect(body).toStrictEqual({
@@ -364,9 +361,6 @@ test("Can exchange access token for session key", async () => {
     });
 
     axiosMock.get.mockImplementation((url, conf) => {
-        console.log(
-            "GET request to " + url + " with config " + JSON.stringify(conf)
-        );
         expect(url).toBe("https://api.github.com/user");
         expect(conf).toHaveProperty(
             "headers.Authorization",
@@ -424,4 +418,72 @@ test("Can handle database failures", async () => {
     await expect(
         github.ghSignupOrLogin({ login: "", name: "", id: "" })
     ).rejects.toStrictEqual({ some: "error" });
+});
+
+test("Can handle different frontend", async () => {
+    const code = "abcdefghijklmnopqrstuvwxyz";
+    const url = "https://other.url";
+    const codeIdx = Object.keys(github.states).length;
+
+    axiosMock.post.mockImplementation((url, body, conf) => {
+        expect(url).toBe("https://github.com/login/oauth/access_token");
+        expect(conf).toHaveProperty("headers.Accept", "application/json");
+        expect(body).toStrictEqual({
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_SECRET,
+            code: code as string,
+            redirect_uri:
+                github.getHome() + config.global.preferred + "/github/login",
+        });
+        console.log("POST RESOLVES");
+        return Promise.resolve({ data: { access_token: "some_token" } });
+    });
+
+    axiosMock.get.mockImplementation((url, conf) => {
+        expect(url).toBe("https://api.github.com/user");
+        expect(conf).toHaveProperty(
+            "headers.Authorization",
+            "token some_token"
+        );
+
+        return Promise.resolve({
+            data: { login: "@my_github", name: "my", id: 69 },
+        });
+    });
+
+    let expUrl = "";
+
+    utilMock.redirect.mockImplementation(async (_, url) => {
+        if (expUrl == "") {
+            expUrl =
+                "https://github.com/login/oauth/authorize?client_id=undefined" +
+                "&allow_signup=true&redirect_uri=undefined%2Fapi-osoc%2Fgithub%2Fchallenge" +
+                "&state=" +
+                Object.keys(github.states)[codeIdx];
+        }
+
+        expect(url).toBe(expUrl);
+        // expect(url).toBe(process.env.FRONTEND + "/login/abcd?is_signup=false");
+        return Promise.resolve();
+    });
+
+    const req1 = getMockReq();
+    const res1 = getMockRes().res;
+
+    req1.body = { callback: url };
+
+    await github.ghIdentity(req1, res1);
+    const state = Object.keys(github.states)[codeIdx];
+
+    expUrl = url + "/login/abcd?is_signup=false";
+
+    const req2 = getMockReq();
+    const res2 = getMockRes().res;
+    req2.query = {
+        code: code,
+        state: state,
+    };
+    return expect(
+        github.ghExchangeAccessToken(req2, res2)
+    ).resolves.not.toThrow();
 });
