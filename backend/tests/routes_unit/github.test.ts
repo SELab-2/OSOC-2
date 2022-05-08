@@ -127,12 +127,14 @@ function expectNoCall<T>(func: T) {
 }
 
 test("Can generate and validate states", () => {
-    expect(github.checkState(github.genState())).toBe(true);
+    expect(
+        github.checkState(github.genState(process.env.FRONTEND as string))
+    ).toBe(process.env.FRONTEND as string);
 });
 
 test("A state is valid only once", () => {
-    const state = github.genState();
-    expect(github.checkState(state)).toBe(true);
+    const state = github.genState(process.env.FRONTEND as string);
+    expect(github.checkState(state)).toBe(process.env.FRONTEND as string);
     expect(github.checkState(state)).toBe(false);
 });
 
@@ -144,10 +146,10 @@ test("ghIdentity correctly redirects", async () => {
         "state=";
     utilMock.redirect.mockReset();
     utilMock.redirect.mockImplementation(async (_, url) => {
-        expect(url).toBe(exp + github.states[0]);
+        expect(url).toBe(exp + Object.keys(github.states)[0]);
     });
 
-    await github.ghIdentity(getMockRes().res);
+    await github.ghIdentity(getMockReq(), getMockRes().res);
 });
 
 test("Can parse GH login", async () => {
@@ -383,7 +385,10 @@ test("Can exchange access token for session key", async () => {
 
     const req = getMockReq();
     const res = getMockRes().res;
-    req.query = { code: code, state: github.genState() };
+    req.query = {
+        code: code,
+        state: github.genState(process.env.FRONTEND as string),
+    };
     return expect(
         github.ghExchangeAccessToken(req, res)
     ).resolves.not.toThrow();
@@ -403,7 +408,10 @@ test("Can handle internet issues", async () => {
 
     const req = getMockReq();
     const res = getMockRes().res;
-    req.query = { code: "code", state: github.genState() };
+    req.query = {
+        code: "code",
+        state: github.genState(process.env.FRONTEND as string),
+    };
     return expect(
         github.ghExchangeAccessToken(req, res)
     ).resolves.not.toThrow();

@@ -14,7 +14,8 @@ import * as session_key from "./session_key.json";
 
 // holds states that are currently active. States are required to validate
 // github callbacks.
-export let states: string[] = [];
+// export let states: string[] = [];
+export const states: { [key: string]: string } = {};
 
 /**
  *  Gets the home URL for the github callback.
@@ -31,9 +32,10 @@ export function getHome(): string {
  *
  *  @returns The new state.
  */
-export function genState(): string {
+export function genState(redirect: string): string {
     const state = crypto.randomBytes(64).join("");
-    states.push(state);
+    // states.push(state);
+    states[state] = redirect;
     return state;
 }
 
@@ -44,13 +46,16 @@ export function genState(): string {
  *  @param state The state to check.
  *  @returns True if the state is valid, otherwise false.
  */
-export function checkState(state: string) {
-    if (!states.includes(state)) {
+export function checkState(state: string): string | false {
+    if (!(state in states)) {
+        // if (!states.includes(state)) {
         return false;
     }
 
-    states = states.filter((x) => x != state);
-    return true;
+    // states = states.filter((x) => x != state);
+    const frontend = states[state];
+    delete states[state];
+    return frontend;
 }
 
 // Step 1: redirect to github for identity
@@ -63,7 +68,15 @@ export function checkState(state: string) {
  * `/github/challenge` on our server. This function only generates a new state,
  * makes it valid and then redirects.
  */
-export function ghIdentity(resp: express.Response): Promise<void> {
+export function ghIdentity(
+    req: express.Request,
+    resp: express.Response
+): Promise<void> {
+    const frontend =
+        "callback" in req.body
+            ? (req.body.callback as string)
+            : (process.env.FRONTEND as string);
+    console.log("Client requested frontend " + frontend);
     let url = "https://github.com/login/oauth/authorize?";
     url += "client_id=" + process.env.GITHUB_CLIENT_ID; // add client id
     url += "&allow_signup=true"; // allow users to sign up to github itself
@@ -72,7 +85,7 @@ export function ghIdentity(resp: express.Response): Promise<void> {
         encodeURIComponent(
             getHome() + config.global.preferred + "/github/challenge"
         );
-    url += "&state=" + genState();
+    url += "&state=" + genState(frontend);
     return util.redirect(resp, url);
 }
 
@@ -93,9 +106,11 @@ export async function ghExchangeAccessToken(
         return Promise.reject(config.apiErrors.github.argumentMissing);
     }
 
-    if (!checkState(req.query.state as string)) {
+    const stateCheck = checkState(req.query.state as string);
+    if (stateCheck === false) {
         return Promise.reject(config.apiErrors.github.illegalState);
     }
+    const frontend = stateCheck as string;
 
     return axios
         .post(
@@ -116,16 +131,16 @@ export async function ghExchangeAccessToken(
         )
         .then((ares) => parseGHLogin(ares.data))
         .then((login) => ghSignupOrLogin(login))
-        .then((result) =>
-            util.redirect(
-                res,
-                process.env.FRONTEND +
-                    "/login/" +
-                    result.sessionkey +
-                    "?is_signup=" +
-                    result.is_signup
-            )
-        )
+        .then((result) => {
+            const url: string =
+                frontend +
+                "/login/" +
+                result.sessionkey +
+                "?is_signup=" +
+                result.is_signup;
+            console.log("Redirecting towards FE " + url);
+            return util.redirect(res, url);
+        })
         .catch((err) => {
             console.log("GITHUB ERROR " + JSON.stringify(err));
             util.redirect(
@@ -261,7 +276,7 @@ export async function ghSignupOrLogin(
 export function getRouter(): express.Router {
     const router: express.Router = express.Router();
 
-    router.get("/", async (_, rs) => await ghIdentity(rs));
+    router.get("/", async (rq, rs) => await ghIdentity(rq, rs));
     router.get(
         "/challenge",
         async (req, res) =>
