@@ -1484,9 +1484,6 @@ export async function createForm(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
-    if (parsedRequest.data.fields == undefined) {
-        return Promise.reject(errors.cookArgumentError());
-    }
 
     const questionInBelgium: Responses.FormResponse<Requests.Question> =
         filterQuestion(parsedRequest, config.liveInBelgium);

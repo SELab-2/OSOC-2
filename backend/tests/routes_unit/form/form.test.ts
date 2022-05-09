@@ -1,11 +1,11 @@
 import { getMockReq } from "@jest-mock/express";
 
-import * as form_router from "../../routes/form";
+import * as form_router from "../../../routes/form";
 
-import * as T from "../../types";
+import * as T from "../../../types";
 import express from "express";
-import * as Rq from "../../request";
-import { errors } from "../../utility";
+import * as Rq from "../../../request";
+import { errors } from "../../../utility";
 /*import express from "express";
 import * as Rq from "../../request";
 import { errors } from "../../utility";*/
@@ -15,7 +15,8 @@ import { errors } from "../../utility";*/
 import * as fs from "fs";
 import * as path from "path";
 //import { Requests, Responses } from "../../types";
-import * as config from "../../routes/form_keys.json";
+//import * as config from "../../../routes/form_keys.json";
+import { createForm } from "../../../routes/form";
 /*import {
     checkQuestionsExist,
     checkWordInAnswer,
@@ -64,16 +65,36 @@ const keys = [
 
 function readDataTestForms(): T.Requests.Form[] {
     return Object.values(
-        fs.readdirSync(path.join(__dirname, "/../../../testforms"))
+        fs.readdirSync(path.join(__dirname, "/../../../../testforms"))
     )
         .filter((filename) => filename.includes("testform"))
         .map((filename) => {
             const readFile = (path: string) => fs.readFileSync(path, "utf8");
             const fileData = readFile(
-                path.join(__dirname, `/../../../testforms/${filename}`)
+                path.join(__dirname, `/../../../../testforms/${filename}`)
             );
             return JSON.parse(fileData);
         });
+}
+
+function readFileFails(file: string): T.Requests.Form | null {
+    const fileData = Object.values(
+        fs.readdirSync(path.join(__dirname, "/../../../../testforms/fails"))
+    )
+        .filter((filename) => filename.includes(file))
+        .map((filename) => {
+            const readFile = (path: string) => fs.readFileSync(path, "utf8");
+            const fileData = readFile(
+                path.join(__dirname, `/../../../../testforms/fails/${filename}`)
+            );
+            return JSON.parse(fileData);
+        });
+
+    if (fileData.length === 0) {
+        return null;
+    }
+
+    return fileData[0];
 }
 
 /*function checkIfFirstQuestionsAreValid(form: T.Requests.Form): boolean | null {
@@ -168,7 +189,7 @@ describe.each(keys)("Questions present", (key) => {
     });
 });
 
-describe.each([
+/*describe.each([
     config.liveInBelgium,
     config.volunteerInfo,
     config.workInJuly,
@@ -198,7 +219,7 @@ describe.each([
             }
         });
     });
-});
+});*/
 
 /*test("Can get birth name", () => {
     readDataTestForms().forEach((form) => {
@@ -210,3 +231,21 @@ describe.each([
         }
     });
 });*/
+
+test("Live in Belgium question absent", async () => {
+    const data = readFileFails("failLiveInBelgiumAbsent.json");
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+});
+
+test("Work in July question absent", async () => {
+    const data = readFileFails("failWorkInJulyAbsent.json");
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+});
