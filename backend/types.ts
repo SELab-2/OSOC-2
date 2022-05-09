@@ -379,6 +379,16 @@ export namespace InternalTypes {
     export interface ProjectFilter {}
 
     /**
+     *  Represents a person, with all associated data.
+     */
+    export interface StudentRole {
+        /**
+         *  The role id.
+         */
+        role_id: number;
+    }
+
+    /**
      *  Represents the drafted students of a project. Usually these will only
      * contain an id, name and list of students.
      */
@@ -554,6 +564,13 @@ export namespace Responses {
      */
     export interface StudentList {
         data: InternalTypes.Student[];
+    }
+
+    /**
+     *  StudentRoles are a list of roles.
+     */
+    export interface StudentRoles {
+        data: InternalTypes.StudentRole[];
     }
 
     /**
