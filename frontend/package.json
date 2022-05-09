@@ -22,7 +22,7 @@
     "@types/react": "18.0.9",
     "@types/validator": "^13.7.2",
     "cross-env": "^7.0.3",
-    "eslint": "8.14.0",
+    "eslint": "8.15.0",
     "eslint-config-next": "12.1.6",
     "sass": "^1.51.0",
     "typedoc": "^0.22.15",
