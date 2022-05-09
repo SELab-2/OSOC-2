@@ -33,6 +33,8 @@ const jobApplicationSkill2: UpdateJobApplicationSkill = {
     is_best: true,
 };
 
+import "../integration_setup";
+
 it("should create 1 new job application skill", async () => {
     const job_application = await prisma.job_application.findFirst();
     const language = await prisma.language.findFirst();

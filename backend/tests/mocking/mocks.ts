@@ -151,7 +151,6 @@ export class MockedRouter
             if (cb == undefined) {
                 throw getInvalidVerbEndpointError(verb, ep);
             } else {
-                console.log("[mockedRouter]: returning await...");
                 return await Promise.resolve().then(
                     async () =>
                         await cb(req, res, function () {

@@ -489,6 +489,14 @@ export namespace Responses {
     }
 
     /**
+     *  A GitHub login response differs from a normal login response by the added
+     * is_signup field, which should tell the client that this user was newly created.
+     */
+    export interface GithubLogin extends Login {
+        is_signup: boolean;
+    }
+
+    /**
      *  A partial student response is the keyed combination of their id and name.
      */
     export interface PartialStudent extends InternalTypes.IdName {}

@@ -42,22 +42,6 @@ interface Req {
     verb: string;
 }
 
-function genPromises(): Promise<unknown>[] {
-    const data: unknown[] = [
-        6,
-        "abc",
-        { key: "value" },
-        { complex: { object: "with", array: [1, 2, 3, 4] } },
-    ];
-    const promises: Promise<unknown>[] = data.map((val) =>
-        util.debug(val).then((res) => {
-            expect(res).toBe(val);
-            return res;
-        })
-    );
-    return promises;
-}
-
 function obtainResponse() {
     const { res } = getMockRes();
     const statSpy = jest.spyOn(res, "status");
@@ -158,19 +142,6 @@ test("utility.errors.cook* work as expected", () => {
     );
 });
 
-test("utility.debug returns identical", () => {
-    return Promise.all(genPromises());
-});
-
-test("utility.debug logs their data", () => {
-    const logSpy = jest.spyOn(console, "log");
-    return Promise.all(
-        genPromises().map((it) =>
-            it.then((val) => expect(logSpy).toHaveBeenCalledWith(val))
-        )
-    );
-});
-
 test("utility.reply writes to a response", () => {
     const data: { status: number; data: unknown }[] = [
         { status: 200, data: "success!" },
@@ -254,8 +225,6 @@ test("utility.addInvalidVerbs adds verbs", () => {
     // please someone check this?
     expect(routerSpy).toHaveBeenCalledTimes(1);
 });
-
-// we need to check line_#117 but I have no idea on how to do that...
 
 test("utility.logRequest logs request and passes control", () => {
     const writeSpy = jest.spyOn(console, "log");
@@ -865,10 +834,7 @@ test("utility.addAllInvalidVerbs adds multiple callbacks", () => {
 
 test("utility.route installs exactly one route", async () => {
     const router = getMockRouter();
-    const cb = () => {
-        console.log("RETURNING");
-        return Promise.resolve({ sessionkey: "abcd", data: {} });
-    };
+    const cb = () => Promise.resolve({ sessionkey: "abcd", data: {} });
     const path = "/";
     const verb = "get";
 
@@ -885,49 +851,6 @@ test("utility.route installs exactly one route", async () => {
         .then(() => router(req1, res1))
         .then(() => {
             expect(res1.status).toHaveBeenCalledWith(500);
-        });
-
-    // incorrect ep
-    const req2 = getMockReq();
-    const res2 = getMockRes().res;
-    req2.path = "/test";
-    req2.method = "get";
-    expect(
-        Promise.resolve().then(() => router(req2, res2))
-    ).rejects.toStrictEqual(getInvalidEndpointError("/test"));
-
-    // incorrect verb/ep
-    const req3 = getMockReq();
-    const res3 = getMockRes().res;
-    req3.path = path;
-    req3.method = "post";
-    expect(
-        Promise.resolve().then(() => router(req3, res3))
-    ).rejects.toStrictEqual(getInvalidVerbEndpointError("post", "/"));
-});
-
-test("utility.routeKeyOnly installs exactly one route", async () => {
-    const router = getMockRouter();
-    const cb = () => {
-        console.log("RETURNING");
-        return Promise.resolve({ sessionkey: "abcd", data: {} });
-    };
-    const path = "/";
-    const verb = "get";
-
-    util.routeKeyOnly(router, verb, path, cb);
-
-    // correct
-    const req1 = getMockReq();
-    const res1 = getMockRes().res;
-    req1.path = path;
-    req1.method = verb;
-
-    // shouldn't throw
-    await Promise.resolve()
-        .then(() => router(req1, res1))
-        .then(() => {
-            expect(res1.status).toHaveBeenCalledWith(200);
         });
 
     // incorrect ep
