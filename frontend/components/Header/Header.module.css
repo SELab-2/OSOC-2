@@ -1,14 +1,13 @@
 .header {
     box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
-    height: clamp(4rem, 5vw, 6rem);
-    padding-block: 0.5rem;
+    padding-block: clamp(0.5rem, 1vw, 1.5rem);;
     padding-inline: min(8rem, 16vw);
     display: flex;
     justify-content: space-between;
     margin-bottom: clamp(1rem, 2vw, 2.5rem);
 }
 
-@media (max-width: 70rem) {
+@media (max-width: 85rem) {
     .header {
         flex-direction: column;
         height: auto;
