@@ -429,14 +429,12 @@ export const StudentFilter: React.FC<{
                             />
                         </div>
                     </div>
-                    <div
-                        data-testid={"rolesSelectedFilterMenu"}
-                        className="dropdown-menu"
-                    >
+                    <div className="dropdown-menu">
                         <div className="dropdown-content">
                             {roles !== undefined
                                 ? roles.map((role) => (
                                       <div
+                                          data-testid={`testRoleItem=${role.name}`}
                                           className={`${
                                               styles.dropdownItem
                                           } dropdown-item ${
