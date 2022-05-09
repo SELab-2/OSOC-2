@@ -5,7 +5,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from "../types";
-
+/* istanbul ignore file */ // don't test this file because there is no real logic. Only the setup of listeners.
 /**
  * function to register the listeners to the sockets.
  * This function is used/imported in the index.ts file
