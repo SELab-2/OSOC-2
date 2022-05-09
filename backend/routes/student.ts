@@ -8,7 +8,7 @@ import * as ormSt from "../orm_functions/student";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
-import { Responses } from "../types";
+import { InternalTypes, Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as ormP from "../orm_functions/person";
@@ -29,7 +29,7 @@ export async function listStudents(
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-    const studentList: object[] = [];
+    const studentList: InternalTypes.Student[] = [];
     const students = await ormSt.getAllStudents();
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
@@ -78,6 +78,7 @@ export async function listStudents(
                 student: students[studentIndex],
                 jobApplication: jobApplication,
                 evaluations: evaluations,
+                evaluation: undefined,
                 roles: roles,
             });
         } else {
@@ -165,6 +166,7 @@ export async function getStudent(
                 year: year,
             },
         },
+        evaluations: undefined,
         roles: roles,
     });
 }
@@ -472,6 +474,7 @@ export async function filterStudents(
                     year: year,
                 },
             },
+            evaluations: undefined,
             roles: roles,
         });
     }
