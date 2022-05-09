@@ -10,7 +10,7 @@ fetchMock.enableMocks();
 jest.mock("next/router");
 let updateOsoc: jest.Mock;
 
-describe("User component tests", () => {
+describe("Osoc filter tests", () => {
     beforeEach(() => {
         updateOsoc = jest.fn();
         fetchMock.resetMocks();
