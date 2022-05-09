@@ -3853,7 +3853,7 @@
             "student": {
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/Student"
+                "$ref": "#/components/schemas/StudentInfo"
               }
             }
           }
@@ -4003,7 +4003,7 @@
                   ]
                 },
                 "student": {
-                  "$ref": "#/components/schemas/Student"
+                  "$ref": "#/components/schemas/StudentInfo"
                 }
               }
             }
@@ -4096,10 +4096,42 @@
       "Student": {
         "type": "object",
         "properties": {
-          "evaluations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AllStudentEvaluations"
+          "evaluation": {
+            "type": "object",
+            "properties": {
+              "evaluations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "MAYBE",
+                        "NO",
+                        "YES"
+                      ]
+                    },
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "is_final": {
+                      "type": "boolean"
+                    },
+                    "motivation": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "osoc": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "number"
+                  }
+                }
+              }
             }
           },
           "jobApplication": {
@@ -4228,40 +4260,180 @@
           "name": "Student"
         }
       },
-      "AllStudents": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Student"
-            }
-          }
-        },
-        "xml": {
-          "name": "AllStudents"
-        }
-      },
-      "AllStudentEvaluations": {
+      "StudentInfo": {
         "type": "object",
         "properties": {
           "evaluation": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Evaluation"
-            }
-          },
-          "osoc": {
             "type": "object",
             "properties": {
-              "year": {
+              "evaluations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "evaluation_id": {
+                      "type": "number"
+                    },
+                    "decision": {
+                      "type": "string",
+                      "enum": [
+                        "MAYBE",
+                        "NO",
+                        "Yes"
+                      ]
+                    },
+                    "is_final": {
+                      "type": "boolean"
+                    },
+                    "motivation": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "osoc": {
+                "type": "number"
+              }
+            }
+          },
+          "jobApplication": {
+            "type": "object",
+            "properties": {
+              "applied_role": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AppliedRole"
+                }
+              },
+              "attachment": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attachment"
+                }
+              },
+              "created_at": {
+                "type": "string",
+                "example": "This is actually a date: 2022-03-14 23:10:00+01"
+              },
+              "edus": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "default": "Informatics"
+                }
+              },
+              "edu_duration": {
+                "type": "number"
+              },
+              "edu_institute": {
+                "type": "string",
+                "default": "Ghent university"
+              },
+              "edu_level": {
+                "type": "string",
+                "default": "Third bachelors degree"
+              },
+              "edu_year": {
+                "type": "string",
+                "default": "3"
+              },
+              "email_status": {
+                "type": "string",
+                "default": "NONE",
+                "enum": [
+                  "DRAFT",
+                  "FAILED",
+                  "NONE",
+                  "SCHEDULED",
+                  "SENT"
+                ]
+              },
+              "fun_fact": {
+                "type": "string",
+                "default": "I like basketball."
+              },
+              "job_application_id": {
+                "type": "number"
+              },
+              "job_application_skill": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JobApplicationSkill"
+                }
+              },
+              "osoc_id": {
+                "type": "number"
+              },
+              "responsibilities": {
+                "type": "string",
+                "default": "I play basketball from 5pm until 7pm."
+              },
+              "student_coach": {
+                "type": "boolean"
+              },
+              "student_id": {
+                "type": "number"
+              },
+              "student_volunteer_info": {
+                "type": "string",
+                "default": "Yes, I can work with a student employment agreement in Belgium."
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "student": {
+            "type": "object",
+            "properties": {
+              "alumni": {
+                "type": "boolean"
+              },
+              "gender": {
+                "type": "string"
+              },
+              "nickname": {
+                "type": "string",
+                "nullable": true
+              },
+              "person": {
+                "$ref": "#/components/schemas/Person"
+              },
+              "person_id": {
+                "type": "number"
+              },
+              "phone_number": {
+                "type": "string"
+              },
+              "pronouns": {
+                "type": "string",
+                "nullable": true
+              },
+              "student_id": {
                 "type": "number"
               }
             }
           }
         },
         "xml": {
-          "name": "AllStudentEvaluations"
+          "name": "StudentInfo"
+        }
+      },
+      "AllStudents": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StudentInfo"
+            }
+          }
+        },
+        "xml": {
+          "name": "AllStudents"
         }
       },
       "AllStudentSuggestions": {
@@ -4299,57 +4471,6 @@
         },
         "xml": {
           "name": "AllStudentSuggestions"
-        }
-      },
-      "Evaluation": {
-        "type": "object",
-        "properties": {
-          "decision": {
-            "type": "string",
-            "enum": [
-              "MAYBE"
-            ]
-          },
-          "evaluation_id": {
-            "type": "number"
-          },
-          "is_final": {
-            "type": "boolean"
-          },
-          "login_user": {
-            "type": "object",
-            "properties": {
-              "login_user_id": {
-                "type": "number"
-              },
-              "person": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string"
-                  },
-                  "firstname": {
-                    "type": "string"
-                  },
-                  "github": {
-                    "type": "string"
-                  },
-                  "lastname": {
-                    "type": "string"
-                  },
-                  "person_id": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          "motivation": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Evaluation"
         }
       },
       "Person": {

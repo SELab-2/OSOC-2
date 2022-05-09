@@ -5,12 +5,29 @@
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
 }
 
+/* The button to close the overview */
+.close {
+  position: relative;
+  left: 90%;
+  top: 3rem;
+}
+
+@media (max-width: 620px) {
+  .close {
+
+  }
+}
+
 .body {
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
+}
+
+.studentCard {
+  padding-right: 8vw;
 }
 
 /* Dropdown Button */
@@ -58,10 +75,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 .suggestionbuttons {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .suggestionbuttons button {
@@ -94,6 +113,10 @@
   gap: 1rem;
 }
 
+.jobapplication div {
+  display: flex;
+  flex-direction: column;
+}
 .jobapplication div a {
   font-weight: lighter;
 }

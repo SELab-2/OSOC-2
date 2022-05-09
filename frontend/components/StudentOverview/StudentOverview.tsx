@@ -5,6 +5,7 @@ import {
     Decision,
     AttachmentType,
     Attachment,
+    Evaluation,
 } from "../../types";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -18,11 +19,9 @@ import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
-    updateEvaluations?: (
-        studentId: number,
-        evalutations: EvaluationCoach[]
-    ) => void;
-}> = ({ student, updateEvaluations }) => {
+    updateEvaluations?: (studentId: number, evalutations: Evaluation[]) => void;
+    clearSelection?: () => void;
+}> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
@@ -57,16 +56,27 @@ export const StudentOverview: React.FC<{
     };
 
     useEffect(() => {
+        setEvaluations([]);
         fetchEvals().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [student]);
 
     /**
      * Call the `updateEvalutations` callback when the evaluations change
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
-            updateEvaluations(student.student.student_id, evaluations);
+            const newEvals: Evaluation[] = [];
+            evaluations.forEach((evaluation) => {
+                const newEval: Evaluation = {
+                    evaluation_id: evaluation.evaluation_id,
+                    decision: evaluation.decision,
+                    motivation: evaluation.reason,
+                    is_final: evaluation.isFinal,
+                };
+                newEvals.push(newEval);
+            });
+            updateEvaluations(student.student.student_id, newEvals);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evaluations]);
@@ -126,6 +136,11 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
+                const evaluation = response as EvaluationCoach;
+                // The creation was succesfull, we can update the evaluation bar
+                if (evaluation !== undefined) {
+                    fetchEvals().then();
+                }
             }
         }
     };
@@ -214,12 +229,18 @@ export const StudentOverview: React.FC<{
         [Decision.NO]: ForbiddenIconColor,
     };
 
+    const close = () => {
+        if (clearSelection !== undefined) {
+            clearSelection();
+        }
+    };
+
     return (
         <div>
             <Modal
                 visible={showSuggestionField}
                 handleClose={closer}
-                title={"Please fill in you motivation (optional)"}
+                title={"Please fill in your motivation (optional)"}
             >
                 <div className={styles.modalContent}>
                     <input
@@ -236,10 +257,19 @@ export const StudentOverview: React.FC<{
                     <button onClick={handleConfirm}>CONFIRM</button>
                 </div>
             </Modal>
-            <StudentCard student={student} display={Display.FULL} />
+            {clearSelection !== undefined ? (
+                <div
+                    className={`delete is-large ${styles.close}`}
+                    onClick={close}
+                />
+            ) : null}
+            <div className={styles.studentCard}>
+                <StudentCard student={student} display={Display.FULL} />
+            </div>
 
             <div className={styles.body}>
                 <div className={styles.finaldecision}>
+                    <h2>Status</h2>
                     <div className={styles.dropdown}>
                         <button className={styles.dropbtn}>Set Status</button>
                         <div className={styles.dropdownContent}>
@@ -252,32 +282,28 @@ export const StudentOverview: React.FC<{
                             </a>
                         </div>
                     </div>
-                    {student.evaluations[0].evaluation.filter(
-                        (evaluation) => evaluation.is_final
-                    )[0] !== undefined ? (
-                        <Image
-                            className={styles.buttonImage}
-                            src={
-                                decision_to_image[
-                                    student.evaluations[0].evaluation.filter(
-                                        (evaluation) => evaluation.is_final
-                                    )[0].decision
-                                ]
-                            }
-                            width={30}
-                            height={30}
-                            alt={"Final Decision"}
-                        />
-                    ) : null}
                 </div>
 
                 <div>
                     {evaluations.map((evaluation) => {
                         if (evaluation.isFinal) {
                             return (
-                                <div key={evaluation.evaluation_id}>
+                                <div
+                                    className={styles.suggestion}
+                                    key={evaluation.evaluation_id}
+                                >
+                                    <Image
+                                        className={styles.buttonImage}
+                                        src={
+                                            decision_to_image[
+                                                evaluation.decision
+                                            ]
+                                        }
+                                        width={30}
+                                        height={30}
+                                        alt={"Final Decision"}
+                                    />
                                     <p>
-                                        {evaluation.decision}{" "}
                                         <strong>
                                             {evaluation.senderFirstname}{" "}
                                             {evaluation.senderLastname}
@@ -340,20 +366,33 @@ export const StudentOverview: React.FC<{
                         .map((attachment) => (
                             <div key={attachment.attachment_id}>
                                 <h1>{getAttachmentType(attachment.type[0])}</h1>
-                                {attachment.type[0] ===
-                                AttachmentType.MOTIVATION_STRING ? (
-                                    <p>{attachment.data}</p>
-                                ) : (
-                                    <a>{attachment.data}</a>
-                                )}
+                                {attachment.data.map((data, index) => {
+                                    if (
+                                        attachment.type[index] ===
+                                        AttachmentType.MOTIVATION_STRING
+                                    ) {
+                                        return <p key={index}>{data}</p>;
+                                    }
+                                    return (
+                                        <a key={index} href={data}>
+                                            {data}
+                                        </a>
+                                    );
+                                })}
                             </div>
                         ))}
-                    <h1>Fun fact</h1>
-                    <p>{student.jobApplication.fun_fact}</p>
-                    <h1>Responsabilities</h1>
-                    <p>{student.jobApplication.responsibilities}</p>
-                    <h1>Volunteer</h1>
-                    <p>{student.jobApplication.student_volunteer_info}</p>
+                    <div>
+                        <h1>Fun fact</h1>
+                        <p>{student.jobApplication.fun_fact}</p>
+                    </div>
+                    <div>
+                        <h1>Responsabilities</h1>
+                        <p>{student.jobApplication.responsibilities}</p>
+                    </div>
+                    <div>
+                        <h1>Volunteer</h1>
+                        <p>{student.jobApplication.student_volunteer_info}</p>
+                    </div>
                 </div>
             </div>
         </div>

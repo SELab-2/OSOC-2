@@ -1,5 +1,11 @@
 .body {
   padding: 1rem;
+  min-width: 14rem;
+}
+
+.body > header {
+  display: flex;
+  justify-content: space-between;
 }
 
 .card h2 {
@@ -27,6 +33,7 @@
   .column {
     margin-left: 0 !important;
     border-right: none !important;
+    padding: 0 !important;
   }
 }
 
