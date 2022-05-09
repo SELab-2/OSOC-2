@@ -315,7 +315,6 @@ describe("student filter tests", () => {
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
             `undefined/student/filter`
         );
-        //TODO there needs to be some sort of number validation.
     });
 
     const testButtonHelperFunction1 = async (
