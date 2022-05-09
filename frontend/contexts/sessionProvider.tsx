@@ -6,7 +6,7 @@ import { AccountStatus } from "../types";
  * Interface for the context, stores the user session application wide
  */
 interface ISessionContext {
-    // Needs to be used in the useEffect function, because state variabeles are not yet available at that time
+    // Needs to be used in the useEffect function, because state variables are not yet available at that time
     getSession?: () => Promise<{
         sessionKey: string;
         isAdmin: boolean;
@@ -14,6 +14,12 @@ interface ISessionContext {
     }>;
     sessionKey: string;
     setSessionKey?: (key: string) => void;
+
+    fetchIsVerified?: () => Promise<{
+        sessionKey: string;
+        isAdmin: boolean;
+        isCoach: boolean;
+    }>;
 
     isCoach: boolean;
     setIsCoach?: (coach: boolean) => void;
@@ -65,49 +71,10 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     }, []);
 
     /**
-     * The `useEffect` is not always called before other page's use effect
-     * Therefore we can use this function to get the session in the useEffect functions
-     * Performs a backend call to verify the session id and also updates the session
+     * function that fetches from the backend to check if the user is still verified
+     * this function automatically redirects and set's the right parameters in the frontend to make the right elements visible
      */
-    const getSession = async () => {
-        // Get the sessionKey from localStorage
-        const fromStorage = localStorage.getItem("sessionKey");
-        const sessionKey = fromStorage ? fromStorage : "";
-
-        if (sessionKey === "") {
-            if (
-                !(
-                    router.pathname.startsWith("/login") ||
-                    router.pathname.startsWith("/reset") ||
-                    router.pathname.startsWith("/pending")
-                )
-            ) {
-                router.push("/login").then();
-            }
-            return {
-                sessionKey: sessionKey,
-                isAdmin: isAdmin,
-                isCoach: isCoach,
-            };
-        }
-
-        // we already did a request, and we know we are pending (key is invalid) => go to pending
-        if (pendingChecked) {
-            router.push("/pending").then();
-            return { sessionKey: "", isAdmin: false, isCoach: false };
-        }
-
-        // Avoid calling /verify twice
-        // verified gets set to false every page reload
-        if (verified) {
-            return {
-                sessionKey: sessionKey,
-                isAdmin: isAdmin,
-                isCoach: isCoach,
-            };
-        }
-
-        verified = true;
+    const fetchIsVerified = async () => {
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
             method: "POST",
             headers: {
@@ -165,6 +132,53 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
             });
     };
 
+    /**
+     * The `useEffect` is not always called before other page's use effect
+     * Therefore we can use this function to get the session in the useEffect functions
+     * Performs a backend call to verify the session id and also updates the session
+     */
+    const getSession = async () => {
+        // Get the sessionKey from localStorage
+        const fromStorage = localStorage.getItem("sessionKey");
+        const sessionKey = fromStorage ? fromStorage : "";
+
+        if (sessionKey === "") {
+            if (
+                !(
+                    router.pathname.startsWith("/login") ||
+                    router.pathname.startsWith("/reset") ||
+                    router.pathname.startsWith("/pending")
+                )
+            ) {
+                router.push("/login").then();
+            }
+            return {
+                sessionKey: sessionKey,
+                isAdmin: isAdmin,
+                isCoach: isCoach,
+            };
+        }
+
+        // we already did a request, and we know we are pending (key is invalid) => go to pending
+        if (pendingChecked) {
+            router.push("/pending").then();
+            return { sessionKey: "", isAdmin: false, isCoach: false };
+        }
+
+        // Avoid calling /verify twice
+        // verified gets set to false every page reload
+        if (verified) {
+            return {
+                sessionKey: sessionKey,
+                isAdmin: isAdmin,
+                isCoach: isCoach,
+            };
+        }
+
+        verified = true;
+        return await fetchIsVerified();
+    };
+
     const setSessionKey = (sessionKey: string) => {
         setSessionKeyState(sessionKey);
         // Update localStorage
@@ -181,6 +195,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                 isAdmin,
                 isVerified,
                 setIsVerified,
+                fetchIsVerified,
             }}
         >
             {children}

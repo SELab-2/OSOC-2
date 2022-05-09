@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
         setIsVerified,
     } = useContext(SessionContext);
 
-    const { getSession } = useContext(SessionContext);
+    const { fetchIsVerified } = useContext(SessionContext);
 
     const { socket } = useSockets();
 
@@ -35,12 +35,11 @@ export const Header: React.FC = () => {
         // when receiving that a loginUser was disabled => fetch from the server to check if session key is still valid
         // getSession wil redirect automatically to /login if the key is invalid
         socket.on("loginUserDisabled", () => {
-            if (getSession) {
-                getSession().then();
+            if (fetchIsVerified) {
+                fetchIsVerified().then();
             }
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [getSession]);
+    }, [fetchIsVerified, sessionKey, socket]);
 
     const logOut = (e: SyntheticEvent) => {
         e.preventDefault();
