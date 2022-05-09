@@ -35,6 +35,15 @@ export enum StudentStatus {
     NO = "NO",
 }
 
+export enum ContractStatus {
+    APPROVED = "APPROVED",
+    CANCELLED = "CANCELLED",
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    SIGNED = "SIGNED",
+    WAIT_APPROVAL = "WAIT_APPROVAL",
+}
+
 export const getNextFilterBoolean = (bool: FilterBoolean) => {
     if (bool == FilterBoolean.TRUE) {
         return FilterBoolean.FALSE;
