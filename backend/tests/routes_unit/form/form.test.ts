@@ -79,13 +79,18 @@ function readDataTestForms(): T.Requests.Form[] {
 
 function readFileFails(file: string): T.Requests.Form | null {
     const fileData = Object.values(
-        fs.readdirSync(path.join(__dirname, "/../../../../testforms/fails"))
+        fs.readdirSync(
+            path.join(__dirname, "/../../../../testforms/test_fails")
+        )
     )
         .filter((filename) => filename.includes(file))
         .map((filename) => {
             const readFile = (path: string) => fs.readFileSync(path, "utf8");
             const fileData = readFile(
-                path.join(__dirname, `/../../../../testforms/fails/${filename}`)
+                path.join(
+                    __dirname,
+                    `/../../../../testforms/test_fails/${filename}`
+                )
             );
             return JSON.parse(fileData);
         });
@@ -234,6 +239,15 @@ describe.each(keys)("Questions present", (key) => {
 
 test("Live in Belgium question absent", async () => {
     const data = readFileFails("failLiveInBelgiumAbsent.json");
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+});
+
+test("Work in July question absent", async () => {
+    const data = readFileFails("failWorkInJulyAbsent.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
