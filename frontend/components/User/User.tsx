@@ -81,10 +81,10 @@ export const User: React.FC<{
                 socket.emit("activateUser");
             } else if (changed_val === "disabled") {
                 socket.emit("disableUser");
-            } else {
-                // other changes are changes to the enum roles
-                socket.emit("updateRoleUser");
             }
+            // also emit that there has been a change in general so that the manage users screen will update
+            // other changes are changes to the enum roles
+            socket.emit("updateRoleUser");
         }
         return res;
     };

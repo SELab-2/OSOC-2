@@ -75,6 +75,9 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
      * this function automatically redirects and set's the right parameters in the frontend to make the right elements visible
      */
     const fetchIsVerified = async () => {
+        const fromStorage = localStorage.getItem("sessionKey");
+        const sessionKey = fromStorage ? fromStorage : "";
+
         return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify`, {
             method: "POST",
             headers: {
@@ -174,7 +177,6 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
                 isCoach: isCoach,
             };
         }
-
         verified = true;
         return await fetchIsVerified();
     };
