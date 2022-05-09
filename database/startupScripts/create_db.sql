@@ -125,9 +125,9 @@ CREATE TABLE IF NOT EXISTS project (
    description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL,
-   CONSTRAINT dates CHECK (start_date <= end_date),
-   CONSTRAINT valid_positions CHECK (positions > 0)
+   /* positions     SMALLINT         NOT NULL, */
+   CONSTRAINT dates CHECK (start_date <= end_date)
+   /* CONSTRAINT valid_positions CHECK (positions > 0) */
 );
 
 

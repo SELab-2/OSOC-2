@@ -370,7 +370,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
     }
 
     /**
@@ -896,7 +895,6 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        positions: number;
     }
 
     export interface ModProject extends IdRequest {
@@ -904,7 +902,6 @@ export namespace Requests {
         partner?: string;
         start?: Date;
         end?: Date;
-        positions?: number;
         osocId?: number;
     }
 

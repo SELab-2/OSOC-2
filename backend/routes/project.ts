@@ -31,7 +31,6 @@ export async function createProject(
                     partner: parsed.data.partner,
                     startDate: new Date(parsed.data.start),
                     endDate: new Date(parsed.data.end),
-                    positions: Number(parsed.data.positions),
                     osocId: Number(parsed.data.osocId),
                 })
                 .then((project) =>
@@ -41,7 +40,6 @@ export async function createProject(
                         partner: project.partner,
                         start_date: project.start_date.toString(),
                         end_date: project.end_date.toString(),
-                        positions: project.positions,
                         osoc_id: project.osoc_id,
                     })
                 );
@@ -78,7 +76,6 @@ export async function listProjects(
                                 partner: val.partner,
                                 start_date: val.start_date.toString(),
                                 end_date: val.end_date.toString(),
-                                positions: val.positions,
                                 osoc_id: val.osoc_id,
                                 students: students,
                                 coaches: users,
@@ -120,7 +117,6 @@ export async function getProject(
                         partner: obj.partner,
                         start_date: obj.start_date.toString(),
                         end_date: obj.end_date.toString(),
-                        positions: obj.positions,
                         osoc_id: obj.osoc_id,
                         students: students,
                         coaches: users,
@@ -148,7 +144,6 @@ export async function modProject(
                     partner: parsed.partner,
                     startDate: parsed.start,
                     endDate: parsed.end,
-                    positions: parsed.positions,
                     osocId: parsed.osocId,
                 })
                 .then((project) =>
@@ -158,7 +153,6 @@ export async function modProject(
                         partner: project.partner,
                         start_date: project.start_date.toString(),
                         end_date: project.end_date.toString(),
-                        positions: project.positions,
                         osoc_id: project.osoc_id,
                     })
                 );
@@ -503,7 +497,6 @@ export async function filterProjects(
             partner: project.partner,
             start_date: project.start_date,
             end_data: project.end_date,
-            positions: project.positions,
             osoc_id: project.osoc_id,
             contracts: contracts,
             coaches: users,

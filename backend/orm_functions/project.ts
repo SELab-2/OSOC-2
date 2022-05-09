@@ -20,7 +20,6 @@ export async function createProject(project: CreateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
         },
     });
     return result;
@@ -185,52 +184,6 @@ export async function getProjectsEndedBeforeDate(date: Date) {
 
 /**
  *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have the exact amount of positions
- */
-export async function getProjectsByNumberPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: positions,
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have less positions
- */
-export async function getProjectsLessPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                lt: positions,
-            },
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have more positions
- */
-export async function getProjectsMorePositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                gt: positions,
-            },
-        },
-    });
-    return result;
-}
-
-/**
- *
  * @param project: UpdateProject object with the values that need to be updated
  * @returns the updated entry in the database
  */
@@ -245,7 +198,6 @@ export async function updateProject(project: UpdateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
         },
     });
     return result;
@@ -385,12 +337,11 @@ export async function filterProjects(
                 (elem) => elem.project_id === project.project_id
             );
 
-            let sum = 0;
             for (const c of project_found[0].project_role) {
-                sum += c._count.contract;
+                if (c._count.contract < c.positions) return false;
             }
 
-            return project.positions === sum;
+            return true;
         });
     }
 
@@ -404,20 +355,22 @@ export async function filterProjects(
                 (elem) => elem.project_id === y.project_id
             );
 
-            let sum_x = 0;
+            let full_x = 1;
             for (const c of project_x_found[0].project_role) {
-                sum_x += c._count.contract;
+                if (c._count.contract < c.positions) {
+                    full_x = 0;
+                    break; // early exit
+                }
             }
 
-            let sum_y = 0;
+            let full_y = 1;
             for (const c of project_y_found[0].project_role) {
-                sum_y += c._count.contract;
+                if (c._count.contract < c.positions) {
+                    full_y = 0;
+                    break; // early exit
+                }
             }
-
-            const fullyAssignedX = x.positions === sum_x ? 1 : 0;
-            const fullyAssignedY = y.positions === sum_y ? 1 : 0;
-
-            return fullyAssignedX - fullyAssignedY;
+            return full_x - full_y;
         });
     }
 
