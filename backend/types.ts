@@ -725,6 +725,22 @@ export namespace InternalTypes {
         start_date: string;
         end_date: string;
         positions: number;
+        roles: object;
+    }
+
+    /**
+     *  Represents a project, with all associated data.
+     */
+    export interface ProjectAndContracts {
+        id: number;
+        name: string;
+        partner: string;
+        start_date: string;
+        end_date: string;
+        positions: number;
+        roles: object;
+        contracts: object;
+        coaches: object;
     }
 
     /**
@@ -1096,10 +1112,16 @@ export namespace Responses {
     export interface Project extends InternalTypes.Project {}
 
     /**
+     *  A project list response with contracts in it
+     */
+    export interface ProjectAndContracts
+        extends InternalTypes.ProjectAndContracts {}
+
+    /**
      *  A project list response is the keyed version of a list of projects
      */
-    export interface ProjectList {
-        data: InternalTypes.Project[];
+    export interface ProjectListAndContracts {
+        data: InternalTypes.ProjectAndContracts[];
     }
 
     /**
@@ -1319,6 +1341,7 @@ export namespace Requests {
         start: Date;
         end: Date;
         positions: number;
+        roles: object;
     }
 
     export interface ModProject extends IdRequest {
@@ -1328,6 +1351,8 @@ export namespace Requests {
         end?: Date;
         positions?: number;
         osocId?: number;
+        addRoles?: object;
+        deleteRoles?: object;
     }
 
     export interface ProjectFilter extends KeyRequest {}
