@@ -66,7 +66,8 @@ export async function filterYear(
 
     const osocs = await ormO.filterOsocs(
         checkedSessionKey.data.yearFilter,
-        checkedSessionKey.data.yearSort
+        checkedSessionKey.data.yearSort,
+        checkedSessionKey.userId
     );
 
     return Promise.resolve({

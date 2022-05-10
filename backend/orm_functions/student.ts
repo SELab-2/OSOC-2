@@ -7,6 +7,7 @@ import {
     FilterBoolean,
     UpdateStudent,
     FilterStringArray,
+    FilterNumber,
 } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
 
@@ -175,7 +176,7 @@ export async function filterStudents(
     alumniFilter: FilterBoolean,
     coachFilter: FilterBoolean,
     statusFilter: decision_enum | undefined,
-    osocYear: number | undefined,
+    osocYear: FilterNumber,
     emailStatusFilter: email_status_enum | undefined,
     firstNameSort: FilterSort,
     lastNameSort: FilterSort,

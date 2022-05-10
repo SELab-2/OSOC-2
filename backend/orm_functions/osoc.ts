@@ -1,5 +1,6 @@
 import prisma from "../prisma/prisma";
 import { UpdateOsoc, FilterNumber, FilterSort } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
 
 /**
  *
@@ -257,15 +258,30 @@ export async function getNewestOsoc() {
  *
  * @param yearFilter year that we are filtering on (or undefined if not filtering on year)
  * @param yearSort asc or desc if we are sorting on year, undefined if we are not sorting on year
+ * @param userId the userId of the user that is searching
  * @returns the filtered osoc editions with their project count in a promise
  */
 export async function filterOsocs(
     yearFilter: FilterNumber,
-    yearSort: FilterSort
+    yearSort: FilterSort,
+    userId: number
 ) {
+    const visibleYears = await getOsocYearsForLoginUser(userId);
+    let searchYears;
+    if (yearFilter !== undefined) {
+        if (!visibleYears.includes(yearFilter)) {
+            return Promise.resolve([]);
+        } else {
+            searchYears = [yearFilter];
+        }
+    } else {
+        searchYears = yearFilter;
+    }
     return await prisma.osoc.findMany({
         where: {
-            year: yearFilter,
+            year: {
+                in: searchYears,
+            },
         },
         orderBy: {
             year: yearSort,
