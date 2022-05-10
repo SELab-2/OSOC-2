@@ -15,7 +15,7 @@ export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.firstname);
+    const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);

@@ -26,11 +26,9 @@ export const StudentFilter: React.FC<{
     const { getSession } = useContext(SessionContext);
     const router = useRouter();
 
-    const [firstNameFilter, setFirstNameFilter] = useState<string>("");
-    const [lastNameFilter, setLastNameFilter] = useState<string>("");
+    const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
-    const [firstNameSort, setFirstNameSort] = useState<Sort>(Sort.NONE);
-    const [lastNameSort, setLastNameSort] = useState<Sort>(Sort.NONE);
+    const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE);
     const [alumni, setAlumni] = useState<boolean>(false);
     const [studentCoach, setstudentCoach] = useState<boolean>(false);
@@ -84,24 +82,11 @@ export const StudentFilter: React.FC<{
     useEffect(() => {
         search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        firstNameSort,
-        lastNameSort,
-        emailSort,
-        alumni,
-        studentCoach,
-        statusFilter,
-        emailStatus,
-    ]);
+    }, [nameSort, emailSort, alumni, studentCoach, statusFilter, emailStatus]);
 
-    const toggleFirstNameSort = async (e: SyntheticEvent) => {
+    const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setFirstNameSort((prev) => getNextSort(prev));
-    };
-
-    const toggleLastNameSort = async (e: SyntheticEvent) => {
-        e.preventDefault();
-        setLastNameSort((prev) => getNextSort(prev));
+        setNameSort((prev) => getNextSort(prev));
     };
 
     const toggleEmailSort = async (e: SyntheticEvent) => {
@@ -214,17 +199,11 @@ export const StudentFilter: React.FC<{
         setRolesActive(false);
         const filters = [];
 
-        if (firstNameFilter !== "") {
-            filters.push(`firstNameFilter=${firstNameFilter}`);
+        if (nameFilter !== "") {
+            filters.push(`nameFilter=${nameFilter}`);
         }
-        if (firstNameSort !== Sort.NONE) {
-            filters.push(`firstNameSort=${firstNameSort}`);
-        }
-        if (lastNameFilter !== "") {
-            filters.push(`lastNameFilter=${lastNameFilter}`);
-        }
-        if (lastNameSort !== Sort.NONE) {
-            filters.push(`lastNameSort=${lastNameSort}`);
+        if (nameSort !== Sort.NONE) {
+            filters.push(`nameSort=${nameSort}`);
         }
         if (emailFilter !== "") {
             filters.push(`emailFilter=${emailFilter}`);
@@ -294,16 +273,14 @@ export const StudentFilter: React.FC<{
                 }`}
             >
                 <div className={styles.query}>
-                    <div onClick={toggleFirstNameSort}>
-                        Firstname
+                    <div onClick={toggleNameSort}>
+                        Name
                         <div className={styles.triangleContainer}>
                             <div
                                 className={`${
-                                    firstNameSort === Sort.ASCENDING
-                                        ? styles.up
-                                        : ""
+                                    nameSort === Sort.ASCENDING ? styles.up : ""
                                 } ${
-                                    firstNameSort === Sort.NONE
+                                    nameSort === Sort.NONE
                                         ? styles.dot
                                         : styles.triangle
                                 }`}
@@ -314,32 +291,7 @@ export const StudentFilter: React.FC<{
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
-                        onChange={(e) => setFirstNameFilter(e.target.value)}
-                    />
-                </div>
-
-                <div className={styles.query}>
-                    <div onClick={toggleLastNameSort}>
-                        Lastname
-                        <div className={styles.triangleContainer}>
-                            <div
-                                className={`${
-                                    lastNameSort === Sort.ASCENDING
-                                        ? styles.up
-                                        : ""
-                                } ${
-                                    lastNameSort === Sort.NONE
-                                        ? styles.dot
-                                        : styles.triangle
-                                }`}
-                            />
-                        </div>
-                    </div>
-                    <input
-                        className={`input ${styles.input}`}
-                        type="text"
-                        placeholder="Search.."
-                        onChange={(e) => setLastNameFilter(e.target.value)}
+                        onChange={(e) => setNameFilter(e.target.value)}
                     />
                 </div>
 

@@ -90,8 +90,7 @@ export enum Decision {
 
 export interface EvaluationCoach {
     evaluation_id: number;
-    senderFirstname: string;
-    senderLastname: string;
+    senderName: string;
     reason: string;
     decision: Decision;
     isFinal: boolean;
@@ -171,8 +170,7 @@ export interface Student {
         person: {
             person_id: number;
             email: string;
-            firstname: string;
-            lastname: string;
+            name: string;
             github: string;
         };
         person_id: number;
@@ -186,8 +184,7 @@ export interface LoginUser {
     person: {
         person_id: number;
         email: string;
-        firstname: string;
-        lastname: string;
+        name: string;
         github: string;
         github_id: number;
     };

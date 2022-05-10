@@ -305,8 +305,7 @@ export const StudentOverview: React.FC<{
                                     />
                                     <p>
                                         <strong>
-                                            {evaluation.senderFirstname}{" "}
-                                            {evaluation.senderLastname}
+                                            {evaluation.senderName}
                                             {": "}
                                         </strong>
                                         {evaluation.reason}
@@ -350,10 +349,7 @@ export const StudentOverview: React.FC<{
                                     alt={"Suggestion"}
                                 />
 
-                                <strong>
-                                    {evaluation.senderFirstname}{" "}
-                                    {evaluation.senderLastname}:
-                                </strong>
+                                <strong>{evaluation.senderName}:</strong>
                                 {evaluation.reason}
                             </div>
                         );
