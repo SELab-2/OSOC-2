@@ -141,3 +141,35 @@ test("Can create osoc edition", async () => {
     expectCall(ormoMock.createOsoc, 2059);
     expectNoCall(utilMock.checkSessionKey);
 });
+
+test("Can get all the osoc editions", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd" };
+    await expect(osoc.listOsocEditions(r)).resolves.toStrictEqual({
+        data: osocs,
+    });
+    expectCall(reqMock.parseOsocAllRequest, r);
+    expect(ormoMock.getAllOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.checkSessionKey, r.body);
+});
+
+test("Can filter the osoc editions", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd", yearFilter: 2022 };
+    await expect(osoc.filterYear(r)).resolves.toStrictEqual({
+        data: [{ osoc_id: 1, year: 2022, _count: { project: 5 } }],
+    });
+    expectCall(reqMock.parseFilterOsocsRequest, r);
+    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
+    expect(ormoMock.filterOsocs).toHaveBeenCalledWith(2022, undefined, 0);
+    expectCall(utilMock.checkSessionKey, r.body);
+});
+
+test("Can delete an osoc edition by id", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd", id: 4 };
+    await expect(osoc.deleteOsocEditionRequest(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseDeleteOsocEditionRequest, r);
+    expectCall(ormoMock.deleteOsocFromDB, 4);
+    expectCall(utilMock.isAdmin, r.body);
+});
