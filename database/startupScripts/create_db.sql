@@ -204,6 +204,12 @@ CREATE TABLE IF NOT EXISTS template_email(
    UNIQUE(owner_id, name)
 );
 
+CREATE TABLE IF NOT EXISTS login_user_osoc(
+    login_user_osoc_id      SERIAL      PRIMARY KEY,
+    login_user_id           INT         NOT NULL REFERENCES login_user(login_user_id),
+    osoc_id                 INT         NOT NULL REFERENCES osoc(osoc_id)
+);
+
 /* Create database extension for job scheduler pg_cron */
 CREATE EXTENSION pg_cron;
 
