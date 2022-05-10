@@ -24,7 +24,7 @@ export const StudentOverview: React.FC<{
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
-    const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
     const [showSuggestionField, setShowSuggestionField] = useState(false);
@@ -48,7 +48,7 @@ export const StudentOverview: React.FC<{
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        setEvaluations(response.data);
+                        setEvaluations(response.evaluation.evaluations);
                     }
                 }
             });
@@ -71,8 +71,9 @@ export const StudentOverview: React.FC<{
                 const newEval: Evaluation = {
                     evaluation_id: evaluation.evaluation_id,
                     decision: evaluation.decision,
-                    motivation: evaluation.reason,
-                    is_final: evaluation.isFinal,
+                    motivation: evaluation.motivation,
+                    is_final: evaluation.is_final,
+                    login_user: evaluation.login_user,
                 };
                 newEvals.push(newEval);
             });
@@ -286,7 +287,7 @@ export const StudentOverview: React.FC<{
 
                 <div>
                     {evaluations.map((evaluation) => {
-                        if (evaluation.isFinal) {
+                        if (evaluation.is_final) {
                             return (
                                 <div
                                     className={styles.suggestion}
@@ -305,11 +306,17 @@ export const StudentOverview: React.FC<{
                                     />
                                     <p>
                                         <strong>
-                                            {evaluation.senderFirstname}{" "}
-                                            {evaluation.senderLastname}
+                                            {
+                                                evaluation.login_user.person
+                                                    .firstname
+                                            }{" "}
+                                            {
+                                                evaluation.login_user.person
+                                                    .lastname
+                                            }
                                             {": "}
                                         </strong>
-                                        {evaluation.reason}
+                                        {evaluation.motivation}
                                     </p>
                                 </div>
                             );
@@ -332,7 +339,7 @@ export const StudentOverview: React.FC<{
                 </div>
 
                 {evaluations.map((evaluation) => {
-                    if (!evaluation.isFinal) {
+                    if (!evaluation.is_final) {
                         return (
                             <div
                                 className={styles.suggestion}
@@ -351,10 +358,10 @@ export const StudentOverview: React.FC<{
                                 />
 
                                 <strong>
-                                    {evaluation.senderFirstname}{" "}
-                                    {evaluation.senderLastname}:
+                                    {evaluation.login_user.person.firstname}{" "}
+                                    {evaluation.login_user.person.lastname}:
                                 </strong>
-                                {evaluation.reason}
+                                {evaluation.motivation}
                             </div>
                         );
                     }

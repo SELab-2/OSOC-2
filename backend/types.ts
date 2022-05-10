@@ -511,7 +511,7 @@ export namespace InternalTypes {
         /**
          *  The evaluations
          */
-        evaluations: StudentEvaluationsField[];
+        evaluations: StudentsAllEvaluationField[];
         /**
          *  The osoc year
          */

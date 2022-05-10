@@ -102,6 +102,7 @@ export interface Evaluation {
     decision: Decision;
     motivation: string;
     is_final: boolean;
+    login_user: LoginUser;
 }
 
 export enum AttachmentType {
