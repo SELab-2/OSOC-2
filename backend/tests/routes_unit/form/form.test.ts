@@ -16,7 +16,6 @@ import * as fs from "fs";
 import * as path from "path";
 //import { Requests, Responses } from "../../types";
 //import * as config from "../../../routes/form_keys.json";
-import { createForm } from "../../../routes/form";
 /*import {
     checkQuestionsExist,
     checkWordInAnswer,
@@ -75,31 +74,6 @@ function readDataTestForms(): T.Requests.Form[] {
             );
             return JSON.parse(fileData);
         });
-}
-
-function readFileFails(file: string): T.Requests.Form | null {
-    const fileData = Object.values(
-        fs.readdirSync(
-            path.join(__dirname, "/../../../../testforms/test_fails")
-        )
-    )
-        .filter((filename) => filename.includes(file))
-        .map((filename) => {
-            const readFile = (path: string) => fs.readFileSync(path, "utf8");
-            const fileData = readFile(
-                path.join(
-                    __dirname,
-                    `/../../../../testforms/test_fails/${filename}`
-                )
-            );
-            return JSON.parse(fileData);
-        });
-
-    if (fileData.length === 0) {
-        return null;
-    }
-
-    return fileData[0];
 }
 
 /*function checkIfFirstQuestionsAreValid(form: T.Requests.Form): boolean | null {
@@ -236,30 +210,3 @@ describe.each(keys)("Questions present", (key) => {
         }
     });
 });*/
-
-test("Live in Belgium question absent", async () => {
-    const data = readFileFails("failLiveInBelgiumAbsent.json");
-    expect(data).not.toBeNull();
-
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
-    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
-});
-
-test("Work in July question absent", async () => {
-    const data = readFileFails("failWorkInJulyAbsent.json");
-    expect(data).not.toBeNull();
-
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
-    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
-});
-
-test("Work in July question absent", async () => {
-    const data = readFileFails("failWorkInJulyAbsent.json");
-    expect(data).not.toBeNull();
-
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
-    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
-});
