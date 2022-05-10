@@ -3,7 +3,7 @@ import React from "react";
 import { Students } from "../../components/Students/Students";
 
 const Index: NextPage = () => {
-    return <Students />;
+    return <Students alwaysLimited={false} />;
 };
 
 export default Index;
