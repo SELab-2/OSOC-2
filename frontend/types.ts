@@ -80,11 +80,11 @@ export enum AccountStatus {
  * @param sort
  */
 export const getNextSort = (sort: Sort) => {
-    if (sort == Sort.ASCENDING) {
+    if (sort === Sort.ASCENDING) {
         return Sort.DESCENDING;
     }
 
-    if (sort == Sort.DESCENDING) {
+    if (sort === Sort.DESCENDING) {
         return Sort.NONE;
     }
 
@@ -95,15 +95,6 @@ export enum Decision {
     YES = "YES",
     MAYBE = "MAYBE",
     NO = "NO",
-}
-
-export interface EvaluationCoach {
-    evaluation_id: number;
-    senderFirstname: string;
-    senderLastname: string;
-    reason: string;
-    decision: Decision;
-    isFinal: boolean;
 }
 
 export interface Evaluation {
