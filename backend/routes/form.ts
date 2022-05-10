@@ -1511,7 +1511,6 @@ export async function createForm(
         wordInAnswerInBelgium.data == null ||
         wordInAnswerCanWorkEnough.data == null
     ) {
-        console.log("test");
         return Promise.resolve({});
     }
 
