@@ -118,3 +118,16 @@ test("Can create a new role", async () => {
         sessionkey: "abcd",
     });
 });
+
+test("Can get all the roles", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd" };
+    await expect(role.listStudentRoles(r)).resolves.toStrictEqual({
+        data: roles,
+    });
+    expectCall(reqMock.parseRolesAllRequest, r);
+    expect(ormoMock.getAllRoles).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.checkSessionKey, {
+        sessionkey: "abcd",
+    });
+});
