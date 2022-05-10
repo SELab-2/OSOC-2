@@ -7,15 +7,18 @@ import * as fs from "fs";
 import * as path from "path";
 import { createForm } from "../../../routes/form";
 
-function readFile(file: string): T.Requests.Form | null {
+export function readFile(
+    file: string,
+    directory: string
+): T.Requests.Form | null {
     const fileData = Object.values(
-        fs.readdirSync(path.join(__dirname, "./create_form_files"))
+        fs.readdirSync(path.join(__dirname, directory))
     )
         .filter((filename) => filename.includes(file))
         .map((filename) => {
             const readFile = (path: string) => fs.readFileSync(path, "utf8");
             const fileData = readFile(
-                path.join(__dirname, `./create_form_files/${filename}`)
+                path.join(__dirname, `${directory}/${filename}`)
             );
             return JSON.parse(fileData);
         });
@@ -28,7 +31,10 @@ function readFile(file: string): T.Requests.Form | null {
 }
 
 test("Live in Belgium question absent", async () => {
-    const data = readFile("failLiveInBelgiumAbsent.json");
+    const data = readFile(
+        "failLiveInBelgiumAbsent.json",
+        "./create_form_files"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -37,7 +43,7 @@ test("Live in Belgium question absent", async () => {
 });
 
 test("Work in July question absent", async () => {
-    const data = readFile("failWorkInJulyAbsent.json");
+    const data = readFile("failWorkInJulyAbsent.json", "./create_form_files");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -46,7 +52,7 @@ test("Work in July question absent", async () => {
 });
 
 test("Work in July 'no' answer", async () => {
-    const data = readFile("liveInBelgiumAnswerNo.json");
+    const data = readFile("liveInBelgiumAnswerNo.json", "./create_form_files");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
