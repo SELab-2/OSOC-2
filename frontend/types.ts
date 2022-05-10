@@ -80,11 +80,11 @@ export enum AccountStatus {
  * @param sort
  */
 export const getNextSort = (sort: Sort) => {
-    if (sort == Sort.ASCENDING) {
+    if (sort === Sort.ASCENDING) {
         return Sort.DESCENDING;
     }
 
-    if (sort == Sort.DESCENDING) {
+    if (sort === Sort.DESCENDING) {
         return Sort.NONE;
     }
 
@@ -97,30 +97,12 @@ export enum Decision {
     NO = "NO",
 }
 
-export interface EvaluationCoach {
-    evaluation_id: number;
-    senderFirstname: string;
-    senderLastname: string;
-    reason: string;
-    decision: Decision;
-    isFinal: boolean;
-}
-
 export interface Evaluation {
-    decision: Decision;
     evaluation_id: number;
-    is_final: boolean;
-    login_user: {
-        login_user_id: number;
-        person: {
-            email: string;
-            firstname: string;
-            github: string;
-            lastname: string;
-            person_id: number;
-        };
-    };
+    decision: Decision;
     motivation: string;
+    is_final: boolean;
+    login_user: LoginUser;
 }
 
 export enum AttachmentType {
