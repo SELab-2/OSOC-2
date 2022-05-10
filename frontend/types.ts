@@ -35,6 +35,15 @@ export enum StudentStatus {
     NO = "NO",
 }
 
+export enum ContractStatus {
+    APPROVED = "APPROVED",
+    CANCELLED = "CANCELLED",
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    SIGNED = "SIGNED",
+    WAIT_APPROVAL = "WAIT_APPROVAL",
+}
+
 export const getNextFilterBoolean = (bool: FilterBoolean) => {
     if (bool == FilterBoolean.TRUE) {
         return FilterBoolean.FALSE;
@@ -98,8 +107,8 @@ export interface EvaluationCoach {
 }
 
 export interface Evaluation {
-    evaluation_id: number;
     decision: Decision;
+    evaluation_id: number;
     motivation: string;
     is_final: boolean;
     login_user: LoginUser;
@@ -117,7 +126,17 @@ export interface Attachment {
     job_application_id: number;
     attachment_id: number;
     data: string[];
-    type: AttachmentType;
+    type: AttachmentType[];
+}
+
+export interface JobApplicationSkill {
+    is_best: boolean;
+    is_preferred: boolean;
+    job_application_id: number;
+    job_application_skill_id: number;
+    language_id: number;
+    level: number;
+    skill: string;
 }
 
 export interface Student {
@@ -146,17 +165,7 @@ export interface Student {
         email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
-        job_application_skill: [
-            {
-                is_best: boolean;
-                is_preferred: boolean;
-                job_application_id: number;
-                job_application_skill_id: number;
-                language_id: number;
-                level: number;
-                skill: string;
-            }
-        ];
+        job_application_skill: [JobApplicationSkill];
         osoc_id: number;
         responsibilities: string;
         student_coach: boolean;
@@ -175,10 +184,11 @@ export interface Student {
             firstname: string;
             lastname: string;
             github: string;
+            github_id: string;
         };
         person_id: number;
         phone_number: string;
-        pronouns: [string];
+        pronouns: string;
         student_id: number;
     };
 }
@@ -226,4 +236,57 @@ export interface ServerToClientEvents {
  */
 export interface ClientToServerEvents {
     updateUser: (loginUserId: number) => void;
+}
+
+export interface ProjectPerson {
+    email: string;
+    firstname: string;
+    github: string;
+    github_id: string;
+    lastname: string;
+    person_id: number;
+}
+
+export interface ProjectLoginUser {
+    login_user: {
+        is_admin: boolean;
+        is_coach: boolean;
+        login_user_id: number;
+        person: ProjectPerson;
+    };
+}
+
+export interface ProjectRole {
+    positions: number;
+    project_id: number;
+    project_role_id: number;
+    role_id: number;
+    role: {
+        name: string;
+    };
+}
+
+export interface Contract {
+    contract_id: number;
+    contract_status: string; // TODO: Make ENUM for this
+    project_role: ProjectRole;
+    students: [Student];
+}
+
+export interface Project {
+    coaches: [ProjectLoginUser];
+    end_date: string;
+    id: number;
+    name: string;
+    osoc_id: number;
+    partner: string;
+    positions: number;
+    start_date: string;
+    contracts: [Contract];
+    roles: [
+        {
+            name: string;
+            positions: number;
+        }
+    ];
 }

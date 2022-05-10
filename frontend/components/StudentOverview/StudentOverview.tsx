@@ -372,7 +372,7 @@ export const StudentOverview: React.FC<{
                         .sort(compareAttachments)
                         .map((attachment) => (
                             <div key={attachment.attachment_id}>
-                                <h1>{getAttachmentType(attachment.type)}</h1>
+                                <h1>{getAttachmentType(attachment.type[0])}</h1>
                                 {attachment.data.map((data, index) => {
                                     if (
                                         attachment.type[index] ===
