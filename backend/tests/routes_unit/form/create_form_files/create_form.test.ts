@@ -39,3 +39,12 @@ test("Work in July 'no' answer", async () => {
     req.body = { ...data };
     await expect(createForm(req)).resolves.toStrictEqual({});
 });
+
+test("Work in July 'null' answer", async () => {
+    const data = readFile("liveInBelgiumAnswerNull.json");
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).resolves.toStrictEqual({});
+});
