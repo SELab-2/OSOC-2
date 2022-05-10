@@ -1044,14 +1044,6 @@ export namespace Responses {
     }
 
     /**
-     *  A list of suggestion info
-     * data.
-     */
-    export interface SuggestionInfoList {
-        data: InternalTypes.SuggestionInfo[];
-    }
-
-    /**
      *  An empty response. Doesn't hold a session key.
      */
     export interface Empty {}
@@ -1158,18 +1150,6 @@ export namespace Responses {
      */
     export interface StudentList {
         data: InternalTypes.Student[];
-    }
-
-    /**
-     *  An EvaluationCoach response.
-     */
-    export interface EvaluationCoach {
-        evaluation_id: number;
-        senderFirstname: string;
-        senderLastname: string;
-        reason: string | null;
-        decision: InternalTypes.Suggestion;
-        isFinal: boolean;
     }
 
     /**
