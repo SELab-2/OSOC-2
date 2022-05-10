@@ -44,6 +44,7 @@ const SettingsPage: NextPage = () => {
     };
 
     useEffect(() => {
+        fetchUser().then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
