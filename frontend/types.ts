@@ -115,19 +115,17 @@ export enum AttachmentType {
 export interface Attachment {
     job_application_id: number;
     attachment_id: number;
-    data: string;
+    data: string[];
     type: AttachmentType;
 }
 
 export interface Student {
-    evaluations: [
-        {
-            evaluation: [Evaluation];
-            osoc: {
-                year: number;
-            };
-        }
-    ];
+    evaluation: {
+        evaluations: Evaluation[];
+        osoc: {
+            year: number;
+        };
+    };
 
     jobApplication: {
         applied_role: [
@@ -220,11 +218,17 @@ export interface Role {
  */
 export interface ServerToClientEvents {
     loginUserUpdated: () => void;
+    loginUserActivated: () => void;
+    loginUserDisabled: () => void;
+    registrationReceived: () => void;
 }
 
 /**
  * types for socket.io when sending something from the client to the server
  */
 export interface ClientToServerEvents {
-    updateUser: (loginUserId: number) => void;
+    updateRoleUser: () => void;
+    activateUser: () => void;
+    disableUser: () => void;
+    submitRegistration: () => void;
 }

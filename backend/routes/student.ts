@@ -129,8 +129,19 @@ export async function getStudent(
         }
     }
 
-    const evaluations = await ormJo.getStudentEvaluationsTotal(
-        student.student_id
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
+    const evaluations = await ormJo.getEvaluationsByYearForStudent(
+        checkedSessionKey.data.id,
+        year
     );
 
     for (const job_application_skill of jobApplication.job_application_skill) {
@@ -148,7 +159,12 @@ export async function getStudent(
     return Promise.resolve({
         student: student,
         jobApplication: jobApplication,
-        evaluations: evaluations,
+        evaluation: {
+            evaluations: evaluations !== null ? evaluations.evaluation : [],
+            osoc: {
+                year: year,
+            },
+        },
         roles: roles,
     });
 }
@@ -184,7 +200,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.EvaluationCoach> {
+): Promise<Responses.SuggestionInfo> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -256,12 +272,14 @@ export async function createStudentSuggestion(
     }
 
     return Promise.resolve({
-        evaluation_id: newEvaluation.evaluation_id,
-        senderFirstname: loginUser.person.firstname,
-        senderLastname: loginUser.person.lastname,
-        reason: newEvaluation.motivation,
-        decision: newEvaluation.decision,
-        isFinal: newEvaluation.is_final,
+        data: {
+            evaluation_id: newEvaluation.evaluation_id,
+            senderFirstname: loginUser.person.firstname,
+            senderLastname: loginUser.person.lastname,
+            reason: newEvaluation.motivation,
+            decision: newEvaluation.decision,
+            isFinal: newEvaluation.is_final,
+        },
     });
 }
 
@@ -273,7 +291,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.SuggestionInfo> {
+): Promise<Responses.SuggestionInfoList> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -400,6 +418,16 @@ export async function filterStudents(
 
     const studentlist = [];
 
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.osocYear === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
     for (const student of students) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
@@ -418,8 +446,9 @@ export async function filterStudents(
             }
         }
 
-        const evaluations = await ormJo.getStudentEvaluationsTotal(
-            student.student_id
+        const evaluations = await ormJo.getEvaluationsByYearForStudent(
+            student.student_id,
+            year
         );
 
         for (const job_application_skill of jobApplication.job_application_skill) {
@@ -437,7 +466,12 @@ export async function filterStudents(
         studentlist.push({
             student: student,
             jobApplication: jobApplication,
-            evaluations: evaluations,
+            evaluation: {
+                evaluations: evaluations !== null ? evaluations.evaluation : [],
+                osoc: {
+                    year: year,
+                },
+            },
             roles: roles,
         });
     }
