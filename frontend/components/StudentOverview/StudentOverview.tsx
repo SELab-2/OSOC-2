@@ -289,7 +289,7 @@ export const StudentOverview: React.FC<{
                                     />
                                     <p>
                                         <strong>
-                                            {evaluation.senderName}
+                                            {evaluation.login_user.person.name}
                                             {": "}
                                         </strong>
                                         {evaluation.motivation}
@@ -333,8 +333,10 @@ export const StudentOverview: React.FC<{
                                     alt={"Suggestion"}
                                 />
 
-                                <strong>{evaluation.senderName}:</strong>
-                                {evaluation.reason}
+                                <strong>
+                                    {evaluation.login_user.person.name}:
+                                </strong>
+                                {evaluation.motivation}
                             </div>
                         );
                     }
