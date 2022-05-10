@@ -98,8 +98,8 @@ export enum Decision {
 }
 
 export interface Evaluation {
-    decision: Decision;
     evaluation_id: number;
+    decision: Decision;
     motivation: string;
     is_final: boolean;
     login_user: LoginUser;

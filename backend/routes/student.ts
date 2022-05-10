@@ -202,7 +202,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.SuggestionInfo> {
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -273,16 +273,7 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    return Promise.resolve({
-        data: {
-            evaluation_id: newEvaluation.evaluation_id,
-            senderFirstname: loginUser.person.firstname,
-            senderLastname: loginUser.person.lastname,
-            reason: newEvaluation.motivation,
-            decision: newEvaluation.decision,
-            isFinal: newEvaluation.is_final,
-        },
-    });
+    return Promise.resolve({});
 }
 
 /**
