@@ -10,7 +10,6 @@ import {
     StudentStatus,
 } from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
-import { useRouter } from "next/router";
 import Image from "next/image";
 import CheckIconColor from "../../../public/images/green_check_mark_color.png";
 import CheckIcon from "../../../public/images/green_check_mark.png";
@@ -24,7 +23,6 @@ export const StudentFilter: React.FC<{
     display: Display;
 }> = ({ setFilteredStudents, display }) => {
     const { getSession } = useContext(SessionContext);
-    const router = useRouter();
 
     const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
@@ -232,7 +230,6 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()

@@ -314,6 +314,16 @@ export async function getEvaluationsByYearForStudent(
                     decision: true,
                     motivation: true,
                     is_final: true,
+                    login_user: {
+                        select: {
+                            person: true,
+                            account_status: true,
+                            login_user_id: true,
+                            person_id: true,
+                            is_admin: true,
+                            is_coach: true,
+                        },
+                    },
                 },
             },
         },

@@ -844,6 +844,18 @@ test("Can parse new project request", () => {
         end: Date.now(),
         positions: 69,
         osocId: 17,
+        roles: {
+            roles: [
+                {
+                    name: "role1",
+                    positions: 4,
+                },
+                {
+                    name: "role2",
+                    positions: 6,
+                },
+            ],
+        },
     };
     const d2: T.Anything = {};
     const d3: T.Anything = {
@@ -888,6 +900,21 @@ test("Can parse update project request", () => {
         start: Date.now(),
         end: Date.now(),
         positions: 69,
+        modifyRoles: {
+            roles: [
+                {
+                    id: 5,
+                    positions: 4,
+                },
+                {
+                    id: 2,
+                    positions: 6,
+                },
+            ],
+        },
+        deleteRoles: {
+            roles: [1, 3],
+        },
     };
     const d2: T.Anything = {};
     const d3: T.Anything = {
@@ -930,6 +957,8 @@ test("Can parse update project request", () => {
     d3.id = id;
     d3.sessionkey = key;
     d3.end = undefined;
+    d3.modifyRoles = undefined;
+    d3.deleteRoles = undefined;
     d4.id = id;
 
     const p1: Promise<void> = expect(
