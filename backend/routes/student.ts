@@ -274,8 +274,7 @@ export async function createStudentSuggestion(
     return Promise.resolve({
         data: {
             evaluation_id: newEvaluation.evaluation_id,
-            senderFirstname: loginUser.person.firstname,
-            senderLastname: loginUser.person.lastname,
+            senderName: loginUser.person.name,
             reason: newEvaluation.motivation,
             decision: newEvaluation.decision,
             isFinal: newEvaluation.is_final,
@@ -324,8 +323,7 @@ export async function getStudentSuggestions(
         for (const evaluation of suggestion.evaluation) {
             suggestionsInfo.push({
                 evaluation_id: evaluation.evaluation_id,
-                senderFirstname: evaluation.login_user?.person.firstname,
-                senderLastname: evaluation.login_user?.person.lastname,
+                senderName: evaluation.login_user?.person.name,
                 reason: evaluation.motivation,
                 decision: evaluation.decision,
                 isFinal: evaluation.is_final,
@@ -402,8 +400,7 @@ export async function filterStudents(
     }
 
     const students = await ormSt.filterStudents(
-        checkedSessionKey.data.firstNameFilter,
-        checkedSessionKey.data.lastNameFilter,
+        checkedSessionKey.data.nameFilter,
         checkedSessionKey.data.emailFilter,
         checkedSessionKey.data.roleFilter,
         checkedSessionKey.data.alumniFilter,
@@ -411,8 +408,7 @@ export async function filterStudents(
         checkedSessionKey.data.statusFilter,
         checkedSessionKey.data.osocYear,
         checkedSessionKey.data.emailStatusFilter,
-        checkedSessionKey.data.firstNameSort,
-        checkedSessionKey.data.lastNameSort,
+        checkedSessionKey.data.nameSort,
         checkedSessionKey.data.emailSort
     );
 

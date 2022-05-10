@@ -98,13 +98,9 @@ export namespace InternalTypes {
          */
         evaluation_id: number;
         /**
-         *  The firstname of the login user.
+         *  The name of the login user.
          */
-        senderFirstname: string | undefined;
-        /**
-         *  The lastname of the login user.
-         */
-        senderLastname: string | undefined;
+        senderName: string | undefined;
         /**
          *  The reason why the decision was made.
          */
@@ -149,13 +145,9 @@ export namespace InternalTypes {
          */
         person_id: number;
         /**
-         *  The firstname of this person.
+         *  The name of this person.
          */
-        firstname: string;
-        /**
-         *  The lastname of this person.
-         */
-        lastname: string;
+        name: string;
         /**
          *  The email of this person.
          */
@@ -167,13 +159,9 @@ export namespace InternalTypes {
      */
     export interface FormPerson {
         /**
-         *  The firstname of this person.
+         *  The name of this person.
          */
-        birthName: string;
-        /**
-         *  The lastname of this person.
-         */
-        lastName: string;
+        name: string;
         /**
          *  The email of this person.
          */
@@ -191,11 +179,11 @@ export namespace InternalTypes {
      */
     export interface FormStudent {
         /**
-         *  The firstname of this person.
+         *  The pronouns of this person.
          */
         pronouns: string | null;
         /**
-         *  The lastname of this person.
+         *  The gender of this person.
          */
         gender: string;
         /**
@@ -717,18 +705,6 @@ export namespace Responses {
     }
 
     /**
-     *  An EvaluationCoach response.
-     */
-    export interface EvaluationCoach {
-        evaluation_id: number;
-        senderFirstname: string;
-        senderLastname: string;
-        reason: string | null;
-        decision: InternalTypes.Suggestion;
-        isFinal: boolean;
-    }
-
-    /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
     export interface ConflictList {
@@ -814,16 +790,14 @@ export namespace Requests {
 
     export interface StudentFilterParameters {
         osocYear?: number;
-        firstNameFilter?: string;
-        lastNameFilter?: string;
+        nameFilter?: string;
         emailFilter?: string;
         roleFilter?: string[] | string;
         alumniFilter?: boolean | string;
         coachFilter?: boolean | string;
         statusFilter?: decision_enum;
         emailStatusFilter?: email_status_enum;
-        firstNameSort?: string;
-        lastNameSort?: string;
+        nameSort?: string;
         emailSort?: string;
         alumniSort?: string;
     }
@@ -852,8 +826,7 @@ export namespace Requests {
 
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;
-        firstName?: string;
-        lastName?: string;
+        name?: string;
         gender?: string;
         pronouns?: string;
         nickname?: string;
@@ -884,8 +857,7 @@ export namespace Requests {
     }
 
     export interface UserRequest {
-        firstName: string;
-        lastName: string;
+        name: string;
         email: string;
         pass: string;
     }

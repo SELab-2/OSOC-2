@@ -198,8 +198,7 @@ test("Can parse update student request", () => {
     const dataV: T.Anything = {
         emailOrGithub: "ab@c.de",
         alumni: false,
-        firstName: "ab c",
-        lastName: "",
+        name: "ab c",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -214,7 +213,7 @@ test("Can parse update student request", () => {
 
     const failure1: T.Anything = {
         emailOrGithub: "ab@c.de",
-        firstName: "ab", // no last name
+        name: "ab",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -228,8 +227,7 @@ test("Can parse update student request", () => {
 
     const failure2: T.Anything = {
         emailOrGithub: "ab@c.de",
-        firstName: "ab c",
-        lastName: "",
+        name: "ab c",
         gender: "Apache Attack Helicopter",
         pronouns: "vroom/vroom",
         phone: "+32420 696969",
@@ -265,7 +263,6 @@ test("Can parse update student request", () => {
     dataV.id = id;
     dataV.sessionkey = sessionkey;
     failure1.id = id;
-    failure1.lastName = undefined;
     failure1.alumni = undefined;
     failure1.nickname = undefined;
     failure1.sessionkey = sessionkey;
@@ -456,11 +453,8 @@ test("Can parse filter students request", () => {
 
     const nothing = {};
     const osocYear: T.Requests.StudentFilterParameters = { osocYear: 2022 };
-    const firstNameFilter: T.Requests.StudentFilterParameters = {
-        firstNameFilter: "Firstname",
-    };
-    const lastNameFilter: T.Requests.StudentFilterParameters = {
-        lastNameFilter: "Lastname",
+    const nameFilter: T.Requests.StudentFilterParameters = {
+        nameFilter: "Firstname",
     };
     const emailFilterGoodEmail: T.Requests.StudentFilterParameters = {
         emailFilter: "firstname.lastname@hotmail.com",
@@ -492,18 +486,14 @@ test("Can parse filter students request", () => {
     const emailStatusFilter: T.Requests.StudentFilterParameters = {
         emailStatusFilter: "SENT",
     };
-    const firstNameSort: T.Requests.StudentFilterParameters = {
-        firstNameSort: "asc",
-    };
-    const lastNameSort: T.Requests.StudentFilterParameters = {
-        lastNameSort: "asc",
+    const nameSort: T.Requests.StudentFilterParameters = {
+        nameSort: "asc",
     };
     const emailSort: T.Requests.StudentFilterParameters = { emailSort: "desc" };
 
     const wrongStatus: T.Anything = { statusFilter: "damn" };
     const wrongEmailStatus: T.Anything = { emailStatusFilter: "email status" };
-    const wrongFirstNameSort: T.Anything = { firstNameSort: "firstname" };
-    const wrongLastNameSort: T.Anything = { lastNameSort: "lastname" };
+    const wrongNameSort: T.Anything = { nameSort: "firstname" };
     const wrongEmailSort: T.Anything = { emailSort: "email" };
     const wrongAlumniFilter: T.Anything = { alumniFilter: "is_admin filter" };
     const wrongCoachFilter: T.Anything = { coachFilter: "is_coach filter" };
@@ -511,8 +501,7 @@ test("Can parse filter students request", () => {
     const okays = [
         [nothing, nothing],
         [osocYear, osocYear],
-        [firstNameFilter, firstNameFilter],
-        [lastNameFilter, lastNameFilter],
+        [nameFilter, nameFilter],
         [emailFilterGoodEmail, emailFilterGoodEmail],
         [emailFilterBadEmail, emailFilterBadEmail],
         [roleFilterList, roleFilterList],
@@ -520,8 +509,7 @@ test("Can parse filter students request", () => {
         [coachFilterBoolean, coachFilterBoolean],
         [statusFilter, statusFilter],
         [emailStatusFilter, emailStatusFilter],
-        [firstNameSort, firstNameSort],
-        [lastNameSort, lastNameSort],
+        [nameSort, nameSort],
         [emailSort, emailSort],
         [roleFilterString, roleFilterList],
         [alumniFilterString, alumniFilterBoolean],
@@ -532,16 +520,14 @@ test("Can parse filter students request", () => {
         req.body = x[0];
         setSessionKey(req, key);
         [
-            "firstNameFilter",
-            "lastNameFilter",
+            "nameFilter",
             "emailFilter",
             "roleFilter",
             "alumniFilter",
             "coachFilter",
             "statusFilter",
             "emailStatusFilter",
-            "firstNameSort",
-            "lastNameSort",
+            "nameSort",
             "emailSort",
         ].forEach((x) => {
             if (!(x in req.body)) {
@@ -559,8 +545,7 @@ test("Can parse filter students request", () => {
 
     const fails = [
         wrongStatus,
-        wrongFirstNameSort,
-        wrongLastNameSort,
+        wrongNameSort,
         wrongEmailSort,
         wrongEmailStatus,
         wrongAlumniFilter,
@@ -817,15 +802,13 @@ test("Can parse final decision request", () => {
 
 test("Can parse coach access request", () => {
     const r1: T.Anything = {
-        firstName: "Jeff Georgette",
-        lastName: "",
+        name: "Jeff Georgette",
         email: "idonthavegithub@git.hub",
         pass: "thisismypassword",
     };
 
     const r2: T.Anything = {
-        firstName: "Jeff Georgette",
-        lastName: "",
+        name: "Jeff Georgette",
         email: "idonthavegithub@git.hub",
     };
 

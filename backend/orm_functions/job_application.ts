@@ -30,8 +30,7 @@ export async function getStudentEvaluationsTotal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -75,8 +74,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -120,8 +118,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
