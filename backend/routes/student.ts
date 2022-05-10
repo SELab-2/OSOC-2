@@ -30,7 +30,21 @@ export async function listStudents(
         return Promise.reject(errors.cookInvalidID());
     }
     const studentList: object[] = [];
-    const students = await ormSt.getAllStudents();
+    const students = await ormSt.filterStudents(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        checkedSessionKey.userId
+    );
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             students[studentIndex].student_id
@@ -413,7 +427,8 @@ export async function filterStudents(
         checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.firstNameSort,
         checkedSessionKey.data.lastNameSort,
-        checkedSessionKey.data.emailSort
+        checkedSessionKey.data.emailSort,
+        checkedSessionKey.userId
     );
 
     const studentlist = [];

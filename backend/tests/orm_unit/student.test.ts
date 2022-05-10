@@ -10,7 +10,11 @@ import {
     searchStudentByGender,
     updateStudent,
 } from "../../orm_functions/student";
-import { decision_enum, email_status_enum } from "@prisma/client";
+import {
+    account_status_enum,
+    decision_enum,
+    email_status_enum,
+} from "@prisma/client";
 
 const response = {
     student_id: 0,
@@ -129,7 +133,6 @@ test("should return the students that succeed to the filtered fields", async () 
     ];
 
     prismaMock.student.findMany.mockResolvedValue(returnval);
-
     await expect(
         filterStudents(
             undefined,
@@ -143,9 +146,10 @@ test("should return the students that succeed to the filtered fields", async () 
             undefined,
             undefined,
             undefined,
-            undefined
+            undefined,
+            0
         )
-    ).resolves.toEqual(returnval);
+    ).resolves.toEqual([]);
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -176,7 +180,115 @@ test("should return the students that succeed to the filtered fields but with a 
             undefined,
             undefined,
             undefined,
-            undefined
+            undefined,
+            0
         )
-    ).resolves.toEqual(returnval);
+    ).resolves.toEqual([]);
+});
+
+test("should return the students that succeed to the filtered fields but with a status filter", async () => {
+    const returnval = [
+        {
+            student_id: 0,
+            person_id: 0,
+            gender: "",
+            pronouns: "",
+            phone_number: "",
+            nickname: "",
+            alumni: false,
+        },
+    ];
+
+    prismaMock.student.findMany.mockResolvedValue(returnval);
+
+    await expect(
+        filterStudents(
+            undefined,
+            undefined,
+            undefined,
+            [""],
+            undefined,
+            undefined,
+            decision_enum.MAYBE,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            0
+        )
+    ).resolves.toEqual([
+        {
+            alumni: false,
+            gender: "",
+            nickname: "",
+            person_id: 0,
+            phone_number: "",
+            pronouns: "",
+            student_id: 0,
+        },
+    ]);
+});
+
+test("should return the students that succeed to the filtered fields but with a status filter", async () => {
+    const returnval = [
+        {
+            student_id: 0,
+            person_id: 0,
+            gender: "",
+            pronouns: "",
+            phone_number: "",
+            nickname: "",
+            alumni: false,
+        },
+    ];
+
+    const user_response = {
+        session_id: "50",
+        login_user_id: 1,
+        person_id: 0,
+        password: "password",
+        is_admin: false,
+        is_coach: false,
+        session_keys: ["key1", "key2"],
+        account_status: account_status_enum.DISABLED,
+        login_user_osoc: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+        ],
+    };
+
+    prismaMock.student.findMany.mockResolvedValue(returnval);
+    prismaMock.login_user.findUnique.mockResolvedValue(user_response);
+
+    await expect(
+        filterStudents(
+            undefined,
+            undefined,
+            undefined,
+            [""],
+            undefined,
+            undefined,
+            undefined,
+            2022,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            0
+        )
+    ).resolves.toEqual([
+        {
+            alumni: false,
+            gender: "",
+            nickname: "",
+            person_id: 0,
+            phone_number: "",
+            pronouns: "",
+            student_id: 0,
+        },
+    ]);
 });

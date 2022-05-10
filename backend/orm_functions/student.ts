@@ -8,6 +8,7 @@ import {
     UpdateStudent,
     FilterStringArray,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
 
 /**
  *
@@ -163,6 +164,7 @@ export async function searchStudentByGender(gender: string) {
  * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
  * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
+ * @param loginUserId the id of the loginUser that is searching
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
@@ -173,12 +175,25 @@ export async function filterStudents(
     alumniFilter: FilterBoolean,
     coachFilter: FilterBoolean,
     statusFilter: decision_enum | undefined,
-    osocYear: number,
+    osocYear: number | undefined,
     emailStatusFilter: email_status_enum | undefined,
     firstNameSort: FilterSort,
     lastNameSort: FilterSort,
-    emailSort: FilterSort
+    emailSort: FilterSort,
+    loginUserId: number
 ) {
+    const yearsAllowedToSee = await getOsocYearsForLoginUser(loginUserId);
+    let searchYears;
+    if (osocYear !== undefined) {
+        if (!yearsAllowedToSee.includes(osocYear)) {
+            return Promise.resolve([]);
+        } else {
+            searchYears = [osocYear];
+        }
+    } else {
+        searchYears = osocYear;
+    }
+
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
     let evaluationFilter;
@@ -200,7 +215,9 @@ export async function filterStudents(
                     email_status: emailStatusFilter,
                     student_coach: coachFilter,
                     osoc: {
-                        year: osocYear,
+                        year: {
+                            in: searchYears,
+                        },
                     },
                     applied_role: {
                         some: {
