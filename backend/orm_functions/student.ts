@@ -152,6 +152,7 @@ export async function searchStudentByGender(gender: string) {
 
 /**
  *
+ * @param pagination object representing the pagination
  * @param firstNameFilter firstname that we are filtering on (or undefined if not filtering on name)
  * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)

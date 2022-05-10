@@ -80,6 +80,7 @@ export async function listStudents(
                 student: students[studentIndex],
                 jobApplication: jobApplication,
                 evaluations: evaluations,
+                evaluation: undefined,
                 roles: roles,
             });
         } else {
@@ -168,6 +169,7 @@ export async function getStudent(
                 year: year,
             },
         },
+        evaluations: undefined,
         roles: roles,
     });
 }
@@ -203,7 +205,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.SuggestionInfo> {
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -274,16 +276,7 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    return Promise.resolve({
-        data: {
-            evaluation_id: newEvaluation.evaluation_id,
-            senderFirstname: loginUser.person.firstname,
-            senderLastname: loginUser.person.lastname,
-            reason: newEvaluation.motivation,
-            decision: newEvaluation.decision,
-            isFinal: newEvaluation.is_final,
-        },
-    });
+    return Promise.resolve({});
 }
 
 /**
@@ -294,7 +287,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.SuggestionInfoList> {
+): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -308,36 +301,28 @@ export async function getStudentSuggestions(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const osoc =
-        checkedSessionKey.data.year == undefined
-            ? await ormOs.getLatestOsoc()
-            : checkedSessionKey.data.year;
-    if (osoc == null) {
-        return Promise.resolve({
-            data: [],
-            sessionkey: checkedSessionKey.data.sessionkey,
-        });
-    }
-    const suggestionsTotal = (
-        await ormJo.getStudentEvaluationsTotal(student.student_id)
-    ).filter((suggestion) => suggestion.osoc.year === osoc.year);
-
-    const suggestionsInfo = [];
-    for (const suggestion of suggestionsTotal) {
-        for (const evaluation of suggestion.evaluation) {
-            suggestionsInfo.push({
-                evaluation_id: evaluation.evaluation_id,
-                senderFirstname: evaluation.login_user?.person.firstname,
-                senderLastname: evaluation.login_user?.person.lastname,
-                reason: evaluation.motivation,
-                decision: evaluation.decision,
-                isFinal: evaluation.is_final,
-            });
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
         }
+    } else {
+        year = checkedSessionKey.data.year;
     }
+
+    const evaluations = await ormJo.getEvaluationsByYearForStudent(
+        student.student_id,
+        year
+    );
 
     return Promise.resolve({
-        data: suggestionsInfo,
+        evaluation: {
+            evaluations: evaluations !== null ? evaluations.evaluation : [],
+            osoc: {
+                year: year,
+            },
+        },
     });
 }
 
@@ -431,10 +416,10 @@ export async function filterStudents(
             year = latestOsocYear.year;
         }
     } else {
-        year = checkedSessionKey.data.year;
+        year = checkedSessionKey.data.osocYear;
     }
 
-    for (const student of students) {
+    for (const student of students.data) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
         );
@@ -478,6 +463,7 @@ export async function filterStudents(
                     year: year,
                 },
             },
+            evaluations: undefined,
             roles: roles,
         });
     }
