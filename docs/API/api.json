@@ -1259,6 +1259,31 @@
             }
           },
           {
+            "name": "roles",
+            "in": "header",
+            "description": "The roles for the project.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "positions": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
             "name": "start_date",
             "in": "header",
             "description": "The start date of this project.",
@@ -1287,6 +1312,9 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1334,6 +1362,9 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1394,6 +1425,9 @@
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
+          },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
           },
@@ -1428,11 +1462,51 @@
             }
           },
           {
+            "name": "deleteRoles",
+            "in": "header",
+            "description": "The id of the roles to delete.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          {
             "name": "end",
             "in": "header",
             "description": "The end date of this project.",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "modifyRoles",
+            "in": "header",
+            "description": "The roles to modify.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number"
+                      },
+                      "positions": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           {
@@ -1490,6 +1564,9 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
+          },
+          "412": {
+            "description": "The data you requested does not exist (yet)."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -3679,6 +3756,20 @@
           "positions": {
             "type": "number"
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "positions": {
+                  "type": "number"
+                }
+              }
+            }
+          },
           "start_date": {
             "type": "string"
           }
@@ -3712,7 +3803,7 @@
           "name": "Project_coach"
         }
       },
-      "Project_students": {
+      "Project_contracts": {
         "type": "array",
         "xml": {
           "name": "Project_students"
@@ -3748,6 +3839,14 @@
                 },
                 "role_id": {
                   "type": "number"
+                },
+                "role": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             },
@@ -3790,11 +3889,25 @@
           "positions": {
             "type": "number"
           },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "positions": {
+                  "type": "number"
+                }
+              }
+            }
+          },
           "start_date": {
             "type": "string"
           },
-          "students": {
-            "$ref": "#/components/schemas/Project_students"
+          "contracts": {
+            "$ref": "#/components/schemas/Project_contracts"
           }
         },
         "xml": {
@@ -3844,6 +3957,20 @@
           },
           "osoc_id": {
             "type": "number"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "positions": {
+                  "type": "number"
+                }
+              }
+            }
           }
         },
         "xml": {

@@ -11,6 +11,7 @@ import {
     getProjectRoleNamesByProject,
     updateProjectRole,
     deleteProjectRole,
+    getProjectRoleById,
 } from "../../orm_functions/project_role";
 
 const returnValue = {
@@ -85,4 +86,16 @@ test("should return the number of free positions", async () => {
 test("should return null because the project_role with given ID was not found", async () => {
     prismaMock.project_role.findUnique.mockResolvedValue(null);
     await expect(getNumberOfFreePositions(0)).resolves.toEqual(null);
+});
+
+test("should return the projectrole that belongs to the projectRoleId", async () => {
+    const res = {
+        project_role_id: 0,
+        project_id: 0,
+        role_id: 0,
+        positions: 0,
+    };
+
+    prismaMock.project_role.findUnique.mockResolvedValue(res);
+    await expect(getProjectRoleById(0)).resolves.toEqual(res);
 });
