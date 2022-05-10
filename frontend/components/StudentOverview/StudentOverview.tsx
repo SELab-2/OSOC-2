@@ -1,7 +1,6 @@
 import {
     Display,
     Student,
-    EvaluationCoach,
     Decision,
     AttachmentType,
     Attachment,
@@ -48,6 +47,7 @@ export const StudentOverview: React.FC<{
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
+                        console.log(response);
                         setEvaluations(response.evaluation.evaluations);
                     }
                 }
@@ -66,18 +66,7 @@ export const StudentOverview: React.FC<{
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
-            const newEvals: Evaluation[] = [];
-            evaluations.forEach((evaluation) => {
-                const newEval: Evaluation = {
-                    evaluation_id: evaluation.evaluation_id,
-                    decision: evaluation.decision,
-                    motivation: evaluation.motivation,
-                    is_final: evaluation.is_final,
-                    login_user: evaluation.login_user,
-                };
-                newEvals.push(newEval);
-            });
-            updateEvaluations(student.student.student_id, newEvals);
+            updateEvaluations(student.student.student_id, evaluations);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evaluations]);
@@ -105,11 +94,8 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
-                const evaluation = response as EvaluationCoach;
                 // The creation was succesfull, we can update the evaluation bar
-                if (evaluation !== undefined) {
-                    fetchEvals().then();
-                }
+                fetchEvals().then();
             }
         }
     };
@@ -137,11 +123,8 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
-                const evaluation = response as EvaluationCoach;
                 // The creation was succesfull, we can update the evaluation bar
-                if (evaluation !== undefined) {
-                    fetchEvals().then();
-                }
+                fetchEvals().then();
             }
         }
     };
