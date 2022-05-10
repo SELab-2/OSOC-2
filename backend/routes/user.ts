@@ -316,7 +316,10 @@ export async function userModSelf(
                     }
                     // the old password to compare to was not as expected => return error
                     if (!valid) {
-                        return Promise.reject();
+                        return Promise.reject({
+                            http: 409,
+                            reason: "Old password is incorrect. Didn't update password.",
+                        });
                     }
                     return Promise.resolve(user);
                 })

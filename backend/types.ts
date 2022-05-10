@@ -92,7 +92,32 @@ export namespace InternalTypes {
      */
     export type Suggestion = "YES" | "MAYBE" | "NO";
 
-    export interface SuggestionInfo {}
+    export interface SuggestionInfo {
+        /**
+         *  The evaluation id.
+         */
+        evaluation_id: number;
+        /**
+         *  The firstname of the login user.
+         */
+        senderFirstname: string | undefined;
+        /**
+         *  The lastname of the login user.
+         */
+        senderLastname: string | undefined;
+        /**
+         *  The reason why the decision was made.
+         */
+        reason: string | null;
+        /**
+         *  The ID.
+         */
+        decision: decision_enum;
+        /**
+         *  The ID.
+         */
+        isFinal: boolean;
+    }
 
     /**
      *  Represents a response that only contains an ID.
@@ -486,6 +511,14 @@ export namespace Responses {
     }
 
     /**
+     *  A GitHub login response differs from a normal login response by the added
+     * is_signup field, which should tell the client that this user was newly created.
+     */
+    export interface GithubLogin extends Login {
+        is_signup: boolean;
+    }
+
+    /**
      *  A partial student response is the keyed combination of their id and name.
      */
     export interface PartialStudent extends InternalTypes.IdName {}
@@ -578,10 +611,18 @@ export namespace Responses {
     }
 
     /**
-     *  A student response is the keyed version of the student and their associated
+     *  The suggestion info
      * data.
      */
     export interface SuggestionInfo {
+        data: InternalTypes.SuggestionInfo;
+    }
+
+    /**
+     *  A list of suggestion info
+     * data.
+     */
+    export interface SuggestionInfoList {
         data: InternalTypes.SuggestionInfo[];
     }
 
