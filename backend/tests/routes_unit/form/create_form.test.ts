@@ -44,3 +44,12 @@ test("Work in July question absent", async () => {
     req.body = { ...data };
     await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
 });
+
+test("Work in July 'no' answer", async () => {
+    const data = readFile("liveInBelgiumAnswerNo.json");
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).resolves.toStrictEqual({});
+});

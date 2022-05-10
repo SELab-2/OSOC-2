@@ -14,7 +14,7 @@
         "key": "question_mK177D",
         "label": "Will you live in Belgium in July 2022?*",
         "type": "MULTIPLE_CHOICE",
-        "value": "343f74a1-7b3d-481e-94f1-cfd613d78f00",
+        "value": "2cf437cc-fee4-496b-8e46-f6c037dca583",
         "options": [
           {
             "id": "343f74a1-7b3d-481e-94f1-cfd613d78f00",
@@ -47,6 +47,22 @@
           {
             "id": "9a065686-5d60-423f-a343-db8ae9066028",
             "text": "No, I won’t be able to work as a student, as a volunteer or for free."
+          }
+        ]
+      },
+      {
+        "key": "question_npOjjP",
+        "label": "Can you work during the month of July, Monday through Thursday (~09:00 to 17:00)?*",
+        "type": "MULTIPLE_CHOICE",
+        "value": "115ad290-a86e-42f5-939e-8276ff41e749",
+        "options": [
+          {
+            "id": "115ad290-a86e-42f5-939e-8276ff41e749",
+            "text": "Yes"
+          },
+          {
+            "id": "7e42e1a5-a15a-4866-b92a-5fd8041a5cc4",
+            "text": "No, I wouldn't be able to work for the majority of days."
           }
         ]
       },
