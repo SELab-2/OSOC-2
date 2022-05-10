@@ -253,33 +253,28 @@ export const StudentFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/students${query}`);
 
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        return { success: false };
-                    } else return json;
-                })
-                .catch((err) => {
-                    console.log(err);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            }
+        )
+            .then((response) => response.json())
+            .then((json) => {
+                if (!json.success) {
                     return { success: false };
-                });
-            setFilteredStudents(response.data);
-        }
+                } else return json;
+            })
+            .catch((err) => {
+                console.log(err);
+                return { success: false };
+            });
+        setFilteredStudents(response.data);
     };
 
     return (

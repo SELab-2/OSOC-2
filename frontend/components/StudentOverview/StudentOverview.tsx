@@ -244,6 +244,7 @@ export const StudentOverview: React.FC<{
             >
                 <div className={styles.modalContent}>
                     <input
+                        data-testid={"motivationInput"}
                         ref={myRef}
                         type="text"
                         name="motivation"
@@ -254,7 +255,12 @@ export const StudentOverview: React.FC<{
                         onChange={(e) => setMotivation(e.target.value)}
                     />
 
-                    <button onClick={handleConfirm}>CONFIRM</button>
+                    <button
+                        data-testid={"motivationConfirm"}
+                        onClick={handleConfirm}
+                    >
+                        CONFIRM
+                    </button>
                 </div>
             </Modal>
             {clearSelection !== undefined ? (
@@ -273,11 +279,22 @@ export const StudentOverview: React.FC<{
                     <div className={styles.dropdown}>
                         <button className={styles.dropbtn}>Set Status</button>
                         <div className={styles.dropdownContent}>
-                            <a onClick={() => enumDecision(Decision.YES)}>
+                            <a
+                                data-testid={"permanentYes"}
+                                onClick={() => enumDecision(Decision.YES)}
+                            >
                                 YES
                             </a>
-                            <a onClick={() => enumDecision(Decision.NO)}>NO</a>
-                            <a onClick={() => enumDecision(Decision.MAYBE)}>
+                            <a
+                                data-testid={"permanentNo"}
+                                onClick={() => enumDecision(Decision.NO)}
+                            >
+                                NO
+                            </a>
+                            <a
+                                data-testid={"permanentMaybe"}
+                                onClick={() => enumDecision(Decision.MAYBE)}
+                            >
                                 MAYBE
                             </a>
                         </div>
