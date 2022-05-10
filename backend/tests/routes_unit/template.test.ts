@@ -121,7 +121,7 @@ beforeEach(() => {
     ormoMock.createTemplate.mockImplementation((y: CreateTemplate) =>
         Promise.resolve({
             template_email_id: 0,
-            owner_id: y.ownerId || null,
+            owner_id: y.ownerId,
             name: y.name || "",
             content: y.content || "",
             cc: y.cc || "",
@@ -129,23 +129,20 @@ beforeEach(() => {
         })
     );
     ormoMock.getAllTemplates.mockResolvedValue(templates);
-    ormoMock.getTemplatesByName.mockImplementation((y: string) =>
-        Promise.resolve([
-            {
-                template_email_id: 0,
-                owner_id: 0,
-                name: y,
-                content: "Hello, password reset",
-                cc: "me@osoc.com",
-                subject: "Password reset",
-                login_user: null,
-            },
-        ])
+    ormoMock.getTemplateById.mockImplementation((y) =>
+        Promise.resolve({
+            template_email_id: y,
+            owner_id: 0,
+            name: "Osoc password reset",
+            content: "Hello, password reset",
+            cc: "me@osoc.com",
+            subject: "Password reset",
+        })
     );
     ormoMock.updateTemplate.mockImplementation((y: UpdateTemplate) =>
         Promise.resolve({
             template_email_id: y.templateId,
-            owner_id: y.ownerId || null,
+            owner_id: 0,
             name: y.name || "",
             content: y.content || "",
             cc: y.cc || "",
@@ -176,7 +173,7 @@ afterEach(() => {
 
     ormoMock.createTemplate.mockReset();
     ormoMock.getAllTemplates.mockReset();
-    ormoMock.getTemplatesByName.mockReset();
+    ormoMock.getTemplateById.mockReset();
     ormoMock.updateTemplate.mockReset();
     ormoMock.deleteTemplate.mockReset();
 });
@@ -192,29 +189,97 @@ test("Can create a template", async () => {
         subject: "Osoc",
     };
     await expect(template.createTemplate(r)).resolves.toStrictEqual({
-        template_id: 0,
-        owner_id: 0,
+        id: 0,
+        owner: 0,
         name: "Osoc denied",
         content: "You are not accepted for osoc",
         cc: "me@osoc.com",
         subject: "Osoc",
     });
     expectCall(reqMock.parseNewTemplateRequest, r);
-    // TODO: should this be admin only?
     expectCall(utilMock.isAdmin, r.body);
     expectCall(ormoMock.createTemplate, {
-        owner_id: 0,
+        ownerId: 0,
         name: "Osoc denied",
         content: "You are not accepted for osoc",
         cc: "me@osoc.com",
         subject: "Osoc",
     });
-    expectCall(utilMock.checkSessionKey, {
+});
+
+test("Can get all the templates", async () => {
+    const r = getMockReq();
+    r.body = {
         sessionkey: "abcd",
-        owner_id: 0,
+    };
+    await expect(template.getAllTemplates(r)).resolves.toStrictEqual({
+        data: templates.map((obj) => ({
+            id: obj.template_email_id,
+            owner: obj.owner_id,
+            name: obj.name,
+        })),
+    });
+    expectCall(reqMock.parseTemplateListRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expect(ormoMock.getAllTemplates).toHaveBeenCalledTimes(1);
+});
+
+test("Can get a template by id", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 4,
+    };
+    await expect(template.getSingleTemplate(r)).resolves.toStrictEqual({
+        id: 4,
+        owner: 0,
+        name: "Osoc password reset",
+        content: "Hello, password reset",
+    });
+    expectCall(reqMock.parseGetTemplateRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.getTemplateById, 4);
+});
+
+test("Can update a template", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 49,
+        name: "Osoc denied",
+        content: "You are not accepted for osoc",
+        cc: "me@osoc.com",
+        subject: "Osoc",
+    };
+    await expect(template.updateTemplate(r)).resolves.toStrictEqual({
+        id: 49,
+        owner: 0,
         name: "Osoc denied",
         content: "You are not accepted for osoc",
         cc: "me@osoc.com",
         subject: "Osoc",
     });
+    expectCall(reqMock.parseUpdateTemplateRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.getTemplateById, 49);
+    expectCall(ormoMock.updateTemplate, {
+        templateId: 49,
+        name: "Osoc denied",
+        content: "You are not accepted for osoc",
+        cc: "me@osoc.com",
+        subject: "Osoc",
+    });
+});
+
+test("Can delete a template by id", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 1,
+    };
+    await expect(template.deleteTemplate(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseDeleteTemplateRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.getTemplateById, 1);
+    expectCall(ormoMock.deleteTemplate, 1);
 });
