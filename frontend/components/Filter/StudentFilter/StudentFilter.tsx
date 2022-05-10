@@ -72,20 +72,14 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
-    /**
-     * Load data on initial page load
-     */
+    // Load roles on page render
     useEffect(() => {
-        if (router.query.toString() === "/students") {
-            search().then();
-        }
+        fetchRoles().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.query]);
+    }, []);
 
+    // Execute search
     useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then();
-        }
         search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -214,7 +208,10 @@ export const StudentFilter: React.FC<{
     };
 
     const search = async () => {
+        setEmailStatusActive(false);
+        setRolesActive(false);
         const filters = [];
+
         if (firstNameFilter !== "") {
             filters.push(`firstNameFilter=${firstNameFilter}`);
         }
@@ -254,31 +251,35 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
-        // await router.push(`/students${query}`);
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `auth/osoc2 ${sessionKey}`,
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-            }
-        )
-            .then((response) => response.json())
-            .then((json) => {
-                if (!json.success) {
+        await router.push(`/students${query}`);
+
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        if (sessionKey !== "") {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }
+            )
+                .then((response) => response.json())
+                .then((json) => {
+                    if (!json.success) {
+                        return { success: false };
+                    } else return json;
+                })
+                .catch((err) => {
+                    console.log(err);
                     return { success: false };
-                } else return json;
-            })
-            .catch((err) => {
-                console.log(err);
-                return { success: false };
-            });
-        console.log(response);
-        setFilteredStudents(response.data);
+                });
+            setFilteredStudents(response.data);
+        }
     };
 
     return (
