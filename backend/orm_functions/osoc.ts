@@ -126,7 +126,7 @@ export async function deleteOsocByYear(year: number) {
 
 /**
  *
- * @param osoc_id the osoc edition that we are deleting from the database
+ * @param osocId: the id of the osoc edition we want to delete
  */
 export async function deleteOsocFromDB(osocId: number) {
     const project_ids = await prisma.project.findMany({

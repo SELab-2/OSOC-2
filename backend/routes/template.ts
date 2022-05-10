@@ -15,7 +15,8 @@ export async function getAllTemplates(
 ): Promise<Responses.TemplateList> {
     return rq
         .parseTemplateListRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .catch(() => Promise.reject(notOwnerError))
         .then(() =>
             ormT
                 .getAllTemplates()
@@ -39,7 +40,8 @@ export async function getSingleTemplate(
 ): Promise<Responses.Template> {
     return rq
         .parseGetTemplateRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .catch(() => Promise.reject(notOwnerError))
         .then((checked) =>
             ormT
                 .getTemplateById(checked.data.id)
@@ -60,7 +62,8 @@ export async function createTemplate(
 ): Promise<Responses.Template> {
     return rq
         .parseNewTemplateRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .catch(() => Promise.reject(notOwnerError))
         .then((checked) =>
             ormT
                 .createTemplate({
@@ -88,7 +91,8 @@ export async function updateTemplate(
 ): Promise<Responses.Template> {
     return rq
         .parseUpdateTemplateRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .catch(() => Promise.reject(notOwnerError))
         .then(async (checked) => {
             return ormT
                 .getTemplateById(checked.data.id)
@@ -127,7 +131,8 @@ export async function deleteTemplate(
 ): Promise<Responses.Empty> {
     return rq
         .parseDeleteTemplateRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
+        .catch(() => Promise.reject(notOwnerError))
         .then(async (checked) => {
             return ormT
                 .getTemplateById(checked.data.id)

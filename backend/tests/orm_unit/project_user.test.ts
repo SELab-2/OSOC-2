@@ -1,6 +1,9 @@
 import { prismaMock } from "./singleton";
 import { CreateProjectUser } from "../../orm_functions/orm_types";
-import { createProjectUser } from "../../orm_functions/project_user";
+import {
+    createProjectUser,
+    getUsersFor,
+} from "../../orm_functions/project_user";
 
 const returnValue = {
     project_user_id: 0,
@@ -16,4 +19,9 @@ test("should create an project user in the db with the given object, returns the
 
     prismaMock.project_user.create.mockResolvedValue(returnValue);
     await expect(createProjectUser(projectUser)).resolves.toEqual(returnValue);
+});
+
+test("should return the loginusers associated with the project", async () => {
+    prismaMock.project_user.findMany.mockResolvedValue([returnValue]);
+    await expect(getUsersFor(0)).resolves.toEqual([returnValue]);
 });
