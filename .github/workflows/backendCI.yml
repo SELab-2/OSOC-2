@@ -54,4 +54,4 @@ jobs:
       with:
         working-directory: backend
         skip-step: install
-        annotations: failed-tests
+        annotations: all
