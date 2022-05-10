@@ -394,7 +394,8 @@ it("should return the filtered projects", async () => {
         filteredProject1.positions === sumRoles,
         "asc",
         "desc",
-        "asc"
+        "asc",
+        1
     );
 
     for (const project of filtered_projects) {

@@ -7,6 +7,7 @@ import {
     FilterBoolean,
     FilterNumberArray,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
 
 /**
  *
@@ -302,6 +303,7 @@ export async function deleteProjectByPartner(partner: string) {
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
  * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
+ * @param userId the userId of the user that is trying to search
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(
@@ -311,9 +313,19 @@ export async function filterProjects(
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
     clientNameSort: FilterSort,
-    fullyAssignedSort: FilterSort
+    fullyAssignedSort: FilterSort,
+    userId: number
 ) {
+    const visibleYears = await getOsocYearsForLoginUser(userId);
+
     const projects = await prisma.project.findMany({
+        where: {
+            osoc: {
+                year: {
+                    in: visibleYears,
+                },
+            },
+        },
         include: {
             project_role: {
                 include: {
@@ -345,6 +357,11 @@ export async function filterProjects(
                 mode: "insensitive",
             },
             project_user: assignedCoachesArray,
+            osoc: {
+                year: {
+                    in: visibleYears,
+                },
+            },
         },
         orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
         include: {

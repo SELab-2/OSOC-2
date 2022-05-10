@@ -488,7 +488,8 @@ export async function filterProjects(
         checkedSessionKey.data.fullyAssignedFilter,
         checkedSessionKey.data.projectNameSort,
         checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort
+        checkedSessionKey.data.fullyAssignedSort,
+        checkedSessionKey.userId
     );
 
     const projectlist = [];
