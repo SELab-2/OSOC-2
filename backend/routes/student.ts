@@ -293,7 +293,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.SuggestionInfoList> {
+): Promise<Responses.Student> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -307,36 +307,61 @@ export async function getStudentSuggestions(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const osoc =
-        checkedSessionKey.data.year == undefined
-            ? await ormOs.getLatestOsoc()
-            : checkedSessionKey.data.year;
-    if (osoc == null) {
-        return Promise.resolve({
-            data: [],
-            sessionkey: checkedSessionKey.data.sessionkey,
-        });
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
+    if (jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID());
     }
-    const suggestionsTotal = (
-        await ormJo.getStudentEvaluationsTotal(student.student_id)
-    ).filter((suggestion) => suggestion.osoc.year === osoc.year);
 
-    const suggestionsInfo = [];
-    for (const suggestion of suggestionsTotal) {
-        for (const evaluation of suggestion.evaluation) {
-            suggestionsInfo.push({
-                evaluation_id: evaluation.evaluation_id,
-                senderFirstname: evaluation.login_user?.person.firstname,
-                senderLastname: evaluation.login_user?.person.lastname,
-                reason: evaluation.motivation,
-                decision: evaluation.decision,
-                isFinal: evaluation.is_final,
-            });
+    const roles = [];
+    for (const applied_role of jobApplication.applied_role) {
+        const role = await ormRo.getRole(applied_role.role_id);
+        if (role != null) {
+            roles.push(role.name);
+        } else {
+            return Promise.reject(errors.cookInvalidID());
+        }
+    }
+
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
+    const evaluations = await ormJo.getEvaluationsByYearForStudent(
+        student.student_id,
+        year
+    );
+
+    for (const job_application_skill of jobApplication.job_application_skill) {
+        if (job_application_skill.language_id != null) {
+            const language = await ormLa.getLanguage(
+                job_application_skill.language_id
+            );
+            if (language == null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+            job_application_skill.skill = language.name;
         }
     }
 
     return Promise.resolve({
-        data: suggestionsInfo,
+        student: student,
+        jobApplication: jobApplication,
+        evaluation: {
+            evaluations: evaluations !== null ? evaluations.evaluation : [],
+            osoc: {
+                year: year,
+            },
+        },
+        evaluations: undefined,
+        roles: roles,
     });
 }
 
