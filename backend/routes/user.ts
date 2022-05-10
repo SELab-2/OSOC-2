@@ -49,6 +49,7 @@ export async function listUsers(
         coach: val.is_coach,
         admin: val.is_admin,
         activated: val.account_status as string,
+        login_user_id: val.login_user_id,
     }));
 
     return Promise.resolve({
@@ -278,6 +279,7 @@ export async function filterUsers(
                         coach: val.is_coach,
                         admin: val.is_admin,
                         activated: val.account_status as string,
+                        login_user_id: val.login_user_id,
                     }));
                     return Promise.resolve({
                         data: udat,

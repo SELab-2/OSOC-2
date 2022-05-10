@@ -290,12 +290,8 @@ export const StudentOverview: React.FC<{
                                     <p>
                                         <strong>
                                             {
-                                                evaluation.login_user.person
-                                                    .firstname
-                                            }{" "}
-                                            {
-                                                evaluation.login_user.person
-                                                    .lastname
+                                                evaluation.login_user
+                                                    .person_data.name
                                             }
                                             {": "}
                                         </strong>
@@ -341,8 +337,7 @@ export const StudentOverview: React.FC<{
                                 />
 
                                 <strong>
-                                    {evaluation.login_user.person.firstname}{" "}
-                                    {evaluation.login_user.person.lastname}:
+                                    {evaluation.login_user.person_data.name}:
                                 </strong>
                                 {evaluation.motivation}
                             </div>

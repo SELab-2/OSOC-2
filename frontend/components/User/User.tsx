@@ -15,20 +15,20 @@ export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.firstname);
-    const [email] = useState<string>(user.person.email);
-    const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
-    const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
-    const [status, setStatus] = useState<AccountStatus>(user.account_status);
+    const [name] = useState<string>(user.person_data.name);
+    const [email] = useState<string>(user.person_data.email);
+    const [isAdmin, setIsAdmin] = useState<boolean>(user.admin);
+    const [isCoach, setIsCoach] = useState<boolean>(user.coach);
+    const [status, setStatus] = useState<AccountStatus>(user.activated);
     const { sessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
 
     // needed for when an update is received via websockets
     useEffect(() => {
-        setIsAdmin(user.is_admin);
-        setIsCoach(user.is_coach);
-        setStatus(user.account_status);
+        setIsAdmin(user.admin);
+        setIsCoach(user.coach);
+        setStatus(user.activated);
     }, [user]);
 
     useEffect(() => {
