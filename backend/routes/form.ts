@@ -1075,7 +1075,7 @@ export function getMotivation(
     if (questionMotivationString.data?.value != null) {
         if ((questionMotivationString.data?.value as string).trim() != "") {
             data.push(questionMotivationString.data?.value as string);
-            types.push("MOTIVATION_URL");
+            types.push("MOTIVATION_STRING");
         }
     }
 

@@ -67,7 +67,6 @@ test("Can parse Key-ID requests", () => {
     onlyid.params.id = res.id.toString();
 
     const calls = [
-        Rq.parseSingleStudentRequest,
         Rq.parseDeleteStudentRequest,
         Rq.parseSingleCoachRequest,
         Rq.parseDeleteCoachRequest,
@@ -365,6 +364,40 @@ test("Can parse get suggestions request", () => {
         req.body = { ...x };
         setSessionKey(req, key);
         return expect(Rq.parseSuggestStudentRequest(req)).rejects.toBe(
+            errors.cookArgumentError()
+        );
+    });
+
+    return Promise.all([okays, fails].flat());
+});
+
+test("Can parse get student request", () => {
+    const key = "my-session-key";
+    const id = 9845;
+
+    const noYear: T.Anything = {};
+    const year: T.Anything = { year: 2022 };
+
+    const i1: T.Anything = { year: 2022 };
+
+    const okays = [noYear, year].map((x) => {
+        const copy: T.Anything = { ...x };
+        copy.id = id;
+        const req: express.Request = getMockReq();
+        req.params.id = id.toString();
+        req.body = x;
+        setSessionKey(req, key);
+        copy.sessionkey = key;
+        return expect(Rq.parseSingleStudentRequest(req)).resolves.toStrictEqual(
+            copy
+        );
+    });
+
+    const fails = [i1].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        setSessionKey(req, key);
+        return expect(Rq.parseSingleStudentRequest(req)).rejects.toBe(
             errors.cookArgumentError()
         );
     });

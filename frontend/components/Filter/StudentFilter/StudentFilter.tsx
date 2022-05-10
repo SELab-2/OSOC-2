@@ -74,20 +74,14 @@ export const StudentFilter: React.FC<{
         setRoles(responseRoles.data);
     };
 
-    /**
-     * Load data on initial page load
-     */
+    // Load roles on page render
     useEffect(() => {
-        if (router.query.toString() === "/students") {
-            search().then();
-        }
+        fetchRoles().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [router.query]);
+    }, []);
 
+    // Execute search
     useEffect(() => {
-        if (roles.length === 0) {
-            fetchRoles().then();
-        }
         search().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -216,7 +210,10 @@ export const StudentFilter: React.FC<{
     };
 
     const search = async () => {
+        setEmailStatusActive(false);
+        setRolesActive(false);
         const filters = [];
+
         if (firstNameFilter !== "") {
             filters.push(`firstNameFilter=${firstNameFilter}`);
         }
@@ -256,8 +253,7 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        // TODO -- setting the url with the filter states is in conflict with the selected student in the url
-        // await router.push(`/students${query}`);
+        await router.push(`/students${query}`);
 
         const { sessionKey } = getSession
             ? await getSession()

@@ -292,3 +292,33 @@ export async function getJobApplicationByYear(year: number) {
         },
     });
 }
+
+/**
+ *
+ * @param studentId: the student id
+ * @param year: the year
+ * @returns all the job applications associated with the given year
+ */
+export async function getEvaluationsByYearForStudent(
+    studentId: number,
+    year: number
+) {
+    return await prisma.job_application.findFirst({
+        where: {
+            student_id: studentId,
+            osoc: {
+                year: year,
+            },
+        },
+        select: {
+            evaluation: {
+                select: {
+                    evaluation_id: true,
+                    decision: true,
+                    motivation: true,
+                    is_final: true,
+                },
+            },
+        },
+    });
+}
