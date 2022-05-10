@@ -293,7 +293,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.Student> {
+): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -305,23 +305,6 @@ export async function getStudentSuggestions(
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
         return Promise.reject(errors.cookInvalidID());
-    }
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const roles = [];
-    for (const applied_role of jobApplication.applied_role) {
-        const role = await ormRo.getRole(applied_role.role_id);
-        if (role != null) {
-            roles.push(role.name);
-        } else {
-            return Promise.reject(errors.cookInvalidID());
-        }
     }
 
     let year = new Date().getFullYear();
@@ -339,29 +322,13 @@ export async function getStudentSuggestions(
         year
     );
 
-    for (const job_application_skill of jobApplication.job_application_skill) {
-        if (job_application_skill.language_id != null) {
-            const language = await ormLa.getLanguage(
-                job_application_skill.language_id
-            );
-            if (language == null) {
-                return Promise.reject(errors.cookInvalidID());
-            }
-            job_application_skill.skill = language.name;
-        }
-    }
-
     return Promise.resolve({
-        student: student,
-        jobApplication: jobApplication,
         evaluation: {
             evaluations: evaluations !== null ? evaluations.evaluation : [],
             osoc: {
                 year: year,
             },
         },
-        evaluations: undefined,
-        roles: roles,
     });
 }
 

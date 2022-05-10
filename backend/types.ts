@@ -495,6 +495,30 @@ export namespace InternalTypes {
     }
 
     /**
+     *  All student evaluations
+     */
+    export interface AllStudentsEvaluations {
+        /**
+         *  The evaluations
+         */
+        evaluation: AllStudentsEvaluationsField;
+    }
+
+    /**
+     *  All student evaluations field
+     */
+    interface AllStudentsEvaluationsField {
+        /**
+         *  The evaluations
+         */
+        evaluations: StudentEvaluationsField[];
+        /**
+         *  The osoc year
+         */
+        osoc: StudentOsocYear;
+    }
+
+    /**
      *  The evaluations field.
      */
     interface StudentEvaluationsField {
@@ -935,6 +959,9 @@ export namespace Responses {
      * data.
      */
     export interface User extends InternalTypes.User {}
+
+    export interface AllStudentEvaluationsResponse
+        extends InternalTypes.AllStudentsEvaluations {}
 
     /**
      *  A studentList response is the keyed version of a list of students and their
