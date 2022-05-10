@@ -4,6 +4,7 @@ import SessionContext from "../contexts/sessionProvider";
 import { Project } from "../types";
 import { ProjectCard } from "../components/ProjectCard/ProjectCard";
 import { Students } from "../components/Students/Students";
+import styles from "../styles/projects.module.scss";
 
 const Projects: NextPage = () => {
     const { getSession } = useContext(SessionContext);
@@ -37,8 +38,8 @@ const Projects: NextPage = () => {
     }, []);
 
     return (
-        <div>
-            <Students />
+        <div className={styles.body}>
+            <Students alwaysLimited={true} />
             <div>
                 {projects.map((project) => {
                     return <ProjectCard key={project.id} project={project} />;

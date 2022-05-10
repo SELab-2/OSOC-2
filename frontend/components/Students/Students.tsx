@@ -6,11 +6,21 @@ import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
 
-export const Students: React.FC = () => {
+/**
+ * Constructs the complete students page with filter included
+ * @param alwaysLimited Whether or not the page should always be shown limited
+ * for in the projects panel for example
+ * @constructor
+ */
+export const Students: React.FC<{ alwaysLimited: boolean }> = ({
+    alwaysLimited = false,
+}) => {
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
     const [selectedStudent, setSelectedStudent] = useState<number>(-1);
-    const [display, setDisplay] = useState<Display>(Display.FULL);
+    const [display, setDisplay] = useState<Display>(
+        alwaysLimited ? Display.LIMITED : Display.FULL
+    );
 
     /**
      * Updates the list of students and sets the selected student index
@@ -19,10 +29,12 @@ export const Students: React.FC = () => {
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
-        if (selectedStudent < 0) {
-            setDisplay(Display.FULL);
-        } else {
-            setDisplay(Display.LIMITED);
+        if (!alwaysLimited) {
+            if (selectedStudent < 0) {
+                setDisplay(Display.FULL);
+            } else {
+                setDisplay(Display.LIMITED);
+            }
         }
     };
 
@@ -42,8 +54,7 @@ export const Students: React.FC = () => {
      */
     const handleKeyPress = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
-            setDisplay(Display.FULL);
-            setSelectedStudent(-1);
+            clearSelection();
         }
     };
 
@@ -51,13 +62,15 @@ export const Students: React.FC = () => {
      * Clears the current selection
      */
     const clearSelection = () => {
-        setDisplay(Display.FULL);
+        if (!alwaysLimited) {
+            setDisplay(Display.FULL);
+        }
         setSelectedStudent(-1);
     };
 
     /**
      * Handles clicking on a student
-     * Ctrl + Click or Alt + Click should upon the student on a seperate page /students/:id
+     * Ctrl + Click or Alt + Click should open the student on a seperate page /students/:id
      * A normal click will upon on the same page and set the query parameter to /students?id=[id]
      * @param e
      * @param student_id
