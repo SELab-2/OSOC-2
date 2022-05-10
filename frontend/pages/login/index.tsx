@@ -11,13 +11,15 @@ import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from "validator";
 import { AccountStatus } from "../../types";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Index: NextPage = () => {
     const router = useRouter();
     const { getSession, setSessionKey, setIsAdmin, setIsCoach } =
         useContext(SessionContext);
+    const { socket } = useSockets();
 
-    // Sets an error message when the `loginError` query paramater is present
+    // Sets an error message when the `loginError` query parameter is present
     useEffect(() => {
         if (getSession) {
             getSession().then(({ sessionKey }) => {
@@ -272,6 +274,7 @@ const Index: NextPage = () => {
             if (response.success) {
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey);
+                    socket.emit("submitRegistration");
                 }
                 await router.push("/pending");
             }
@@ -282,7 +285,7 @@ const Index: NextPage = () => {
      * When the users want to login with github we follow the github web authentication application flow
      * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
      *
-     * Redirect to homepage upon succes
+     * Redirect to homepage upon success
      *
      * @param e - The event triggering this function call
      */
