@@ -7,7 +7,6 @@ import { Responses } from "../types";
 import * as util from "../utility";
 import * as ormSe from "../orm_functions/session_key";
 import { errors } from "../utility";
-import * as ormL from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -73,7 +72,7 @@ export async function modCoach(
                             await ormSe.removeAllKeysForLoginUserId(
                                 res.login_user_id
                             );
-                            await ormL.updateLoginUser({
+                            await ormLU.updateLoginUser({
                                 loginUserId: res.login_user_id,
                                 isAdmin: false,
                                 isCoach: false,
