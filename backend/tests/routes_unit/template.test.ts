@@ -271,6 +271,34 @@ test("Can update a template", async () => {
     });
 });
 
+test("Can update a template", async () => {
+    ormoMock.getTemplateById.mockImplementation((y) =>
+        Promise.resolve({
+            template_email_id: y,
+            owner_id: 69,
+            name: "Osoc password reset",
+            content: "Hello, password reset",
+            cc: "me@osoc.com",
+            subject: "Password reset",
+        })
+    );
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 49,
+        name: "Osoc denied",
+        content: "You are not accepted for osoc",
+        cc: "me@osoc.com",
+        subject: "Osoc",
+    };
+    await expect(template.updateTemplate(r)).resolves.toStrictEqual(
+        template.notOwnerError
+    );
+    expectCall(reqMock.parseUpdateTemplateRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.getTemplateById, 49);
+});
+
 test("Can delete a template by id", async () => {
     const r = getMockReq();
     r.body = {
@@ -282,4 +310,28 @@ test("Can delete a template by id", async () => {
     expectCall(utilMock.isAdmin, r.body);
     expectCall(ormoMock.getTemplateById, 1);
     expectCall(ormoMock.deleteTemplate, 1);
+});
+
+test("Can delete a template by id", async () => {
+    ormoMock.getTemplateById.mockImplementation((y) =>
+        Promise.resolve({
+            template_email_id: y,
+            owner_id: 69,
+            name: "Osoc password reset",
+            content: "Hello, password reset",
+            cc: "me@osoc.com",
+            subject: "Password reset",
+        })
+    );
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 1,
+    };
+    await expect(template.deleteTemplate(r)).resolves.toStrictEqual(
+        template.notOwnerError
+    );
+    expectCall(reqMock.parseDeleteTemplateRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.getTemplateById, 1);
 });

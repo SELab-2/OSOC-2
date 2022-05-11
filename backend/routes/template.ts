@@ -5,7 +5,7 @@ import * as rq from "../request";
 import { ApiError, Responses } from "../types";
 import * as util from "../utility";
 
-const notOwnerError: ApiError = {
+export const notOwnerError: ApiError = {
     http: util.errors.cookInsufficientRights().http,
     reason: "You can only modify/delete templates you own.",
 };
@@ -16,7 +16,6 @@ export async function getAllTemplates(
     return rq
         .parseTemplateListRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .catch(() => Promise.reject(notOwnerError))
         .then(() =>
             ormT
                 .getAllTemplates()
@@ -41,7 +40,6 @@ export async function getSingleTemplate(
     return rq
         .parseGetTemplateRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .catch(() => Promise.reject(notOwnerError))
         .then((checked) =>
             ormT
                 .getTemplateById(checked.data.id)
@@ -63,7 +61,6 @@ export async function createTemplate(
     return rq
         .parseNewTemplateRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .catch(() => Promise.reject(notOwnerError))
         .then((checked) =>
             ormT
                 .createTemplate({
@@ -92,7 +89,6 @@ export async function updateTemplate(
     return rq
         .parseUpdateTemplateRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .catch(() => Promise.reject(notOwnerError))
         .then(async (checked) => {
             return ormT
                 .getTemplateById(checked.data.id)
@@ -132,7 +128,6 @@ export async function deleteTemplate(
     return rq
         .parseDeleteTemplateRequest(req)
         .then((parsed) => util.isAdmin(parsed))
-        .catch(() => Promise.reject(notOwnerError))
         .then(async (checked) => {
             return ormT
                 .getTemplateById(checked.data.id)
@@ -141,8 +136,7 @@ export async function deleteTemplate(
                     if (templ.owner_id != checked.userId) {
                         return util
                             .isAdmin(checked.data)
-                            .catch(() => Promise.reject(notOwnerError))
-                            .then(() => templ);
+                            .catch(() => Promise.reject(notOwnerError));
                     }
                     return Promise.resolve(templ);
                 })
