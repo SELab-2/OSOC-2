@@ -27,3 +27,15 @@ export async function deleteOsocsForLoginuser(loginUserId: number) {
         },
     });
 }
+
+/**
+ * Delete all connections between the osoc table and loginUser table for a given osoc edition
+ * @param osocId: the id of the osoc whose connections to loginUsers we want to delete
+ */
+export async function deleteOsocsLoginConnectionFromOsoc(osocId: number) {
+    return await prisma.login_user_osoc.deleteMany({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+}

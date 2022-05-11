@@ -218,7 +218,6 @@ export async function respOrErrorNoReinject(
             if (isError(err as Anything))
                 return replyError(res, err as ApiError);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
-            console.log((err as Error).stack);
             return replyError(res, errors.cookServerError());
         });
 }

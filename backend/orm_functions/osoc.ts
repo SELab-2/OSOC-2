@@ -1,6 +1,7 @@
 import prisma from "../prisma/prisma";
 import { UpdateOsoc, FilterNumber, FilterSort } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
+import { deleteOsocsLoginConnectionFromOsoc } from "./login_user_osoc";
 
 /**
  *
@@ -169,11 +170,7 @@ export async function deleteOsocFromDB(osocId: number) {
     });
 
     // remove the links between login_user and osoc
-    await prisma.login_user_osoc.deleteMany({
-        where: {
-            osoc_id: osocId,
-        },
-    });
+    await deleteOsocsLoginConnectionFromOsoc(osocId);
 
     // Remove all the linked contracts
     await prisma.contract.deleteMany({

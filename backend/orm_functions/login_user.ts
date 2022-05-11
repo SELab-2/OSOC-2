@@ -8,6 +8,7 @@ import {
     UpdateLoginUser,
 } from "./orm_types";
 import { account_status_enum } from "@prisma/client";
+import { deleteOsocsForLoginuser } from "./login_user_osoc";
 
 /**
  *
@@ -218,11 +219,7 @@ export async function deleteLoginUserFromDB(loginUserId: number) {
             },
         }),
         // delete the link between te loginuser and the usoc
-        prisma.login_user_osoc.deleteMany({
-            where: {
-                login_user_id: loginUserId,
-            },
-        }),
+        deleteOsocsForLoginuser(loginUserId),
     ]);
 
     const person = await prisma.login_user.delete({
