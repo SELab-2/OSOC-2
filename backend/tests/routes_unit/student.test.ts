@@ -37,6 +37,14 @@ import * as ormo from "../../orm_functions/student";
 jest.mock("../../orm_functions/student");
 const ormoMock = ormo as jest.Mocked<typeof ormo>;
 
+import * as ormoPerson from "../../orm_functions/person";
+jest.mock("../../orm_functions/person");
+const ormoMockPerson = ormoPerson as jest.Mocked<typeof ormoPerson>;
+
+import * as ormoLogin from "../../orm_functions/login_user";
+jest.mock("../../orm_functions/login_user");
+const ormoMockLogin = ormoLogin as jest.Mocked<typeof ormoLogin>;
+
 import * as ormoJob from "../../orm_functions/job_application";
 jest.mock("../../orm_functions/job_application");
 const ormoMockJob = ormoJob as jest.Mocked<typeof ormoJob>;
@@ -83,6 +91,89 @@ function keyData<T>(v: T): KD<T> {
         },
     };
 }
+
+const filter_student = {
+    student_id: 0,
+    person_id: 0,
+    gender: "Male",
+    pronouns: "",
+    phone_number: "0457441257",
+    nickname: "Wizard",
+    alumni: true,
+    person: {
+        person_id: 0,
+        name: "person0",
+        email: "person0@mail.com",
+        github: "",
+        github_id: "0",
+    },
+    job_application: [
+        {
+            job_application_id: 0,
+            student_id: 0,
+            responsibilities: "Responsibiliy0",
+            fun_fact: "Funfact0",
+            student_volunteer_info: "Volunteer0",
+            student_coach: true,
+            osoc_id: 0,
+            edus: ["Edu0"],
+            edu_level: "Master",
+            edu_duration: 5,
+            edu_year: "5",
+            edu_institute: "UGent",
+            email_status: email_status_enum.DRAFT,
+            created_at: new Date("2022-03-14 23:10:00+01"),
+            evaluation: [
+                {
+                    evaluation_id: 0,
+                    motivation: "good eval 0",
+                    decision: decision_enum.YES,
+                    is_final: true,
+                    login_user: {
+                        login_user_id: 0,
+                        person: {
+                            person_id: 0,
+                            name: "person0",
+                            email: "person0@mail.com",
+                            github: "",
+                        },
+                    },
+                },
+            ],
+            attachment: [
+                {
+                    attachment_id: 0,
+                    job_application_id: 0,
+                    data: ["attachment0"],
+                    type: [type_enum.MOTIVATION_STRING],
+                },
+            ],
+            job_application_skill: [
+                {
+                    job_application_skill_id: 0,
+                    job_application_id: 0,
+                    skill: "skill0",
+                    language_id: 0,
+                    level: 3,
+                    is_preferred: true,
+                    is_best: true,
+                },
+            ],
+            applied_role: [
+                {
+                    role_id: 0,
+                    applied_role_id: 0,
+                    job_application_id: 0,
+                    role: {
+                        role_id: 0,
+                        name: "Role0",
+                    },
+                },
+            ],
+            language_id: 0,
+        },
+    ],
+};
 
 const students = [
     {
@@ -364,6 +455,7 @@ const studentEvaluationsByYear = [
                     account_status: account_status_enum.ACTIVATED,
                     is_admin: true,
                     is_coach: true,
+                    password: "Password",
                     person: {
                         person_id: 0,
                         name: "person0",
@@ -389,6 +481,7 @@ const studentEvaluationsByYear = [
                     account_status: account_status_enum.ACTIVATED,
                     is_admin: true,
                     is_coach: true,
+                    password: "Password",
                     person: {
                         person_id: 0,
                         name: "person0",
@@ -414,6 +507,7 @@ const studentEvaluationsByYear = [
                     account_status: account_status_enum.ACTIVATED,
                     is_admin: true,
                     is_coach: true,
+                    password: "Password",
                     person: {
                         person_id: 0,
                         name: "person0",
@@ -480,9 +574,21 @@ beforeEach(() => {
     );
 
     ormoMock.getAllStudents.mockResolvedValue(students);
+    ormoMock.deleteStudent.mockImplementation((y) =>
+        Promise.resolve(students[y])
+    );
+    ormoMock.filterStudents.mockImplementation(() =>
+        Promise.resolve([filter_student])
+    );
+    ormoMockPerson.deletePersonById.mockImplementation((y) =>
+        Promise.resolve(students[y].person)
+    );
     ormoMock.getStudent.mockImplementation((y) => Promise.resolve(students[y]));
     ormoMockJob.getLatestJobApplicationOfStudent.mockImplementation((y) =>
         Promise.resolve(latestJobApplication[y])
+    );
+    ormoMockJob.getStudentEvaluationsTemp.mockImplementation((y) =>
+        Promise.resolve(studentEvaluations[y])
     );
     ormoMockJob.getEvaluationsByYearForStudent.mockImplementation((id) =>
         Promise.resolve(studentEvaluationsByYear[id])
@@ -507,6 +613,20 @@ beforeEach(() => {
             is_final: true,
         })
     );
+    ormoMockEval.updateEvaluationForStudent.mockImplementation((y) =>
+        Promise.resolve({
+            evaluation_id: y.evaluation_id,
+            login_user_id: y.loginUserId,
+            job_application_id: 0,
+            decision: y.decision || decision_enum.YES,
+            motivation: y.motivation || null,
+            is_final: false,
+        })
+    );
+
+    ormoMockLogin.getLoginUserById.mockImplementation((id) =>
+        Promise.resolve(studentEvaluationsByYear[id].evaluation[0].login_user)
+    );
 });
 
 afterEach(() => {
@@ -523,12 +643,16 @@ afterEach(() => {
 
     ormoMock.getAllStudents.mockReset();
     ormoMock.getStudent.mockReset();
+    ormoMock.filterStudents.mockReset();
     ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();
     ormoMockRole.getRole.mockReset();
     ormoMockJob.getStudentEvaluationsTotal.mockReset();
     ormoMockLanguage.getLanguage.mockReset();
     ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMockEval.updateEvaluationForStudent.mockReset();
+    ormoMockEval.createEvaluationForStudent.mockReset();
+    ormoMockLogin.getLoginUserById.mockReset();
 });
 
 test("Can get all the students", async () => {
@@ -827,6 +951,7 @@ test("Can get a student by id", async () => {
                         is_admin: true,
                         is_coach: true,
                         login_user_id: 0,
+                        password: "Password",
                         person: {
                             email: "person0@mail.com",
                             github: "",
@@ -931,4 +1056,231 @@ test("Can create a student confirmation", async () => {
         motivation: "You are not accepted for osoc",
         isFinal: true,
     });
+});
+
+test("Can create a student evaluation", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+        suggestion: "YES",
+        reason: "You are not accepted for osoc",
+    };
+    await expect(student.createStudentSuggestion(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseSuggestStudentRequest, r);
+    expectCall(utilMock.checkSessionKey, r.body);
+    expectCall(ormoMock.getStudent, 0);
+    expectCall(ormoMockEval.createEvaluationForStudent, {
+        loginUserId: 0,
+        jobApplicationId: 0,
+        decision: "NO",
+        motivation: "You are not accepted for osoc",
+        isFinal: true,
+    });
+});
+
+test("Can get student suggestions", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+    };
+    await expect(student.getStudentSuggestions(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseGetSuggestionsStudentRequest, r);
+    expectCall(utilMock.checkSessionKey, r.body);
+    expectCall(ormoMock.getStudent, 0);
+});
+
+test("Can filter students", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        emailFilter: "person0@mail.com",
+    };
+    await expect(student.filterStudents(r)).resolves.toStrictEqual({
+        data: [
+            {
+                evaluation: {
+                    evaluations: [
+                        {
+                            decision: "YES",
+                            evaluation_id: 0,
+                            is_final: true,
+                            login_user: {
+                                account_status: "ACTIVATED",
+                                is_admin: true,
+                                is_coach: true,
+                                login_user_id: 0,
+                                password: "Password",
+                                person: {
+                                    email: "person0@mail.com",
+                                    github: "",
+                                    github_id: "0",
+                                    name: "person0",
+                                    person_id: 0,
+                                },
+                                person_id: 0,
+                            },
+                            motivation: "good eval 0",
+                        },
+                    ],
+                    osoc: {
+                        year: 2022,
+                    },
+                },
+                evaluations: undefined,
+                jobApplication: {
+                    applied_role: [
+                        {
+                            applied_role_id: 0,
+                            job_application_id: 0,
+                            role_id: 0,
+                        },
+                    ],
+                    attachment: [
+                        {
+                            attachment_id: 0,
+                            data: ["attachment0"],
+                            job_application_id: 0,
+                            type: ["MOTIVATION_STRING"],
+                        },
+                    ],
+                    created_at: new Date("2022-03-14T22:10:00.000Z"),
+                    edu_duration: 5,
+                    edu_institute: "UGent",
+                    edu_level: "Master",
+                    edu_year: "5",
+                    edus: ["Edu0"],
+                    email_status: "DRAFT",
+                    fun_fact: "Funfact0",
+                    job_application_id: 0,
+                    job_application_skill: [
+                        {
+                            is_best: true,
+                            is_preferred: true,
+                            job_application_id: 0,
+                            job_application_skill_id: 0,
+                            language_id: 0,
+                            level: 3,
+                            skill: "language0",
+                        },
+                    ],
+                    language_id: 0,
+                    osoc_id: 0,
+                    responsibilities: "Responsibiliy0",
+                    student_coach: true,
+                    student_id: 0,
+                    student_volunteer_info: "Volunteer0",
+                },
+                roles: ["Role0"],
+                student: {
+                    alumni: true,
+                    gender: "Male",
+                    job_application: [
+                        {
+                            applied_role: [
+                                {
+                                    applied_role_id: 0,
+                                    job_application_id: 0,
+                                    role: {
+                                        name: "Role0",
+                                        role_id: 0,
+                                    },
+                                    role_id: 0,
+                                },
+                            ],
+                            attachment: [
+                                {
+                                    attachment_id: 0,
+                                    data: ["attachment0"],
+                                    job_application_id: 0,
+                                    type: ["MOTIVATION_STRING"],
+                                },
+                            ],
+                            created_at: new Date("2022-03-14T22:10:00.000Z"),
+                            edu_duration: 5,
+                            edu_institute: "UGent",
+                            edu_level: "Master",
+                            edu_year: "5",
+                            edus: ["Edu0"],
+                            email_status: "DRAFT",
+                            evaluation: [
+                                {
+                                    decision: "YES",
+                                    evaluation_id: 0,
+                                    is_final: true,
+                                    login_user: {
+                                        login_user_id: 0,
+                                        person: {
+                                            email: "person0@mail.com",
+                                            github: "",
+                                            name: "person0",
+                                            person_id: 0,
+                                        },
+                                    },
+                                    motivation: "good eval 0",
+                                },
+                            ],
+                            fun_fact: "Funfact0",
+                            job_application_id: 0,
+                            job_application_skill: [
+                                {
+                                    is_best: true,
+                                    is_preferred: true,
+                                    job_application_id: 0,
+                                    job_application_skill_id: 0,
+                                    language_id: 0,
+                                    level: 3,
+                                    skill: "skill0",
+                                },
+                            ],
+                            language_id: 0,
+                            osoc_id: 0,
+                            responsibilities: "Responsibiliy0",
+                            student_coach: true,
+                            student_id: 0,
+                            student_volunteer_info: "Volunteer0",
+                        },
+                    ],
+                    nickname: "Wizard",
+                    person: {
+                        email: "person0@mail.com",
+                        github: "",
+                        github_id: "0",
+                        name: "person0",
+                        person_id: 0,
+                    },
+                    person_id: 0,
+                    phone_number: "0457441257",
+                    pronouns: "",
+                    student_id: 0,
+                },
+            },
+        ],
+    });
+    expectCall(reqMock.parseFilterStudentsRequest, r);
+    expectCall(utilMock.checkSessionKey, r.body);
+    expect(ormoMock.filterStudents).toHaveBeenCalledWith(
+        undefined,
+        "person0@mail.com",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined
+    );
+});
+
+test("Can delete a student by id", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+    };
+    await expect(student.deleteStudent(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseDeleteStudentRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.deleteStudent, 0);
 });
