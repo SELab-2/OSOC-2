@@ -391,6 +391,7 @@ beforeEach(() => {
     );
 
     ormoMock.getAllStudents.mockResolvedValue(students);
+    ormoMock.getStudent.mockImplementation((y) => Promise.resolve(students[y]));
     ormoMockJob.getLatestJobApplicationOfStudent.mockImplementation((y) =>
         Promise.resolve(latestJobApplication[y])
     );
@@ -698,4 +699,16 @@ test("Can get all the students", async () => {
     expectCall(reqMock.parseStudentAllRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
     expect(ormoMock.getAllStudents).toHaveBeenCalledTimes(1);
+});
+
+test("Can get a student by id", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+    };
+    await expect(student.getStudent(r)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseSingleStudentRequest, r);
+    expectCall(utilMock.checkSessionKey, r.body);
+    expectCall(ormoMock.getStudent, 0);
 });
