@@ -34,6 +34,7 @@ const ormoMock = ormo as jest.Mocked<typeof ormo>;
 import * as osoc from "../../routes/osoc";
 
 import * as ormlo from "../../orm_functions/login_user_osoc";
+import { errors } from "../../utility";
 jest.mock("../../orm_functions/login_user_osoc");
 const ormloMock = ormlo as jest.Mocked<typeof ormlo>;
 
@@ -148,6 +149,21 @@ test("Can create osoc edition", async () => {
     await expect(osoc.createOsocEdition(r)).resolves.toStrictEqual({
         data: { id: 0, year: 2059 },
     });
+    expectCall(reqMock.parseNewOsocEditionRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.createOsoc, 2059);
+    expectNoCall(utilMock.checkSessionKey);
+});
+
+test("osoc create fails because of database error when connecting loginUser to osoc", async () => {
+    const r = getMockReq();
+    ormloMock.addOsocToUser.mockReset(); // resetting this mock will trigger the fail
+    r.body = { sessionkey: "abcd", year: 2059 };
+
+    await expect(osoc.createOsocEdition(r)).rejects.toBe(
+        errors.cookServerError()
+    );
+
     expectCall(reqMock.parseNewOsocEditionRequest, r);
     expectCall(utilMock.isAdmin, r.body);
     expectCall(ormoMock.createOsoc, 2059);
