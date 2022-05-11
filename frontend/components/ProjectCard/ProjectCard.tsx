@@ -3,7 +3,6 @@ import { Project } from "../../types";
 import styles from "./ProjectCard.module.css";
 
 export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
-    console.log(project);
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
 
     const calculateRoleMap = () => {

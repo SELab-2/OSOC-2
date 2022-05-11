@@ -24,8 +24,6 @@ export const StudentOverview: React.FC<{
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-    // the counter is used to check if the evaluations data is updated because putting
-    // the evaluations variable in the useEffect hook causes an infinite loop
     const [showSuggestionField, setShowSuggestionField] = useState(false);
     const [decision, setDecision] = useState<Decision>(Decision.YES);
     const [suggestBool, setSuggestBool] = useState(true);
