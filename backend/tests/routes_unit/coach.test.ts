@@ -33,8 +33,7 @@ const people: (login_user & { person: person })[] = [
     {
         person: {
             person_id: 1,
-            firstname: "Jeffrey",
-            lastname: "Jan",
+            name: "Jeffrey Jan",
             email: "jeffrey@jan.be",
             github: null,
             github_id: null,
@@ -49,8 +48,7 @@ const people: (login_user & { person: person })[] = [
     {
         person: {
             person_id: 2,
-            firstname: "Jan",
-            lastname: "Jeffrey",
+            name: "Jan Jeffrey",
             email: null,
             github: "@jan_jeffrey",
             github_id: "16968456845",
@@ -97,8 +95,7 @@ beforeEach(() => {
             person_id: 1,
             email: "test@email.com",
             github: null,
-            firstname: "test",
-            lastname: "test",
+            name: "test",
             github_id: null,
         },
     });
@@ -185,7 +182,7 @@ test("Can list all coaches", async () => {
     const res = people.map((val) => ({
         person_data: {
             id: val.person.person_id,
-            name: val.person.firstname,
+            name: val.person.name,
             email: val.person.email,
             github: val.person.github,
         },

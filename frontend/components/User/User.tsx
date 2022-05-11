@@ -15,7 +15,7 @@ export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.firstname);
+    const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
@@ -77,7 +77,14 @@ export const User: React.FC<{
                 return { success: false };
             });
         if (res.success !== false) {
-            socket.emit("updateUser", userId);
+            if (changed_val === "activated") {
+                socket.emit("activateUser");
+            } else if (changed_val === "disabled") {
+                socket.emit("disableUser");
+            }
+            // also emit that there has been a change in general so that the manage users screen will update
+            // other changes are changes to the enum roles
+            socket.emit("updateRoleUser");
         }
         return res;
     };
@@ -115,7 +122,7 @@ export const User: React.FC<{
         if (status === AccountStatus.ACTIVATED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
+                "disabled", // the account is still on activated => we disable the account
                 isAdmin,
                 isCoach,
                 AccountStatus.DISABLED
@@ -126,7 +133,7 @@ export const User: React.FC<{
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
+                "activated", // the account is still on disabled => we enable the account
                 isAdmin,
                 isCoach,
                 AccountStatus.ACTIVATED
@@ -141,7 +148,7 @@ export const User: React.FC<{
         e.preventDefault();
         const response = await setUserRole(
             "coach",
-            "enum",
+            "activated",
             isAdmin,
             isCoach,
             AccountStatus.ACTIVATED

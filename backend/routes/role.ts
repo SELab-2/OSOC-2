@@ -12,7 +12,7 @@ import * as ormRo from "../orm_functions/role";
  */
 export async function listStudentRoles(
     req: express.Request
-): Promise<Responses.StudentList> {
+): Promise<Responses.StudentRoles> {
     return rq
         .parseRolesAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))

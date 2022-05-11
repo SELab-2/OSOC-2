@@ -30,8 +30,7 @@ export async function getStudentEvaluationsTotal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -75,8 +74,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -120,8 +118,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -317,6 +314,16 @@ export async function getEvaluationsByYearForStudent(
                     decision: true,
                     motivation: true,
                     is_final: true,
+                    login_user: {
+                        select: {
+                            person: true,
+                            account_status: true,
+                            login_user_id: true,
+                            person_id: true,
+                            is_admin: true,
+                            is_coach: true,
+                        },
+                    },
                 },
             },
         },

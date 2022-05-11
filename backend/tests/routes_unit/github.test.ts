@@ -43,7 +43,7 @@ beforeEach(() => {
                 ? {
                       github: "@my_github",
                       person_id: 69,
-                      firstname: "my",
+                      name: "my",
                       login_user: {
                           password: null,
                           login_user_id: 420,
@@ -59,18 +59,17 @@ beforeEach(() => {
     ormPMock.updatePerson.mockImplementation((u) =>
         Promise.resolve({
             person_id: u.personId,
-            firstname: u.firstname != null ? u.firstname : "jeff",
+            name: u.name != null ? u.name : "jeff",
             email: u.email != null ? u.email : null,
             github: u.github != null ? u.github : "@my_acct",
             github_id: "784",
-            lastname: u.lastname != null ? u.lastname : "",
+            lastname: u.name != null ? u.name : "",
         })
     );
     ormPMock.createPerson.mockImplementation((p) =>
         Promise.resolve({
             person_id: 1234,
-            firstname: p.firstname,
-            lastname: p.lastname,
+            name: p.name,
             github: orNull(p.github),
             github_id: orNull(p.github_id),
             email: orNull(p.email),
@@ -182,7 +181,7 @@ test("Can detect if name changes are required", () => {
     const base_person = {
         github: "",
         person_id: 78645312,
-        firstname: "",
+        name: "",
         login_user: null,
     };
 
@@ -195,26 +194,26 @@ test("Can detect if name changes are required", () => {
     expect(
         github.githubNameChange(
             { ...base_login, name: "abcd" },
-            { ...base_person, firstname: "cdef" }
+            { ...base_person, name: "cdef" }
         )
     ).toBeTruthy();
     expect(
         github.githubNameChange(
             { ...base_login, login: "abcd", name: "cdef" },
-            { ...base_person, github: "cdef", firstname: "cdef" }
+            { ...base_person, github: "cdef", name: "cdef" }
         )
     ).toBeTruthy();
     expect(
         github.githubNameChange(
             { ...base_login, login: "cdef", name: "abcd" },
-            { ...base_person, github: "cdef", firstname: "cdef" }
+            { ...base_person, github: "cdef", name: "cdef" }
         )
     ).toBeTruthy();
 
     expect(
         github.githubNameChange(
             { ...base_login, login: "abcd", name: "cdef" },
-            { ...base_person, github: "abcd", firstname: "cdef" }
+            { ...base_person, github: "abcd", name: "cdef" }
         )
     ).toBeFalsy();
 });
@@ -260,7 +259,7 @@ test("Can login if the account exists and update username", async () => {
     expect(ormP.updatePerson).toHaveBeenCalledWith({
         personId: 69,
         github: "@my_github",
-        firstname: "alo",
+        name: "alo",
     });
     expectNoCall(ormLU.createLoginUser);
     expectNoCall(ormP.createPerson);
@@ -286,7 +285,7 @@ test("Can login if the account exists and update github handle", async () => {
     expect(ormP.updatePerson).toHaveBeenCalledWith({
         personId: 69,
         github: "@jefke",
-        firstname: "my",
+        name: "my",
     });
     expectNoCall(ormLU.createLoginUser);
     expectNoCall(ormP.createPerson);
@@ -307,8 +306,7 @@ test("Can register if account doesn't exist", async () => {
     expectCall(ormPMock.getPasswordPersonByGithub, "-69");
     expectCall(ormP.createPerson, {
         github: "@jefke",
-        firstname: "my",
-        lastname: "",
+        name: "my",
         github_id: "-69",
     });
     expectCall(ormLU.createLoginUser, {
@@ -435,7 +433,6 @@ test("Can handle different frontend", async () => {
             redirect_uri:
                 github.getHome() + config.global.preferred + "/github/login",
         });
-        console.log("POST RESOLVES");
         return Promise.resolve({ data: { access_token: "some_token" } });
     });
 

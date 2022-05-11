@@ -249,8 +249,7 @@ export async function parseUpdateStudentRequest(
 ): Promise<Requests.UpdateStudent> {
     const bodyF = [
         "emailOrGithub",
-        "firstName",
-        "lastName",
+        "name",
         "gender",
         "pronouns",
         "phone",
@@ -268,8 +267,7 @@ export async function parseUpdateStudentRequest(
                 sessionkey: getSessionKey(req),
                 id: Number(req.params.id),
                 emailOrGithub: maybe<string>(req.body, "emailOrGithub"),
-                firstName: maybe<string>(req.body, "firstName"),
-                lastName: maybe<string>(req.body, "lastName"),
+                name: maybe<string>(req.body, "name"),
                 gender: maybe<string>(req.body, "gender"),
                 pronouns: maybe<string>(req.body, "pronouns"),
                 phone: maybe<string>(req.body, "phone"),
@@ -431,8 +429,7 @@ export async function parseFilterStudentsRequest(
     }
 
     for (const filter of [
-        maybe(req.body, "firstNameSort"),
-        maybe(req.body, "lastNameSort"),
+        maybe(req.body, "nameSort"),
         maybe(req.body, "emailSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
@@ -457,16 +454,14 @@ export async function parseFilterStudentsRequest(
     return Promise.resolve({
         sessionkey: auth.sessionkey,
         osocYear: osoc_year,
-        firstNameFilter: maybe(req.body, "firstNameFilter"),
-        lastNameFilter: maybe(req.body, "lastNameFilter"),
+        nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         roleFilter: roles,
         alumniFilter: alumniFilter,
         coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
         emailStatusFilter: maybe(req.body, "emailStatusFilter"),
-        firstNameSort: maybe(req.body, "firstNameSort"),
-        lastNameSort: maybe(req.body, "lastNameSort"),
+        nameSort: maybe(req.body, "nameSort"),
         emailSort: maybe(req.body, "emailSort"),
     });
 }
@@ -574,14 +569,12 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
-        () =>
-            Promise.resolve({
-                firstName: req.body.firstName,
-                lastName: "",
-                email: req.body.email,
-                pass: req.body.pass,
-            })
+    return hasFields(req, ["name", "email", "pass"], types.neither).then(() =>
+        Promise.resolve({
+            name: req.body.name,
+            email: req.body.email,
+            pass: req.body.pass,
+        })
     );
 }
 
@@ -596,7 +589,7 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId"],
+        ["name", "partner", "start", "end", "positions", "osocId", "roles"],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -607,6 +600,7 @@ export async function parseNewProjectRequest(
             end: req.body.end,
             osocId: Number(req.body.osocId),
             positions: Number(req.body.positions),
+            roles: req.body.roles,
         }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
@@ -620,7 +614,15 @@ export async function parseNewProjectRequest(
 export async function parseUpdateProjectRequest(
     req: express.Request
 ): Promise<Requests.ModProject> {
-    const options = ["name", "partner", "start", "end", "positions"];
+    const options = [
+        "name",
+        "partner",
+        "start",
+        "end",
+        "positions",
+        "modifyRoles",
+        "deleteRoles",
+    ];
 
     return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, options)) return rejector();
@@ -636,6 +638,8 @@ export async function parseUpdateProjectRequest(
                 maybe(req.body, "positions") == undefined
                     ? undefined
                     : Number(req.body.positions),
+            modifyRoles: maybe<object>(req.body, "modifyRoles"),
+            deleteRoles: maybe<object>(req.body, "deleteRoles"),
         }).then(idIsNumber);
     });
 }
