@@ -33,6 +33,10 @@ const ormoMock = ormo as jest.Mocked<typeof ormo>;
 
 import * as osoc from "../../routes/osoc";
 
+import * as ormlo from "../../orm_functions/login_user_osoc";
+jest.mock("../../orm_functions/login_user_osoc");
+const ormloMock = ormlo as jest.Mocked<typeof ormlo>;
+
 function expectCall<T, U>(func: T, val: U) {
     expect(func).toHaveBeenCalledTimes(1);
     expect(func).toHaveBeenCalledWith(val);
@@ -113,6 +117,12 @@ beforeEach(() => {
         }
     );
     ormoMock.deleteOsocFromDB.mockImplementation(() => Promise.resolve());
+
+    ormloMock.addOsocToUser.mockResolvedValue({
+        login_user_osoc_id: 0,
+        login_user_id: 0,
+        osoc_id: 0,
+    });
 });
 
 afterEach(() => {
@@ -128,6 +138,8 @@ afterEach(() => {
     ormoMock.getAllOsoc.mockReset();
     ormoMock.filterOsocs.mockReset();
     ormoMock.deleteOsocFromDB.mockReset();
+
+    ormloMock.addOsocToUser.mockReset();
 });
 
 test("Can create osoc edition", async () => {
@@ -149,7 +161,7 @@ test("Can get all the osoc editions", async () => {
         data: osocs,
     });
     expectCall(reqMock.parseOsocAllRequest, r);
-    expect(ormoMock.getAllOsoc).toHaveBeenCalledTimes(1);
+    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
     expectCall(utilMock.checkSessionKey, r.body);
 });
 

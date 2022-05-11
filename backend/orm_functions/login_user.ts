@@ -198,25 +198,32 @@ export async function deleteLoginUserByPersonId(personId: number) {
  * @param loginUserId the login user who's info we are deleting from the database
  */
 export async function deleteLoginUserFromDB(loginUserId: number) {
-    // Remove all the linked password reset
-    await prisma.password_reset.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
-    // Remove all the linked project users
-    await prisma.project_user.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
-
-    // Remove all the linked sessionkeys
-    await prisma.session_keys.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
+    await Promise.all([
+        // Remove all the linked password reset
+        prisma.password_reset.deleteMany({
+            where: {
+                login_user_id: loginUserId,
+            },
+        }),
+        // Remove all the linked project users
+        prisma.project_user.deleteMany({
+            where: {
+                login_user_id: loginUserId,
+            },
+        }),
+        // Remove all the linked sessionkeys
+        prisma.session_keys.deleteMany({
+            where: {
+                login_user_id: loginUserId,
+            },
+        }),
+        // delete the link between te loginuser and the usoc
+        prisma.login_user_osoc.deleteMany({
+            where: {
+                login_user_id: loginUserId,
+            },
+        }),
+    ]);
 
     const person = await prisma.login_user.delete({
         where: {
@@ -253,8 +260,6 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
- * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coach)
- * @param adminFilter adminstatus that we are filtering on (or undefined if not filtering on admin)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status

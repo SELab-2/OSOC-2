@@ -130,9 +130,10 @@ test("should delete the login user with the given person id and return the delet
 });
 
 test("should delete all data of a login_user", async () => {
-    prismaMock.password_reset.deleteMany.mockResolvedValue({ count: 2 });
-    prismaMock.project_user.deleteMany.mockResolvedValue({ count: 2 });
-    prismaMock.session_keys.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.password_reset.deleteMany.mockResolvedValue({ count: 0 });
+    prismaMock.project_user.deleteMany.mockResolvedValue({ count: 0 });
+    prismaMock.session_keys.deleteMany.mockResolvedValue({ count: 0 });
+    prismaMock.login_user_osoc.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.login_user.delete.mockResolvedValue({
         login_user_id: 0,
         person_id: 0,
@@ -155,6 +156,7 @@ test("should delete all data of a login_user", async () => {
     expect(prismaMock.password_reset.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.project_user.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.session_keys.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.login_user_osoc.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.login_user.delete).toBeCalledTimes(1);
     expect(prismaMock.person.delete).toBeCalledTimes(1);
 });

@@ -137,6 +137,7 @@ test("should delete everything associated with the give osoc edition", async () 
         },
     ]);
     prismaMock.project_user.deleteMany.mockResolvedValue({ count: 0 });
+    prismaMock.login_user_osoc.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.contract.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.project_role.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.project.deleteMany.mockResolvedValue({ count: 0 });
@@ -156,6 +157,7 @@ test("should delete everything associated with the give osoc edition", async () 
     expect(prismaMock.project_role.findMany).toBeCalledTimes(1);
     expect(prismaMock.job_application.findMany).toBeCalledTimes(1);
     expect(prismaMock.project_user.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.login_user_osoc.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.contract.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.project_role.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.project.deleteMany).toBeCalledTimes(1);

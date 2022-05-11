@@ -85,7 +85,17 @@ export async function listProjects(
     }
 
     const allProjects = [];
-    for (const project of await ormPr.getAllProjects()) {
+
+    for (const project of await ormPr.filterProjects(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        checkedSessionKey.userId
+    )) {
         const roles = await ormPrRole.getProjectRolesByProject(
             project.project_id
         );

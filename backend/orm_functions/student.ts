@@ -192,7 +192,7 @@ export async function filterStudents(
             searchYears = [osocYear];
         }
     } else {
-        searchYears = osocYear;
+        searchYears = yearsAllowedToSee;
     }
 
     // manually create filter object for evaluation because evaluation doesn't need to exist

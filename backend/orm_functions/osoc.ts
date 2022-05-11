@@ -168,6 +168,13 @@ export async function deleteOsocFromDB(osocId: number) {
         },
     });
 
+    // remove the links between login_user and osoc
+    await prisma.login_user_osoc.deleteMany({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+
     // Remove all the linked contracts
     await prisma.contract.deleteMany({
         where: {
@@ -275,7 +282,7 @@ export async function filterOsocs(
             searchYears = [yearFilter];
         }
     } else {
-        searchYears = yearFilter;
+        searchYears = visibleYears;
     }
     return await prisma.osoc.findMany({
         where: {
