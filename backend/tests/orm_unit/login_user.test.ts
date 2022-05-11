@@ -136,8 +136,7 @@ test("should delete all data of a login_user", async () => {
     prismaMock.person.delete.mockResolvedValue({
         person_id: 0,
         email: "",
-        firstname: "firstname",
-        lastname: "lastname",
+        name: "name",
         github: "",
         github_id: "",
     });

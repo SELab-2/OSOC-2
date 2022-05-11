@@ -345,8 +345,7 @@ test("utility.checkSessionKey works on valid session key", async () => {
         is_coach: false,
         account_status: "ACTIVATED",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -381,8 +380,7 @@ test("utility.checkSessionKey fails on valid session key (pending)", async () =>
         is_coach: false,
         account_status: "PENDING",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -412,8 +410,7 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
         is_coach: false,
         account_status: "PENDING",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -448,8 +445,7 @@ test("utility.checkSessionKey fails on valid session key (disabled)", async () =
         is_coach: false,
         account_status: "DISABLED",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -479,8 +475,7 @@ test("utility.checkSessionKey fails on valid session key (disabled, false)", asy
         is_coach: false,
         account_status: "DISABLED",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -565,8 +560,7 @@ test(
                         is_coach: false,
                         account_status: "ACTIVATED",
                         person: {
-                            firstname: "firstname",
-                            lastname: "lastname",
+                            name: "firstname",
                             email: "email@hotmail.com",
                             github: "hiethub",
                             person_id: 1,
@@ -581,8 +575,7 @@ test(
                     is_coach: false,
                     account_status: "ACTIVATED",
                     person: {
-                        firstname: "firstname",
-                        lastname: "lastname",
+                        name: "firstname",
                         email: "email@mail.com",
                         github: "hiethub",
                         person_id: 0,
@@ -605,8 +598,7 @@ test(
                         is_coach: false,
                         account_status: "ACTIVATED",
                         person: {
-                            lastname: "lastname",
-                            firstname: "firstname",
+                            name: "firstname",
                             github: "hiethub",
                             person_id: 0,
                             email: "email@mail.com",
@@ -891,8 +883,7 @@ test("utility.isValidID checks IDs", async () => {
                     email: null,
                     github: null,
                     github_id: null,
-                    firstname: "jeffrey",
-                    lastname: "jan",
+                    name: "jeffrey jan",
                 },
             });
         }

@@ -274,7 +274,7 @@ export async function filterLoginUsers(
 ) {
     const filter: Prisma.login_userWhereInput = {
         person: {
-            firstname: {
+            name: {
                 contains: nameFilter,
                 mode: "insensitive",
             },
@@ -294,7 +294,7 @@ export async function filterLoginUsers(
         take: pagination.pageSize,
         where: filter,
         orderBy: [
-            { person: { firstname: nameSort } },
+            { person: { name: nameSort } },
             { person: { email: emailSort } },
         ],
         include: {

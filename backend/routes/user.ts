@@ -42,7 +42,7 @@ export async function listUsers(
     const updated = loginUsers.data.map((val) => ({
         person_data: {
             id: val.person.person_id,
-            name: val.person.firstname,
+            name: val.person.name,
             email: val.person.email,
             github: val.person.github,
         },
@@ -92,13 +92,11 @@ export async function createUserRequest(
 
         person = await ormP.updatePerson({
             personId: foundPerson[0].person_id,
-            firstname: parsedRequest.firstName,
-            lastname: "",
+            name: parsedRequest.name,
         });
     } else {
         person = await ormP.createPerson({
-            firstname: parsedRequest.firstName,
-            lastname: "",
+            name: parsedRequest.name,
             email: validator.default
                 .normalizeEmail(parsedRequest.email)
                 .toString(),
@@ -155,7 +153,7 @@ export async function setAccountStatus(
         .then((res) => {
             return Promise.resolve({
                 id: res.person_id,
-                name: res.person.firstname + " " + res.person.lastname,
+                name: res.person.name,
             });
         });
 }
@@ -272,7 +270,7 @@ export async function filterUsers(
                     const udat = users.data.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
-                            name: val.person.firstname,
+                            name: val.person.name,
                             email: val.person.email,
                             github: val.person.github,
                         },
@@ -355,7 +353,7 @@ export async function userModSelf(
                         return ormP
                             .updatePerson({
                                 personId: person.person_id,
-                                firstname: checked.data.name,
+                                name: checked.data.name,
                             })
                             .then(() => Promise.resolve());
                     }

@@ -131,10 +131,7 @@ it("should return all student evaluations for the student with given id", async 
                 "login_user_id"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "firstname"
-            );
-            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "lastname"
+                "name"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
@@ -184,10 +181,7 @@ it("should return all final student evaluations for the student with given id", 
                 "login_user_id"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "firstname"
-            );
-            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "lastname"
+                "name"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
@@ -238,10 +232,7 @@ it("should return all suggestion evaluations for the student with given id", asy
                 "login_user_id"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "firstname"
-            );
-            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
-                "lastname"
+                "name"
             );
             expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"

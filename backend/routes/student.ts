@@ -393,8 +393,7 @@ export async function filterStudents(
             currentPage: checkedSessionKey.data.currentPage,
             pageSize: checkedSessionKey.data.pageSize,
         },
-        checkedSessionKey.data.firstNameFilter,
-        checkedSessionKey.data.lastNameFilter,
+        checkedSessionKey.data.nameFilter,
         checkedSessionKey.data.emailFilter,
         checkedSessionKey.data.roleFilter,
         checkedSessionKey.data.alumniFilter,
@@ -402,8 +401,7 @@ export async function filterStudents(
         checkedSessionKey.data.statusFilter,
         checkedSessionKey.data.osocYear,
         checkedSessionKey.data.emailStatusFilter,
-        checkedSessionKey.data.firstNameSort,
-        checkedSessionKey.data.lastNameSort,
+        checkedSessionKey.data.nameSort,
         checkedSessionKey.data.emailSort
     );
 
