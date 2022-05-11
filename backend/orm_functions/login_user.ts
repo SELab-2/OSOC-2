@@ -281,7 +281,7 @@ export async function filterLoginUsers(
     return await prisma.login_user.findMany({
         where: {
             person: {
-                firstname: {
+                name: {
                     contains: nameFilter,
                     mode: "insensitive",
                 },
@@ -295,7 +295,7 @@ export async function filterLoginUsers(
             is_admin: isAdmin,
         },
         orderBy: [
-            { person: { firstname: nameSort } },
+            { person: { name: nameSort } },
             { person: { email: emailSort } },
         ],
         include: {

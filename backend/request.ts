@@ -104,9 +104,7 @@ function hasFields(
             return Promise.reject(errors.cookUnauthenticated());
         }
     }
-    // if ((reqType == types.key || reqType == types.id) &&
-    //     (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
-    //   return Promise.reject(errors.cookUnauthenticated());
+
     if (reqType == types.id && !("id" in req.params)) return rejector();
     return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
 }
@@ -220,8 +218,7 @@ export async function parseUpdateStudentRequest(
 ): Promise<Requests.UpdateStudent> {
     const bodyF = [
         "emailOrGithub",
-        "firstName",
-        "lastName",
+        "name",
         "gender",
         "pronouns",
         "phone",
@@ -237,8 +234,7 @@ export async function parseUpdateStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             emailOrGithub: maybe(req.body, "emailOrGithub"),
-            firstName: maybe(req.body, "firstName"),
-            lastName: maybe(req.body, "lastName"),
+            name: maybe(req.body, "name"),
             gender: maybe(req.body, "gender"),
             pronouns: maybe(req.body, "pronouns"),
             phone: maybe(req.body, "phone"),
@@ -393,8 +389,7 @@ export async function parseFilterStudentsRequest(
     }
 
     for (const filter of [
-        maybe(req.body, "firstNameSort"),
-        maybe(req.body, "lastNameSort"),
+        maybe(req.body, "nameSort"),
         maybe(req.body, "emailSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
@@ -418,16 +413,14 @@ export async function parseFilterStudentsRequest(
     return Promise.resolve({
         sessionkey: getSessionKey(req),
         osocYear: osoc_year,
-        firstNameFilter: maybe(req.body, "firstNameFilter"),
-        lastNameFilter: maybe(req.body, "lastNameFilter"),
+        nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         roleFilter: roles,
         alumniFilter: alumniFilter,
         coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
         emailStatusFilter: maybe(req.body, "emailStatusFilter"),
-        firstNameSort: maybe(req.body, "firstNameSort"),
-        lastNameSort: maybe(req.body, "lastNameSort"),
+        nameSort: maybe(req.body, "nameSort"),
         emailSort: maybe(req.body, "emailSort"),
     });
 }
@@ -534,14 +527,12 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
-        () =>
-            Promise.resolve({
-                firstName: req.body.firstName,
-                lastName: "",
-                email: req.body.email,
-                pass: req.body.pass,
-            })
+    return hasFields(req, ["name", "email", "pass"], types.neither).then(() =>
+        Promise.resolve({
+            name: req.body.name,
+            email: req.body.email,
+            pass: req.body.pass,
+        })
     );
 }
 

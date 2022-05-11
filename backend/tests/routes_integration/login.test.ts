@@ -123,8 +123,7 @@ describe("POST /login endpoint", () => {
         };
         const person = {
             email: "person@person.com",
-            firstname: "person",
-            lastname: "person",
+            name: "person",
         };
         await prisma.person.create({ data: person }).then((p) => {
             const u = { ...user, person_id: p.person_id };

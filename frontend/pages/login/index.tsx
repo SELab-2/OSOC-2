@@ -243,7 +243,7 @@ const Index: NextPage = () => {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        firstName: registerName.trim(),
+                        name: registerName.trim(),
                         email: registerEmail,
                         pass: registerPassword,
                     }),

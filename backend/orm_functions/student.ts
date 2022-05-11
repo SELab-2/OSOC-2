@@ -153,8 +153,7 @@ export async function searchStudentByGender(gender: string) {
 
 /**
  *
- * @param firstNameFilter firstname that we are filtering on (or undefined if not filtering on name)
- * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
+ * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
  * @param roleFilterArray role that we are filtering on (or undefined if not filtering on role)
  * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
@@ -162,15 +161,13 @@ export async function searchStudentByGender(gender: string) {
  * @param statusFilter decision status that we are filtering on (or undefined if not filtering on status)
  * @param emailStatusFilter email status that we are filtering on (or undefined if not filtering on email status)
  * @param osocYear: the osoc year the application belongs to (or undefined if not filtering on year)
- * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
- * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
+ * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param loginUserId the id of the loginUser that is searching
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
-    firstNameFilter: FilterString,
-    lastNameFilter: FilterString,
+    nameFilter: FilterString,
     emailFilter: FilterString,
     roleFilterArray: FilterStringArray,
     alumniFilter: FilterBoolean,
@@ -178,8 +175,7 @@ export async function filterStudents(
     statusFilter: decision_enum | undefined,
     osocYear: FilterNumber,
     emailStatusFilter: email_status_enum | undefined,
-    firstNameSort: FilterSort,
-    lastNameSort: FilterSort,
+    nameSort: FilterSort,
     emailSort: FilterSort,
     loginUserId: number
 ) {
@@ -231,12 +227,8 @@ export async function filterStudents(
                 },
             },
             person: {
-                firstname: {
-                    contains: firstNameFilter,
-                    mode: "insensitive",
-                },
-                lastname: {
-                    contains: lastNameFilter,
+                name: {
+                    contains: nameFilter,
                     mode: "insensitive",
                 },
                 email: {
@@ -247,9 +239,8 @@ export async function filterStudents(
             alumni: alumniFilter,
         },
         orderBy: [
-            { person: { firstname: firstNameSort } },
+            { person: { name: nameSort } },
             { person: { email: emailSort } },
-            { person: { lastname: lastNameSort } },
         ],
         include: {
             person: true,
