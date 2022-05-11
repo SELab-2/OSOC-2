@@ -1,9 +1,9 @@
 import { account_status_enum } from "@prisma/client";
+import * as prisma from "@prisma/client";
 import express from "express";
 import * as validator from "validator";
 
 import * as ormLU from "../orm_functions/login_user";
-import * as ormL from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { Responses } from "../types";
@@ -27,15 +27,9 @@ export async function listUsers(
     req: express.Request
 ): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const loginUsers = await ormL.getAllLoginUsers();
+    await util.isAdmin(parsedRequest); // authentication
 
-    loginUsers.map((val) => ({
+    const loginUsers = (await ormLU.getAllLoginUsers()).map((val) => ({
         person_data: {
             id: val.person.person_id,
             name: val.person.name,
@@ -62,16 +56,12 @@ export async function createUserRequest(
     req: express.Request
 ): Promise<Responses.Id> {
     const parsedRequest = await rq.parseRequestUserRequest(req);
-    if (parsedRequest.pass == undefined) {
-        console.log(" -> WARNING user request without password");
-        return Promise.reject(util.errors.cookArgumentError());
-    }
 
     const foundPerson = await ormP.searchPersonByLogin(
         validator.default.normalizeEmail(parsedRequest.email).toString()
     );
 
-    let person;
+    let person: prisma.person;
 
     if (foundPerson.length !== 0) {
         const foundLoginUser = await ormLU.searchLoginUserByPerson(
@@ -111,7 +101,7 @@ export async function createUserRequest(
     });
 
     const key: string = util.generateKey();
-    const futureDate = new Date();
+    const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + session_key.valid_period);
     const addedKey = await addSessionKey(
         loginUser.login_user_id,
@@ -166,7 +156,7 @@ export async function createUserAcceptance(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -206,7 +196,7 @@ export async function deleteUserRequest(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -384,7 +374,7 @@ export async function getCurrentUser(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const login_user = await ormL
+    const login_user = await ormLU
         .getLoginUserById(checkedSessionKey.userId)
         .then((obj) => util.getOrReject(obj));
     login_user.password = null;
