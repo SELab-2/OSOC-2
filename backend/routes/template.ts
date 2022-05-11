@@ -134,9 +134,7 @@ export async function deleteTemplate(
                 .then((templ) => util.getOrReject(templ))
                 .then(async (templ) => {
                     if (templ.owner_id != checked.userId) {
-                        return util
-                            .isAdmin(checked.data)
-                            .catch(() => Promise.reject(notOwnerError));
+                        return Promise.reject(notOwnerError);
                     }
                     return Promise.resolve(templ);
                 })

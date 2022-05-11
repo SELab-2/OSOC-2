@@ -271,7 +271,7 @@ test("Can update a template", async () => {
     });
 });
 
-test("Can update a template", async () => {
+test("Can update a template (invalid case)", async () => {
     ormoMock.getTemplateById.mockImplementation((y) =>
         Promise.resolve({
             template_email_id: y,
@@ -291,7 +291,7 @@ test("Can update a template", async () => {
         cc: "me@osoc.com",
         subject: "Osoc",
     };
-    await expect(template.updateTemplate(r)).resolves.toStrictEqual(
+    await expect(template.updateTemplate(r)).rejects.toStrictEqual(
         template.notOwnerError
     );
     expectCall(reqMock.parseUpdateTemplateRequest, r);
@@ -312,7 +312,7 @@ test("Can delete a template by id", async () => {
     expectCall(ormoMock.deleteTemplate, 1);
 });
 
-test("Can delete a template by id", async () => {
+test("Can delete a template by id (invalid case)", async () => {
     ormoMock.getTemplateById.mockImplementation((y) =>
         Promise.resolve({
             template_email_id: y,
@@ -328,7 +328,7 @@ test("Can delete a template by id", async () => {
         sessionkey: "abcd",
         id: 1,
     };
-    await expect(template.deleteTemplate(r)).resolves.toStrictEqual(
+    await expect(template.deleteTemplate(r)).rejects.toStrictEqual(
         template.notOwnerError
     );
     expectCall(reqMock.parseDeleteTemplateRequest, r);
