@@ -8,7 +8,7 @@ import * as ormLa from "../../../../orm_functions/language";
 jest.mock("../../../../orm_functions/language");
 const ormLaMock = ormLa as jest.Mocked<typeof ormLa>;
 
-test("Insert a job application in the database", async () => {
+test("Insert job application skills in the database", async () => {
     ormLaMock.getLanguageByName.mockResolvedValueOnce({
         name: "Dutch",
         language_id: 1,
@@ -64,7 +64,7 @@ test("Insert a job application in the database", async () => {
     ormLaMock.getLanguageByName.mockReset();
 });
 
-test("Insert a job application in the database", async () => {
+test("Insert job application skills in the database (new languages)", async () => {
     ormLaMock.getLanguageByName.mockResolvedValueOnce(null);
 
     ormLaMock.getLanguageByName.mockResolvedValueOnce(null);
