@@ -8,7 +8,12 @@
 
 import { getMockReq } from "@jest-mock/express";
 import { WithUserID } from "../../types";
-import { email_status_enum, type_enum, decision_enum } from "@prisma/client";
+import {
+    email_status_enum,
+    type_enum,
+    decision_enum,
+    account_status_enum,
+} from "@prisma/client";
 
 // setup mock for request
 import * as req from "../../request";
@@ -43,6 +48,10 @@ const ormoMockRole = ormoRole as jest.Mocked<typeof ormoRole>;
 import * as ormoLanguage from "../../orm_functions/language";
 jest.mock("../../orm_functions/language");
 const ormoMockLanguage = ormoLanguage as jest.Mocked<typeof ormoLanguage>;
+
+import * as ormoOsoc from "../../orm_functions/osoc";
+jest.mock("../../orm_functions/osoc");
+const ormoMockOsoc = ormoOsoc as jest.Mocked<typeof ormoOsoc>;
 
 import * as student from "../../routes/student";
 
@@ -337,6 +346,82 @@ const studentEvaluations = [
         },
     ],
 ];
+const studentEvaluationsByYear = [
+    {
+        evaluation: [
+            {
+                evaluation_id: 0,
+                motivation: "good eval 0",
+                decision: decision_enum.YES,
+                is_final: true,
+                login_user: {
+                    login_user_id: 0,
+                    person_id: 0,
+                    account_status: account_status_enum.ACTIVATED,
+                    is_admin: true,
+                    is_coach: true,
+                    person: {
+                        person_id: 0,
+                        name: "person0",
+                        email: "person0@mail.com",
+                        github: "",
+                        github_id: "0",
+                    },
+                },
+            },
+        ],
+    },
+
+    {
+        evaluation: [
+            {
+                evaluation_id: 0,
+                motivation: "good eval 0",
+                decision: decision_enum.YES,
+                is_final: true,
+                login_user: {
+                    login_user_id: 0,
+                    person_id: 0,
+                    account_status: account_status_enum.ACTIVATED,
+                    is_admin: true,
+                    is_coach: true,
+                    person: {
+                        person_id: 0,
+                        name: "person0",
+                        email: "person0@mail.com",
+                        github: "",
+                        github_id: "0",
+                    },
+                },
+            },
+        ],
+    },
+
+    {
+        evaluation: [
+            {
+                evaluation_id: 0,
+                motivation: "good eval 0",
+                decision: decision_enum.YES,
+                is_final: true,
+                login_user: {
+                    login_user_id: 0,
+                    person_id: 0,
+                    account_status: account_status_enum.ACTIVATED,
+                    is_admin: true,
+                    is_coach: true,
+                    person: {
+                        person_id: 0,
+                        name: "person0",
+                        email: "person0@mail.com",
+                        github: "",
+                        github_id: "0",
+                    },
+                },
+            },
+        ],
+    },
+];
 const language = [
     {
         language_id: 0,
@@ -395,12 +480,18 @@ beforeEach(() => {
     ormoMockJob.getLatestJobApplicationOfStudent.mockImplementation((y) =>
         Promise.resolve(latestJobApplication[y])
     );
+    ormoMockJob.getEvaluationsByYearForStudent.mockImplementation((id) =>
+        Promise.resolve(studentEvaluationsByYear[id])
+    );
     ormoMockRole.getRole.mockImplementation((y) => Promise.resolve(roles[y]));
     ormoMockJob.getStudentEvaluationsTotal.mockImplementation((y) =>
         Promise.resolve(studentEvaluations[y])
     );
     ormoMockLanguage.getLanguage.mockImplementation((y) =>
         Promise.resolve(language[y])
+    );
+    ormoMockOsoc.getLatestOsoc.mockImplementation(() =>
+        Promise.resolve({ osoc_id: 0, year: 2022 })
     );
 });
 
@@ -417,10 +508,13 @@ afterEach(() => {
     utilMock.isAdmin.mockReset();
 
     ormoMock.getAllStudents.mockReset();
+    ormoMock.getStudent.mockReset();
     ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
     ormoMockRole.getRole.mockReset();
     ormoMockJob.getStudentEvaluationsTotal.mockReset();
     ormoMockLanguage.getLanguage.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
 });
 
 test("Can get all the students", async () => {
@@ -707,7 +801,96 @@ test("Can get a student by id", async () => {
         sessionkey: "abcd",
         id: 0,
     };
-    await expect(student.getStudent(r)).resolves.toStrictEqual({});
+    await expect(student.getStudent(r)).resolves.toStrictEqual({
+        evaluation: {
+            evaluations: [
+                {
+                    decision: "YES",
+                    evaluation_id: 0,
+                    is_final: true,
+                    login_user: {
+                        account_status: "ACTIVATED",
+                        is_admin: true,
+                        is_coach: true,
+                        login_user_id: 0,
+                        person: {
+                            email: "person0@mail.com",
+                            github: "",
+                            github_id: "0",
+                            name: "person0",
+                            person_id: 0,
+                        },
+                        person_id: 0,
+                    },
+                    motivation: "good eval 0",
+                },
+            ],
+            osoc: {
+                year: 2022,
+            },
+        },
+        evaluations: undefined,
+        jobApplication: {
+            applied_role: [
+                {
+                    applied_role_id: 0,
+                    job_application_id: 0,
+                    role_id: 0,
+                },
+            ],
+            attachment: [
+                {
+                    attachment_id: 0,
+                    data: ["attachment0"],
+                    job_application_id: 0,
+                    type: ["MOTIVATION_STRING"],
+                },
+            ],
+            created_at: new Date("2022-03-14T22:10:00.000Z"),
+            edu_duration: 5,
+            edu_institute: "UGent",
+            edu_level: "Master",
+            edu_year: "5",
+            edus: ["Edu0"],
+            email_status: "DRAFT",
+            fun_fact: "Funfact0",
+            job_application_id: 0,
+            job_application_skill: [
+                {
+                    is_best: true,
+                    is_preferred: true,
+                    job_application_id: 0,
+                    job_application_skill_id: 0,
+                    language_id: 0,
+                    level: 3,
+                    skill: "language0",
+                },
+            ],
+            language_id: 0,
+            osoc_id: 0,
+            responsibilities: "Responsibiliy0",
+            student_coach: true,
+            student_id: 0,
+            student_volunteer_info: "Volunteer0",
+        },
+        roles: ["Role0"],
+        student: {
+            alumni: true,
+            gender: "Male",
+            nickname: "Wizard",
+            person: {
+                email: "person0@mail.com",
+                github: "",
+                github_id: "0",
+                name: "person0",
+                person_id: 0,
+            },
+            person_id: 0,
+            phone_number: "0457441257",
+            pronouns: "",
+            student_id: 0,
+        },
+    });
     expectCall(reqMock.parseSingleStudentRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
     expectCall(ormoMock.getStudent, 0);
