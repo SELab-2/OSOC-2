@@ -172,8 +172,7 @@ export interface Student {
         person: {
             person_id: number;
             email: string;
-            firstname: string;
-            lastname: string;
+            name: string;
             github: string;
             github_id: string;
         };
@@ -188,8 +187,7 @@ export interface LoginUser {
     person: {
         person_id: number;
         email: string;
-        firstname: string;
-        lastname: string;
+        name: string;
         github: string;
         github_id: number;
     };
