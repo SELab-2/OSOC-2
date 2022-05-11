@@ -7,7 +7,7 @@
 // -> if those stacks work, all failures work as well (because Promises).
 
 import { getMockReq } from "@jest-mock/express";
-import { WithUserID } from "../../types";
+import { Decision, WithUserID } from "../../types";
 import {
     email_status_enum,
     type_enum,
@@ -52,6 +52,10 @@ const ormoMockLanguage = ormoLanguage as jest.Mocked<typeof ormoLanguage>;
 import * as ormoOsoc from "../../orm_functions/osoc";
 jest.mock("../../orm_functions/osoc");
 const ormoMockOsoc = ormoOsoc as jest.Mocked<typeof ormoOsoc>;
+
+import * as ormoEval from "../../orm_functions/evaluation";
+jest.mock("../../orm_functions/evaluation");
+const ormoMockEval = ormoEval as jest.Mocked<typeof ormoEval>;
 
 import * as student from "../../routes/student";
 
@@ -493,6 +497,16 @@ beforeEach(() => {
     ormoMockOsoc.getLatestOsoc.mockImplementation(() =>
         Promise.resolve({ osoc_id: 0, year: 2022 })
     );
+    ormoMockEval.createEvaluationForStudent.mockImplementation(() =>
+        Promise.resolve({
+            evaluation_id: 0,
+            login_user_id: 0,
+            job_application_id: 0,
+            decision: Decision.NO,
+            motivation: "You are not accepted for osoc",
+            is_final: true,
+        })
+    );
 });
 
 afterEach(() => {
@@ -894,4 +908,27 @@ test("Can get a student by id", async () => {
     expectCall(reqMock.parseSingleStudentRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
     expectCall(ormoMock.getStudent, 0);
+});
+
+test("Can create a student confirmation", async () => {
+    const r = getMockReq();
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+        reply: Decision.NO,
+        reason: "You are not accepted for osoc",
+    };
+    await expect(student.createStudentConfirmation(r)).resolves.toStrictEqual(
+        {}
+    );
+    expectCall(reqMock.parseFinalizeDecisionRequest, r);
+    expectCall(utilMock.checkSessionKey, r.body);
+    expectCall(ormoMock.getStudent, 0);
+    expectCall(ormoMockEval.createEvaluationForStudent, {
+        loginUserId: 0,
+        jobApplicationId: 0,
+        decision: Decision.NO,
+        motivation: "You are not accepted for osoc",
+        isFinal: true,
+    });
 });
