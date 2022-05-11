@@ -718,6 +718,7 @@ export namespace InternalTypes {
         start_date: string;
         end_date: string;
         positions: number;
+        description: string | null;
         roles: object;
         contracts: object;
         coaches: object;

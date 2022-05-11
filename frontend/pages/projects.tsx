@@ -38,12 +38,17 @@ const Projects: NextPage = () => {
     }, []);
 
     return (
-        <div className={styles.body}>
-            <Students alwaysLimited={true} />
-            <div>
-                {projects.map((project) => {
-                    return <ProjectCard key={project.id} project={project} />;
-                })}
+        <div>
+            <button>Add Project</button>
+            <div className={styles.body}>
+                <Students alwaysLimited={true} />
+                <div>
+                    {projects.map((project) => {
+                        return (
+                            <ProjectCard key={project.id} project={project} />
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

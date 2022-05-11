@@ -46,6 +46,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         return () => {
             document.body.removeEventListener("keydown", handleKeyPress);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**

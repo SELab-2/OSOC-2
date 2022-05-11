@@ -235,11 +235,10 @@ export interface ClientToServerEvents {
 
 export interface ProjectPerson {
     email: string;
-    firstname: string;
     github: string;
     github_id: string;
-    lastname: string;
     person_id: number;
+    name: string;
 }
 
 export interface ProjectLoginUser {
@@ -277,6 +276,7 @@ export interface Project {
     partner: string;
     positions: number;
     start_date: string;
+    description: string | null;
     contracts: [Contract];
     roles: [
         {
