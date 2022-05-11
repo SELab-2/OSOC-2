@@ -22,7 +22,7 @@ export const StudentOverview: React.FC<{
     clearSelection?: () => void;
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
-    const { sessionKey, getSession } = useContext(SessionContext);
+    const { sessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
@@ -32,26 +32,20 @@ export const StudentOverview: React.FC<{
     const [motivation, setMotivation] = useState("");
 
     const fetchEvals = async () => {
-        if (getSession !== undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                if (sessionKey != "") {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                            },
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        console.log(response);
-                        setEvaluations(response.evaluation.evaluations);
-                    }
-                }
-            });
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined && response.success) {
+            console.log(response);
+            setEvaluations(response.evaluation.evaluations);
         }
     };
 
@@ -72,60 +66,56 @@ export const StudentOverview: React.FC<{
     }, [evaluations]);
 
     const makeSuggestion = async () => {
-        if (sessionKey != "") {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify({
-                        id: student.student.student_id,
-                        suggestion: decision,
-                        reason: motivation,
-                    }),
-                }
-            )
-                .then((response) => response.json())
-                .catch((error) => console.log(error));
-            if (response !== undefined && response.success) {
-                setMotivation("");
-                // The creation was succesfull, we can update the evaluation bar
-                fetchEvals().then();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    id: student.student.student_id,
+                    suggestion: decision,
+                    reason: motivation,
+                }),
             }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined && response.success) {
+            setMotivation("");
+            // The creation was succesfull, we can update the evaluation bar
+            fetchEvals().then();
         }
     };
 
     const makeDecision = async () => {
-        if (sessionKey != "") {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify({
-                        id: student.student.student_id,
-                        reply: decision,
-                        reason: motivation,
-                    }),
-                }
-            )
-                .then((response) => response.json())
-                .catch((error) => console.log(error));
-            if (response !== undefined && response.success) {
-                setMotivation("");
-                // The creation was succesfull, we can update the evaluation bar
-                fetchEvals().then();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    id: student.student.student_id,
+                    reply: decision,
+                    reason: motivation,
+                }),
             }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined && response.success) {
+            setMotivation("");
+            // The creation was succesfull, we can update the evaluation bar
+            fetchEvals().then();
         }
     };
 
@@ -290,6 +280,7 @@ export const StudentOverview: React.FC<{
                         if (evaluation.is_final) {
                             return (
                                 <div
+                                    data-testid={"finalEvaluation"}
                                     className={styles.suggestion}
                                     key={evaluation.evaluation_id}
                                 >
@@ -319,18 +310,26 @@ export const StudentOverview: React.FC<{
                 <div className={styles.suggestionheader}>
                     <h2>Suggestions</h2>
                     <div className={styles.suggestionbuttons}>
-                        <button onClick={() => enumSuggest(Decision.YES)}>
+                        <button
+                            data-testid={"suggestYes"}
+                            onClick={() => enumSuggest(Decision.YES)}
+                        >
                             Suggest yes
                         </button>
-                        <button onClick={() => enumSuggest(Decision.MAYBE)}>
+                        <button
+                            data-testid={"suggestMaybe"}
+                            onClick={() => enumSuggest(Decision.MAYBE)}
+                        >
                             Suggest maybe
                         </button>
-                        <button onClick={() => enumSuggest(Decision.NO)}>
+                        <button
+                            data-testid={"suggestNo"}
+                            onClick={() => enumSuggest(Decision.NO)}
+                        >
                             Suggest no
                         </button>
                     </div>
                 </div>
-
                 {evaluations.map((evaluation) => {
                     if (!evaluation.is_final) {
                         return (

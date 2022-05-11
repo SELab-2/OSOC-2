@@ -17,6 +17,7 @@ export const Modal: React.FC<{
 }> = ({ children, visible, handleClose, title }) => {
     return (
         <div
+            data-testid={"modal"}
             className={`${styles.modal} ${
                 visible ? styles.displayBlock : styles.displayNone
             }`}
