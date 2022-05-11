@@ -93,7 +93,7 @@ describe("student filter tests", () => {
                     evaluation: { evaluations: [] },
                 })
             );
-            render(<StudentOverview student={student} />);
+            await render(<StudentOverview student={student} />);
         });
     });
     afterEach(() => {
@@ -152,6 +152,7 @@ describe("student filter tests", () => {
         expect(fetchMock.mock.calls[lastLength][1]?.body).toBe(
             `{"id":${student.student.student_id},"${mode}":"${decision}","reason":"${message}"}`
         );
+        fetchMock.mockClear();
     };
     test("test button calls", async () => {
         await testButton("permanentYes", "confirm", "YES", "reply");

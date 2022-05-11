@@ -22,7 +22,7 @@ export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
     display: Display;
 }> = ({ setFilteredStudents, display }) => {
-    const { sessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
 
     const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
@@ -46,6 +46,9 @@ export const StudentFilter: React.FC<{
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const responseRoles = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
             {
@@ -228,7 +231,9 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
             {

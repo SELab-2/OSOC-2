@@ -20,7 +20,7 @@ export const User: React.FC<{
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
     const [status, setStatus] = useState<AccountStatus>(user.account_status);
-    const { sessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
 
@@ -49,6 +49,9 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
@@ -168,6 +171,9 @@ export const User: React.FC<{
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +

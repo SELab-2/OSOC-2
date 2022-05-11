@@ -10,7 +10,7 @@ export const OsocCreateFilter: React.FC<{
     const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
-    const { sessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
 
     const router = useRouter();
 
@@ -64,6 +64,9 @@ export const OsocCreateFilter: React.FC<{
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         await router.push(`/osocs${query}`);
 
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
             {
@@ -86,6 +89,9 @@ export const OsocCreateFilter: React.FC<{
      * Create the new osoc edition
      */
     const create = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
             {

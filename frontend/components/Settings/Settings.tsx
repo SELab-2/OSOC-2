@@ -101,9 +101,6 @@ export const Settings: React.FC<{
             setApplyError("");
         }
 
-        const { sessionKey } =
-            getSession != undefined ? await getSession() : { sessionKey: "" };
-
         // We dynamically build the body
         const body: Record<string, unknown> = {};
         if (newName !== "") {
@@ -118,6 +115,9 @@ export const Settings: React.FC<{
         }
 
         if (body !== {}) {
+            const { sessionKey } = getSession
+                ? await getSession()
+                : { sessionKey: "" };
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
                 {

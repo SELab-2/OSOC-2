@@ -22,7 +22,6 @@ export const StudentOverview: React.FC<{
     clearSelection?: () => void;
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
-    const { sessionKey } = useContext(SessionContext);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
@@ -30,8 +29,12 @@ export const StudentOverview: React.FC<{
     const [decision, setDecision] = useState<Decision>(Decision.YES);
     const [suggestBool, setSuggestBool] = useState(true);
     const [motivation, setMotivation] = useState("");
+    const { getSession } = useContext(SessionContext);
 
     const fetchEvals = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
             {
@@ -67,6 +70,9 @@ export const StudentOverview: React.FC<{
 
     const makeSuggestion = async () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
             {
@@ -94,6 +100,9 @@ export const StudentOverview: React.FC<{
 
     const makeDecision = async () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/confirm`,
             {
