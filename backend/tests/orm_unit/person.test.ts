@@ -14,8 +14,7 @@ import {
 const returnValue = {
     person_id: 0,
     email: "email@mail.com",
-    firstname: "FirstName",
-    lastname: "LastName",
+    name: "name",
     github: null,
     github_id: "666",
 };
@@ -23,8 +22,7 @@ const returnValue = {
 test("should create a person in the db with the given object, returns the new record", async () => {
     const person: CreatePerson = {
         email: "email@mail.com",
-        firstname: "FirstName",
-        lastname: "LastName",
+        name: "name",
     };
 
     prismaMock.person.create.mockResolvedValue(returnValue);
@@ -65,9 +63,8 @@ test("should return all the people with the given login (email or github)", asyn
 test("should update the person with the new data and return the updated record", async () => {
     const person: UpdatePerson = {
         email: "email@mail.com",
-        firstname: "newFirst",
+        name: "new_name",
         github: null,
-        lastname: "",
         personId: 0,
     };
 
