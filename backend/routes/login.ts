@@ -31,18 +31,22 @@ export async function login(req: express.Request): Promise<Responses.Login> {
                     reason: "Invalid e-mail or password.",
                 });
             } else {
+                const data = {
+                    id: pass.login_user.login_user_id,
+                    password: pass.login_user.password,
+                    status: pass.login_user.account_status,
+                    admin: pass.login_user.is_admin,
+                    coach: pass.login_user.is_coach,
+                };
                 // check if the passwords match!
-                const valid = await bcrypt.compare(
-                    parsed.pass,
-                    pass.login_user.password
-                );
+                const valid = await bcrypt.compare(parsed.pass, data.password);
                 if (!valid) {
                     return Promise.reject({
                         http: 409,
                         reason: "Invalid e-mail or password.",
                     });
                 }
-                if (pass?.login_user?.account_status == "DISABLED") {
+                if (data.status == "DISABLED") {
                     return Promise.reject({
                         http: 409,
                         reason: "Account is disabled.",
@@ -59,15 +63,9 @@ export async function login(req: express.Request): Promise<Responses.Login> {
                     futureDate
                 ).then((ins) => ({
                     sessionkey: ins.session_key,
-                    is_admin: util.getOrDefault(
-                        pass?.login_user?.is_admin,
-                        false
-                    ),
-                    is_coach: util.getOrDefault(
-                        pass?.login_user?.is_coach,
-                        false
-                    ),
-                    account_status: pass?.login_user?.account_status,
+                    is_admin: data.admin,
+                    is_coach: data.coach,
+                    account_status: data.status,
                 }));
             }
         })

@@ -12,8 +12,7 @@
     "docker:down": "docker-compose down",
     "integrationTests": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i",
     "test": "jest -i",
-    "coverage": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i --coverage",
-    "tmp": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i --coverageDirectory='../../cov' --coverage"
+    "coverage": "npm run dockerIntegration:up && npm run migrate:postgres && jest -i --coverage"
   },
   "author": "",
   "license": "ISC",
