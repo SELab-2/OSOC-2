@@ -104,9 +104,7 @@ function hasFields(
             return Promise.reject(errors.cookUnauthenticated());
         }
     }
-    // if ((reqType == types.key || reqType == types.id) &&
-    //     (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
-    //   return Promise.reject(errors.cookUnauthenticated());
+
     if (reqType == types.id && !("id" in req.params)) return rejector();
     return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
 }
