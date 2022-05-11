@@ -175,7 +175,7 @@ export function githubNameChange(
     person: {
         github: string | null;
         person_id: number;
-        firstname: string;
+        name: string;
         login_user: {
             password: string | null;
             login_user_id: number;
@@ -186,7 +186,7 @@ export function githubNameChange(
     }
 ): boolean {
     if (person.github != login.login) return true;
-    if (person.firstname != login.name) return true;
+    if (person.name != login.name) return true;
     return false;
 }
 
@@ -213,7 +213,7 @@ export async function ghSignupOrLogin(
                     .updatePerson({
                         personId: person.person_id,
                         github: login.login,
-                        firstname: login.name,
+                        name: login.name,
                     })
                     .then(() => person.login_user);
             } else {
@@ -226,8 +226,7 @@ export async function ghSignupOrLogin(
                 return ormP
                     .createPerson({
                         github: login.login,
-                        firstname: login.name,
-                        lastname: "",
+                        name: login.name,
                         github_id: login.id,
                     })
                     .then((person) =>

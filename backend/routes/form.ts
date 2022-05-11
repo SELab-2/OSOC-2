@@ -176,8 +176,7 @@ export async function jsonToPerson(
     const email = await getEmail(form);
 
     return Promise.resolve({
-        birthName: birthName,
-        lastName: lastName,
+        name: (birthName + " " + lastName).trim(),
         email: email,
     });
 }
@@ -1196,16 +1195,14 @@ export async function addPersonToDatabase(
     if (checkIfEmailInDb.length > 0) {
         await ormP.updatePerson({
             personId: checkIfEmailInDb[0].person_id,
-            firstname: formResponse.birthName,
-            lastname: formResponse.lastName,
+            name: formResponse.name,
             github: null,
             email: formResponse.email,
         });
         personId = checkIfEmailInDb[0].person_id;
     } else {
         const person = await ormP.createPerson({
-            firstname: formResponse.birthName,
-            lastname: formResponse.lastName,
+            name: formResponse.name,
             email: formResponse.email,
         });
         personId = person.person_id;

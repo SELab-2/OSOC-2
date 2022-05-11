@@ -97,8 +97,7 @@ test("should delete everything related to the student", async () => {
         person_id: 0,
         email: "",
         github: "",
-        firstname: "",
-        lastname: "",
+        name: "",
         github_id: "",
     });
 
@@ -134,13 +133,11 @@ test("should return the students that succeed to the filtered fields", async () 
         filterStudents(
             undefined,
             undefined,
-            undefined,
             [""],
             undefined,
             undefined,
             undefined,
             2022,
-            undefined,
             undefined,
             undefined,
             undefined
@@ -167,13 +164,11 @@ test("should return the students that succeed to the filtered fields but with a 
         filterStudents(
             undefined,
             undefined,
-            undefined,
             [""],
             undefined,
             undefined,
             decision_enum.MAYBE,
             2022,
-            undefined,
             undefined,
             undefined,
             undefined
