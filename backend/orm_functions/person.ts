@@ -9,8 +9,7 @@ import { CreatePerson, UpdatePerson } from "./orm_types";
 export async function createPerson(person: CreatePerson) {
     return await prisma.person.create({
         data: {
-            firstname: person.firstname,
-            lastname: person.lastname,
+            name: person.name,
             github: person.github,
             email: person.email,
             github_id: person.github_id,
@@ -61,7 +60,7 @@ export async function getPasswordPersonByGithub(github: string) {
         select: {
             github: true,
             person_id: true,
-            firstname: true,
+            name: true,
             login_user: {
                 select: {
                     password: true,
@@ -84,14 +83,7 @@ export async function getPasswordPersonByGithub(github: string) {
 export async function searchPersonByName(name: string) {
     return await prisma.person.findMany({
         where: {
-            OR: [
-                {
-                    firstname: { contains: name },
-                },
-                {
-                    lastname: { contains: name },
-                },
-            ],
+            name: { contains: name },
         },
     });
 }
@@ -126,8 +118,7 @@ export async function updatePerson(person: UpdatePerson) {
     return await prisma.person.update({
         where: { person_id: person.personId },
         data: {
-            firstname: person.firstname,
-            lastname: person.lastname,
+            name: person.name,
             github: person.github,
             email: person.email,
         },

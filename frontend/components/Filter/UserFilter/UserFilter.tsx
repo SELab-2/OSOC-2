@@ -33,6 +33,7 @@ export const UserFilter: React.FC<{
     useEffect(() => {
         return () => {
             socket.off("loginUserUpdated");
+            socket.off("registrationReceived");
         }; // disconnect from the socket on dismount
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -54,8 +55,13 @@ export const UserFilter: React.FC<{
      */
     useEffect(() => {
         socket.off("loginUserUpdated"); // remove the earlier added listeners
+        socket.off("registrationReceived");
         // add new listener
         socket.on("loginUserUpdated", () => {
+            if (loading) return;
+            search().then();
+        });
+        socket.on("registrationReceived", () => {
             if (loading) return;
             search().then();
         });

@@ -18,8 +18,7 @@ describe("User component tests", () => {
             person: {
                 person_id: 1,
                 email: "test",
-                firstname: "aa",
-                lastname: "aga",
+                name: "aga",
                 github: "",
                 github_id: 0,
             },
@@ -33,8 +32,7 @@ describe("User component tests", () => {
             person: {
                 person_id: 1,
                 email: "test",
-                firstname: "aa",
-                lastname: "aga",
+                name: "aa",
                 github: "",
                 github_id: -1,
             },
@@ -48,8 +46,7 @@ describe("User component tests", () => {
             person: {
                 person_id: 1,
                 email: "test",
-                firstname: "aa",
-                lastname: "aga",
+                name: "aa",
                 github: "",
                 github_id: -1,
             },
@@ -70,7 +67,7 @@ describe("User component tests", () => {
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
         expect(screen.getByTestId("userName")!.firstChild!.nodeValue).toBe(
-            userAdminCoach.person.firstname
+            userAdminCoach.person.name
         );
 
         expect(screen.queryByTestId("pendingButton")).toBeNull();

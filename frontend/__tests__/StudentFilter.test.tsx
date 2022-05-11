@@ -46,8 +46,6 @@ describe("student filter tests", () => {
     test("test student filter component render", () => {
         expect(screen.getByTestId("firstNameSort")).toBeInTheDocument();
         expect(screen.getByTestId("firstNameInput")).toBeInTheDocument();
-        expect(screen.getByTestId("lastNameSort")).toBeInTheDocument();
-        expect(screen.getByTestId("lastNameInput")).toBeInTheDocument();
         expect(screen.getByTestId("emailSort")).toBeInTheDocument();
         expect(screen.getByTestId("emailInput")).toBeInTheDocument();
         expect(screen.getByTestId("osocYearInput")).toBeInTheDocument();
@@ -68,7 +66,7 @@ describe("student filter tests", () => {
         expect(screen.getByTestId("searchButton")).toBeInTheDocument();
     });
 
-    test("test firstname filters", async () => {
+    test("test name sort filters", async () => {
         await act(async () => {
             fetchMock.mockOnce(
                 JSON.stringify({
@@ -84,7 +82,7 @@ describe("student filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?firstNameSort=asc"
+            "undefined/student/filter?nameSort=asc"
         );
         await act(async () => {
             fetchMock.mockOnce(
@@ -96,7 +94,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?firstNameSort=desc"
+            "undefined/student/filter?nameSort=desc"
         );
         await act(async () => {
             fetchMock.mockOnce(
@@ -125,84 +123,10 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?firstNameFilter=${name_text}`
+            `undefined/student/filter?nameFilter=${name_text}`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId("firstNameInput"));
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            screen.getByTestId("searchButton").click();
-        });
-        lastLength = fetchMock.mock.calls.length - 1;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter`
-        );
-    });
-
-    test("test lastname filters", async () => {
-        await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            await fireEvent.click(screen.getByTestId("lastNameSort"));
-        });
-        let lastLength = fetchMock.mock.calls.length - 1;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?lastNameSort=asc"
-        );
-        await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            await fireEvent.click(screen.getByTestId("lastNameSort"));
-        });
-        lastLength = fetchMock.mock.calls.length - 1;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?lastNameSort=desc"
-        );
-        await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            await fireEvent.click(screen.getByTestId("lastNameSort"));
-        });
-        lastLength = fetchMock.mock.calls.length - 1;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter"
-        );
-        const name_text = "last name";
-        await act(async () => {
-            await fireEvent.type(
-                screen.getByTestId("lastNameInput"),
-                name_text
-            );
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            screen.getByTestId("searchButton").click();
-        });
-        lastLength = fetchMock.mock.calls.length - 1;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?lastNameFilter=${name_text}`
-        );
-        await act(async () => {
-            await fireEvent.clear(screen.getByTestId("lastNameInput"));
             fetchMock.mockOnce(
                 JSON.stringify({
                     success: true,

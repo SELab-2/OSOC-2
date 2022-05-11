@@ -1,7 +1,6 @@
 import {
     Display,
     Student,
-    EvaluationCoach,
     Decision,
     AttachmentType,
     Attachment,
@@ -24,7 +23,7 @@ export const StudentOverview: React.FC<{
 }> = ({ student, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const { sessionKey, getSession } = useContext(SessionContext);
-    const [evaluations, setEvaluations] = useState<EvaluationCoach[]>([]);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
     const [showSuggestionField, setShowSuggestionField] = useState(false);
@@ -48,7 +47,8 @@ export const StudentOverview: React.FC<{
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        setEvaluations(response.data);
+                        console.log(response);
+                        setEvaluations(response.evaluation.evaluations);
                     }
                 }
             });
@@ -66,17 +66,7 @@ export const StudentOverview: React.FC<{
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
-            const newEvals: Evaluation[] = [];
-            evaluations.forEach((evaluation) => {
-                const newEval: Evaluation = {
-                    evaluation_id: evaluation.evaluation_id,
-                    decision: evaluation.decision,
-                    motivation: evaluation.reason,
-                    is_final: evaluation.isFinal,
-                };
-                newEvals.push(newEval);
-            });
-            updateEvaluations(student.student.student_id, newEvals);
+            updateEvaluations(student.student.student_id, evaluations);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evaluations]);
@@ -104,11 +94,8 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
-                const evaluation = response as EvaluationCoach;
                 // The creation was succesfull, we can update the evaluation bar
-                if (evaluation !== undefined) {
-                    fetchEvals().then();
-                }
+                fetchEvals().then();
             }
         }
     };
@@ -136,11 +123,8 @@ export const StudentOverview: React.FC<{
                 .catch((error) => console.log(error));
             if (response !== undefined && response.success) {
                 setMotivation("");
-                const evaluation = response as EvaluationCoach;
                 // The creation was succesfull, we can update the evaluation bar
-                if (evaluation !== undefined) {
-                    fetchEvals().then();
-                }
+                fetchEvals().then();
             }
         }
     };
@@ -303,7 +287,7 @@ export const StudentOverview: React.FC<{
 
                 <div>
                     {evaluations.map((evaluation) => {
-                        if (evaluation.isFinal) {
+                        if (evaluation.is_final) {
                             return (
                                 <div
                                     className={styles.suggestion}
@@ -322,11 +306,10 @@ export const StudentOverview: React.FC<{
                                     />
                                     <p>
                                         <strong>
-                                            {evaluation.senderFirstname}{" "}
-                                            {evaluation.senderLastname}
+                                            {evaluation.login_user.person.name}
                                             {": "}
                                         </strong>
-                                        {evaluation.reason}
+                                        {evaluation.motivation}
                                     </p>
                                 </div>
                             );
@@ -349,7 +332,7 @@ export const StudentOverview: React.FC<{
                 </div>
 
                 {evaluations.map((evaluation) => {
-                    if (!evaluation.isFinal) {
+                    if (!evaluation.is_final) {
                         return (
                             <div
                                 className={styles.suggestion}
@@ -368,10 +351,9 @@ export const StudentOverview: React.FC<{
                                 />
 
                                 <strong>
-                                    {evaluation.senderFirstname}{" "}
-                                    {evaluation.senderLastname}:
+                                    {evaluation.login_user.person.name}:
                                 </strong>
-                                {evaluation.reason}
+                                {evaluation.motivation}
                             </div>
                         );
                     }
@@ -382,7 +364,7 @@ export const StudentOverview: React.FC<{
                         .sort(compareAttachments)
                         .map((attachment) => (
                             <div key={attachment.attachment_id}>
-                                <h1>{getAttachmentType(attachment.type)}</h1>
+                                <h1>{getAttachmentType(attachment.type[0])}</h1>
                                 {attachment.data.map((data, index) => {
                                     if (
                                         attachment.type[index] ===

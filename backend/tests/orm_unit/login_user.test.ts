@@ -20,6 +20,7 @@ import {
     setCoach,
     setAdmin,
     filterLoginUsers,
+    deleteLoginUserFromDB,
 } from "../../orm_functions/login_user";
 
 const response = {
@@ -118,6 +119,35 @@ test("should delete the login user with the given id and return the deleted reco
 test("should delete the login user with the given person id and return the deleted record", async () => {
     prismaMock.login_user.delete.mockResolvedValue(returnValue);
     await expect(deleteLoginUserByPersonId(0)).resolves.toEqual(returnValue);
+});
+
+test("should delete all data of a login_user", async () => {
+    prismaMock.password_reset.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.project_user.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.session_keys.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.login_user.delete.mockResolvedValue({
+        login_user_id: 0,
+        person_id: 0,
+        password: "",
+        is_admin: false,
+        is_coach: true,
+        account_status: account_status_enum.DISABLED,
+    });
+    prismaMock.person.delete.mockResolvedValue({
+        person_id: 0,
+        email: "",
+        name: "name",
+        github: "",
+        github_id: "",
+    });
+
+    await deleteLoginUserFromDB(0);
+
+    expect(prismaMock.password_reset.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.project_user.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.session_keys.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.login_user.delete).toBeCalledTimes(1);
+    expect(prismaMock.person.delete).toBeCalledTimes(1);
 });
 
 test("should return the login_user with given id", async () => {

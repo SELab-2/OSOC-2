@@ -18,8 +18,7 @@ describe("User component tests", () => {
             person: {
                 person_id: 1,
                 email: "test",
-                firstname: "aa",
-                lastname: "aga",
+                name: "aa",
                 github: "",
                 github_id: 0,
             },
@@ -40,7 +39,7 @@ describe("User component tests", () => {
         expect(screen.getByTestId("personName")).toBeInTheDocument();
 
         expect(screen.getByTestId("personName").textContent).toBe(
-            "Current Name: " + userAdminCoach.person.firstname
+            "Current Name: " + userAdminCoach.person.name
         );
         expect(screen.getByTestId("labelNewName")).toBeInTheDocument();
         expect(screen.getByTestId("labelNewName").textContent).toBe("New Name");

@@ -27,10 +27,7 @@ export async function listAdmins(
                     obj.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
-                            name:
-                                val.person.firstname +
-                                " " +
-                                val.person.lastname,
+                            name: val.person.name,
                             email: val.person.email,
                             github: val.person.github,
                         },
@@ -82,10 +79,7 @@ export async function modAdmin(req: express.Request): Promise<Responses.Admin> {
                         }
                         return Promise.resolve({
                             id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
+                            name: res.person.name,
                         });
                     });
             }

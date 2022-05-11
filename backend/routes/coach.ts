@@ -28,7 +28,7 @@ export async function listCoaches(
                     obj.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
-                            name: val.person.firstname,
+                            name: val.person.name,
                             email: val.person.email,
                             github: val.person.github,
                         },
@@ -82,10 +82,7 @@ export async function modCoach(
                         }
                         return Promise.resolve({
                             id: res.login_user_id,
-                            name:
-                                res.person.firstname +
-                                " " +
-                                res.person.lastname,
+                            name: res.person.name,
                         });
                     });
             } else {
@@ -137,7 +134,7 @@ export async function getCoachRequests(
                         .map((v) => ({
                             person_data: {
                                 id: v.person.person_id,
-                                name: v.person.firstname,
+                                name: v.person.name,
                             },
                             coach: v.is_coach,
                             admin: v.is_admin,
