@@ -1060,6 +1060,11 @@ test("Can create a student confirmation", async () => {
 
 test("Can create a student evaluation", async () => {
     const r = getMockReq();
+
+    // override
+    ormoMockJob.getStudentEvaluationsTemp.mockReset();
+    ormoMockJob.getStudentEvaluationsTemp.mockResolvedValue([]);
+
     r.body = {
         sessionkey: "abcd",
         id: 0,
@@ -1073,9 +1078,9 @@ test("Can create a student evaluation", async () => {
     expectCall(ormoMockEval.createEvaluationForStudent, {
         loginUserId: 0,
         jobApplicationId: 0,
-        decision: "NO",
+        decision: "YES",
         motivation: "You are not accepted for osoc",
-        isFinal: true,
+        isFinal: false,
     });
 });
 
@@ -1083,8 +1088,42 @@ test("Can get student suggestions", async () => {
     const r = getMockReq();
     r.body = {
         sessionkey: "abcd",
+        id: 0,
     };
-    await expect(student.getStudentSuggestions(r)).resolves.toStrictEqual({});
+
+    const result = {
+        evaluation: {
+            evaluations: [
+                {
+                    decision: "YES",
+                    evaluation_id: 0,
+                    is_final: true,
+                    login_user: {
+                        account_status: "ACTIVATED",
+                        is_admin: true,
+                        is_coach: true,
+                        login_user_id: 0,
+                        password: "Password",
+                        person: {
+                            email: "person0@mail.com",
+                            github: "",
+                            github_id: "0",
+                            name: "person0",
+                            person_id: 0,
+                        },
+                        person_id: 0,
+                    },
+                    motivation: "good eval 0",
+                },
+            ],
+            osoc: {
+                year: 2022,
+            },
+        },
+    }; // please clean up?
+    await expect(student.getStudentSuggestions(r)).resolves.toStrictEqual(
+        result
+    );
     expectCall(reqMock.parseGetSuggestionsStudentRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
     expectCall(ormoMock.getStudent, 0);
