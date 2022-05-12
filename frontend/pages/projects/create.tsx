@@ -1,10 +1,12 @@
 import { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { OsocEdition } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 
 const Create: NextPage = () => {
+    const router = useRouter();
     const { getSession } = useContext(SessionContext);
 
     const formatDate = () => {
@@ -113,7 +115,7 @@ const Create: NextPage = () => {
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         alert("Project succesfully created!");
-                        window.close();
+                        router.push("/projects");
                     }
                 }
             });

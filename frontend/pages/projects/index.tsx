@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { Project } from "../../types";
@@ -7,6 +8,7 @@ import { Students } from "../../components/Students/Students";
 import styles from "../../styles/projects.module.scss";
 
 const Index: NextPage = () => {
+    const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [projects, setProjects] = useState<Project[]>([]);
 
@@ -41,7 +43,7 @@ const Index: NextPage = () => {
         <div>
             <button
                 onClick={() => {
-                    window.open("/projects/create", "_blank")?.focus();
+                    router.push("/projects/create");
                 }}
             >
                 Add Project
