@@ -261,3 +261,40 @@ test("Can logout", async () => {
     );
     expectCall(session_keyMock.removeAllKeysForUser, "abcd");
 });
+
+test("Edge case", async () => {
+    personMock.getPasswordPersonByEmail.mockImplementation((name) => {
+        if (name == "mail_00@00.com") {
+            return Promise.resolve({ login_user: null });
+        }
+        return Promise.resolve({
+            login_user: {
+                login_user_id: 0,
+                password: null,
+                account_status: "ENABLED" as account_status_enum,
+                is_admin: false,
+                is_coach: false,
+            },
+        });
+    });
+
+    // edge case 1
+    {
+        const req = getMockReq();
+        req.body = { name: "mail_00@00.com", pass: "" };
+        await expect(login.login(req)).rejects.toStrictEqual({
+            http: 409,
+            reason: "Invalid e-mail or password.",
+        });
+    }
+
+    // edge case 2
+    {
+        const req = getMockReq();
+        req.body = { name: "mail_01@00.com", pass: "" };
+        await expect(login.login(req)).rejects.toStrictEqual({
+            http: 409,
+            reason: "Invalid e-mail or password.",
+        });
+    }
+});
