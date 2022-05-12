@@ -184,18 +184,16 @@ export interface Student {
 }
 
 export interface LoginUser {
-    person: {
-        person_id: number;
+    person_data: {
+        id: number;
         email: string;
         name: string;
         github: string;
-        github_id: number;
     };
     login_user_id: number;
-    person_id: number;
-    is_admin: boolean;
-    is_coach: boolean;
-    account_status: AccountStatus;
+    coach: boolean;
+    admin: boolean;
+    activated: AccountStatus;
 }
 
 export interface OsocEdition {
