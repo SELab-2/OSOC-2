@@ -49,11 +49,12 @@ jobs:
       run: npx dotenv -e prisma/.env.test -- npx prisma db push
       working-directory: backend
 
+    - name: Setup environment
+      run: export NODE_OPTIONS="--max-old-space-size=4096"
+
     - name: Coverage Report
       uses: ArtiomTr/jest-coverage-report-action@v2
       with:
         working-directory: backend
         skip-step: install
         annotations: failed-tests
-    - name: Setup environment
-      run: echo "{environment_variable_name}={value}" >> $GITHUB_ENV
