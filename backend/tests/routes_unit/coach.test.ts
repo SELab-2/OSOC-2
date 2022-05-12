@@ -26,6 +26,9 @@ const ormLMock = ormL as jest.Mocked<typeof ormL>;
 import * as ormP from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
 const ormPMock = ormP as jest.Mocked<typeof ormP>;
+import * as ormS from "../../orm_functions/session_key";
+jest.mock("../../orm_functions/session_key");
+const ormSMock = ormS as jest.Mocked<typeof ormS>;
 
 import * as coach from "../../routes/coach";
 
@@ -131,7 +134,12 @@ beforeEach(() => {
     ormLMock.searchAllCoachLoginUsers.mockResolvedValue(people);
     ormLMock.updateLoginUser.mockImplementation((v) => {
         if (v.loginUserId != 7 && v.loginUserId != 8) return Promise.reject({});
-        return Promise.resolve(v.loginUserId == 7 ? people[0] : people[1]);
+        const res = v.loginUserId == 7 ? people[0] : people[1];
+        if (v.isAdmin == false && v.isCoach == false) {
+            res.is_admin = false;
+            res.is_coach = false;
+        }
+        return Promise.resolve(res);
     });
     ormLMock.deleteLoginUserByPersonId.mockImplementation((v) => {
         if (v != 1 && v != 2) {
@@ -148,6 +156,8 @@ beforeEach(() => {
         }
         return Promise.resolve(v == 1 ? people[0].person : people[1].person);
     });
+
+    ormSMock.removeAllKeysForLoginUserId.mockResolvedValue({ count: 0 });
 });
 
 // reset
@@ -170,6 +180,8 @@ afterEach(() => {
 
     ormLMock.updateLoginUser.mockReset();
     ormPMock.deletePersonById.mockReset();
+
+    ormSMock.removeAllKeysForLoginUserId.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -239,6 +251,24 @@ test("Can modify a single coach (2).", async () => {
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
 
+test("Can force-logout a coach", async () => {
+    const req = getMockReq();
+    req.body = {
+        id: 7,
+        isAdmin: false,
+        isCoach: false,
+        sessionkey: "abcd",
+    };
+    const res = { id: 7, name: "Jeffrey Jan" };
+    await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
+    expectCall(reqMock.parseUpdateCoachRequest, req);
+    expect(ormLMock.updateLoginUser).toHaveBeenCalledTimes(2);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+    expectCall(ormSMock.removeAllKeysForLoginUserId, 7);
+});
+
 test("Can delete coaches", async () => {
     const req = getMockReq();
     req.body = { id: 1, sessionkey: "abcd" };
@@ -248,5 +278,35 @@ test("Can delete coaches", async () => {
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteCoachRequest, req);
     expectCall(ormLMock.deleteLoginUserFromDB, req.body.id);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+});
+
+test("Can't update oneself", async () => {
+    utilMock.isAdmin.mockReset();
+    utilMock.isAdmin.mockImplementation((v) =>
+        Promise.resolve({
+            userId: 7,
+            data: v,
+            accountStatus: "ACTIVATED",
+            is_admin: true,
+            is_coach: true,
+        })
+    );
+
+    const req = getMockReq();
+    req.body = {
+        id: 7,
+        isAdmin: false,
+        isCoach: false,
+        sessionkey: "abcd",
+    };
+
+    await expect(coach.modCoach(req)).rejects.toStrictEqual(
+        util.errors.cookInvalidID()
+    );
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
+    expectCall(reqMock.parseUpdateCoachRequest, req);
+    expect(ormLMock.updateLoginUser).toHaveBeenCalledTimes(0);
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });

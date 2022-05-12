@@ -126,6 +126,11 @@ export namespace InternalTypes {
         id: number;
     }
 
+    export interface Role {
+        role_id: number;
+        name: string;
+    }
+
     /**
      *  Represents a partial type response. Usually these will only contain a name
      * and an ID.
@@ -875,6 +880,15 @@ export interface WithUserID<T> {
  */
 export namespace Responses {
     /**
+     *  A paginable response holds, besides a data array, also the current page
+     * number and the total number of objects in the database
+     */
+    export interface Paginable<T> {
+        pagination: { page: number; count: number };
+        data: T[];
+    }
+
+    /**
      *  A response consisting of only a session key.
      */
     export interface Key {
@@ -891,8 +905,7 @@ export namespace Responses {
     /**
      *  A response consisting of and id and boolean.
      */
-    export interface Id_alumni {
-        id: number;
+    export interface Id_alumni extends Id {
         hasAlreadyTakenPart: boolean;
     }
 
@@ -963,9 +976,7 @@ export namespace Responses {
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
-    export interface StudentList {
-        data: InternalTypes.Student[];
-    }
+    export interface StudentList extends Paginable<InternalTypes.Student> {}
 
     /**
      *  StudentRoles are a list of roles.
@@ -977,8 +988,10 @@ export namespace Responses {
     /**
      *
      */
-    export interface UserList {
-        data: InternalTypes.User[];
+    export interface UserList extends Paginable<InternalTypes.User> {}
+
+    export interface RoleList {
+        data: InternalTypes.Role[];
     }
 
     /**
@@ -1095,13 +1108,13 @@ export namespace Responses {
     export interface ProjectListAndContracts {
         data: InternalTypes.ProjectAndContracts[];
     }
+    export interface ProjectList extends Paginable<InternalTypes.Project> {}
 
     /**
      *  A project filter list is a list of projects
      */
-    export interface ProjectFilterList {
-        data: InternalTypes.ProjectFilter;
-    }
+    export interface ProjectFilterList
+        extends Paginable<InternalTypes.ProjectFilter> {}
 
     /**
      *  An admin list response is the keyed version of the list of admins.
@@ -1180,6 +1193,11 @@ export namespace Responses {
 }
 
 export namespace Requests {
+    export interface PaginableRequest extends KeyRequest {
+        currentPage: number;
+        pageSize: number; // will be filled in by the parser using the config
+    }
+
     export interface Login {
         name: string;
         pass: string;
@@ -1230,9 +1248,21 @@ export namespace Requests {
         alumniSort?: string;
     }
 
-    export interface StudentFilter extends KeyRequest {}
+    export interface StudentFilter extends PaginableRequest {
+        osocYear?: number;
+        nameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[];
+        alumniFilter?: boolean;
+        coachFilter?: boolean;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        nameSort?: FilterSort;
+        emailSort?: FilterSort;
+        alumniSort?: FilterSort;
+    }
 
-    export interface UserFilter extends KeyRequest {
+    export interface UserFilter extends PaginableRequest {
         sessionkey: string;
         nameFilter?: string;
         emailFilter?: string;
@@ -1311,7 +1341,14 @@ export namespace Requests {
         deleteRoles?: object;
     }
 
-    export interface ProjectFilter extends KeyRequest {}
+    export interface ProjectFilter extends PaginableRequest {
+        projectNameFilter?: string;
+        clientNameFilter?: string;
+        assignedCoachesFilterArray?: number[];
+        fullyAssignedFilter?: boolean;
+        projectNameSort?: FilterSort;
+        clientNameSort?: FilterSort;
+    }
 
     export interface Draft extends IdRequest {
         studentId: number;
