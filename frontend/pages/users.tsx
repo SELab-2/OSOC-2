@@ -3,9 +3,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
 import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
-import { LoginUser } from "../types";
+import {
+    AccountStatus,
+    LoginUser,
+    Pagination,
+    Sort,
+    UserFilterParams,
+} from "../types";
 import SessionContext from "../contexts/sessionProvider";
 import { useRouter } from "next/router";
+import { Paginator } from "../components/Paginator/Paginator";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -13,9 +20,22 @@ import { useRouter } from "next/router";
  */
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
-
+    const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
     const { getSession } = useContext(SessionContext);
     const router = useRouter();
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 0,
+        count: 0,
+    });
+    const [searchParams, setSearchParams] = useState<UserFilterParams>({
+        nameFilter: "",
+        emailFilter: "",
+        nameSort: Sort.NONE,
+        emailSort: Sort.NONE,
+        adminFilter: false,
+        coachFilter: false,
+        statusFilter: AccountStatus.NONE,
+    });
 
     useEffect(() => {
         if (getSession) {
@@ -41,9 +61,131 @@ const Users: NextPage = () => {
         setUsers(users);
     };
 
+    const updatePagination = (pagination: Pagination) => {
+        setPagination(pagination);
+    };
+
+    const navigator = (page: number) => {
+        search(
+            searchParams.nameFilter,
+            searchParams.nameSort,
+            searchParams.emailFilter,
+            searchParams.emailSort,
+            searchParams.adminFilter,
+            searchParams.coachFilter,
+            searchParams.statusFilter,
+            page
+        ).then();
+    };
+
+    const filter = async (
+        nameFilter: string,
+        nameSort: Sort,
+        emailFilter: string,
+        emailSort: Sort,
+        adminFilter: boolean,
+        coachFilter: boolean,
+        statusFilter: AccountStatus
+    ) => {
+        setSearchParams({
+            nameFilter: nameFilter,
+            nameSort: nameSort,
+            emailFilter: emailFilter,
+            emailSort: emailSort,
+            adminFilter: adminFilter,
+            coachFilter: coachFilter,
+            statusFilter: statusFilter,
+        });
+        setPagination({ page: 0, count: 0 });
+        await search(
+            nameFilter,
+            nameSort,
+            emailFilter,
+            emailSort,
+            adminFilter,
+            coachFilter,
+            statusFilter,
+            0
+        );
+    };
+
+    /**
+     * Build and execute the query
+     */
+    const search = async (
+        nameFilter: string,
+        nameSort: Sort,
+        emailFilter: string,
+        emailSort: Sort,
+        adminFilter: boolean,
+        coachFilter: boolean,
+        statusFilter: AccountStatus,
+        currentPage: number
+    ) => {
+        if (loading) return;
+
+        const filters = [];
+        if (nameFilter !== "") {
+            filters.push(`nameFilter=${nameFilter}`);
+        }
+
+        if (nameSort !== Sort.NONE) {
+            filters.push(`nameSort=${nameSort}`);
+        }
+
+        if (emailFilter !== "") {
+            filters.push(`emailFilter=${emailFilter}`);
+        }
+
+        if (emailSort !== Sort.NONE) {
+            filters.push(`emailSort=${emailSort}`);
+        }
+
+        if (adminFilter) {
+            filters.push(`isAdminFilter=${adminFilter}`);
+        }
+
+        if (coachFilter) {
+            filters.push(`isCoachFilter=${coachFilter}`);
+        }
+
+        if (statusFilter !== AccountStatus.NONE) {
+            filters.push(`statusFilter=${statusFilter}`);
+        }
+
+        filters.push(`currentPage=${currentPage}`);
+
+        const query = filters.length > 0 ? `?${filters.join("&")}` : "";
+
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        if (sessionKey !== "") {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                    },
+                }
+            )
+                .then((response) => response.json())
+                .catch((err) => {
+                    console.log(err);
+                });
+            console.log(response.pagination);
+            updateUsers(response.data);
+            updatePagination(response.pagination);
+        }
+        isLoading(false);
+    };
+
     return (
         <div className={styles.body}>
-            <UserFilter updateUsers={updateUsers} />
+            <UserFilter search={filter} />
             <div>
                 {users !== undefined
                     ? users.map((user) => {
@@ -57,6 +199,7 @@ const Users: NextPage = () => {
                       })
                     : null}
             </div>
+            <Paginator pagination={pagination} navigator={navigator} />
         </div>
     );
 };

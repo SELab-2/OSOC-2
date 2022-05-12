@@ -283,3 +283,26 @@ export interface Project {
         }
     ];
 }
+
+export interface UserFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    adminFilter: boolean;
+    coachFilter: boolean;
+    statusFilter: AccountStatus;
+}
+
+/** The amount of items on a single page */
+export const pageSize = 3;
+
+/**
+ * Interface for pagination
+ */
+export interface Pagination {
+    /** The current page */
+    page: number;
+    /** The total amount of items */
+    count: number;
+}
