@@ -1214,7 +1214,7 @@
         "operationId": "create_project",
         "parameters": [
           {
-            "name": "end_date",
+            "name": "end",
             "in": "header",
             "description": "The end date of this project.",
             "required": true,
@@ -1284,7 +1284,7 @@
             }
           },
           {
-            "name": "start_date",
+            "name": "start",
             "in": "header",
             "description": "The start date of this project.",
             "required": true,
