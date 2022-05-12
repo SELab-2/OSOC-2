@@ -1,20 +1,13 @@
-.body {
+.students {
+  width: clamp(18rem, 94vw, 60rem);
   margin-inline: auto;
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
-  display: flex;
-  flex-direction: column;
+  position: relative;
 }
 
 .body > nav {
   width: clamp(18rem, 94vw, 60rem);
-  padding-inline: 2rem;
   margin-inline: auto;
-  margin-top: 1rem;
-}
-
-.students {
-  width: clamp(18rem, 94vw, 60rem);
-  position: relative;
 }
 
 .students.limited {

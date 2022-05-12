@@ -222,69 +222,64 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     };
 
     return (
-        <div className={styles.body}>
-            <div
-                className={`${styles.students} ${
-                    display === Display.LIMITED ? styles.limited : ""
-                }`}
-            >
-                <div>
-                    <StudentFilter display={display} search={filter} />
-                    <div className={styles.scrollView}>
-                        <div className={styles.topShadowCaster} />
-                        <div
-                            className={`${styles.studentCards} ${
-                                display === Display.LIMITED
-                                    ? styles.limited
-                                    : ""
-                            }`}
-                        >
-                            {students.map((student, index) => {
-                                const id = student.student.student_id;
-                                id_to_index[id] = index;
-                                return (
-                                    <div
-                                        key={student.student.student_id}
-                                        className={styles.card}
-                                        onClick={(e) =>
-                                            clickStudent(
-                                                e,
-                                                student.student.student_id,
-                                                index
-                                            )
-                                        }
-                                    >
-                                        <StudentCard
-                                            student={student as Student}
-                                            display={display}
+        <div
+            className={`${styles.students} ${
+                display === Display.LIMITED ? styles.limited : ""
+            }`}
+        >
+            <div>
+                <StudentFilter display={display} search={filter} />
+                <div className={styles.scrollView}>
+                    <div className={styles.topShadowCaster} />
+                    <div
+                        className={`${styles.studentCards} ${
+                            display === Display.LIMITED ? styles.limited : ""
+                        }`}
+                    >
+                        {students.map((student, index) => {
+                            const id = student.student.student_id;
+                            id_to_index[id] = index;
+                            return (
+                                <div
+                                    key={student.student.student_id}
+                                    className={styles.card}
+                                    onClick={(e) =>
+                                        clickStudent(
+                                            e,
+                                            student.student.student_id,
+                                            index
+                                        )
+                                    }
+                                >
+                                    <StudentCard
+                                        student={student as Student}
+                                        display={display}
+                                    />
+                                    {student.evaluation.evaluations.filter(
+                                        (evaluation) => !evaluation.is_final
+                                    ).length > 0 ? (
+                                        <EvaluationBar
+                                            evaluations={
+                                                student.evaluation.evaluations
+                                            }
                                         />
-                                        {student.evaluation.evaluations.filter(
-                                            (evaluation) => !evaluation.is_final
-                                        ).length > 0 ? (
-                                            <EvaluationBar
-                                                evaluations={
-                                                    student.evaluation
-                                                        .evaluations
-                                                }
-                                            />
-                                        ) : null}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className={styles.bottomShadowCaster} />
+                                    ) : null}
+                                </div>
+                            );
+                        })}
                     </div>
+                    <div className={styles.bottomShadowCaster} />
                 </div>
-                {selectedStudent !== -1 &&
-                students[selectedStudent] !== undefined ? (
-                    <StudentOverview
-                        updateEvaluations={updateStudentEvaluation}
-                        student={students[selectedStudent]}
-                        clearSelection={clearSelection}
-                    />
-                ) : null}
+                <Paginator pagination={pagination} navigator={navigator} />
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            {selectedStudent !== -1 &&
+            students[selectedStudent] !== undefined ? (
+                <StudentOverview
+                    updateEvaluations={updateStudentEvaluation}
+                    student={students[selectedStudent]}
+                    clearSelection={clearSelection}
+                />
+            ) : null}
         </div>
     );
 };
