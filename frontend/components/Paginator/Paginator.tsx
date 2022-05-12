@@ -1,6 +1,5 @@
 import { pageSize, Pagination } from "../../types";
 import React from "react";
-import styles from "./Paginator.module.scss";
 
 export const Paginator: React.FC<{
     pagination: Pagination;
@@ -35,7 +34,7 @@ export const Paginator: React.FC<{
 
     return (
         <nav
-            className={`is-centered pagination ${styles.pagination}`}
+            className="is-centered pagination"
             role="navigation"
             aria-label="pagination"
         >
