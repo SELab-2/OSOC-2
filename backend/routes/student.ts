@@ -206,9 +206,6 @@ export async function createStudentSuggestion(
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // if (checkedSessionKey.data == undefined) {
-    //     return Promise.reject(errors.cookInvalidID());
-    // } // what? this doesn't make an ounce of sense?
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -248,7 +245,6 @@ export async function createStudentSuggestion(
                 checkedSessionKey.userId
         );
 
-        console.log("Updating!");
         newEvaluation = await ormEv.updateEvaluationForStudent({
             evaluation_id: suggestion[0].evaluation_id,
             loginUserId: checkedSessionKey.userId,
@@ -256,7 +252,6 @@ export async function createStudentSuggestion(
             motivation: checkedSessionKey.data.reason,
         });
     } else {
-        console.log("Creating");
         newEvaluation = await ormEv.createEvaluationForStudent({
             loginUserId: checkedSessionKey.userId,
             jobApplicationId: jobApplication.job_application_id,
@@ -288,9 +283,6 @@ export async function getStudentSuggestions(
 ): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // if (checkedSessionKey.data == undefined) {
-    //     return Promise.reject(errors.cookInvalidID());
-    // } // ounces of sense are hard to come by...
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
