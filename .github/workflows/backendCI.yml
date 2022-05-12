@@ -56,4 +56,4 @@ jobs:
         skip-step: install
         annotations: failed-tests
     - name: Setup environment
-      run: export NODE_OPTIONS="--max-old-space-size=4096"
+      run: echo "{environment_variable_name}={value}" >> $GITHUB_ENV
