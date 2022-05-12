@@ -11,12 +11,19 @@ export const OsocCreateFilter: React.FC<{
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
     const { getSession } = useContext(SessionContext);
 
+    const [isAdmin, setIsAdmin] = useState(false);
+
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
      * the query parameters
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
+        if (getSession) {
+            getSession().then(({ isAdmin }) => {
+                setIsAdmin(isAdmin);
+            });
+        }
         const params: OsocFilterParams = {
             yearFilter: yearFilter,
             yearSort: yearSort,
@@ -116,16 +123,18 @@ export const OsocCreateFilter: React.FC<{
                     <button onClick={searchPress}>Search</button>
                 </div>
 
-                {/* This shouldn't be a styles query probably */}
-                <div className={styles.query}>
-                    <input
-                        className={`input ${styles.input}`}
-                        type="text"
-                        placeholder="Year.."
-                        onChange={(e) => setOsocCreate(e.target.value)}
-                    />
-                    <button onClick={createPress}>Create</button>
-                </div>
+                {/** Only admins should be able to create new osoc editions */}
+                {isAdmin ? (
+                    <div className={styles.query}>
+                        <input
+                            className={`input ${styles.input}`}
+                            type="text"
+                            placeholder="Year.."
+                            onChange={(e) => setOsocCreate(e.target.value)}
+                        />
+                        <button onClick={createPress}>Create</button>
+                    </div>
+                ) : null}
             </form>
         </div>
     );
