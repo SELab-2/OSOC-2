@@ -39,6 +39,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         count: 0,
     });
 
+    const [loading, isLoading] = useState(false);
+
     /**
      * Updates the list of students and sets the selected student index
      * @param filteredStudents
@@ -150,6 +152,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param page
      */
     const search = async (params: StudentFilterParams, page: number) => {
+        if (loading) return;
+        isLoading(true);
         const filters = [];
 
         if (params.nameFilter !== "") {
@@ -219,6 +223,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             setFilteredStudents(response.data);
             setPagination(response.pagination);
         }
+        isLoading(false);
     };
 
     return (

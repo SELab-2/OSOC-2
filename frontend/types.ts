@@ -307,6 +307,11 @@ export interface UserFilterParams {
     statusFilter: AccountStatus;
 }
 
+export interface OsocFilterParams {
+    yearFilter: string;
+    yearSort: Sort;
+}
+
 /** The amount of items on a single page */
 export const pageSize = 3;
 

@@ -1,19 +1,15 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, OsocEdition, Sort } from "../../../types";
+import { getNextSort, OsocFilterParams, Sort } from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
-import { useRouter } from "next/router";
 
 export const OsocCreateFilter: React.FC<{
-    updateOsoc: (osocs: Array<OsocEdition>) => void;
-}> = ({ updateOsoc }) => {
+    search: (params: OsocFilterParams) => void;
+}> = ({ search }) => {
     const [osocCreate, setOsocCreate] = useState<string>("");
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
     const { getSession } = useContext(SessionContext);
-    const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-
-    const router = useRouter();
 
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
@@ -21,14 +17,16 @@ export const OsocCreateFilter: React.FC<{
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
-        if (loading) return;
-        search().then();
+        const params: OsocFilterParams = {
+            yearFilter: yearFilter,
+            yearSort: yearSort,
+        };
+        search(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [yearSort]);
 
     const toggleYearSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setYearSort(getNextSort(yearSort));
     };
 
@@ -38,8 +36,11 @@ export const OsocCreateFilter: React.FC<{
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
-        search().then();
+        const params: OsocFilterParams = {
+            yearFilter: yearFilter,
+            yearSort: yearSort,
+        };
+        search(params);
     };
 
     /**
@@ -48,57 +49,13 @@ export const OsocCreateFilter: React.FC<{
      */
     const createPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         create().then();
-    };
-
-    /**
-     * Build and execute the query
-     */
-    const search = async () => {
-        isLoading(true);
-        const filters = [];
-
-        if (yearFilter !== "") {
-            filters.push(`yearFilter=${yearFilter}`);
-        }
-
-        if (yearSort !== Sort.NONE) {
-            filters.push(`yearSort=${yearSort}`);
-        }
-
-        const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/osocs${query}`);
-
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            updateOsoc(response.data);
-            isLoading(false);
-        }
     };
 
     /**
      * Create the new osoc edition
      */
     const create = async () => {
-        isLoading(true);
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -121,8 +78,13 @@ export const OsocCreateFilter: React.FC<{
                 .catch((err) => {
                     console.log(err);
                 });
-            console.log(response);
-            search().then();
+            if (response.success) {
+                const params: OsocFilterParams = {
+                    yearFilter: yearFilter,
+                    yearSort: yearSort,
+                };
+                search(params);
+            }
         }
     };
 
