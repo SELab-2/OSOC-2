@@ -34,7 +34,7 @@ test("The motivation link question is absent", async () => {
     );
 });
 
-test("The url field in the motivation link question is undefined", async () => {
+test("The url field in the motivation upload question is undefined", async () => {
     const data = readFile("motivationUrlNotDefined.json");
     expect(data).not.toBeNull();
 
