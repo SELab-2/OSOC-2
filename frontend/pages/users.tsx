@@ -61,10 +61,6 @@ const Users: NextPage = () => {
         setUsers(users);
     };
 
-    const updatePagination = (pagination: Pagination) => {
-        setPagination(pagination);
-    };
-
     const navigator = (page: number) => {
         search(
             searchParams.nameFilter,
@@ -176,9 +172,8 @@ const Users: NextPage = () => {
                 .catch((err) => {
                     console.log(err);
                 });
-            console.log(response.pagination);
             updateUsers(response.data);
-            updatePagination(response.pagination);
+            setPagination(response.pagination);
         }
         isLoading(false);
     };

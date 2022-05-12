@@ -284,6 +284,19 @@ export interface Project {
     ];
 }
 
+export interface StudentFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    alumni: boolean;
+    studentCoach: boolean;
+    statusFilter: StudentStatus;
+    osocYear: string;
+    emailStatus: EmailStatus;
+    selectedRoles: Set<string>;
+}
+
 export interface UserFilterParams {
     nameFilter: string;
     emailFilter: string;

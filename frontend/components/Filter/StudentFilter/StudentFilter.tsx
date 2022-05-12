@@ -6,7 +6,7 @@ import {
     getNextSort,
     Role,
     Sort,
-    Student,
+    StudentFilterParams,
     StudentStatus,
 } from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
@@ -19,9 +19,9 @@ import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
-    setFilteredStudents: (user: Array<Student>) => void;
+    search: (params: StudentFilterParams) => void;
     display: Display;
-}> = ({ setFilteredStudents, display }) => {
+}> = ({ search, display }) => {
     const { getSession } = useContext(SessionContext);
 
     const [nameFilter, setNameFilter] = useState<string>("");
@@ -78,7 +78,21 @@ export const StudentFilter: React.FC<{
 
     // Execute search
     useEffect(() => {
-        search().then();
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, alumni, studentCoach, statusFilter, emailStatus]);
 
@@ -189,75 +203,21 @@ export const StudentFilter: React.FC<{
 
     const searchPress = (e: SyntheticEvent) => {
         e.preventDefault();
-        search().then();
-    };
-
-    const search = async () => {
         setEmailStatusActive(false);
         setRolesActive(false);
-        const filters = [];
-
-        if (nameFilter !== "") {
-            filters.push(`nameFilter=${nameFilter}`);
-        }
-        if (nameSort !== Sort.NONE) {
-            filters.push(`nameSort=${nameSort}`);
-        }
-        if (emailFilter !== "") {
-            filters.push(`emailFilter=${emailFilter}`);
-        }
-        if (emailSort !== Sort.NONE) {
-            filters.push(`emailSort=${emailSort}`);
-        }
-        if (alumni) {
-            filters.push(`alumniFilter=${alumni}`);
-        }
-        if (studentCoach) {
-            filters.push(`coachFilter=${studentCoach}`);
-        }
-        if (osocYear !== "") {
-            filters.push(`osocYear=${osocYear}`);
-        }
-        if (selectedRoles.size !== 0) {
-            filters.push(
-                `roleFilter=${Array.from(selectedRoles.values()).toString()}`
-            );
-        }
-        if (statusFilter !== StudentStatus.EMPTY) {
-            filters.push(`statusFilter=${statusFilter}`);
-        }
-        if (emailStatus !== EmailStatus.EMPTY) {
-            filters.push(`emailStatusFilter=${emailStatus}`);
-        }
-        const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        return { success: false };
-                    } else return json;
-                })
-                .catch((err) => {
-                    console.log(err);
-                    return { success: false };
-                });
-            setFilteredStudents(response.data);
-        }
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     return (
