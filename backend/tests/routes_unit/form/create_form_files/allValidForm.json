@@ -266,67 +266,43 @@
         "key": "question_mRPXXQ",
         "label": "Upload your CV – size limit 10MB",
         "type": "FILE_UPLOAD",
-        "value": [
-          {
-            "id": "w2BOdp",
-            "name": "testfile.txt",
-            "url": "https://storage.googleapis.com/tally-response-assets/repXzN/3de274d0-98ef-4a6c-983b-8ba54a584a81/testfile.txt",
-            "mimeType": "text/plain",
-            "size": 30
-          }
-        ]
+        "value": null
       },
       {
         "key": "question_woGrrN",
         "label": "Or link to your CV",
         "type": "INPUT_LINK",
-        "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        "value": null
       },
       {
         "key": "question_nGlNNO",
         "label": "Upload your portfolio – size limit 10MB",
         "type": "FILE_UPLOAD",
-        "value": [
-          {
-            "id": "3xj9bG",
-            "name": "database_backup.sh",
-            "url": "https://storage.googleapis.com/tally-response-assets/repXzN/6bb09701-f317-4499-88b2-a186663165f3/database_backup.sh",
-            "mimeType": "application/x-sh",
-            "size": 517
-          }
-        ]
+        "value": null
       },
       {
         "key": "question_mOGppM",
         "label": "Or link to your portfolio / GitHub",
         "type": "INPUT_LINK",
-        "value": "https://github.com/BramDevlaminck"
+        "value": null
       },
       {
         "key": "question_mVJRR6",
         "label": "Upload your motivation – size limit 10MB",
         "type": "FILE_UPLOAD",
-        "value": [
-          {
-            "id": "mZoPk0",
-            "name": "Screenshot 2022-04-12 at 15.03.14.png",
-            "url": "https://storage.googleapis.com/tally-response-assets/repXzN/e8244fc4-8045-4ec8-bdfd-dabe37d76fd6/Screenshot-2022-04-12-at-15.03.14.png",
-            "mimeType": "image/png",
-            "size": 116341
-          }
-        ]
+        "value": null
       },
       {
         "key": "question_nPOMMx",
         "label": "Or link to your motivation",
         "type": "INPUT_LINK",
-        "value": "https://www.wow4u.com/page6.html"
+        "value": null
       },
       {
         "key": "question_3EWjj2",
         "label": "Or write about your motivation",
         "type": "TEXTAREA",
-        "value": "this is a test textform about motivation"
+        "value": null
       },
       {
         "key": "question_nrPNNX",
