@@ -55,3 +55,5 @@ jobs:
         working-directory: backend
         skip-step: install
         annotations: failed-tests
+    - name: Setup environment
+      run: export NODE_OPTIONS="--max-old-space-size=4096"
