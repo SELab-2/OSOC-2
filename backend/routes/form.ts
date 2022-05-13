@@ -18,6 +18,9 @@ import { type_enum } from "@prisma/client";
 import * as validator from "validator";
 import * as rq from "../request";
 import * as config from "./form_keys.json";
+import * as T from "../types";
+import fs from "fs";
+import path from "path";
 
 /**
  *  This function searches a question with a given key in the form.
@@ -1546,6 +1549,20 @@ export async function createForm(
     }
 
     return Promise.resolve({});
+}
+
+export async function readFile(
+    directoryPart: string | null,
+    file: string
+): Promise<T.Requests.Form> {
+    const readFile = (path: string) => fs.readFileSync(path, "utf8");
+    let fileData;
+    if (directoryPart === null) {
+        fileData = readFile(path.join(__dirname, `${file}`));
+    } else {
+        fileData = readFile(path.join(__dirname, `${directoryPart}/${file}`));
+    }
+    return Promise.resolve(JSON.parse(fileData));
 }
 
 /**

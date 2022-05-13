@@ -1,11 +1,8 @@
 import { getMockReq } from "@jest-mock/express";
 
-import * as T from "../../../../types";
 import express from "express";
 import { errors } from "../../../../utility";
-import * as fs from "fs";
-import * as path from "path";
-import { createForm } from "../../../../routes/form";
+import { createForm, readFile } from "../../../../routes/form";
 
 import * as ormOs from "../../../../orm_functions/osoc";
 import { job_application, osoc } from "@prisma/client";
@@ -57,19 +54,11 @@ const jobApplication: job_application = {
     created_at: new Date("2022-04-14T18:15:30.245Z"),
 };
 
-export function readFile(
-    directoryPart: string,
-    file: string
-): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(
-        path.join(__dirname, `./${directoryPart}/${file}`)
-    );
-    return JSON.parse(fileData);
-}
-
 test("Live in Belgium question absent", async () => {
-    const data = readFile(".", "failLiveInBelgiumAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "failLiveInBelgiumAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -78,7 +67,10 @@ test("Live in Belgium question absent", async () => {
 });
 
 test("Work in July question absent", async () => {
-    const data = readFile(".", "failWorkInJulyAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "failWorkInJulyAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -87,7 +79,10 @@ test("Work in July question absent", async () => {
 });
 
 test("Work in July 'no' answer", async () => {
-    const data = readFile(".", "liveInBelgiumAnswerNo.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "liveInBelgiumAnswerNo.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -96,7 +91,10 @@ test("Work in July 'no' answer", async () => {
 });
 
 test("Work in July 'null' answer", async () => {
-    const data = readFile(".", "liveInBelgiumAnswerNull.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "liveInBelgiumAnswerNull.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -107,7 +105,10 @@ test("Work in July 'null' answer", async () => {
 test("No osoc year specified", async () => {
     mockDatabaseCalls(null);
 
-    const data = readFile(".", "allValidForm.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "allValidForm.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -208,7 +209,10 @@ test("Osoc year specified", async () => {
         year: 2023,
     });
 
-    const data = readFile(".", "allValidForm.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "allValidForm.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();

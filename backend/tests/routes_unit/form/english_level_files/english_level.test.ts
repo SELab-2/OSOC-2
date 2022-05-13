@@ -1,16 +1,15 @@
 import express from "express";
 import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
-import { readFile } from "../create_form_files/create_form.test";
 
-import { getEnglishLevel } from "../../../../routes/form";
+import { getEnglishLevel, readFile } from "../../../../routes/form";
 import form_keys from "../../../../routes/form_keys.json";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
 
 test("english level question absent", async () => {
-    const data = readFile(
-        "../english_level_files",
+    const data = await readFile(
+        "../tests/routes_unit/form/english_level_files",
         "englishLevelQuestionAbsent.json"
     );
     expect(data).not.toBeNull();
@@ -23,8 +22,8 @@ test("english level question absent", async () => {
 });
 
 test("English level options absent", async () => {
-    const data = readFile(
-        "../english_level_files",
+    const data = await readFile(
+        "../tests/routes_unit/form/english_level_files",
         "englishLevelOptionsAbsent.json"
     );
     expect(data).not.toBeNull();
@@ -37,7 +36,10 @@ test("English level options absent", async () => {
 });
 
 test("English level amount of stars test", async () => {
-    const data = readFile("../english_level_files", "englishLevelStars.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/english_level_files",
+        "englishLevelStars.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getEnglishLevel(data as Form)).resolves.toStrictEqual(5);
