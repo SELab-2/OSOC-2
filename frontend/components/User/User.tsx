@@ -180,6 +180,8 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 }
+                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+                socket.emit("updateRoleUser"); // this refreshes the manage users page
                 removeUser(user);
                 return json;
             })
