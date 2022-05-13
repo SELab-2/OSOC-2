@@ -10,6 +10,7 @@ import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
+import { Modal } from "../Modal/Modal";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -23,6 +24,7 @@ export const User: React.FC<{
     const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -188,6 +190,15 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
+            .then(async (json) => {
+                if (!json.success) {
+                    return { success: false };
+                }
+                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+                socket.emit("updateRoleUser"); // this refreshes the manage users page
+                removeUser(user);
+                return json;
+            })
             .catch((err) => {
                 console.log(err);
                 return { success: false };
@@ -282,10 +293,22 @@ export const User: React.FC<{
                     </div>
                 </div>
             </div>
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete User ${name}`}
+            >
+                <p>
+                    You are about to delete an osoc user! Deleting an osoc user
+                    cannot be undone and will result in data loss. Are you
+                    certain that you wish to delete osoc user {name}?
+                </p>
+                <button onClick={deleteUser}>DELETE</button>
+            </Modal>
             <button
                 data-testid={"buttonDelete"}
                 className={`delete ${styles.delete}`}
-                onClick={deleteUser}
+                onClick={() => setShowDeleteModal(true)}
             />
         </div>
     );

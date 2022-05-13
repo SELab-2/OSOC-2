@@ -131,6 +131,35 @@ function maybe<T>(obj: Anything, key: string): T | undefined {
 }
 
 /**
+ *  Resolves with the given object if the `object.id` is a valid number
+ * (not NaN), otherwise, returns the rejector.
+ *  @template T The type of object to validate (should be an IdRequest).
+ *  @param r The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
+    return isNaN(r.id) ? rejector() : Promise.resolve(r);
+}
+
+/**
+ *  Resolves with the given object if none of the keys is a NaN value (they can
+ * be undefined) in the given object; otherwise, returns the rejector.
+ *  @template T The type of object to validate.
+ *  @param keys The keys to check.
+ *  @param obj The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+function allNonNaN<T extends Anything>(keys: string[], obj: T): Promise<T> {
+    return keys.every((v) => {
+        return obj[v] == undefined || !isNaN(obj[v] as number);
+    })
+        ? Promise.resolve(obj)
+        : rejector();
+}
+
+/**
  *  Parses a key-only request.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -175,7 +204,7 @@ async function parseKeyIdRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
     );
 }
 
@@ -188,7 +217,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
@@ -198,7 +227,7 @@ async function parseUpdateLoginUser(
                 req.body,
                 "accountStatus"
             ) as account_status_enum,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -243,22 +272,28 @@ export async function parseUpdateStudentRequest(
         "education",
     ];
 
-    return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, bodyF)) return rejector();
+    return hasFields(req, [], types.id)
+        .then(() => {
+            if (!atLeastOneField(req, bodyF))
+                return rejector<Requests.UpdateStudent>();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            emailOrGithub: maybe(req.body, "emailOrGithub"),
-            name: maybe(req.body, "name"),
-            gender: maybe(req.body, "gender"),
-            pronouns: maybe(req.body, "pronouns"),
-            phone: maybe(req.body, "phone"),
-            education: maybe(req.body, "education"),
-            alumni: maybe(req.body, "alumni"),
-            nickname: maybe(req.body, "nickname"),
-        });
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                emailOrGithub: maybe<string>(req.body, "emailOrGithub"),
+                name: maybe<string>(req.body, "name"),
+                gender: maybe<string>(req.body, "gender"),
+                pronouns: maybe<string>(req.body, "pronouns"),
+                phone: maybe<string>(req.body, "phone"),
+                education: maybe<Requests.UpdateStudent["education"]>(
+                    req.body,
+                    "education"
+                ),
+                alumni: maybe<boolean>(req.body, "alumni"),
+                nickname: maybe<string>(req.body, "nickname"),
+            });
+        })
+        .then(idIsNumber);
 }
 
 /**
@@ -270,7 +305,7 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(() => {
+    return hasFields(req, ["suggestion"], types.id).then(async () => {
         const sug: unknown = req.body.suggestion;
         if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
             return rejector();
@@ -279,8 +314,8 @@ export async function parseSuggestStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe(req.body, "reason"),
-        });
+            reason: maybe<string>(req.body, "reason"),
+        }).then(idIsNumber);
     });
 }
 
@@ -293,18 +328,18 @@ export async function parseSuggestStudentRequest(
 export async function parseGetSuggestionsStudentRequest(
     req: express.Request
 ): Promise<Requests.YearId> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if ("year" in req.body) {
             return Promise.resolve({
                 sessionkey: getSessionKey(req),
                 id: Number(req.params.id),
                 year: Number(req.body.year),
-            });
+            }).then((o) => allNonNaN(["id", "year"], o));
         } else {
             return Promise.resolve({
                 sessionkey: getSessionKey(req),
                 id: Number(req.params.id),
-            });
+            }).then(idIsNumber);
         }
     });
 }
@@ -346,7 +381,8 @@ export async function parseFilterOsocsRequest(
     const authenticated = await parseKeyRequest(req); // enforce authentication
     let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
-        year = parseInt(req.body.yearFilter);
+        year = Number(req.body.yearFilter);
+        if (isNaN(year)) return rejector();
     }
 
     for (const filter of [maybe(req.body, "yearSort")]) {
@@ -421,6 +457,7 @@ export async function parseFilterStudentsRequest(
     let osoc_year = new Date().getFullYear();
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
+        if (isNaN(osoc_year)) return rejector();
     }
 
     let alumniFilter: boolean | undefined = undefined;
@@ -521,7 +558,7 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if ("reply" in req.body) {
             if (
                 req.body.reply != Decision.YES &&
@@ -534,9 +571,9 @@ export async function parseFinalizeDecisionRequest(
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            reason: maybe(req.body, "reason"),
-            reply: maybe(req.body, "reply"),
-        });
+            reason: maybe<string>(req.body, "reason"),
+            reply: maybe<InternalTypes.Suggestion>(req.body, "reply"),
+        }).then(idIsNumber);
     });
 }
 
@@ -578,10 +615,10 @@ export async function parseNewProjectRequest(
             partner: req.body.partner,
             start: req.body.start,
             end: req.body.end,
-            osocId: req.body.osocId,
-            positions: req.body.positions,
+            osocId: Number(req.body.osocId),
+            positions: Number(req.body.positions),
             roles: req.body.roles,
-        })
+        }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
 
@@ -604,20 +641,23 @@ export async function parseUpdateProjectRequest(
         "deleteRoles",
     ];
 
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, options)) return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            partner: maybe(req.body, "partner"),
-            start: maybe(req.body, "start"),
-            end: maybe(req.body, "end"),
-            positions: maybe(req.body, "positions"),
-            modifyRoles: maybe(req.body, "modifyRoles"),
-            deleteRoles: maybe(req.body, "deleteRoles"),
-        });
+            name: maybe<string>(req.body, "name"),
+            partner: maybe<string>(req.body, "partner"),
+            start: maybe<Date>(req.body, "start"),
+            end: maybe<Date>(req.body, "end"),
+            positions:
+                maybe(req.body, "positions") == undefined
+                    ? undefined
+                    : Number(req.body.positions),
+            modifyRoles: maybe<object>(req.body, "modifyRoles"),
+            deleteRoles: maybe<object>(req.body, "deleteRoles"),
+        }).then(idIsNumber);
     });
 }
 
@@ -685,9 +725,9 @@ export async function parseDraftStudentRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            studentId: req.body.studentId,
+            studentId: Number(req.body.studentId),
             role: req.body.role,
-        })
+        }).then((o) => allNonNaN(["id", "studentId"], o))
     );
 }
 
@@ -700,7 +740,7 @@ export async function parseDraftStudentRequest(
 export async function parseSetFollowupStudentRequest(
     req: express.Request
 ): Promise<Requests.Followup> {
-    return hasFields(req, ["type"], types.id).then(() => {
+    return hasFields(req, ["type"], types.id).then(async () => {
         const type: string = req.body.type;
         if (
             type != "SCHEDULED" &&
@@ -715,7 +755,7 @@ export async function parseSetFollowupStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             type: type as FollowupType,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -748,18 +788,18 @@ export async function parseNewTemplateRequest(
 export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            subject: maybe(req.body, "subject"),
-            cc: maybe(req.body, "cc"),
-            content: maybe(req.body, "content"),
-        });
+            name: maybe<string>(req.body, "name"),
+            subject: maybe<string>(req.body, "subject"),
+            cc: maybe<string>(req.body, "cc"),
+            content: maybe<string>(req.body, "content"),
+        }).then(idIsNumber);
     });
 }
 
@@ -839,7 +879,7 @@ export async function parseResetPasswordRequest(
 export async function parseStudentRoleRequest(
     req: express.Request
 ): Promise<Requests.Role> {
-    return hasFields(req, ["name"], types.neither).then(() =>
+    return hasFields(req, ["name"], types.key).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             name: req.body.name,
@@ -855,7 +895,7 @@ export async function parseRemoveAssigneeRequest(
             sessionkey: getSessionKey(req),
             studentId: req.body.student,
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
     );
 }
 
@@ -901,18 +941,19 @@ export async function parseAcceptNewUserRequest(
             id: Number(req.params.id),
             is_admin: req.body.is_admin,
             is_coach: req.body.is_coach,
-        })
+        }).then(idIsNumber)
     );
 }
 
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
+    console.log(parseInt(req.body.year));
     return hasFields(req, ["year"], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             year: parseInt(req.body.year),
-        })
+        }).then((obj) => allNonNaN(["year"], obj))
     );
 }
 

@@ -16,24 +16,22 @@ export const Modal: React.FC<{
     handleClose: (e: SyntheticEvent) => void;
 }> = ({ children, visible, handleClose, title }) => {
     return (
-        <div
-            data-testid={"modal"}
-            className={`${styles.modal} ${
-                visible ? styles.displayBlock : styles.displayNone
-            }`}
-        >
-            <div className={styles.modalMain}>
-                <div className={styles.header}>
-                    <p>{title}</p>
+        <div className={`modal ${visible ? "is-active" : ""}`}>
+            <div className="modal-background" />
+            <div className="modal-card">
+                <header className={`${styles.header} modal-card-head`}>
+                    <p className="modal-card-title">{title}</p>
                     <button
-                        className={styles.modalButton}
+                        className="delete"
                         type="button"
                         onClick={handleClose}
                     >
                         Close
                     </button>
-                </div>
-                {children}
+                </header>
+                <section className={`modal-card-body ${styles.body}`}>
+                    {children}
+                </section>
             </div>
         </div>
     );
