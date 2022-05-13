@@ -435,7 +435,7 @@ export async function unAssignCoach(
     req: express.Request
 ): Promise<Responses.Empty> {
     return rq
-        .parseCoachRequest(req)
+        .parseRemoveCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (checked) => {
             return ormPU
