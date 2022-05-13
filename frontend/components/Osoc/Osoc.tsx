@@ -2,6 +2,7 @@ import styles from "./Osoc.module.css";
 import React, { SyntheticEvent, useContext, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { OsocEdition } from "../../types";
+import { Modal } from "../Modal/Modal";
 
 export const Osoc: React.FC<{
     osoc: OsocEdition;
@@ -11,6 +12,7 @@ export const Osoc: React.FC<{
     const [projects] = useState<number>(osoc._count.project);
     const { sessionKey } = useContext(SessionContext);
     const osocId = osoc.osoc_id;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const deleteOsoc = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -46,9 +48,21 @@ export const Osoc: React.FC<{
             </div>
 
             <p># Projects: {projects}</p>
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete Osoc ${year}`}
+            >
+                <p>
+                    You are about to delete an osoc edition! Deleting an osoc
+                    edition cannot be undone and will result in data loss. Are
+                    you sure that you wish to delete osoc edition {year}?
+                </p>
+                <button onClick={deleteOsoc}>DELETE</button>
+            </Modal>
             <button
                 className={`delete ${styles.delete}`}
-                onClick={deleteOsoc}
+                onClick={() => setShowDeleteModal(true)}
             />
         </div>
     );
