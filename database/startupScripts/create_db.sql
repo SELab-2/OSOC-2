@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS project_role (
 
 
 /* enum used in job appliction for the contract status */
-CREATE TYPE contract_status_enum AS ENUM ('DRAFT', 'APPROVED', 'CANCELLED', 'WAIT_APPROVAL', 'SIGNED', 'SENT');
+CREATE TYPE contract_status_enum AS ENUM ('APPLIED', 'APPROVED', 'AWAITING_PROJECT', 'CONTRACT_CONFIRMED', 'CONTRACT_DECLINED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS contract(
    contract_id                 SERIAL                  PRIMARY KEY,

@@ -207,12 +207,12 @@ enum decision_enum {
 }
 
 enum contract_status_enum {
-  DRAFT
+  APPLIED
   APPROVED
-  CANCELLED
-  WAIT_APPROVAL
-  SIGNED
-  SENT
+  AWAITING_PROJECT
+  CONTRACT_CONFIRMED
+  CONTRACT_DECLINED
+  REJECTED
 }
 
 enum email_status_enum {

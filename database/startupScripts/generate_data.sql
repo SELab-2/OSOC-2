@@ -49,7 +49,7 @@ INSERT INTO project_role(project_id, role_id, positions) VALUES((SELECT project_
 INSERT INTO contract(student_id, project_role_id, information, created_by_login_user_id, contract_status) VALUES
 ((SELECT student_id FROM student WHERE phone_number = '0032476553498'),
 (SELECT project_role_id FROM project_role WHERE positions = 2), 'Developer contract for osoc platform',
-(SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'DRAFT');
+(SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'APPLIED');
 
 /* Insert data into applied_role table */
 INSERT INTO applied_role(job_application_id, role_id)VALUES
