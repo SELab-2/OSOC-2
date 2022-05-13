@@ -16,7 +16,7 @@ test("should create a contract", async () => {
         projectRoleId: 1,
         information: "fake information",
         loginUserId: 5,
-        contractStatus: contract_status_enum.WAIT_APPROVAL,
+        contractStatus: contract_status_enum.AWAITING_PROJECT,
     };
 
     const returnContract = {
@@ -25,7 +25,7 @@ test("should create a contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL,
+        contract_status: contract_status_enum.AWAITING_PROJECT,
     };
 
     prismaMock.contract.create.mockResolvedValue(returnContract);
@@ -38,7 +38,7 @@ test("should update a contract", async () => {
         contractId: 1,
         information: "fake information",
         loginUserId: 5,
-        contractStatus: contract_status_enum.WAIT_APPROVAL,
+        contractStatus: contract_status_enum.AWAITING_PROJECT,
     };
 
     const returnContract = {
@@ -47,7 +47,7 @@ test("should update a contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL,
+        contract_status: contract_status_enum.AWAITING_PROJECT,
     };
 
     prismaMock.contract.update.mockResolvedValue(returnContract);
@@ -74,7 +74,7 @@ test("should remove the give contract", async () => {
         project_role_id: 1,
         information: "fake information",
         created_by_login_user_id: 5,
-        contract_status: contract_status_enum.WAIT_APPROVAL,
+        contract_status: contract_status_enum.AWAITING_PROJECT,
     };
 
     prismaMock.contract.delete.mockResolvedValue(returnContract);
@@ -89,7 +89,7 @@ test("should list all contracts of a student", async () => {
             project_role_id: 1,
             information: "fake information",
             created_by_login_user_id: 5,
-            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_status: contract_status_enum.AWAITING_PROJECT,
             contract_id: 5,
             project_role: {
                 project: {
@@ -121,7 +121,7 @@ test("should list all contracts linked to a project", async () => {
             project_role_id: 1,
             information: "fake information",
             created_by_login_user_id: 5,
-            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_status: contract_status_enum.AWAITING_PROJECT,
             contract_id: 5,
             project_role: {
                 project: {
@@ -153,7 +153,7 @@ test("should list all contracts linked to an osoc edition", async () => {
             project_role_id: 2,
             information: "fake information",
             created_by_login_user_id: 5,
-            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_status: contract_status_enum.AWAITING_PROJECT,
             contract_id: 4,
             project_role: {
                 project: {
@@ -176,7 +176,7 @@ test("should list all contracts linked to an osoc edition", async () => {
             project_role_id: 1,
             information: "fake information",
             created_by_login_user_id: 5,
-            contract_status: contract_status_enum.WAIT_APPROVAL,
+            contract_status: contract_status_enum.AWAITING_PROJECT,
             contract_id: 5,
             project_role: {
                 project: {

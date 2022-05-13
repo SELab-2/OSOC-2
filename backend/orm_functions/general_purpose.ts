@@ -19,7 +19,7 @@ export async function addStudentToProject(requestInfo: AddStudentToProject) {
             projectRoleId: project_role.project_role_id,
             information: requestInfo.information,
             loginUserId: requestInfo.loginUserId,
-            contractStatus: contract_status_enum.DRAFT,
+            contractStatus: contract_status_enum.AWAITING_PROJECT,
         });
     }
     return project_role;

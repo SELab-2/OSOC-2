@@ -17,14 +17,14 @@ const contract1: UpdateContract = {
     contractId: 0,
     information: "Contract details",
     loginUserId: 0,
-    contractStatus: contract_status_enum.SENT,
+    contractStatus: contract_status_enum.APPLIED,
 };
 
 const contract2: UpdateContract = {
     contractId: 0,
     information: "New Contract details",
     loginUserId: 0,
-    contractStatus: contract_status_enum.SIGNED,
+    contractStatus: contract_status_enum.CONTRACT_CONFIRMED,
 };
 
 it("should create 1 new contract linked to a student", async () => {
@@ -37,7 +37,7 @@ it("should create 1 new contract linked to a student", async () => {
             projectRoleId: project_role.project_role_id,
             information: "Contract details",
             loginUserId: login_user.login_user_id,
-            contractStatus: contract_status_enum.SENT,
+            contractStatus: contract_status_enum.APPLIED,
         };
         const created_contract = await createContract(contract);
         contract1.contractId = created_contract.contract_id;
@@ -77,7 +77,7 @@ it("should create 1 new contract linked to a student", async () => {
             projectRoleId: project_role.project_role_id,
             information: "Student Contract details",
             loginUserId: login_user.login_user_id,
-            contractStatus: contract_status_enum.CANCELLED,
+            contractStatus: contract_status_enum.REJECTED,
         };
         const created_contract = await createContract(contract);
         expect(created_contract).toHaveProperty(
@@ -153,7 +153,7 @@ it("should list all contracts linked to a student", async () => {
             projectRoleId: project_role.project_role_id,
             information: "Contract details",
             loginUserId: login_user.login_user_id,
-            contractStatus: contract_status_enum.SENT,
+            contractStatus: contract_status_enum.APPLIED,
         };
 
         await createContract(contract);
@@ -181,7 +181,7 @@ it("should list all contracts linked to a project", async () => {
             projectRoleId: project_role.project_role_id,
             information: "Contract details",
             loginUserId: login_user.login_user_id,
-            contractStatus: contract_status_enum.SENT,
+            contractStatus: contract_status_enum.APPLIED,
         };
 
         await createContract(contract);
@@ -212,7 +212,7 @@ it("should list all contracts linked to an osoc year", async () => {
             projectRoleId: project_role.project_role_id,
             information: "Contract details",
             loginUserId: login_user.login_user_id,
-            contractStatus: contract_status_enum.SENT,
+            contractStatus: contract_status_enum.APPLIED,
         };
 
         await createContract(contract);
