@@ -1,20 +1,14 @@
 import { errors } from "../../../../utility";
 
-import { getPortfolio } from "../../../../routes/form";
-import * as T from "../../../../types";
-import fs from "fs";
-import path from "path";
+import { getPortfolio, readFile } from "../../../../routes/form";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
 
-export function readFile(file: string): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
-    return JSON.parse(fileData);
-}
-
 test("The portfolio link question is absent", async () => {
-    const data = readFile("portfolioLinkQuestionAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/portfolio_files",
+        "portfolioLinkQuestionAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getPortfolio(data as Form)).rejects.toBe(
@@ -23,7 +17,10 @@ test("The portfolio link question is absent", async () => {
 });
 
 test("The value of the portfolio link question is not empty", async () => {
-    const data = readFile("portfolioLinkValueNotEmpty.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/portfolio_files",
+        "portfolioLinkValueNotEmpty.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getPortfolio(data as Form)).resolves.toStrictEqual({
@@ -35,7 +32,10 @@ test("The value of the portfolio link question is not empty", async () => {
 });
 
 test("The url field in the portfolio upload question is undefined", async () => {
-    const data = readFile("portfolioUrlNotDefined.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/portfolio_files",
+        "portfolioUrlNotDefined.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getPortfolio(data as Form)).rejects.toBe(
@@ -44,7 +44,10 @@ test("The url field in the portfolio upload question is undefined", async () => 
 });
 
 test("The value of the portfolio upload field is valid", async () => {
-    const data = readFile("portfolioUploadValueValid.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/portfolio_files",
+        "portfolioUploadValueValid.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getPortfolio(data as Form)).resolves.toStrictEqual({

@@ -1,27 +1,24 @@
 import { errors } from "../../../../utility";
 
-import { getCV } from "../../../../routes/form";
-import * as T from "../../../../types";
-import fs from "fs";
-import path from "path";
+import { getCV, readFile } from "../../../../routes/form";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
 
-export function readFile(file: string): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
-    return JSON.parse(fileData);
-}
-
 test("The cv link question is absent", async () => {
-    const data = readFile("cvLinkQuestionAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/cv_files",
+        "cvLinkQuestionAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getCV(data as Form)).rejects.toBe(errors.cookArgumentError());
 });
 
 test("The value of the cv link question is not empty", async () => {
-    const data = readFile("cvLinkValueNotEmpty.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/cv_files",
+        "cvLinkValueNotEmpty.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getCV(data as Form)).resolves.toStrictEqual({
@@ -33,14 +30,20 @@ test("The value of the cv link question is not empty", async () => {
 });
 
 test("The url field in the cv upload question is undefined", async () => {
-    const data = readFile("cvUrlNotDefined.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/cv_files",
+        "cvUrlNotDefined.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getCV(data as Form)).rejects.toBe(errors.cookArgumentError());
 });
 
 test("The value of the cv upload field is valid", async () => {
-    const data = readFile("cvUploadValueValid.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/cv_files",
+        "cvUploadValueValid.json"
+    );
     expect(data).not.toBeNull();
 
     await expect(getCV(data as Form)).resolves.toStrictEqual({

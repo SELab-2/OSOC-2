@@ -2,21 +2,15 @@ import express from "express";
 import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
 
-import { getVolunteerInfo } from "../../../../routes/form";
-import * as T from "../../../../types";
-import fs from "fs";
-import path from "path";
+import { getVolunteerInfo, readFile } from "../../../../routes/form";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
 
-export function readFile(file: string): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
-    return JSON.parse(fileData);
-}
-
 test("Volunteer info question absent", async () => {
-    const data = readFile("volunteerInfoQuestionAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/volunteer_info_files",
+        "volunteerInfoQuestionAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -27,7 +21,10 @@ test("Volunteer info question absent", async () => {
 });
 
 test("Volunteer info options are absent", async () => {
-    const data = readFile("volunteerInfoOptionsAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/volunteer_info_files",
+        "volunteerInfoOptionsAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();

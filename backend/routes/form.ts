@@ -1556,12 +1556,7 @@ export async function readFile(
     file: string
 ): Promise<T.Requests.Form> {
     const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    let fileData;
-    if (directoryPart === null) {
-        fileData = readFile(path.join(__dirname, `${file}`));
-    } else {
-        fileData = readFile(path.join(__dirname, `${directoryPart}/${file}`));
-    }
+    const fileData = readFile(path.join(__dirname, `${directoryPart}/${file}`));
     return Promise.resolve(JSON.parse(fileData));
 }
 

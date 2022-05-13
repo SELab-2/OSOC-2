@@ -2,19 +2,13 @@ import express from "express";
 import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
 
-import { createForm } from "../../../../routes/form";
-import * as T from "../../../../types";
-import fs from "fs";
-import path from "path";
-
-export function readFile(file: string): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
-    return JSON.parse(fileData);
-}
+import { createForm, readFile } from "../../../../routes/form";
 
 test("Birth name question absent", async () => {
-    const data = readFile("failBirthNameQuestionAbsent.json");
+    const data = await readFile(
+        "../tests/routes_unit/form/birth_name_files",
+        "failBirthNameQuestionAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
