@@ -56,7 +56,7 @@ export const Osoc: React.FC<{
                 <p>
                     You are about to delete an osoc edition! Deleting an osoc
                     edition cannot be undone and will result in data loss. Are
-                    you sure that you wish to delete osoc edition {year}?
+                    you certain that you wish to delete osoc edition {year}?
                 </p>
                 <button onClick={deleteOsoc}>DELETE</button>
             </Modal>
