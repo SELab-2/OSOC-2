@@ -1346,6 +1346,7 @@ export namespace Requests {
         clientNameFilter?: string;
         assignedCoachesFilterArray?: number[];
         fullyAssignedFilter?: boolean;
+        osocYearFilter?: number;
         projectNameSort?: FilterSort;
         clientNameSort?: FilterSort;
     }

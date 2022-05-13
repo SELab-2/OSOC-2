@@ -6,6 +6,7 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as ormPr from "../orm_functions/project";
 import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
+import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
 import { InternalTypes, Responses, StringDict } from "../types";
@@ -557,23 +558,34 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checked = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     // .catch((res) => res);
-    if (checked.data == undefined) {
+    if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
+    }
+
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.osocYearFilter === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.osocYearFilter;
     }
 
     const projects = await ormPr.filterProjects(
         {
-            currentPage: checked.data.currentPage,
-            pageSize: checked.data.pageSize,
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
         },
-        checked.data.projectNameFilter,
-        checked.data.clientNameFilter,
-        checked.data.assignedCoachesFilterArray,
-        checked.data.fullyAssignedFilter,
-        checked.data.projectNameSort,
-        checked.data.clientNameSort
+        checkedSessionKey.data.projectNameFilter,
+        checkedSessionKey.data.clientNameFilter,
+        checkedSessionKey.data.assignedCoachesFilterArray,
+        checkedSessionKey.data.fullyAssignedFilter,
+        year,
+        checkedSessionKey.data.projectNameSort,
+        checkedSessionKey.data.clientNameSort
     );
 
     const projectlist = [];
