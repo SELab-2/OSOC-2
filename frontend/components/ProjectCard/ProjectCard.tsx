@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { Project } from "../../types";
 import styles from "./ProjectCard.module.css";
 
 export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+    const router = useRouter();
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
 
     const calculateRoleMap = () => {
@@ -62,6 +64,11 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
             <br></br>
             <h1>Project Info</h1>
             <p>{project.description}</p>
+            <button
+                onClick={() => router.push(`projects/${project.id}/change`)}
+            >
+                Change
+            </button>
         </div>
     );
 };
