@@ -117,3 +117,29 @@ test("Insert a job application in the database", async () => {
         id: 1,
     });
 });
+
+test("Insert a job application in the database", async () => {
+    await expect(
+        addJobApplicationToDatabase(
+            {
+                responsibilities: null,
+                funFact: "I am funny",
+                volunteerInfo: "volunteer info",
+                studentCoach: null,
+                osocId: 1,
+                educations: ["Backend development"],
+                educationLevel: "A professional Bachelor",
+                educationDuration: 5,
+                educationYear: "3rd",
+                educationInstitute: "Ghent university",
+                emailStatus: "DRAFT",
+                createdAt: "December 17, 2021 03:24:00",
+            },
+            {
+                id: 1,
+            }
+        )
+    ).resolves.toStrictEqual({
+        id: 1,
+    });
+});
