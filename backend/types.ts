@@ -1339,6 +1339,7 @@ export namespace Requests {
         osocId?: number;
         addRoles?: object;
         deleteRoles?: object;
+        description?: string;
     }
 
     export interface ProjectFilter extends PaginableRequest {

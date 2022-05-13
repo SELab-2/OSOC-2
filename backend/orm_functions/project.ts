@@ -248,6 +248,7 @@ export async function updateProject(project: UpdateProject) {
             start_date: project.startDate,
             end_date: project.endDate,
             positions: project.positions,
+            description: project.description,
         },
     });
     return result;

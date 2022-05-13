@@ -198,6 +198,7 @@ export async function modProject(
         endDate: checkedId.end,
         positions: checkedId.positions,
         osocId: checkedId.osocId,
+        description: checkedId.description,
     });
 
     if (checkedId.modifyRoles !== undefined) {
@@ -243,6 +244,7 @@ export async function modProject(
         positions: updatedProject.positions,
         osoc_id: updatedProject.osoc_id,
         roles: roles,
+        description: updatedProject.description,
     });
 }
 

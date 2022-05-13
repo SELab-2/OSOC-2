@@ -639,6 +639,7 @@ export async function parseUpdateProjectRequest(
         "positions",
         "modifyRoles",
         "deleteRoles",
+        "description",
     ];
 
     return hasFields(req, [], types.id).then(async () => {
@@ -657,6 +658,7 @@ export async function parseUpdateProjectRequest(
                     : Number(req.body.positions),
             modifyRoles: maybe<object>(req.body, "modifyRoles"),
             deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            description: maybe<string>(req.body, "description"),
         }).then(idIsNumber);
     });
 }
