@@ -7,7 +7,6 @@ import { Responses } from "../types";
 import * as util from "../utility";
 import * as ormSe from "../orm_functions/session_key";
 import { errors } from "../utility";
-import * as ormL from "../orm_functions/login_user";
 
 /**
  *  Attempts to list all coaches in the system.
@@ -73,7 +72,7 @@ export async function modCoach(
                             await ormSe.removeAllKeysForLoginUserId(
                                 res.login_user_id
                             );
-                            await ormL.updateLoginUser({
+                            await ormLU.updateLoginUser({
                                 loginUserId: res.login_user_id,
                                 isAdmin: false,
                                 isCoach: false,
@@ -112,44 +111,6 @@ export async function deleteCoach(
 }
 
 /**
- *  Attempts to get all data for the requests of coaches in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function getCoachRequests(
-    req: express.Request
-): Promise<Responses.CoachList> {
-    return rq
-        .parseGetAllCoachRequestsRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(async () => {
-            return ormLU
-                .getAllLoginUsers()
-                .then((obj) =>
-                    obj
-                        .filter(
-                            (v) => v.is_coach && v.account_status == "PENDING"
-                        )
-                        .map((v) => ({
-                            person_data: {
-                                id: v.person.person_id,
-                                name: v.person.name,
-                            },
-                            coach: v.is_coach,
-                            admin: v.is_admin,
-                            activated: v.account_status as string,
-                        }))
-                )
-                .then((arr) =>
-                    Promise.resolve({
-                        data: arr,
-                    })
-                );
-        });
-}
-
-/**
  *  Gets the router for all `/coaches/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/coaches/`
  * endpoints.
@@ -158,8 +119,6 @@ export function getRouter(): express.Router {
     const router: express.Router = express.Router({ strict: true });
     util.setupRedirect(router, "/coach");
     util.route(router, "get", "/all", listCoaches);
-
-    util.route(router, "get", "/request", getCoachRequests);
 
     util.route(router, "post", "/:id", modCoach);
     util.route(router, "delete", "/:id", deleteCoach);

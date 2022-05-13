@@ -23,11 +23,9 @@ test("Can parse Key-only requests", () => {
 
     const calls = [
         Rq.parseLogoutRequest,
-        Rq.parseStudentAllRequest,
         Rq.parseCoachAllRequest,
         Rq.parseGetAllCoachRequestsRequest,
         Rq.parseAdminAllRequest,
-        Rq.parseProjectAllRequest,
         Rq.parseConflictAllRequest,
         Rq.parseFollowupAllRequest,
         Rq.parseTemplateListRequest,
@@ -99,6 +97,49 @@ test("Can parse Key-ID requests", () => {
         );
 
     return Promise.all([successes, failures, otherfails].flat());
+});
+
+test("Can parse pagination requests", () => {
+    const valid: express.Request = getMockReq();
+    const invalid: express.Request = getMockReq();
+    const wrongprop: express.Request = getMockReq();
+    const validPg: express.Request = getMockReq();
+
+    setSessionKey(valid, "hello I am a key");
+    setSessionKey(validPg, "hello I am a key");
+    wrongprop.body.key = "hello I am a key as well";
+    validPg.body.currentPage = 5;
+    const size = config.global.pageSize;
+
+    const calls = [
+        Rq.parseStudentAllRequest,
+        Rq.parseProjectAllRequest,
+        Rq.parseUserAllRequest,
+    ];
+
+    const successes = calls.map((call) =>
+        expect(call(valid)).resolves.toStrictEqual({
+            sessionkey: "hello I am a key",
+            currentPage: 0,
+            pageSize: size,
+        })
+    );
+
+    const paged = calls.map((call) =>
+        expect(call(validPg)).resolves.toStrictEqual({
+            sessionkey: "hello I am a key",
+            currentPage: 5,
+            pageSize: size,
+        })
+    );
+
+    const failures = calls
+        .flatMap((call) => [call(invalid), call(wrongprop)])
+        .map((sub) =>
+            expect(sub).rejects.toStrictEqual(errors.cookUnauthenticated())
+        );
+
+    return Promise.all([successes, paged, failures].flat());
 });
 
 test("Can parse update login user requests", () => {
@@ -445,7 +486,21 @@ test("Can parse filter osocs request", () => {
         );
     });
 
-    return Promise.all([okays, fails].flat());
+    const unauth = [
+        nothing,
+        yearFilterOnly,
+        yearSortOnly1,
+        yearSortOnly2,
+        yearFilterAndSort,
+    ].map((body) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...body };
+        expect(Rq.parseFilterOsocsRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([okays, fails, unauth].flat());
 });
 
 test("Can parse filter students request", () => {
@@ -522,18 +577,22 @@ test("Can parse filter students request", () => {
         [
             "nameFilter",
             "emailFilter",
-            "roleFilter",
             "alumniFilter",
             "coachFilter",
             "statusFilter",
             "emailStatusFilter",
             "nameSort",
+            "roleFilter",
             "emailSort",
-        ].forEach((x) => {
-            if (!(x in req.body)) {
-                copy[x] = undefined;
+        ].forEach((v) => {
+            if (!(v in req.body)) {
+                copy[v] = undefined;
             }
         });
+
+        copy.currentPage = 0;
+        copy.pageSize = config.global.pageSize;
+
         if (!("osocYear" in req.body)) {
             copy["osocYear"] = new Date().getFullYear();
         }
@@ -559,7 +618,31 @@ test("Can parse filter students request", () => {
         );
     });
 
-    return Promise.all([okays, fails].flat());
+    const unauth = [
+        nothing,
+        osocYear,
+        nameFilter,
+        emailFilterGoodEmail,
+        emailFilterBadEmail,
+        roleFilterList,
+        alumniFilterBoolean,
+        coachFilterBoolean,
+        statusFilter,
+        emailStatusFilter,
+        nameSort,
+        emailSort,
+        roleFilterString,
+        alumniFilterString,
+        coachFilterString,
+    ].map((body) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...body };
+        return expect(Rq.parseFilterStudentsRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([okays, fails, unauth].flat());
 });
 
 test("Can parse filter users request", () => {
@@ -632,6 +715,8 @@ test("Can parse filter users request", () => {
             }
         });
         copy.sessionkey = key;
+        copy.currentPage = 0;
+        copy.pageSize = config.global.pageSize;
         return expect(Rq.parseFilterUsersRequest(req)).resolves.toStrictEqual(
             copy
         );
@@ -652,7 +737,25 @@ test("Can parse filter users request", () => {
         );
     });
 
-    return Promise.all([okays, fails].flat());
+    const unauth = [
+        nothing,
+        isAdminFilterString,
+        isCoachFilterString,
+        nameFilter,
+        emailFilterGoodEmail,
+        emailFilterBadEmail,
+        nameSort,
+        statusFilter,
+        emailSort,
+    ].map((x) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...x };
+        return expect(Rq.parseFilterUsersRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([okays, fails, unauth].flat());
 });
 
 test("Can parse filter projects request", () => {
@@ -683,9 +786,6 @@ test("Can parse filter projects request", () => {
     const clientNameSort = {
         clientNameSort: "asc",
     };
-    const fullyAssignedSort = {
-        fullyAssignedSort: "desc",
-    };
 
     const wrongFullyAssignedFilter: T.Anything = {
         fullyAssignedFilter: "Fully assigned filter",
@@ -696,9 +796,6 @@ test("Can parse filter projects request", () => {
     const wrongClientNameSort: T.Anything = {
         clientNameSort: "Client name sort",
     };
-    const wrongFullyAssignedSort: T.Anything = {
-        fullyAssignedSort: "Fully assigned sort",
-    };
 
     const okays = [
         [nothing, nothing],
@@ -708,7 +805,6 @@ test("Can parse filter projects request", () => {
         [clientNameFilter, clientNameFilter],
         [projectNameSort, projectNameSort],
         [clientNameSort, clientNameSort],
-        [fullyAssignedSort, fullyAssignedSort],
     ].map((x) => {
         const copy: T.Anything = { ...x[1] };
         const req: express.Request = getMockReq();
@@ -721,13 +817,14 @@ test("Can parse filter projects request", () => {
             "fullyAssignedFilter",
             "projectNameSort",
             "clientNameSort",
-            "fullyAssignedSort",
         ].forEach((x) => {
             if (!(x in req.body)) {
                 copy[x] = undefined;
             }
         });
         copy.sessionkey = key;
+        copy.currentPage = 0;
+        copy.pageSize = config.global.pageSize;
         return expect(
             Rq.parseFilterProjectsRequest(req)
         ).resolves.toStrictEqual(copy);
@@ -737,7 +834,6 @@ test("Can parse filter projects request", () => {
         wrongFullyAssignedFilter,
         wrongProjectNameSort,
         wrongClientNameSort,
-        wrongFullyAssignedSort,
     ].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
@@ -747,7 +843,23 @@ test("Can parse filter projects request", () => {
         );
     });
 
-    return Promise.all([okays, fails].flat());
+    const unauth = [
+        nothing,
+        fullyAssignedFilterString,
+        assignedCoachesFilterString,
+        projectNameFilter,
+        clientNameFilter,
+        projectNameSort,
+        clientNameSort,
+    ].map((body) => {
+        const req: express.Request = getMockReq();
+        req.body = { ...body };
+        expect(Rq.parseFilterProjectsRequest(req)).rejects.toBe(
+            errors.cookUnauthenticated()
+        );
+    });
+
+    return Promise.all([okays, fails, unauth].flat());
 });
 
 test("Can parse final decision request", () => {
