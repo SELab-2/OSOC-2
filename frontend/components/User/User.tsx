@@ -303,7 +303,9 @@ export const User: React.FC<{
                     cannot be undone and will result in data loss. Are you
                     certain that you wish to delete osoc user {name}?
                 </p>
-                <button onClick={deleteUser}>DELETE</button>
+                <button data-testid={"confirmDelete"} onClick={deleteUser}>
+                    DELETE
+                </button>
             </Modal>
             <button
                 data-testid={"buttonDelete"}

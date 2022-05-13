@@ -161,6 +161,7 @@ describe("User component tests", () => {
         await act(async () => {
             fetchMock.mockOnce(JSON.stringify({ success: true }));
             screen.getByTestId("buttonDelete").click();
+            screen.getByTestId("confirmDelete").click();
         });
         expect(fetchMock).toHaveBeenCalledTimes(1);
     });
