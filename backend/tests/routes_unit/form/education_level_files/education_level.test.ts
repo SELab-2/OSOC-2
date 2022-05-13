@@ -50,3 +50,15 @@ test("Education level other question value not null", async () => {
         "No diploma"
     );
 });
+
+test("Education level options absent", async () => {
+    const data = await readFile(
+        "../tests/routes_unit/form/education_level_files",
+        "educationLevelOptionsAbsent.json"
+    );
+    expect(data).not.toBeNull();
+
+    await expect(getEducationLevel(data as Form)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+});
