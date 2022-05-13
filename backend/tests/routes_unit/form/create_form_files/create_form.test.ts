@@ -66,6 +66,30 @@ test("Live in Belgium question absent", async () => {
     await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
 });
 
+test("Live in Belgium value is null", async () => {
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "failLiveInBelgiumValueNull.json"
+    );
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+});
+
+test("Work in july value is null", async () => {
+    const data = await readFile(
+        "../tests/routes_unit/form/create_form_files",
+        "failWorkInJulyValueNull.json"
+    );
+    expect(data).not.toBeNull();
+
+    const req: express.Request = getMockReq();
+    req.body = { ...data };
+    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+});
+
 test("Work in July question absent", async () => {
     const data = await readFile(
         "../tests/routes_unit/form/create_form_files",
