@@ -935,6 +935,7 @@ test("Can get all the students", async () => {
                 },
             },
         ],
+        pagination: { page: 0, count: 3 },
     });
     expectCall(reqMock.parseStudentAllRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
