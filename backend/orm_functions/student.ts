@@ -1,4 +1,4 @@
-import { decision_enum, email_status_enum } from "@prisma/client";
+import { decision_enum, email_status_enum, Prisma } from "@prisma/client";
 import prisma from "../prisma/prisma";
 import {
     CreateStudent,
@@ -8,6 +8,7 @@ import {
     UpdateStudent,
     FilterStringArray,
     FilterNumber,
+    DBPagination,
 } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
 
@@ -153,6 +154,7 @@ export async function searchStudentByGender(gender: string) {
 
 /**
  *
+ * @param pagination object representing the pagination
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
  * @param roleFilterArray role that we are filtering on (or undefined if not filtering on role)
@@ -167,6 +169,7 @@ export async function searchStudentByGender(gender: string) {
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
+    pagination: DBPagination,
     nameFilter: FilterString,
     emailFilter: FilterString,
     roleFilterArray: FilterStringArray,
@@ -183,7 +186,10 @@ export async function filterStudents(
     let searchYears;
     if (osocYear !== undefined) {
         if (!yearsAllowedToSee.includes(osocYear)) {
-            return Promise.resolve([]);
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
         } else {
             searchYears = [osocYear];
         }
@@ -205,39 +211,44 @@ export async function filterStudents(
         evaluationFilter = undefined;
     }
 
-    return await prisma.student.findMany({
-        where: {
-            job_application: {
-                some: {
-                    email_status: emailStatusFilter,
-                    student_coach: coachFilter,
-                    osoc: {
-                        year: {
-                            in: searchYears,
+    const filter: Prisma.studentWhereInput = {
+        job_application: {
+            some: {
+                email_status: emailStatusFilter,
+                student_coach: coachFilter,
+                osoc: {
+                    year: {
+                        in: searchYears,
+                    },
+                },
+                applied_role: {
+                    some: {
+                        role: {
+                            name: { in: roleFilterArray },
                         },
                     },
-                    applied_role: {
-                        some: {
-                            role: {
-                                name: { in: roleFilterArray },
-                            },
-                        },
-                    },
-                    evaluation: evaluationFilter,
                 },
+                evaluation: evaluationFilter,
             },
-            person: {
-                name: {
-                    contains: nameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
-            },
-            alumni: alumniFilter,
         },
+        person: {
+            name: {
+                contains: nameFilter,
+                mode: "insensitive",
+            },
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
+        },
+        alumni: alumniFilter,
+    };
+
+    const count = await prisma.student.count({ where: filter });
+    const data = await prisma.student.findMany({
+        where: filter,
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
         orderBy: [
             { person: { name: nameSort } },
             { person: { email: emailSort } },
@@ -265,4 +276,9 @@ export async function filterStudents(
             },
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }

@@ -386,6 +386,7 @@ it("should return the filtered projects", async () => {
     }
 
     const filtered_projects = await filterProjects(
+        { currentPage: 0, pageSize: 25 },
         filteredProject1.name,
         filteredProject1.partner,
         filteredProject1.project_user.map(
@@ -394,11 +395,10 @@ it("should return the filtered projects", async () => {
         filteredProject1.positions === sumRoles,
         "asc",
         "desc",
-        "asc",
         1
     );
 
-    for (const project of filtered_projects) {
+    for (const project of filtered_projects.data) {
         expect(project).toHaveProperty("name", filteredProject1.name);
         expect(project).toHaveProperty("partner", filteredProject1.partner);
         expect(project).toHaveProperty("positions", filteredProject1.positions);

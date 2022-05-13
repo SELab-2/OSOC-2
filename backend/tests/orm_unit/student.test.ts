@@ -134,6 +134,7 @@ test("should return the students that succeed to the filtered fields", async () 
     prismaMock.student.findMany.mockResolvedValue(returnval);
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -146,7 +147,7 @@ test("should return the students that succeed to the filtered fields", async () 
             undefined,
             0
         )
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ data: [], pagination: { count: 0, page: 0 } });
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -166,6 +167,7 @@ test("should return the students that succeed to the filtered fields but with a 
 
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -178,7 +180,7 @@ test("should return the students that succeed to the filtered fields but with a 
             undefined,
             0
         )
-    ).resolves.toEqual([]);
+    ).resolves.toEqual({ data: [], pagination: { count: 0, page: 0 } });
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -198,6 +200,7 @@ test("should return the students that succeed to the filtered fields but with a 
 
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -210,17 +213,20 @@ test("should return the students that succeed to the filtered fields but with a 
             undefined,
             0
         )
-    ).resolves.toEqual([
-        {
-            alumni: false,
-            gender: "",
-            nickname: "",
-            person_id: 0,
-            phone_number: "",
-            pronouns: "",
-            student_id: 0,
-        },
-    ]);
+    ).resolves.toEqual({
+        data: [
+            {
+                alumni: false,
+                gender: "",
+                nickname: "",
+                person_id: 0,
+                phone_number: "",
+                pronouns: "",
+                student_id: 0,
+            },
+        ],
+        pagination: { count: undefined, page: 0 },
+    });
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -259,6 +265,7 @@ test("should return the students that succeed to the filtered fields but with a 
 
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -271,15 +278,18 @@ test("should return the students that succeed to the filtered fields but with a 
             undefined,
             0
         )
-    ).resolves.toEqual([
-        {
-            alumni: false,
-            gender: "",
-            nickname: "",
-            person_id: 0,
-            phone_number: "",
-            pronouns: "",
-            student_id: 0,
-        },
-    ]);
+    ).resolves.toEqual({
+        data: [
+            {
+                alumni: false,
+                gender: "",
+                nickname: "",
+                person_id: 0,
+                phone_number: "",
+                pronouns: "",
+                student_id: 0,
+            },
+        ],
+        pagination: { count: undefined, page: 0 },
+    });
 });

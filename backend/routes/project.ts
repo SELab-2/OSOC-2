@@ -77,7 +77,7 @@ export async function createProject(
  */
 export async function listProjects(
     req: express.Request
-): Promise<Responses.ProjectListAndContracts> {
+): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseProjectAllRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     if (checkedSessionKey.data == undefined) {
@@ -85,9 +85,11 @@ export async function listProjects(
     }
 
     const allProjects = [];
-
-    for (const project of await ormPr.filterProjects(
-        undefined,
+    const fetchedProjects = await ormPr.filterProjects(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
         undefined,
         undefined,
         undefined,
@@ -95,7 +97,8 @@ export async function listProjects(
         undefined,
         undefined,
         checkedSessionKey.userId
-    )) {
+    );
+    for (const project of fetchedProjects.data) {
         const roles = await ormPrRole.getProjectRolesByProject(
             project.project_id
         );
@@ -128,6 +131,7 @@ export async function listProjects(
     }
 
     return Promise.resolve({
+        pagination: fetchedProjects.pagination,
         data: allProjects,
     });
 }
@@ -507,6 +511,8 @@ export async function unAssignStudent(
 export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
+    // not implementing pagination as we don't expect the number of conflicts
+    // to be > 50 (2 * page size); which is kind of a minimum...
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -565,27 +571,29 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
+    const checked = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
+    if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const projects = await ormPr.filterProjects(
-        checkedSessionKey.data.projectNameFilter,
-        checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
-        checkedSessionKey.data.fullyAssignedFilter,
-        checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort,
-        checkedSessionKey.userId
+        {
+            currentPage: checked.data.currentPage,
+            pageSize: checked.data.pageSize,
+        },
+        checked.data.projectNameFilter,
+        checked.data.clientNameFilter,
+        checked.data.assignedCoachesFilterArray,
+        checked.data.fullyAssignedFilter,
+        checked.data.projectNameSort,
+        checked.data.clientNameSort,
+        checked.userId
     );
 
     const projectlist = [];
 
-    for (const project of projects) {
+    for (const project of projects.data) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
         const users = await ormPU.getUsersFor(project.project_id);
 
@@ -603,6 +611,7 @@ export async function filterProjects(
     }
 
     return Promise.resolve({
+        pagination: projects.pagination,
         data: projectlist,
     });
 }

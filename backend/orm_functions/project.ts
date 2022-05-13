@@ -1,4 +1,5 @@
 import prisma from "../prisma/prisma";
+import { Prisma } from "@prisma/client";
 import {
     CreateProject,
     UpdateProject,
@@ -6,6 +7,7 @@ import {
     FilterSort,
     FilterBoolean,
     FilterNumberArray,
+    DBPagination,
 } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
 
@@ -295,25 +297,24 @@ export async function deleteProjectByPartner(partner: string) {
 }
 
 /**
- *
+ * @param page current page and page size
  * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
- * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
- * @param userId the userId of the user that is trying to search
+ * @param userId the id of the user who searches
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(
+    page: DBPagination,
     projectNameFilter: FilterString,
     clientNameFilter: FilterString,
     assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     projectNameSort: FilterSort,
     clientNameSort: FilterSort,
-    fullyAssignedSort: FilterSort,
     userId: number
 ) {
     const visibleYears = await getOsocYearsForLoginUser(userId);
@@ -346,24 +347,36 @@ export async function filterProjects(
         };
     }
 
-    const filtered_projects = await prisma.project.findMany({
-        where: {
-            name: {
-                contains: projectNameFilter,
-                mode: "insensitive",
-            },
-            partner: {
-                contains: clientNameFilter,
-                mode: "insensitive",
-            },
-            project_user: assignedCoachesArray,
-            osoc: {
-                year: {
-                    in: visibleYears,
-                },
+    const actualFilter: Prisma.projectWhereInput = {
+        name: {
+            contains: projectNameFilter,
+            mode: "insensitive",
+        },
+        partner: {
+            contains: clientNameFilter,
+            mode: "insensitive",
+        },
+        project_user: assignedCoachesArray,
+        osoc: {
+            year: {
+                in: visibleYears,
             },
         },
-        orderBy: [{ name: projectNameSort }, { partner: clientNameSort }],
+    };
+
+    // create the orderby object
+    let sortObject;
+    if (projectNameSort === undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: projectNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort === undefined) {
+        sortObject = [{ partner: clientNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: projectNameSort }, { partner: clientNameSort }];
+    }
+
+    let filtered_projects = await prisma.project.findMany({
+        where: actualFilter,
+        orderBy: sortObject,
         include: {
             project_user: {
                 select: {
@@ -388,16 +401,16 @@ export async function filterProjects(
         },
     });
 
-    if (filtered_projects.length === 0) {
-        return filtered_projects;
-    }
+    // if (filtered_projects.length === 0) {
+    //     return filtered_projects;
+    // }
 
     if (
         fullyAssignedFilter != undefined &&
         fullyAssignedFilter &&
         filtered_projects.length !== 0
     ) {
-        return filtered_projects.filter((project) => {
+        filtered_projects = filtered_projects.filter((project) => {
             const project_found = projects.filter(
                 (elem) => elem.project_id === project.project_id
             );
@@ -411,35 +424,12 @@ export async function filterProjects(
         });
     }
 
-    if (fullyAssignedSort === "desc" || fullyAssignedSort === "asc") {
-        filtered_projects.sort((x, y) => {
-            const project_x_found = projects.filter(
-                (elem) => elem.project_id === x.project_id
-            );
+    const count = filtered_projects.length;
+    const start = page.currentPage * page.pageSize;
+    const end = start + page.pageSize;
 
-            const project_y_found = projects.filter(
-                (elem) => elem.project_id === y.project_id
-            );
-
-            let sum_x = 0;
-            for (const c of project_x_found[0].project_role) {
-                sum_x += c._count.contract;
-            }
-
-            let sum_y = 0;
-            for (const c of project_y_found[0].project_role) {
-                sum_y += c._count.contract;
-            }
-
-            const fullyAssignedX = x.positions === sum_x ? 1 : 0;
-            const fullyAssignedY = y.positions === sum_y ? 1 : 0;
-
-            return fullyAssignedX - fullyAssignedY;
-        });
-    }
-
-    if (fullyAssignedSort === "desc") {
-        filtered_projects.reverse();
-    }
-    return filtered_projects;
+    return {
+        pagination: { page: page.currentPage, count: count },
+        data: filtered_projects.slice(start, end),
+    };
 }

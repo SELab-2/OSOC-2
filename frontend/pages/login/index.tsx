@@ -401,8 +401,12 @@ const Index: NextPage = () => {
                         <Modal
                             handleClose={closeModal}
                             visible={showPasswordReset}
-                            title="Please enter your email below and we will send you a link to reset your password."
+                            title="Password Reset"
                         >
+                            <p>
+                                Please enter your email below and we will send
+                                you a link to reset your password.
+                            </p>
                             <label className={styles.label}>
                                 <input
                                     type="text"

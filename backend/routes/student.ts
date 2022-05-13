@@ -8,7 +8,7 @@ import * as ormSt from "../orm_functions/student";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
-import { InternalTypes, Responses } from "../types";
+import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as ormP from "../orm_functions/person";
@@ -23,14 +23,16 @@ export async function listStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseStudentAllRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
     const studentList: InternalTypes.Student[] = [];
-    const students = await ormSt.filterStudents(
+    const studentsP = await ormSt.filterStudents(
+        {
+            pageSize: checkedSessionKey.data.pageSize,
+            currentPage: checkedSessionKey.data.currentPage,
+        },
         undefined,
         undefined,
         undefined,
@@ -43,6 +45,8 @@ export async function listStudents(
         undefined,
         checkedSessionKey.userId
     );
+
+    const students = studentsP.data;
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             students[studentIndex].student_id
@@ -99,6 +103,7 @@ export async function listStudents(
     }
 
     return Promise.resolve({
+        pagination: studentsP.pagination,
         data: studentList,
     });
 }
@@ -391,14 +396,17 @@ export async function filterStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const students = await ormSt.filterStudents(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
         checkedSessionKey.data.nameFilter,
         checkedSessionKey.data.emailFilter,
         checkedSessionKey.data.roleFilter,
@@ -412,7 +420,7 @@ export async function filterStudents(
         checkedSessionKey.userId
     );
 
-    const studentlist = [];
+    const studentlist: InternalTypes.Student[] = [];
 
     let year = new Date().getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
@@ -421,10 +429,10 @@ export async function filterStudents(
             year = latestOsocYear.year;
         }
     } else {
-        year = checkedSessionKey.data.year;
+        year = checkedSessionKey.data.osocYear;
     }
 
-    for (const student of students) {
+    for (const student of students.data) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
         );
@@ -474,6 +482,7 @@ export async function filterStudents(
     }
 
     return Promise.resolve({
+        pagination: students.pagination,
         data: studentlist,
     });
 }

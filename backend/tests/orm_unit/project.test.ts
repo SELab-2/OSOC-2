@@ -286,8 +286,8 @@ test("should return all filtered projects by name", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             "project 1",
-            undefined,
             undefined,
             undefined,
             undefined,
@@ -295,7 +295,10 @@ test("should return all filtered projects by name", async () => {
             undefined,
             0
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by partner", async () => {
@@ -303,16 +306,19 @@ test("should return all filtered projects by partner", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             "partner 1",
             undefined,
             undefined,
             undefined,
             undefined,
-            undefined,
             0
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by assigned coaches", async () => {
@@ -320,16 +326,19 @@ test("should return all filtered projects by assigned coaches", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [1],
             undefined,
             undefined,
             undefined,
-            undefined,
             0
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by fully assigned status", async () => {
@@ -347,27 +356,29 @@ test("should return all filtered projects by fully assigned status", async () =>
     ]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
             true,
             undefined,
             undefined,
-            undefined,
             0
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        pagination: { count: 1, page: 0 },
+        data: [filteredProject1],
+    });
 });
 
 test("should return all filtered projects sorted by the fully assigned status", async () => {
-    prismaMock.login_user.findUnique.mockResolvedValue(user_return);
     prismaMock.project.findMany.mockResolvedValue([
         filteredProject2,
         filteredProject1,
     ]);
     await expect(
         filterProjects(
-            undefined,
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
@@ -376,7 +387,10 @@ test("should return all filtered projects sorted by the fully assigned status", 
             "desc",
             0
         )
-    ).resolves.toEqual([filteredProject1, filteredProject2]);
+    ).resolves.toEqual({
+        data: [filteredProject2, filteredProject1],
+        pagination: { count: 2, page: 0 },
+    });
 
     prismaMock.project.findMany.mockResolvedValue([
         filteredProject1,
@@ -385,7 +399,7 @@ test("should return all filtered projects sorted by the fully assigned status", 
 
     await expect(
         filterProjects(
-            undefined,
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
@@ -394,5 +408,8 @@ test("should return all filtered projects sorted by the fully assigned status", 
             "desc",
             0
         )
-    ).resolves.toEqual([filteredProject1, filteredProject2]);
+    ).resolves.toEqual({
+        data: [filteredProject1, filteredProject2],
+        pagination: { count: 2, page: 0 },
+    });
 });
