@@ -80,7 +80,6 @@ const Index: NextPage = () => {
         e.preventDefault();
 
         let error = false;
-
         if (loginEmail === "") {
             setLoginEmailError("Email cannot be empty");
             error = true;
@@ -364,6 +363,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Email
                             <input
+                                data-testid={"inputEmailLogin"}
                                 type="text"
                                 name="loginEmail"
                                 value={loginEmail}
@@ -371,6 +371,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"loginEmailError"}
                             className={`${styles.textFieldError} ${
                                 loginEmailError !== "" ? styles.anim : ""
                             }`}
@@ -380,6 +381,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Password
                             <input
+                                data-testid={"inputPassLogin"}
                                 type="password"
                                 name="loginPassword"
                                 value={loginPassword}
@@ -389,6 +391,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"loginPasswordError"}
                             className={`${styles.textFieldError} ${
                                 loginPasswordError !== "" ? styles.anim : ""
                             }`}
@@ -409,6 +412,7 @@ const Index: NextPage = () => {
                             </p>
                             <label className={styles.label}>
                                 <input
+                                    data-testid={"forgotPassInput"}
                                     type="text"
                                     name="loginEmail"
                                     value={passwordResetMail}
@@ -418,6 +422,7 @@ const Index: NextPage = () => {
                                 />
                             </label>
                             <p
+                                data-testid={"forgotPassError"}
                                 className={`${styles.textFieldError} ${
                                     passwordResetMailError !== ""
                                         ? styles.anim
@@ -426,10 +431,21 @@ const Index: NextPage = () => {
                             >
                                 {passwordResetMailError}
                             </p>
-                            <button onClick={resetPassword}>CONFIRM</button>
+                            <button
+                                data-testid={"forgotPassConfirm"}
+                                onClick={resetPassword}
+                            >
+                                CONFIRM
+                            </button>
                         </Modal>
-                        <button onClick={(e) => submitLogin(e)}>LOG IN</button>
+                        <button
+                            data-testid={"loginButton"}
+                            onClick={(e) => submitLogin(e)}
+                        >
+                            LOG IN
+                        </button>
                         <p
+                            data-testid={"backendErrorLogin"}
                             className={`${styles.textFieldError} ${
                                 loginBackendError !== "" ? styles.anim : ""
                             }`}
@@ -442,6 +458,7 @@ const Index: NextPage = () => {
                             <div />
                         </div>
                         <div
+                            data-testid={"githubLogin"}
                             className={styles.githubContainer}
                             onClick={(e) => githubLogin(e)}
                         >
@@ -470,6 +487,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Name
                             <input
+                                data-testid={"nameRegister"}
                                 type="text"
                                 name="registerName"
                                 value={registerName}
@@ -479,6 +497,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorNameRegister"}
                             className={`${styles.textFieldError} ${
                                 registerNameError !== "" ? styles.anim : ""
                             }`}
@@ -488,6 +507,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Email
                             <input
+                                data-testid={"emailRegister"}
                                 type="text"
                                 name="registerEmail"
                                 value={registerEmail}
@@ -497,6 +517,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorEmailRegister"}
                             className={`${styles.textFieldError} ${
                                 registerEmailError !== "" ? styles.anim : ""
                             }`}
@@ -506,6 +527,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Password
                             <input
+                                data-testid={"passwordRegister"}
                                 type="password"
                                 name="registerPassword"
                                 value={registerPassword}
@@ -524,6 +546,7 @@ const Index: NextPage = () => {
                                 }}
                             >
                                 <p
+                                    data-testid={"passStrength"}
                                     className={`${
                                         styles.textFieldError
                                     } ${scoreToStyle()}`}
@@ -540,6 +563,7 @@ const Index: NextPage = () => {
                             </div>
                         ) : (
                             <p
+                                data-testid={"passRegisterError"}
                                 className={`${styles.textFieldError} ${
                                     registerPasswordError !== ""
                                         ? styles.anim
@@ -552,6 +576,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Confirm Password
                             <input
+                                data-testid={"rePasswordRegister"}
                                 type="password"
                                 name="registerConfirmPassword"
                                 value={registerConfirmPassword}
@@ -561,6 +586,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorRePasswordRegister"}
                             className={`${styles.textFieldError} ${
                                 registerConfirmPasswordError !== ""
                                     ? styles.anim
@@ -569,10 +595,14 @@ const Index: NextPage = () => {
                         >
                             {registerConfirmPasswordError}
                         </p>
-                        <button onClick={(e) => submitRegister(e)}>
+                        <button
+                            data-testid={"registerButton"}
+                            onClick={(e) => submitRegister(e)}
+                        >
                             REGISTER
                         </button>
                         <p
+                            data-testid={"errorBackendRegister"}
                             className={`${styles.textFieldError} ${
                                 registerBackendError !== "" ? styles.anim : ""
                             }`}
