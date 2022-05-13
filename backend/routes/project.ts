@@ -8,9 +8,10 @@ import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
-import { InternalTypes, Responses, StringDict } from "../types";
+import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+import { project_role } from "@prisma/client";
 
 /**
  *  Attempts to create a new project in the system.
@@ -274,15 +275,6 @@ export async function modProjectStudent(
         .parseDraftStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            console.log(
-                "Attempting to modify project " +
-                    parsed.data.id +
-                    " by moving student " +
-                    parsed.data.studentId +
-                    " to role `" +
-                    parsed.data.role +
-                    "`"
-            );
             return ormCtr
                 .contractsByProject(parsed.data.id)
                 .then((arr) =>
@@ -458,6 +450,66 @@ export async function getProjectConflicts(
         });
 }
 
+export async function assignStudent(
+    req: express.Request
+): Promise<Responses.ModProjectStudent> {
+    const alreadyContract: ApiError = {
+        http: 409,
+        reason: "This student does already have a contract",
+    };
+
+    // authenticate, parse, ...
+    const checked = await rq
+        .parseDraftStudentRequest(req)
+        .then((parsed) => util.isAdmin(parsed));
+    // check if edition is ready
+    const latestOsoc = await ormOsoc
+        .getLatestOsoc()
+        .then((osoc) => util.getOrReject(osoc));
+    // check if no contracts yet
+    await ormCtr
+        .contractsForStudent(checked.data.id)
+        .then((data) =>
+            data.filter(
+                (x) => x.project_role.project.osoc_id == latestOsoc.osoc_id
+            )
+        )
+        .then((filtered) =>
+            filtered.length > 0
+                ? Promise.reject(alreadyContract)
+                : Promise.resolve()
+        );
+
+    // get project role
+    // then create contract
+    // then assign
+    return ormRole
+        .getRolesByName(checked.data.role)
+        .then((r) => util.getOrReject(r))
+        .then((r) =>
+            ormPrRole
+                .getProjectRolesByProject(checked.data.id)
+                .then((rs) => rs.filter((rp) => rp.role_id == r.role_id))
+                .then((rs) =>
+                    rs.length > 0
+                        ? Promise.resolve(rs[0])
+                        : util.getOrReject<project_role>(null)
+                )
+        )
+        .then((r) =>
+            ormCtr
+                .createContract({
+                    studentId: checked.data.studentId,
+                    projectRoleId: r.project_role_id,
+                    loginUserId: checked.userId,
+                    contractStatus: "DRAFT",
+                })
+                .then(() => ormRole.getRole(r.role_id))
+        )
+        .then(util.getOrReject)
+        .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
+}
+
 /**
  *  Attempts to filter projects in the system by name, client, coaches or fully assigned.
  *  @param req The Express.js request to extract all required data from.
@@ -529,6 +581,7 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id/draft", getDraftedStudents);
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
+    util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
