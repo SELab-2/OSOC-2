@@ -10,7 +10,7 @@ import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionStudent, errors } from "../utility";
 import * as ormP from "../orm_functions/person";
 
 /**
@@ -120,6 +120,7 @@ export async function getStudent(
     const parsedRequest = await rq.parseSingleStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());

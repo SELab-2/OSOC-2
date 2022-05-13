@@ -282,3 +282,32 @@ export async function filterStudents(
         data: data,
     };
 }
+
+/**
+ * @param studentId: the id of the student whose job application years we are searching
+ * @returns a list of all the years the student has applied for
+ */
+export async function getAppliedYearsForStudent(studentId: number) {
+    const student = await prisma.student.findUnique({
+        where: {
+            student_id: studentId,
+        },
+        select: {
+            job_application: {
+                select: {
+                    osoc: {
+                        select: {
+                            year: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (student === null) {
+        return [];
+    }
+
+    return student.job_application.map((app) => app.osoc.year);
+}
