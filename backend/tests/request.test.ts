@@ -780,6 +780,9 @@ test("Can parse filter projects request", () => {
     const fullyAssignedFilterBoolean = {
         fullyAssignedFilter: true,
     };
+    const osocYearFilter = {
+        osocYearFilter: 2022,
+    };
     const projectNameSort = {
         projectNameSort: "asc",
     };
@@ -803,6 +806,7 @@ test("Can parse filter projects request", () => {
         [assignedCoachesFilterString, assignedCoachesFilterArray],
         [projectNameFilter, projectNameFilter],
         [clientNameFilter, clientNameFilter],
+        [osocYearFilter, osocYearFilter],
         [projectNameSort, projectNameSort],
         [clientNameSort, clientNameSort],
     ].map((x) => {
@@ -815,6 +819,7 @@ test("Can parse filter projects request", () => {
             "clientNameFilter",
             "assignedCoachesFilterArray",
             "fullyAssignedFilter",
+            "osocYearFilter",
             "projectNameSort",
             "clientNameSort",
         ].forEach((x) => {
@@ -849,6 +854,7 @@ test("Can parse filter projects request", () => {
         assignedCoachesFilterString,
         projectNameFilter,
         clientNameFilter,
+        osocYearFilter,
         projectNameSort,
         clientNameSort,
     ].map((body) => {
