@@ -15,46 +15,40 @@ describe("User component tests", () => {
 
     beforeEach(() => {
         userAdminCoach = {
-            person: {
-                person_id: 1,
+            person_data: {
+                id: 1,
                 email: "test",
                 name: "aga",
                 github: "",
-                github_id: 0,
             },
             login_user_id: 1,
-            person_id: 1,
-            is_admin: true,
-            is_coach: true,
-            account_status: AccountStatus.ACTIVATED,
+            admin: true,
+            coach: true,
+            activated: AccountStatus.ACTIVATED,
         };
         userInvalid = {
-            person: {
-                person_id: 1,
+            person_data: {
+                id: 1,
                 email: "test",
                 name: "aa",
                 github: "",
-                github_id: -1,
             },
             login_user_id: 1,
-            person_id: 1,
-            is_admin: false,
-            is_coach: true,
-            account_status: AccountStatus.PENDING,
+            admin: false,
+            coach: true,
+            activated: AccountStatus.PENDING,
         };
         userDisabled = {
-            person: {
-                person_id: 1,
+            person_data: {
+                id: 1,
                 email: "test",
                 name: "aa",
                 github: "",
-                github_id: -1,
             },
             login_user_id: 1,
-            person_id: 1,
-            is_admin: false,
-            is_coach: false,
-            account_status: AccountStatus.DISABLED,
+            admin: false,
+            coach: false,
+            activated: AccountStatus.DISABLED,
         };
         fetchMock.resetMocks();
     });
@@ -67,14 +61,14 @@ describe("User component tests", () => {
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
         expect(screen.getByTestId("userName")!.firstChild!.nodeValue).toBe(
-            userAdminCoach.person.name
+            userAdminCoach.person_data.name
         );
 
         expect(screen.queryByTestId("pendingButton")).toBeNull();
 
         expect(screen.getByTestId("userEmail")).toBeInTheDocument();
         expect(screen.getByTestId("userEmail")!.firstChild!.nodeValue).toBe(
-            userAdminCoach.person.email
+            userAdminCoach.person_data.email
         );
     });
 
