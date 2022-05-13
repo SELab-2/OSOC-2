@@ -10,25 +10,27 @@ import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
+import { Modal } from "../Modal/Modal";
 
 export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.name);
-    const [email] = useState<string>(user.person.email);
-    const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
-    const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
-    const [status, setStatus] = useState<AccountStatus>(user.account_status);
+    const [name] = useState<string>(user.person_data.name);
+    const [email] = useState<string>(user.person_data.email);
+    const [isAdmin, setIsAdmin] = useState<boolean>(user.admin);
+    const [isCoach, setIsCoach] = useState<boolean>(user.coach);
+    const [status, setStatus] = useState<AccountStatus>(user.activated);
     const { sessionKey } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
-        setIsAdmin(user.is_admin);
-        setIsCoach(user.is_coach);
-        setStatus(user.account_status);
+        setIsAdmin(user.admin);
+        setIsCoach(user.coach);
+        setStatus(user.activated);
     }, [user]);
 
     useEffect(() => {
@@ -178,6 +180,8 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 }
+                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+                socket.emit("updateRoleUser"); // this refreshes the manage users page
                 removeUser(user);
                 return json;
             })
@@ -238,9 +242,21 @@ export const User: React.FC<{
                     </div>
                 </div>
             </div>
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete User ${name}`}
+            >
+                <p>
+                    You are about to delete an osoc user! Deleting an osoc user
+                    cannot be undone and will result in data loss. Are you
+                    certain that you wish to delete osoc user {name}?
+                </p>
+                <button onClick={deleteUser}>DELETE</button>
+            </Modal>
             <button
                 className={`delete ${styles.delete}`}
-                onClick={deleteUser}
+                onClick={() => setShowDeleteModal(true)}
             />
         </div>
     );

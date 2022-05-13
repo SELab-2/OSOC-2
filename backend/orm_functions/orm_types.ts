@@ -5,6 +5,12 @@ import {
     account_status_enum,
 } from "@prisma/client";
 
+/***/
+export interface DBPagination {
+    currentPage: number;
+    pageSize: number;
+}
+
 /**
  * interface for the object needed to create a person
  */
