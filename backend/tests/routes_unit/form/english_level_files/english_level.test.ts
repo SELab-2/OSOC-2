@@ -1,23 +1,18 @@
 import express from "express";
 import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
+import { readFile } from "../create_form_files/create_form.test";
 
 import { getEnglishLevel } from "../../../../routes/form";
 import form_keys from "../../../../routes/form_keys.json";
-import * as T from "../../../../types";
-import fs from "fs";
-import path from "path";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
 
-export function readFile(file: string): T.Requests.Form | null {
-    const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
-    return JSON.parse(fileData);
-}
-
 test("english level question absent", async () => {
-    const data = readFile("englishLevelQuestionAbsent.json");
+    const data = readFile(
+        "../english_level_files",
+        "englishLevelQuestionAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -28,7 +23,10 @@ test("english level question absent", async () => {
 });
 
 test("English level options absent", async () => {
-    const data = readFile("englishLevelOptionsAbsent.json");
+    const data = readFile(
+        "../english_level_files",
+        "englishLevelOptionsAbsent.json"
+    );
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -39,7 +37,7 @@ test("English level options absent", async () => {
 });
 
 test("English level amount of stars test", async () => {
-    const data = readFile("englishLevelStars.json");
+    const data = readFile("../english_level_files", "englishLevelStars.json");
     expect(data).not.toBeNull();
 
     await expect(getEnglishLevel(data as Form)).resolves.toStrictEqual(5);

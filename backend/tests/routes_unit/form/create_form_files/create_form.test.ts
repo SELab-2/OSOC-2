@@ -57,14 +57,19 @@ const jobApplication: job_application = {
     created_at: new Date("2022-04-14T18:15:30.245Z"),
 };
 
-function readFile(file: string): T.Requests.Form | null {
+export function readFile(
+    directoryPart: string,
+    file: string
+): T.Requests.Form | null {
     const readFile = (path: string) => fs.readFileSync(path, "utf8");
-    const fileData = readFile(path.join(__dirname, `./${file}`));
+    const fileData = readFile(
+        path.join(__dirname, `./${directoryPart}/${file}`)
+    );
     return JSON.parse(fileData);
 }
 
 test("Live in Belgium question absent", async () => {
-    const data = readFile("failLiveInBelgiumAbsent.json");
+    const data = readFile(".", "failLiveInBelgiumAbsent.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -73,7 +78,7 @@ test("Live in Belgium question absent", async () => {
 });
 
 test("Work in July question absent", async () => {
-    const data = readFile("failWorkInJulyAbsent.json");
+    const data = readFile(".", "failWorkInJulyAbsent.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -82,7 +87,7 @@ test("Work in July question absent", async () => {
 });
 
 test("Work in July 'no' answer", async () => {
-    const data = readFile("liveInBelgiumAnswerNo.json");
+    const data = readFile(".", "liveInBelgiumAnswerNo.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -91,7 +96,7 @@ test("Work in July 'no' answer", async () => {
 });
 
 test("Work in July 'null' answer", async () => {
-    const data = readFile("liveInBelgiumAnswerNull.json");
+    const data = readFile(".", "liveInBelgiumAnswerNull.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -102,7 +107,7 @@ test("Work in July 'null' answer", async () => {
 test("No osoc year specified", async () => {
     mockDatabaseCalls(null);
 
-    const data = readFile("allValidForm.json");
+    const data = readFile(".", "allValidForm.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
@@ -203,7 +208,7 @@ test("Osoc year specified", async () => {
         year: 2023,
     });
 
-    const data = readFile("allValidForm.json");
+    const data = readFile(".", "allValidForm.json");
     expect(data).not.toBeNull();
 
     const req: express.Request = getMockReq();
