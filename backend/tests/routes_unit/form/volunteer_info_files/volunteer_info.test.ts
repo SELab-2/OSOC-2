@@ -1,7 +1,4 @@
-import express from "express";
-import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
-
 import { getVolunteerInfo, readFile } from "../../../../routes/form";
 import { Requests } from "../../../../types";
 import Form = Requests.Form;
@@ -13,8 +10,6 @@ test("Volunteer info question absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
     await expect(getVolunteerInfo(data as Form)).rejects.toBe(
         errors.cookArgumentError()
     );
@@ -27,8 +22,6 @@ test("Volunteer info options are absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
     await expect(getVolunteerInfo(data as Form)).rejects.toBe(
         errors.cookArgumentError()
     );

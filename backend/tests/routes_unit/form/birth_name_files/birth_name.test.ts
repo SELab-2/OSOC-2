@@ -1,8 +1,6 @@
-import express from "express";
-import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
 
-import { createForm, readFile } from "../../../../routes/form";
+import { getBirthName, readFile } from "../../../../routes/form";
 
 test("Birth name question absent", async () => {
     const data = await readFile(
@@ -11,7 +9,5 @@ test("Birth name question absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
-    await expect(createForm(req)).rejects.toBe(errors.cookArgumentError());
+    await expect(getBirthName(data)).rejects.toBe(errors.cookArgumentError());
 });

@@ -1,5 +1,3 @@
-import express from "express";
-import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
 
 import { getBestSkill, readFile } from "../../../../routes/form";
@@ -13,8 +11,6 @@ test("Best skill question absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
     await expect(getBestSkill(data as Form)).rejects.toBe(
         errors.cookArgumentError()
     );

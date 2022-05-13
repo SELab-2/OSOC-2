@@ -1,7 +1,4 @@
-import express from "express";
-import { getMockReq } from "@jest-mock/express";
 import { errors } from "../../../../utility";
-
 import { getEnglishLevel, readFile } from "../../../../routes/form";
 import form_keys from "../../../../routes/form_keys.json";
 import { Requests } from "../../../../types";
@@ -14,8 +11,6 @@ test("english level question absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
     await expect(getEnglishLevel(data as Form)).rejects.toBe(
         errors.cookArgumentError()
     );
@@ -28,8 +23,6 @@ test("English level options absent", async () => {
     );
     expect(data).not.toBeNull();
 
-    const req: express.Request = getMockReq();
-    req.body = { ...data };
     await expect(getEnglishLevel(data as Form)).rejects.toBe(
         errors.cookArgumentError()
     );
