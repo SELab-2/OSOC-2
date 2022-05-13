@@ -468,7 +468,7 @@ export async function assignStudent(
         .then((osoc) => util.getOrReject(osoc));
     // check if no contracts yet
     await ormCtr
-        .contractsForStudent(checked.data.id)
+        .contractsForStudent(checked.data.studentId)
         .then((data) =>
             data.filter(
                 (x) => x.project_role.project.osoc_id == latestOsoc.osoc_id
