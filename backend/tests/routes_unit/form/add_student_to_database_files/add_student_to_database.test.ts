@@ -45,7 +45,7 @@ const students: (student & { person: person })[] = [
 beforeEach(() => {
     // mocks for orm
     ormStMock.getAllStudents.mockResolvedValue(students);
-    ormStMock.createStudent.mockResolvedValue({
+    ormStMock.createStudent.mockResolvedValueOnce({
         student_id: 3,
         person_id: 3,
         gender: "M",
@@ -54,11 +54,36 @@ beforeEach(() => {
         nickname: "Nick3",
         alumni: true,
     });
-    ormStMock.updateStudent.mockResolvedValue({
+    ormStMock.createStudent.mockResolvedValueOnce({
+        student_id: 3,
+        person_id: 3,
+        gender: "M",
+        pronouns: null,
+        phone_number: "0426719124",
+        nickname: null,
+        alumni: true,
+    });
+    ormStMock.updateStudent.mockResolvedValueOnce({
         student_id: 2,
         person_id: 2,
         gender: "M",
         pronouns: "He/him/his",
+        phone_number: "0476124356",
+        nickname: "Nick4",
+        alumni: true,
+        person: {
+            person_id: 2,
+            name: "Test2",
+            email: "test2@mail.com",
+            github: null,
+            github_id: null,
+        },
+    });
+    ormStMock.updateStudent.mockResolvedValueOnce({
+        student_id: 2,
+        person_id: 2,
+        gender: "M",
+        pronouns: null,
         phone_number: "0476124356",
         nickname: "Nick4",
         alumni: true,
@@ -84,7 +109,7 @@ function expectCall<T, U>(func: T, val: U) {
     expect(func).toHaveBeenCalledWith(val);
 }
 
-test("Insert a student in the database (student not yet in the database)", async () => {
+test("Insert a student in the database (student not yet in the database), pronouns and nickname not null", async () => {
     await expect(
         addStudentToDatabase(
             {
@@ -115,7 +140,36 @@ test("Insert a student in the database (student not yet in the database)", async
     expect(ormSt.getAllStudents).toHaveBeenCalledTimes(1);
 });
 
-test("Insert a student in the database (student already in the database)", async () => {
+test("Insert a student in the database (student not yet in the database), pronouns and nickname null", async () => {
+    await expect(
+        addStudentToDatabase(
+            {
+                pronouns: null,
+                gender: "M",
+                phoneNumber: "0426719124",
+                nickname: null,
+                alumni: true,
+            },
+            {
+                id: 3,
+            }
+        )
+    ).resolves.toStrictEqual({
+        id: 3,
+        hasAlreadyTakenPart: true,
+    });
+
+    expectCall(ormSt.createStudent, {
+        personId: 3,
+        gender: "M",
+        phoneNumber: "0426719124",
+        alumni: true,
+    });
+
+    expect(ormSt.getAllStudents).toHaveBeenCalledTimes(1);
+});
+
+test("Insert a student in the database (student already in the database), pronouns are not null", async () => {
     await expect(
         addStudentToDatabase(
             {
@@ -137,6 +191,37 @@ test("Insert a student in the database (student already in the database)", async
     expectCall(ormSt.updateStudent, {
         studentId: 2,
         pronouns: "He/him/his",
+        gender: "M",
+        phoneNumber: "0426719124",
+        nickname: "Nick3",
+        alumni: true,
+    });
+
+    expect(ormSt.getAllStudents).toHaveBeenCalledTimes(1);
+});
+
+test("Insert a student in the database (student already in the database), pronouns are null", async () => {
+    await expect(
+        addStudentToDatabase(
+            {
+                pronouns: null,
+                gender: "M",
+                phoneNumber: "0426719124",
+                nickname: "Nick3",
+                alumni: true,
+            },
+            {
+                id: 2,
+            }
+        )
+    ).resolves.toStrictEqual({
+        id: 2,
+        hasAlreadyTakenPart: true,
+    });
+
+    expectCall(ormSt.updateStudent, {
+        studentId: 2,
+        pronouns: "",
         gender: "M",
         phoneNumber: "0426719124",
         nickname: "Nick3",

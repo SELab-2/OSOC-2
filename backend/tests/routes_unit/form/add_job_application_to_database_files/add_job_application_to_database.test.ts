@@ -92,7 +92,7 @@ afterEach(() => {
     ormJoMock.createJobApplication.mockReset();
 });
 
-test("Insert a job application in the database", async () => {
+test("Insert a job application in the database, studentCoach not null", async () => {
     await expect(
         addJobApplicationToDatabase(
             {
@@ -118,7 +118,7 @@ test("Insert a job application in the database", async () => {
     });
 });
 
-test("Insert a job application in the database", async () => {
+test("Insert a job application in the database, studentCoach null", async () => {
     await expect(
         addJobApplicationToDatabase(
             {
