@@ -1419,6 +1419,14 @@ export namespace Requests {
     export interface RmDraftStudent extends IdRequest {
         studentId: number;
     }
+
+    export interface RmDraftCoach extends IdRequest {
+        projectUserId: number;
+    }
+
+    export interface DraftCoach extends IdRequest {
+        loginUserId: number;
+    }
 }
 
 /**

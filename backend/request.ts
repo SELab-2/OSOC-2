@@ -901,6 +901,30 @@ export async function parseRemoveAssigneeRequest(
     );
 }
 
+export async function parseRemoveCoachRequest(
+    req: express.Request
+): Promise<Requests.RmDraftCoach> {
+    return hasFields(req, ["project_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            projectUserId: req.body.project_user,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseAssignCoachRequest(
+    req: express.Request
+): Promise<Requests.DraftCoach> {
+    return hasFields(req, ["login_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            loginUserId: req.body.login_user,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
 export async function parseUserModSelfRequest(
     req: express.Request
 ): Promise<Requests.UserPwd> {
