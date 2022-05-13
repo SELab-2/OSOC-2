@@ -13,23 +13,24 @@ const Index: NextPage = () => {
     const [projects, setProjects] = useState<Project[]>([]);
 
     const fetchProjects = async () => {
-        if (getSession != undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/project/all`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `auth/osoc2 ${sessionKey}`,
-                        },
-                    }
-                )
-                    .then((response) => response.json())
-                    .catch((error) => console.log(error));
-                if (response !== undefined && response.success) {
-                    setProjects(response.data);
-                }
-            });
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project/all`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined && response.success) {
+            setProjects(response.data);
+        } else {
+            setProjects([]);
         }
     };
 
