@@ -5,6 +5,12 @@ import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
+import {
+    DragDropContext,
+    Draggable,
+    Droppable,
+    DropResult,
+} from "react-beautiful-dnd";
 
 /**
  * Constructs the complete students page with filter included
@@ -112,6 +118,10 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         setStudents([...students]);
     };
 
+    const handleOnDragEnd = (result: DropResult) => {
+        if (!result.destination) return;
+    };
+
     return (
         <div
             className={`${styles.students} ${
@@ -130,37 +140,76 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             display === Display.LIMITED ? styles.limited : ""
                         }`}
                     >
-                        {students.map((student, index) => {
-                            const id = student.student.student_id;
-                            id_to_index[id] = index;
-                            return (
-                                <div
-                                    key={student.student.student_id}
-                                    className={styles.card}
-                                    onClick={(e) =>
-                                        clickStudent(
-                                            e,
-                                            student.student.student_id,
-                                            index
-                                        )
-                                    }
-                                >
-                                    <StudentCard
-                                        student={student as Student}
-                                        display={display}
-                                    />
-                                    {student.evaluation.evaluations.filter(
-                                        (evaluation) => !evaluation.is_final
-                                    ).length > 0 ? (
-                                        <EvaluationBar
-                                            evaluations={
-                                                student.evaluation.evaluations
-                                            }
-                                        />
-                                    ) : null}
-                                </div>
-                            );
-                        })}
+                        <DragDropContext onDragEnd={handleOnDragEnd}>
+                            <Droppable droppableId={"students"}>
+                                {(provided) => (
+                                    <div ref={provided.innerRef}>
+                                        {students.map((student, index) => {
+                                            const id =
+                                                student.student.student_id;
+                                            id_to_index[id] = index;
+                                            console.log(id);
+                                            return (
+                                                <Draggable
+                                                    key={id}
+                                                    draggableId={id.toString()}
+                                                    index={index}
+                                                    isDragDisabled={true}
+                                                >
+                                                    {(provided) => (
+                                                        <div
+                                                            ref={
+                                                                provided.innerRef
+                                                            }
+                                                            {...provided.draggableProps}
+                                                            {...provided.dragHandleProps}
+                                                            key={
+                                                                student.student
+                                                                    .student_id
+                                                            }
+                                                            className={
+                                                                styles.card
+                                                            }
+                                                            onClick={(e) =>
+                                                                clickStudent(
+                                                                    e,
+                                                                    student
+                                                                        .student
+                                                                        .student_id,
+                                                                    index
+                                                                )
+                                                            }
+                                                        >
+                                                            <StudentCard
+                                                                student={
+                                                                    student as Student
+                                                                }
+                                                                display={
+                                                                    display
+                                                                }
+                                                            />
+                                                            {student.evaluation.evaluations.filter(
+                                                                (evaluation) =>
+                                                                    !evaluation.is_final
+                                                            ).length > 0 ? (
+                                                                <EvaluationBar
+                                                                    evaluations={
+                                                                        student
+                                                                            .evaluation
+                                                                            .evaluations
+                                                                    }
+                                                                />
+                                                            ) : null}
+                                                        </div>
+                                                    )}
+                                                </Draggable>
+                                            );
+                                        })}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
                     </div>
                     <div className={styles.bottomShadowCaster} />
                 </div>
