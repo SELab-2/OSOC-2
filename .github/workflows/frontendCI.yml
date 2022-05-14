@@ -9,7 +9,7 @@ on:
 
   # Should run all tests and upload the codecoverage on main
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   ci:
@@ -23,7 +23,12 @@ jobs:
 
       - run: npm install
         working-directory: frontend
-      - run: npm run build --if-present
+      - run: npm run build
         working-directory: frontend
-      - run: npm test --if-present
-        working-directory: frontend
+
+      - name: Coverage Report
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          working-directory: frontend
+          skip-step: install
+          annotations: failed-tests

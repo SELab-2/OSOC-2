@@ -21,7 +21,7 @@ export const User: React.FC<{
     const [isAdmin, setIsAdmin] = useState<boolean>(user.admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.coach);
     const [status, setStatus] = useState<AccountStatus>(user.activated);
-    const { sessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -35,7 +35,7 @@ export const User: React.FC<{
 
     useEffect(() => {
         if (!isAdmin && !isCoach) {
-            setStatus(AccountStatus.DISABLED);
+            setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
 
@@ -51,6 +51,9 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
@@ -101,7 +104,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsAdmin(!isAdmin);
+            setIsAdmin((isAdmin) => !isAdmin);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -115,7 +121,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsCoach(!isCoach);
+            setIsCoach((isCoach) => !isCoach);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -130,7 +139,9 @@ export const User: React.FC<{
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.DISABLED);
+                setStatus(() => AccountStatus.DISABLED);
+                setIsAdmin(() => false);
+                setIsCoach(() => false);
             }
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
@@ -141,7 +152,7 @@ export const User: React.FC<{
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.ACTIVATED);
+                setStatus(() => AccountStatus.ACTIVATED);
             }
         }
     };
@@ -162,7 +173,10 @@ export const User: React.FC<{
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        await fetch(
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
                 userId.toString(),
@@ -189,46 +203,79 @@ export const User: React.FC<{
                 console.log(err);
                 return { success: false };
             });
+        if (response.success) {
+            removeUser(user);
+            return response;
+        } else {
+            return { success: false };
+        }
     };
 
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p>{name}</p>
+                <p data-testid={"userName"}>{name}</p>
                 {status === AccountStatus.PENDING ? (
-                    <button className={styles.pending} onClick={activateUser}>
+                    <button
+                        data-testid={"pendingButton"}
+                        className={styles.pending}
+                        onClick={activateUser}
+                    >
                         ACTIVATE
                     </button>
                 ) : null}
             </div>
 
-            <p>{email}</p>
+            <p data-testid={"userEmail"}>{email}</p>
             <div className={styles.buttons}>
-                <div className={styles.buttonContainer} onClick={toggleIsAdmin}>
+                <div
+                    data-testid={"buttonIsAdmin"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsAdmin}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsAdmin"}
                             className={styles.buttonImage}
                             width={30}
                             height={30}
                             src={isAdmin ? AdminIconColor : AdminIcon}
-                            alt={"Admin"}
+                            alt={
+                                isAdmin
+                                    ? "Person is an admin"
+                                    : "Person is not an admin"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleIsCoach}>
+                <div
+                    data-testid={"buttonIsCoach"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsCoach}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsCoach"}
                             className={styles.buttonImage}
                             src={isCoach ? CoachIconColor : CoachIcon}
                             width={30}
                             height={30}
-                            alt={"Coach"}
+                            alt={
+                                isCoach
+                                    ? "Person is a coach"
+                                    : "Person is not a coach"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleStatus}>
+                <div
+                    data-testid={"buttonStatus"}
+                    className={styles.buttonContainer}
+                    onClick={toggleStatus}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageStatus"}
                             className={styles.buttonImage}
                             src={
                                 status === AccountStatus.DISABLED
@@ -237,7 +284,11 @@ export const User: React.FC<{
                             }
                             width={30}
                             height={30}
-                            alt={"Disabled"}
+                            alt={
+                                status === AccountStatus.DISABLED
+                                    ? "Person is disabled"
+                                    : "Person is not disabled"
+                            }
                         />
                     </div>
                 </div>
@@ -252,9 +303,12 @@ export const User: React.FC<{
                     cannot be undone and will result in data loss. Are you
                     certain that you wish to delete osoc user {name}?
                 </p>
-                <button onClick={deleteUser}>DELETE</button>
+                <button data-testid={"confirmDelete"} onClick={deleteUser}>
+                    DELETE
+                </button>
             </Modal>
             <button
+                data-testid={"buttonDelete"}
                 className={`delete ${styles.delete}`}
                 onClick={() => setShowDeleteModal(true)}
             />

@@ -46,8 +46,9 @@ export const StudentFilter: React.FC<{
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
-        const { sessionKey } =
-            getSession != undefined ? await getSession() : { sessionKey: "" };
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const responseRoles = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
             {
@@ -230,34 +231,31 @@ export const StudentFilter: React.FC<{
             filters.push(`emailStatusFilter=${emailStatus}`);
         }
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        return { success: false };
-                    } else return json;
-                })
-                .catch((err) => {
-                    console.log(err);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            }
+        )
+            .then((response) => response.json())
+            .then((json) => {
+                if (!json.success) {
                     return { success: false };
-                });
-            setFilteredStudents(response.data);
-        }
+                } else return json;
+            })
+            .catch((err) => {
+                console.log(err);
+                return { success: false };
+            });
+        setFilteredStudents(response.data);
     };
 
     return (
@@ -270,7 +268,7 @@ export const StudentFilter: React.FC<{
                 }`}
             >
                 <div className={styles.query}>
-                    <div onClick={toggleNameSort}>
+                    <div data-testid={"firstNameSort"} onClick={toggleNameSort}>
                         Name
                         <div className={styles.triangleContainer}>
                             <div
@@ -285,6 +283,7 @@ export const StudentFilter: React.FC<{
                         </div>
                     </div>
                     <input
+                        data-testid={"firstNameInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
@@ -293,7 +292,7 @@ export const StudentFilter: React.FC<{
                 </div>
 
                 <div className={styles.query}>
-                    <div onClick={toggleEmailSort}>
+                    <div data-testid={"emailSort"} onClick={toggleEmailSort}>
                         Email
                         <div className={styles.triangleContainer}>
                             <div
@@ -310,6 +309,7 @@ export const StudentFilter: React.FC<{
                         </div>
                     </div>
                     <input
+                        data-testid={"emailInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
@@ -321,6 +321,7 @@ export const StudentFilter: React.FC<{
                     Osoc edition
                     {/* Maybe dropdown */}
                     <input
+                        data-testid={"osocYearInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
@@ -331,6 +332,7 @@ export const StudentFilter: React.FC<{
 
             <div className={styles.studentButtonsContainer}>
                 <button
+                    data-testid={"alumniFilter"}
                     className={`${alumni ? styles.active : styles.inactive}`}
                     onClick={toggleAlumni}
                 >
@@ -338,6 +340,7 @@ export const StudentFilter: React.FC<{
                 </button>
 
                 <button
+                    data-testid={"coachFilter"}
                     className={`${
                         studentCoach ? styles.active : styles.inactive
                     }`}
@@ -348,6 +351,7 @@ export const StudentFilter: React.FC<{
 
                 <div className={`dropdown ${rolesActive ? "is-active" : ""}`}>
                     <div
+                        data-testid={"rolesSelectedFilterDisplay"}
                         className={`dropdown-trigger ${
                             rolesActive || selectedRoles.size > 0
                                 ? styles.active
@@ -373,6 +377,7 @@ export const StudentFilter: React.FC<{
                             {roles !== undefined
                                 ? roles.map((role) => (
                                       <div
+                                          data-testid={`testRoleItem=${role.name}`}
                                           className={`${
                                               styles.dropdownItem
                                           } dropdown-item ${
@@ -397,6 +402,7 @@ export const StudentFilter: React.FC<{
                     }`}
                 >
                     <div
+                        data-testid={"emailFilterDisplay"}
                         className={`dropdown-trigger ${
                             emailStatusActive ||
                             emailStatus !== EmailStatus.EMPTY
@@ -419,6 +425,7 @@ export const StudentFilter: React.FC<{
                     <div className="dropdown-menu">
                         <div className="dropdown-content">
                             <div
+                                data-testid={"emailFilterNone"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -432,6 +439,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.NONE}
                             </div>
                             <div
+                                data-testid={"emailFilterDraft"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -445,6 +453,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.DRAFT}
                             </div>
                             <div
+                                data-testid={"emailFilterSent"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -458,6 +467,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.SENT}
                             </div>
                             <div
+                                data-testid={"emailFilterFailed"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -471,6 +481,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.FAILED}
                             </div>
                             <div
+                                data-testid={"emailFilterScheduled"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -490,6 +501,7 @@ export const StudentFilter: React.FC<{
                 <div className={styles.studentButtons}>
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"emailFilterYes"}
                             className={styles.buttonImage}
                             src={
                                 statusFilter === StudentStatus.YES
@@ -506,6 +518,7 @@ export const StudentFilter: React.FC<{
 
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"emailFilterMaybe"}
                             className={styles.buttonImage}
                             src={
                                 statusFilter === StudentStatus.MAYBE
@@ -522,6 +535,7 @@ export const StudentFilter: React.FC<{
 
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"emailFilterNo"}
                             className={styles.buttonImage}
                             src={
                                 statusFilter === StudentStatus.NO
@@ -537,7 +551,9 @@ export const StudentFilter: React.FC<{
                     </div>
                 </div>
 
-                <button onClick={searchPress}>Search</button>
+                <button data-testid={"searchButton"} onClick={searchPress}>
+                    Search
+                </button>
             </div>
         </div>
     );
