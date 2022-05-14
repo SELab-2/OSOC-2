@@ -2,7 +2,7 @@ import express from "express";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionOsoc, errors } from "../utility";
 import * as ormO from "../orm_functions/osoc";
 import { addOsocToUser } from "../orm_functions/login_user_osoc";
 
@@ -96,6 +96,7 @@ export async function deleteOsocEditionRequest(
     return rq
         .parseDeleteOsocEditionRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionOsoc)
         .then(async (parsed) => {
             return ormO
                 .deleteOsocFromDB(parsed.data.id)

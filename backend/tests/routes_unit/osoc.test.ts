@@ -22,7 +22,8 @@ jest.mock("../../utility", () => {
         ...og,
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
-    }; // we want to only mock checkSessionKey and isAdmin
+        checkYearPermissionOsoc: jest.fn(),
+    }; // we want to only mock checkSessionKey, isAdmin and checkYearPermissionOsoc
 });
 const utilMock = util as jest.Mocked<typeof util>;
 
@@ -101,6 +102,9 @@ beforeEach(() => {
             ? Promise.resolve(keyData(v).abcd)
             : Promise.reject(util.errors.cookInsufficientRights())
     );
+    utilMock.checkYearPermissionOsoc.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     ormoMock.createOsoc.mockImplementation((y) =>
         Promise.resolve({ osoc_id: 0, year: y })
@@ -134,6 +138,7 @@ afterEach(() => {
 
     utilMock.checkSessionKey.mockReset();
     utilMock.isAdmin.mockReset();
+    utilMock.checkYearPermissionOsoc.mockReset();
 
     ormoMock.createOsoc.mockReset();
     ormoMock.getAllOsoc.mockReset();

@@ -24,6 +24,7 @@ import { getOsocYearsForLoginUser } from "./orm_functions/login_user";
 import { getAppliedYearsForStudent } from "./orm_functions/student";
 import IdRequest = Requests.IdRequest;
 import { getProjectYear } from "./orm_functions/project";
+import { getOsocById } from "./orm_functions/osoc";
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -373,6 +374,11 @@ export async function checkYearPermissionStudent<T extends IdRequest>(
     return Promise.reject(errors.cookInsufficientRights());
 }
 
+/**
+ * returns the userData object if the user is allowed to see the project
+ * Otherwise it returns an insufficient rights error.
+ * @param userData: object with the userId and projectId
+ */
 export async function checkYearPermissionProject<T extends IdRequest>(
     userData: WithUserID<T>
 ): Promise<WithUserID<T>> {
@@ -383,6 +389,26 @@ export async function checkYearPermissionProject<T extends IdRequest>(
 
     // check if the project year is inside the visible years for the user
     if (visibleYears.includes(projectYear)) {
+        return userData;
+    }
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
+ * returns the userData object if the user is allowed to see the osoc edition
+ * Otherwise it returns an insufficient rights error.
+ * @param userData: object with the userId and osocID
+ */
+export async function checkYearPermissionOsoc<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the year that the project belongs to
+    const osoc = await getOsocById(userData.data.id);
+
+    // check if the project year is inside the visible years for the user
+    if (osoc !== null && visibleYears.includes(osoc.year)) {
         return userData;
     }
     return Promise.reject(errors.cookInsufficientRights());
