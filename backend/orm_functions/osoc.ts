@@ -297,3 +297,16 @@ export async function filterOsocs(
         },
     });
 }
+
+/**
+ *
+ * @param osocId: the id of the osoc edition we are searching
+ * @returns the found osoc edition in a promise
+ */
+export async function getOsocById(osocId: number) {
+    return await prisma.osoc.findUnique({
+        where: {
+            osoc_id: osocId,
+        },
+    });
+}

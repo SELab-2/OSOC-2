@@ -25,8 +25,10 @@ import {
     deleteProjectByPartner,
     getProjectById,
     filterProjects,
+    getProjectYear,
 } from "../../orm_functions/project";
 import { account_status_enum } from "@prisma/client";
+import { errors } from "../../utility";
 
 const user_return = {
     session_id: "50",
@@ -455,4 +457,27 @@ test("should return all filtered projects sorted by the fully assigned status", 
         data: [filteredProject1, filteredProject2],
         pagination: { count: 2, page: 0 },
     });
+});
+
+test("should return the year a project belongs to", async () => {
+    const val = {
+        project_id: 0,
+        description: "",
+        partner: "",
+        osoc: {
+            year: 2022,
+        },
+        start_date: new Date(),
+        end_date: new Date(),
+        name: "",
+        positions: 0,
+        osoc_id: 0,
+    };
+    prismaMock.project.findUnique.mockResolvedValue(val);
+    await expect(getProjectYear(0)).resolves.toEqual(2022);
+});
+
+test("should return the year a project belongs to", async () => {
+    prismaMock.project.findUnique.mockResolvedValue(null);
+    await expect(getProjectYear(0)).rejects.toBe(errors.cookInvalidID());
 });

@@ -23,6 +23,7 @@ import {
 import { getOsocYearsForLoginUser } from "./orm_functions/login_user";
 import { getAppliedYearsForStudent } from "./orm_functions/student";
 import IdRequest = Requests.IdRequest;
+import { getProjectYear } from "./orm_functions/project";
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -355,9 +356,9 @@ export async function isAdmin<T extends Requests.KeyRequest>(
  *
  * @param userData: object that contains the studentId whose data is queried and the id of the loginUser that is querying the data
  */
-export async function checkYearPermissionStudent(
-    userData: WithUserID<IdRequest>
-): Promise<WithUserID<IdRequest>> {
+export async function checkYearPermissionStudent<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
     // get the years that are visible for the loginUser
     const visibleYears = await getOsocYearsForLoginUser(userData.userId);
     // get the years that the student applied in
@@ -367,9 +368,24 @@ export async function checkYearPermissionStudent(
 
     // check if the student has a job application that is inside the visible years
     if (studentAppliedYears.some((year) => visibleYears.indexOf(year) >= 0)) {
-        return Promise.resolve(userData);
+        return userData;
     }
-    return Promise.reject(errors.cookUnauthenticated());
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+export async function checkYearPermissionProject<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the year that the project belongs to
+    const projectYear = await getProjectYear(userData.data.id);
+
+    // check if the project year is inside the visible years for the user
+    if (visibleYears.includes(projectYear)) {
+        return userData;
+    }
+    return Promise.reject(errors.cookInsufficientRights());
 }
 
 /**

@@ -10,6 +10,7 @@ import {
     DBPagination,
 } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
+import { errors } from "../utility";
 
 /**
  *
@@ -432,4 +433,29 @@ export async function filterProjects(
         pagination: { page: page.currentPage, count: count },
         data: filtered_projects.slice(start, end),
     };
+}
+
+/**
+ * returns the year that a project belongs to
+ * @param projectId: id of the project whose year we are looking for
+ */
+export async function getProjectYear(projectId: number) {
+    const project = await prisma.project.findUnique({
+        where: {
+            project_id: projectId,
+        },
+        select: {
+            osoc: {
+                select: {
+                    year: true,
+                },
+            },
+        },
+    });
+
+    if (project === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    return project.osoc.year;
 }

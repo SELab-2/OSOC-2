@@ -12,6 +12,7 @@ import {
     deleteOsocFromDB,
     getNewestOsoc,
     filterOsocs,
+    getOsocById,
 } from "../../orm_functions/osoc";
 import { UpdateOsoc } from "../../orm_functions/orm_types";
 import { account_status_enum, email_status_enum } from "@prisma/client";
@@ -285,4 +286,13 @@ test("should return filtered list of osocs", async () => {
         expect(val).toHaveProperty("year");
     });
     expect(prismaMock.osoc.findMany).toBeCalledTimes(0);
+});
+
+test("should return the found osoc edition", async () => {
+    const osoc = {
+        osoc_id: 0,
+        year: 0,
+    };
+    prismaMock.osoc.findUnique.mockResolvedValue(osoc);
+    await expect(getOsocById(0)).resolves.toEqual(osoc);
 });

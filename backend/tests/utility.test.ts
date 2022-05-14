@@ -35,7 +35,11 @@ const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 import * as config from "../config.json";
 import { ApiError, Anything } from "../types";
 import * as util from "../utility";
-import { checkYearPermissionStudent, errors } from "../utility";
+import {
+    checkYearPermissionProject,
+    checkYearPermissionStudent,
+    errors,
+} from "../utility";
 import { account_status_enum } from "@prisma/client";
 
 interface Req {
@@ -709,7 +713,55 @@ test("the student is NOT visible for the loginUser", async () => {
     };
 
     await expect(checkYearPermissionStudent(inputObj)).rejects.toBe(
-        errors.cookUnauthenticated()
+        errors.cookInsufficientRights()
+    );
+});
+
+test("the project is visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2022));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the project is NOT visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2021));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
     );
 });
 
