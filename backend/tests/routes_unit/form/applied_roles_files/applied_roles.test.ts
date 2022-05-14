@@ -16,6 +16,18 @@ test("Applied roles question value is null", async () => {
     );
 });
 
+test("Applied roles other question value is null", async () => {
+    const data = await readFile(
+        "../tests/routes_unit/form/applied_roles_files",
+        "failAppliedRolesOtherValueNull.json"
+    );
+    expect(data).not.toBeNull();
+
+    await expect(getAppliedRoles(data as Form)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+});
+
 test("Applied roles question value is null", async () => {
     const data = await readFile(
         "../tests/routes_unit/form/applied_roles_files",
