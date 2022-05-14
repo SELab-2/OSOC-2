@@ -18,9 +18,10 @@ import {
  * for in the projects panel for example
  * @constructor
  */
-export const Students: React.FC<{ alwaysLimited: boolean }> = ({
-    alwaysLimited = false,
-}) => {
+export const Students: React.FC<{
+    alwaysLimited: boolean;
+    dragDisabled: boolean;
+}> = ({ alwaysLimited = false, dragDisabled }) => {
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
     const [selectedStudent, setSelectedStudent] = useState<number>(-1);
@@ -148,13 +149,14 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                                             const id =
                                                 student.student.student_id;
                                             id_to_index[id] = index;
-                                            console.log(id);
                                             return (
                                                 <Draggable
                                                     key={id}
                                                     draggableId={id.toString()}
                                                     index={index}
-                                                    isDragDisabled={true}
+                                                    isDragDisabled={
+                                                        dragDisabled
+                                                    }
                                                 >
                                                     {(provided) => (
                                                         <div

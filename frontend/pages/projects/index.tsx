@@ -6,7 +6,6 @@ import { Project } from "../../types";
 import { ProjectCard } from "../../components/ProjectCard/ProjectCard";
 import { Students } from "../../components/Students/Students";
 import styles from "../../styles/projects.module.scss";
-import { Droppable } from "react-beautiful-dnd";
 
 const Index: NextPage = () => {
     const router = useRouter();
@@ -51,18 +50,7 @@ const Index: NextPage = () => {
                 Add Project
             </button>
             <div className={styles.body}>
-                <Droppable droppableId={"students"}>
-                    {(provided) => (
-                        <div
-                            className="characters"
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                        >
-                            <Students alwaysLimited={true} />
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
+                <Students alwaysLimited={true} dragDisabled={false} />
 
                 <div>
                     {projects.map((project) => {
