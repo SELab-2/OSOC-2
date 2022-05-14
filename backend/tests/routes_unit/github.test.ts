@@ -321,7 +321,7 @@ test("Can register if account doesn't exist", async () => {
     expectNoCall(ormP.updatePerson);
 });
 
-test("Login/Register fails if the request is incorrect", async () => {
+test("Login/Register test_fails if the request is incorrect", async () => {
     const req = getMockReq();
     const res = getMockRes().res;
 
