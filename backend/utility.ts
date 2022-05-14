@@ -22,7 +22,7 @@ import {
 } from "./types";
 import { getOsocYearsForLoginUser } from "./orm_functions/login_user";
 import { getAppliedYearsForStudent } from "./orm_functions/student";
-import YearId = Requests.YearId;
+import IdRequest = Requests.IdRequest;
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -321,29 +321,6 @@ export async function checkSessionKey<T extends Requests.KeyRequest>(
 }
 
 /**
- * returns the userData in a promise if the loginUser should be able to see the requested student
- * Otherwise it returns a rejection with insufficient rights.
- *
- * @param userData: object that contains the studentId whose data is queried and the id of the loginUser that is querying the data
- */
-export async function checkYearPermissionStudent(
-    userData: WithUserID<YearId>
-): Promise<WithUserID<YearId>> {
-    // get the years that are visible for the loginUser
-    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
-    // get the years that the student applied in
-    const studentAppliedYears = await getAppliedYearsForStudent(
-        userData.data.id
-    );
-
-    // check if the student has a job application that is inside the visible years
-    if (studentAppliedYears.some((year) => visibleYears.indexOf(year) >= 0)) {
-        return Promise.resolve(userData);
-    }
-    return Promise.reject(errors.cookUnauthenticated());
-}
-
-/**
  *  Checks the session key (see {@link checkSessionKey}), then checks whether or
  * not it corresponds to an admin user.
  *
@@ -370,6 +347,29 @@ export async function isAdmin<T extends Requests.KeyRequest>(
                         : Promise.reject(errors.cookInsufficientRights())
                 )
         );
+}
+
+/**
+ * returns the userData in a promise if the loginUser should be able to see the requested student
+ * Otherwise it returns a rejection with insufficient rights.
+ *
+ * @param userData: object that contains the studentId whose data is queried and the id of the loginUser that is querying the data
+ */
+export async function checkYearPermissionStudent(
+    userData: WithUserID<IdRequest>
+): Promise<WithUserID<IdRequest>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the years that the student applied in
+    const studentAppliedYears = await getAppliedYearsForStudent(
+        userData.data.id
+    );
+
+    // check if the student has a job application that is inside the visible years
+    if (studentAppliedYears.some((year) => visibleYears.indexOf(year) >= 0)) {
+        return Promise.resolve(userData);
+    }
+    return Promise.reject(errors.cookUnauthenticated());
 }
 
 /**

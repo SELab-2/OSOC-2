@@ -6,6 +6,7 @@ import {
     deleteStudentFromDB,
     filterStudents,
     getAllStudents,
+    getAppliedYearsForStudent,
     getStudent,
     searchStudentByGender,
     updateStudent,
@@ -292,4 +293,36 @@ test("should return the students that succeed to the filtered fields but with a 
         ],
         pagination: { count: undefined, page: 0 },
     });
+});
+
+test("should return a list with the applied years", async () => {
+    const val = {
+        job_application: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+            {
+                osoc: {
+                    year: 2023,
+                },
+            },
+        ],
+        student_id: 0,
+        person_id: 0,
+        gender: "",
+        pronouns: "",
+        phone_number: "",
+        nickname: "",
+        alumni: false,
+    };
+
+    prismaMock.student.findUnique.mockResolvedValue(val);
+    await expect(getAppliedYearsForStudent(0)).resolves.toEqual([2022, 2023]);
+});
+
+test("should return the empty list of visible years because the student does not exist", async () => {
+    prismaMock.student.findUnique.mockResolvedValue(null);
+    await expect(getAppliedYearsForStudent(0)).resolves.toEqual([]);
 });

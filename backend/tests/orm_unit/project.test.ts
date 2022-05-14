@@ -413,3 +413,46 @@ test("should return all filtered projects sorted by the fully assigned status", 
         pagination: { count: 2, page: 0 },
     });
 });
+
+test("should return all filtered projects sorted by the fully assigned status", async () => {
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject2,
+        filteredProject1,
+    ]);
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject2, filteredProject1],
+        pagination: { count: 2, page: 0 },
+    });
+
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject1,
+        filteredProject2,
+    ]);
+
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "asc",
+            undefined,
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject1, filteredProject2],
+        pagination: { count: 2, page: 0 },
+    });
+});

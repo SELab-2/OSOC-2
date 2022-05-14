@@ -35,7 +35,8 @@ const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 import * as config from "../config.json";
 import { ApiError, Anything } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionStudent, errors } from "../utility";
+import { account_status_enum } from "@prisma/client";
 
 interface Req {
     url: string;
@@ -653,11 +654,63 @@ test("utility.isAdmin can catch errors from the DB", async () => {
         Promise.reject({})
     );
 
-    expect(
+    await expect(
         util.isAdmin({
             sessionkey: "key",
         })
     ).rejects.toStrictEqual(util.errors.cookInsufficientRights());
+});
+
+test("the student is visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the student is NOT visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2021])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).rejects.toBe(
+        errors.cookUnauthenticated()
+    );
 });
 
 test("utility.refreshKey removes a key and replaces it", async () => {

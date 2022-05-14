@@ -201,6 +201,7 @@ export async function deleteStudent(
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionStudent)
         .then(async (parsed) => {
             return ormSt
                 .deleteStudent(parsed.data.id)
@@ -224,6 +225,7 @@ export async function createStudentSuggestion(
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -306,6 +308,7 @@ export async function getStudentSuggestions(
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
@@ -353,6 +356,7 @@ export async function createStudentConfirmation(
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
