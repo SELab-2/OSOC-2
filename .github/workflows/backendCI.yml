@@ -8,50 +8,50 @@ on:
 
   # Should run all tests and upload the codecoverage on main
   push:
-    branches: [main]
-  
+    branches: [ main ]
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     
     services:
-     postgres: # this is for the integration testing of the orm functions
-       image: postgres:14.2
-       env:
-        POSTGRES_USER: prisma
-        POSTGRES_PASSWORD: prisma
-        POSTGRES_DB: tests
-       ports:
-        - 5433:5432
-       options:
-         --health-cmd pg_isready
-         --health-interval 10s
-         --health-timeout 5s
-         --health-retries 5
+      postgres: # this is for the integration testing of the orm functions
+        image: postgres:14.2
+        env:
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+          POSTGRES_DB: tests
+        ports:
+          - 5433:5432
+        options:
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Create Prisma Env File
-      run: |
-        touch backend/prisma/.env
-        echo DATABASE_URL="postgresql://osoc2:password@db:5432/osoc2?connect_timeout=30&pool_timeout=30" >> backend/prisma/.env
-        cat backend/prisma/.env
-    - name: Use Node.js 17.x
-      uses: actions/setup-node@v3
-      with:
-        node-version: 17.x
+      - uses: actions/checkout@v3
+      - name: Create Prisma Env File
+        run: |
+          touch backend/prisma/.env
+          echo DATABASE_URL="postgresql://osoc2:password@db:5432/osoc2?connect_timeout=30&pool_timeout=30" >> backend/prisma/.env
+          cat backend/prisma/.env
+      - name: Use Node.js 17.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 17.x
 
-    - run: npm install
-      working-directory: backend
-
-    # push the db scheme to the db container
-    - name: Push schema to docker file
-      run: npx dotenv -e prisma/.env.test -- npx prisma db push
-      working-directory: backend
-
-    - name: Coverage Report
-      uses: ArtiomTr/jest-coverage-report-action@v2
-      with:
+      - run: npm install
         working-directory: backend
-        skip-step: install
-        annotations: failed-tests
+
+      # push the db scheme to the db container
+      - name: Push schema to docker file
+        run: npx dotenv -e prisma/.env.test -- npx prisma db push
+        working-directory: backend
+
+      - name: Coverage Report
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          working-directory: backend
+          skip-step: install
+          annotations: failed-tests
