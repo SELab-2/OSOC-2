@@ -5,16 +5,12 @@ import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
-import {
-    DragDropContext,
-    Draggable,
-    Droppable,
-    DropResult,
-} from "react-beautiful-dnd";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 
 /**
  * Constructs the complete students page with filter included
  * @param alwaysLimited Whether or not the page should always be shown limited
+ * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
  * @constructor
  */
@@ -119,10 +115,6 @@ export const Students: React.FC<{
         setStudents([...students]);
     };
 
-    const handleOnDragEnd = (result: DropResult) => {
-        if (!result.destination) return;
-    };
-
     return (
         <div
             className={`${styles.students} ${
@@ -141,77 +133,63 @@ export const Students: React.FC<{
                             display === Display.LIMITED ? styles.limited : ""
                         }`}
                     >
-                        <DragDropContext onDragEnd={handleOnDragEnd}>
-                            <Droppable droppableId={"students"}>
-                                {(provided) => (
-                                    <div ref={provided.innerRef}>
-                                        {students.map((student, index) => {
-                                            const id =
-                                                student.student.student_id;
-                                            id_to_index[id] = index;
-                                            return (
-                                                <Draggable
-                                                    key={id}
-                                                    draggableId={id.toString()}
-                                                    index={index}
-                                                    isDragDisabled={
-                                                        dragDisabled
-                                                    }
-                                                >
-                                                    {(provided) => (
-                                                        <div
-                                                            ref={
-                                                                provided.innerRef
-                                                            }
-                                                            {...provided.draggableProps}
-                                                            {...provided.dragHandleProps}
-                                                            key={
+                        <Droppable droppableId={"students"}>
+                            {(provided) => (
+                                <div ref={provided.innerRef}>
+                                    {students.map((student, index) => {
+                                        const id = student.student.student_id;
+                                        id_to_index[id] = index;
+                                        return (
+                                            <Draggable
+                                                key={"student:" + id.toString()}
+                                                draggableId={
+                                                    "student:" + id.toString()
+                                                }
+                                                index={index}
+                                                isDragDisabled={dragDisabled}
+                                            >
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className={styles.card}
+                                                        onClick={(e) =>
+                                                            clickStudent(
+                                                                e,
                                                                 student.student
-                                                                    .student_id
+                                                                    .student_id,
+                                                                index
+                                                            )
+                                                        }
+                                                    >
+                                                        <StudentCard
+                                                            student={
+                                                                student as Student
                                                             }
-                                                            className={
-                                                                styles.card
-                                                            }
-                                                            onClick={(e) =>
-                                                                clickStudent(
-                                                                    e,
+                                                            display={display}
+                                                        />
+                                                        {student.evaluation.evaluations.filter(
+                                                            (evaluation) =>
+                                                                !evaluation.is_final
+                                                        ).length > 0 ? (
+                                                            <EvaluationBar
+                                                                evaluations={
                                                                     student
-                                                                        .student
-                                                                        .student_id,
-                                                                    index
-                                                                )
-                                                            }
-                                                        >
-                                                            <StudentCard
-                                                                student={
-                                                                    student as Student
-                                                                }
-                                                                display={
-                                                                    display
+                                                                        .evaluation
+                                                                        .evaluations
                                                                 }
                                                             />
-                                                            {student.evaluation.evaluations.filter(
-                                                                (evaluation) =>
-                                                                    !evaluation.is_final
-                                                            ).length > 0 ? (
-                                                                <EvaluationBar
-                                                                    evaluations={
-                                                                        student
-                                                                            .evaluation
-                                                                            .evaluations
-                                                                    }
-                                                                />
-                                                            ) : null}
-                                                        </div>
-                                                    )}
-                                                </Draggable>
-                                            );
-                                        })}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                                                        ) : null}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        );
+                                    })}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
                     </div>
                     <div className={styles.bottomShadowCaster} />
                 </div>

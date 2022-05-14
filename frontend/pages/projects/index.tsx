@@ -6,6 +6,12 @@ import { Project } from "../../types";
 import { ProjectCard } from "../../components/ProjectCard/ProjectCard";
 import { Students } from "../../components/Students/Students";
 import styles from "../../styles/projects.module.scss";
+import {
+    DragDropContext,
+    Draggable,
+    Droppable,
+    DropResult,
+} from "react-beautiful-dnd";
 
 const Index: NextPage = () => {
     const router = useRouter();
@@ -40,6 +46,12 @@ const Index: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const onDragEnd = (result: DropResult) => {
+        if (!result.destination) return;
+        console.log(result.source);
+        console.log(result);
+    };
+
     return (
         <div>
             <button
@@ -49,17 +61,45 @@ const Index: NextPage = () => {
             >
                 Add Project
             </button>
-            <div className={styles.body}>
-                <Students alwaysLimited={true} dragDisabled={false} />
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className={styles.body}>
+                    <Students alwaysLimited={true} dragDisabled={false} />
 
-                <div>
-                    {projects.map((project) => {
-                        return (
-                            <ProjectCard key={project.id} project={project} />
-                        );
-                    })}
+                    <Droppable droppableId={"projects"}>
+                        {(provided) => (
+                            <div ref={provided.innerRef}>
+                                {projects.map((project, index) => {
+                                    const id = project.id;
+                                    return (
+                                        <Draggable
+                                            key={"project:" + id.toString()}
+                                            draggableId={
+                                                "project:" + id.toString()
+                                            }
+                                            index={index}
+                                            isDragDisabled={true}
+                                        >
+                                            {(provided) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                >
+                                                    <ProjectCard
+                                                        key={project.id}
+                                                        project={project}
+                                                    />
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    );
+                                })}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
                 </div>
-            </div>
+            </DragDropContext>
         </div>
     );
 };
