@@ -5,6 +5,7 @@ import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
+import scrollStyles from "../ScrollView.module.scss";
 
 /**
  * Constructs the complete students page with filter included
@@ -123,8 +124,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                     display={display}
                     setFilteredStudents={setFilteredStudents}
                 />
-                <div className={styles.scrollView}>
-                    <div className={styles.topShadowCaster} />
+                <div className={scrollStyles.scrollView}>
+                    <div className={scrollStyles.topShadowCaster} />
                     <div
                         className={`${styles.studentCards} ${
                             display === Display.LIMITED ? styles.limited : ""
@@ -162,7 +163,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             );
                         })}
                     </div>
-                    <div className={styles.bottomShadowCaster} />
+                    <div className={scrollStyles.bottomShadowCaster} />
                 </div>
             </div>
             {selectedStudent !== -1 &&
