@@ -1609,6 +1609,7 @@ export async function addRolesToDatabase(
             const created_role = await ormRo.createRole(
                 formResponse.roles[role_index]
             );
+
             await ormAppRo.createAppliedRole({
                 jobApplicationId: job_application_id,
                 roleId: created_role.role_id,
