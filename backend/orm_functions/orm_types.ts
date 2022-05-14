@@ -402,6 +402,10 @@ export interface UpdateProject {
      * undefined if unchanged or the new number of positions of the project
      */
     positions?: number;
+    /**
+     * undefined if unchanged or the new description of the project
+     */
+    description?: string;
 }
 
 /**
