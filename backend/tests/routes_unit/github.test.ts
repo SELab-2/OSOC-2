@@ -433,7 +433,6 @@ test("Can handle different frontend", async () => {
             redirect_uri:
                 github.getHome() + config.global.preferred + "/github/login",
         });
-        console.log("POST RESOLVES");
         return Promise.resolve({ data: { access_token: "some_token" } });
     });
 
