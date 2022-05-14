@@ -1015,6 +1015,7 @@ test("Can parse update project request", () => {
     const d1: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
+        description: "Project description",
         start: Date.now(),
         end: Date.now(),
         positions: 69,
@@ -1038,6 +1039,7 @@ test("Can parse update project request", () => {
     const d3: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
+        description: "Project description",
         start: Date.now(),
         positions: 420,
     };

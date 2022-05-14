@@ -1339,6 +1339,7 @@ export namespace Requests {
         osocId?: number;
         addRoles?: object;
         deleteRoles?: object;
+        description?: string;
     }
 
     export interface ProjectFilter extends PaginableRequest {
@@ -1418,6 +1419,14 @@ export namespace Requests {
 
     export interface RmDraftStudent extends IdRequest {
         studentId: number;
+    }
+
+    export interface RmDraftCoach extends IdRequest {
+        projectUserId: number;
+    }
+
+    export interface DraftCoach extends IdRequest {
+        loginUserId: number;
     }
 }
 
