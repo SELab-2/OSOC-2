@@ -83,50 +83,50 @@ const filteredProject1: FilterProjects = {
     ],
 };
 
-const filteredProject2: FilterProjects = {
-    project_id: 2,
-    name: "project 2",
-    osoc_id: 1,
-    partner: "partner 2",
-    start_date: new Date("2022-08-17"),
-    end_date: new Date("2022-08-29"),
-    positions: 9,
-    description: "description 1",
-    project_role: [
-        {
-            positions: 2,
-            role: {
-                name: "Front-end developer",
-            },
-            _count: {
-                contract: 1,
-            },
-        },
-        {
-            positions: 7,
-            role: {
-                name: "Back-end developer",
-            },
-            _count: {
-                contract: 0,
-            },
-        },
-    ],
-    project_user: [
-        {
-            login_user: {
-                login_user_id: 3,
-                is_coach: true,
-            },
-        },
-        {
-            login_user: {
-                login_user_id: 4,
-                is_coach: true,
-            },
-        },
-    ],
-};
+// const filteredProject2: FilterProjects = {
+//     project_id: 2,
+//     name: "project 2",
+//     osoc_id: 1,
+//     partner: "partner 2",
+//     start_date: new Date("2022-08-17"),
+//     end_date: new Date("2022-08-29"),
+//     positions: 9,
+//     description: "description 1",
+//     project_role: [
+//         {
+//             positions: 2,
+//             role: {
+//                 name: "Front-end developer",
+//             },
+//             _count: {
+//                 contract: 1,
+//             },
+//         },
+//         {
+//             positions: 7,
+//             role: {
+//                 name: "Back-end developer",
+//             },
+//             _count: {
+//                 contract: 0,
+//             },
+//         },
+//     ],
+//     project_user: [
+//         {
+//             login_user: {
+//                 login_user_id: 3,
+//                 is_coach: true,
+//             },
+//         },
+//         {
+//             login_user: {
+//                 login_user_id: 4,
+//                 is_coach: true,
+//             },
+//         },
+//     ],
+// };
 
 test("should create a project in the db with the given object, returns the new record", async () => {
     const project: CreateProject = {
@@ -266,45 +266,54 @@ test("should return all filtered projects by name", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             "project 1",
-            undefined,
             undefined,
             undefined,
             undefined,
             undefined,
             undefined
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by partner", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             "partner 1",
             undefined,
             undefined,
             undefined,
-            undefined,
             undefined
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by assigned coaches", async () => {
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [1],
             undefined,
             undefined,
-            undefined,
             undefined
         )
-    ).resolves.toEqual([filteredProject1]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });
 
 test("should return all filtered projects by fully assigned status", async () => {
@@ -321,48 +330,16 @@ test("should return all filtered projects by fully assigned status", async () =>
     ]);
     await expect(
         filterProjects(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
             true,
             undefined,
-            undefined,
             undefined
         )
-    ).resolves.toEqual([filteredProject1]);
-});
-
-test("should return all filtered projects sorted by the fully assigned status", async () => {
-    prismaMock.project.findMany.mockResolvedValue([
-        filteredProject2,
-        filteredProject1,
-    ]);
-    await expect(
-        filterProjects(
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            "desc"
-        )
-    ).resolves.toEqual([filteredProject1, filteredProject2]);
-
-    prismaMock.project.findMany.mockResolvedValue([
-        filteredProject1,
-        filteredProject2,
-    ]);
-
-    await expect(
-        filterProjects(
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            "desc"
-        )
-    ).resolves.toEqual([filteredProject1, filteredProject2]);
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
 });

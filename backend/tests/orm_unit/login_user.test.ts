@@ -159,6 +159,7 @@ test("should return the filtered list of users", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
     await expect(
         filterLoginUsers(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
@@ -167,12 +168,16 @@ test("should return the filtered list of users", async () => {
             undefined,
             undefined
         )
-    ).resolves.toEqual([returnValue]);
+    ).resolves.toEqual({
+        data: [returnValue],
+        pagination: { count: undefined, page: 0 },
+    });
 });
 
 test("should reject and throw an error because only sorting on 1 field is allowed", async () => {
     try {
         await filterLoginUsers(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             "asc",

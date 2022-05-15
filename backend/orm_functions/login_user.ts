@@ -2,12 +2,13 @@ import prisma from "../prisma/prisma";
 
 import {
     CreateLoginUser,
+    DBPagination,
     FilterBoolean,
     FilterSort,
     FilterString,
     UpdateLoginUser,
 } from "./orm_types";
-import { account_status_enum } from "@prisma/client";
+import { account_status_enum, Prisma } from "@prisma/client";
 
 /**
  *
@@ -262,31 +263,36 @@ export async function getLoginUserById(loginUserId: number) {
  */
 
 export async function filterLoginUsers(
-    nameFilter: FilterString,
-    emailFilter: FilterString,
-    nameSort: FilterSort,
-    emailSort: FilterSort,
-    statusFilter: account_status_enum | undefined,
-    isCoach: FilterBoolean,
-    isAdmin: FilterBoolean
+    pagination: DBPagination,
+    nameFilter: FilterString = undefined,
+    emailFilter: FilterString = undefined,
+    nameSort: FilterSort = undefined,
+    emailSort: FilterSort = undefined,
+    statusFilter: account_status_enum | undefined = undefined,
+    isCoach: FilterBoolean = undefined,
+    isAdmin: FilterBoolean = undefined
 ) {
-    // execute the query
-    return await prisma.login_user.findMany({
-        where: {
-            person: {
-                name: {
-                    contains: nameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
+    const filter: Prisma.login_userWhereInput = {
+        person: {
+            name: {
+                contains: nameFilter,
+                mode: "insensitive",
             },
-            account_status: statusFilter,
-            is_coach: isCoach,
-            is_admin: isAdmin,
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
         },
+        account_status: statusFilter,
+        is_coach: isCoach,
+        is_admin: isAdmin,
+    };
+    const count = await prisma.login_user.count({ where: filter });
+    // execute the query
+    const data = await prisma.login_user.findMany({
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
+        where: filter,
         orderBy: [
             { person: { name: nameSort } },
             { person: { email: emailSort } },
@@ -295,6 +301,11 @@ export async function filterLoginUsers(
             person: true,
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }
 
 /**

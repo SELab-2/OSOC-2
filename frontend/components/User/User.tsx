@@ -10,30 +10,32 @@ import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
+import { Modal } from "../Modal/Modal";
 
 export const User: React.FC<{
     user: LoginUser;
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.name);
-    const [email] = useState<string>(user.person.email);
-    const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
-    const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
-    const [status, setStatus] = useState<AccountStatus>(user.account_status);
-    const { sessionKey } = useContext(SessionContext);
+    const [name] = useState<string>(user.person_data.name);
+    const [email] = useState<string>(user.person_data.email);
+    const [isAdmin, setIsAdmin] = useState<boolean>(user.admin);
+    const [isCoach, setIsCoach] = useState<boolean>(user.coach);
+    const [status, setStatus] = useState<AccountStatus>(user.activated);
+    const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
-        setIsAdmin(user.is_admin);
-        setIsCoach(user.is_coach);
-        setStatus(user.account_status);
+        setIsAdmin(user.admin);
+        setIsCoach(user.coach);
+        setStatus(user.activated);
     }, [user]);
 
     useEffect(() => {
         if (!isAdmin && !isCoach) {
-            setStatus(AccountStatus.DISABLED);
+            setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
 
@@ -49,6 +51,9 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
@@ -99,7 +104,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsAdmin(!isAdmin);
+            setIsAdmin((isAdmin) => !isAdmin);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -113,7 +121,10 @@ export const User: React.FC<{
             status
         );
         if (response.success) {
-            setIsCoach(!isCoach);
+            setIsCoach((isCoach) => !isCoach);
+            if (status === AccountStatus.DISABLED) {
+                await toggleStatus(e);
+            }
         }
     };
 
@@ -128,7 +139,9 @@ export const User: React.FC<{
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.DISABLED);
+                setStatus(() => AccountStatus.DISABLED);
+                setIsAdmin(() => false);
+                setIsCoach(() => false);
             }
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
@@ -139,7 +152,7 @@ export const User: React.FC<{
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.ACTIVATED);
+                setStatus(() => AccountStatus.ACTIVATED);
             }
         }
     };
@@ -160,7 +173,10 @@ export const User: React.FC<{
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        await fetch(
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
                 userId.toString(),
@@ -178,6 +194,8 @@ export const User: React.FC<{
                 if (!json.success) {
                     return { success: false };
                 }
+                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+                socket.emit("updateRoleUser"); // this refreshes the manage users page
                 removeUser(user);
                 return json;
             })
@@ -185,46 +203,79 @@ export const User: React.FC<{
                 console.log(err);
                 return { success: false };
             });
+        if (response.success) {
+            removeUser(user);
+            return response;
+        } else {
+            return { success: false };
+        }
     };
 
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p>{name}</p>
+                <p data-testid={"userName"}>{name}</p>
                 {status === AccountStatus.PENDING ? (
-                    <button className={styles.pending} onClick={activateUser}>
+                    <button
+                        data-testid={"pendingButton"}
+                        className={styles.pending}
+                        onClick={activateUser}
+                    >
                         ACTIVATE
                     </button>
                 ) : null}
             </div>
 
-            <p>{email}</p>
+            <p data-testid={"userEmail"}>{email}</p>
             <div className={styles.buttons}>
-                <div className={styles.buttonContainer} onClick={toggleIsAdmin}>
+                <div
+                    data-testid={"buttonIsAdmin"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsAdmin}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsAdmin"}
                             className={styles.buttonImage}
                             width={30}
                             height={30}
                             src={isAdmin ? AdminIconColor : AdminIcon}
-                            alt={"Admin"}
+                            alt={
+                                isAdmin
+                                    ? "Person is an admin"
+                                    : "Person is not an admin"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleIsCoach}>
+                <div
+                    data-testid={"buttonIsCoach"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsCoach}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsCoach"}
                             className={styles.buttonImage}
                             src={isCoach ? CoachIconColor : CoachIcon}
                             width={30}
                             height={30}
-                            alt={"Coach"}
+                            alt={
+                                isCoach
+                                    ? "Person is a coach"
+                                    : "Person is not a coach"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleStatus}>
+                <div
+                    data-testid={"buttonStatus"}
+                    className={styles.buttonContainer}
+                    onClick={toggleStatus}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageStatus"}
                             className={styles.buttonImage}
                             src={
                                 status === AccountStatus.DISABLED
@@ -233,14 +284,33 @@ export const User: React.FC<{
                             }
                             width={30}
                             height={30}
-                            alt={"Disabled"}
+                            alt={
+                                status === AccountStatus.DISABLED
+                                    ? "Person is disabled"
+                                    : "Person is not disabled"
+                            }
                         />
                     </div>
                 </div>
             </div>
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete User ${name}`}
+            >
+                <p>
+                    You are about to delete an osoc user! Deleting an osoc user
+                    cannot be undone and will result in data loss. Are you
+                    certain that you wish to delete osoc user {name}?
+                </p>
+                <button data-testid={"confirmDelete"} onClick={deleteUser}>
+                    DELETE
+                </button>
+            </Modal>
             <button
+                data-testid={"buttonDelete"}
                 className={`delete ${styles.delete}`}
-                onClick={deleteUser}
+                onClick={() => setShowDeleteModal(true)}
             />
         </div>
     );

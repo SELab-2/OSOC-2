@@ -16,7 +16,7 @@ import {
 import { registerLoginUserHandlers } from "./websocket_events/login_user";
 
 export const app: express.Application = express();
-export const port: number = config.port;
+export const port: number = config.global.port;
 export const httpServer = createServer(app);
 
 // require makes it A LOT easier to use this. Import gives some weird behaviour
