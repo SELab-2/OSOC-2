@@ -22,29 +22,50 @@ import { project_role } from "@prisma/client";
 export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
-    return rq
-        .parseNewProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
-            return ormPr
-                .createProject({
-                    name: parsed.data.name,
-                    partner: parsed.data.partner,
-                    startDate: new Date(parsed.data.start),
-                    endDate: new Date(parsed.data.end),
-                    osocId: Number(parsed.data.osocId),
-                })
-                .then((project) =>
-                    Promise.resolve({
-                        id: project.project_id,
-                        name: project.name,
-                        partner: project.partner,
-                        start_date: project.start_date.toString(),
-                        end_date: project.end_date.toString(),
-                        osoc_id: project.osoc_id,
-                    })
-                );
+    const parsedRequest = await rq.parseNewProjectRequest(req);
+    const checkedSessionKey = await util
+        .isAdmin(parsedRequest)
+        .catch((res) => res);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const createdProject = await ormPr.createProject({
+        name: checkedSessionKey.data.name,
+        partner: checkedSessionKey.data.partner,
+        startDate: new Date(checkedSessionKey.data.start),
+        endDate: new Date(checkedSessionKey.data.end),
+        osocId: Number(checkedSessionKey.data.osocId),
+    });
+
+    const roleList = [];
+
+    for (const role of checkedSessionKey.data.roles.roles) {
+        let roleByName = await ormRole.getRolesByName(role.name);
+        if (roleByName === null) {
+            roleByName = await ormRole.createRole(role.name);
+        }
+        const createdProjectRole = await ormPrRole.createProjectRole({
+            projectId: createdProject.project_id,
+            roleId: roleByName.role_id,
+            positions: role.positions,
         });
+
+        roleList.push({
+            name: role.name,
+            positions: createdProjectRole.positions,
+        });
+    }
+
+    return Promise.resolve({
+        id: createdProject.project_id,
+        name: createdProject.name,
+        partner: createdProject.partner,
+        start_date: createdProject.start_date.toString(),
+        end_date: createdProject.end_date.toString(),
+        osoc_id: createdProject.osoc_id,
+        roles: roleList,
+    });
 }
 
 /**
@@ -55,41 +76,48 @@ export async function createProject(
  */
 export async function listProjects(
     req: express.Request
-): Promise<Responses.ProjectList> {
-    return rq
-        .parseProjectAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () =>
-            ormPr
-                .getAllProjects()
-                .then((obj) =>
-                    Promise.all(
-                        obj.map(async (val) => {
-                            const students = await ormCtr.contractsByProject(
-                                val.project_id
-                            );
-                            const users = await ormPU.getUsersFor(
-                                val.project_id
-                            );
-                            return Promise.resolve({
-                                id: Number(val.project_id),
-                                name: val.name,
-                                partner: val.partner,
-                                start_date: val.start_date.toString(),
-                                end_date: val.end_date.toString(),
-                                osoc_id: val.osoc_id,
-                                students: students,
-                                coaches: users,
-                            });
-                        })
-                    )
-                )
-                .then((obj) =>
-                    Promise.resolve({
-                        data: obj,
-                    })
-                )
+): Promise<Responses.ProjectListAndContracts> {
+    const parsedRequest = await rq.parseProjectAllRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    if (checkedSessionKey.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const allProjects = [];
+    for (const project of await ormPr.getAllProjects()) {
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
         );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
+
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+        const users = await ormPU.getUsersFor(project.project_id);
+        allProjects.push({
+            id: Number(project.project_id),
+            name: project.name,
+            partner: project.partner,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
+            osoc_id: project.osoc_id,
+            roles: projectRoles,
+            contracts: contracts,
+            coaches: users,
+        });
+    }
+
+    return Promise.resolve({
+        data: allProjects,
+    });
 }
 
 /**
@@ -100,64 +128,119 @@ export async function listProjects(
  */
 export async function getProject(
     req: express.Request
-): Promise<Responses.Project> {
-    return rq
-        .parseSingleProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) => util.isValidID(parsed.data, "project"))
-        .then(async (parsed) =>
-            ormPr.getProjectById(parsed.id).then(async (obj) => {
-                if (obj !== null) {
-                    const students = await ormCtr.contractsByProject(
-                        obj.project_id
-                    );
-                    const users = await ormPU.getUsersFor(obj.project_id);
-                    return Promise.resolve({
-                        id: Number(obj.project_id),
-                        name: obj.name,
-                        partner: obj.partner,
-                        start_date: obj.start_date.toString(),
-                        end_date: obj.end_date.toString(),
-                        osoc_id: obj.osoc_id,
-                        students: students,
-                        coaches: users,
-                    });
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            })
+): Promise<Responses.ProjectAndContracts> {
+    const parsedRequest = await rq.parseSingleProjectRequest(req);
+    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
+    if (checked.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const checkedId = await util.isValidID(checked.data, "project");
+
+    const project = await ormPr.getProjectById(checkedId.id);
+    if (project !== null) {
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
         );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
+
+        const users = await ormPU.getUsersFor(project.project_id);
+
+        return Promise.resolve({
+            id: Number(project.project_id),
+            name: project.name,
+            partner: project.partner,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
+            osoc_id: project.osoc_id,
+            roles: projectRoles,
+            contracts: contracts,
+            coaches: users,
+        });
+    }
+
+    return Promise.reject(errors.cookInvalidID());
 }
 
 export async function modProject(
     req: express.Request
 ): Promise<Responses.Project> {
-    return rq
-        .parseUpdateProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) => util.isValidID(parsed.data, "project"))
-        .then(async (parsed) => {
-            // UPDATING LOGIC
-            return ormPr
-                .updateProject({
-                    projectId: parsed.id,
-                    name: parsed.name,
-                    partner: parsed.partner,
-                    startDate: parsed.start,
-                    endDate: parsed.end,
-                    osocId: parsed.osocId,
-                })
-                .then((project) =>
-                    Promise.resolve({
-                        id: project.project_id,
-                        name: project.name,
-                        partner: project.partner,
-                        start_date: project.start_date.toString(),
-                        end_date: project.end_date.toString(),
-                        osoc_id: project.osoc_id,
-                    })
-                );
+    const parsedRequest = await rq.parseUpdateProjectRequest(req);
+    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
+    if (checked.data == undefined) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    const checkedId = await util
+        .isValidID(checked.data, "project")
+        .catch((res) => res);
+
+    const updatedProject = await ormPr.updateProject({
+        projectId: checkedId.id,
+        name: checkedId.name,
+        partner: checkedId.partner,
+        startDate: checkedId.start,
+        endDate: checkedId.end,
+        osocId: checkedId.osocId,
+        description: checkedId.description,
+    });
+
+    if (checkedId.modifyRoles !== undefined) {
+        for (const changeRolePositions of checkedId.modifyRoles.roles) {
+            const foundRole = await ormRole.getRole(changeRolePositions.id);
+            if (foundRole !== null) {
+                await ormPrRole.updateProjectRole({
+                    projectRoleId: changeRolePositions.id,
+                    projectId: checkedId.id,
+                    roleId: foundRole.role_id,
+                    positions: changeRolePositions.positions,
+                });
+            }
+        }
+    }
+
+    if (checkedId.deleteRoles !== undefined) {
+        for (const deleteRoleId of checkedId.deleteRoles.roles) {
+            await ormPrRole.deleteProjectRole(deleteRoleId);
+        }
+    }
+
+    const projectRoles = await ormPrRole.getProjectRolesByProject(checkedId.id);
+    const roles = [];
+    for (const projectRole of projectRoles) {
+        const foundRole = await ormRole.getRole(projectRole.role_id);
+        if (foundRole === null) {
+            return Promise.reject(errors.cookNoDataError());
+        }
+
+        roles.push({
+            name: foundRole.name,
+            positions: projectRole.positions,
         });
+    }
+
+    return Promise.resolve({
+        id: updatedProject.project_id,
+        name: updatedProject.name,
+        partner: updatedProject.partner,
+        start_date: updatedProject.start_date.toString(),
+        end_date: updatedProject.end_date.toString(),
+        osoc_id: updatedProject.osoc_id,
+        roles: roles,
+        description: updatedProject.description,
+    });
 }
 
 /**
@@ -334,6 +417,83 @@ export async function modProjectStudent(
         });
 }
 
+export async function unAssignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseRemoveCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.project_user_id ==
+                            checked.data.projectUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length == 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.projectUserId.toString() +
+                                " is not assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    for (const project_user of found) {
+                        await ormPU.deleteProjectUser(
+                            project_user.project_user_id
+                        );
+                    }
+
+                    return Promise.resolve({});
+                });
+        });
+}
+
+export async function assignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseAssignCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length != 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is already assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    const project_user = await ormPU.createProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
+
+                    return Promise.resolve(project_user);
+                });
+        });
+}
+
 export async function unAssignStudent(
     req: express.Request
 ): Promise<Responses.Empty> {
@@ -402,6 +562,8 @@ export async function unAssignStudent(
 export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
+    // not implementing pagination as we don't expect the number of conflicts
+    // to be > 50 (2 * page size); which is kind of a minimum...
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -520,26 +682,28 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
+    const checked = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
+    if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const projects = await ormPr.filterProjects(
-        checkedSessionKey.data.projectNameFilter,
-        checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
-        checkedSessionKey.data.fullyAssignedFilter,
-        checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort
+        {
+            currentPage: checked.data.currentPage,
+            pageSize: checked.data.pageSize,
+        },
+        checked.data.projectNameFilter,
+        checked.data.clientNameFilter,
+        checked.data.assignedCoachesFilterArray,
+        checked.data.fullyAssignedFilter,
+        checked.data.projectNameSort,
+        checked.data.clientNameSort
     );
 
     const projectlist = [];
 
-    for (const project of projects) {
+    for (const project of projects.data) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
         const users = await ormPU.getUsersFor(project.project_id);
 
@@ -556,6 +720,7 @@ export async function filterProjects(
     }
 
     return Promise.resolve({
+        pagination: projects.pagination,
         data: projectlist,
     });
 }
@@ -583,6 +748,8 @@ export function getRouter(): express.Router {
 
     util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/coach", unAssignCoach);
+    util.route(router, "post", "/:id/coach", assignCoach);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 

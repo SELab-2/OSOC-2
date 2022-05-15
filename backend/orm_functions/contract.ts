@@ -103,9 +103,29 @@ export async function contractsByProject(projectId: number) {
                     person: true,
                 },
             },
-            project_role: true,
+            project_role: {
+                select: {
+                    positions: true,
+                    project_id: true,
+                    project_role_id: true,
+                    role_id: true,
+                    role: {
+                        select: {
+                            name: true,
+                        },
+                    },
+                },
+            },
             contract_status: true,
             contract_id: true,
+            login_user: {
+                select: {
+                    login_user_id: true,
+                    is_admin: true,
+                    is_coach: true,
+                    person: true,
+                },
+            },
         },
     });
 }

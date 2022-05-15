@@ -1,18 +1,18 @@
 /* Insert data into person table */
-INSERT INTO person(email, firstname, lastname)
-VALUES('alicestudent@gmail.com', 'Alice', 'Smith'),
-('bob.admin@osoc.com', 'Bob', 'Jones'), ('Trudycoach@gmail.com', 'Trudy', 'Taylor'),
-('osoc2@mail.com', 'Osoc', 'TeamTwo');
+INSERT INTO person(email, "name")
+VALUES('alicestudent@gmail.com', 'Alice Smith'),
+('bob.admin@osoc.com', 'Bob Jones'), ('Trudycoach@gmail.com', 'Trudy Taylor'),
+('osoc2@mail.com', 'Osoc TeamTwo');
 
 /* Insert data into student table */
 INSERT INTO student(person_id, gender, phone_number, nickname, alumni)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Alice'),
+VALUES((SELECT person_id FROM person WHERE "name" LIKE 'Alice%'),
 'Female', '0032476553498', 'Unicorn', TRUE);
 
 /* Insert data into login_user table */
 INSERT INTO login_user(person_id, password, is_admin, is_coach, account_status)
-VALUES((SELECT person_id FROM person WHERE firstname = 'Bob'), '$2b$08$ffQO2UCEFHUHcn9d.XHHg.hFKn7oF5AOW82J.hsOqq8gV0TzMEuzq', TRUE, FALSE , 'ACTIVATED'),
-((SELECT person_id FROM person WHERE firstname = 'Trudy'), '$2b$08$XDDmyKZnWsai9wVAW7r.GOOv7pGKa7oHLlBhVAqTmPgiscMzynpVq', FALSE, TRUE, 'PENDING'),
+VALUES((SELECT person_id FROM person WHERE "name" LIKE 'Bob%'), '$2b$08$ffQO2UCEFHUHcn9d.XHHg.hFKn7oF5AOW82J.hsOqq8gV0TzMEuzq', TRUE, FALSE , 'ACTIVATED'),
+((SELECT person_id FROM person WHERE "name" LIKE 'Trudy%'), '$2b$08$XDDmyKZnWsai9wVAW7r.GOOv7pGKa7oHLlBhVAqTmPgiscMzynpVq', FALSE, TRUE, 'PENDING'),
 ((SELECT person_id FROM person WHERE email = 'osoc2@mail.com'), '$2b$08$MCblaKGOOBV7NpiW62GEc.km732o6XWDJxU6SfU3NMENxMuCWFlJq', TRUE, FALSE, 'ACTIVATED');
 
 /* Insert data into osoc table */

@@ -20,6 +20,7 @@ import {
     setCoach,
     setAdmin,
     filterLoginUsers,
+    deleteLoginUserFromDB,
 } from "../../orm_functions/login_user";
 
 const response = {
@@ -120,6 +121,35 @@ test("should delete the login user with the given person id and return the delet
     await expect(deleteLoginUserByPersonId(0)).resolves.toEqual(returnValue);
 });
 
+test("should delete all data of a login_user", async () => {
+    prismaMock.password_reset.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.project_user.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.session_keys.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.login_user.delete.mockResolvedValue({
+        login_user_id: 0,
+        person_id: 0,
+        password: "",
+        is_admin: false,
+        is_coach: true,
+        account_status: account_status_enum.DISABLED,
+    });
+    prismaMock.person.delete.mockResolvedValue({
+        person_id: 0,
+        email: "",
+        name: "name",
+        github: "",
+        github_id: "",
+    });
+
+    await deleteLoginUserFromDB(0);
+
+    expect(prismaMock.password_reset.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.project_user.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.session_keys.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.login_user.delete).toBeCalledTimes(1);
+    expect(prismaMock.person.delete).toBeCalledTimes(1);
+});
+
 test("should return the login_user with given id", async () => {
     prismaMock.login_user.findUnique.mockResolvedValue(response);
     await expect(getLoginUserById(0)).resolves.toEqual(response);
@@ -129,6 +159,7 @@ test("should return the filtered list of users", async () => {
     prismaMock.login_user.findMany.mockResolvedValue([returnValue]);
     await expect(
         filterLoginUsers(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             undefined,
@@ -137,12 +168,16 @@ test("should return the filtered list of users", async () => {
             undefined,
             undefined
         )
-    ).resolves.toEqual([returnValue]);
+    ).resolves.toEqual({
+        data: [returnValue],
+        pagination: { count: undefined, page: 0 },
+    });
 });
 
 test("should reject and throw an error because only sorting on 1 field is allowed", async () => {
     try {
         await filterLoginUsers(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             "asc",

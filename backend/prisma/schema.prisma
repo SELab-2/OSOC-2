@@ -114,8 +114,7 @@ model person {
   person_id  Int         @id @default(autoincrement())
   email      String?     @unique @db.VarChar(320)
   github     String?     @unique
-  firstname  String
-  lastname   String
+  name       String
   github_id  String?     @unique
   login_user login_user?
   student    student?

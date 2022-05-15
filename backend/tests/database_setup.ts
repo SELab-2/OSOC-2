@@ -12,28 +12,23 @@ export function personData() {
     return [
         {
             email: "email@testmail.com",
-            firstname: "firstNameTest",
-            lastname: "lastNameTest",
+            name: "firstNameTest",
         },
         {
             github: "test@github.com",
-            firstname: "firstNameTest2",
-            lastname: "lastNameTest2",
+            name: "firstNameTest2",
         },
         {
             email: "testmail2@mail.com",
-            firstname: "first",
-            lastname: "last",
+            name: "first",
         },
         {
             email: "studentmail@mail.com",
-            firstname: "student",
-            lastname: "student",
+            name: "student",
         },
         {
             email: "coachmail@mail.com",
-            firstname: "coach",
-            lastname: "testcoach",
+            name: "coach",
         },
     ];
 }

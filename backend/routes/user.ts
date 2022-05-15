@@ -33,22 +33,28 @@ export async function listUsers(
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-    const loginUsers = await ormL.getAllLoginUsers();
+    // const loginUsers = await ormL.getAllLoginUsers();
+    const loginUsers = await ormL.filterLoginUsers({
+        currentPage: parsedRequest.currentPage,
+        pageSize: parsedRequest.pageSize,
+    });
 
-    loginUsers.map((val) => ({
+    const updated = loginUsers.data.map((val) => ({
         person_data: {
             id: val.person.person_id,
-            name: val.person.firstname,
+            name: val.person.name,
             email: val.person.email,
             github: val.person.github,
         },
         coach: val.is_coach,
         admin: val.is_admin,
         activated: val.account_status as string,
+        login_user_id: val.login_user_id,
     }));
 
     return Promise.resolve({
-        data: loginUsers,
+        pagination: loginUsers.pagination,
+        data: updated,
     });
 }
 
@@ -86,13 +92,11 @@ export async function createUserRequest(
 
         person = await ormP.updatePerson({
             personId: foundPerson[0].person_id,
-            firstname: parsedRequest.firstName,
-            lastname: "",
+            name: parsedRequest.name,
         });
     } else {
         person = await ormP.createPerson({
-            firstname: parsedRequest.firstName,
-            lastname: "",
+            name: parsedRequest.name,
             email: validator.default
                 .normalizeEmail(parsedRequest.email)
                 .toString(),
@@ -149,7 +153,7 @@ export async function setAccountStatus(
         .then((res) => {
             return Promise.resolve({
                 id: res.person_id,
-                name: res.person.firstname + " " + res.person.lastname,
+                name: res.person.name,
             });
         });
 }
@@ -250,6 +254,10 @@ export async function filterUsers(
         .then(async (parsed) => {
             return ormLU
                 .filterLoginUsers(
+                    {
+                        currentPage: parsed.data.currentPage,
+                        pageSize: parsed.data.pageSize,
+                    },
                     parsed.data.nameFilter,
                     parsed.data.emailFilter,
                     parsed.data.nameSort,
@@ -259,18 +267,22 @@ export async function filterUsers(
                     parsed.data.isAdminFilter
                 )
                 .then((users) => {
-                    users.map((val) => ({
+                    const udat = users.data.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
-                            name: val.person.firstname,
+                            name: val.person.name,
                             email: val.person.email,
                             github: val.person.github,
                         },
                         coach: val.is_coach,
                         admin: val.is_admin,
                         activated: val.account_status as string,
+                        login_user_id: val.login_user_id,
                     }));
-                    return Promise.resolve({ data: users });
+                    return Promise.resolve({
+                        data: udat,
+                        pagination: users.pagination,
+                    });
                 });
         });
 }
@@ -341,7 +353,7 @@ export async function userModSelf(
                         return ormP
                             .updatePerson({
                                 personId: person.person_id,
-                                firstname: checked.data.name,
+                                name: checked.data.name,
                             })
                             .then(() => Promise.resolve());
                     }

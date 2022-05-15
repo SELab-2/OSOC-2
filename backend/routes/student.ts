@@ -8,7 +8,7 @@ import * as ormSt from "../orm_functions/student";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
-import { Responses } from "../types";
+import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as ormP from "../orm_functions/person";
@@ -23,14 +23,16 @@ export async function listStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseStudentAllRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-    const studentList: object[] = [];
-    const students = await ormSt.getAllStudents();
+    const studentList: InternalTypes.Student[] = [];
+    const studentsP = await ormSt.filterStudents({
+        pageSize: parsedRequest.pageSize,
+        currentPage: parsedRequest.currentPage,
+    });
+    const students = studentsP.data;
     for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             students[studentIndex].student_id
@@ -78,6 +80,7 @@ export async function listStudents(
                 student: students[studentIndex],
                 jobApplication: jobApplication,
                 evaluations: evaluations,
+                evaluation: undefined,
                 roles: roles,
             });
         } else {
@@ -86,6 +89,7 @@ export async function listStudents(
     }
 
     return Promise.resolve({
+        pagination: studentsP.pagination,
         data: studentList,
     });
 }
@@ -165,6 +169,7 @@ export async function getStudent(
                 year: year,
             },
         },
+        evaluations: undefined,
         roles: roles,
     });
 }
@@ -200,7 +205,7 @@ export async function deleteStudent(
  */
 export async function createStudentSuggestion(
     req: express.Request
-): Promise<Responses.SuggestionInfo> {
+): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -271,16 +276,7 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    return Promise.resolve({
-        data: {
-            evaluation_id: newEvaluation.evaluation_id,
-            senderFirstname: loginUser.person.firstname,
-            senderLastname: loginUser.person.lastname,
-            reason: newEvaluation.motivation,
-            decision: newEvaluation.decision,
-            isFinal: newEvaluation.is_final,
-        },
-    });
+    return Promise.resolve({});
 }
 
 /**
@@ -291,7 +287,7 @@ export async function createStudentSuggestion(
  */
 export async function getStudentSuggestions(
     req: express.Request
-): Promise<Responses.SuggestionInfoList> {
+): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
@@ -305,36 +301,28 @@ export async function getStudentSuggestions(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const osoc =
-        checkedSessionKey.data.year == undefined
-            ? await ormOs.getLatestOsoc()
-            : checkedSessionKey.data.year;
-    if (osoc == null) {
-        return Promise.resolve({
-            data: [],
-            sessionkey: checkedSessionKey.data.sessionkey,
-        });
-    }
-    const suggestionsTotal = (
-        await ormJo.getStudentEvaluationsTotal(student.student_id)
-    ).filter((suggestion) => suggestion.osoc.year === osoc.year);
-
-    const suggestionsInfo = [];
-    for (const suggestion of suggestionsTotal) {
-        for (const evaluation of suggestion.evaluation) {
-            suggestionsInfo.push({
-                evaluation_id: evaluation.evaluation_id,
-                senderFirstname: evaluation.login_user?.person.firstname,
-                senderLastname: evaluation.login_user?.person.lastname,
-                reason: evaluation.motivation,
-                decision: evaluation.decision,
-                isFinal: evaluation.is_final,
-            });
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
         }
+    } else {
+        year = checkedSessionKey.data.year;
     }
+
+    const evaluations = await ormJo.getEvaluationsByYearForStudent(
+        student.student_id,
+        year
+    );
 
     return Promise.resolve({
-        data: suggestionsInfo,
+        evaluation: {
+            evaluations: evaluations !== null ? evaluations.evaluation : [],
+            osoc: {
+                year: year,
+            },
+        },
     });
 }
 
@@ -394,16 +382,18 @@ export async function filterStudents(
     req: express.Request
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const students = await ormSt.filterStudents(
-        checkedSessionKey.data.firstNameFilter,
-        checkedSessionKey.data.lastNameFilter,
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
+        checkedSessionKey.data.nameFilter,
         checkedSessionKey.data.emailFilter,
         checkedSessionKey.data.roleFilter,
         checkedSessionKey.data.alumniFilter,
@@ -411,12 +401,11 @@ export async function filterStudents(
         checkedSessionKey.data.statusFilter,
         checkedSessionKey.data.osocYear,
         checkedSessionKey.data.emailStatusFilter,
-        checkedSessionKey.data.firstNameSort,
-        checkedSessionKey.data.lastNameSort,
+        checkedSessionKey.data.nameSort,
         checkedSessionKey.data.emailSort
     );
 
-    const studentlist = [];
+    const studentlist: InternalTypes.Student[] = [];
 
     let year = new Date().getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
@@ -425,10 +414,10 @@ export async function filterStudents(
             year = latestOsocYear.year;
         }
     } else {
-        year = checkedSessionKey.data.year;
+        year = checkedSessionKey.data.osocYear;
     }
 
-    for (const student of students) {
+    for (const student of students.data) {
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
         );
@@ -472,11 +461,13 @@ export async function filterStudents(
                     year: year,
                 },
             },
+            evaluations: undefined,
             roles: roles,
         });
     }
 
     return Promise.resolve({
+        pagination: students.pagination,
         data: studentlist,
     });
 }

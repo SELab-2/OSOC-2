@@ -2,12 +2,13 @@ import prisma from "../prisma/prisma";
 
 import {
     CreateLoginUser,
+    DBPagination,
     FilterBoolean,
     FilterSort,
     FilterString,
     UpdateLoginUser,
 } from "./orm_types";
-import { account_status_enum } from "@prisma/client";
+import { account_status_enum, Prisma } from "@prisma/client";
 
 /**
  *
@@ -253,8 +254,6 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
- * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coach)
- * @param adminFilter adminstatus that we are filtering on (or undefined if not filtering on admin)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
@@ -264,39 +263,49 @@ export async function getLoginUserById(loginUserId: number) {
  */
 
 export async function filterLoginUsers(
-    nameFilter: FilterString,
-    emailFilter: FilterString,
-    nameSort: FilterSort,
-    emailSort: FilterSort,
-    statusFilter: account_status_enum | undefined,
-    isCoach: FilterBoolean,
-    isAdmin: FilterBoolean
+    pagination: DBPagination,
+    nameFilter: FilterString = undefined,
+    emailFilter: FilterString = undefined,
+    nameSort: FilterSort = undefined,
+    emailSort: FilterSort = undefined,
+    statusFilter: account_status_enum | undefined = undefined,
+    isCoach: FilterBoolean = undefined,
+    isAdmin: FilterBoolean = undefined
 ) {
-    // execute the query
-    return await prisma.login_user.findMany({
-        where: {
-            person: {
-                firstname: {
-                    contains: nameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
+    const filter: Prisma.login_userWhereInput = {
+        person: {
+            name: {
+                contains: nameFilter,
+                mode: "insensitive",
             },
-            account_status: statusFilter,
-            is_coach: isCoach,
-            is_admin: isAdmin,
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
         },
+        account_status: statusFilter,
+        is_coach: isCoach,
+        is_admin: isAdmin,
+    };
+    const count = await prisma.login_user.count({ where: filter });
+    // execute the query
+    const data = await prisma.login_user.findMany({
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
+        where: filter,
         orderBy: [
-            { person: { firstname: nameSort } },
+            { person: { name: nameSort } },
             { person: { email: emailSort } },
         ],
         include: {
             person: true,
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }
 
 /**

@@ -4,6 +4,7 @@ import {
     refreshKey,
     checkSessionKey,
     removeAllKeysForUser,
+    removeAllKeysForLoginUserId,
 } from "../../orm_functions/session_key";
 
 const futureDate = new Date();
@@ -65,4 +66,10 @@ test("should remove all keys from the user with the given key", async () => {
     const count = { count: 0 };
     prismaMock.session_keys.deleteMany.mockResolvedValue(count);
     await expect(removeAllKeysForUser("key")).resolves.toEqual(count);
+});
+
+test("should remove all keys from the login user", async () => {
+    const res = { count: 0 };
+    prismaMock.session_keys.deleteMany.mockResolvedValue(res);
+    await expect(removeAllKeysForLoginUserId(0)).resolves.toEqual(res);
 });

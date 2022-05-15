@@ -2,8 +2,7 @@ CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
    github       TEXT               UNIQUE,
-   firstname    TEXT               NOT NULL,
-   lastname     TEXT               NOT NULL,
+   "name"     TEXT               NOT NULL,
    github_id    TEXT               UNIQUE,
    CONSTRAINT login CHECK (email IS NOT NULL OR (github IS NOT NULL AND github_id IS NOT NULL)),
    CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')

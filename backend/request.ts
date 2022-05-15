@@ -104,9 +104,7 @@ function hasFields(
             return Promise.reject(errors.cookUnauthenticated());
         }
     }
-    // if ((reqType == types.key || reqType == types.id) &&
-    //     (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
-    //   return Promise.reject(errors.cookUnauthenticated());
+
     if (reqType == types.id && !("id" in req.params)) return rejector();
     return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
 }
@@ -133,6 +131,35 @@ function maybe<T>(obj: Anything, key: string): T | undefined {
 }
 
 /**
+ *  Resolves with the given object if the `object.id` is a valid number
+ * (not NaN), otherwise, returns the rejector.
+ *  @template T The type of object to validate (should be an IdRequest).
+ *  @param r The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
+    return isNaN(r.id) ? rejector() : Promise.resolve(r);
+}
+
+/**
+ *  Resolves with the given object if none of the keys is a NaN value (they can
+ * be undefined) in the given object; otherwise, returns the rejector.
+ *  @template T The type of object to validate.
+ *  @param keys The keys to check.
+ *  @param obj The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+function allNonNaN<T extends Anything>(keys: string[], obj: T): Promise<T> {
+    return keys.every((v) => {
+        return obj[v] == undefined || !isNaN(obj[v] as number);
+    })
+        ? Promise.resolve(obj)
+        : rejector();
+}
+
+/**
  *  Parses a key-only request.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -148,6 +175,22 @@ async function parseKeyRequest(
     );
 }
 
+async function parsePaginationRequest(
+    req: express.Request
+): Promise<Requests.PaginableRequest> {
+    return parseKeyRequest(req).then((parsed) => {
+        let currentPage = 0;
+        if ("currentPage" in req.body) {
+            currentPage = Number(req.body.currentPage);
+        }
+        return {
+            ...parsed,
+            currentPage: currentPage,
+            pageSize: config.global.pageSize,
+        };
+    });
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
@@ -161,7 +204,7 @@ async function parseKeyIdRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
     );
 }
 
@@ -174,7 +217,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
@@ -184,7 +227,7 @@ async function parseUpdateLoginUser(
                 req.body,
                 "accountStatus"
             ) as account_status_enum,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -220,8 +263,7 @@ export async function parseUpdateStudentRequest(
 ): Promise<Requests.UpdateStudent> {
     const bodyF = [
         "emailOrGithub",
-        "firstName",
-        "lastName",
+        "name",
         "gender",
         "pronouns",
         "phone",
@@ -230,23 +272,28 @@ export async function parseUpdateStudentRequest(
         "education",
     ];
 
-    return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, bodyF)) return rejector();
+    return hasFields(req, [], types.id)
+        .then(() => {
+            if (!atLeastOneField(req, bodyF))
+                return rejector<Requests.UpdateStudent>();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            emailOrGithub: maybe(req.body, "emailOrGithub"),
-            firstName: maybe(req.body, "firstName"),
-            lastName: maybe(req.body, "lastName"),
-            gender: maybe(req.body, "gender"),
-            pronouns: maybe(req.body, "pronouns"),
-            phone: maybe(req.body, "phone"),
-            education: maybe(req.body, "education"),
-            alumni: maybe(req.body, "alumni"),
-            nickname: maybe(req.body, "nickname"),
-        });
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                emailOrGithub: maybe<string>(req.body, "emailOrGithub"),
+                name: maybe<string>(req.body, "name"),
+                gender: maybe<string>(req.body, "gender"),
+                pronouns: maybe<string>(req.body, "pronouns"),
+                phone: maybe<string>(req.body, "phone"),
+                education: maybe<Requests.UpdateStudent["education"]>(
+                    req.body,
+                    "education"
+                ),
+                alumni: maybe<boolean>(req.body, "alumni"),
+                nickname: maybe<string>(req.body, "nickname"),
+            });
+        })
+        .then(idIsNumber);
 }
 
 /**
@@ -258,7 +305,7 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(() => {
+    return hasFields(req, ["suggestion"], types.id).then(async () => {
         const sug: unknown = req.body.suggestion;
         if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
             return rejector();
@@ -267,8 +314,8 @@ export async function parseSuggestStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe(req.body, "reason"),
-        });
+            reason: maybe<string>(req.body, "reason"),
+        }).then(idIsNumber);
     });
 }
 
@@ -281,18 +328,18 @@ export async function parseSuggestStudentRequest(
 export async function parseGetSuggestionsStudentRequest(
     req: express.Request
 ): Promise<Requests.YearId> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if ("year" in req.body) {
             return Promise.resolve({
                 sessionkey: getSessionKey(req),
                 id: Number(req.params.id),
                 year: Number(req.body.year),
-            });
+            }).then((o) => allNonNaN(["id", "year"], o));
         } else {
             return Promise.resolve({
                 sessionkey: getSessionKey(req),
                 id: Number(req.params.id),
-            });
+            }).then(idIsNumber);
         }
     });
 }
@@ -331,9 +378,11 @@ export async function parseSingleStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
+    const authenticated = await parseKeyRequest(req); // enforce authentication
     let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
-        year = parseInt(req.body.yearFilter);
+        year = Number(req.body.yearFilter);
+        if (isNaN(year)) return rejector();
     }
 
     for (const filter of [maybe(req.body, "yearSort")]) {
@@ -343,7 +392,7 @@ export async function parseFilterOsocsRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...authenticated,
         yearFilter: year,
         yearSort: maybe<FilterSort>(req.body, "yearSort"),
     });
@@ -358,8 +407,10 @@ export async function parseFilterOsocsRequest(
 export async function parseFilterStudentsRequest(
     req: express.Request
 ): Promise<Requests.StudentFilter> {
-    let mail = maybe(req.body, "emailFilter");
-    let roles = maybe(req.body, "roleFilter");
+    const paged = await parsePaginationRequest(req); // ensure authentication
+
+    let mail = maybe<string>(req.body, "emailFilter");
+    let roles: string[] | undefined = undefined; // = maybe(req.body, "roleFilter");
     if (
         ("statusFilter" in req.body &&
             !Object.values(Decision).includes(
@@ -388,13 +439,14 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    if ("roleFilter" in req.body && typeof req.body.roleFilter === "string") {
-        roles = req.body.roleFilter.split(",");
+    if ("roleFilter" in req.body) {
+        if (typeof req.body.roleFilter === "string")
+            roles = req.body.roleFilter.split(",");
+        else roles = req.body.roleFilter as string[];
     }
 
     for (const filter of [
-        maybe(req.body, "firstNameSort"),
-        maybe(req.body, "lastNameSort"),
+        maybe(req.body, "nameSort"),
         maybe(req.body, "emailSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
@@ -405,29 +457,28 @@ export async function parseFilterStudentsRequest(
     let osoc_year = new Date().getFullYear();
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
+        if (isNaN(osoc_year)) return rejector();
     }
 
-    let alumniFilter = maybe(req.body, "alumniFilter");
+    let alumniFilter: boolean | undefined = undefined;
     if ("alumniFilter" in req.body) {
         alumniFilter = req.body.alumniFilter.toString() === "true";
     }
-    let coachFilter = maybe(req.body, "coachFilter");
+    let coachFilter: boolean | undefined = undefined;
     if ("coachFilter" in req.body) {
         coachFilter = req.body.coachFilter.toString() === "true";
     }
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paged,
         osocYear: osoc_year,
-        firstNameFilter: maybe(req.body, "firstNameFilter"),
-        lastNameFilter: maybe(req.body, "lastNameFilter"),
+        nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         roleFilter: roles,
         alumniFilter: alumniFilter,
         coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
         emailStatusFilter: maybe(req.body, "emailStatusFilter"),
-        firstNameSort: maybe(req.body, "firstNameSort"),
-        lastNameSort: maybe(req.body, "lastNameSort"),
+        nameSort: maybe(req.body, "nameSort"),
         emailSort: maybe(req.body, "emailSort"),
     });
 }
@@ -441,6 +492,7 @@ export async function parseFilterStudentsRequest(
 export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     let mail = undefined;
 
     if (
@@ -486,7 +538,7 @@ export async function parseFilterUsersRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         statusFilter: maybe(req.body, "statusFilter"),
@@ -506,7 +558,7 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if ("reply" in req.body) {
             if (
                 req.body.reply != Decision.YES &&
@@ -519,9 +571,9 @@ export async function parseFinalizeDecisionRequest(
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            reason: maybe(req.body, "reason"),
-            reply: maybe(req.body, "reply"),
-        });
+            reason: maybe<string>(req.body, "reason"),
+            reply: maybe<InternalTypes.Suggestion>(req.body, "reply"),
+        }).then(idIsNumber);
     });
 }
 
@@ -534,14 +586,12 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
-        () =>
-            Promise.resolve({
-                firstName: req.body.firstName,
-                lastName: "",
-                email: req.body.email,
-                pass: req.body.pass,
-            })
+    return hasFields(req, ["name", "email", "pass"], types.neither).then(() =>
+        Promise.resolve({
+            name: req.body.name,
+            email: req.body.email,
+            pass: req.body.pass,
+        })
     );
 }
 
@@ -556,7 +606,7 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId"],
+        ["name", "partner", "start", "end", "positions", "osocId", "roles"],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -565,9 +615,10 @@ export async function parseNewProjectRequest(
             partner: req.body.partner,
             start: req.body.start,
             end: req.body.end,
-            osocId: req.body.osocId,
-            positions: req.body.positions,
-        })
+            osocId: Number(req.body.osocId),
+            positions: Number(req.body.positions),
+            roles: req.body.roles,
+        }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
 
@@ -580,20 +631,35 @@ export async function parseNewProjectRequest(
 export async function parseUpdateProjectRequest(
     req: express.Request
 ): Promise<Requests.ModProject> {
-    const options = ["name", "partner", "start", "end", "positions"];
+    const options = [
+        "name",
+        "partner",
+        "start",
+        "end",
+        "positions",
+        "modifyRoles",
+        "deleteRoles",
+        "description",
+    ];
 
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, options)) return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            partner: maybe(req.body, "partner"),
-            start: maybe(req.body, "start"),
-            end: maybe(req.body, "end"),
-            positions: maybe(req.body, "positions"),
-        });
+            name: maybe<string>(req.body, "name"),
+            partner: maybe<string>(req.body, "partner"),
+            start: maybe<Date>(req.body, "start"),
+            end: maybe<Date>(req.body, "end"),
+            positions:
+                maybe(req.body, "positions") == undefined
+                    ? undefined
+                    : Number(req.body.positions),
+            modifyRoles: maybe<object>(req.body, "modifyRoles"),
+            deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            description: maybe<string>(req.body, "description"),
+        }).then(idIsNumber);
     });
 }
 
@@ -606,6 +672,7 @@ export async function parseUpdateProjectRequest(
 export async function parseFilterProjectsRequest(
     req: express.Request
 ): Promise<Requests.ProjectFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     for (const filter of [
         maybe(req.body, "projectNameSort"),
         maybe(req.body, "clientNameSort"),
@@ -616,7 +683,7 @@ export async function parseFilterProjectsRequest(
         }
     }
 
-    let assignedCoachesFilterArray = maybe(
+    let assignedCoachesFilterArray = maybe<number[]>(
         req.body,
         "assignedCoachesFilterArray"
     );
@@ -628,7 +695,7 @@ export async function parseFilterProjectsRequest(
         }
     }
 
-    let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
+    let fullyAssignedFilter = maybe<boolean>(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
         if (!checkStringBoolean(req.body.fullyAssignedFilter.toString())) {
             return rejector();
@@ -637,14 +704,13 @@ export async function parseFilterProjectsRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         projectNameFilter: maybe(req.body, "projectNameFilter"),
         clientNameFilter: maybe(req.body, "clientNameFilter"),
         assignedCoachesFilterArray: assignedCoachesFilterArray,
         fullyAssignedFilter: fullyAssignedFilter,
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
-        fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
     });
 }
 
@@ -661,9 +727,9 @@ export async function parseDraftStudentRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            studentId: req.body.studentId,
+            studentId: Number(req.body.studentId),
             role: req.body.role,
-        })
+        }).then((o) => allNonNaN(["id", "studentId"], o))
     );
 }
 
@@ -676,7 +742,7 @@ export async function parseDraftStudentRequest(
 export async function parseSetFollowupStudentRequest(
     req: express.Request
 ): Promise<Requests.Followup> {
-    return hasFields(req, ["type"], types.id).then(() => {
+    return hasFields(req, ["type"], types.id).then(async () => {
         const type: string = req.body.type;
         if (
             type != "SCHEDULED" &&
@@ -691,7 +757,7 @@ export async function parseSetFollowupStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             type: type as FollowupType,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -724,18 +790,18 @@ export async function parseNewTemplateRequest(
 export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            subject: maybe(req.body, "subject"),
-            cc: maybe(req.body, "cc"),
-            content: maybe(req.body, "content"),
-        });
+            name: maybe<string>(req.body, "name"),
+            subject: maybe<string>(req.body, "subject"),
+            cc: maybe<string>(req.body, "cc"),
+            content: maybe<string>(req.body, "content"),
+        }).then(idIsNumber);
     });
 }
 
@@ -815,7 +881,7 @@ export async function parseResetPasswordRequest(
 export async function parseStudentRoleRequest(
     req: express.Request
 ): Promise<Requests.Role> {
-    return hasFields(req, ["name"], types.neither).then(() =>
+    return hasFields(req, ["name"], types.key).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             name: req.body.name,
@@ -831,7 +897,31 @@ export async function parseRemoveAssigneeRequest(
             sessionkey: getSessionKey(req),
             studentId: req.body.student,
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseRemoveCoachRequest(
+    req: express.Request
+): Promise<Requests.RmDraftCoach> {
+    return hasFields(req, ["project_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            projectUserId: req.body.project_user,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseAssignCoachRequest(
+    req: express.Request
+): Promise<Requests.DraftCoach> {
+    return hasFields(req, ["login_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            loginUserId: req.body.login_user,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
     );
 }
 
@@ -877,18 +967,19 @@ export async function parseAcceptNewUserRequest(
             id: Number(req.params.id),
             is_admin: req.body.is_admin,
             is_coach: req.body.is_coach,
-        })
+        }).then(idIsNumber)
     );
 }
 
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
+    console.log(parseInt(req.body.year));
     return hasFields(req, ["year"], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             year: parseInt(req.body.year),
-        })
+        }).then((obj) => allNonNaN(["year"], obj))
     );
 }
 
@@ -897,11 +988,6 @@ export async function parseNewOsocEditionRequest(
  * {@link parseKeyRequest}.
  */
 export const parseLogoutRequest = parseKeyRequest;
-/**
- *  A request to `GET /student/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseStudentAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /roles/all` only requires a session key
  * {@link parseKeyRequest}.
@@ -922,16 +1008,6 @@ export const parseGetAllCoachRequestsRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseAdminAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /user/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseUserAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /project/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseProjectAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /project/conflicts` only requires a session key
  * {@link parseKeyRequest}.
@@ -1055,3 +1131,22 @@ export const parseOsocAllRequest = parseKeyRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
+
+/**
+ *  A request to `GET /user/all` only requires a session key and optionally the
+ * current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseUserAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /project/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseProjectAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /student/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseStudentAllRequest = parsePaginationRequest;

@@ -5,18 +5,20 @@ import {
     account_status_enum,
 } from "@prisma/client";
 
+/***/
+export interface DBPagination {
+    currentPage: number;
+    pageSize: number;
+}
+
 /**
  * interface for the object needed to create a person
  */
 export interface CreatePerson {
     /**
-     * the person's firstname
+     * the person's name
      */
-    firstname: string;
-    /**
-     * the person's lastname
-     */
-    lastname: string;
+    name: string;
 
     /**
      * the person's github account, only one of github/email can be used
@@ -37,17 +39,13 @@ export interface CreatePerson {
  */
 export interface UpdatePerson {
     /**
-     * the person who's info we are updating
+     * the person whose info we are updating
      */
     personId: number;
     /**
-     * undefined if unchanged or new firstname
+     * undefined if unchanged or new name
      */
-    firstname?: string;
-    /**
-     * undefined if unchanged or the new lastname
-     */
-    lastname?: string;
+    name?: string;
     /**
      * undefined if unchanged or the new github
      */
@@ -396,6 +394,10 @@ export interface UpdateProject {
      * undefined if unchanged or the new end date of the project
      */
     endDate?: Date;
+    /**
+     * undefined if unchanged or the new description of the project
+     */
+    description?: string;
 }
 
 /**
