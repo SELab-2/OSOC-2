@@ -11,7 +11,7 @@ import * as rq from "../request";
 import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-import { project_role } from "@prisma/client";
+// import { project_role } from "@prisma/client";
 
 /**
  *  Attempts to create a new project in the system.
@@ -619,6 +619,14 @@ export async function assignStudent(
         http: 409,
         reason: "This student does already have a contract",
     };
+    const nonexist: ApiError = {
+        http: 404,
+        reason: "That role doesn't exist",
+    };
+    const noplace: ApiError = {
+        http: 409,
+        reason: "There are no more free spaces for that role",
+    };
 
     // authenticate, parse, ...
     const checked = await rq
@@ -645,28 +653,20 @@ export async function assignStudent(
     // get project role
     // then create contract
     // then assign
-    return ormRole
-        .getRolesByName(checked.data.role)
-        .then((r) => util.getOrReject(r))
+    return getFreeSpotsFor(checked.data.role, checked.data.id)
+        .catch(() => Promise.reject(nonexist))
         .then((r) =>
-            ormPrRole
-                .getProjectRolesByProject(checked.data.id)
-                .then((rs) => rs.filter((rp) => rp.role_id == r.role_id))
-                .then((rs) =>
-                    rs.length > 0
-                        ? Promise.resolve(rs[0])
-                        : util.getOrReject<project_role>(null)
-                )
+            r.count > 0 ? Promise.resolve(r) : Promise.reject(noplace)
         )
         .then((r) =>
             ormCtr
                 .createContract({
                     studentId: checked.data.studentId,
-                    projectRoleId: r.project_role_id,
+                    projectRoleId: r.role,
                     loginUserId: checked.userId,
                     contractStatus: "DRAFT",
                 })
-                .then(() => ormRole.getRole(r.role_id))
+                .then(() => ormRole.getRole(r.role))
         )
         .then(util.getOrReject)
         .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
