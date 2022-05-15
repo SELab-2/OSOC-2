@@ -98,6 +98,7 @@ export async function createUserRequest(
         parsedRequest.pass,
         config.encryption.encryptionRounds
     );
+    console.log("Pass hash " + hash);
 
     const loginUser = await ormLU.createLoginUser({
         personId: person.person_id,
@@ -125,7 +126,6 @@ export async function createUserRequest(
 export async function setAccountStatus(
     person_id: number,
     stat: account_status_enum,
-    key: string,
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
@@ -173,7 +173,6 @@ export async function createUserAcceptance(
                         return setAccountStatus(
                             parsed.data.id,
                             "ACTIVATED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
@@ -213,7 +212,6 @@ export async function deleteUserRequest(
                         return setAccountStatus(
                             parsed.data.id,
                             "DISABLED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
