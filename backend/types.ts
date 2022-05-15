@@ -1171,17 +1171,6 @@ export namespace Responses {
     export type OrError<T> = ApiError | T;
 
     /**
-     *  An API response is one of the previous response types.
-     *  @deprecated Not up to date
-     */
-    export type ApiResponse =
-        | Empty
-        | Key
-        | PartialStudent
-        | IdNameList
-        | ConflictList;
-
-    /**
      *  Either an error while parsing the form or a data value.
      */
     export interface FormResponse<T> {
@@ -1443,9 +1432,7 @@ export type Table = "project" | "student";
  *  A route callback is a function taking an Express js request and returning a
  * promise (resolving to an API response).
  */
-export type RouteCallback<T extends Responses.ApiResponse> = (
-    req: express.Request
-) => Promise<T>;
+export type RouteCallback<T> = (req: express.Request) => Promise<T>;
 
 /**
  *  Helper type for unsafe type checks.
