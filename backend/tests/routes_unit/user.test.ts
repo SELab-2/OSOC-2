@@ -43,7 +43,7 @@ import * as user from "../../routes/user";
 const users: (login_user & { person: person })[] = [
     {
         login_user_id: 0,
-        password: "",
+        password: "oldpass",
         person_id: 0,
         is_admin: false,
         is_coach: true,
@@ -91,6 +91,7 @@ const users: (login_user & { person: person })[] = [
 beforeEach(() => {
     valMock.normalizeEmail.mockImplementation((v) => v);
     bcryptMock.hash.mockImplementation((v) => Promise.resolve(v));
+    bcryptMock.compare.mockImplementation((x, y) => Promise.resolve(x === y));
 
     reqMock.parseUserAllRequest.mockResolvedValue({
         currentPage: 0,
@@ -106,6 +107,10 @@ beforeEach(() => {
     reqMock.parseFilterUsersRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseUserModSelfRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseCurrentUserRequest.mockResolvedValue({ sessionkey: "valid" });
 
     utilMock.isAdmin.mockImplementation((v) => {
         return Promise.resolve({
@@ -118,6 +123,20 @@ beforeEach(() => {
     });
     utilMock.generateKey.mockImplementation(() => "abcdefghijklmnopqrstuvwxyz");
     utilMock.mutable.mockImplementation((v) => Promise.resolve(v));
+    utilMock.checkSessionKey.mockImplementation((v) =>
+        Promise.resolve({
+            data: v,
+            userId: 0,
+            is_coach: true,
+            is_admin: true,
+            accountStatus: "ACTIVATED",
+        })
+    );
+    utilMock.getOrReject.mockImplementation((v) =>
+        v == undefined || v == null
+            ? Promise.reject({ reason: "getorreject" })
+            : Promise.resolve(v)
+    );
 
     ormLUMock.getAllLoginUsers.mockResolvedValue(users);
     ormLUMock.filterLoginUsers.mockResolvedValue({
@@ -140,6 +159,7 @@ beforeEach(() => {
         });
     });
     ormLUMock.updateLoginUser.mockResolvedValue(users[0]);
+    ormLUMock.getLoginUserById.mockResolvedValue(users[0]);
 
     ormSKMock.addSessionKey.mockImplementation((id, key, dat) =>
         Promise.resolve({
@@ -171,30 +191,38 @@ beforeEach(() => {
             email: cr.email === undefined ? null : cr.email,
         });
     });
+
+    ormSKMock.removeAllKeysForUser.mockResolvedValue({ count: 1 });
 });
 
 afterEach(() => {
     valMock.normalizeEmail.mockReset();
     bcryptMock.hash.mockReset();
+    bcryptMock.compare.mockReset();
 
     reqMock.parseUserAllRequest.mockReset();
     reqMock.parseRequestUserRequest.mockReset();
     reqMock.parseAcceptNewUserRequest.mockReset();
     reqMock.parseFilterUsersRequest.mockReset();
+    reqMock.parseUserModSelfRequest.mockReset();
 
     utilMock.isAdmin.mockReset();
     utilMock.generateKey.mockReset();
     utilMock.mutable.mockReset();
+    utilMock.checkSessionKey.mockReset();
+    utilMock.getOrReject.mockReset();
 
     ormLUMock.getAllLoginUsers.mockReset();
     ormLUMock.filterLoginUsers.mockReset();
     ormLUMock.searchLoginUserByPerson.mockReset();
     ormLUMock.createLoginUser.mockReset();
+    ormLUMock.updateLoginUser.mockReset();
+    ormLUMock.getLoginUserById.mockReset();
     ormPMock.searchPersonByLogin.mockReset();
     ormPMock.updatePerson.mockReset();
     ormPMock.createPerson.mockReset();
     ormSKMock.addSessionKey.mockReset();
-    ormLUMock.updateLoginUser.mockReset();
+    ormSKMock.removeAllKeysForUser.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -409,4 +437,69 @@ test("Can filter users", async () => {
     expectCall(reqMock.parseFilterUsersRequest, req);
     expectCall(utilMock.isAdmin, req.body);
     expect(ormLUMock.filterLoginUsers).toHaveBeenCalledTimes(1);
+});
+
+test("Can modify self", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "abcd",
+        pass: { oldpass: users[0].password, newpass: "abcde" },
+        name: "myname",
+    };
+
+    await expect(user.userModSelf(req)).resolves.toStrictEqual({
+        sessionkey: "abcdefghijklmnopqrstuvwxyz",
+    });
+    expectCall(reqMock.parseUserModSelfRequest, req);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.getLoginUserById, 0);
+    expectCall(utilMock.getOrReject, users[0]);
+    expect(bcryptMock.compare).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.updateLoginUser, {
+        loginUserId: 0,
+        accountStatus: users[0].account_status,
+        password: "abcde",
+    });
+    expectCall(ormPMock.updatePerson, {
+        personId: users[0].person_id,
+        name: "myname",
+    });
+});
+
+test("Can't modify self (invalid old password)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "abcd",
+        pass: { oldpass: users[0].password + "__old", newpass: "abcde" },
+        name: "myname",
+    };
+
+    await expect(user.userModSelf(req)).rejects.toStrictEqual({
+        http: 409,
+        reason: "Old password is incorrect. Didn't update password.",
+    });
+    expectCall(reqMock.parseUserModSelfRequest, req);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.getLoginUserById, 0);
+    expectCall(utilMock.getOrReject, users[0]);
+    expect(bcryptMock.compare).toHaveBeenCalledTimes(1);
+    expect(ormLUMock.updateLoginUser).not.toHaveBeenCalled();
+    expect(ormPMock.updatePerson).not.toHaveBeenCalled();
+});
+
+test("Can get current user", async () => {
+    const req = getMockReq();
+
+    await expect(user.getCurrentUser(req)).resolves.toStrictEqual({
+        data: {
+            login_user: {
+                ...users[0],
+                password: null,
+            },
+        },
+        sessionkey: "valid",
+    });
+    expectCall(reqMock.parseCurrentUserRequest, req);
+    expectCall(utilMock.checkSessionKey, { sessionkey: "valid" });
+    expectCall(ormLUMock.getLoginUserById, 0);
 });

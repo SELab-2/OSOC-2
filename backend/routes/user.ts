@@ -295,7 +295,7 @@ export async function userModSelf(
                     if (
                         checked.data.pass !== null &&
                         checked.data.pass !== undefined &&
-                        user.password
+                        user.password !== null
                     ) {
                         valid = await bcrypt.compare(
                             checked.data.pass?.oldpass,
@@ -314,16 +314,12 @@ export async function userModSelf(
                 .then(async (user) => {
                     if (
                         checked.data.pass !== null &&
-                        checked.data.pass !== undefined
+                        checked.data.pass !== undefined &&
+                        checked.data.pass.oldpass !== null &&
+                        checked.data.pass.oldpass !== undefined &&
+                        checked.data.pass.newpass !== null &&
+                        checked.data.pass.newpass !== undefined
                     ) {
-                        if (
-                            checked.data.pass.oldpass !== undefined &&
-                            checked.data.pass.oldpass !== null &&
-                            checked.data.pass.newpass === undefined &&
-                            checked.data.pass.newpass === null
-                        ) {
-                            return Promise.reject(errors.cookArgumentError());
-                        }
                         return ormLU.updateLoginUser({
                             loginUserId: checked.userId,
                             accountStatus: user.account_status,
@@ -379,26 +375,17 @@ export async function getCurrentUser(
 ): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
 
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const login_user = await ormLU
         .getLoginUserById(checkedSessionKey.userId)
         .then((obj) => util.getOrReject(obj));
-    login_user.password = null;
 
     return Promise.resolve({
         data: {
-            login_user: login_user,
+            login_user: { ...login_user, password: null },
         },
         sessionkey: checkedSessionKey.data.sessionkey,
-    }).then((obj) => {
-        console.log(JSON.stringify(obj));
-        return Promise.resolve(obj);
     });
 }
 /**
