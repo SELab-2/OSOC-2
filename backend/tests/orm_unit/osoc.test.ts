@@ -189,8 +189,13 @@ test("should return filtered list of osocs", async () => {
     ];
 
     prismaMock.osoc.findMany.mockResolvedValue(expected);
-    const res = await filterOsocs(2022, undefined);
-    res.forEach((val) => {
+    const res = await filterOsocs(
+        { currentPage: 0, pageSize: 25 },
+        2022,
+        undefined
+    );
+    expect(res.pagination).toStrictEqual({ page: 0, count: undefined });
+    res.data.forEach((val) => {
         expect(val).toHaveProperty("osoc_id");
         expect(val).toHaveProperty("year");
     });
