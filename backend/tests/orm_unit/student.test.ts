@@ -10,7 +10,12 @@ import {
     searchStudentByGender,
     updateStudent,
 } from "../../orm_functions/student";
-import { decision_enum, email_status_enum } from "@prisma/client";
+import { decision_enum } from "@prisma/client";
+
+// mock that is used to mock the deletePersonFromDB function
+import * as personORM from "../../orm_functions/person";
+jest.mock("../../orm_functions/person");
+export const personORMMock = personORM as jest.Mocked<typeof personORM>;
 
 const response = {
     student_id: 0,
@@ -65,26 +70,9 @@ test("should delete the student", async () => {
 });
 
 test("should delete everything related to the student", async () => {
-    prismaMock.job_application.findMany.mockResolvedValue([
-        {
-            job_application_id: 0,
-            student_id: 0,
-            student_volunteer_info: "",
-            responsibilities: "",
-            fun_fact: "",
-            student_coach: false,
-            osoc_id: 0,
-            edus: [""],
-            edu_level: "",
-            edu_duration: 0,
-            edu_year: "",
-            edu_institute: "",
-            email_status: email_status_enum.DRAFT,
-            created_at: new Date(),
-        },
-    ]);
-    prismaMock.attachment.deleteMany.mockResolvedValue({ count: 0 });
-    prismaMock.student.delete.mockResolvedValue({
+    personORMMock.deletePersonFromDB.mockResolvedValue();
+
+    const student = {
         student_id: 0,
         person_id: 0,
         gender: "",
@@ -92,21 +80,14 @@ test("should delete everything related to the student", async () => {
         phone_number: "",
         nickname: "",
         alumni: false,
-    });
-    prismaMock.person.delete.mockResolvedValue({
-        person_id: 0,
-        email: "",
-        github: "",
-        name: "",
-        github_id: "",
-    });
-
+    };
+    prismaMock.student.findUnique.mockResolvedValue(student);
     await deleteStudentFromDB(0);
 
-    expect(prismaMock.job_application.findMany).toBeCalledTimes(1);
-    expect(prismaMock.attachment.deleteMany).toBeCalledTimes(1);
-    expect(prismaMock.student.delete).toBeCalledTimes(1);
-    expect(prismaMock.person.delete).toBeCalledTimes(1);
+    expect(personORMMock.deletePersonFromDB).toBeCalledTimes(1);
+    expect(prismaMock.student.findUnique).toBeCalledTimes(1);
+
+    personORMMock.deletePersonFromDB.mockReset();
 });
 
 test("should return all the people with the selected gender", async () => {
