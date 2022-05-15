@@ -503,3 +503,78 @@ test("Can get current user", async () => {
     expectCall(utilMock.checkSessionKey, { sessionkey: "valid" });
     expectCall(ormLUMock.getLoginUserById, 0);
 });
+
+test("Can't accept new users (login user is null)", async () => {
+    ormLUMock.searchLoginUserByPerson.mockReset();
+    ormLUMock.searchLoginUserByPerson.mockResolvedValue(null);
+
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 1, is_admin: false, is_coach: false };
+
+    await expect(user.createUserAcceptance(req)).rejects.toStrictEqual(
+        undefined
+    );
+    expectCall(reqMock.parseAcceptNewUserRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+    expect(ormLU.searchLoginUserByPerson).toHaveBeenCalledTimes(1);
+});
+
+test("Can't reject new users (login user is null)", async () => {
+    ormLUMock.searchLoginUserByPerson.mockReset();
+    ormLUMock.searchLoginUserByPerson.mockResolvedValue(null);
+
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 1, is_admin: false, is_coach: false };
+
+    await expect(user.deleteUserRequest(req)).rejects.toStrictEqual(undefined);
+    expectCall(reqMock.parseAcceptNewUserRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+    expect(ormLU.searchLoginUserByPerson).toHaveBeenCalledTimes(1);
+});
+
+test("Can modify self (no pass change)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "abcd",
+        name: "myname",
+    };
+
+    await expect(user.userModSelf(req)).resolves.toStrictEqual({
+        sessionkey: "abcd",
+    });
+    expectCall(reqMock.parseUserModSelfRequest, req);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.getLoginUserById, 0);
+    expectCall(utilMock.getOrReject, users[0]);
+    expect(bcryptMock.compare).toHaveBeenCalledTimes(0);
+    expect(ormLUMock.updateLoginUser).not.toHaveBeenCalled();
+    expectCall(ormPMock.updatePerson, {
+        personId: users[0].person_id,
+        name: "myname",
+    });
+});
+
+test("Can modify self (no name change)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "abcd",
+        pass: { oldpass: users[0].password, newpass: "abcde" },
+    };
+
+    await expect(user.userModSelf(req)).resolves.toStrictEqual({
+        sessionkey: "abcdefghijklmnopqrstuvwxyz",
+    });
+    expectCall(reqMock.parseUserModSelfRequest, req);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.getLoginUserById, 0);
+    expectCall(utilMock.getOrReject, users[0]);
+    expect(bcryptMock.compare).toHaveBeenCalledTimes(1);
+    expectCall(ormLUMock.updateLoginUser, {
+        loginUserId: 0,
+        accountStatus: users[0].account_status,
+        password: "abcde",
+    });
+    expect(ormPMock.updatePerson).not.toHaveBeenCalled();
+});
