@@ -5,7 +5,8 @@ import React, { useContext, useState } from "react";
 import styles from "../styles/users.module.css";
 import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
-// import { Paginator } from "../components/Paginator/Paginator";
+import { Paginator } from "../components/Paginator/Paginator";
+import { Pagination } from "../types";
 
 /**
  * The `osoc edition` page, only accessible for admins
@@ -15,12 +16,12 @@ const Osocs: NextPage = () => {
     const { getSession } = useContext(SessionContext);
 
     const [osocEditions, setEditions] = useState<Array<OsocEdition>>([]);
-    // const [params, setParams] = useState<OsocFilterParams>();
+    const [params, setParams] = useState<OsocFilterParams>();
     const [loading, isLoading] = useState(false);
-    // const [pagination, setPagination] = useState<Pagination>({
-    //     page: 0,
-    //     count: 0,
-    // });
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 0,
+        count: 0,
+    });
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
@@ -32,19 +33,18 @@ const Osocs: NextPage = () => {
         }
     };
 
-    // TODO
-    // const navigator = (page: number) => {
-    //     if (params !== undefined) {
-    //         search(params, page).then();
-    //     }
-    // };
+    const navigator = (page: number) => {
+        if (params !== undefined) {
+            search(params, page).then();
+        }
+    };
 
     /**
      * Called by the osocfilter to filter
      * @param params
      */
     const filter = async (params: OsocFilterParams) => {
-        // setParams(params);
+        setParams(params);
         search(params, 0).then();
     };
 
@@ -90,7 +90,7 @@ const Osocs: NextPage = () => {
                     console.log(err);
                 });
             setEditions(response.data);
-            // setPagination(response.pagination);
+            setPagination(response.pagination);
         }
         isLoading(false);
     };
@@ -111,7 +111,7 @@ const Osocs: NextPage = () => {
                       })
                     : null}
             </div>
-            {/* TODO <Paginator pagination={pagination} navigator={navigator} /> */}
+            <Paginator pagination={pagination} navigator={navigator} />
         </div>
     );
 };
