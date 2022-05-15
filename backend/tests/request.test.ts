@@ -472,9 +472,11 @@ test("Can parse filter osocs request", () => {
             }
         });
         copy.sessionkey = key;
-        return expect(Rq.parseFilterOsocsRequest(req)).resolves.toStrictEqual(
-            copy
-        );
+        return expect(Rq.parseFilterOsocsRequest(req)).resolves.toStrictEqual({
+            ...copy,
+            currentPage: 0,
+            pageSize: config.global.pageSize,
+        });
     });
 
     const fails = [i1, i2].map((x) => {
