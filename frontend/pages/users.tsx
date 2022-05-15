@@ -39,6 +39,7 @@ const Users: NextPage = () => {
 
     useEffect(() => {
         if (getSession) {
+            // Only admins may see the manage users screen
             getSession().then(({ isAdmin }) => {
                 if (!isAdmin) {
                     router.push("/").then();
