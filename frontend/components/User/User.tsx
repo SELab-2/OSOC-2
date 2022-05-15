@@ -97,6 +97,10 @@ export const User: React.FC<{
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
         // when account is disabled and we set admin (== currently admin is disabled) => set account to activated
         // when we disable admin (== currently enabled) but coach is still active => keep account active, otherwise disable the account
         const statusToSet =
@@ -118,6 +122,10 @@ export const User: React.FC<{
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
         // when account is disabled and we set coach (== currently coach is disabled) => set account to activated
         // when we disable coach (== currently enabled) but admin is still active => keep account active, otherwise disable the account
         const statusToSet =
