@@ -101,9 +101,6 @@ export const Settings: React.FC<{
             setApplyError("");
         }
 
-        const { sessionKey } =
-            getSession != undefined ? await getSession() : { sessionKey: "" };
-
         // We dynamically build the body
         const body: Record<string, unknown> = {};
         if (newName !== "") {
@@ -118,6 +115,9 @@ export const Settings: React.FC<{
         }
 
         if (body !== {}) {
+            const { sessionKey } = getSession
+                ? await getSession()
+                : { sessionKey: "" };
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
                 {
@@ -153,26 +153,33 @@ export const Settings: React.FC<{
         }
     };
 
-    console.log(person);
     return (
         <div className={styles.body}>
             <form className={styles.form}>
-                <label className={styles.label}>
-                    Current Name: {person.person.name}
+                <label data-testid={"personName"} className={styles.label}>
+                    Current Name: {person.person_data.name}
                 </label>
-                <label className={styles.label}>
+                <label data-testid={"labelNewName"} className={styles.label}>
                     New Name
-                    <input onChange={(e) => setNewName(e.target.value)} />
+                    <input
+                        data-testid={"inputNewName"}
+                        onChange={(e) => setNewName(e.target.value)}
+                    />
                 </label>
 
-                <label className={styles.label}>
+                <label
+                    data-testid={"labelCurrentPassword"}
+                    className={styles.label}
+                >
                     Current Password
                     <input
+                        data-testid={"inputCurrentPassword"}
                         type="password"
                         onChange={(e) => setCurrPassword(e.target.value)}
                     />
                 </label>
                 <p
+                    data-testid={"errorCurrPass"}
                     className={`${styles.textFieldError} ${
                         currPasswordError !== "" ? styles.anim : ""
                     }`}
@@ -180,9 +187,13 @@ export const Settings: React.FC<{
                     {currPasswordError}
                 </p>
 
-                <label className={styles.label}>
+                <label
+                    data-testid={"labelNewPassword"}
+                    className={styles.label}
+                >
                     New Password
                     <input
+                        data-testid={"inputNewPassword"}
                         type="password"
                         onChange={(e) => updateNewPassword(e.target.value)}
                     />
@@ -203,6 +214,7 @@ export const Settings: React.FC<{
                             Password strength:
                         </p>
                         <p
+                            data-testid={"newPassScoreError"}
                             className={`${
                                 styles.textFieldError
                             } ${scoreToStyle()}`}
@@ -212,6 +224,7 @@ export const Settings: React.FC<{
                     </div>
                 ) : (
                     <p
+                        data-testid={"newPassError"}
                         className={`${styles.textFieldError} ${
                             newPasswordError !== "" ? styles.anim : ""
                         }`}
@@ -219,15 +232,22 @@ export const Settings: React.FC<{
                         {newPasswordError}
                     </p>
                 )}
-                <label className={styles.label}>
+                <label
+                    data-testid={"labelRetypeNewPassword"}
+                    className={styles.label}
+                >
                     Retype New Password
                     <input
+                        data-testid={"inputRetypeNewPassword"}
                         type="password"
                         onChange={(e) => updateRetypePass(e.target.value)}
                     />
                 </label>
-                <button onClick={changeUser}>Apply Changes</button>
+                <button data-testid={"confirmButton"} onClick={changeUser}>
+                    Apply Changes
+                </button>
                 <p
+                    data-testid={"pErrorPassword"}
                     className={`${styles.textFieldError} ${
                         applyError !== "" ? styles.anim : ""
                     }`}

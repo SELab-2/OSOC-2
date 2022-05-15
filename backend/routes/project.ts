@@ -198,6 +198,7 @@ export async function modProject(
         endDate: checkedId.end,
         positions: checkedId.positions,
         osocId: checkedId.osocId,
+        description: checkedId.description,
     });
 
     if (checkedId.modifyRoles !== undefined) {
@@ -243,6 +244,7 @@ export async function modProject(
         positions: updatedProject.positions,
         osoc_id: updatedProject.osoc_id,
         roles: roles,
+        description: updatedProject.description,
     });
 }
 
@@ -429,6 +431,83 @@ export async function modProjectStudent(
         });
 }
 
+export async function unAssignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseRemoveCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.project_user_id ==
+                            checked.data.projectUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length == 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.projectUserId.toString() +
+                                " is not assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    for (const project_user of found) {
+                        await ormPU.deleteProjectUser(
+                            project_user.project_user_id
+                        );
+                    }
+
+                    return Promise.resolve({});
+                });
+        });
+}
+
+export async function assignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseAssignCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length != 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is already assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    const project_user = await ormPU.createProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
+
+                    return Promise.resolve(project_user);
+                });
+        });
+}
+
 export async function unAssignStudent(
     req: express.Request
 ): Promise<Responses.Empty> {
@@ -497,6 +576,8 @@ export async function unAssignStudent(
 export async function getProjectConflicts(
     req: express.Request
 ): Promise<Responses.ConflictList> {
+    // not implementing pagination as we don't expect the number of conflicts
+    // to be > 50 (2 * page size); which is kind of a minimum...
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
@@ -555,26 +636,28 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
+    const checked = await util.checkSessionKey(parsedRequest);
+    // .catch((res) => res);
+    if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
 
     const projects = await ormPr.filterProjects(
-        checkedSessionKey.data.projectNameFilter,
-        checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
-        checkedSessionKey.data.fullyAssignedFilter,
-        checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort
+        {
+            currentPage: checked.data.currentPage,
+            pageSize: checked.data.pageSize,
+        },
+        checked.data.projectNameFilter,
+        checked.data.clientNameFilter,
+        checked.data.assignedCoachesFilterArray,
+        checked.data.fullyAssignedFilter,
+        checked.data.projectNameSort,
+        checked.data.clientNameSort
     );
 
     const projectlist = [];
 
-    for (const project of projects) {
+    for (const project of projects.data) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
         const users = await ormPU.getUsersFor(project.project_id);
 
@@ -592,6 +675,7 @@ export async function filterProjects(
     }
 
     return Promise.resolve({
+        pagination: projects.pagination,
         data: projectlist,
     });
 }
@@ -618,6 +702,8 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/coach", unAssignCoach);
+    util.route(router, "post", "/:id/coach", assignCoach);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 

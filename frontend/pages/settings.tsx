@@ -8,18 +8,16 @@ const SettingsPage: NextPage = () => {
     const { getSession } = useContext(SessionContext);
 
     const defaultUser: LoginUser = {
-        person: {
-            person_id: -1,
+        person_data: {
+            id: -1,
             email: "",
             name: "",
             github: "",
-            github_id: 0,
         },
         login_user_id: -1,
-        person_id: -1,
-        is_admin: false,
-        is_coach: false,
-        account_status: AccountStatus.DISABLED,
+        admin: false,
+        coach: false,
+        activated: AccountStatus.DISABLED,
     };
 
     const [user, setUser] = useState<LoginUser>(defaultUser);

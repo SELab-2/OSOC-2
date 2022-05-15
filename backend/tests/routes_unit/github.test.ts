@@ -321,7 +321,7 @@ test("Can register if account doesn't exist", async () => {
     expectNoCall(ormP.updatePerson);
 });
 
-test("Login/Register fails if the request is incorrect", async () => {
+test("Login/Register test_fails if the request is incorrect", async () => {
     const req = getMockReq();
     const res = getMockRes().res;
 
@@ -433,7 +433,6 @@ test("Can handle different frontend", async () => {
             redirect_uri:
                 github.getHome() + config.global.preferred + "/github/login",
         });
-        console.log("POST RESOLVES");
         return Promise.resolve({ data: { access_token: "some_token" } });
     });
 

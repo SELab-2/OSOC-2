@@ -131,6 +131,7 @@ test("should return the students that succeed to the filtered fields", async () 
 
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -142,7 +143,10 @@ test("should return the students that succeed to the filtered fields", async () 
             undefined,
             undefined
         )
-    ).resolves.toEqual(returnval);
+    ).resolves.toEqual({
+        data: returnval,
+        pagination: { count: undefined, page: 0 },
+    });
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -162,6 +166,7 @@ test("should return the students that succeed to the filtered fields but with a 
 
     await expect(
         filterStudents(
+            { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
             [""],
@@ -173,5 +178,8 @@ test("should return the students that succeed to the filtered fields but with a 
             undefined,
             undefined
         )
-    ).resolves.toEqual(returnval);
+    ).resolves.toEqual({
+        data: returnval,
+        pagination: { count: undefined, page: 0 },
+    });
 });

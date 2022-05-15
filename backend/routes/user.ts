@@ -27,9 +27,14 @@ export async function listUsers(
     req: express.Request
 ): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
-    await util.isAdmin(parsedRequest); // authentication
+    await util.isAdmin(parsedRequest);
+    // const loginUsers = await ormL.getAllLoginUsers();
+    const loginUsers = await ormLU.filterLoginUsers({
+        currentPage: parsedRequest.currentPage,
+        pageSize: parsedRequest.pageSize,
+    });
 
-    const loginUsers = (await ormLU.getAllLoginUsers()).map((val) => ({
+    const updated = loginUsers.data.map((val) => ({
         person_data: {
             id: val.person.person_id,
             name: val.person.name,
@@ -39,10 +44,12 @@ export async function listUsers(
         coach: val.is_coach,
         admin: val.is_admin,
         activated: val.account_status as string,
+        login_user_id: val.login_user_id,
     }));
 
     return Promise.resolve({
-        data: loginUsers,
+        pagination: loginUsers.pagination,
+        data: updated,
     });
 }
 
@@ -238,6 +245,10 @@ export async function filterUsers(
         .then(async (parsed) => {
             return ormLU
                 .filterLoginUsers(
+                    {
+                        currentPage: parsed.data.currentPage,
+                        pageSize: parsed.data.pageSize,
+                    },
                     parsed.data.nameFilter,
                     parsed.data.emailFilter,
                     parsed.data.nameSort,
@@ -247,7 +258,7 @@ export async function filterUsers(
                     parsed.data.isAdminFilter
                 )
                 .then((users) => {
-                    users.map((val) => ({
+                    const udat = users.data.map((val) => ({
                         person_data: {
                             id: val.person.person_id,
                             name: val.person.name,
@@ -257,8 +268,12 @@ export async function filterUsers(
                         coach: val.is_coach,
                         admin: val.is_admin,
                         activated: val.account_status as string,
+                        login_user_id: val.login_user_id,
                     }));
-                    return Promise.resolve({ data: users });
+                    return Promise.resolve({
+                        data: udat,
+                        pagination: users.pagination,
+                    });
                 });
         });
 }

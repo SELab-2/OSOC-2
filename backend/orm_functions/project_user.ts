@@ -24,6 +24,7 @@ export async function getUsersFor(project: number) {
     return await prisma.project_user.findMany({
         where: { project_id: project },
         select: {
+            project_user_id: true,
             login_user: {
                 select: {
                     login_user_id: true,
@@ -32,6 +33,19 @@ export async function getUsersFor(project: number) {
                     person: true,
                 },
             },
+        },
+    });
+}
+
+/**
+ *
+ * @param projectUserId the project_user we are deleting from the project_user-table
+ * @returns a promise with the deleted record inside
+ */
+export async function deleteProjectUser(projectUserId: number) {
+    return await prisma.project_user.delete({
+        where: {
+            project_user_id: projectUserId,
         },
     });
 }

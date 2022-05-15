@@ -135,7 +135,7 @@ export const UserFilter: React.FC<{
      * Build and execute the query
      */
     const search = async () => {
-        isLoading(true);
+        isLoading(() => true);
         const filters = [];
         if (nameFilter !== "") {
             filters.push(`nameFilter=${nameFilter}`);
@@ -171,24 +171,23 @@ export const UserFilter: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            updateUsers(response.data);
-        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((err) => {
+                console.log(err);
+            });
+        updateUsers(response.data);
+
         isLoading(false);
     };
 
@@ -196,7 +195,7 @@ export const UserFilter: React.FC<{
         <div className={styles.userfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
-                    <div onClick={toggleNameSort}>
+                    <div data-testid={"nameSort"} onClick={toggleNameSort}>
                         Names
                         <div className={styles.triangleContainer}>
                             <div
@@ -212,6 +211,7 @@ export const UserFilter: React.FC<{
                     </div>
 
                     <input
+                        data-testid={"nameInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
@@ -225,13 +225,14 @@ export const UserFilter: React.FC<{
                         }`}
                         type="button"
                         onClick={togglePendingStatus}
+                        data-testid={"pendingButton"}
                     >
                         Pending
                     </button>
                 </div>
 
                 <div className={styles.query}>
-                    <div onClick={toggleEmailSort}>
+                    <div data-testid={"emailSort"} onClick={toggleEmailSort}>
                         Email
                         <div className={styles.triangleContainer}>
                             <div
@@ -249,17 +250,21 @@ export const UserFilter: React.FC<{
                     </div>
 
                     <input
+                        data-testid={"emailInput"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
                         onChange={(e) => setEmailFilter(e.target.value)}
                     />
-                    <button onClick={searchPress}>Search</button>
+                    <button data-testid={"searchButton"} onClick={searchPress}>
+                        Search
+                    </button>
                 </div>
 
                 <div className={styles.buttons}>
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"adminButton"}
                             className={styles.buttonImage}
                             src={adminFilter ? AdminIconColor : AdminIcon}
                             width={30}
@@ -272,6 +277,7 @@ export const UserFilter: React.FC<{
 
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"coachButton"}
                             className={styles.buttonImage}
                             src={coachFilter ? CoachIconColor : CoachIcon}
                             width={30}
@@ -284,6 +290,7 @@ export const UserFilter: React.FC<{
 
                     <div className={styles.buttonContainer}>
                         <Image
+                            data-testid={"disabledButton"}
                             className={styles.buttonImage}
                             src={
                                 statusFilter === AccountStatus.DISABLED
