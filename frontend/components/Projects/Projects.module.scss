@@ -6,6 +6,7 @@
 .projectCards {
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: 1.5rem;
   max-height: 75rem;
   overflow-y: scroll;
@@ -14,7 +15,7 @@
   align-items: flex-start;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 800px) {
   .projectCards {
     gap: 1rem !important;
   }

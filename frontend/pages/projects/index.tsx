@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import { Projects } from "../../components/Projects/Projects";
 import { Students } from "../../components/Students/Students";
-import styles from "../../styles/projects.module.scss";
+import styles from "./projects.module.scss";
 
 const Index: NextPage = () => {
     return (
