@@ -283,3 +283,15 @@ export interface Project {
         }
     ];
 }
+
+/**
+ * Interface for displaying notifications
+ */
+export interface INotification {
+    /** The message of the notification */
+    message: string;
+    /** Lifespan of the notification, in milliseconds */
+    duration: number;
+    /** An index indicating notification age, 0 being the newest notification */
+    index: number;
+}
