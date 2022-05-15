@@ -141,6 +141,8 @@ export async function searchAllAdminAndCoachLoginUsers(bool: boolean) {
  * @returns the updated entry in the database
  */
 export async function updateLoginUser(loginUser: UpdateLoginUser) {
+    console.log("----------");
+    console.log(loginUser);
     const result = await prisma.login_user.update({
         where: {
             login_user_id: loginUser.loginUserId,

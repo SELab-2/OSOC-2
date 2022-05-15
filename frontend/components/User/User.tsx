@@ -54,6 +54,8 @@ export const User: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
+        console.log(json_body);
+
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
@@ -112,30 +114,36 @@ export const User: React.FC<{
     };
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
+        console.log("coach: " + isCoach);
         e.preventDefault();
+        const statusToSet = !isCoach
+            ? AccountStatus.ACTIVATED
+            : AccountStatus.DISABLED;
         const response = await setUserRole(
             "coach",
             "coach",
             isAdmin,
             !isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
-            setIsCoach((isCoach) => !isCoach);
-            if (status === AccountStatus.DISABLED) {
-                await toggleStatus(e);
-            }
+            setIsCoach(!isCoach);
+            setStatus(statusToSet);
         }
     };
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
+        console.log("toggle");
+        console.log(status);
+        console.log(status === AccountStatus.ACTIVATED);
+        console.log(status === AccountStatus.DISABLED);
         if (status === AccountStatus.ACTIVATED) {
             const response = await setUserRole(
                 "coach",
                 "disabled", // the account is still on activated => we disable the account
-                isAdmin,
-                isCoach,
+                false, // when the account is disabled we remove all the admin perms
+                false, // when the account is disabled we remove all the coach perms
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
@@ -148,10 +156,11 @@ export const User: React.FC<{
                 "coach",
                 "activated", // the account is still on disabled => we enable the account
                 isAdmin,
-                isCoach,
+                true, // when activating an account we always want to set the user to be a coach
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
+                setIsCoach(true);
                 setStatus(() => AccountStatus.ACTIVATED);
             }
         }
