@@ -94,9 +94,7 @@ export async function requestReset(
                         to: parsed.email,
                         subject: config.email.header,
                         html: createEmail(code.reset_id),
-                    }).then((data) => {
-                        console.log(data);
-                        nodemailer.getTestMessageUrl(data);
+                    }).then(() => {
                         return Promise.resolve({});
                     });
                 });
