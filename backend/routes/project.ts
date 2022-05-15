@@ -644,13 +644,13 @@ export async function filterProjects(
     }
 
     let year = new Date().getFullYear();
-    if (checkedSessionKey.data.osocYearFilter === undefined) {
+    if (checkedSessionKey.data.osocYear === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
             year = latestOsocYear.year;
         }
     } else {
-        year = checkedSessionKey.data.osocYearFilter;
+        year = checkedSessionKey.data.osocYear;
     }
 
     const projects = await ormPr.filterProjects(
