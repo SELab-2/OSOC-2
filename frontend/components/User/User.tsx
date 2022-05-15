@@ -54,7 +54,6 @@ export const User: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        console.log(json_body);
 
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
@@ -98,27 +97,33 @@ export const User: React.FC<{
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // when account is disabled and we set admin (== currently admin is disabled) => set account to activated
+        // when we disable admin (== currently enabled) but coach is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isAdmin || isCoach
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "admin",
             "admin",
             !isAdmin,
             isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
             setIsAdmin((isAdmin) => !isAdmin);
-            if (status === AccountStatus.DISABLED) {
-                await toggleStatus(e);
-            }
+            setStatus(statusToSet);
         }
     };
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
-        console.log("coach: " + isCoach);
         e.preventDefault();
-        const statusToSet = !isCoach
-            ? AccountStatus.ACTIVATED
-            : AccountStatus.DISABLED;
+        // when account is disabled and we set coach (== currently coach is disabled) => set account to activated
+        // when we disable coach (== currently enabled) but admin is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isCoach || isAdmin
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "coach",
             "coach",
@@ -134,10 +139,6 @@ export const User: React.FC<{
 
     const toggleStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        console.log("toggle");
-        console.log(status);
-        console.log(status === AccountStatus.ACTIVATED);
-        console.log(status === AccountStatus.DISABLED);
         if (status === AccountStatus.ACTIVATED) {
             const response = await setUserRole(
                 "coach",

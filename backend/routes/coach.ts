@@ -59,7 +59,6 @@ export async function modCoach(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            console.log(parsed);
             if (parsed.data.id !== parsed.userId) {
                 // parse to enum
                 const accountStatus = parsed.data
@@ -68,11 +67,13 @@ export async function modCoach(
                 // get the loginUser we are modifying. We need this user to check if the user is disabled at the moment or not
                 const userToModify = await getLoginUserById(parsed.data.id);
 
-                // when we set the account to active and the account was disabled => set isCoach to true. Otherwise just use the value from the request
+                // when we set the account to active and the account was disabled and isAdmin is not set to true => set isCoach to true. Otherwise just use the value from the request
                 const coachVal =
                     accountStatus === account_status_enum.ACTIVATED &&
                     userToModify &&
-                    userToModify.account_status === account_status_enum.DISABLED
+                    userToModify.account_status ===
+                        account_status_enum.DISABLED &&
+                    !parsed.data.isAdmin
                         ? true
                         : parsed.data.isCoach;
 

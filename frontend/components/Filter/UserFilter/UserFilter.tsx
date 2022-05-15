@@ -69,7 +69,6 @@ export const UserFilter: React.FC<{
         socket.off("registrationReceived");
         // add new listener
         socket.on("loginUserUpdated", () => {
-            console.log("update!");
             search(
                 nameFilter,
                 nameSort,
@@ -81,7 +80,6 @@ export const UserFilter: React.FC<{
             );
         });
         socket.on("registrationReceived", () => {
-            console.log("registration");
             search(
                 nameFilter,
                 nameSort,
