@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Project } from "../../types";
 import styles from "./ProjectCard.module.css";
+import { Label } from "../Labels/Label";
+import { ProjectRole } from "../Labels/ProjectRole";
 
 export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
     const router = useRouter();
@@ -27,43 +29,57 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
     };
 
     return (
-        <div className={styles.card}>
-            <div>
-                <h2>{project.name}</h2>
-                <p>
-                    {formatDate(project.start_date)} -{" "}
-                    {formatDate(project.end_date)}
-                </p>
-            </div>
-            <p>{project.partner}</p>
-            <br></br>
-            <h1>Coaches</h1>
-            {project.coaches.map((coach) => {
-                return (
-                    <p key={coach.login_user.login_user_id}>
-                        {coach.login_user.person.name}
-                    </p>
-                );
-            })}
-            <br></br>
-            <h1>Roles</h1>
-            {project.roles.map((role) => {
-                return (
-                    <div key={role.name}>
+        <div className={styles.body}>
+            <header>
+                <div className={styles.left}>
+                    <div>
+                        <h2>{project.name}</h2>
                         <p>
-                            {role.name} {roleMap[role.name]}/{role.positions}
+                            {formatDate(project.start_date)} -{" "}
+                            {formatDate(project.end_date)}
                         </p>
                     </div>
-                );
-            })}
-            <br></br>
-            <h1>Assignees</h1>
-            {project.contracts.map((contract) => {
-                return <p key={contract.project_role.project_role_id}>hello</p>;
-            })}
-            <br></br>
-            <h1>Project Info</h1>
-            <p>{project.description}</p>
+                    <h3>{project.partner}</h3>
+                    <div className={styles.coaches}>
+                        {project.coaches.map((coach) => {
+                            return (
+                                <Label
+                                    key={coach.login_user.login_user_id}
+                                    label={coach.login_user.person.name}
+                                />
+                            );
+                        })}
+                    </div>
+                </div>
+                <div className={styles.roles}>
+                    {project.roles.map((role) => {
+                        return (
+                            <ProjectRole
+                                key={role.name}
+                                label={role.name}
+                                positions={`${roleMap[role.name] || 0}/${
+                                    role.positions
+                                }`}
+                            />
+                        );
+                    })}
+                </div>
+            </header>
+
+            <div className={styles.assignees}>
+                <h1>Assignees</h1>
+                {project.contracts.map((contract) => {
+                    return (
+                        <p key={contract.project_role.project_role_id}>hello</p>
+                    );
+                })}
+            </div>
+
+            <div className={styles.description}>
+                <h1>Project Description</h1>
+                <p>{project.description}</p>
+            </div>
+
             <button
                 onClick={() => router.push(`projects/${project.id}/change`)}
             >
