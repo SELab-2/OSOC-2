@@ -98,7 +98,6 @@ export async function createUserRequest(
         parsedRequest.pass,
         config.encryption.encryptionRounds
     );
-    console.log("Pass hash " + hash);
 
     const loginUser = await ormLU.createLoginUser({
         personId: person.person_id,

@@ -77,7 +77,7 @@ const users: (login_user & { person: person })[] = [
         person_id: 2,
         is_admin: true,
         is_coach: true,
-        account_status: "ACTIVATED",
+        account_status: "PENDING",
         person: {
             person_id: 2,
             email: null,
@@ -100,6 +100,12 @@ beforeEach(() => {
     reqMock.parseRequestUserRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseAcceptNewUserRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseFilterUsersRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     utilMock.isAdmin.mockImplementation((v) => {
         return Promise.resolve({
@@ -111,6 +117,7 @@ beforeEach(() => {
         });
     });
     utilMock.generateKey.mockImplementation(() => "abcdefghijklmnopqrstuvwxyz");
+    utilMock.mutable.mockImplementation((v) => Promise.resolve(v));
 
     ormLUMock.getAllLoginUsers.mockResolvedValue(users);
     ormLUMock.filterLoginUsers.mockResolvedValue({
@@ -172,9 +179,12 @@ afterEach(() => {
 
     reqMock.parseUserAllRequest.mockReset();
     reqMock.parseRequestUserRequest.mockReset();
+    reqMock.parseAcceptNewUserRequest.mockReset();
+    reqMock.parseFilterUsersRequest.mockReset();
 
     utilMock.isAdmin.mockReset();
     utilMock.generateKey.mockReset();
+    utilMock.mutable.mockReset();
 
     ormLUMock.getAllLoginUsers.mockReset();
     ormLUMock.filterLoginUsers.mockReset();
@@ -339,4 +349,64 @@ test("Can set account status", async () => {
         isCoach: true,
         accountStatus: "PENDING",
     });
+});
+
+test("Can accept new users", async () => {
+    ormLUMock.searchLoginUserByPerson.mockReset();
+    ormLUMock.searchLoginUserByPerson.mockResolvedValue(users[2]);
+
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 1, is_admin: false, is_coach: false };
+
+    await expect(user.createUserAcceptance(req)).resolves.toStrictEqual({
+        id: 0,
+        name: "Person 1",
+    });
+    expectCall(reqMock.parseAcceptNewUserRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+    expect(ormLU.searchLoginUserByPerson).toHaveBeenCalledTimes(2);
+});
+
+test("Can reject new users", async () => {
+    ormLUMock.searchLoginUserByPerson.mockReset();
+    ormLUMock.searchLoginUserByPerson.mockResolvedValue(users[2]);
+
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 1, is_admin: false, is_coach: false };
+
+    await expect(user.deleteUserRequest(req)).resolves.toStrictEqual({
+        id: 0,
+        name: "Person 1",
+    });
+    expectCall(reqMock.parseAcceptNewUserRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+    expect(ormLU.searchLoginUserByPerson).toHaveBeenCalledTimes(2);
+});
+
+test("Can filter users", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    const res = users.map((x) => ({
+        person_data: {
+            id: x.person.person_id,
+            name: x.person.name,
+            email: x.person.email,
+            github: x.person.github,
+        },
+        coach: x.is_coach,
+        admin: x.is_admin,
+        activated: x.account_status as string,
+        login_user_id: x.login_user_id,
+    }));
+
+    await expect(user.filterUsers(req)).resolves.toStrictEqual({
+        pagination: { page: 0, count: res.length },
+        data: res,
+    });
+    expectCall(reqMock.parseFilterUsersRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(ormLUMock.filterLoginUsers).toHaveBeenCalledTimes(1);
 });
