@@ -198,6 +198,7 @@ export async function modProject(
         endDate: checkedId.end,
         positions: checkedId.positions,
         osocId: checkedId.osocId,
+        description: checkedId.description,
     });
 
     if (checkedId.modifyRoles !== undefined) {
@@ -243,6 +244,7 @@ export async function modProject(
         positions: updatedProject.positions,
         osoc_id: updatedProject.osoc_id,
         roles: roles,
+        description: updatedProject.description,
     });
 }
 
@@ -426,6 +428,83 @@ export async function modProjectStudent(
                         role: util.getOrDefault(res?.role.name, ""),
                     })
                 );
+        });
+}
+
+export async function unAssignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseRemoveCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.project_user_id ==
+                            checked.data.projectUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length == 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.projectUserId.toString() +
+                                " is not assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    for (const project_user of found) {
+                        await ormPU.deleteProjectUser(
+                            project_user.project_user_id
+                        );
+                    }
+
+                    return Promise.resolve({});
+                });
+        });
+}
+
+export async function assignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseAssignCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length != 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is already assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    const project_user = await ormPU.createProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
+
+                    return Promise.resolve(project_user);
+                });
         });
 }
 
@@ -623,6 +702,8 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/coach", unAssignCoach);
+    util.route(router, "post", "/:id/coach", assignCoach);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 

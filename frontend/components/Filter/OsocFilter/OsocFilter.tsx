@@ -99,7 +99,7 @@ export const OsocCreateFilter: React.FC<{
         <div className={styles.osocfilter}>
             <form className={styles.form}>
                 <div className={styles.query}>
-                    <div onClick={toggleYearSort}>
+                    <div data-testid={"yearSorter"} onClick={toggleYearSort}>
                         Year
                         <div className={styles.triangleContainer}>
                             <div
@@ -115,24 +115,33 @@ export const OsocCreateFilter: React.FC<{
                     </div>
 
                     <input
+                        data-testid={"yearFilter"}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Year.."
                         onChange={(e) => setYearFilter(e.target.value)}
                     />
-                    <button onClick={searchPress}>Search</button>
+                    <button data-testid={"searchButton"} onClick={searchPress}>
+                        Search
+                    </button>
                 </div>
 
                 {/** Only admins should be able to create new osoc editions */}
                 {isAdmin ? (
                     <div className={styles.query}>
                         <input
+                            data-testid={"yearInput"}
                             className={`input ${styles.input}`}
                             type="text"
                             placeholder="Year.."
                             onChange={(e) => setOsocCreate(e.target.value)}
                         />
-                        <button onClick={createPress}>Create</button>
+                        <button
+                            data-testid={"createButton"}
+                            onClick={createPress}
+                        >
+                            Create
+                        </button>
                     </div>
                 ) : null}
             </form>

@@ -1009,6 +1009,7 @@ test("Can parse update project request", () => {
     const d1: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
+        description: "Project description",
         start: Date.now(),
         end: Date.now(),
         positions: 69,
@@ -1032,6 +1033,7 @@ test("Can parse update project request", () => {
     const d3: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
+        description: "Project description",
         start: Date.now(),
         positions: 420,
     };
@@ -1097,11 +1099,11 @@ test("Can parse draft student request", () => {
     const id = 89846;
 
     const d1: T.Anything = {
-        studentId: "im-a-student",
+        studentId: 486453,
         role: "the useless one",
     };
-    const d2: T.Anything = { studentId: "im-a-student" };
-    const d3: T.Anything = { studentId: "im-a-student", role: "the lazy one" };
+    const d2: T.Anything = { studentId: 486453 };
+    const d3: T.Anything = { studentId: 486453, role: "the lazy one" };
 
     const r1: express.Request = getMockReq();
     const r2: express.Request = getMockReq();
