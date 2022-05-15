@@ -997,9 +997,8 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList {
-        data: InternalTypes.OsocEdition[];
-    }
+    export interface OsocEditionList
+        extends Paginable<InternalTypes.OsocEdition> {}
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
@@ -1262,7 +1261,7 @@ export namespace Requests {
         isAdminFilter?: boolean;
     }
 
-    export interface OsocFilter extends KeyRequest {
+    export interface OsocFilter extends PaginableRequest {
         yearFilter?: number;
         yearSort?: FilterSort;
     }
