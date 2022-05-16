@@ -189,9 +189,7 @@ export interface LoginUser {
         email: string;
         name: string;
         github: string;
-        github_id: string;
     };
-    person_id: number;
     login_user_id: number;
     is_coach: boolean;
     is_admin: boolean;

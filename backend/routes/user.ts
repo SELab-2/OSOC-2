@@ -6,7 +6,7 @@ import * as validator from "validator";
 import * as ormLU from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { Responses } from "../types";
+import { AccountStatus, Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as session_key from "./session_key.json";
@@ -35,15 +35,15 @@ export async function listUsers(
     });
 
     const updated = loginUsers.data.map((val) => ({
-        person_data: {
-            id: val.person.person_id,
+        person: {
+            person_id: val.person.person_id,
             name: val.person.name,
-            email: val.person.email,
-            github: val.person.github,
+            email: val.person.email === null ? "" : val.person.email,
+            github: val.person.github === null ? "" : val.person.github,
         },
-        coach: val.is_coach,
-        admin: val.is_admin,
-        activated: val.account_status as string,
+        is_coach: val.is_coach,
+        is_admin: val.is_admin,
+        account_status: val.account_status as AccountStatus,
         login_user_id: val.login_user_id,
     }));
 
@@ -256,15 +256,21 @@ export async function filterUsers(
                 )
                 .then((users) => {
                     const udat = users.data.map((val) => ({
-                        person_data: {
-                            id: val.person.person_id,
+                        person: {
+                            person_id: val.person.person_id,
                             name: val.person.name,
-                            email: val.person.email,
-                            github: val.person.github,
+                            email:
+                                val.person.email === null
+                                    ? ""
+                                    : val.person.email,
+                            github:
+                                val.person.github === null
+                                    ? ""
+                                    : val.person.github,
                         },
-                        coach: val.is_coach,
-                        admin: val.is_admin,
-                        activated: val.account_status as string,
+                        is_coach: val.is_coach,
+                        is_admin: val.is_admin,
+                        account_status: val.account_status as AccountStatus,
                         login_user_id: val.login_user_id,
                     }));
                     return Promise.resolve({
@@ -381,12 +387,24 @@ export async function getCurrentUser(
         .getLoginUserById(checkedSessionKey.userId)
         .then((obj) => util.getOrReject(obj));
 
-    return Promise.resolve({
-        data: {
-            login_user: { ...login_user, password: null },
+    const user = {
+        person: {
+            person_id: login_user.person.person_id,
+            name: login_user.person.name,
+            email:
+                login_user.person.email === null ? "" : login_user.person.email,
+            github:
+                login_user.person.github === null
+                    ? ""
+                    : login_user.person.github,
         },
-        sessionkey: checkedSessionKey.data.sessionkey,
-    });
+        is_coach: login_user.is_coach,
+        is_admin: login_user.is_admin,
+        account_status: login_user.account_status as AccountStatus,
+        login_user_id: login_user.login_user_id,
+    };
+
+    return Promise.resolve(user);
 }
 /**
  *  Gets the router for all `/user/` related endpoints.
