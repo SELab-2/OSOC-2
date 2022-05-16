@@ -157,25 +157,23 @@ const Users: NextPage = () => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            updateUsers(response.data);
-            setPagination(response.pagination);
-        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((err) => {
+                console.log(err);
+            });
+        updateUsers(response.data);
+        setPagination(response.pagination);
         isLoading(false);
     };
 

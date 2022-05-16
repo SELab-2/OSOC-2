@@ -2,22 +2,26 @@ import "@testing-library/jest-dom";
 import fetchMock from "jest-fetch-mock";
 import { act, render, screen } from "@testing-library/react";
 import fireEvent from "@testing-library/user-event";
-import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
+import Osocs from "../pages/osocs";
 
 jest.mock("next/router", () => require("next-router-mock"));
 
 fetchMock.enableMocks();
 jest.mock("next/router");
-let updateOsoc: jest.Mock;
 
+const response = JSON.stringify({
+    success: true,
+    data: [],
+    pagination: { count: 0 },
+});
 describe("Osoc filter tests", () => {
-    beforeEach(() => {
-        updateOsoc = jest.fn();
+    beforeEach(async () => {
         fetchMock.resetMocks();
-        fetchMock.mockOnce(
-            JSON.stringify({ success: true, data: { test: [] } })
-        );
-        render(<OsocCreateFilter updateOsoc={updateOsoc} />);
+        fetchMock.mockOnce(response);
+        fetchMock.mockOnce(response);
+        await act(async () => {
+            await render(<Osocs />);
+        });
     });
     afterEach(() => {
         fetchMock.resetMocks();
@@ -26,74 +30,44 @@ describe("Osoc filter tests", () => {
         expect(screen.getByTestId("yearSorter")).toBeInTheDocument();
         expect(screen.getByTestId("yearFilter")).toBeInTheDocument();
         expect(screen.getByTestId("searchButton")).toBeInTheDocument();
-        expect(screen.getByTestId("yearInput")).toBeInTheDocument();
-        expect(screen.getByTestId("createButton")).toBeInTheDocument();
     });
 
     test("filtering osoc edition", async () => {
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
+            fetchMock.mockOnce(response);
             await fireEvent.click(screen.getByTestId("yearSorter"));
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearSort=asc"
+            "undefined/osoc/filter?yearSort=asc&currentPage=0"
         );
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
+            fetchMock.mockOnce(response);
             await fireEvent.click(screen.getByTestId("yearSorter"));
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearSort=desc"
+            "undefined/osoc/filter?yearSort=desc&currentPage=0"
         );
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
+            fetchMock.mockOnce(response);
             await fireEvent.click(screen.getByTestId("yearSorter"));
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter"
+            "undefined/osoc/filter?currentPage=0"
         );
     });
 
     test("test osoc filter", async () => {
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
+            fetchMock.mockOnce(response);
             await fireEvent.type(screen.getByTestId("yearFilter"), "2020");
             screen.getByTestId("searchButton").click();
         });
         const lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearFilter=2020"
-        );
-    });
-
-    test("test create osoc year", async () => {
-        await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
-            fetchMock.mockOnce(
-                JSON.stringify({ success: true, data: { test: [] } })
-            );
-            await fireEvent.type(screen.getByTestId("yearInput"), "2020");
-            screen.getByTestId("createButton").click();
-        });
-        const lastLength = fetchMock.mock.calls.length - 2;
-        expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/create"
-        );
-        expect(fetchMock.mock.calls[lastLength][1]?.body).toBe(
-            '{"year":"2020"}'
+            "undefined/osoc/filter?yearFilter=2020&currentPage=0"
         );
     });
 });
