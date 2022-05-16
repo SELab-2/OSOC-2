@@ -9,6 +9,7 @@ import {
     UpdateLoginUser,
 } from "./orm_types";
 import { account_status_enum, Prisma } from "@prisma/client";
+import { deletePersonFromDB } from "./person";
 
 /**
  *
@@ -196,43 +197,16 @@ export async function deleteLoginUserByPersonId(personId: number) {
 
 /**
  *
- * @param loginUserId the login user who's info we are deleting from the database
+ * @param loginUserId the login user whose info we are deleting from the database
  */
 export async function deleteLoginUserFromDB(loginUserId: number) {
-    // Remove all the linked password reset
-    await prisma.password_reset.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
-    // Remove all the linked project users
-    await prisma.project_user.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
+    // search the personId
+    const loginUser = await getLoginUserById(loginUserId);
 
-    // Remove all the linked sessionkeys
-    await prisma.session_keys.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-        },
-    });
-
-    const person = await prisma.login_user.delete({
-        where: {
-            login_user_id: loginUserId,
-        },
-        include: {
-            person: true,
-        },
-    });
-
-    await prisma.person.delete({
-        where: {
-            person_id: person.person_id,
-        },
-    });
+    if (loginUser) {
+        // call the delete
+        await deletePersonFromDB(loginUser.person_id);
+    }
 }
 
 /**
