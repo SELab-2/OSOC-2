@@ -1306,3 +1306,161 @@ test("Can delete a student by id", async () => {
     expectCall(utilMock.isAdmin, r.body);
     expectCall(ormoMock.deleteStudent, 0);
 });
+
+test("Job application is null for filterStudents", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+        osocYear: 2022,
+    };
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMock.filterStudents.mockReset();
+});
+
+test("Role wasn't found in filterStudents", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibiliy0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.DRAFT,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [
+            {
+                attachment_id: 0,
+                job_application_id: 0,
+                data: ["attachment0"],
+                type: [type_enum.MOTIVATION_STRING],
+            },
+        ],
+        job_application_skill: [
+            {
+                job_application_skill_id: 0,
+                job_application_id: 0,
+                skill: "skill0",
+                language_id: 0,
+                level: 3,
+                is_preferred: true,
+                is_best: true,
+            },
+        ],
+        applied_role: [
+            {
+                role_id: 0,
+                applied_role_id: 0,
+                job_application_id: 0,
+            },
+        ],
+    });
+
+    ormoMockRole.getRole.mockResolvedValue(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockRole.getRole.mockReset();
+    ormoMock.filterStudents.mockReset();
+});
+
+test("Skill language is invalid for filterStudents", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2022,
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibiliy0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.DRAFT,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [
+            {
+                attachment_id: 0,
+                job_application_id: 0,
+                data: ["attachment0"],
+                type: [type_enum.MOTIVATION_STRING],
+            },
+        ],
+        job_application_skill: [
+            {
+                job_application_skill_id: 0,
+                job_application_id: 0,
+                skill: "skill0",
+                language_id: 0,
+                level: 3,
+                is_preferred: true,
+                is_best: true,
+            },
+        ],
+        applied_role: [
+            {
+                role_id: 0,
+                applied_role_id: 0,
+                job_application_id: 0,
+            },
+        ],
+    });
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
+
+    ormoMockLanguage.getLanguage.mockResolvedValue(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMock.filterStudents.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
+    ormoMockLanguage.getLanguage.mockReset();
+});
