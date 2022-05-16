@@ -1024,6 +1024,44 @@ test("Fails if no student was found in createStudentSuggestion", async () => {
     ormoMock.getStudent.mockReset();
 });
 
+test("No osoc year in the database for createStudentSuggestion", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        suggestion: "YES",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+    ormoMockOsoc.getLatestOsoc.mockResolvedValue(null);
+
+    await expect(student.createStudentSuggestion(r)).rejects.toBe(
+        errors.cookNoDataError()
+    );
+
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMock.getStudent.mockReset();
+});
+
 test("Can get student suggestions", async () => {
     const r = getMockReq();
     r.body = {

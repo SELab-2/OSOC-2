@@ -288,10 +288,6 @@ export async function filterStudents(
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     const students = await ormSt.filterStudents(
         {
