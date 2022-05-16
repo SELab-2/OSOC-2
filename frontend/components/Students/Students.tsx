@@ -12,12 +12,14 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
  * @param alwaysLimited Whether or not the page should always be shown limited
  * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
+ * @param updateParentStudents
  * @constructor
  */
 export const Students: React.FC<{
     alwaysLimited: boolean;
     dragDisabled: boolean;
-}> = ({ alwaysLimited = false, dragDisabled }) => {
+    updateParentStudents: (Students: Array<Student>) => void;
+}> = ({ alwaysLimited = false, dragDisabled, updateParentStudents }) => {
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
     const [selectedStudent, setSelectedStudent] = useState<number>(-1);
@@ -32,6 +34,7 @@ export const Students: React.FC<{
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
+        updateParentStudents(students);
         if (!alwaysLimited) {
             if (selectedStudent < 0) {
                 setDisplay(Display.FULL);
