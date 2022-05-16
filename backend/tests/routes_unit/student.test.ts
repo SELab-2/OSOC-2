@@ -785,6 +785,41 @@ test("Fails if no student was found", async () => {
     ormoMock.getStudent.mockReset();
 });
 
+test("Job application wasn't found in getStudent", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue(null);
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    await expect(student.getStudent(r)).rejects.toBe(errors.cookInvalidID());
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMock.getStudent.mockReset();
+});
+
 test("Can create a student confirmation", async () => {
     const r = getMockReq();
     r.body = {
