@@ -13,6 +13,7 @@ import {
 import SessionContext from "../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import { Paginator } from "../components/Paginator/Paginator";
+import { useSockets } from "../contexts/socketProvider";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -37,6 +38,16 @@ const Users: NextPage = () => {
         statusFilter: AccountStatus.NONE,
     });
 
+    const { socket } = useSockets();
+
+    useEffect(() => {
+        return () => {
+            socket.off("loginUserUpdated");
+            socket.off("registrationReceived");
+        }; // disconnect from the socket on dismount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     useEffect(() => {
         if (getSession) {
             // Only admins may see the manage users screen
@@ -48,6 +59,41 @@ const Users: NextPage = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    /**
+     * when the server notifies that a user has changed, we should re-fetch to get the latest changes
+     * we need the dependency array to make sure we use the latest version of the filter fields
+     */
+    useEffect(() => {
+        socket.off("loginUserUpdated"); // remove the earlier added listeners
+        socket.off("registrationReceived");
+        // add new listener
+        socket.on("loginUserUpdated", () => {
+            search(
+                searchParams.nameFilter,
+                searchParams.nameSort,
+                searchParams.emailFilter,
+                searchParams.emailSort,
+                searchParams.adminFilter,
+                searchParams.coachFilter,
+                searchParams.statusFilter,
+                pagination.page
+            ).then();
+        });
+        socket.on("registrationReceived", () => {
+            search(
+                searchParams.nameFilter,
+                searchParams.nameSort,
+                searchParams.emailFilter,
+                searchParams.emailSort,
+                searchParams.adminFilter,
+                searchParams.coachFilter,
+                searchParams.statusFilter,
+                pagination.page
+            ).then();
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, searchParams]);
 
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
@@ -76,10 +122,9 @@ const Users: NextPage = () => {
     };
 
     /**
-     * search that is used when auto refreshing on websocket event,...
-     * We keep the same page as before
+     * manual filter. This happens when we explicitly pressed the button => go back to first page
      */
-    const filterAutomatic = async (
+    const filter = async (
         nameFilter: string,
         nameSort: Sort,
         emailFilter: string,
@@ -88,7 +133,6 @@ const Users: NextPage = () => {
         coachFilter: boolean,
         statusFilter: AccountStatus
     ) => {
-        console.log(pagination.page);
         setSearchParams({
             nameFilter: nameFilter,
             nameSort: nameSort,
@@ -98,6 +142,8 @@ const Users: NextPage = () => {
             coachFilter: coachFilter,
             statusFilter: statusFilter,
         });
+        // reset the page to the first page when manual searching!
+        setPagination({ page: 0, count: 0 });
         await search(
             nameFilter,
             nameSort,
@@ -106,33 +152,7 @@ const Users: NextPage = () => {
             adminFilter,
             coachFilter,
             statusFilter,
-            pagination.page
-        );
-    };
-
-    /**
-     * manual filter. This happens when we explicitly pressed the button => go back to first page
-     */
-    const filterManual = async (
-        nameFilter: string,
-        nameSort: Sort,
-        emailFilter: string,
-        emailSort: Sort,
-        adminFilter: boolean,
-        coachFilter: boolean,
-        statusFilter: AccountStatus
-    ) => {
-        console.log("manual(");
-        // reset the page to the first page when manual searching!
-        setPagination({ page: 0, count: 0 });
-        await filterAutomatic(
-            nameFilter,
-            nameSort,
-            emailFilter,
-            emailSort,
-            adminFilter,
-            coachFilter,
-            statusFilter
+            0
         );
     };
 
@@ -209,10 +229,7 @@ const Users: NextPage = () => {
 
     return (
         <div className={styles.body}>
-            <UserFilter
-                searchAutomatic={filterAutomatic}
-                searchManual={filterManual}
-            />
+            <UserFilter search={filter} />
             <div>
                 {users !== undefined
                     ? users.map((user) => {

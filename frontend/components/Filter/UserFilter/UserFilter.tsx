@@ -9,10 +9,9 @@ import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
 import { AccountStatus, getNextSort, Sort } from "../../../types";
 import { useRouter } from "next/router";
-import { useSockets } from "../../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
-    searchAutomatic: (
+    search: (
         nameFilter: string,
         nameSort: Sort,
         emailFilter: string,
@@ -21,16 +20,7 @@ export const UserFilter: React.FC<{
         coachFilter: boolean,
         statusFilter: AccountStatus
     ) => void;
-    searchManual: (
-        nameFilter: string,
-        nameSort: Sort,
-        emailFilter: string,
-        emailSort: Sort,
-        adminFilter: boolean,
-        coachFilter: boolean,
-        statusFilter: AccountStatus
-    ) => void;
-}> = ({ searchAutomatic, searchManual }) => {
+}> = ({ search }) => {
     const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
@@ -41,15 +31,6 @@ export const UserFilter: React.FC<{
         AccountStatus.NONE
     );
     useRouter();
-    const { socket } = useSockets();
-
-    useEffect(() => {
-        return () => {
-            socket.off("loginUserUpdated");
-            socket.off("registrationReceived");
-        }; // disconnect from the socket on dismount
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
@@ -57,7 +38,7 @@ export const UserFilter: React.FC<{
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
-        searchManual(
+        search(
             nameFilter,
             nameSort,
             emailFilter,
@@ -68,48 +49,6 @@ export const UserFilter: React.FC<{
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
-
-    /**
-     * when the server notifies that a user has changed, we should re-fetch to get the latest changes
-     * we need the dependency array to make sure we use the latest version of the filter fields
-     */
-    useEffect(() => {
-        socket.off("loginUserUpdated"); // remove the earlier added listeners
-        socket.off("registrationReceived");
-        // add new listener
-        socket.on("loginUserUpdated", () => {
-            searchAutomatic(
-                nameFilter,
-                nameSort,
-                emailFilter,
-                emailSort,
-                adminFilter,
-                coachFilter,
-                statusFilter
-            );
-        });
-        socket.on("registrationReceived", () => {
-            searchAutomatic(
-                nameFilter,
-                nameSort,
-                emailFilter,
-                emailSort,
-                adminFilter,
-                coachFilter,
-                statusFilter
-            );
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        socket,
-        nameFilter,
-        nameSort,
-        emailFilter,
-        emailSort,
-        statusFilter,
-        coachFilter,
-        adminFilter,
-    ]);
 
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -155,7 +94,7 @@ export const UserFilter: React.FC<{
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        searchManual(
+        search(
             nameFilter,
             nameSort,
             emailFilter,
