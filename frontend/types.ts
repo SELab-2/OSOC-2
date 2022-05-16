@@ -284,6 +284,47 @@ export interface Project {
     ];
 }
 
+export interface StudentFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    alumni: boolean;
+    studentCoach: boolean;
+    statusFilter: StudentStatus;
+    osocYear: string;
+    emailStatus: EmailStatus;
+    selectedRoles: Set<string>;
+}
+
+export interface UserFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    adminFilter: boolean;
+    coachFilter: boolean;
+    statusFilter: AccountStatus;
+}
+
+export interface OsocFilterParams {
+    yearFilter: string;
+    yearSort: Sort;
+}
+
+/** The amount of items on a single page */
+export const pageSize = 25;
+
+/**
+ * Interface for pagination
+ */
+export interface Pagination {
+    /** The current page */
+    page: number;
+    /** The total amount of items */
+    count: number;
+}
+
 export enum NotificationType {
     SUCCESS,
     WARNING,
