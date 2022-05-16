@@ -936,7 +936,6 @@ test("Can parse coach access request", () => {
     req1.body = { ...r1 };
 
     const req2: express.Request = getMockReq();
-    r2.pass = undefined;
     req2.body = { ...r2 };
 
     const req3: express.Request = getMockReq();
@@ -947,7 +946,7 @@ test("Can parse coach access request", () => {
     ).resolves.toStrictEqual(r1);
     const prom2: Promise<void> = expect(
         Rq.parseRequestUserRequest(req2)
-    ).resolves.toStrictEqual(r2);
+    ).rejects.toBe(errors.cookArgumentError());
     const prom3: Promise<void> = expect(
         Rq.parseRequestUserRequest(req3)
     ).rejects.toBe(errors.cookArgumentError());
