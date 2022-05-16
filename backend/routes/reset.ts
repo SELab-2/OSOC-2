@@ -32,7 +32,10 @@ export async function sendMail(mail: Email) {
                 );
             }
         })
-        .catch((e) => console.log("Email error:" + JSON.stringify(e)));
+        .catch((e) => {
+            console.log("Email error:" + JSON.stringify(e));
+            return Promise.reject(config.apiErrors.reset.sendEmail);
+        });
 
     const transp = nodemailer.createTransport({
         service: "gmail",
@@ -85,10 +88,6 @@ export async function requestReset(
                     util.generateKey(),
                     date
                 )
-                .catch((e) => {
-                    console.log(e);
-                    return Promise.reject();
-                })
                 .then(async (code) => {
                     return sendMail({
                         to: parsed.email,
