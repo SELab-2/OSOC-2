@@ -184,16 +184,16 @@ export interface Student {
 }
 
 export interface LoginUser {
-    person_data: {
-        id: number;
+    person: {
+        person_id: number;
         email: string;
         name: string;
         github: string;
     };
     login_user_id: number;
-    coach: boolean;
-    admin: boolean;
-    activated: AccountStatus;
+    is_coach: boolean;
+    is_admin: boolean;
+    account_status: AccountStatus;
 }
 
 export interface OsocEdition {
@@ -282,4 +282,65 @@ export interface Project {
             positions: number;
         }
     ];
+}
+
+export interface StudentFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    alumni: boolean;
+    studentCoach: boolean;
+    statusFilter: StudentStatus;
+    osocYear: string;
+    emailStatus: EmailStatus;
+    selectedRoles: Set<string>;
+}
+
+export interface UserFilterParams {
+    nameFilter: string;
+    emailFilter: string;
+    nameSort: Sort;
+    emailSort: Sort;
+    adminFilter: boolean;
+    coachFilter: boolean;
+    statusFilter: AccountStatus;
+}
+
+export interface OsocFilterParams {
+    yearFilter: string;
+    yearSort: Sort;
+}
+
+/** The amount of items on a single page */
+export const pageSize = 25;
+
+/**
+ * Interface for pagination
+ */
+export interface Pagination {
+    /** The current page */
+    page: number;
+    /** The total amount of items */
+    count: number;
+}
+
+export enum NotificationType {
+    SUCCESS,
+    WARNING,
+    ERROR,
+}
+
+/**
+ * Interface for displaying notifications
+ */
+export interface INotification {
+    /** The message of the notification */
+    message: string;
+    /** Lifespan of the notification, in milliseconds */
+    duration: number;
+    /** An index indicating notification age, 0 being the newest notification */
+    index: number;
+    /** The type of notification */
+    type: NotificationType;
 }

@@ -4,6 +4,7 @@ import {
     decision_enum,
     email_status_enum,
     type_enum,
+    person,
 } from "@prisma/client";
 import express from "express";
 import { FilterSort } from "./orm_functions/orm_types";
@@ -179,11 +180,11 @@ export namespace InternalTypes {
      * student in the database.
      */
     export interface Student {
-        student: StudentField;
-        jobApplication: StudentJobApplication;
+        student: StudentField | null;
+        jobApplication: StudentJobApplication | undefined;
         evaluation: StudentEvaluation | undefined;
         evaluations: StudentsAllEvaluations[] | undefined;
-        roles: string[];
+        roles: string[] | undefined;
     }
 
     /**
@@ -223,7 +224,7 @@ export namespace InternalTypes {
         /**
          *  The person id of this student.
          */
-        person_id: number;
+        person_id: number | undefined;
         /**
          *  The person fields.
          */
@@ -654,7 +655,18 @@ export namespace InternalTypes {
     /**
      *  Represents a user, with all associated data.
      */
-    export interface User {}
+    export interface User {
+        person: {
+            person_id: number;
+            email: string;
+            name: string;
+            github: string;
+        };
+        login_user_id: number;
+        is_coach: boolean;
+        is_admin: boolean;
+        account_status: AccountStatus;
+    }
 
     /**
      *  Represents an osoc edition, with all associated data.
@@ -722,8 +734,30 @@ export namespace InternalTypes {
         start_date: string;
         end_date: string;
         roles: object;
-        contracts: object;
+        contracts: Contract[];
         coaches: object;
+    }
+
+    /**
+     *  Represents a contract, with all associated data.
+     */
+    export interface Contract {
+        project_role: {
+            project_role_id: number;
+            project_id: number;
+            role_id: number;
+            positions: number;
+            role: { name: string };
+        };
+        contract_id: number;
+        contract_status: contract_status_enum;
+        login_user: {
+            person: person;
+            login_user_id: number;
+            is_admin: boolean;
+            is_coach: boolean;
+        } | null;
+        student: Student;
     }
 
     /**
@@ -944,6 +978,11 @@ export namespace Responses {
      * data.
      */
     export interface Student extends InternalTypes.Student {}
+
+    /**
+     *  Represents a contract, with all associated data.
+     */
+    export interface Contract extends InternalTypes.Contract {}
 
     /**
      *  A form-student.

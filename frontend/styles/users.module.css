@@ -1,5 +1,8 @@
 .body {
     width: clamp(18rem, 86vw, 100rem);
     margin-inline: auto;
-    margin-bottom: clamp(1rem, 2vw, 2.5rem);;
+    margin-bottom: clamp(1rem, 2vw, 2.5rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
