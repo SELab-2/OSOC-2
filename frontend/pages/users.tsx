@@ -70,25 +70,29 @@ const Users: NextPage = () => {
         // add new listener
         socket.on("loginUserUpdated", () => {
             search(
-                searchParams.nameFilter,
-                searchParams.nameSort,
-                searchParams.emailFilter,
-                searchParams.emailSort,
-                searchParams.adminFilter,
-                searchParams.coachFilter,
-                searchParams.statusFilter,
+                {
+                    nameFilter: searchParams.nameFilter,
+                    nameSort: searchParams.nameSort,
+                    emailFilter: searchParams.emailFilter,
+                    emailSort: searchParams.emailSort,
+                    adminFilter: searchParams.adminFilter,
+                    coachFilter: searchParams.coachFilter,
+                    statusFilter: searchParams.statusFilter,
+                },
                 pagination.page
             ).then();
         });
         socket.on("registrationReceived", () => {
             search(
-                searchParams.nameFilter,
-                searchParams.nameSort,
-                searchParams.emailFilter,
-                searchParams.emailSort,
-                searchParams.adminFilter,
-                searchParams.coachFilter,
-                searchParams.statusFilter,
+                {
+                    nameFilter: searchParams.nameFilter,
+                    nameSort: searchParams.nameSort,
+                    emailFilter: searchParams.emailFilter,
+                    emailSort: searchParams.emailSort,
+                    adminFilter: searchParams.adminFilter,
+                    coachFilter: searchParams.coachFilter,
+                    statusFilter: searchParams.statusFilter,
+                },
                 pagination.page
             ).then();
         });
@@ -110,13 +114,15 @@ const Users: NextPage = () => {
 
     const navigator = (page: number) => {
         search(
-            searchParams.nameFilter,
-            searchParams.nameSort,
-            searchParams.emailFilter,
-            searchParams.emailSort,
-            searchParams.adminFilter,
-            searchParams.coachFilter,
-            searchParams.statusFilter,
+            {
+                nameFilter: searchParams.nameFilter,
+                nameSort: searchParams.nameSort,
+                emailFilter: searchParams.emailFilter,
+                emailSort: searchParams.emailSort,
+                adminFilter: searchParams.adminFilter,
+                coachFilter: searchParams.coachFilter,
+                statusFilter: searchParams.statusFilter,
+            },
             page
         ).then();
     };
@@ -145,13 +151,15 @@ const Users: NextPage = () => {
         // reset the page to the first page when manual searching!
         setPagination({ page: 0, count: 0 });
         await search(
-            nameFilter,
-            nameSort,
-            emailFilter,
-            emailSort,
-            adminFilter,
-            coachFilter,
-            statusFilter,
+            {
+                nameFilter: nameFilter,
+                nameSort: nameSort,
+                emailFilter: emailFilter,
+                emailSort: emailSort,
+                adminFilter: adminFilter,
+                coachFilter: coachFilter,
+                statusFilter: statusFilter,
+            },
             0
         );
     };
@@ -159,45 +167,36 @@ const Users: NextPage = () => {
     /**
      * Build and execute the query
      */
-    const search = async (
-        nameFilter: string,
-        nameSort: Sort,
-        emailFilter: string,
-        emailSort: Sort,
-        adminFilter: boolean,
-        coachFilter: boolean,
-        statusFilter: AccountStatus,
-        currentPage: number
-    ) => {
+    const search = async (params: UserFilterParams, currentPage: number) => {
         if (loading) return;
 
         const filters = [];
-        if (nameFilter !== "") {
-            filters.push(`nameFilter=${nameFilter}`);
+        if (params.nameFilter !== "") {
+            filters.push(`nameFilter=${params.nameFilter}`);
         }
 
-        if (nameSort !== Sort.NONE) {
-            filters.push(`nameSort=${nameSort}`);
+        if (params.nameSort !== Sort.NONE) {
+            filters.push(`nameSort=${params.nameSort}`);
         }
 
-        if (emailFilter !== "") {
-            filters.push(`emailFilter=${emailFilter}`);
+        if (params.emailFilter !== "") {
+            filters.push(`emailFilter=${params.emailFilter}`);
         }
 
-        if (emailSort !== Sort.NONE) {
-            filters.push(`emailSort=${emailSort}`);
+        if (params.emailSort !== Sort.NONE) {
+            filters.push(`emailSort=${params.emailSort}`);
         }
 
-        if (adminFilter) {
-            filters.push(`isAdminFilter=${adminFilter}`);
+        if (params.adminFilter) {
+            filters.push(`isAdminFilter=${params.adminFilter}`);
         }
 
-        if (coachFilter) {
-            filters.push(`isCoachFilter=${coachFilter}`);
+        if (params.coachFilter) {
+            filters.push(`isCoachFilter=${params.coachFilter}`);
         }
 
-        if (statusFilter !== AccountStatus.NONE) {
-            filters.push(`statusFilter=${statusFilter}`);
+        if (params.statusFilter !== AccountStatus.NONE) {
+            filters.push(`statusFilter=${params.statusFilter}`);
         }
 
         filters.push(`currentPage=${currentPage}`);
