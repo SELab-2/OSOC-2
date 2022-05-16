@@ -766,7 +766,7 @@ test("Can get a student by id", async () => {
     expectCall(ormoMock.getStudent, 0);
 });
 
-test("Fails if no student was found", async () => {
+test("Fails if no student was found in getStudent", async () => {
     const r = getMockReq();
     const id = 1000;
 
@@ -1001,6 +1001,27 @@ test("Can create a student evaluation", async () => {
         motivation: "You are not accepted for osoc",
         isFinal: false,
     });
+});
+
+test("Fails if no student was found in createStudentSuggestion", async () => {
+    const r = getMockReq();
+    const id = 1000;
+
+    r.body = {
+        sessionkey: "abcd",
+        suggestion: "YES",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce(null);
+
+    await expect(student.createStudentSuggestion(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMock.getStudent.mockReset();
 });
 
 test("Can get student suggestions", async () => {
