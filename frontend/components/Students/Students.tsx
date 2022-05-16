@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./Students.module.scss";
 import { Display, Evaluation, Student } from "../../types";
-import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
+import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";

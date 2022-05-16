@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import fetchMock from "jest-fetch-mock";
 import { act, render, screen } from "@testing-library/react";
 import fireEvent from "@testing-library/user-event";
-import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
+import { OsocCreateFilter } from "../components/Filters/OsocFilter";
 
 jest.mock("next/router", () => require("next-router-mock"));
 

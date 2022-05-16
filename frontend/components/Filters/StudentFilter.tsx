@@ -1,4 +1,4 @@
-import styles from "../Filter.module.css";
+import styles from "./Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import {
     Display,
@@ -8,15 +8,15 @@ import {
     Sort,
     Student,
     StudentStatus,
-} from "../../../types";
-import SessionContext from "../../../contexts/sessionProvider";
+} from "../../types";
+import SessionContext from "../../contexts/sessionProvider";
 import Image from "next/image";
-import CheckIconColor from "../../../public/images/green_check_mark_color.png";
-import CheckIcon from "../../../public/images/green_check_mark.png";
-import ExclamationIconColor from "../../../public/images/exclamation_mark_color.png";
-import ExclamationIcon from "../../../public/images/exclamation_mark.png";
-import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
+import CheckIconColor from "../../public/images/green_check_mark_color.png";
+import CheckIcon from "../../public/images/green_check_mark.png";
+import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
+import ExclamationIcon from "../../public/images/exclamation_mark.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
     setFilteredStudents: (user: Array<Student>) => void;
@@ -318,7 +318,7 @@ export const StudentFilter: React.FC<{
                 </div>
 
                 <div className={styles.query}>
-                    Osoc edition
+                    Osoc Edition
                     {/* Maybe dropdown */}
                     <input
                         data-testid={"osocYearInput"}

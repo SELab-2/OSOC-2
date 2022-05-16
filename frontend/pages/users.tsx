@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import React, { useContext, useEffect, useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
-import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
+import { UserFilter } from "../components/Filters/UserFilter";
 import { LoginUser } from "../types";
 import SessionContext from "../contexts/sessionProvider";
 import { useRouter } from "next/router";

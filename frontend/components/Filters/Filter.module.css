@@ -56,7 +56,7 @@
 }
 
 /* The filter container */
-.userfilter, .studentfilter, .osocfilter {
+.userfilter, .studentfilter, .osocfilter, .projectfilter {
     background-color: var(--neutral-150);
     border-radius: 0.5rem;
 }
@@ -66,14 +66,14 @@
     padding: 0.5rem 0.2rem;
 }
 
-.studentfilter {
+.studentfilter, .projectfilter {
     display: flex;
     flex-wrap: wrap;
     padding: 1rem;
     gap: 1rem;
 }
 
-.studentfilterinputs {
+.studentfilterinputs, .projectfilterinput {
     display: grid;
     width: 100%;
     grid-template-columns: 1fr 1fr;
@@ -83,7 +83,7 @@
     display: contents;
 }
 
-.studentfilter div, .osocfilter div, .userfilter div {
+.studentfilter div, .osocfilter div, .userfilter div, .projectfilter div {
     justify-content: flex-start;
     gap: 0.5rem;
 }
@@ -109,7 +109,7 @@
         flex-wrap: wrap;
     }
 
-    .studentfilterinputs {
+    .studentfilterinputs, .projectfilterinputs {
         display: contents;
     }
 }

@@ -5,6 +5,7 @@ import { Project } from "../../types";
 import { ProjectCard } from "../ProjectCard/ProjectCard";
 import styles from "./Projects.module.scss";
 import scrollStyles from "../ScrollView.module.scss";
+import { ProjectFilter } from "../Filters/ProjectFilter";
 
 /**
  * Projects page with project filter included
@@ -52,6 +53,7 @@ export const Projects: React.FC = () => {
             >
                 Add Project
             </button>
+            <ProjectFilter />
             <div className={scrollStyles.scrollView}>
                 <div className={scrollStyles.topShadowCaster} />
                 <div className={styles.projectCards}>
