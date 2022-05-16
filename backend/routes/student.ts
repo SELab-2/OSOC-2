@@ -15,87 +15,6 @@ import * as ormP from "../orm_functions/person";
 import { login_user, person } from "@prisma/client";
 
 /**
- *  Attempts to list all students in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function listStudents(
-    req: express.Request
-): Promise<Responses.StudentList> {
-    const parsedRequest = await rq.parseStudentAllRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const studentList: InternalTypes.Student[] = [];
-    const studentsP = await ormSt.filterStudents({
-        pageSize: parsedRequest.pageSize,
-        currentPage: parsedRequest.currentPage,
-    });
-    const students = studentsP.data;
-    for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-            students[studentIndex].student_id
-        );
-        if (jobApplication != null) {
-            const roles = [];
-            for (const applied_role of jobApplication.applied_role) {
-                const role = await ormRo.getRole(applied_role.role_id);
-                if (role != null) {
-                    roles.push(role.name);
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            }
-
-            const evaluations = await ormJo.getStudentEvaluationsTotal(
-                students[studentIndex].student_id
-            );
-
-            for (
-                let skillIndex = 0;
-                skillIndex < jobApplication.job_application_skill.length;
-                skillIndex++
-            ) {
-                if (
-                    jobApplication.job_application_skill[skillIndex]
-                        .language_id != null
-                ) {
-                    const language = await ormLa.getLanguage(
-                        Number(
-                            jobApplication.job_application_skill[skillIndex]
-                                .language_id
-                        )
-                    );
-                    if (language != null) {
-                        jobApplication.job_application_skill[skillIndex].skill =
-                            language.name;
-                    } else {
-                        return Promise.reject(errors.cookInvalidID());
-                    }
-                }
-            }
-
-            studentList.push({
-                student: students[studentIndex],
-                jobApplication: jobApplication,
-                evaluations: evaluations,
-                evaluation: undefined,
-                roles: roles,
-            });
-        } else {
-            return Promise.reject(errors.cookInvalidID());
-        }
-    }
-
-    return Promise.resolve({
-        pagination: studentsP.pagination,
-        data: studentList,
-    });
-}
-
-/**
  *  Attempts to get all data for a certain student in the system.
  *  @param req The Express.js request to extract all required data from.
  *  @returns See the API documentation. Successes are passed using
@@ -105,12 +24,7 @@ export async function getStudent(
     req: express.Request
 ): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -473,7 +387,7 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/student");
     util.route(router, "get", "/filter", filterStudents);
-    util.route(router, "get", "/all", listStudents);
+    util.route(router, "get", "/all", filterStudents);
     util.route(router, "get", "/:id", getStudent);
     util.route(router, "delete", "/:id", deleteStudent);
 
