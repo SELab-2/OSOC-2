@@ -24,16 +24,12 @@ export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseNewProjectRequest(req);
-    console.log("check");
     const checkedSessionKey = await util
         .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-
-    console.log("hierzo");
-    console.log(checkedSessionKey.data);
 
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
