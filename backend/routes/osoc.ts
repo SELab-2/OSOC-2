@@ -45,11 +45,12 @@ export async function listOsocEditions(
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-    const osocEditions = await ormO.getAllOsoc();
-
-    return Promise.resolve({
-        data: osocEditions,
+    const osocEditions = await ormO.filterOsocs({
+        pageSize: parsedRequest.pageSize,
+        currentPage: parsedRequest.currentPage,
     });
+
+    return Promise.resolve(osocEditions);
 }
 
 /**
@@ -65,13 +66,15 @@ export async function filterYear(
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const osocs = await ormO.filterOsocs(
+        {
+            currentPage: parsedRequest.currentPage,
+            pageSize: parsedRequest.pageSize,
+        },
         checkedSessionKey.data.yearFilter,
         checkedSessionKey.data.yearSort
     );
 
-    return Promise.resolve({
-        data: osocs,
-    });
+    return Promise.resolve(osocs);
 }
 
 /**

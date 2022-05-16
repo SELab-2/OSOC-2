@@ -709,7 +709,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
         roles: object;
     }
 
@@ -722,8 +721,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
-        description: string | null;
         roles: object;
         contracts: object;
         coaches: object;
@@ -998,9 +995,8 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList {
-        data: InternalTypes.OsocEdition[];
-    }
+    export interface OsocEditionList
+        extends Paginable<InternalTypes.OsocEdition> {}
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
@@ -1172,17 +1168,6 @@ export namespace Responses {
     export type OrError<T> = ApiError | T;
 
     /**
-     *  An API response is one of the previous response types.
-     *  @deprecated Not up to date
-     */
-    export type ApiResponse =
-        | Empty
-        | Key
-        | PartialStudent
-        | IdNameList
-        | ConflictList;
-
-    /**
      *  Either an error while parsing the form or a data value.
      */
     export interface FormResponse<T> {
@@ -1274,7 +1259,7 @@ export namespace Requests {
         isAdminFilter?: boolean;
     }
 
-    export interface OsocFilter extends KeyRequest {
+    export interface OsocFilter extends PaginableRequest {
         yearFilter?: number;
         yearSort?: FilterSort;
     }
@@ -1327,7 +1312,6 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        positions: number;
         roles: object;
     }
 
@@ -1336,10 +1320,10 @@ export namespace Requests {
         partner?: string;
         start?: Date;
         end?: Date;
-        positions?: number;
         osocId?: number;
         addRoles?: object;
         deleteRoles?: object;
+        description?: string;
     }
 
     export interface ProjectFilter extends PaginableRequest {
@@ -1347,6 +1331,7 @@ export namespace Requests {
         clientNameFilter?: string;
         assignedCoachesFilterArray?: number[];
         fullyAssignedFilter?: boolean;
+        osocYear?: number;
         projectNameSort?: FilterSort;
         clientNameSort?: FilterSort;
     }
@@ -1419,6 +1404,14 @@ export namespace Requests {
     export interface RmDraftStudent extends IdRequest {
         studentId: number;
     }
+
+    export interface RmDraftCoach extends IdRequest {
+        projectUserId: number;
+    }
+
+    export interface DraftCoach extends IdRequest {
+        loginUserId: number;
+    }
 }
 
 /**
@@ -1435,9 +1428,7 @@ export type Table = "project" | "student";
  *  A route callback is a function taking an Express js request and returning a
  * promise (resolving to an API response).
  */
-export type RouteCallback<T extends Responses.ApiResponse> = (
-    req: express.Request
-) => Promise<T>;
+export type RouteCallback<T> = (req: express.Request) => Promise<T>;
 
 /**
  *  Helper type for unsafe type checks.

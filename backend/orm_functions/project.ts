@@ -22,7 +22,6 @@ export async function createProject(project: CreateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
         },
     });
     return result;
@@ -187,52 +186,6 @@ export async function getProjectsEndedBeforeDate(date: Date) {
 
 /**
  *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have the exact amount of positions
- */
-export async function getProjectsByNumberPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: positions,
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have less positions
- */
-export async function getProjectsLessPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                lt: positions,
-            },
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have more positions
- */
-export async function getProjectsMorePositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                gt: positions,
-            },
-        },
-    });
-    return result;
-}
-
-/**
- *
  * @param project: UpdateProject object with the values that need to be updated
  * @returns the updated entry in the database
  */
@@ -247,7 +200,7 @@ export async function updateProject(project: UpdateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
+            description: project.description,
         },
     });
     return result;
@@ -301,6 +254,7 @@ export async function deleteProjectByPartner(partner: string) {
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
+ * @param osocYearFilter: the osoc year the project belongs to (or undefined if not filtering on year)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
  * @returns the filtered students with their person data and other filter fields in a promise
@@ -311,6 +265,7 @@ export async function filterProjects(
     clientNameFilter: FilterString = undefined,
     assignedCoachesFilterArray: FilterNumberArray = undefined,
     fullyAssignedFilter: FilterBoolean = undefined,
+    osocYearFilter: number | undefined = undefined,
     projectNameSort: FilterSort = undefined,
     clientNameSort: FilterSort = undefined
 ) {
@@ -336,6 +291,9 @@ export async function filterProjects(
     }
 
     const actualFilter: Prisma.projectWhereInput = {
+        osoc: {
+            year: osocYearFilter,
+        },
         name: {
             contains: projectNameFilter,
             mode: "insensitive",
@@ -398,12 +356,11 @@ export async function filterProjects(
                 (elem) => elem.project_id === project.project_id
             );
 
-            let sum = 0;
             for (const c of project_found[0].project_role) {
-                sum += c._count.contract;
+                if (c._count.contract < c.positions) return false;
             }
 
-            return project.positions === sum;
+            return true;
         });
     }
 

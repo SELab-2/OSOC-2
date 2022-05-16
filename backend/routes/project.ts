@@ -6,11 +6,13 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as ormPr from "../orm_functions/project";
 import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
+import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
-import { InternalTypes, Responses, StringDict } from "../types";
+import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
+// import { project_role } from "@prisma/client";
 
 /**
  *  Attempts to create a new project in the system.
@@ -38,7 +40,6 @@ export async function createProject(
         partner: checkedSessionKey.data.partner,
         startDate: new Date(checkedSessionKey.data.start),
         endDate: new Date(checkedSessionKey.data.end),
-        positions: Number(checkedSessionKey.data.positions),
         osocId: Number(checkedSessionKey.data.osocId),
     });
 
@@ -67,7 +68,6 @@ export async function createProject(
         partner: createdProject.partner,
         start_date: createdProject.start_date.toString(),
         end_date: createdProject.end_date.toString(),
-        positions: createdProject.positions,
         osoc_id: createdProject.osoc_id,
         roles: roleList,
     });
@@ -113,7 +113,6 @@ export async function listProjects(
             partner: project.partner,
             start_date: project.start_date.toString(),
             end_date: project.end_date.toString(),
-            positions: project.positions,
             osoc_id: project.osoc_id,
             description: project.description,
             roles: projectRoles,
@@ -171,7 +170,6 @@ export async function getProject(
             partner: project.partner,
             start_date: project.start_date.toString(),
             end_date: project.end_date.toString(),
-            positions: project.positions,
             osoc_id: project.osoc_id,
             description: project.description,
             roles: projectRoles,
@@ -202,8 +200,8 @@ export async function modProject(
         partner: checkedId.partner,
         startDate: checkedId.start,
         endDate: checkedId.end,
-        positions: checkedId.positions,
         osocId: checkedId.osocId,
+        description: checkedId.description,
     });
 
     if (checkedId.modifyRoles !== undefined) {
@@ -246,9 +244,9 @@ export async function modProject(
         partner: updatedProject.partner,
         start_date: updatedProject.start_date.toString(),
         end_date: updatedProject.end_date.toString(),
-        positions: updatedProject.positions,
         osoc_id: updatedProject.osoc_id,
         roles: roles,
+        description: updatedProject.description,
     });
 }
 
@@ -367,15 +365,6 @@ export async function modProjectStudent(
         .parseDraftStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            console.log(
-                "Attempting to modify project " +
-                    parsed.data.id +
-                    " by moving student " +
-                    parsed.data.studentId +
-                    " to role `" +
-                    parsed.data.role +
-                    "`"
-            );
             return ormCtr
                 .contractsByProject(parsed.data.id)
                 .then((arr) =>
@@ -432,6 +421,83 @@ export async function modProjectStudent(
                         role: util.getOrDefault(res?.role.name, ""),
                     })
                 );
+        });
+}
+
+export async function unAssignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseRemoveCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.project_user_id ==
+                            checked.data.projectUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length == 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.projectUserId.toString() +
+                                " is not assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    for (const project_user of found) {
+                        await ormPU.deleteProjectUser(
+                            project_user.project_user_id
+                        );
+                    }
+
+                    return Promise.resolve({});
+                });
+        });
+}
+
+export async function assignCoach(
+    req: express.Request
+): Promise<Responses.Empty> {
+    return rq
+        .parseAssignCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
+                    )
+                )
+                .then(async (found) => {
+                    if (found.length != 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is already assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    const project_user = await ormPU.createProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
+
+                    return Promise.resolve(project_user);
+                });
         });
 }
 
@@ -553,6 +619,66 @@ export async function getProjectConflicts(
         });
 }
 
+export async function assignStudent(
+    req: express.Request
+): Promise<Responses.ModProjectStudent> {
+    const alreadyContract: ApiError = {
+        http: 409,
+        reason: "This student does already have a contract",
+    };
+    const nonexist: ApiError = {
+        http: 404,
+        reason: "That role doesn't exist",
+    };
+    const noplace: ApiError = {
+        http: 409,
+        reason: "There are no more free spaces for that role",
+    };
+
+    // authenticate, parse, ...
+    const checked = await rq
+        .parseDraftStudentRequest(req)
+        .then((parsed) => util.isAdmin(parsed));
+    // check if edition is ready
+    const latestOsoc = await ormOsoc
+        .getLatestOsoc()
+        .then((osoc) => util.getOrReject(osoc));
+    // check if no contracts yet
+    await ormCtr
+        .contractsForStudent(checked.data.studentId)
+        .then((data) =>
+            data.filter(
+                (x) => x.project_role.project.osoc_id == latestOsoc.osoc_id
+            )
+        )
+        .then((filtered) =>
+            filtered.length > 0
+                ? Promise.reject(alreadyContract)
+                : Promise.resolve()
+        );
+
+    // get project role
+    // then create contract
+    // then assign
+    return getFreeSpotsFor(checked.data.role, checked.data.id)
+        .catch(() => Promise.reject(nonexist))
+        .then((r) =>
+            r.count > 0 ? Promise.resolve(r) : Promise.reject(noplace)
+        )
+        .then((r) =>
+            ormCtr
+                .createContract({
+                    studentId: checked.data.studentId,
+                    projectRoleId: r.role,
+                    loginUserId: checked.userId,
+                    contractStatus: "DRAFT",
+                })
+                .then(() => ormRole.getRole(r.role))
+        )
+        .then(util.getOrReject)
+        .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
+}
+
 /**
  *  Attempts to filter projects in the system by name, client, coaches or fully assigned.
  *  @param req The Express.js request to extract all required data from.
@@ -563,23 +689,34 @@ export async function filterProjects(
     req: express.Request
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checked = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     // .catch((res) => res);
-    if (checked.data == undefined) {
+    if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
+    }
+
+    let year = new Date().getFullYear();
+    if (checkedSessionKey.data.osocYear === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        }
+    } else {
+        year = checkedSessionKey.data.osocYear;
     }
 
     const projects = await ormPr.filterProjects(
         {
-            currentPage: checked.data.currentPage,
-            pageSize: checked.data.pageSize,
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
         },
-        checked.data.projectNameFilter,
-        checked.data.clientNameFilter,
-        checked.data.assignedCoachesFilterArray,
-        checked.data.fullyAssignedFilter,
-        checked.data.projectNameSort,
-        checked.data.clientNameSort
+        checkedSessionKey.data.projectNameFilter,
+        checkedSessionKey.data.clientNameFilter,
+        checkedSessionKey.data.assignedCoachesFilterArray,
+        checkedSessionKey.data.fullyAssignedFilter,
+        year,
+        checkedSessionKey.data.projectNameSort,
+        checkedSessionKey.data.clientNameSort
     );
 
     const projectlist = [];
@@ -594,7 +731,6 @@ export async function filterProjects(
             partner: project.partner,
             start_date: project.start_date,
             end_data: project.end_date,
-            positions: project.positions,
             osoc_id: project.osoc_id,
             contracts: contracts,
             coaches: users,
@@ -628,7 +764,10 @@ export function getRouter(): express.Router {
     util.route(router, "get", "/:id/draft", getDraftedStudents);
     util.route(router, "post", "/:id/draft", modProjectStudent);
 
+    util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
+    util.route(router, "delete", "/:id/coach", unAssignCoach);
+    util.route(router, "post", "/:id/coach", assignCoach);
 
     util.route(router, "get", "/conflicts", getProjectConflicts);
 
