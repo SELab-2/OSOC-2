@@ -709,6 +709,7 @@ export async function parseFilterProjectsRequest(
         clientNameFilter: maybe(req.body, "clientNameFilter"),
         assignedCoachesFilterArray: assignedCoachesFilterArray,
         fullyAssignedFilter: fullyAssignedFilter,
+        osocYear: maybe(req.body, "osocYear"),
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
     });

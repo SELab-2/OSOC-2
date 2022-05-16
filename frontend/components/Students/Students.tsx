@@ -198,31 +198,29 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        return { success: false };
-                    } else return json;
-                })
-                .catch((err) => {
-                    console.log(err);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/filter` + query,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            }
+        )
+            .then((response) => response.json())
+            .then((json) => {
+                if (!json.success) {
                     return { success: false };
-                });
-            setFilteredStudents(response.data);
-            setPagination(response.pagination);
-        }
+                } else return json;
+            })
+            .catch((err) => {
+                console.log(err);
+                return { success: false };
+            });
+        setFilteredStudents(response.data);
+        setPagination(response.pagination);
         isLoading(false);
     };
 

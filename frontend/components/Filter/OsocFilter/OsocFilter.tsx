@@ -66,32 +66,30 @@ export const OsocCreateFilter: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        if (sessionKey !== "") {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        year: osocCreate,
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `auth/osoc2 ${sessionKey}`,
-                    },
-                }
-            )
-                .then((response) => response.json())
-                .catch((err) => {
-                    console.log(err);
-                });
-            if (response.success) {
-                const params: OsocFilterParams = {
-                    yearFilter: yearFilter,
-                    yearSort: yearSort,
-                };
-                search(params);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/create`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    year: osocCreate,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
             }
+        )
+            .then((response) => response.json())
+            .catch((err) => {
+                console.log(err);
+            });
+        if (response.success) {
+            const params: OsocFilterParams = {
+                yearFilter: yearFilter,
+                yearSort: yearSort,
+            };
+            search(params);
         }
     };
 

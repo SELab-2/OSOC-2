@@ -302,6 +302,7 @@ export async function deleteProjectByPartner(partner: string) {
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
  * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
+ * @param osocYearFilter: the osoc year the project belongs to (or undefined if not filtering on year)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
  * @returns the filtered students with their person data and other filter fields in a promise
@@ -312,6 +313,7 @@ export async function filterProjects(
     clientNameFilter: FilterString = undefined,
     assignedCoachesFilterArray: FilterNumberArray = undefined,
     fullyAssignedFilter: FilterBoolean = undefined,
+    osocYearFilter: number | undefined = undefined,
     projectNameSort: FilterSort = undefined,
     clientNameSort: FilterSort = undefined
 ) {
@@ -337,6 +339,9 @@ export async function filterProjects(
     }
 
     const actualFilter: Prisma.projectWhereInput = {
+        osoc: {
+            year: osocYearFilter,
+        },
         name: {
             contains: projectNameFilter,
             mode: "insensitive",
