@@ -235,15 +235,15 @@ test("Can request all users", async () => {
     rq.body = { sessionkey: "key" };
 
     const res = users.map((x) => ({
-        person_data: {
-            id: x.person.person_id,
+        person: {
+            person_id: x.person.person_id,
             name: x.person.name,
-            email: x.person.email,
-            github: x.person.github,
+            email: x.person.email === null ? "" : x.person.email,
+            github: x.person.github === null ? "" : x.person.github,
         },
-        coach: x.is_coach,
-        admin: x.is_admin,
-        activated: x.account_status as string,
+        is_coach: x.is_coach,
+        is_admin: x.is_admin,
+        account_status: x.account_status,
         login_user_id: x.login_user_id,
     }));
 
@@ -418,15 +418,15 @@ test("Can filter users", async () => {
     req.body = { sessionkey: "key" };
 
     const res = users.map((x) => ({
-        person_data: {
-            id: x.person.person_id,
+        person: {
+            person_id: x.person.person_id,
             name: x.person.name,
-            email: x.person.email,
-            github: x.person.github,
+            email: x.person.email === null ? "" : x.person.email,
+            github: x.person.github === null ? "" : x.person.github,
         },
-        coach: x.is_coach,
-        admin: x.is_admin,
-        activated: x.account_status as string,
+        is_coach: x.is_coach,
+        is_admin: x.is_admin,
+        account_status: x.account_status,
         login_user_id: x.login_user_id,
     }));
 
@@ -491,13 +491,17 @@ test("Can get current user", async () => {
     const req = getMockReq();
 
     await expect(user.getCurrentUser(req)).resolves.toStrictEqual({
-        data: {
-            login_user: {
-                ...users[0],
-                password: null,
-            },
+        person: {
+            person_id: users[0].person.person_id,
+            name: users[0].person.name,
+            email: users[0].person.email === null ? "" : users[0].person.email,
+            github:
+                users[0].person.github === null ? "" : users[0].person.github,
         },
-        sessionkey: "valid",
+        is_coach: users[0].is_coach,
+        is_admin: users[0].is_admin,
+        account_status: users[0].account_status,
+        login_user_id: users[0].login_user_id,
     });
     expectCall(reqMock.parseCurrentUserRequest, req);
     expectCall(utilMock.checkSessionKey, { sessionkey: "valid" });

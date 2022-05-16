@@ -654,7 +654,18 @@ export namespace InternalTypes {
     /**
      *  Represents a user, with all associated data.
      */
-    export interface User {}
+    export interface User {
+        person: {
+            person_id: number;
+            email: string;
+            name: string;
+            github: string;
+        };
+        login_user_id: number;
+        is_coach: boolean;
+        is_admin: boolean;
+        account_status: AccountStatus;
+    }
 
     /**
      *  Represents an osoc edition, with all associated data.

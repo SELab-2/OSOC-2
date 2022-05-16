@@ -15,16 +15,16 @@ describe("User component tests", () => {
         fetchUser = jest.fn();
 
         userAdminCoach = {
-            person_data: {
-                id: -1,
+            person: {
+                person_id: -1,
                 email: "test",
                 name: "aa",
                 github: "",
             },
             login_user_id: -1,
-            coach: true,
-            admin: true,
-            activated: AccountStatus.ACTIVATED,
+            is_coach: true,
+            is_admin: true,
+            account_status: AccountStatus.ACTIVATED,
         };
         fetchMock.resetMocks();
     });
@@ -37,7 +37,7 @@ describe("User component tests", () => {
         expect(screen.getByTestId("personName")).toBeInTheDocument();
 
         expect(screen.getByTestId("personName").textContent).toBe(
-            "Current Name: " + userAdminCoach.person_data.name
+            "Current Name: " + userAdminCoach.person.name
         );
         expect(screen.getByTestId("labelNewName")).toBeInTheDocument();
         expect(screen.getByTestId("labelNewName").textContent).toBe("New Name");
