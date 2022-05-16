@@ -709,7 +709,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
         roles: object;
     }
 
@@ -722,7 +721,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
         roles: object;
         contracts: object;
         coaches: object;
@@ -1314,7 +1312,6 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        positions: number;
         roles: object;
     }
 
@@ -1323,7 +1320,6 @@ export namespace Requests {
         partner?: string;
         start?: Date;
         end?: Date;
-        positions?: number;
         osocId?: number;
         addRoles?: object;
         deleteRoles?: object;
