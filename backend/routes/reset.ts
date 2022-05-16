@@ -159,7 +159,6 @@ export async function resetPassword(
                     });
                 })
                 .then((user) => {
-                    console.log(JSON.stringify(user));
                     const futureDate = new Date();
                     futureDate.setDate(
                         futureDate.getDate() + session_key.valid_period
