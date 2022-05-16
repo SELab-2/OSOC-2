@@ -6,6 +6,7 @@ import { Label } from "../Labels/Label";
 import { ProjectRole } from "../Labels/ProjectRole";
 
 export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+    console.log(project);
     const router = useRouter();
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
 

@@ -297,6 +297,15 @@ export interface StudentFilterParams {
     selectedRoles: Set<string>;
 }
 
+export interface ProjectFilterParams {
+    nameFilter: string;
+    clientFilter: string;
+    fullyAssigned: boolean;
+    osocYear: string;
+    nameSort: Sort;
+    clientSort: Sort;
+}
+
 export interface UserFilterParams {
     nameFilter: string;
     emailFilter: string;
