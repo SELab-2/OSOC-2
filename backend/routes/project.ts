@@ -24,16 +24,12 @@ export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseNewProjectRequest(req);
-    console.log("check");
     const checkedSessionKey = await util
         .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-
-    console.log("hierzo");
-    console.log(checkedSessionKey.data);
 
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
@@ -106,6 +102,39 @@ export async function listProjects(
         }
 
         const contracts = await ormCtr.contractsByProject(project.project_id);
+
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? contract.student
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
         const users = await ormPU.getUsersFor(project.project_id);
         allProjects.push({
             id: Number(project.project_id),
@@ -116,7 +145,7 @@ export async function listProjects(
             osoc_id: project.osoc_id,
             description: project.description,
             roles: projectRoles,
-            contracts: contracts,
+            contracts: newContracts,
             coaches: users,
         });
     }
@@ -147,6 +176,38 @@ export async function getProject(
     if (project !== null) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
 
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? contract.student
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
         const roles = await ormPrRole.getProjectRolesByProject(
             project.project_id
         );
@@ -173,7 +234,7 @@ export async function getProject(
             osoc_id: project.osoc_id,
             description: project.description,
             roles: projectRoles,
-            contracts: contracts,
+            contracts: newContracts,
             coaches: users,
         });
     }
