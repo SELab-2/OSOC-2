@@ -313,7 +313,7 @@ export interface OsocFilterParams {
 }
 
 /** The amount of items on a single page */
-export const pageSize = 3;
+export const pageSize = 25;
 
 /**
  * Interface for pagination
