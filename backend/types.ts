@@ -761,11 +761,6 @@ export namespace InternalTypes {
     }
 
     /**
-     *  Represents a project, with all associated data.
-     */
-    export interface ProjectFilter {}
-
-    /**
      *  Represents a person, with all associated data.
      */
     export interface StudentRole {
@@ -1145,12 +1140,6 @@ export namespace Responses {
         data: InternalTypes.ProjectAndContracts[];
     }
     export interface ProjectList extends Paginable<InternalTypes.Project> {}
-
-    /**
-     *  A project filter list is a list of projects
-     */
-    export interface ProjectFilterList
-        extends Paginable<InternalTypes.ProjectFilter> {}
 
     /**
      *  An admin list response is the keyed version of the list of admins.
