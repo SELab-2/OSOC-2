@@ -157,7 +157,7 @@ export const Settings: React.FC<{
         <div className={styles.body}>
             <form className={styles.form}>
                 <label data-testid={"personName"} className={styles.label}>
-                    Current Name: {person.person_data.name}
+                    Current Name: {person.person.name}
                 </label>
                 <label data-testid={"labelNewName"} className={styles.label}>
                     New Name
