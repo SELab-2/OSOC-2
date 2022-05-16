@@ -102,13 +102,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                             />
                         );
                     })}
-                    <button
-                        onClick={() =>
-                            notify("Hello there", NotificationType.ERROR, 2000)
-                        }
-                    >
-                        Create notif
-                    </button>
                 </div>
                 {children}
             </div>

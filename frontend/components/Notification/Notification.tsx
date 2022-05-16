@@ -10,7 +10,7 @@ export const Notification: React.FC<{
 }> = ({ message, index, onDelete, type }) => {
     return (
         <div
-            className={`notification ${
+            className={`notification ${styles.notification} ${
                 type === NotificationType.SUCCESS
                     ? styles.success
                     : type === NotificationType.WARNING
