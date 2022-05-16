@@ -284,6 +284,12 @@ export interface Project {
     ];
 }
 
+export enum NotificationType {
+    SUCCESS,
+    WARNING,
+    ERROR,
+}
+
 /**
  * Interface for displaying notifications
  */
@@ -294,4 +300,6 @@ export interface INotification {
     duration: number;
     /** An index indicating notification age, 0 being the newest notification */
     index: number;
+    /** The type of notification */
+    type: NotificationType;
 }

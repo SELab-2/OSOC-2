@@ -1,11 +1,17 @@
 import React, { createContext, ReactNode, useEffect, useState } from "react";
-import { INotification } from "../types";
+import { INotification, NotificationType } from "../types";
 import { Notification } from "../components/Notification/Notification";
 import styles from "./notificationProvider.module.scss";
 
-interface INotificationContext {}
+interface INotificationContext {
+    notify?: (
+        message: string,
+        type: NotificationType,
+        duration: number
+    ) => void;
+}
 
-const NotificationContext = createContext<INotificationContext>({});
+export const NotificationContext = createContext<INotificationContext>({});
 /**
  * The notification provider allows us to make in browser notifications
  * @param children
@@ -44,6 +50,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 message: notifications[i].message,
                 index: notifications[i].index - 1,
                 duration: notifications[i].duration,
+                type: notifications[i].type,
             };
             newnotifs.push(newnotif);
         }
@@ -53,15 +60,27 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     /**
      * Creates and displayes a new notification on top of possible existing notifications
      * @param message
+     * @param type
+     * @param duration
      */
-    const notify = (message: string) => {
+    const notify = (
+        message: string,
+        type: NotificationType,
+        duration: number
+    ) => {
         const newnotifs = [];
-        newnotifs.push({ message: message, index: 0, duration: 1000 });
+        newnotifs.push({
+            message: message,
+            index: 0,
+            duration: duration,
+            type: type,
+        });
         for (const notification of notifications) {
             const newnotif: INotification = {
                 message: notification.message,
                 index: notification.index + 1,
                 duration: notification.duration,
+                type: notification.type,
             };
             newnotifs.push(newnotif);
         }
@@ -69,7 +88,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     };
 
     return (
-        <NotificationContext.Provider value={{}}>
+        <NotificationContext.Provider value={{ notify: notify }}>
             <div>
                 <div className={styles.notifications}>
                     {notifications.map((notification) => {
@@ -79,10 +98,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                                 message={notification.message}
                                 index={notification.index}
                                 onDelete={deleteNotification}
+                                type={notification.type}
                             />
                         );
                     })}
-                    <button onClick={() => notify("Hello there")}>
+                    <button
+                        onClick={() =>
+                            notify("Hello there", NotificationType.ERROR, 2000)
+                        }
+                    >
                         Create notif
                     </button>
                 </div>
