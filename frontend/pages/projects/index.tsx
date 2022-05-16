@@ -40,6 +40,7 @@ const Index: NextPage = () => {
             .then((response) => response.json())
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
+            console.log("aaa");
             setProjects(response.data);
         } else {
             setProjects([]);
@@ -136,7 +137,7 @@ const Index: NextPage = () => {
                 >
                     <p>Please choose a role</p>
                     {currentProject.roles.map((role) => {
-                        if (roleMap[role.name] <= role.positions) {
+                        if (roleMap[role.name] < role.positions) {
                             return (
                                 <button onClick={handleButtonRole}>
                                     {role.name}

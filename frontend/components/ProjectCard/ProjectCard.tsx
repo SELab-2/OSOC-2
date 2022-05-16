@@ -13,7 +13,9 @@ export const ProjectCard: React.FC<{
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { getSession } = useContext(SessionContext);
-    const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
+    const [currentStudent, setCurrentStudent] = useState<Student | undefined>(
+        undefined
+    );
 
     const calculateRoleMap = () => {
         const map: { [K: string]: number } = {};
@@ -58,7 +60,7 @@ export const ProjectCard: React.FC<{
             .then((response) => response.json())
             .catch((error) => console.log(error));
         if (response.success) {
-            updateProject();
+            await updateProject();
         }
         return;
     };
@@ -66,7 +68,7 @@ export const ProjectCard: React.FC<{
     useEffect(() => {
         calculateRoleMap();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentStudent, deleteUser]);
+    }, [currentStudent]);
 
     return (
         <div className={styles.card}>
