@@ -69,6 +69,7 @@ const Users: NextPage = () => {
         socket.off("registrationReceived");
         // add new listener
         socket.on("loginUserUpdated", () => {
+            const scrollPosition = window.scrollY;
             search(
                 {
                     nameFilter: searchParams.nameFilter,
@@ -81,8 +82,10 @@ const Users: NextPage = () => {
                 },
                 pagination.page
             ).then();
+            window.scrollTo(0, scrollPosition);
         });
         socket.on("registrationReceived", () => {
+            const scrollPosition = window.scrollY;
             search(
                 {
                     nameFilter: searchParams.nameFilter,
@@ -95,6 +98,7 @@ const Users: NextPage = () => {
                 },
                 pagination.page
             ).then();
+            window.scrollTo(0, scrollPosition);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, searchParams]);
