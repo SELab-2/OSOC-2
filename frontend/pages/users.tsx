@@ -75,7 +75,11 @@ const Users: NextPage = () => {
         ).then();
     };
 
-    const filter = async (
+    /**
+     * search that is used when auto refreshing on websocket event,...
+     * We keep the same page as before
+     */
+    const filterAutomatic = async (
         nameFilter: string,
         nameSort: Sort,
         emailFilter: string,
@@ -84,6 +88,7 @@ const Users: NextPage = () => {
         coachFilter: boolean,
         statusFilter: AccountStatus
     ) => {
+        console.log(pagination.page);
         setSearchParams({
             nameFilter: nameFilter,
             nameSort: nameSort,
@@ -93,7 +98,6 @@ const Users: NextPage = () => {
             coachFilter: coachFilter,
             statusFilter: statusFilter,
         });
-        setPagination({ page: 0, count: 0 });
         await search(
             nameFilter,
             nameSort,
@@ -102,7 +106,33 @@ const Users: NextPage = () => {
             adminFilter,
             coachFilter,
             statusFilter,
-            0
+            pagination.page
+        );
+    };
+
+    /**
+     * manual filter. This happens when we explicitly pressed the button => go back to first page
+     */
+    const filterManual = async (
+        nameFilter: string,
+        nameSort: Sort,
+        emailFilter: string,
+        emailSort: Sort,
+        adminFilter: boolean,
+        coachFilter: boolean,
+        statusFilter: AccountStatus
+    ) => {
+        console.log("manual(");
+        // reset the page to the first page when manual searching!
+        setPagination({ page: 0, count: 0 });
+        await filterAutomatic(
+            nameFilter,
+            nameSort,
+            emailFilter,
+            emailSort,
+            adminFilter,
+            coachFilter,
+            statusFilter
         );
     };
 
@@ -181,7 +211,10 @@ const Users: NextPage = () => {
 
     return (
         <div className={styles.body}>
-            <UserFilter search={filter} />
+            <UserFilter
+                searchAutomatic={filterAutomatic}
+                searchManual={filterManual}
+            />
             <div>
                 {users !== undefined
                     ? users.map((user) => {

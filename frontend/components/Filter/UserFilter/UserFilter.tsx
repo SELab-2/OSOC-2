@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 import { useSockets } from "../../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
-    search: (
+    searchAutomatic: (
         nameFilter: string,
         nameSort: Sort,
         emailFilter: string,
@@ -21,7 +21,16 @@ export const UserFilter: React.FC<{
         coachFilter: boolean,
         statusFilter: AccountStatus
     ) => void;
-}> = ({ search }) => {
+    searchManual: (
+        nameFilter: string,
+        nameSort: Sort,
+        emailFilter: string,
+        emailSort: Sort,
+        adminFilter: boolean,
+        coachFilter: boolean,
+        statusFilter: AccountStatus
+    ) => void;
+}> = ({ searchAutomatic, searchManual }) => {
     const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
@@ -48,7 +57,7 @@ export const UserFilter: React.FC<{
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
-        search(
+        searchManual(
             nameFilter,
             nameSort,
             emailFilter,
@@ -69,7 +78,7 @@ export const UserFilter: React.FC<{
         socket.off("registrationReceived");
         // add new listener
         socket.on("loginUserUpdated", () => {
-            search(
+            searchAutomatic(
                 nameFilter,
                 nameSort,
                 emailFilter,
@@ -80,7 +89,7 @@ export const UserFilter: React.FC<{
             );
         });
         socket.on("registrationReceived", () => {
-            search(
+            searchAutomatic(
                 nameFilter,
                 nameSort,
                 emailFilter,
@@ -146,7 +155,7 @@ export const UserFilter: React.FC<{
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        search(
+        searchManual(
             nameFilter,
             nameSort,
             emailFilter,
