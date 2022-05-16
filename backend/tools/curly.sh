@@ -16,8 +16,8 @@ function help() {
 function main() {
     printf 'Endpoint to access (or -h for help)? '
     read ep
-    if [[ $ep = '-h' ]]; then help $1; exit 0; fi
-    if [[ $2 = '-no' ]]; then api=''; else api='/api-osoc'; fi
+    if [[ "$ep" = '-h' ]]; then help; exit 0; fi
+    if [[ "$2" = '-no' ]]; then api=''; else api='/api-osoc'; fi
 
     printf 'HTTP Verb? '
     read verb
@@ -37,9 +37,9 @@ function main() {
     while read key; do
         printf 'Value? '
         read value
-        if [[ $args = '' ]]; then
+        if [[ "$args" = '' ]]; then
             args="\"$key\": \"$value\""
-        elif [[ ${value:0:1} = '{' ]]; then
+        elif [[ "${value:0:1}" = '{' ]]; then
             # send JSON objects correctly
             args="$args, \"$key\": $value"
             echo "Will send '$value' as JSON-object"
@@ -54,14 +54,14 @@ function main() {
     echo "Curl command: \`curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args $skey -H \"Content-Type: application/json\"\`"
     printf 'Send this curl command (yes/y/no/n/maybe)? '
     read ans
-    while [ $ans != 'yes' ] && [ $ans != 'no' ] && [ $ans != 'maybe' ] && [ $ans != 'y' ] && [ $ans != 'n' ]; do
+    while [ "$ans" != 'yes' ] && [ "$ans" != 'no' ] && [ "$ans" != 'maybe' ] && [ "$ans" != 'y' ] && [ "$ans" != 'n' ]; do
         printf 'Invalid answer. Send this curl command (yes/y/no/n/maybe)? '
         read ans
     done
 
-    if [ $ans = 'y' ] || [ $ans = 'yes' ]; then
+    if [ "$ans" = 'y' ] || [ "$ans" = 'yes' ]; then
         /bin/sh -c "curl -X \"$verb\" \"http://localhost:4096$api$ep\" -i -d $args $skey -H \"Content-Type: application/json\""
-    elif [ $ans = 'maybe' ]; then
+    elif [ "$ans" = 'maybe' ]; then
         printf 'Output file? '
         read f
         echo "#!/bin/sh" >f

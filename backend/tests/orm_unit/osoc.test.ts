@@ -107,7 +107,6 @@ test("should delete everything associated with the give osoc edition", async () 
             description: "",
             start_date: new Date(),
             end_date: new Date(),
-            positions: 0,
         },
     ]);
     prismaMock.project_role.findMany.mockResolvedValue([
@@ -189,8 +188,13 @@ test("should return filtered list of osocs", async () => {
     ];
 
     prismaMock.osoc.findMany.mockResolvedValue(expected);
-    const res = await filterOsocs(2022, undefined);
-    res.forEach((val) => {
+    const res = await filterOsocs(
+        { currentPage: 0, pageSize: 25 },
+        2022,
+        undefined
+    );
+    expect(res.pagination).toStrictEqual({ page: 0, count: undefined });
+    res.data.forEach((val) => {
         expect(val).toHaveProperty("osoc_id");
         expect(val).toHaveProperty("year");
     });
