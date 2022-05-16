@@ -8,16 +8,16 @@ const SettingsPage: NextPage = () => {
     const { getSession } = useContext(SessionContext);
 
     const defaultUser: LoginUser = {
-        person_data: {
-            id: -1,
+        person: {
+            person_id: -1,
             email: "",
             name: "",
             github: "",
         },
         login_user_id: -1,
-        admin: false,
-        coach: false,
-        activated: AccountStatus.DISABLED,
+        is_admin: false,
+        is_coach: false,
+        account_status: AccountStatus.DISABLED,
     };
 
     const [user, setUser] = useState<LoginUser>(defaultUser);
@@ -37,7 +37,7 @@ const SettingsPage: NextPage = () => {
             .then((response) => response.json())
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
-            setUser(response.data.login_user);
+            setUser(response);
         }
     };
 

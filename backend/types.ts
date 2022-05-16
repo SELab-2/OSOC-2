@@ -654,7 +654,18 @@ export namespace InternalTypes {
     /**
      *  Represents a user, with all associated data.
      */
-    export interface User {}
+    export interface User {
+        person: {
+            person_id: number;
+            email: string;
+            name: string;
+            github: string;
+        };
+        login_user_id: number;
+        is_coach: boolean;
+        is_admin: boolean;
+        account_status: AccountStatus;
+    }
 
     /**
      *  Represents an osoc edition, with all associated data.
@@ -709,7 +720,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
         roles: object;
     }
 
@@ -722,7 +732,6 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
         roles: object;
         contracts: object;
         coaches: object;
@@ -1314,7 +1323,6 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        positions: number;
         roles: object;
     }
 
@@ -1323,7 +1331,6 @@ export namespace Requests {
         partner?: string;
         start?: Date;
         end?: Date;
-        positions?: number;
         osocId?: number;
         addRoles?: object;
         deleteRoles?: object;
@@ -1335,6 +1342,7 @@ export namespace Requests {
         clientNameFilter?: string;
         assignedCoachesFilterArray?: number[];
         fullyAssignedFilter?: boolean;
+        osocYear?: number;
         projectNameSort?: FilterSort;
         clientNameSort?: FilterSort;
     }

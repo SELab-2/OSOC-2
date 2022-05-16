@@ -107,7 +107,6 @@ test("should delete everything associated with the give osoc edition", async () 
             description: "",
             start_date: new Date(),
             end_date: new Date(),
-            positions: 0,
         },
     ]);
     prismaMock.project_role.findMany.mockResolvedValue([

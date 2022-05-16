@@ -78,7 +78,6 @@ export function projectsData(osocs: dbtypes.osoc[]) {
             partner: "partner-test",
             start_date: new Date("2022-05-22"),
             end_date: new Date("2022-06-31"),
-            positions: 10,
         },
         {
             name: "project-test-2",
@@ -86,7 +85,6 @@ export function projectsData(osocs: dbtypes.osoc[]) {
             partner: "partner-test-2",
             start_date: new Date("2022-09-15"),
             end_date: new Date("2022-10-23"),
-            positions: 9,
         },
         {
             name: "project-test-3",
@@ -94,7 +92,6 @@ export function projectsData(osocs: dbtypes.osoc[]) {
             partner: "partner-test-3",
             start_date: new Date("2022-09-15"),
             end_date: new Date("2022-10-23"),
-            positions: 9,
         },
     ];
 }

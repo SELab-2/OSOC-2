@@ -15,40 +15,40 @@ describe("User component tests", () => {
 
     beforeEach(() => {
         userAdminCoach = {
-            person_data: {
-                id: 1,
+            person: {
+                person_id: 1,
                 email: "test",
                 name: "aga",
                 github: "",
             },
             login_user_id: 1,
-            admin: true,
-            coach: true,
-            activated: AccountStatus.ACTIVATED,
+            is_admin: true,
+            is_coach: true,
+            account_status: AccountStatus.ACTIVATED,
         };
         userInvalid = {
-            person_data: {
-                id: 1,
+            person: {
+                person_id: 1,
                 email: "test",
                 name: "aa",
                 github: "",
             },
             login_user_id: 1,
-            admin: false,
-            coach: true,
-            activated: AccountStatus.PENDING,
+            is_admin: false,
+            is_coach: true,
+            account_status: AccountStatus.PENDING,
         };
         userDisabled = {
-            person_data: {
-                id: 1,
+            person: {
+                person_id: 1,
                 email: "test",
                 name: "aa",
                 github: "",
             },
             login_user_id: 1,
-            admin: false,
-            coach: false,
-            activated: AccountStatus.DISABLED,
+            is_admin: false,
+            is_coach: false,
+            account_status: AccountStatus.DISABLED,
         };
         fetchMock.resetMocks();
     });
@@ -61,14 +61,14 @@ describe("User component tests", () => {
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
         expect(screen.getByTestId("userName")!.firstChild!.nodeValue).toBe(
-            userAdminCoach.person_data.name
+            userAdminCoach.person.name
         );
 
         expect(screen.queryByTestId("pendingButton")).toBeNull();
 
         expect(screen.getByTestId("userEmail")).toBeInTheDocument();
         expect(screen.getByTestId("userEmail")!.firstChild!.nodeValue).toBe(
-            userAdminCoach.person_data.email
+            userAdminCoach.person.email
         );
     });
 

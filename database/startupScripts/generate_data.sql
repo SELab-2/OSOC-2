@@ -34,8 +34,8 @@ INSERT INTO job_application(student_id, osoc_id, student_volunteer_info, respons
 INSERT INTO role(name)VALUES('Developer');
 
  /* Insert data into project table */
- INSERT INTO project(name, osoc_id, partner, start_date, end_date, positions)VALUES('OSOC Platform',
- (SELECT osoc_id FROM osoc WHERE year = 2022), 'UGent', DATE '2022-07-01', DATE '2022-08-15', 2);
+ INSERT INTO project(name, osoc_id, partner, start_date, end_date)VALUES('OSOC Platform',
+ (SELECT osoc_id FROM osoc WHERE year = 2022), 'UGent', DATE '2022-07-01', DATE '2022-08-15');
 
 /* Insert data into project_user table */
 INSERT INTO project_user(login_user_id, project_id)VALUES((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2),
