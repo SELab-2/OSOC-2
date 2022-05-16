@@ -393,6 +393,7 @@ it("should return the filtered projects", async () => {
             (user) => user.login_user.login_user_id
         ),
         filteredProject1.positions === sumRoles,
+        2022,
         "asc",
         "desc"
     );
