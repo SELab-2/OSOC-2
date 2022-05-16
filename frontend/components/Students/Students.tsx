@@ -34,7 +34,7 @@ export const Students: React.FC<{
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
-        updateParentStudents(students);
+        updateParentStudents([...filteredStudents]);
         if (!alwaysLimited) {
             if (selectedStudent < 0) {
                 setDisplay(Display.FULL);
@@ -116,6 +116,7 @@ export const Students: React.FC<{
                 evalutationsCoach;
         }
         setStudents([...students]);
+        updateParentStudents([...students]);
     };
 
     return (

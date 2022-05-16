@@ -45,20 +45,29 @@ const Index: NextPage = () => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        console.log(student);
-        console.log(project);
 
+        //TODO add role
+        const body = {
+            data: {
+                role: "Developer",
+                studentId: student.student.student_id,
+            },
+        };
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/project/all`,
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
             {
-                method: "GET",
+                method: "POST",
+                body: JSON.stringify(body),
                 headers: {
                     Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
                 },
             }
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
+        console.log(response);
         if (response !== undefined && response.success) {
             setProjects(response.data);
         } else {
@@ -82,8 +91,6 @@ const Index: NextPage = () => {
                 await addStudentProject(student, project);
             }
         }
-        console.log(result.source);
-        console.log(result);
     };
 
     return (
