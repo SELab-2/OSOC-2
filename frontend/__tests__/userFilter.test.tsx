@@ -2,25 +2,25 @@ import "@testing-library/jest-dom";
 import fetchMock from "jest-fetch-mock";
 import { act, render, screen } from "@testing-library/react";
 import fireEvent from "@testing-library/user-event";
-import { UserFilter } from "../components/Filters/UserFilter";
+import Users from "../pages/users";
 
 jest.mock("next/router", () => require("next-router-mock"));
 
 fetchMock.enableMocks();
 jest.mock("next/router");
-let updateUser: jest.Mock;
+
+const response = JSON.stringify({
+    success: true,
+    data: [],
+    pagination: { count: 0 },
+});
 
 describe("user filter tests", () => {
     beforeEach(async () => {
-        updateUser = jest.fn();
         fetchMock.resetMocks();
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
-            render(<UserFilter updateUsers={updateUser} />);
+            fetchMock.mockOnce(response);
+            render(<Users />);
         });
     });
     afterEach(() => {
@@ -45,68 +45,48 @@ describe("user filter tests", () => {
         inputReqVal: string
     ) => {
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId(sort).click();
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${sortReqVal}=asc`
+            `undefined/user/filter?${sortReqVal}=asc&currentPage=0`
         );
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId(sort).click();
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${sortReqVal}=desc`
+            `undefined/user/filter?${sortReqVal}=desc&currentPage=0`
         );
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId(sort).click();
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter`
+            `undefined/user/filter?currentPage=0`
         );
 
         const test_val = "testvalue";
         await act(async () => {
             await fireEvent.type(screen.getByTestId(input), test_val);
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId("searchButton").click();
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${inputReqVal}=${test_val}`
+            `undefined/user/filter?${inputReqVal}=${test_val}&currentPage=0`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId(input));
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId("searchButton").click();
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter`
+            `undefined/user/filter?currentPage=0`
         );
     };
 
@@ -130,28 +110,20 @@ describe("user filter tests", () => {
         valueFilter: string
     ) => {
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId(button).click();
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${valueFilter}`
+            `undefined/user/filter?${valueFilter}&currentPage=0`
         );
         await act(async () => {
-            fetchMock.mockOnce(
-                JSON.stringify({
-                    success: true,
-                })
-            );
+            fetchMock.mockOnce(response);
             screen.getByTestId(button).click();
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter`
+            `undefined/user/filter?currentPage=0`
         );
     };
     test("test buttons presses", async () => {

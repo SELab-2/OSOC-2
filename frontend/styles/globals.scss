@@ -16,7 +16,16 @@
   --neutral-200: #DBDBDD;
 }
 
+/**
+ * Declare our bulma styles
+ */
+$pagination-color: var(--primary-100);
+$pagination-current-background-color: var(--primary-100);
+$pagination-current-border-color: var(--primary-100);
+$pagination-disabled-background-color: var(--neutral-200);
+
 @import '~bulma/bulma.sass';
+
 
 html,
 body {

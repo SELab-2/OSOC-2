@@ -310,3 +310,43 @@ test("Can't update oneself", async () => {
     expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
+
+test("Can assign coach role when activating", async () => {
+    const req = getMockReq();
+    req.body = {
+        id: 7,
+        isAdmin: false,
+        isCoach: false,
+        accountStatus: account_status_enum.ACTIVATED,
+        sessionkey: "abcd",
+    };
+    ormLMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 1,
+        person_id: 1,
+        password: "test",
+        is_admin: false,
+        is_coach: false,
+        account_status: account_status_enum.DISABLED,
+        person: {
+            person_id: 1,
+            email: "test@email.com",
+            github: null,
+            name: "test",
+            github_id: null,
+        },
+    });
+    const res = { id: 7, name: "Jeffrey Jan" };
+    await expect(coach.modCoach(req)).resolves.toStrictEqual(res);
+    expect(utilMock.checkSessionKey).toHaveBeenCalledTimes(0);
+    expectCall(reqMock.parseUpdateCoachRequest, req);
+    expectCall(ormLMock.updateLoginUser, {
+        loginUserId: 7,
+        isAdmin: false,
+        isCoach: true,
+        accountStatus: account_status_enum.ACTIVATED,
+    });
+    expect(utilMock.isAdmin).toHaveBeenCalledTimes(1);
+    expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+
+    ormLMock.getLoginUserById.mockReset();
+});
