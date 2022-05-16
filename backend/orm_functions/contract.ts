@@ -118,6 +118,14 @@ export async function contractsByProject(projectId: number) {
             },
             contract_status: true,
             contract_id: true,
+            login_user: {
+                select: {
+                    login_user_id: true,
+                    is_admin: true,
+                    is_coach: true,
+                    person: true,
+                },
+            },
         },
     });
 }

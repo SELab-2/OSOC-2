@@ -364,10 +364,6 @@ export interface CreateProject {
      * the end date of the project
      */
     endDate: Date;
-    /**
-     * the amount of people who need to assigned to the project
-     */
-    positions: number;
 }
 
 /**
@@ -399,9 +395,9 @@ export interface UpdateProject {
      */
     endDate?: Date;
     /**
-     * undefined if unchanged or the new number of positions of the project
+     * undefined if unchanged or the new description of the project
      */
-    positions?: number;
+    description?: string;
 }
 
 /**

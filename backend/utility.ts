@@ -14,7 +14,6 @@ import {
     Errors,
     InternalTypes,
     Requests,
-    Responses,
     RouteCallback,
     Table,
     Verb,
@@ -203,9 +202,9 @@ export function logRequest(
  *  @param prom The promise with the data or error.
  *  @returns An empty promise (`Promise<void>`).
  */
-export async function respOrErrorNoReinject(
+export async function respOrErrorNoReinject<T extends Record<keyof T, unknown>>(
     res: express.Response,
-    prom: Promise<Responses.ApiResponse>
+    prom: Promise<T>
 ): Promise<void> {
     const isError = (err: Anything): boolean => {
         return err != undefined && "http" in err && "reason" in err;
@@ -215,10 +214,7 @@ export async function respOrErrorNoReinject(
         .then((data) => {
             return Promise.resolve(data);
         })
-        .then(
-            (data: Responses.ApiResponse): Promise<void> =>
-                replySuccess(res, data as typeof data)
-        )
+        .then((data): Promise<void> => replySuccess(res, data as typeof data))
         .catch((err: unknown): Promise<void> => {
             if (isError(err as Anything))
                 return replyError(res, err as ApiError);
@@ -239,10 +235,10 @@ export async function respOrErrorNoReinject(
  * that's Keyed).
  *  @returns An empty promise (`Promise<void>`).
  */
-export async function respOrError<T>(
+export async function respOrError<T extends Record<keyof T, unknown>>(
     req: express.Request,
     res: express.Response,
-    prom: Promise<Responses.ApiResponse & T>
+    prom: Promise<T>
 ): Promise<void> {
     return respOrErrorNoReinject(
         res,
@@ -469,7 +465,7 @@ export async function refreshAndInjectKey<T>(
  *  @param path The (relative) route path.
  *  @param callback The function which will respond.
  */
-export function route<T extends Responses.ApiResponse>(
+export function route<T extends Record<keyof T, unknown>>(
     router: express.Router,
     verb: Verb,
     path: string,

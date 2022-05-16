@@ -378,7 +378,7 @@ export async function parseSingleStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
-    const authenticated = await parseKeyRequest(req); // enforce authentication
+    const authenticated = await parsePaginationRequest(req); // enforce authentication
     let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
         year = Number(req.body.yearFilter);
@@ -639,6 +639,7 @@ export async function parseUpdateProjectRequest(
         "positions",
         "modifyRoles",
         "deleteRoles",
+        "description",
     ];
 
     return hasFields(req, [], types.id).then(async () => {
@@ -657,6 +658,7 @@ export async function parseUpdateProjectRequest(
                     : Number(req.body.positions),
             modifyRoles: maybe<object>(req.body, "modifyRoles"),
             deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            description: maybe<string>(req.body, "description"),
         }).then(idIsNumber);
     });
 }
@@ -707,6 +709,7 @@ export async function parseFilterProjectsRequest(
         clientNameFilter: maybe(req.body, "clientNameFilter"),
         assignedCoachesFilterArray: assignedCoachesFilterArray,
         fullyAssignedFilter: fullyAssignedFilter,
+        osocYear: maybe(req.body, "osocYear"),
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
     });
@@ -894,6 +897,30 @@ export async function parseRemoveAssigneeRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             studentId: req.body.student,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseRemoveCoachRequest(
+    req: express.Request
+): Promise<Requests.RmDraftCoach> {
+    return hasFields(req, ["project_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            projectUserId: req.body.project_user,
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseAssignCoachRequest(
+    req: express.Request
+): Promise<Requests.DraftCoach> {
+    return hasFields(req, ["login_user"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            loginUserId: req.body.login_user,
             id: Number(req.params.id),
         }).then(idIsNumber)
     );
@@ -1090,11 +1117,6 @@ export const parseUpdateCoachRequest = parseUpdateLoginUser;
  */
 export const parseUpdateAdminRequest = parseUpdateLoginUser;
 /**
- *  A request to `GET /osoc/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseOsocAllRequest = parseKeyRequest;
-/**
  *  Parses a request to `POST /osoc/`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -1124,3 +1146,9 @@ export const parseProjectAllRequest = parsePaginationRequest;
  * {@link parsePaginationRequest}.
  */
 export const parseStudentAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /osoc/all` only requires a session key and optionally the
+ * current page number
+ * {@link parseKeyRequest}.
+ */
+export const parseOsocAllRequest = parsePaginationRequest;

@@ -1,5 +1,10 @@
 import prisma from "../prisma/prisma";
-import { UpdateOsoc, FilterNumber, FilterSort } from "./orm_types";
+import {
+    UpdateOsoc,
+    FilterNumber,
+    FilterSort,
+    DBPagination,
+} from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
 import { deleteOsocsLoginConnectionFromOsoc } from "./login_user_osoc";
 
@@ -266,6 +271,7 @@ export async function getNewestOsoc() {
  * @returns the filtered osoc editions with their project count in a promise
  */
 export async function filterOsocs(
+    pagination: DBPagination,
     yearFilter: FilterNumber,
     yearSort: FilterSort,
     userId: number
@@ -274,14 +280,22 @@ export async function filterOsocs(
     let searchYears;
     if (yearFilter !== undefined) {
         if (!visibleYears.includes(yearFilter)) {
-            return Promise.resolve([]);
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
         } else {
             searchYears = [yearFilter];
         }
     } else {
         searchYears = visibleYears;
     }
-    return await prisma.osoc.findMany({
+
+    const count = await prisma.osoc.count({ where: { year: yearFilter } });
+
+    const data = await prisma.osoc.findMany({
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
         where: {
             year: {
                 in: searchYears,
@@ -296,6 +310,11 @@ export async function filterOsocs(
             },
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }
 
 /**

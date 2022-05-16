@@ -379,7 +379,7 @@ test("utility.checkSessionKey works on valid session key", async () => {
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on valid session key (pending)", async () => {
+test("utility.checkSessionKey test_fails on valid session key (pending)", async () => {
     login_userMock.getLoginUserById.mockReset();
     session_keyMock.checkSessionKey.mockReset();
     login_userMock.getLoginUserById.mockResolvedValue({
@@ -444,7 +444,7 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on valid session key (disabled)", async () => {
+test("utility.checkSessionKey test_fails on valid session key (disabled)", async () => {
     login_userMock.getLoginUserById.mockReset();
     session_keyMock.checkSessionKey.mockReset();
     login_userMock.getLoginUserById.mockResolvedValue({
@@ -474,7 +474,7 @@ test("utility.checkSessionKey fails on valid session key (disabled)", async () =
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on valid session key (disabled, false)", async () => {
+test("utility.checkSessionKey test_fails on valid session key (disabled, false)", async () => {
     login_userMock.getLoginUserById.mockReset();
     session_keyMock.checkSessionKey.mockReset();
     login_userMock.getLoginUserById.mockResolvedValue({
@@ -504,7 +504,7 @@ test("utility.checkSessionKey fails on valid session key (disabled, false)", asy
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on invalid session key (1)", async () => {
+test("utility.checkSessionKey test_fails on invalid session key (1)", async () => {
     session_keyMock.checkSessionKey.mockReset();
     session_keyMock.checkSessionKey.mockRejectedValue(new Error());
 
@@ -518,7 +518,7 @@ test("utility.checkSessionKey fails on invalid session key (1)", async () => {
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on invalid session key (2)", async () => {
+test("utility.checkSessionKey test_fails on invalid session key (2)", async () => {
     session_keyMock.checkSessionKey.mockReset();
     session_keyMock.checkSessionKey.mockResolvedValue(null);
 
@@ -532,7 +532,7 @@ test("utility.checkSessionKey fails on invalid session key (2)", async () => {
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on non-existent users", async () => {
+test("utility.checkSessionKey test_fails on non-existent users", async () => {
     login_userMock.getLoginUserById.mockReset();
     login_userMock.getLoginUserById.mockResolvedValue(null);
     session_keyMock.checkSessionKey.mockReset();

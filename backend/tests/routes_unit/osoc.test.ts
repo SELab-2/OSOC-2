@@ -111,14 +111,17 @@ beforeEach(() => {
     );
     ormoMock.getAllOsoc.mockResolvedValue(osocs);
     ormoMock.filterOsocs.mockImplementation(
-        (f: number | undefined, s: string | undefined) => {
+        (_, f: number | undefined, s: string | undefined) => {
             let data = osocs;
             if (f != undefined) data = data.filter((v) => v.year == f);
             if (s != undefined)
                 data = data.sort(
                     (a, b) => (s == "desc" ? -1 : 1) * (a.year - b.year)
                 );
-            return Promise.resolve(data);
+            return Promise.resolve({
+                pagination: { page: 0, count: 7 },
+                data: data,
+            });
         }
     );
     ormoMock.deleteOsocFromDB.mockImplementation(() => Promise.resolve());
@@ -180,8 +183,10 @@ test("Can get all the osoc editions", async () => {
     r.body = { sessionkey: "abcd" };
     await expect(osoc.listOsocEditions(r)).resolves.toStrictEqual({
         data: osocs,
+        pagination: { page: 0, count: 7 },
     });
     expectCall(reqMock.parseOsocAllRequest, r);
+    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
     expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
     expectCall(utilMock.checkSessionKey, r.body);
 });
@@ -191,10 +196,16 @@ test("Can filter the osoc editions", async () => {
     r.body = { sessionkey: "abcd", yearFilter: 2022 };
     await expect(osoc.filterYear(r)).resolves.toStrictEqual({
         data: [{ osoc_id: 1, year: 2022, _count: { project: 5 } }],
+        pagination: { page: 0, count: 7 },
     });
     expectCall(reqMock.parseFilterOsocsRequest, r);
     expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
-    expect(ormoMock.filterOsocs).toHaveBeenCalledWith(2022, undefined, 0);
+    expect(ormoMock.filterOsocs).toHaveBeenCalledWith(
+        { currentPage: undefined, pageSize: undefined },
+        2022,
+        undefined,
+        0
+    );
     expectCall(utilMock.checkSessionKey, r.body);
 });
 

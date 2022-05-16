@@ -16,9 +16,6 @@ import {
     getProjectsByEndDate,
     getProjectsEndedBeforeDate,
     getProjectsEndedAfterDate,
-    getProjectsByNumberPositions,
-    getProjectsLessPositions,
-    getProjectsMorePositions,
     deleteProject,
     updateProject,
     deleteProjectByOsocEdition,
@@ -156,7 +153,6 @@ test("should create a project in the db with the given object, returns the new r
         partner: "Best partner",
         startDate: new Date("2022-07-13"),
         endDate: new Date("2022-08-31"),
-        positions: 10,
     };
 
     prismaMock.project.create.mockResolvedValue(returnValue);
@@ -234,23 +230,6 @@ test("should return all the project that ended before the given end date", async
     ).resolves.toEqual([returnValue]);
 });
 
-test("should return all the projects with the given number of positions", async () => {
-    prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsByNumberPositions(10)).resolves.toEqual([
-        returnValue,
-    ]);
-});
-
-test("should return all the projects with less positions", async () => {
-    prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsLessPositions(20)).resolves.toEqual([returnValue]);
-});
-
-test("should return all the projects with more positions", async () => {
-    prismaMock.project.findMany.mockResolvedValue([returnValue]);
-    await expect(getProjectsMorePositions(5)).resolves.toEqual([returnValue]);
-});
-
 test("should update the project with the new data and return the updated record", async () => {
     const project: UpdateProject = {
         projectId: 0,
@@ -259,7 +238,6 @@ test("should update the project with the new data and return the updated record"
         partner: "UGent",
         startDate: new Date("2022-06-05"),
         endDate: new Date("2022-09-16"),
-        positions: 7,
     };
 
     prismaMock.project.update.mockResolvedValue(returnValue);
@@ -295,6 +273,7 @@ test("should return all filtered projects by name", async () => {
             undefined,
             undefined,
             undefined,
+            undefined,
             0
         )
     ).resolves.toEqual({
@@ -311,6 +290,7 @@ test("should return all filtered projects by partner", async () => {
             { currentPage: 0, pageSize: 25 },
             undefined,
             "partner 1",
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -332,6 +312,7 @@ test("should return all filtered projects by assigned coaches", async () => {
             undefined,
             undefined,
             [1],
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -365,6 +346,7 @@ test("should return all filtered projects by fully assigned status", async () =>
             true,
             undefined,
             undefined,
+            undefined,
             0
         )
     ).resolves.toEqual({
@@ -386,6 +368,7 @@ test("should return all filtered projects sorted by the fully assigned status", 
             undefined,
             undefined,
             undefined,
+            undefined,
             "desc",
             0
         )
@@ -402,6 +385,7 @@ test("should return all filtered projects sorted by the fully assigned status", 
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -429,6 +413,7 @@ test("should return all filtered projects sorted by the fully assigned status", 
             undefined,
             undefined,
             undefined,
+            undefined,
             "desc",
             0
         )
@@ -445,6 +430,7 @@ test("should return all filtered projects sorted by the fully assigned status", 
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
+            undefined,
             undefined,
             undefined,
             undefined,
