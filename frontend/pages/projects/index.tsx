@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { Project, Student } from "../../types";
 import { ProjectCard } from "../../components/ProjectCard/ProjectCard";
@@ -12,12 +12,17 @@ import {
     Droppable,
     DropResult,
 } from "react-beautiful-dnd";
+import { Modal } from "../../components/Modal/Modal";
 
 const Index: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [projects, setProjects] = useState<Project[]>([]);
     const [students, updateParentStudents] = useState<Student[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentProject, setCurrentProject] = useState<Project | null>(null);
+    const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
+    const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
 
     const fetchProjects = async () => {
         const { sessionKey } = getSession
@@ -41,20 +46,23 @@ const Index: NextPage = () => {
         }
     };
 
-    const addStudentProject = async (student: Student, project: Project) => {
+    const handleButtonRole = async (e: SyntheticEvent) => {
+        if (e.currentTarget.textContent) {
+            await addStudentProject(e.currentTarget.textContent);
+        }
+        setShowModal(false);
+    };
+    const addStudentProject = async (role: string) => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
 
-        //TODO add role
         const body = {
-            data: {
-                role: "Developer",
-                studentId: student.student.student_id,
-            },
+            role: role,
+            studentId: currentStudent?.student.student_id,
         };
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${currentProject?.id}/assignee`,
             {
                 method: "POST",
                 body: JSON.stringify(body),
@@ -69,16 +77,26 @@ const Index: NextPage = () => {
             .catch((error) => console.log(error));
         console.log(response);
         if (response !== undefined && response.success) {
-            setProjects(response.data);
+            await fetchProjects();
         } else {
             setProjects([]);
         }
     };
+
+    const calculateRoleMap = (project: Project) => {
+        const map: { [K: string]: number } = {};
+        for (const contract of project.contracts) {
+            map[contract.project_role.role.name] =
+                (map[contract.project_role.role.name] || 0) + 1;
+        }
+        setRoleMap(map);
+    };
+
     useEffect(() => {
         fetchProjects().then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [currentProject, currentStudent]);
 
     const onDragEnd = async (result: DropResult) => {
         if (!result.destination) return;
@@ -87,8 +105,16 @@ const Index: NextPage = () => {
         if (destination.droppableId === "projects") {
             const student = students.at(source.index);
             const project = projects.at(destination.index);
-            if (student && project) {
-                await addStudentProject(student, project);
+            if (
+                student &&
+                project &&
+                student.evaluation.evaluations.filter((x) => x.is_final)
+                    .length == 1
+            ) {
+                calculateRoleMap(project);
+                setCurrentProject(project);
+                setCurrentStudent(student);
+                setShowModal(true);
             }
         }
     };
@@ -102,6 +128,25 @@ const Index: NextPage = () => {
             >
                 Add Project
             </button>
+            {currentProject !== null ? (
+                <Modal
+                    handleClose={() => setShowModal(false)}
+                    visible={showModal}
+                    title={`Remove student`}
+                >
+                    <p>Please choose a role</p>
+                    {currentProject.roles.map((role) => {
+                        if (roleMap[role.name] <= role.positions) {
+                            return (
+                                <button onClick={handleButtonRole}>
+                                    {role.name}
+                                </button>
+                            );
+                        }
+                    })}
+                </Modal>
+            ) : null}
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className={styles.body}>
                     <Students
@@ -133,6 +178,9 @@ const Index: NextPage = () => {
                                                     <ProjectCard
                                                         key={project.id}
                                                         project={project}
+                                                        updateProject={
+                                                            fetchProjects
+                                                        }
                                                     />
                                                 </div>
                                             )}

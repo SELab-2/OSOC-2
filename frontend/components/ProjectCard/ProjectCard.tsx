@@ -1,15 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Project } from "../../types";
+import { Project, Student } from "../../types";
 import styles from "./ProjectCard.module.css";
 import { Modal } from "../Modal/Modal";
+import SessionContext from "../../contexts/sessionProvider";
 
-export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+export const ProjectCard: React.FC<{
+    project: Project;
+    updateProject: () => void;
+}> = ({ project, updateProject }) => {
     const router = useRouter();
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [currentStudent, setCurrentStudent] = useState(-1);
-    const [currentProject, setCurrentProject] = useState(-1);
+    const { getSession } = useContext(SessionContext);
+    const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
 
     const calculateRoleMap = () => {
         const map: { [K: string]: number } = {};
@@ -20,29 +24,49 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
         setRoleMap(map);
     };
 
-    useEffect(() => {
-        console.log(project.contracts.at(0)?.student);
-        calculateRoleMap();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     const formatDate = (date: string) => {
         const dateParts = date.split(" ");
         return `${dateParts[2]} ${dateParts[1]} ${dateParts[3]}`;
     };
 
-    const setSelectedIds = (studentId: number, projectId: number) => {
+    const setSelected = (student: Student) => {
         setShowDeleteModal(true);
-        setCurrentProject(projectId);
-        setCurrentStudent(studentId);
+        setCurrentStudent(student);
     };
 
-    const deleteUser = () => {
+    const deleteUser = async () => {
         setShowDeleteModal(false);
-        console.log(currentProject);
-        console.log(currentStudent);
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+
+        const body = {
+            student: currentStudent?.student.student_id,
+        };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
+            {
+                method: "DELETE",
+                body: JSON.stringify(body),
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response.success) {
+            updateProject();
+        }
         return;
     };
+
+    useEffect(() => {
+        calculateRoleMap();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentStudent, deleteUser]);
 
     return (
         <div className={styles.card}>
@@ -88,16 +112,11 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
             <h1>Assignees</h1>
             {project.contracts.map((contract) => {
                 return (
-                    <div key={contract.project_role.project_role_id}>
-                        <p>hello</p>
+                    <div key={contract.student.student.student_id}>
+                        <p>{contract.student.student.student_id}</p>
                         <button
                             className={`delete ${styles.delete}`}
-                            onClick={() =>
-                                setSelectedIds(
-                                    contract.student.student.student_id,
-                                    project.id
-                                )
-                            }
+                            onClick={() => setSelected(contract.student)}
                         />
                     </div>
                 );
