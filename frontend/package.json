@@ -11,7 +11,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@testing-library/user-event": "^14.1.1",
+    "@testing-library/user-event": "^14.2.0",
     "@types/jest": "^27.4.1",
     "bulma": "^0.9.4",
     "jest-environment-jsdom": "^28.1.0",
