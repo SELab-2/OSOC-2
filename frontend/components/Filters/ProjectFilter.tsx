@@ -1,8 +1,10 @@
 import styles from "./Filter.module.css";
-import React, { SyntheticEvent, useState } from "react";
-import { getNextSort, Sort } from "../../types";
+import React, { SyntheticEvent, useEffect, useState } from "react";
+import { getNextSort, ProjectFilterParams, Sort } from "../../types";
 
-export const ProjectFilter: React.FC = () => {
+export const ProjectFilter: React.FC<{
+    search: (params: ProjectFilterParams) => void;
+}> = ({ search }) => {
     const [nameFilter, setNameFilter] = useState<string>("");
     const [clientFilter, setClientFilter] = useState<string>("");
     const [fullyAssigned, setFullyAssigned] = useState<boolean>(false);
@@ -10,9 +12,33 @@ export const ProjectFilter: React.FC = () => {
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
     const [clientSort, setClientSort] = useState<Sort>(Sort.NONE);
 
-    console.log(nameFilter);
-    console.log(clientFilter);
-    console.log(osocYear);
+    /**
+     * Execute search everytime the filter changes
+     */
+    useEffect(() => {
+        const params: ProjectFilterParams = {
+            nameFilter: nameFilter,
+            clientFilter: clientFilter,
+            nameSort: nameSort,
+            clientSort: clientSort,
+            fullyAssigned: fullyAssigned,
+            osocYear: osocYear,
+        };
+        search(params);
+    }, [nameSort, clientSort, fullyAssigned]);
+
+    const searchPress = () => {
+        const params: ProjectFilterParams = {
+            nameFilter: nameFilter,
+            clientFilter: clientFilter,
+            nameSort: nameSort,
+            clientSort: clientSort,
+            fullyAssigned: fullyAssigned,
+            osocYear: osocYear,
+        };
+        search(params);
+    };
+
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
         setNameSort((prev) => getNextSort(prev));
@@ -95,6 +121,7 @@ export const ProjectFilter: React.FC = () => {
                     Fully assigned
                 </button>
             </div>
+            <button onClick={searchPress}>Search</button>
         </div>
     );
 };
