@@ -652,12 +652,14 @@ export async function parseUpdateProjectRequest(
             partner: maybe<string>(req.body, "partner"),
             start: maybe<Date>(req.body, "start"),
             end: maybe<Date>(req.body, "end"),
-            positions:
-                maybe(req.body, "positions") == undefined
-                    ? undefined
-                    : Number(req.body.positions),
-            modifyRoles: maybe<object>(req.body, "modifyRoles"),
-            deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            modifyRoles: maybe<Requests.ModProject["modifyRoles"]>(
+                req.body,
+                "modifyRoles"
+            ),
+            deleteRoles: maybe<Requests.ModProject["deleteRoles"]>(
+                req.body,
+                "deleteRoles"
+            ),
             description: maybe<string>(req.body, "description"),
         }).then(idIsNumber);
     });

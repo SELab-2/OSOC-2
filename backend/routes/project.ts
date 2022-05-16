@@ -12,7 +12,6 @@ import * as rq from "../request";
 import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-// import { project_role } from "@prisma/client";
 
 /**
  *  Attempts to create a new project in the system.
@@ -24,12 +23,7 @@ export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseNewProjectRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
 
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
@@ -78,11 +72,7 @@ export async function createProject(
 export async function listProjects(
     req: express.Request
 ): Promise<Responses.ProjectListAndContracts> {
-    const parsedRequest = await rq.parseProjectAllRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    await rq.parseProjectAllRequest(req).then(util.checkSessionKey);
 
     const allProjects = [];
     for (const project of await ormPr.getAllProjects()) {
@@ -243,15 +233,10 @@ export async function getProject(
 export async function modProject(
     req: express.Request
 ): Promise<Responses.Project> {
-    const parsedRequest = await rq.parseUpdateProjectRequest(req);
-    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
-    if (checked.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const checkedId = await util
-        .isValidID(checked.data, "project")
-        .catch((res) => res);
+    const checkedId = await rq
+        .parseUpdateProjectRequest(req)
+        .then(util.isAdmin)
+        .then((checked) => util.isValidID(checked.data, "project"));
 
     const updatedProject = await ormPr.updateProject({
         projectId: checkedId.id,

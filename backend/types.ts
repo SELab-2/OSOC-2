@@ -1351,7 +1351,7 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        roles: object;
+        roles: { roles: { name: string; positions: number }[] };
     }
 
     export interface ModProject extends IdRequest {
@@ -1360,8 +1360,8 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        addRoles?: object;
-        deleteRoles?: object;
+        modifyRoles?: { roles: { id: number; positions: number }[] };
+        deleteRoles?: { roles: number[] };
         description?: string;
     }
 
