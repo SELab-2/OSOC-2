@@ -883,6 +883,77 @@ test("Role wasn't found in getStudent", async () => {
     ormoMock.getStudent.mockReset();
 });
 
+test("Year is defined in the getStudent request and skill language is invalid", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2022,
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        applied_role: [],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 5,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "5",
+        edus: ["Edu0"],
+        email_status: "DRAFT",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [
+            {
+                is_best: true,
+                is_preferred: true,
+                job_application_id: 0,
+                job_application_skill_id: 0,
+                language_id: 0,
+                level: 3,
+                skill: "language0",
+            },
+        ],
+        osoc_id: 0,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+    });
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
+
+    ormoMockLanguage.getLanguage.mockResolvedValue(null);
+
+    await expect(student.getStudent(r)).rejects.toBe(errors.cookInvalidID());
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
+    ormoMockLanguage.getLanguage.mockReset();
+});
+
 test("Can create a student confirmation", async () => {
     const r = getMockReq();
     r.body = {
