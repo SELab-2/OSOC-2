@@ -14,6 +14,7 @@ import {
     decision_enum,
     account_status_enum,
 } from "@prisma/client";
+import { errors } from "../../utility";
 
 // setup mock for request
 import * as req from "../../request";
@@ -763,6 +764,25 @@ test("Can get a student by id", async () => {
     expectCall(reqMock.parseSingleStudentRequest, r);
     expectCall(utilMock.checkSessionKey, r.body);
     expectCall(ormoMock.getStudent, 0);
+});
+
+test("Fails if no student was found", async () => {
+    const r = getMockReq();
+    const id = 1000;
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2025,
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce(null);
+
+    await expect(student.getStudent(r)).rejects.toBe(errors.cookInvalidID());
+
+    ormoMock.getStudent.mockReset();
 });
 
 test("Can create a student confirmation", async () => {
