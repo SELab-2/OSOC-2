@@ -1,9 +1,9 @@
 import { account_status_enum } from "@prisma/client";
+import * as prisma from "@prisma/client";
 import express from "express";
 import * as validator from "validator";
 
 import * as ormLU from "../orm_functions/login_user";
-import * as ormL from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
 import { Responses } from "../types";
@@ -27,14 +27,9 @@ export async function listUsers(
     req: express.Request
 ): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    await util.isAdmin(parsedRequest);
     // const loginUsers = await ormL.getAllLoginUsers();
-    const loginUsers = await ormL.filterLoginUsers({
+    const loginUsers = await ormLU.filterLoginUsers({
         currentPage: parsedRequest.currentPage,
         pageSize: parsedRequest.pageSize,
     });
@@ -68,16 +63,12 @@ export async function createUserRequest(
     req: express.Request
 ): Promise<Responses.Id> {
     const parsedRequest = await rq.parseRequestUserRequest(req);
-    if (parsedRequest.pass == undefined) {
-        console.log(" -> WARNING user request without password");
-        return Promise.reject(util.errors.cookArgumentError());
-    }
 
     const foundPerson = await ormP.searchPersonByLogin(
         validator.default.normalizeEmail(parsedRequest.email).toString()
     );
 
-    let person;
+    let person: prisma.person;
 
     if (foundPerson.length !== 0) {
         const foundLoginUser = await ormLU.searchLoginUserByPerson(
@@ -117,7 +108,7 @@ export async function createUserRequest(
     });
 
     const key: string = util.generateKey();
-    const futureDate = new Date();
+    const futureDate = new Date(Date.now());
     futureDate.setDate(futureDate.getDate() + session_key.valid_period);
     const addedKey = await addSessionKey(
         loginUser.login_user_id,
@@ -134,7 +125,6 @@ export async function createUserRequest(
 export async function setAccountStatus(
     person_id: number,
     stat: account_status_enum,
-    key: string,
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
@@ -172,7 +162,7 @@ export async function createUserAcceptance(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -182,7 +172,6 @@ export async function createUserAcceptance(
                         return setAccountStatus(
                             parsed.data.id,
                             "ACTIVATED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
@@ -212,7 +201,7 @@ export async function deleteUserRequest(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -222,7 +211,6 @@ export async function deleteUserRequest(
                         return setAccountStatus(
                             parsed.data.id,
                             "DISABLED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
@@ -307,7 +295,7 @@ export async function userModSelf(
                     if (
                         checked.data.pass !== null &&
                         checked.data.pass !== undefined &&
-                        user.password
+                        user.password !== null
                     ) {
                         valid = await bcrypt.compare(
                             checked.data.pass?.oldpass,
@@ -326,16 +314,12 @@ export async function userModSelf(
                 .then(async (user) => {
                     if (
                         checked.data.pass !== null &&
-                        checked.data.pass !== undefined
+                        checked.data.pass !== undefined &&
+                        checked.data.pass.oldpass !== null &&
+                        checked.data.pass.oldpass !== undefined &&
+                        checked.data.pass.newpass !== null &&
+                        checked.data.pass.newpass !== undefined
                     ) {
-                        if (
-                            checked.data.pass.oldpass !== undefined &&
-                            checked.data.pass.oldpass !== null &&
-                            checked.data.pass.newpass === undefined &&
-                            checked.data.pass.newpass === null
-                        ) {
-                            return Promise.reject(errors.cookArgumentError());
-                        }
                         return ormLU.updateLoginUser({
                             loginUserId: checked.userId,
                             accountStatus: user.account_status,
@@ -391,26 +375,17 @@ export async function getCurrentUser(
 ): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
 
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
-    const login_user = await ormL
+    const login_user = await ormLU
         .getLoginUserById(checkedSessionKey.userId)
         .then((obj) => util.getOrReject(obj));
-    login_user.password = null;
 
     return Promise.resolve({
         data: {
-            login_user: login_user,
+            login_user: { ...login_user, password: null },
         },
         sessionkey: checkedSessionKey.data.sessionkey,
-    }).then((obj) => {
-        console.log(JSON.stringify(obj));
-        return Promise.resolve(obj);
     });
 }
 /**

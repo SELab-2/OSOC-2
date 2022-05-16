@@ -14,7 +14,7 @@ function help() {
 }
 
 function main() {
-    if [ $2 = '-h' ]; then help $1; return 0; fi
+    if [ "$1" = '-h' ]; then help "$0"; return 0; fi
 
     id=`docker ps | grep 'osoc-2-db-1' | cut -d' ' -f1`
     docker exec -it $id /bin/sh -c "psql -U osoc2 -c \"table $2;\""
