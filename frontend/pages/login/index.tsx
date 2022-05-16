@@ -10,13 +10,15 @@ import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from "validator";
-import { AccountStatus } from "../../types";
+import { AccountStatus, NotificationType } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Index: NextPage = () => {
     const router = useRouter();
     const { getSession, setSessionKey, setIsAdmin, setIsCoach } =
         useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
 
     // Sets an error message when the `loginError` query parameter is present
@@ -134,6 +136,9 @@ const Index: NextPage = () => {
                 }
                 if (setIsCoach) {
                     setIsCoach(response.is_coach);
+                }
+                if (notify) {
+                    notify("Login successful!", NotificationType.SUCCESS, 2000);
                 }
                 if (response.account_status === AccountStatus.ACTIVATED) {
                     router.push("/students").then();
