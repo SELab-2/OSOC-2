@@ -961,8 +961,8 @@ test("Can parse new project request", () => {
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
         osocId: 17,
+        description: "Project description",
         roles: {
             roles: [
                 {
@@ -1020,7 +1020,7 @@ test("Can parse update project request", () => {
         start: Date.now(),
         end: Date.now(),
         positions: 69,
-        modifyRoles: {
+        roles: {
             roles: [
                 {
                     id: 5,
@@ -1032,8 +1032,11 @@ test("Can parse update project request", () => {
                 },
             ],
         },
-        deleteRoles: {
-            roles: [1, 3],
+        addCoaches: {
+            coaches: [2, 3],
+        },
+        removeCoaches: {
+            coaches: [1],
         },
     };
     const d2: T.Anything = {};
