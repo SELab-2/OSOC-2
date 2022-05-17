@@ -5,13 +5,23 @@ import * as config from "../config.json";
 import * as Rq from "../request";
 import * as T from "../types";
 import { errors } from "../utility";
-import { idIsNumber } from "../request";
+import { allNonNaN, idIsNumber } from "../request";
 
 function setSessionKey(req: express.Request, key: string): void {
     req.headers.authorization = config.global.authScheme + " " + key;
 }
 
 test("Id is number tests", () => {
+    expect(
+        allNonNaN(["year", "id"], { year: 2022, id: 2 })
+    ).resolves.toStrictEqual({ year: 2022, id: 2 });
+    const noNumber = parseInt("id");
+    expect(
+        allNonNaN(["year", "id"], { year: 2022, id: noNumber })
+    ).rejects.toBe(errors.cookArgumentError());
+});
+
+test("Ids are numbers tests", () => {
     expect(idIsNumber({ id: 1, sessionkey: "key" })).resolves.toStrictEqual({
         id: 1,
         sessionkey: "key",
