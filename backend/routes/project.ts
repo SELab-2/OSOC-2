@@ -59,7 +59,15 @@ export async function createProject(
         });
     }
 
-    //const coachList = [];
+    const coachList = [];
+
+    for (const coachId of checkedSessionKey.data.coaches) {
+        const project_user = await ormPU.createProjectUser({
+            projectId: createdProject.project_id,
+            loginUserId: Number(coachId),
+        });
+        coachList.push(project_user);
+    }
 
     return Promise.resolve({
         id: createdProject.project_id,
