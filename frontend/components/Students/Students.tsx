@@ -69,7 +69,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             const id_number = Number(id);
             if (!isNaN(id_number)) {
                 for (let i = 0; i < students.length; i++) {
-                    console.log(students[i].student.student_id);
                     if (students[i].student.student_id === id_number) {
                         setSelectedStudent(i);
                         if (!alwaysLimited) {
@@ -121,7 +120,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
 
     /**
      * Handles clicking on a student
-     * Ctrl + Click or Alt + Click should open the student on a seperate page /students/:id
+     * Ctrl + Click or Alt + Click should open the student on a separate page /students/:id
      * A normal click will upon on the same page and set the query parameter to /students?id=[id]
      * @param e
      * @param student_id
