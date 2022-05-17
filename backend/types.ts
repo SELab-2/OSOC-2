@@ -1453,6 +1453,11 @@ export namespace Requests {
     export interface DraftCoach extends IdRequest {
         loginUserId: number;
     }
+
+    export interface UserYearPermissions extends IdRequest {
+        login_user_id: number;
+        osoc_id: number;
+    }
 }
 
 /**

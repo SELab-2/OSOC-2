@@ -974,12 +974,32 @@ export async function parseAcceptNewUserRequest(
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
-    console.log(parseInt(req.body.year));
     return hasFields(req, ["year"], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             year: parseInt(req.body.year),
         }).then((obj) => allNonNaN(["year"], obj))
+    );
+}
+
+/**
+ *  Parses a request to `POST /user/years`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseUsersPermissionsRequest(
+    req: express.Request
+): Promise<Requests.UserYearPermissions> {
+    return hasFields(req, ["osoc_id", "login_user_id"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            id: Number(req.params.id),
+            osoc_id: parseInt(req.body.osoc_id),
+            login_user_id: parseInt(req.body.login_user_id),
+        })
+            .then((obj) => allNonNaN(["osoc_id", "login_user_id"], obj))
+            .then(idIsNumber)
     );
 }
 
