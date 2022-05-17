@@ -1464,3 +1464,71 @@ test("Skill language is invalid for filterStudents", async () => {
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();
     ormoMockLanguage.getLanguage.mockReset();
 });
+
+test("Suggestion not empty in createStudentSuggestion", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        suggestion: "YES",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418387",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+    ormoMockOsoc.getLatestOsoc.mockResolvedValue({
+        year: 2022,
+        osoc_id: 1,
+    });
+
+    ormoMockJob.getStudentEvaluationsTemp.mockResolvedValue([
+        {
+            osoc: { year: 2022 },
+            evaluation: [
+                {
+                    decision: Decision.YES,
+                    motivation: null,
+                    evaluation_id: 1,
+                    is_final: false,
+                    login_user: {
+                        login_user_id: 1,
+                        person: {
+                            person_id: 2,
+                            name: "Login user",
+                            email: "user@mail.com",
+                            github: null,
+                        },
+                    },
+                },
+            ],
+        },
+    ]);
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue(null);
+
+    await expect(student.createStudentSuggestion(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getStudentEvaluationsTemp.mockReset();
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+});
