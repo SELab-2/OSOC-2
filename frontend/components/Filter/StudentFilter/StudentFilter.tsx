@@ -4,6 +4,7 @@ import {
     Display,
     EmailStatus,
     getNextSort,
+    NotificationType,
     Role,
     Sort,
     StudentFilterParams,
@@ -17,6 +18,7 @@ import ExclamationIconColor from "../../../public/images/exclamation_mark_color.
 import ExclamationIcon from "../../../public/images/exclamation_mark.png";
 import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
+import { NotificationContext } from "../../../contexts/notificationProvider";
 
 export const StudentFilter: React.FC<{
     search: (params: StudentFilterParams) => void;
@@ -44,6 +46,7 @@ export const StudentFilter: React.FC<{
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
     const [rolesActive, setRolesActive] = useState<boolean>(false);
     const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
+    const { notify } = useContext(NotificationContext);
 
     const fetchRoles = async () => {
         const { sessionKey } = getSession
@@ -65,10 +68,26 @@ export const StudentFilter: React.FC<{
                 } else return json;
             })
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
                 return { success: false };
             });
-        setRoles(responseRoles.data);
+        if (responseRoles.data !== undefined) {
+            setRoles(responseRoles.data);
+        } else {
+            if (notify) {
+                notify(
+                    "Something went wrong when fetching roles",
+                    NotificationType.ERROR,
+                    2000
+                );
+            }
+        }
     };
 
     // Load roles on page render

@@ -8,9 +8,10 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types";
+import { AccountStatus, LoginUser, NotificationType } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -25,6 +26,7 @@ export const User: React.FC<{
     const { socket } = useSockets();
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { notify } = useContext(NotificationContext);
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -79,7 +81,13 @@ export const User: React.FC<{
                 }
             })
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
                 return { success: false };
             });
         if (res.success !== false) {
@@ -91,6 +99,13 @@ export const User: React.FC<{
             // also emit that there has been a change in general so that the manage users screen will update
             // other changes are changes to the enum roles
             socket.emit("updateRoleUser");
+            if (notify) {
+                notify(
+                    `Successfully updated ${name} authorities`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
         }
         return res;
     };
@@ -194,7 +209,7 @@ export const User: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        const response = await fetch(
+        await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
                 userId.toString(),
@@ -215,18 +230,25 @@ export const User: React.FC<{
                 socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
                 socket.emit("updateRoleUser"); // this refreshes the manage users page
                 removeUser(user);
+                if (notify) {
+                    notify(
+                        `Successfully removed${user.person.name}!`,
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
                 return json;
             })
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
                 return { success: false };
             });
-        if (response.success) {
-            removeUser(user);
-            return response;
-        } else {
-            return { success: false };
-        }
     };
 
     return (

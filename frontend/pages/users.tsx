@@ -6,6 +6,7 @@ import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
 import {
     AccountStatus,
     LoginUser,
+    NotificationType,
     Pagination,
     Sort,
     UserFilterParams,
@@ -14,6 +15,7 @@ import SessionContext from "../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import { Paginator } from "../components/Paginator/Paginator";
 import { useSockets } from "../contexts/socketProvider";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -39,6 +41,7 @@ const Users: NextPage = () => {
     });
 
     const { socket } = useSockets();
+    const { notify } = useContext(NotificationContext);
 
     useEffect(() => {
         return () => {
@@ -223,7 +226,13 @@ const Users: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
             });
         updateUsers(response.data);
         setPagination(response.pagination);

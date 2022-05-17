@@ -1,5 +1,10 @@
 import { Osoc } from "../components/Osoc/Osoc";
-import { OsocEdition, OsocFilterParams, Sort } from "../types";
+import {
+    NotificationType,
+    OsocEdition,
+    OsocFilterParams,
+    Sort,
+} from "../types";
 import { NextPage } from "next";
 import React, { useContext, useState } from "react";
 import styles from "../styles/users.module.css";
@@ -7,6 +12,7 @@ import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
 import { Paginator } from "../components/Paginator/Paginator";
 import { Pagination } from "../types";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 /**
  * The `osoc edition` page, only accessible for admins
@@ -22,6 +28,7 @@ const Osocs: NextPage = () => {
         page: 0,
         count: 0,
     });
+    const { notify } = useContext(NotificationContext);
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
@@ -86,10 +93,18 @@ const Osocs: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
             });
-        setEditions(response.data);
-        setPagination(response.pagination);
+        if (response.data && response.pagination) {
+            setEditions(response.data);
+            setPagination(response.pagination);
+        }
         isLoading(false);
     };
 

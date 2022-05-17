@@ -9,6 +9,7 @@ import {
     StudentFilterParams,
     StudentStatus,
     Pagination,
+    NotificationType,
 } from "../../types";
 import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -17,6 +18,7 @@ import { StudentOverview } from "../StudentOverview/StudentOverview";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 /**
  * Constructs the complete students page with filter included
@@ -42,6 +44,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     });
 
     const [loading, isLoading] = useState(false);
+    const { notify } = useContext(NotificationContext);
 
     /**
      * Updates the list of students and sets the selected student index
@@ -247,11 +250,19 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 } else return json;
             })
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
                 return { success: false };
             });
-        setFilteredStudents(response.data);
-        setPagination(response.pagination);
+        if (response.data && response.pagination) {
+            setFilteredStudents(response.data);
+            setPagination(response.pagination);
+        }
         isLoading(false);
     };
 

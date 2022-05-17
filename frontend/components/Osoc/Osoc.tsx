@@ -1,8 +1,9 @@
 import styles from "./Osoc.module.css";
 import React, { SyntheticEvent, useContext, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition } from "../../types";
+import { NotificationType, OsocEdition } from "../../types";
 import { Modal } from "../Modal/Modal";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const Osoc: React.FC<{
     osoc: OsocEdition;
@@ -13,6 +14,7 @@ export const Osoc: React.FC<{
     const { sessionKey, isAdmin } = useContext(SessionContext);
     const osocId = osoc.osoc_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { notify } = useContext(NotificationContext);
 
     const deleteOsoc = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -36,9 +38,22 @@ export const Osoc: React.FC<{
                 return json;
             })
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
                 return { success: false };
             });
+        if (notify) {
+            notify(
+                "Successfully deleted osoc edition!",
+                NotificationType.SUCCESS,
+                2000
+            );
+        }
     };
 
     return (

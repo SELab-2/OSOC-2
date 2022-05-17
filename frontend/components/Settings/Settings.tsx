@@ -1,8 +1,9 @@
 import React, { SyntheticEvent, useContext, useState } from "react";
-import { LoginUser } from "../../types";
+import { LoginUser, NotificationType } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "../../styles/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const Settings: React.FC<{
     person: LoginUser;
@@ -17,6 +18,7 @@ export const Settings: React.FC<{
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [applyError, setApplyError] = useState<string>("");
     const { getSession, setSessionKey } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
     /**
      * Gets called everytime the new password input field's value changes
@@ -135,15 +137,27 @@ export const Settings: React.FC<{
                     setApplyError(
                         "Something went wrong while trying to execute your request."
                     );
-                    console.log(err);
+                    if (notify) {
+                        notify(
+                            "Something went wrong:" + err,
+                            NotificationType.ERROR,
+                            2000
+                        );
+                    }
                 });
             if (response !== undefined) {
                 if (response.success) {
                     if (setSessionKey) {
                         setSessionKey(response.sessionkey);
                     }
-                    fetchUser();
-                    // TODO notify succes
+                    await fetchUser();
+                    if (notify) {
+                        notify(
+                            "Your credentials are succesfully changed",
+                            NotificationType.SUCCESS,
+                            2000
+                        );
+                    }
                 } else {
                     setApplyError(
                         `Failed to apply changes. Please check all fields. ${response.reason}`

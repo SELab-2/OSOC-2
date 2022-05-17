@@ -329,11 +329,25 @@ const Index: NextPage = () => {
                 }
             )
                 .then((res) => res.json())
-                .catch((error) => console.log(error));
+                .catch((err) => {
+                    if (notify) {
+                        notify(
+                            "Something went wrong:" + err,
+                            NotificationType.ERROR,
+                            2000
+                        );
+                    }
+                });
             if (response.success) {
                 setPasswordResetMailError("");
                 setShowPasswordReset(false);
-                // TODO -- Notification
+                if (notify) {
+                    notify(
+                        "Successfully sent a recovery email.!",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
             } else {
                 setPasswordResetMailError(response.reason);
             }

@@ -2,15 +2,17 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import SessionContext from "../../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
-import { Student } from "../../types";
+import { NotificationType, Student } from "../../types";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import styles from "../../components/StudentOverview/StudentOverview.module.scss";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Pid: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [student, setStudent] = useState<Student>();
     const { pid } = router.query; // pid is the student id
+    const { notify } = useContext(NotificationContext);
 
     const fetchStudent = async () => {
         if (getSession !== undefined && pid !== undefined) {
@@ -26,7 +28,15 @@ const Pid: NextPage = () => {
                         }
                     )
                         .then((response) => response.json())
-                        .catch((error) => console.log(error));
+                        .catch((err) => {
+                            if (notify) {
+                                notify(
+                                    "Something went wrong:" + err,
+                                    NotificationType.ERROR,
+                                    2000
+                                );
+                            }
+                        });
                     if (response !== undefined && response.success) {
                         setStudent(response);
                     }

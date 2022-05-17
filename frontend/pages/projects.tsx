@@ -1,14 +1,16 @@
 import { NextPage } from "next";
 import { useContext, useEffect, useState } from "react";
 import SessionContext from "../contexts/sessionProvider";
-import { Project } from "../types";
+import { NotificationType, Project } from "../types";
 import { ProjectCard } from "../components/ProjectCard/ProjectCard";
 import { Students } from "../components/Students/Students";
 import styles from "../styles/projects.module.scss";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 const Projects: NextPage = () => {
     const { getSession } = useContext(SessionContext);
     const [projects, setProjects] = useState<Project[]>([]);
+    const { notify } = useContext(NotificationContext);
 
     const fetchProjects = async () => {
         if (getSession != undefined) {
@@ -23,7 +25,15 @@ const Projects: NextPage = () => {
                     }
                 )
                     .then((response) => response.json())
-                    .catch((error) => console.log(error));
+                    .catch((err) => {
+                        if (notify) {
+                            notify(
+                                "Something went wrong:" + err,
+                                NotificationType.ERROR,
+                                2000
+                            );
+                        }
+                    });
                 if (response !== undefined && response.success) {
                     setProjects(response.data);
                 }

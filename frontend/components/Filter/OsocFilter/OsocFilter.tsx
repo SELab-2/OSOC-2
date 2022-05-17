@@ -1,7 +1,13 @@
 import styles from "../Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, OsocFilterParams, Sort } from "../../../types";
+import {
+    getNextSort,
+    NotificationType,
+    OsocFilterParams,
+    Sort,
+} from "../../../types";
 import SessionContext from "../../../contexts/sessionProvider";
+import { NotificationContext } from "../../../contexts/notificationProvider";
 
 export const OsocCreateFilter: React.FC<{
     search: (params: OsocFilterParams) => void;
@@ -10,6 +16,7 @@ export const OsocCreateFilter: React.FC<{
     const [yearFilter, setYearFilter] = useState<string>("");
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
     const { getSession } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -82,7 +89,13 @@ export const OsocCreateFilter: React.FC<{
         )
             .then((response) => response.json())
             .catch((err) => {
-                console.log(err);
+                if (notify) {
+                    notify(
+                        "Something went wrong:" + err,
+                        NotificationType.ERROR,
+                        2000
+                    );
+                }
             });
         if (response.success) {
             const params: OsocFilterParams = {
@@ -90,6 +103,13 @@ export const OsocCreateFilter: React.FC<{
                 yearSort: yearSort,
             };
             search(params);
+            if (notify) {
+                notify(
+                    "Successfully created a new osoc edition!",
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
         }
     };
 
