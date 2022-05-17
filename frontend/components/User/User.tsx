@@ -70,7 +70,6 @@ export const User: React.FC<{
                 ids.push(edition.osoc_id);
             }
             setUserEditions(new Set(ids));
-            console.log(response);
         }
     };
 
@@ -274,7 +273,7 @@ export const User: React.FC<{
         } else {
             userEditions.add(id);
         }
-        setUserEditions(userEditions);
+        setUserEditions(new Set(userEditions));
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/year/${userId}`, {
             method: method,
             body: JSON.stringify({
@@ -286,7 +285,15 @@ export const User: React.FC<{
                 Accept: "application/json",
                 Authorization: `auth/osoc2 ${sessionKey}`,
             },
-        }).catch((reason) => console.log(reason));
+        }).catch((reason) => {
+            console.log(reason);
+            if (method === "POST") {
+                userEditions.delete(id);
+            } else {
+                userEditions.add(id);
+            }
+            setUserEditions(new Set(userEditions));
+        });
     };
 
     return (
