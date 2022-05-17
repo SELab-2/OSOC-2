@@ -131,7 +131,7 @@ test("should delete everything associated with the give osoc edition", async () 
             edu_duration: 0,
             edu_year: "",
             edu_institute: "",
-            email_status: email_status_enum.DRAFT,
+            email_status: email_status_enum.APPLIED,
             created_at: new Date(),
         },
     ]);
