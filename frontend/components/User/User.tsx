@@ -8,9 +8,10 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import {AccountStatus, LoginUser, OsocEdition} from "../../types";
+import { AccountStatus, LoginUser, OsocEdition } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
+import triangle from "../Filter/Filter.module.css";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -233,7 +234,7 @@ export const User: React.FC<{
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p data-testid={"userName"}>{name}</p>
+                <div data-testid={"userName"}>{name}</div>
                 {status === AccountStatus.PENDING ? (
                     <button
                         data-testid={"pendingButton"}
@@ -242,10 +243,35 @@ export const User: React.FC<{
                     >
                         ACTIVATE
                     </button>
-                ) : null}
+                ) : (
+                    <div className="dropdown is-right is-hoverable">
+                        <div
+                            className={`dropdown-trigger ${triangle.inactive}`}
+                        >
+                            Editions
+                            <div className={triangle.triangleContainer}>
+                                <div className={triangle.triangle} />
+                            </div>
+                        </div>
+                        <div className={`dropdown-menu ${styles.dropdownmenu}`}>
+                            <div className="dropdown-content">
+                                {editions.map((edition) => {
+                                    return (
+                                        <div
+                                            key={edition.osoc_id}
+                                            className={`dropdown-item ${styles.dropdownitem}`}
+                                        >
+                                            {edition.year}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <p data-testid={"userEmail"}>{email}</p>
+            <div data-testid={"userEmail"}>{email}</div>
             <div className={styles.buttons}>
                 <div
                     data-testid={"buttonIsAdmin"}
