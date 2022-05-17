@@ -59,6 +59,9 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
     // Because `useEffect` can have a different order we need to check if the session id has already been verified
     let verified = false;
     let pendingChecked = false;
+    // variable to keep track if we are awaiting the request sent to the backend
+    // this is needed to make sure we have the data and to also prevent some unneeded requests
+    let loading = false;
 
     /**
      * Everytime the page is reloaded we need to get the session from local storage
@@ -170,15 +173,18 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({
 
         // Avoid calling /verify twice
         // verified gets set to false every page reload
-        if (verified) {
+        if (verified && !loading) {
             return {
                 sessionKey: sessionKey,
                 isAdmin: isAdmin,
                 isCoach: isCoach,
             };
         }
+        loading = true;
         verified = true;
-        return await fetchIsVerified();
+        const temp = await fetchIsVerified();
+        loading = false;
+        return temp;
     };
 
     const setSessionKey = (sessionKey: string) => {

@@ -1,5 +1,5 @@
 import styles from "../Filter.module.css";
-import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import AdminIconColor from "../../../public/images/admin_icon_color.png";
 import AdminIcon from "../../../public/images/admin_icon.png";
@@ -7,14 +7,20 @@ import CoachIconColor from "../../../public/images/coach_icon_color.png";
 import CoachIcon from "../../../public/images/coach_icon.png";
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import { AccountStatus, getNextSort, LoginUser, Sort } from "../../../types";
-import SessionContext from "../../../contexts/sessionProvider";
+import { AccountStatus, getNextSort, Sort } from "../../../types";
 import { useRouter } from "next/router";
-import { useSockets } from "../../../contexts/socketProvider";
 
 export const UserFilter: React.FC<{
-    updateUsers: (users: Array<LoginUser>) => void;
-}> = ({ updateUsers }) => {
+    search: (
+        nameFilter: string,
+        nameSort: Sort,
+        emailFilter: string,
+        emailSort: Sort,
+        adminFilter: boolean,
+        coachFilter: boolean,
+        statusFilter: AccountStatus
+    ) => void;
+}> = ({ search }) => {
     const [nameFilter, setNameFilter] = useState<string>("");
     const [emailFilter, setEmailFilter] = useState<string>("");
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
@@ -24,19 +30,7 @@ export const UserFilter: React.FC<{
     const [statusFilter, setStatusFilter] = useState<AccountStatus>(
         AccountStatus.NONE
     );
-    const { getSession } = useContext(SessionContext);
-    const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-    const router = useRouter();
-
-    const { socket } = useSockets();
-
-    useEffect(() => {
-        return () => {
-            socket.off("loginUserUpdated");
-            socket.off("registrationReceived");
-        }; // disconnect from the socket on dismount
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    useRouter();
 
     /**
      * Every time a filter changes we perform a search, on initial page load we also get the filter settings from
@@ -44,66 +38,40 @@ export const UserFilter: React.FC<{
      * This makes the filter responsible for all the user data fetching
      */
     useEffect(() => {
-        if (loading) return;
-        search().then();
+        search(
+            nameFilter,
+            nameSort,
+            emailFilter,
+            emailSort,
+            adminFilter,
+            coachFilter,
+            statusFilter
+        );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, adminFilter, coachFilter, statusFilter]);
 
-    /**
-     * when the server notifies that a user has changed, we should re-fetch to get the latest changes
-     * we need the dependency array to make sure we use the latest version of the filter fields
-     */
-    useEffect(() => {
-        socket.off("loginUserUpdated"); // remove the earlier added listeners
-        socket.off("registrationReceived");
-        // add new listener
-        socket.on("loginUserUpdated", () => {
-            if (loading) return;
-            search().then();
-        });
-        socket.on("registrationReceived", () => {
-            if (loading) return;
-            search().then();
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        socket,
-        nameFilter,
-        nameSort,
-        emailFilter,
-        emailSort,
-        statusFilter,
-        coachFilter,
-        adminFilter,
-    ]);
-
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setNameSort(getNextSort(nameSort));
     };
 
     const toggleEmailSort = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setEmailSort(getNextSort(emailSort));
     };
 
     const toggleAdminFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setAdminFilter(() => !adminFilter);
     };
 
     const toggleCoachFilter = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         setCoachFilter(() => !coachFilter);
     };
 
     const togglePendingStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         if (statusFilter === AccountStatus.PENDING) {
             setStatusFilter(AccountStatus.NONE);
         } else {
@@ -113,7 +81,6 @@ export const UserFilter: React.FC<{
 
     const toggleDisabledStatus = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
         if (statusFilter === AccountStatus.DISABLED) {
             setStatusFilter(() => AccountStatus.NONE);
         } else {
@@ -127,68 +94,15 @@ export const UserFilter: React.FC<{
      */
     const searchPress = async (e: SyntheticEvent) => {
         e.preventDefault();
-        if (loading) return;
-        search().then();
-    };
-
-    /**
-     * Build and execute the query
-     */
-    const search = async () => {
-        isLoading(() => true);
-        const filters = [];
-        if (nameFilter !== "") {
-            filters.push(`nameFilter=${nameFilter}`);
-        }
-
-        if (nameSort !== Sort.NONE) {
-            filters.push(`nameSort=${nameSort}`);
-        }
-
-        if (emailFilter !== "") {
-            filters.push(`emailFilter=${emailFilter}`);
-        }
-
-        if (emailSort !== Sort.NONE) {
-            filters.push(`emailSort=${emailSort}`);
-        }
-
-        if (adminFilter) {
-            filters.push(`isAdminFilter=${adminFilter}`);
-        }
-
-        if (coachFilter) {
-            filters.push(`isCoachFilter=${coachFilter}`);
-        }
-
-        if (statusFilter !== AccountStatus.NONE) {
-            filters.push(`statusFilter=${statusFilter}`);
-        }
-
-        const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-        await router.push(`/users${query}`);
-
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Authorization: `auth/osoc2 ${sessionKey}`,
-                },
-            }
-        )
-            .then((response) => response.json())
-            .catch((err) => {
-                console.log(err);
-            });
-        updateUsers(response.data);
-
-        isLoading(false);
+        search(
+            nameFilter,
+            nameSort,
+            emailFilter,
+            emailSort,
+            adminFilter,
+            coachFilter,
+            statusFilter
+        );
     };
 
     return (

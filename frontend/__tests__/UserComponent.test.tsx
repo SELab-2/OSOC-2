@@ -60,14 +60,14 @@ describe("User component tests", () => {
         render(<User user={userAdminCoach} removeUser={removeUser} />);
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
-        expect(screen.getByTestId("userName")!.firstChild!.nodeValue).toBe(
+        expect(screen.getByTestId("userName").firstChild?.nodeValue).toBe(
             userAdminCoach.person.name
         );
 
         expect(screen.queryByTestId("pendingButton")).toBeNull();
 
         expect(screen.getByTestId("userEmail")).toBeInTheDocument();
-        expect(screen.getByTestId("userEmail")!.firstChild!.nodeValue).toBe(
+        expect(screen.getByTestId("userEmail").firstChild?.nodeValue).toBe(
             userAdminCoach.person.email
         );
     });
@@ -191,7 +191,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsAdmin").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(screen.getByAltText("Person is an admin")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")
@@ -210,7 +210,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsCoach").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(screen.getByAltText("Person is a coach")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")

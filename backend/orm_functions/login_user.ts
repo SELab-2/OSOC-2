@@ -9,7 +9,7 @@ import {
     UpdateLoginUser,
 } from "./orm_types";
 import { account_status_enum, Prisma } from "@prisma/client";
-import { deleteOsocsForLoginuser } from "./login_user_osoc";
+import { deletePersonFromDB } from "./person";
 
 /**
  *
@@ -197,46 +197,16 @@ export async function deleteLoginUserByPersonId(personId: number) {
 
 /**
  *
- * @param loginUserId the login user who's info we are deleting from the database
+ * @param loginUserId the login user whose info we are deleting from the database
  */
 export async function deleteLoginUserFromDB(loginUserId: number) {
-    await Promise.all([
-        // Remove all the linked password reset
-        prisma.password_reset.deleteMany({
-            where: {
-                login_user_id: loginUserId,
-            },
-        }),
-        // Remove all the linked project users
-        prisma.project_user.deleteMany({
-            where: {
-                login_user_id: loginUserId,
-            },
-        }),
-        // Remove all the linked sessionkeys
-        prisma.session_keys.deleteMany({
-            where: {
-                login_user_id: loginUserId,
-            },
-        }),
-        // delete the link between te loginuser and the usoc
-        deleteOsocsForLoginuser(loginUserId),
-    ]);
+    // search the personId
+    const loginUser = await getLoginUserById(loginUserId);
 
-    const person = await prisma.login_user.delete({
-        where: {
-            login_user_id: loginUserId,
-        },
-        include: {
-            person: true,
-        },
-    });
-
-    await prisma.person.delete({
-        where: {
-            person_id: person.person_id,
-        },
-    });
+    if (loginUser) {
+        // call the delete
+        await deletePersonFromDB(loginUser.person_id);
+    }
 }
 
 /**
