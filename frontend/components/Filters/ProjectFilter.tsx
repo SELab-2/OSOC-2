@@ -55,7 +55,7 @@ export const ProjectFilter: React.FC<{
     };
 
     return (
-        <div className={`${styles.projectfilter} ${styles.contents}`}>
+        <div className={styles.projectfilter}>
             <div className={styles.query}>
                 <div onClick={toggleNameSort}>
                     Project Name
@@ -93,34 +93,32 @@ export const ProjectFilter: React.FC<{
                             }`}
                         />
                     </div>
-                    <input
-                        className={`input ${styles.input}`}
-                        type="text"
-                        placeholder="Search.."
-                        onChange={(e) => setClientFilter(e.target.value)}
-                    />
                 </div>
-
-                <div className={styles.query}>
-                    Osoc Edition
-                    {/* Maybe dropdown */}
-                    <input
-                        className={`input ${styles.input}`}
-                        type="text"
-                        placeholder="Search.."
-                        onChange={(e) => setOsocYear(e.target.value)}
-                    />
-                </div>
-
-                <button
-                    className={`${
-                        fullyAssigned ? styles.active : styles.inactive
-                    }`}
-                    onClick={toggleFullyAssigned}
-                >
-                    Fully assigned
-                </button>
+                <input
+                    className={`input ${styles.input}`}
+                    type="text"
+                    placeholder="Search.."
+                    onChange={(e) => setClientFilter(e.target.value)}
+                />
             </div>
+
+            <div className={styles.query}>
+                Osoc Edition
+                {/* Maybe dropdown */}
+                <input
+                    className={`input ${styles.input}`}
+                    type="text"
+                    placeholder="Search.."
+                    onChange={(e) => setOsocYear(e.target.value)}
+                />
+            </div>
+
+            <button
+                className={`${fullyAssigned ? styles.active : styles.inactive}`}
+                onClick={toggleFullyAssigned}
+            >
+                Fully assigned
+            </button>
             <button onClick={searchPress}>Search</button>
         </div>
     );
