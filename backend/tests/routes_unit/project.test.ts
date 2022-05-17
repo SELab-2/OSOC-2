@@ -314,6 +314,9 @@ beforeEach(() => {
     reqMock.parseGetDraftedStudentsRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseDraftStudentRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -397,12 +400,29 @@ beforeEach(() => {
     ormPrRMock.getNumberOfFreePositions.mockImplementation((v) =>
         Promise.resolve((v + 1) * (v + 2))
     );
+    ormPrRMock.getProjectRoleById.mockImplementation((v) =>
+        Promise.resolve({
+            ...projectroles[v],
+            role: { ...roles[v] },
+        })
+    );
 
     // contract orm
     ormCMock.contractsByProject.mockImplementation((id) =>
         Promise.resolve(
             contracts.filter((x) => x.project_role.project_id == id)
         )
+    );
+    ormCMock.updateContract.mockImplementation((upd) =>
+        Promise.resolve({
+            contract_id: upd.contractId,
+            loginUserId: upd.loginUserId,
+            project_role_id: upd.projectRoleId || 0,
+            student_id: 0,
+            information: "",
+            created_by_login_user_id: 0,
+            contract_status: upd.contractStatus || "DRAFT",
+        })
     );
 
     // project user orm
@@ -422,6 +442,7 @@ afterEach(() => {
     reqMock.parseUpdateProjectRequest.mockReset();
     reqMock.parseDeleteProjectRequest.mockReset();
     reqMock.parseGetDraftedStudentsRequest.mockReset();
+    reqMock.parseDraftStudentRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
@@ -446,9 +467,11 @@ afterEach(() => {
     ormPrRMock.getProjectRolesByProject.mockReset();
     ormPrRMock.updateProjectRole.mockReset();
     ormPrRMock.getNumberOfFreePositions.mockReset();
+    ormPrRMock.getProjectRoleById.mockReset();
 
     // contract orm
     ormCMock.contractsByProject.mockReset();
+    ormCMock.updateContract.mockReset();
 
     // project user orm
     ormPUMock.getUsersFor.mockReset();
@@ -633,4 +656,155 @@ test("Can't get free spots for nonexistent project role", async () => {
     expectCall(ormPrRMock.getProjectRolesByProject, 0);
     expect(ormRMock.getRole).toHaveBeenCalledTimes(3);
     expect(ormPrRMock.getNumberOfFreePositions).not.toHaveBeenCalled();
+});
+
+test("Can create a new project role", async () => {
+    await expect(
+        project.createProjectRoleFor(0, roles[1].name)
+    ).resolves.toStrictEqual({ count: 1, role: 0 });
+    expectCall(ormRMock.getRolesByName, roles[1].name);
+    expectCall(ormPrRMock.createProjectRole, {
+        projectId: 0,
+        roleId: 1,
+        positions: 1,
+    });
+});
+
+test("Can't create a project role for a nonexistent role", async () => {
+    await expect(
+        project.createProjectRoleFor(0, "george")
+    ).rejects.toStrictEqual({
+        http: 409,
+        reason: "That role doesn't exist.",
+    });
+    expectCall(ormRMock.getRolesByName, "george");
+    expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
+});
+
+test("Can modify a student on a project", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "frontend",
+    };
+
+    await expect(project.modProjectStudent(req)).resolves.toStrictEqual({
+        drafted: true,
+        role: "frontend",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expectCall(ormCMock.contractsByProject, req.body.id);
+    expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+    expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
+    expectCall(ormCMock.updateContract, {
+        contractId: 0,
+        loginUserId: 0,
+        projectRoleId: 2,
+    });
+    expectCall(ormPrRole.getProjectRoleById, 2);
+});
+
+test("Can modify a student on a project (create project role)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "backend",
+    };
+
+    await expect(project.modProjectStudent(req)).resolves.toStrictEqual({
+        drafted: true,
+        role: "dev",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expectCall(ormCMock.contractsByProject, req.body.id);
+    expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+    expectCall(ormPrRMock.createProjectRole, {
+        projectId: 0,
+        roleId: 1,
+        positions: 1,
+    });
+    expectCall(ormCMock.updateContract, {
+        contractId: 0,
+        loginUserId: 0,
+        projectRoleId: 0,
+    });
+    expectCall(ormPrRole.getProjectRoleById, 0);
+});
+
+test("Can't modify a student on a project (no spots)", async () => {
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(0);
+
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "frontend",
+    };
+
+    await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
+        http: 409,
+        reason: "Can't add this role to the student. There are no more vacant spots.",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expectCall(ormCMock.contractsByProject, req.body.id);
+    expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+    expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
+    expect(ormCMock.updateContract).not.toHaveBeenCalled();
+    expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+});
+
+test("Can't modify a student on a project (ambiguous)", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([contracts[0], contracts[0]]);
+
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "frontend",
+    };
+
+    await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
+        http: 409,
+        reason: "The request is ambiguous.",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expectCall(ormCMock.contractsByProject, req.body.id);
+    expect(ormPrRMock.getProjectRolesByProject).not.toHaveBeenCalled();
+    expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
+    expect(ormCMock.updateContract).not.toHaveBeenCalled();
+    expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+});
+
+test("Can't modify a student on a project (not assigned)", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([]);
+
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "frontend",
+    };
+
+    await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
+        http: 204,
+        reason: "The selected student is not assigned to this project.",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expectCall(ormCMock.contractsByProject, req.body.id);
+    expect(ormPrRMock.getProjectRolesByProject).not.toHaveBeenCalled();
+    expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
+    expect(ormCMock.updateContract).not.toHaveBeenCalled();
+    expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
 });
