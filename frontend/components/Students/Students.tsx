@@ -16,6 +16,7 @@ import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
+import { useRouter } from "next/router";
 
 /**
  * Constructs the complete students page with filter included
@@ -26,6 +27,7 @@ import { Paginator } from "../Paginator/Paginator";
 export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     alwaysLimited = false,
 }) => {
+    const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
@@ -58,6 +60,33 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     };
 
     /**
+     * Set the selected student
+     * from the url parameter
+     */
+    useEffect(() => {
+        const id = router.query.id;
+        if (id !== undefined) {
+            const id_number = Number(id);
+            if (!isNaN(id_number)) {
+                for (let i = 0; i < students.length; i++) {
+                    console.log(students[i].student.student_id);
+                    if (students[i].student.student_id === id_number) {
+                        setSelectedStudent(i);
+                        if (!alwaysLimited) {
+                            if (selectedStudent < 0) {
+                                setDisplay(Display.FULL);
+                            } else {
+                                setDisplay(Display.LIMITED);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }, [router.query, students]);
+
+    /**
      * We add a listener for keypresses
      */
     useEffect(() => {
@@ -76,6 +105,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (e.key === "Escape") {
             clearSelection();
         }
+        router.push(`/students`).then();
     };
 
     /**
@@ -86,6 +116,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             setDisplay(Display.FULL);
         }
         setSelectedStudent(-1);
+        router.push(`/students`).then();
     };
 
     /**
@@ -107,6 +138,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             window.open(`/students/${student_id}`);
             return;
         }
+        router.push(`/students?id=${student_id}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
