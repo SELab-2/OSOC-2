@@ -1011,15 +1011,12 @@ export async function parseUsersPermissionsRequest(
  */
 export async function parseGetUserPermissionsRequest(
     req: express.Request
-): Promise<Requests.UserYearsPermissions> {
-    return hasFields(req, ["login_user_id"], types.id).then(() =>
+): Promise<Requests.IdRequest> {
+    return hasFields(req, [], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            login_user_id: parseInt(req.body.login_user_id),
-        })
-            .then((obj) => allNonNaN(["login_user_id"], obj))
-            .then(idIsNumber)
+        }).then(idIsNumber)
     );
 }
 

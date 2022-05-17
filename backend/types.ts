@@ -1467,10 +1467,6 @@ export namespace Requests {
         login_user_id: number;
         osoc_id: number;
     }
-
-    export interface UserYearsPermissions extends IdRequest {
-        login_user_id: number;
-    }
 }
 
 /**

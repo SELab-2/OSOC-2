@@ -476,7 +476,7 @@ export async function getYearPermissions(
 
     if (isAdminCheck.is_admin) {
         const years = await ormLuOs.getOsocYearsForLoginUserById(
-            checkedSessionKey.data.login_user_id
+            checkedSessionKey.data.id
         );
 
         return Promise.resolve(
@@ -510,7 +510,7 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/year/:id", createUserPermission);
     util.route(router, "delete", "/year/:id", deleteUserPermission);
 
-    util.route(router, "get", "/years", getYearPermissions);
+    util.route(router, "get", "/years/:id", getYearPermissions);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
