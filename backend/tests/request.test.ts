@@ -1131,7 +1131,6 @@ test("Can parse update project request", () => {
     d4.id = id;
     d5.id = id;
     d5.sessionkey = key;
-    d5.positions = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
