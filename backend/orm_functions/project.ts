@@ -357,6 +357,8 @@ export async function filterProjects(
             );
 
             for (const c of project_found[0].project_role) {
+                console.log(c._count.contract);
+                console.log(c.positions);
                 if (c._count.contract < c.positions) return false;
             }
 
