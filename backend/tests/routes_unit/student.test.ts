@@ -1725,3 +1725,67 @@ test("New evaluation in createStudentSuggestion", async () => {
     utilMock.checkSessionKey.mockReset();
     ormoMockEval.createEvaluationForStudent.mockReset();
 });
+
+test("Fails if no student was found in getStudentSuggestions", async () => {
+    const r = getMockReq();
+    const id = 1000;
+
+    r.body = {
+        sessionkey: "abcd",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce(null);
+
+    await expect(student.getStudentSuggestions(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMock.getStudent.mockReset();
+});
+
+test("Student was found in getStudentSuggestions", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2023,
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 2,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
+
+    await expect(student.getStudentSuggestions(r)).resolves.toStrictEqual({
+        evaluation: {
+            evaluations: [],
+            osoc: {
+                year: 2023,
+            },
+        },
+    });
+
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
+});
