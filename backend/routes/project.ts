@@ -312,9 +312,21 @@ export async function modProject(
         });
     }
 
-    for (const coachId of checkedId.coaches) {
-        await ormPU.deleteProjectUser(coachId);
+    for (const coachId of checkedId.addCoaches) {
+        await ormPU.createProjectUser({
+            projectId: checkedId.id,
+            loginUserId: coachId,
+        });
     }
+
+    for (const coachId of checkedId.removeCoaches) {
+        await ormPU.deleteProjectUser({
+            projectId: checkedId.id,
+            loginUserId: coachId,
+        });
+    }
+
+    const coachList = await ormPU.getUsersFor(Number(checkedId.id));
 
     return Promise.resolve({
         id: updatedProject.project_id,
@@ -325,7 +337,7 @@ export async function modProject(
         osoc_id: updatedProject.osoc_id,
         roles: roles,
         description: updatedProject.description,
-        coaches: [],
+        coaches: coachList,
     });
 }
 
