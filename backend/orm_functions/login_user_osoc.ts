@@ -81,7 +81,7 @@ export async function createEntry(loginUserId: number, year: number) {
 
 export async function setOsocYearsForUsers(
     loginUserId: number,
-    years: [number]
+    years: number[]
 ) {
     const yearsCurrent = await getYearsForUser(loginUserId);
 
