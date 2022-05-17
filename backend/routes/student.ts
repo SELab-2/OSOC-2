@@ -241,12 +241,7 @@ export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
