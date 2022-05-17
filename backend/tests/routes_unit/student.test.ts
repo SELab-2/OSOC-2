@@ -29,6 +29,7 @@ jest.mock("../../utility", () => {
         ...og,
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
+        checkYearPermissionStudent: jest.fn(),
     }; // we want to only mock checkSessionKey and isAdmin
 });
 const utilMock = util as jest.Mocked<typeof util>;
@@ -636,9 +637,14 @@ beforeEach(() => {
     ormoMockLogin.getLoginUserById.mockImplementation((id) =>
         Promise.resolve(studentEvaluationsByYear[id].evaluation[0].login_user)
     );
+
+    utilMock.checkYearPermissionStudent.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 });
 
 afterEach(() => {
+    utilMock.checkYearPermissionStudent.mockReset();
     reqMock.parseStudentAllRequest.mockReset();
     reqMock.parseSingleStudentRequest.mockReset();
     reqMock.parseDeleteStudentRequest.mockReset();
@@ -670,6 +676,7 @@ test("Can get a student by id", async () => {
         sessionkey: "abcd",
         id: 0,
     };
+
     await expect(student.getStudent(r)).resolves.toStrictEqual({
         evaluation: {
             evaluations: [
@@ -1291,7 +1298,8 @@ test("Can filter students", async () => {
         undefined,
         undefined,
         undefined,
-        undefined
+        undefined,
+        0
     );
 });
 
