@@ -422,6 +422,8 @@ export async function createUserPermission(
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
+    console.log(parsedRequest);
+
     if (isAdminCheck.is_admin) {
         await ormLuOs.addOsocToUser(
             checkedSessionKey.data.login_user_id,

@@ -70,6 +70,7 @@ export const User: React.FC<{
                 ids.push(edition.osoc_id);
             }
             setUserEditions(new Set(ids));
+            console.log(response);
         }
     };
 
