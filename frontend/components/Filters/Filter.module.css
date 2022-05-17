@@ -71,6 +71,7 @@
     flex-wrap: wrap;
     padding: 1rem;
     gap: 1rem;
+    justify-content: space-between;
 }
 
 .studentfilterinputs, .projectfilterinput {
@@ -83,7 +84,7 @@
     display: contents;
 }
 
-.studentfilter div, .osocfilter div, .userfilter div, .projectfilter div {
+.studentfilter div, .osocfilter div, .userfilter div {
     justify-content: flex-start;
     gap: 0.5rem;
 }
@@ -109,7 +110,7 @@
         flex-wrap: wrap;
     }
 
-    .studentfilterinputs, .projectfilterinputs {
+    .studentfilterinputs {
         display: contents;
     }
 }
