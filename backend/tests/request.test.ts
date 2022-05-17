@@ -476,6 +476,7 @@ test("Can parse filter osocs request", () => {
 
     const i1: T.Anything = { yearSort: "sort" };
     const i2: T.Anything = { yearFilter: 2022, yearSort: "sort" };
+    const i3: T.Anything = { yearFilter: "year", yearSort: "asc" };
 
     const okays = [
         nothing,
@@ -501,7 +502,7 @@ test("Can parse filter osocs request", () => {
         });
     });
 
-    const fails = [i1, i2].map((x) => {
+    const fails = [i1, i2, i3].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
         setSessionKey(req, key);
@@ -576,6 +577,7 @@ test("Can parse filter students request", () => {
     const wrongEmailSort: T.Anything = { emailSort: "email" };
     const wrongAlumniFilter: T.Anything = { alumniFilter: "is_admin filter" };
     const wrongCoachFilter: T.Anything = { coachFilter: "is_coach filter" };
+    const wrongOsocYear: T.Anything = { osocYear: "year" };
 
     const okays = [
         [nothing, nothing],
@@ -633,6 +635,7 @@ test("Can parse filter students request", () => {
         wrongEmailStatus,
         wrongAlumniFilter,
         wrongCoachFilter,
+        wrongOsocYear,
     ].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
@@ -1073,12 +1076,35 @@ test("Can parse update project request", () => {
         end: Date.now(),
         positions: 69,
     };
+    const d5: T.Anything = {
+        name: "Experiment One",
+        partner: "Simic Combine",
+        description: "Project description",
+        start: Date.now(),
+        end: Date.now(),
+        modifyRoles: {
+            roles: [
+                {
+                    id: 5,
+                    positions: 4,
+                },
+                {
+                    id: 2,
+                    positions: 6,
+                },
+            ],
+        },
+        deleteRoles: {
+            roles: [1, 3],
+        },
+    };
 
     const req1: express.Request = getMockReq();
     const req2: express.Request = getMockReq();
     const req3: express.Request = getMockReq();
     const req4: express.Request = getMockReq();
     const req5: express.Request = getMockReq();
+    const req6: express.Request = getMockReq();
 
     req1.body = { ...d1 };
     req1.params.id = id.toString();
@@ -1093,6 +1119,9 @@ test("Can parse update project request", () => {
     req4.params.id = id.toString();
     req5.body = { ...d1 };
     setSessionKey(req5, key);
+    req6.body = { ...d5 };
+    req6.params.id = id.toString();
+    setSessionKey(req6, key);
 
     d1.id = id;
     d1.sessionkey = key;
@@ -1103,6 +1132,9 @@ test("Can parse update project request", () => {
     d3.modifyRoles = undefined;
     d3.deleteRoles = undefined;
     d4.id = id;
+    d5.id = id;
+    d5.sessionkey = key;
+    d5.positions = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
@@ -1119,8 +1151,11 @@ test("Can parse update project request", () => {
     const p5: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req5)
     ).rejects.toBe(errors.cookArgumentError());
+    const p6: Promise<void> = expect(
+        Rq.parseUpdateProjectRequest(req6)
+    ).resolves.toStrictEqual(d5);
 
-    return Promise.all([p1, p2, p3, p4, p5]);
+    return Promise.all([p1, p2, p3, p4, p5, p6]);
 });
 
 test("Can parse draft student request", () => {
