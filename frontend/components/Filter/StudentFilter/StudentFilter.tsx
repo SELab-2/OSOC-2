@@ -29,7 +29,7 @@ export const StudentFilter: React.FC<{
     const [nameSort, setNameSort] = useState<Sort>(Sort.NONE);
     const [emailSort, setEmailSort] = useState<Sort>(Sort.NONE);
     const [alumni, setAlumni] = useState<boolean>(false);
-    const [studentCoach, setstudentCoach] = useState<boolean>(false);
+    const [studentCoach, setStudentCoach] = useState<boolean>(false);
     const [statusFilter, setStatusFilter] = useState<StudentStatus>(
         StudentStatus.EMPTY
     );
@@ -73,12 +73,86 @@ export const StudentFilter: React.FC<{
 
     // Load roles on page render
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const nameFilter = urlParams.get("nameFilter");
+        const emailFilter = urlParams.get("emailFilter");
+        const nameSort = urlParams.get("nameSort");
+        const emailSort = urlParams.get("emailSort");
+        const alumni = urlParams.get("alumni");
+        const studentCoach = urlParams.get("studentCoach");
+        const statusFilter = urlParams.get("statusFilter");
+        const osocYear = urlParams.get("osocYear");
+        const emailStatus = urlParams.get("emailStatus");
+
+        // parse all the arguments and set the state
+        if (nameFilter !== null) {
+            setNameFilter(nameFilter);
+            console.log(nameFilter);
+        }
+        if (emailFilter !== null) {
+            setEmailFilter(emailFilter);
+        }
+        if (
+            nameSort !== null &&
+            Object.values(Sort).includes(nameSort as Sort)
+        ) {
+            setNameSort(nameSort as Sort);
+        }
+        if (
+            emailSort !== null &&
+            Object.values(Sort).includes(emailSort as Sort)
+        ) {
+            setEmailSort(emailSort as Sort);
+        }
+        if (alumni === "true" || alumni === "false") {
+            setAlumni(alumni === "true");
+        }
+        if (studentCoach === "true" || studentCoach === "false") {
+            setStudentCoach(studentCoach === "true");
+        }
+        if (
+            statusFilter !== null &&
+            Object.values(StudentStatus).includes(statusFilter as StudentStatus)
+        ) {
+            setStatusFilter(statusFilter as StudentStatus);
+        }
+        if (osocYear !== null && new RegExp("d+").test(osocYear)) {
+            setOsocYear(osocYear);
+        }
+        if (
+            emailStatus !== null &&
+            Object.values(EmailStatus).includes(emailStatus as EmailStatus)
+        ) {
+            setEmailStatus(emailStatus as EmailStatus);
+        }
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter ? nameFilter : "",
+            emailFilter: emailFilter ? emailFilter : "",
+            nameSort: nameSort ? (nameSort as Sort) : Sort.NONE,
+            emailSort: emailSort ? (emailSort as Sort) : Sort.NONE,
+            alumni: alumni === "true",
+            studentCoach: studentCoach === "true",
+            statusFilter: statusFilter
+                ? (statusFilter as StudentStatus)
+                : StudentStatus.EMPTY,
+            osocYear:
+                osocYear && new RegExp("d+").test(osocYear) ? osocYear : "",
+            emailStatus: emailStatus
+                ? (emailStatus as EmailStatus)
+                : EmailStatus.EMPTY,
+            selectedRoles: selectedRoles,
+        };
+        console.log(params);
+        search(params);
+
         fetchRoles().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Execute search
     useEffect(() => {
+        console.log("fetch");
         setEmailStatusActive(false);
         setRolesActive(false);
         const params: StudentFilterParams = {
@@ -93,6 +167,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
+        console.log(params);
         search(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, emailSort, alumni, studentCoach, statusFilter, emailStatus]);
@@ -100,95 +175,306 @@ export const StudentFilter: React.FC<{
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
         setNameSort((prev) => getNextSort(prev));
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: getNextSort(nameSort),
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailSort = async (e: SyntheticEvent) => {
         e.preventDefault();
         setEmailSort((prev) => getNextSort(prev));
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: getNextSort(emailSort),
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleFilterYes = async (e: SyntheticEvent) => {
         e.preventDefault();
-        //This is because the call is async
+        let newVal;
         if (statusFilter !== StudentStatus.YES) {
-            setStatusFilter(() => StudentStatus.YES);
+            newVal = StudentStatus.YES;
         } else {
-            setStatusFilter(() => StudentStatus.EMPTY);
+            newVal = StudentStatus.EMPTY;
         }
+        setStatusFilter(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: newVal,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
         e.preventDefault();
+        let newVal;
         if (statusFilter !== StudentStatus.MAYBE) {
-            setStatusFilter(() => StudentStatus.MAYBE);
+            newVal = StudentStatus.MAYBE;
         } else {
-            setStatusFilter(() => StudentStatus.EMPTY);
+            newVal = StudentStatus.EMPTY;
         }
+        setStatusFilter(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: newVal,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleFilterNo = async (e: SyntheticEvent) => {
         e.preventDefault();
+        let newVal;
         if (statusFilter !== StudentStatus.NO) {
-            setStatusFilter(() => StudentStatus.NO);
+            newVal = StudentStatus.NO;
         } else {
-            setStatusFilter(() => StudentStatus.EMPTY);
+            newVal = StudentStatus.EMPTY;
         }
+        setStatusFilter(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: newVal,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailNone = async (e: SyntheticEvent) => {
         e.preventDefault();
+
+        let newVal;
         if (emailStatus !== EmailStatus.NONE) {
-            setEmailStatus(() => EmailStatus.NONE);
+            newVal = EmailStatus.NONE;
         } else {
-            setEmailStatus(() => EmailStatus.EMPTY);
+            newVal = EmailStatus.EMPTY;
         }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailDraft = async (e: SyntheticEvent) => {
         e.preventDefault();
-        //This is because the call is async
+
+        let newVal;
         if (emailStatus !== EmailStatus.DRAFT) {
-            setEmailStatus(() => EmailStatus.DRAFT);
+            newVal = EmailStatus.DRAFT;
         } else {
-            setEmailStatus(() => EmailStatus.EMPTY);
+            newVal = EmailStatus.EMPTY;
         }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailSent = async (e: SyntheticEvent) => {
         e.preventDefault();
+
+        let newVal;
         if (emailStatus !== EmailStatus.SENT) {
-            setEmailStatus(() => EmailStatus.SENT);
+            newVal = EmailStatus.SENT;
         } else {
-            setEmailStatus(() => EmailStatus.EMPTY);
+            newVal = EmailStatus.EMPTY;
         }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailFailed = async (e: SyntheticEvent) => {
         e.preventDefault();
+
+        let newVal;
         if (emailStatus !== EmailStatus.FAILED) {
-            setEmailStatus(() => EmailStatus.FAILED);
+            newVal = EmailStatus.FAILED;
         } else {
-            setEmailStatus(() => EmailStatus.EMPTY);
+            newVal = EmailStatus.EMPTY;
         }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleEmailScheduled = async (e: SyntheticEvent) => {
         e.preventDefault();
+
+        let newVal;
         if (emailStatus !== EmailStatus.SCHEDULED) {
-            setEmailStatus(() => EmailStatus.SCHEDULED);
+            newVal = EmailStatus.SCHEDULED;
         } else {
-            setEmailStatus(() => EmailStatus.EMPTY);
+            newVal = EmailStatus.EMPTY;
         }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleAlumni = async (e: SyntheticEvent) => {
         e.preventDefault();
         setAlumni((prev) => !prev);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: !alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const toggleStudentCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
-        setstudentCoach((prev) => !prev);
+        setStudentCoach((prev) => !prev);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: !studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        search(params);
     };
 
     const selectRole = (role: string) => {
@@ -199,7 +485,25 @@ export const StudentFilter: React.FC<{
             // Select role
             selectedRoles.add(role);
         }
-        setSelectedRoles(new Set(selectedRoles));
+
+        const newRoles = new Set(selectedRoles);
+        setSelectedRoles(newRoles);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: !studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: newRoles,
+        };
+        search(params);
     };
 
     const searchPress = (e: SyntheticEvent) => {
@@ -247,6 +551,7 @@ export const StudentFilter: React.FC<{
                     </div>
                     <input
                         data-testid={"firstNameInput"}
+                        value={nameFilter}
                         className={`input ${styles.input}`}
                         type="text"
                         placeholder="Search.."
