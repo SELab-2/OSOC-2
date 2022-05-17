@@ -182,12 +182,8 @@
 /* Filters that act like checkboxes */
 .inactive {
     background-color: transparent;
-    border-radius: 0.4rem;
     border: 0.1rem solid rgba(10, 8, 57, 0.25);
     color: rgba(10, 8, 57, 0.25);
-    font-weight: normal;
-    transition-duration: 0.2s;
-    font-size: large;
 }
 
 .inactive:hover {
@@ -195,14 +191,23 @@
     box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
 }
 
+.active, .inactive {
+    font-size: large;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-inline: 1.5rem;
+    transition-duration: 0.2s;
+    border-radius: 0.4rem;
+    font-weight: normal;
+    min-height: 2.5rem;
+    gap: 0.5rem;
+}
+
 .active {
     background-color: var(--neutral-100);
     color: var(--primary-100);
-    font-weight: normal;
-    transition-duration: 0.2s;
     border: 0.1rem solid transparent;
-    border-radius: 0.4rem;
-    font-size: large;
 }
 
 .active:hover {

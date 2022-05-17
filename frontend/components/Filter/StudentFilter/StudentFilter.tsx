@@ -42,8 +42,6 @@ export const StudentFilter: React.FC<{
     const [roles, setRoles] = useState<Array<Role>>([]);
     // A set of active roles
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
-    const [rolesActive, setRolesActive] = useState<boolean>(false);
-    const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
         const { sessionKey } = getSession
@@ -79,8 +77,6 @@ export const StudentFilter: React.FC<{
 
     // Execute search
     useEffect(() => {
-        setEmailStatusActive(false);
-        setRolesActive(false);
         const params: StudentFilterParams = {
             nameFilter: nameFilter,
             emailFilter: emailFilter,
@@ -204,8 +200,6 @@ export const StudentFilter: React.FC<{
 
     const searchPress = (e: SyntheticEvent) => {
         e.preventDefault();
-        setEmailStatusActive(false);
-        setRolesActive(false);
         const params: StudentFilterParams = {
             nameFilter: nameFilter,
             emailFilter: emailFilter,
@@ -312,15 +306,14 @@ export const StudentFilter: React.FC<{
                     Student Coach Only
                 </button>
 
-                <div className={`dropdown ${rolesActive ? "is-active" : ""}`}>
+                <div className="dropdown is-right is-hoverable">
                     <div
                         data-testid={"rolesSelectedFilterDisplay"}
                         className={`dropdown-trigger ${
-                            rolesActive || selectedRoles.size > 0
-                                ? styles.active
-                                : styles.inactive
-                        } ${styles.dropdownTrigger}`}
-                        onClick={() => setRolesActive(!rolesActive)}
+                            selectedRoles.size === 0
+                                ? styles.inactive
+                                : styles.active
+                        }`}
                     >
                         {selectedRoles.size > 0
                             ? selectedRoles.size === 1
@@ -328,11 +321,7 @@ export const StudentFilter: React.FC<{
                                 : `${selectedRoles.size} roles selected`
                             : "No role selected"}
                         <div className={styles.triangleContainer}>
-                            <div
-                                className={`${rolesActive ? styles.up : ""} ${
-                                    styles.triangle
-                                }`}
-                            />
+                            <div className={styles.triangle} />
                         </div>
                     </div>
                     <div className="dropdown-menu">
@@ -359,30 +348,20 @@ export const StudentFilter: React.FC<{
                     </div>
                 </div>
 
-                <div
-                    className={`dropdown ${
-                        emailStatusActive ? "is-active" : ""
-                    }`}
-                >
+                <div className="dropdown is-right is-hoverable">
                     <div
                         data-testid={"emailFilterDisplay"}
                         className={`dropdown-trigger ${
-                            emailStatusActive ||
-                            emailStatus !== EmailStatus.EMPTY
-                                ? styles.active
-                                : styles.inactive
-                        } ${styles.dropdownTrigger}`}
-                        onClick={() => setEmailStatusActive(!emailStatusActive)}
+                            emailStatus === EmailStatus.EMPTY
+                                ? styles.inactive
+                                : styles.active
+                        }`}
                     >
                         {emailStatus === EmailStatus.EMPTY
                             ? "No email selected"
                             : emailStatus}
                         <div className={styles.triangleContainer}>
-                            <div
-                                className={`${
-                                    emailStatusActive ? styles.up : ""
-                                } ${styles.triangle}`}
-                            />
+                            <div className={styles.triangle} />
                         </div>
                     </div>
                     <div className="dropdown-menu">
