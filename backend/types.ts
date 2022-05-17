@@ -722,6 +722,8 @@ export namespace InternalTypes {
         start_date: string;
         end_date: string;
         roles: object;
+        description: string;
+        coaches: object;
     }
 
     /**
@@ -1342,6 +1344,7 @@ export namespace Requests {
         end: Date;
         roles: object;
         description: string;
+        coaches: object;
     }
 
     export interface ModProject extends IdRequest {

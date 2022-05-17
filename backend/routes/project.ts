@@ -59,6 +59,8 @@ export async function createProject(
         });
     }
 
+    //const coachList = [];
+
     return Promise.resolve({
         id: createdProject.project_id,
         name: createdProject.name,
@@ -68,6 +70,7 @@ export async function createProject(
         osoc_id: createdProject.osoc_id,
         description: createdProject.description,
         roles: roleList,
+        coaches: coachList,
     });
 }
 
@@ -310,6 +313,7 @@ export async function modProject(
         osoc_id: updatedProject.osoc_id,
         roles: roles,
         description: updatedProject.description,
+        coaches: [],
     });
 }
 

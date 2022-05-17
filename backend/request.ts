@@ -615,6 +615,7 @@ export async function parseNewProjectRequest(
             "osocId",
             "roles",
             "description",
+            "coaches",
         ],
         types.key
     ).then(() =>
@@ -628,6 +629,7 @@ export async function parseNewProjectRequest(
             positions: Number(req.body.positions),
             roles: req.body.roles,
             description: req.body.description,
+            coaches: req.body.coaches,
         }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
