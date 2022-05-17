@@ -46,22 +46,14 @@ export async function listOsocEditions(
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseOsocAllRequest(req);
     const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
+        .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-    const osocEditions = await ormO.filterOsocs(
-        {
-            pageSize: parsedRequest.pageSize,
-            currentPage: parsedRequest.currentPage,
-        },
-        undefined,
-        undefined,
-        checkedSessionKey.userId
-    );
+    const osocEditions = await ormO.getAllOsoc();
 
-    return Promise.resolve(osocEditions);
+    return Promise.resolve({ data: osocEditions });
 }
 
 /**

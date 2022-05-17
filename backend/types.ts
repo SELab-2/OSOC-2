@@ -1034,8 +1034,9 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList
-        extends Paginable<InternalTypes.OsocEdition> {}
+    export interface OsocEditionList {
+        data: OsocEdition[];
+    }
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
@@ -1329,7 +1330,8 @@ export namespace Requests {
     }
 
     export interface Confirm extends IdRequest {
-        reply?: InternalTypes.Suggestion;
+        reply: InternalTypes.Suggestion;
+        reason?: string;
     }
 
     export interface UpdateLoginUser extends IdRequest {
