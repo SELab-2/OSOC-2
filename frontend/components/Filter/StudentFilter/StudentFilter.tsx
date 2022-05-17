@@ -150,28 +150,6 @@ export const StudentFilter: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Execute search
-    useEffect(() => {
-        console.log("fetch");
-        setEmailStatusActive(false);
-        setRolesActive(false);
-        const params: StudentFilterParams = {
-            nameFilter: nameFilter,
-            emailFilter: emailFilter,
-            nameSort: nameSort,
-            emailSort: emailSort,
-            alumni: alumni,
-            studentCoach: studentCoach,
-            statusFilter: statusFilter,
-            osocYear: osocYear,
-            emailStatus: emailStatus,
-            selectedRoles: selectedRoles,
-        };
-        console.log(params);
-        search(params);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [nameSort, emailSort, alumni, studentCoach, statusFilter, emailStatus]);
-
     const toggleNameSort = async (e: SyntheticEvent) => {
         e.preventDefault();
         setNameSort((prev) => getNextSort(prev));

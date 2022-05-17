@@ -51,8 +51,9 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         let index = -1;
+        const searchParams = new URLSearchParams(window.location.search);
         if (selectedStudent === -1) {
-            const id = new URLSearchParams(window.location.search).get("id");
+            const id = searchParams.get("id");
             if (id !== null) {
                 const id_number = Number(id);
                 if (!isNaN(id_number)) {
@@ -111,7 +112,12 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (e.key === "Escape") {
             clearSelection();
         }
-        router.push(`/students`).then();
+        // TODO: moet hier niet setSelectedStudent(-1) komen?
+        // delete the id from the url
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        // push the url
+        router.push(`/students?${params.toString()}`).then();
     };
 
     /**
@@ -122,7 +128,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             setDisplay(Display.FULL);
         }
         setSelectedStudent(-1);
-        router.push(`/students`).then();
+        // delete the id from the url
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        // push the url
+        router.push(`/students?${params.toString()}`).then();
     };
 
     /**
@@ -144,7 +154,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             window.open(`/students/${student_id}`);
             return;
         }
-        router.push(`/students?id=${student_id}`).then();
+        // set the new id
+        const params = new URLSearchParams(window.location.search);
+        params.set("id", student_id.toString());
+        // push the url
+        router.push(`/students?${params.toString()}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
@@ -182,7 +196,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         setParams(params);
         search(params, 0).then();
     };
-
     /**
      * Search function with pagination
      * @param params
@@ -259,6 +272,9 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         setFilteredStudents(response.data);
         setPagination(response.pagination);
         isLoading(false);
+        const id = new URLSearchParams(window.location.search).get("id");
+        const frontendQuery = id !== null ? query + "&id=" + id : query;
+        router.push(`/students${frontendQuery}`).then();
     };
 
     return (
