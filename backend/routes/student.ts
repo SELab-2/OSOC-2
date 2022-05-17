@@ -125,7 +125,9 @@ export async function createStudentSuggestion(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -202,7 +204,9 @@ export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -244,7 +248,9 @@ export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
