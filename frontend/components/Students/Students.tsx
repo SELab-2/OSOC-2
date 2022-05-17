@@ -189,13 +189,37 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     };
 
     /**
-     * Called by the studentfilter to filter
+     * Called by the studentfilter to filter when a button is (manually) pressed => set page back to 0
      * @param params
      */
-    const filter = async (params: StudentFilterParams) => {
+    const filterManual = async (params: StudentFilterParams) => {
         setParams(params);
+        clearSelection();
+
         search(params, 0).then();
     };
+
+    /**
+     * Called by the studentfilter to filter when a websocket event is received. We need to keep track of the current page!
+     * @param params
+     */
+    const filterAutomatic = async (params: StudentFilterParams) => {
+        setParams(params);
+        // get the current page
+        const currentPageStr = new URLSearchParams(window.location.search).get(
+            "currentPage"
+        );
+        const currentPageInt =
+            currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
+                ? Number(currentPageStr)
+                : 0;
+        setPagination({
+            page: currentPageInt,
+            count: 0, //TODO: what value should this be? I thought this would have to be currentPageInt * pageSize + 1
+        });
+        search(params, currentPageInt).then();
+    };
+
     /**
      * Search function with pagination
      * @param params
@@ -244,7 +268,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         filters.push(`currentPage=${page}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -284,7 +307,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             }`}
         >
             <div>
-                <StudentFilter display={display} search={filter} />
+                <StudentFilter
+                    display={display}
+                    searchManual={filterManual}
+                    searchAutomatic={filterAutomatic}
+                />
                 <div className={styles.scrollView}>
                     <div className={styles.topShadowCaster} />
                     <div

@@ -19,9 +19,10 @@ import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png"
 import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
-    search: (params: StudentFilterParams) => void;
+    searchManual: (params: StudentFilterParams) => void;
+    searchAutomatic: (params: StudentFilterParams) => void;
     display: Display;
-}> = ({ search, display }) => {
+}> = ({ searchManual, searchAutomatic, display }) => {
     const { getSession } = useContext(SessionContext);
 
     const [nameFilter, setNameFilter] = useState<string>("");
@@ -117,7 +118,7 @@ export const StudentFilter: React.FC<{
         ) {
             setStatusFilter(statusFilter as StudentStatus);
         }
-        if (osocYear !== null && new RegExp("d+").test(osocYear)) {
+        if (osocYear !== null && new RegExp("[0-9]+").test(osocYear)) {
             setOsocYear(osocYear);
         }
         if (
@@ -137,14 +138,14 @@ export const StudentFilter: React.FC<{
                 ? (statusFilter as StudentStatus)
                 : StudentStatus.EMPTY,
             osocYear:
-                osocYear && new RegExp("d+").test(osocYear) ? osocYear : "",
+                osocYear && new RegExp("[0-9]+").test(osocYear) ? osocYear : "",
             emailStatus: emailStatus
                 ? (emailStatus as EmailStatus)
                 : EmailStatus.EMPTY,
             selectedRoles: selectedRoles,
         };
         console.log(params);
-        search(params);
+        searchAutomatic(params);
 
         fetchRoles().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,7 +169,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailSort = async (e: SyntheticEvent) => {
@@ -189,7 +190,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleFilterYes = async (e: SyntheticEvent) => {
@@ -216,7 +217,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleFilterMaybe = async (e: SyntheticEvent) => {
@@ -243,7 +244,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleFilterNo = async (e: SyntheticEvent) => {
@@ -270,7 +271,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailNone = async (e: SyntheticEvent) => {
@@ -298,7 +299,7 @@ export const StudentFilter: React.FC<{
             emailStatus: newVal,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailDraft = async (e: SyntheticEvent) => {
@@ -326,7 +327,7 @@ export const StudentFilter: React.FC<{
             emailStatus: newVal,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailSent = async (e: SyntheticEvent) => {
@@ -354,7 +355,7 @@ export const StudentFilter: React.FC<{
             emailStatus: newVal,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailFailed = async (e: SyntheticEvent) => {
@@ -382,7 +383,7 @@ export const StudentFilter: React.FC<{
             emailStatus: newVal,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleEmailScheduled = async (e: SyntheticEvent) => {
@@ -410,7 +411,7 @@ export const StudentFilter: React.FC<{
             emailStatus: newVal,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleAlumni = async (e: SyntheticEvent) => {
@@ -431,7 +432,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleStudentCoach = async (e: SyntheticEvent) => {
@@ -452,7 +453,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const selectRole = (role: string) => {
@@ -481,7 +482,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: newRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     const searchPress = (e: SyntheticEvent) => {
@@ -500,7 +501,7 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus,
             selectedRoles: selectedRoles,
         };
-        search(params);
+        searchManual(params);
     };
 
     return (
