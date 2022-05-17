@@ -12,101 +12,7 @@ import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
 import { checkYearPermissionStudent, errors } from "../utility";
 import * as ormP from "../orm_functions/person";
-
-/**
- *  Attempts to list all students in the system.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function listStudents(
-    req: express.Request
-): Promise<Responses.StudentList> {
-    const parsedRequest = await rq.parseStudentAllRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const studentList: InternalTypes.Student[] = [];
-    const studentsP = await ormSt.filterStudents(
-        {
-            pageSize: checkedSessionKey.data.pageSize,
-            currentPage: checkedSessionKey.data.currentPage,
-        },
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        checkedSessionKey.userId
-    );
-
-    const students = studentsP.data;
-    for (let studentIndex = 0; studentIndex < students.length; studentIndex++) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-            students[studentIndex].student_id
-        );
-        if (jobApplication != null) {
-            const roles = [];
-            for (const applied_role of jobApplication.applied_role) {
-                const role = await ormRo.getRole(applied_role.role_id);
-                if (role != null) {
-                    roles.push(role.name);
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            }
-
-            const evaluations = await ormJo.getStudentEvaluationsTotal(
-                students[studentIndex].student_id
-            );
-
-            for (
-                let skillIndex = 0;
-                skillIndex < jobApplication.job_application_skill.length;
-                skillIndex++
-            ) {
-                if (
-                    jobApplication.job_application_skill[skillIndex]
-                        .language_id != null
-                ) {
-                    const language = await ormLa.getLanguage(
-                        Number(
-                            jobApplication.job_application_skill[skillIndex]
-                                .language_id
-                        )
-                    );
-                    if (language != null) {
-                        jobApplication.job_application_skill[skillIndex].skill =
-                            language.name;
-                    } else {
-                        return Promise.reject(errors.cookInvalidID());
-                    }
-                }
-            }
-
-            studentList.push({
-                student: students[studentIndex],
-                jobApplication: jobApplication,
-                evaluations: evaluations,
-                evaluation: undefined,
-                roles: roles,
-            });
-        } else {
-            return Promise.reject(errors.cookInvalidID());
-        }
-    }
-
-    return Promise.resolve({
-        pagination: studentsP.pagination,
-        data: studentList,
-    });
-}
+import { login_user, person } from "@prisma/client";
 
 /**
  *  Attempts to get all data for a certain student in the system.
@@ -120,11 +26,7 @@ export async function getStudent(
     const parsedRequest = await rq.parseSingleStudentRequest(req);
     const checkedSessionKey = await util
         .checkSessionKey(parsedRequest)
-        .then(checkYearPermissionStudent)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -223,13 +125,7 @@ export async function createStudentSuggestion(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .then(checkYearPermissionStudent)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -285,8 +181,8 @@ export async function createStudentSuggestion(
         });
     }
 
-    let loginUser;
-    if (newEvaluation.login_user_id) {
+    let loginUser: (login_user & { person: person }) | null = null;
+    if (newEvaluation.login_user_id !== null) {
         loginUser = await ormLU.getLoginUserById(newEvaluation.login_user_id);
     }
     if (loginUser === null || loginUser === undefined) {
@@ -306,13 +202,7 @@ export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .then(checkYearPermissionStudent)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -354,13 +244,7 @@ export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .then(checkYearPermissionStudent)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
@@ -402,10 +286,6 @@ export async function filterStudents(
 ): Promise<Responses.StudentList> {
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     const students = await ormSt.filterStudents(
         {
@@ -502,7 +382,7 @@ export function getRouter(): express.Router {
 
     util.setupRedirect(router, "/student");
     util.route(router, "get", "/filter", filterStudents);
-    util.route(router, "get", "/all", listStudents);
+    util.route(router, "get", "/all", filterStudents);
     util.route(router, "get", "/:id", getStudent);
     util.route(router, "delete", "/:id", deleteStudent);
 
