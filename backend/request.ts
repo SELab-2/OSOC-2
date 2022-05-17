@@ -611,7 +611,6 @@ export async function parseNewProjectRequest(
             "partner",
             "start",
             "end",
-            "positions",
             "osocId",
             "roles",
             "description",
@@ -626,7 +625,6 @@ export async function parseNewProjectRequest(
             start: req.body.start,
             end: req.body.end,
             osocId: Number(req.body.osocId),
-            positions: Number(req.body.positions),
             roles: req.body.roles,
             description: req.body.description,
             coaches: req.body.coaches,
@@ -648,7 +646,6 @@ export async function parseUpdateProjectRequest(
         "partner",
         "start",
         "end",
-        "positions",
         "roles",
         "description",
         "addCoaches",
@@ -665,10 +662,6 @@ export async function parseUpdateProjectRequest(
             partner: maybe<string>(req.body, "partner"),
             start: maybe<Date>(req.body, "start"),
             end: maybe<Date>(req.body, "end"),
-            positions:
-                maybe(req.body, "positions") == undefined
-                    ? undefined
-                    : Number(req.body.positions),
             roles: maybe<object>(req.body, "roles"),
             description: maybe<string>(req.body, "description"),
             addCoaches: maybe<object>(req.body, "addCoaches"),

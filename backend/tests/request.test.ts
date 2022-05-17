@@ -975,6 +975,7 @@ test("Can parse new project request", () => {
                 },
             ],
         },
+        coaches: [1, 2],
     };
     const d2: T.Anything = {};
     const d3: T.Anything = {
@@ -982,7 +983,6 @@ test("Can parse new project request", () => {
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 420,
     };
 
     const req1: express.Request = getMockReq();
@@ -1019,7 +1019,6 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
         roles: {
             roles: [
                 {
@@ -1045,21 +1044,11 @@ test("Can parse update project request", () => {
         partner: "Simic Combine",
         description: "Project description",
         start: Date.now(),
-        positions: 420,
-    };
-    const d4: T.Anything = {
-        name: "Experiment One",
-        partner: "Simic Combine",
-        start: Date.now(),
-        end: Date.now(),
-        positions: 69,
     };
 
     const req1: express.Request = getMockReq();
     const req2: express.Request = getMockReq();
     const req3: express.Request = getMockReq();
-    const req4: express.Request = getMockReq();
-    const req5: express.Request = getMockReq();
 
     req1.body = { ...d1 };
     req1.params.id = id.toString();
@@ -1070,10 +1059,6 @@ test("Can parse update project request", () => {
     req3.body = { ...d3 };
     req3.params.id = id.toString();
     setSessionKey(req3, key);
-    req4.body = { ...d4 };
-    req4.params.id = id.toString();
-    req5.body = { ...d1 };
-    setSessionKey(req5, key);
 
     d1.id = id;
     d1.sessionkey = key;
@@ -1081,9 +1066,9 @@ test("Can parse update project request", () => {
     d3.id = id;
     d3.sessionkey = key;
     d3.end = undefined;
-    d3.modifyRoles = undefined;
-    d3.deleteRoles = undefined;
-    d4.id = id;
+    d3.removeCoaches = undefined;
+    d3.roles = undefined;
+    d3.addCoaches = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
@@ -1094,14 +1079,8 @@ test("Can parse update project request", () => {
     const p3: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req3)
     ).resolves.toStrictEqual(d3);
-    const p4: Promise<void> = expect(
-        Rq.parseUpdateProjectRequest(req4)
-    ).rejects.toBe(errors.cookUnauthenticated());
-    const p5: Promise<void> = expect(
-        Rq.parseUpdateProjectRequest(req5)
-    ).rejects.toBe(errors.cookArgumentError());
 
-    return Promise.all([p1, p2, p3, p4, p5]);
+    return Promise.all([p1, p2, p3]);
 });
 
 test("Can parse draft student request", () => {
