@@ -5,13 +5,13 @@ import prisma from "../prisma/prisma";
  * An entry in this table indicates that this loginUser should be able to see the osoc edition
  *
  * @param loginUserId: the id of the loginUser that should be able to see the osoc edition
- * @param osoc_id: the id of the osoc edition that the loginUser should see
+ * @param osocId: the id of the osoc edition that the loginUser should see
  */
-export async function addOsocToUser(loginUserId: number, osoc_id: number) {
+export async function addOsocToUser(loginUserId: number, osocId: number) {
     return await prisma.login_user_osoc.create({
         data: {
             login_user_id: loginUserId,
-            osoc_id: osoc_id,
+            osoc_id: osocId,
         },
     });
 }
@@ -35,6 +35,21 @@ export async function deleteOsocsForLoginuser(loginUserId: number) {
 export async function deleteOsocsLoginConnectionFromOsoc(osocId: number) {
     return await prisma.login_user_osoc.deleteMany({
         where: {
+            osoc_id: osocId,
+        },
+    });
+}
+
+/**
+ * remove the permissions of an loginUser to see data from this osocEdition
+ * @param loginUserId: the id of the loginuser
+ * @param osocId: the id of the osoc edition
+ */
+export async function removeOsocFromUser(loginUserId: number, osocId: number) {
+    // will only delete 1 entry because each combination o
+    return await prisma.login_user_osoc.deleteMany({
+        where: {
+            login_user_id: loginUserId,
             osoc_id: osocId,
         },
     });

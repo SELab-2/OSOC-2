@@ -207,6 +207,8 @@ model login_user_osoc {
   osoc_id            Int
   login_user         login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
   osoc               osoc       @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([login_user_id, osoc_id])
 }
 
 enum decision_enum {

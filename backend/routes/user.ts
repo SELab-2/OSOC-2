@@ -16,6 +16,7 @@ import {
 } from "../orm_functions/session_key";
 import * as config from "../config.json";
 import * as bcrypt from "bcrypt";
+import * as ormLuOs from "../orm_functions/login_user_osoc";
 
 /**
  *  Attempts to list all students in the system.
@@ -406,6 +407,59 @@ export async function getCurrentUser(
 
     return Promise.resolve(user);
 }
+
+/**
+ *  Attempts to create a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function createUserPermission(
+    req: express.Request
+): Promise<Responses.Empty> {
+    const parsedRequest = await rq.parseUsersPermissionsRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        await ormLuOs.addOsocToUser(
+            checkedSessionKey.data.login_user_id,
+            checkedSessionKey.data.osoc_id
+        );
+
+        return Promise.resolve({});
+    }
+
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
+ *  Attempts to delte a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function deleteUserPermission(
+    req: express.Request
+): Promise<Responses.Empty> {
+    const parsedRequest = await rq.parseUsersPermissionsRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        await ormLuOs.removeOsocFromUser(
+            checkedSessionKey.data.login_user_id,
+            checkedSessionKey.data.osoc_id
+        );
+
+        return Promise.resolve({});
+    }
+
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
 /**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
@@ -420,6 +474,9 @@ export function getRouter(): express.Router {
 
     util.route(router, "get", "/self", getCurrentUser);
     util.route(router, "post", "/self", userModSelf);
+
+    util.route(router, "post", "/year/:id", createUserPermission);
+    util.route(router, "delete", "/year/:id", deleteUserPermission);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
