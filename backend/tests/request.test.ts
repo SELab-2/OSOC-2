@@ -1593,3 +1593,73 @@ test("Can parse self-modify requests", () => {
 
     return Promise.all([valids, invalids, unauths].flat());
 });
+
+test("Can parse remove coach request", () => {
+    const r1: T.Anything = {
+        project_user: 1,
+    };
+
+    const res: T.Requests.IdRequest = {
+        sessionkey: "Hello I am a key",
+        id: 20123,
+    };
+
+    const req1: express.Request = getMockReq();
+    req1.body = { ...r1 };
+
+    const req2: express.Request = getMockReq();
+    req2.body = {};
+
+    setSessionKey(req1, res.sessionkey);
+    req1.params.id = res.id.toString();
+    setSessionKey(req2, res.sessionkey);
+    req2.params.id = res.id.toString();
+
+    const prom1: Promise<void> = expect(
+        Rq.parseRemoveCoachRequest(req1)
+    ).resolves.toStrictEqual({
+        sessionkey: "Hello I am a key",
+        projectUserId: 1,
+        id: 20123,
+    });
+    const prom2: Promise<void> = expect(
+        Rq.parseRemoveCoachRequest(req2)
+    ).rejects.toBe(errors.cookArgumentError());
+
+    return Promise.all([prom1, prom2]);
+});
+
+test("Can parse remove coach request", () => {
+    const r1: T.Anything = {
+        login_user: 1,
+    };
+
+    const res: T.Requests.IdRequest = {
+        sessionkey: "Hello I am a key",
+        id: 20123,
+    };
+
+    const req1: express.Request = getMockReq();
+    req1.body = { ...r1 };
+
+    const req2: express.Request = getMockReq();
+    req2.body = {};
+
+    setSessionKey(req1, res.sessionkey);
+    req1.params.id = res.id.toString();
+    setSessionKey(req2, res.sessionkey);
+    req2.params.id = res.id.toString();
+
+    const prom1: Promise<void> = expect(
+        Rq.parseAssignCoachRequest(req1)
+    ).resolves.toStrictEqual({
+        sessionkey: "Hello I am a key",
+        loginUserId: 1,
+        id: 20123,
+    });
+    const prom2: Promise<void> = expect(
+        Rq.parseAssignCoachRequest(req2)
+    ).rejects.toBe(errors.cookArgumentError());
+
+    return Promise.all([prom1, prom2]);
+});

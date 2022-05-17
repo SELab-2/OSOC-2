@@ -1134,6 +1134,15 @@ export namespace Responses {
     export interface Project extends InternalTypes.Project {}
 
     /**
+     *  A user permission response
+     * data.
+     */
+    export interface UserYearsPermissions {
+        osoc_id: number;
+        year: number;
+    }
+
+    /**
      *  A project list response with contracts in it
      */
     export interface ProjectAndContracts
@@ -1457,6 +1466,10 @@ export namespace Requests {
     export interface UserYearPermissions extends IdRequest {
         login_user_id: number;
         osoc_id: number;
+    }
+
+    export interface UserYearsPermissions extends IdRequest {
+        login_user_id: number;
     }
 }
 

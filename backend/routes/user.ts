@@ -461,6 +461,38 @@ export async function deleteUserPermission(
 }
 
 /**
+ *  Attempts to delte a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function getYearPermissions(
+    req: express.Request
+): Promise<Responses.UserYearsPermissions[]> {
+    const parsedRequest = await rq.parseGetUserPermissionsRequest(req);
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        const years = await ormLuOs.getOsocYearsForLoginUserById(
+            checkedSessionKey.data.login_user_id
+        );
+
+        return Promise.resolve(
+            years.map((year) => {
+                return {
+                    osoc_id: year.osoc_id,
+                    year: year.osoc.year,
+                };
+            })
+        );
+    }
+
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
  * endpoints.
@@ -477,6 +509,8 @@ export function getRouter(): express.Router {
 
     util.route(router, "post", "/year/:id", createUserPermission);
     util.route(router, "delete", "/year/:id", deleteUserPermission);
+
+    util.route(router, "get", "/years", getYearPermissions);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))
