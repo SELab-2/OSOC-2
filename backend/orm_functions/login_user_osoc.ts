@@ -1,4 +1,5 @@
 import prisma from "../prisma/prisma";
+import { getOsocByYear } from "./osoc";
 
 /**
  * creates an entry in the "in between table" for osoc and login_user.
@@ -38,4 +39,65 @@ export async function deleteOsocsLoginConnectionFromOsoc(osocId: number) {
             osoc_id: osocId,
         },
     });
+}
+
+export async function getYearsForUser(loginUserId: number) {
+    const res = await prisma.login_user_osoc.findMany({
+        where: {
+            login_user_id: loginUserId,
+        },
+        include: {
+            osoc: true,
+        },
+    });
+
+    return res.map((obj) => obj.osoc.year);
+}
+
+export async function deleteEntry(loginUserId: number, year: number) {
+    // will always only delete 1 thing even though this is a deleteMany
+    await prisma.login_user_osoc.deleteMany({
+        where: {
+            login_user_id: loginUserId,
+            osoc: {
+                year: year,
+            },
+        },
+    });
+}
+
+export async function createEntry(loginUserId: number, year: number) {
+    const osoc = await getOsocByYear(year);
+
+    if (osoc) {
+        await prisma.login_user_osoc.create({
+            data: {
+                login_user_id: loginUserId,
+                osoc_id: osoc.osoc_id,
+            },
+        });
+    }
+}
+
+export async function setOsocYearsForUsers(
+    loginUserId: number,
+    years: [number]
+) {
+    const yearsCurrent = await getYearsForUser(loginUserId);
+
+    await Promise.all(
+        yearsCurrent.filter((year) => {
+            if (!years.includes(year)) {
+                return deleteEntry(loginUserId, year);
+            }
+        })
+    );
+
+    await Promise.all(
+        years.filter((year) => {
+            if (!years.includes(year)) {
+                return createEntry(loginUserId, year);
+            }
+        })
+    );
 }
