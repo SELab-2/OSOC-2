@@ -308,6 +308,12 @@ beforeEach(() => {
     reqMock.parseUpdateProjectRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseDeleteProjectRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseGetDraftedStudentsRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -329,6 +335,9 @@ beforeEach(() => {
         })
     );
     utilMock.isValidID.mockImplementation((v) => Promise.resolve(v));
+    utilMock.getOrDefault.mockImplementation((v, x) =>
+        v == undefined || v == null ? x : v
+    );
 
     // project orm
     ormPrMock.createProject.mockImplementation((v) =>
@@ -345,6 +354,12 @@ beforeEach(() => {
             start_date: orDefault(v.startDate, new Date(1000000)),
             end_date: orDefault(v.endDate, new Date(10000000)),
         })
+    );
+    ormPrMock.deleteProject.mockImplementation(() =>
+        Promise.resolve(projects[0])
+    );
+    ormPrMock.getProjectById.mockImplementation((id) =>
+        Promise.resolve(projects[id])
     );
 
     // role orm
@@ -379,11 +394,14 @@ beforeEach(() => {
         })
     );
     ormPrRMock.deleteProjectRole.mockResolvedValue(projectroles[0]);
+    ormPrRMock.getNumberOfFreePositions.mockImplementation((v) =>
+        Promise.resolve((v + 1) * (v + 2))
+    );
 
     // contract orm
     ormCMock.contractsByProject.mockImplementation((id) =>
         Promise.resolve(
-            contracts.filter((x) => x.project_role.project_role_id == id)
+            contracts.filter((x) => x.project_role.project_id == id)
         )
     );
 
@@ -402,16 +420,21 @@ afterEach(() => {
     reqMock.parseNewProjectRequest.mockReset();
     reqMock.parseProjectAllRequest.mockReset();
     reqMock.parseUpdateProjectRequest.mockReset();
+    reqMock.parseDeleteProjectRequest.mockReset();
+    reqMock.parseGetDraftedStudentsRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
     utilMock.checkSessionKey.mockReset();
     utilMock.isValidID.mockReset();
+    utilMock.getOrDefault.mockReset();
 
     // project orm
     ormPrMock.createProject.mockReset();
     ormPrMock.getAllProjects.mockReset();
     ormPrMock.updateProject.mockReset();
+    ormPrMock.deleteProject.mockReset();
+    ormPrMock.getProjectById.mockReset();
 
     // role orm
     ormRMock.getRolesByName.mockReset();
@@ -422,6 +445,7 @@ afterEach(() => {
     ormPrRMock.createProjectRole.mockReset();
     ormPrRMock.getProjectRolesByProject.mockReset();
     ormPrRMock.updateProjectRole.mockReset();
+    ormPrRMock.getNumberOfFreePositions.mockReset();
 
     // contract orm
     ormCMock.contractsByProject.mockReset();
@@ -553,4 +577,60 @@ test("Can modify projects", async () => {
     });
     expectCall(ormPrRMock.deleteProjectRole, req.body.deleteRoles.roles[0]);
     expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+});
+
+test("Can delete projects", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+    };
+
+    await expect(project.deleteProject(req)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseDeleteProjectRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
+    expectCall(ormPrMock.deleteProject, 0);
+});
+
+test("Can get students drafted for project", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+    };
+
+    const students = contracts
+        .filter((x) => x.project_role.project_id == 0)
+        .map((x) => ({ student: x.student, status: x.contract_status }));
+
+    await expect(project.getDraftedStudents(req)).resolves.toStrictEqual({
+        students: students,
+        id: 0,
+        name: projects[0].name,
+    });
+    expectCall(reqMock.parseGetDraftedStudentsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormPrMock.getProjectById, 0);
+    expectCall(ormCMock.contractsByProject, 0);
+    expect(utilMock.getOrDefault).toHaveBeenCalledTimes(1);
+});
+
+test("Can get free spots for project role", async () => {
+    await expect(project.getFreeSpotsFor("dev", 0)).resolves.toStrictEqual({
+        role: 0,
+        count: 2,
+    });
+    expectCall(ormPrRMock.getProjectRolesByProject, 0);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(3);
+    expectCall(ormPrRole.getNumberOfFreePositions, 0);
+});
+
+test("Can't get free spots for nonexistent project role", async () => {
+    await expect(project.getFreeSpotsFor("george", 0)).rejects.toStrictEqual(
+        undefined
+    );
+    expectCall(ormPrRMock.getProjectRolesByProject, 0);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(3);
+    expect(ormPrRMock.getNumberOfFreePositions).not.toHaveBeenCalled();
 });

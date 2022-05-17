@@ -365,7 +365,6 @@ export async function getFreeSpotsFor(
         )
         .then((roles) => roles.filter((r) => r.block?.name == role))
         .then(async (rest) => {
-            console.log("Resulting roles: " + JSON.stringify(rest));
             if (rest.length != 1) return Promise.reject();
             return ormPrRole
                 .getNumberOfFreePositions(rest[0].project_role_id)
