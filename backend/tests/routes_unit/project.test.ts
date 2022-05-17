@@ -38,6 +38,10 @@ import * as ormPU from "../../orm_functions/project_user";
 jest.mock("../../orm_functions/project_user");
 const ormPUMock = ormPU as jest.Mocked<typeof ormPU>;
 
+import * as ormEv from "../../orm_functions/evaluation";
+jest.mock("../../orm_functions/evaluation");
+const ormEvMock = ormEv as jest.Mocked<typeof ormEv>;
+
 import * as project from "../../routes/project";
 import { CreateProject } from "../../orm_functions/orm_types";
 
@@ -289,6 +293,68 @@ const contracts: contrtype[] = [
     },
 ];
 
+const studcontr = [
+    {
+        student: {
+            student_id: 0,
+            person_id: 0,
+            gender: "apache attack heli",
+            pronouns: null,
+            phone_number: "+32",
+            nickname: null,
+            alumni: false,
+        },
+        project_role: {
+            project_id: 0,
+            project: { osoc_id: 2022 },
+        },
+        contract_id: 0,
+    },
+    {
+        student: {
+            student_id: 1,
+            person_id: 1,
+            gender: "apache attack heli",
+            pronouns: null,
+            phone_number: "+32",
+            nickname: null,
+            alumni: false,
+        },
+        project_role: {
+            project_id: 0,
+            project: { osoc_id: 2022 },
+        },
+        contract_id: 1,
+    },
+];
+
+const evals = [
+    {
+        evaluation_id: 0,
+        login_user_id: 0,
+        job_application_id: 0,
+        decision: "YES" as prisma.decision_enum,
+        is_final: true,
+        motivation: null,
+    },
+    {
+        evaluation_id: 1,
+        login_user_id: 0,
+        job_application_id: 1,
+        decision: "MAYBE" as prisma.decision_enum,
+        is_final: true,
+        motivation: null,
+    },
+    {
+        evaluation_id: 2,
+        login_user_id: 0,
+        job_application_id: 2,
+        decision: "NO" as prisma.decision_enum,
+        is_final: true,
+        motivation: null,
+    },
+];
+
 function orDefault<T>(v: T | undefined, d: T): T {
     return v == undefined ? d : v;
 }
@@ -315,6 +381,15 @@ beforeEach(() => {
         Promise.resolve(v.body)
     );
     reqMock.parseDraftStudentRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseRemoveCoachRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseAssignCoachRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
+    reqMock.parseRemoveAssigneeRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
 
@@ -424,11 +499,49 @@ beforeEach(() => {
             contract_status: upd.contractStatus || "DRAFT",
         })
     );
+    ormCMock.contractsForStudent.mockResolvedValue(studcontr);
+    ormCMock.removeContract.mockImplementation((v) =>
+        Promise.resolve({
+            contract_id: v,
+            student_id: 0,
+            created_by_login_user_id: 0,
+            project_role_id: 0,
+            information: null,
+            contract_status: "DRAFT",
+        })
+    );
 
     // project user orm
     ormPUMock.getUsersFor.mockResolvedValue([
         { login_user: loginuser, project_user_id: 0 },
     ]);
+    ormPUMock.deleteProjectUser.mockImplementation((v) =>
+        Promise.resolve({
+            project_id: 0,
+            login_user_id: 0,
+            project_user_id: v,
+        })
+    );
+    ormPUMock.createProjectUser.mockImplementation((v) =>
+        Promise.resolve({
+            login_user_id: v.loginUserId,
+            project_id: v.projectId,
+            project_user_id: 0,
+        })
+    );
+
+    // evaluation orm
+    ormEvMock.getEvaluationByPartiesFor.mockResolvedValue(evals);
+    ormEvMock.updateEvaluationForStudent.mockImplementation((v) =>
+        Promise.resolve({
+            evaluation_id: v.evaluation_id,
+            decision: "MAYBE",
+            login_user_id: v.loginUserId,
+            motivation: v.motivation || null,
+            job_application_id: 0,
+            is_final: true,
+        })
+    );
 });
 
 afterEach(() => {
@@ -443,6 +556,9 @@ afterEach(() => {
     reqMock.parseDeleteProjectRequest.mockReset();
     reqMock.parseGetDraftedStudentsRequest.mockReset();
     reqMock.parseDraftStudentRequest.mockReset();
+    reqMock.parseRemoveCoachRequest.mockReset();
+    reqMock.parseAssignCoachRequest.mockReset();
+    reqMock.parseRemoveAssigneeRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
@@ -472,9 +588,18 @@ afterEach(() => {
     // contract orm
     ormCMock.contractsByProject.mockReset();
     ormCMock.updateContract.mockReset();
+    ormCMock.removeContract.mockReset();
+    ormCMock.contractsForStudent.mockReset();
+    ormCMock.removeContract.mockReset();
 
     // project user orm
     ormPUMock.getUsersFor.mockReset();
+    ormPUMock.deleteProjectUser.mockReset();
+    ormPUMock.createProjectUser.mockReset();
+
+    // evaluation orm
+    ormEvMock.getEvaluationByPartiesFor.mockReset();
+    ormEvMock.updateEvaluationForStudent.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -807,4 +932,133 @@ test("Can't modify a student on a project (not assigned)", async () => {
     expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
     expect(ormCMock.updateContract).not.toHaveBeenCalled();
     expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+});
+
+test("Can un-assign coaches", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        projectUserId: 0,
+    };
+
+    await expect(project.unAssignCoach(req)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseRemoveCoachRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormPUMock.getUsersFor, 0);
+    expectCall(ormPUMock.deleteProjectUser, 0);
+});
+
+test("Can't un-assign coaches (invalid id)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        projectUserId: 7,
+    };
+
+    await expect(project.unAssignCoach(req)).rejects.toStrictEqual({
+        http: 400,
+        reason: "The coach with ID 7 is not assigned to project 0",
+    });
+    expectCall(reqMock.parseRemoveCoachRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormPUMock.getUsersFor, 0);
+    expect(ormPUMock.deleteProjectUser).not.toHaveBeenCalled();
+});
+
+test("Can assign coaches", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        loginUserId: 7,
+    };
+
+    await expect(project.assignCoach(req)).resolves.toStrictEqual({
+        project_user_id: 0,
+        login_user_id: 7,
+        project_id: 0,
+    });
+    expectCall(reqMock.parseAssignCoachRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormPUMock.getUsersFor, 0);
+    expectCall(ormPUMock.createProjectUser, { projectId: 0, loginUserId: 7 });
+});
+
+test("Can't assign coaches (already assigned)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        loginUserId: 0,
+    };
+
+    await expect(project.assignCoach(req)).rejects.toStrictEqual({
+        http: 400,
+        reason: "The coach with ID 0 is already assigned to project 0",
+    });
+    expectCall(reqMock.parseAssignCoachRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormPUMock.getUsersFor, 0);
+    expect(ormPUMock.createProjectUser).not.toHaveBeenCalled();
+});
+
+test("Can un-assign students", async () => {
+    ormEvMock.getEvaluationByPartiesFor.mockResolvedValue([evals[0]]);
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+    };
+
+    await expect(project.unAssignStudent(req)).resolves.toStrictEqual({});
+    expectCall(reqMock.parseRemoveAssigneeRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormEvMock.getEvaluationByPartiesFor).toHaveBeenCalledTimes(2);
+    expect(ormEvMock.updateEvaluationForStudent).toHaveBeenCalledTimes(2);
+    expect(ormCMock.removeContract).toHaveBeenCalledTimes(2);
+});
+
+test("Can't un-assign students (multiple evals)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+    };
+
+    await expect(project.unAssignStudent(req)).rejects.toStrictEqual({
+        http: 400,
+        reason: "Multiple evaluations match.",
+    });
+    expectCall(reqMock.parseRemoveAssigneeRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormEvMock.getEvaluationByPartiesFor).toHaveBeenCalledTimes(1);
+    expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
+    expect(ormCMock.removeContract).not.toHaveBeenCalled();
+});
+
+test("Can't un-assign students (no contracts)", async () => {
+    ormCMock.contractsForStudent.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+    };
+
+    await expect(project.unAssignStudent(req)).rejects.toStrictEqual({
+        http: 400,
+        reason: "The student with ID 0 is not assigned to project 0",
+    });
+    expectCall(reqMock.parseRemoveAssigneeRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormEvMock.getEvaluationByPartiesFor).not.toHaveBeenCalled();
+    expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
+    expect(ormCMock.removeContract).not.toHaveBeenCalled();
 });

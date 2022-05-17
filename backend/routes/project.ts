@@ -508,7 +508,7 @@ export async function unAssignCoach(
 
 export async function assignCoach(
     req: express.Request
-): Promise<Responses.Empty> {
+): Promise<Responses.ProjectUser> {
     return rq
         .parseAssignCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))

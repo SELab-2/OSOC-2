@@ -923,7 +923,7 @@ export async function parseAssignCoachRequest(
     return hasFields(req, ["login_user"], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
-            loginUserId: req.body.login_user,
+            loginUserId: Number(req.body.login_user),
             id: Number(req.params.id),
         }).then(idIsNumber)
     );
