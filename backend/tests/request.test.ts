@@ -1019,7 +1019,6 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
         modifyRoles: {
             roles: [
                 {
@@ -1042,14 +1041,12 @@ test("Can parse update project request", () => {
         partner: "Simic Combine",
         description: "Project description",
         start: Date.now(),
-        positions: 420,
     };
     const d4: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
     };
 
     const req1: express.Request = getMockReq();

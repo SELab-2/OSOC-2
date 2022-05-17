@@ -635,7 +635,6 @@ export async function parseUpdateProjectRequest(
         "partner",
         "start",
         "end",
-        "positions",
         "modifyRoles",
         "deleteRoles",
         "description",
