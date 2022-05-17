@@ -440,20 +440,16 @@ export async function deleteUserPermission(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseUsersPermissionsRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .isAdmin(parsedRequest)
+        .catch(() => Promise.reject(errors.cookInsufficientRights()));
 
-    const isAdminCheck = await util.isAdmin(parsedRequest);
+    await ormLuOs.removeOsocFromUser(
+        checkedSessionKey.data.login_user_id,
+        checkedSessionKey.data.osoc_id
+    );
 
-    if (isAdminCheck.is_admin) {
-        await ormLuOs.removeOsocFromUser(
-            checkedSessionKey.data.login_user_id,
-            checkedSessionKey.data.osoc_id
-        );
-
-        return Promise.resolve({});
-    }
-
-    return Promise.reject(errors.cookInsufficientRights());
+    return Promise.resolve({});
 }
 
 /**

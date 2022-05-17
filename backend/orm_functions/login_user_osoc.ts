@@ -35,7 +35,7 @@ export async function addOsocToUser(loginUserId: number, osocId: number) {
     const entry = await getLoginUserOsocByIds(loginUserId, osocId);
 
     // only create new entry if entry does not yet exists
-    if (entry !== null) {
+    if (entry === null) {
         return await prisma.login_user_osoc.create({
             data: {
                 login_user_id: loginUserId,

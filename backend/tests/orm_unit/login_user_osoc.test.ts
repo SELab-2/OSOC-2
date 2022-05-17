@@ -28,7 +28,7 @@ test("should return null because the entry does not exist", async () => {
 });
 
 test("should connect a login user with an osoc edition", async () => {
-    prismaMock.login_user_osoc.findMany.mockResolvedValue(entries);
+    prismaMock.login_user_osoc.findMany.mockResolvedValue([]);
 
     const expected = {
         login_user_osoc_id: 0,
