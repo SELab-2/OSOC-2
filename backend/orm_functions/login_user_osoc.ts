@@ -1,18 +1,17 @@
 import prisma from "../prisma/prisma";
-import { getOsocByYear } from "./osoc";
 
 /**
  * creates an entry in the "in between table" for osoc and login_user.
  * An entry in this table indicates that this loginUser should be able to see the osoc edition
  *
  * @param loginUserId: the id of the loginUser that should be able to see the osoc edition
- * @param osoc_id: the id of the osoc edition that the loginUser should see
+ * @param osocId: the id of the osoc edition that the loginUser should see
  */
-export async function addOsocToUser(loginUserId: number, osoc_id: number) {
+export async function addOsocToUser(loginUserId: number, osocId: number) {
     return await prisma.login_user_osoc.create({
         data: {
             login_user_id: loginUserId,
-            osoc_id: osoc_id,
+            osoc_id: osocId,
         },
     });
 }
@@ -41,63 +40,17 @@ export async function deleteOsocsLoginConnectionFromOsoc(osocId: number) {
     });
 }
 
-export async function getYearsForUser(loginUserId: number) {
-    const res = await prisma.login_user_osoc.findMany({
+/**
+ * remove the permissions of an loginUser to see data from this osocEdition
+ * @param loginUserId: the id of the loginuser
+ * @param osocId: the id of the osoc edition
+ */
+export async function removeOsocFromUser(loginUserId: number, osocId: number) {
+    // will only delete 1 entry because each combination o
+    return await prisma.login_user_osoc.deleteMany({
         where: {
             login_user_id: loginUserId,
-        },
-        include: {
-            osoc: true,
+            osoc_id: osocId,
         },
     });
-
-    return res.map((obj) => obj.osoc.year);
-}
-
-export async function deleteEntry(loginUserId: number, year: number) {
-    // will always only delete 1 thing even though this is a deleteMany
-    await prisma.login_user_osoc.deleteMany({
-        where: {
-            login_user_id: loginUserId,
-            osoc: {
-                year: year,
-            },
-        },
-    });
-}
-
-export async function createEntry(loginUserId: number, year: number) {
-    const osoc = await getOsocByYear(year);
-
-    if (osoc) {
-        await prisma.login_user_osoc.create({
-            data: {
-                login_user_id: loginUserId,
-                osoc_id: osoc.osoc_id,
-            },
-        });
-    }
-}
-
-export async function setOsocYearsForUsers(
-    loginUserId: number,
-    years: number[]
-) {
-    const yearsCurrent = await getYearsForUser(loginUserId);
-
-    await Promise.all(
-        yearsCurrent.filter((year) => {
-            if (!years.includes(year)) {
-                return deleteEntry(loginUserId, year);
-            }
-        })
-    );
-
-    await Promise.all(
-        years.filter((year) => {
-            if (!years.includes(year)) {
-                return createEntry(loginUserId, year);
-            }
-        })
-    );
 }
