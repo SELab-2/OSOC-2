@@ -34,7 +34,6 @@
     "express": "^4.17.3",
     "googleapis": "^100.0.0",
     "nodemailer": "^6.7.3",
-    "passport": "^0.5.2",
     "prisma": "3.14",
     "socket.io": "^4.4.1",
     "ts-jest": "^27.1.3",
