@@ -28,6 +28,7 @@ const project1: CreateProject = {
     partner: "test-partner",
     startDate: new Date("2022-07-13"),
     endDate: new Date("2022-07-15"),
+    description: "test-description",
 };
 
 const project2: UpdateProject = {
@@ -96,6 +97,7 @@ it("should create 1 new project where osoc is 2022", async () => {
             partner: "test-partner",
             startDate: new Date("2022-07-13"),
             endDate: new Date("2022-07-15"),
+            description: "test-description",
         };
 
         const created_project = await createProject(project0);

@@ -1,5 +1,5 @@
 import { prismaMock } from "./singleton";
-import { CreateProjectUser } from "../../orm_functions/orm_types";
+import { ProjectUser } from "../../orm_functions/orm_types";
 import {
     createProjectUser,
     getUsersFor,
@@ -12,7 +12,7 @@ const returnValue = {
 };
 
 test("should create an project user in the db with the given object, returns the new record", async () => {
-    const projectUser: CreateProjectUser = {
+    const projectUser: ProjectUser = {
         loginUserId: 0,
         projectId: 0,
     };
