@@ -541,7 +541,7 @@ test("Can parse filter students request", () => {
         statusFilter: "YES",
     };
     const emailStatusFilter: T.Requests.StudentFilterParameters = {
-        emailStatusFilter: "SENT",
+        emailStatusFilter: "APPROVED",
     };
     const nameSort: T.Requests.StudentFilterParameters = {
         nameSort: "asc",
