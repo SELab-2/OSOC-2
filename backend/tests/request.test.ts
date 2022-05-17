@@ -873,7 +873,7 @@ test("Can parse filter projects request", () => {
 test("Can parse final decision request", () => {
     const key = "key";
     const id = 6969420420;
-    const data: T.Anything = {};
+    const noData: T.Anything = {};
     const dat2: T.Anything = { reply: "YES" };
     const dat3: T.Anything = { reply: "NO" };
     const dat4: T.Anything = { reply: "MAYBE" };
@@ -881,7 +881,7 @@ test("Can parse final decision request", () => {
     const dat6: T.Anything = { reply: "maybe" };
     const dat7: T.Anything = { reply: "YES" };
 
-    const p = [data, dat2, dat3, dat4].map((x) => {
+    const p = [dat2, dat3, dat4].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
@@ -896,7 +896,7 @@ test("Can parse final decision request", () => {
         ).resolves.toStrictEqual(x);
     });
 
-    const q = [dat5, dat6].map((x) => {
+    const q = [noData, dat5, dat6].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
