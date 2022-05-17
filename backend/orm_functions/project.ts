@@ -22,6 +22,7 @@ export async function createProject(project: CreateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
+            description: project.description,
         },
     });
 }

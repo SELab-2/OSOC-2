@@ -1341,6 +1341,7 @@ export namespace Requests {
         start: Date;
         end: Date;
         roles: object;
+        description: string;
     }
 
     export interface ModProject extends IdRequest {

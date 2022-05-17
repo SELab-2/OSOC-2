@@ -364,6 +364,10 @@ export interface CreateProject {
      * the end date of the project
      */
     endDate: Date;
+    /**
+     * a short description of the project
+     */
+    description: string;
 }
 
 /**

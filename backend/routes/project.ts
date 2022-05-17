@@ -37,6 +37,7 @@ export async function createProject(
         startDate: new Date(checkedSessionKey.data.start),
         endDate: new Date(checkedSessionKey.data.end),
         osocId: Number(checkedSessionKey.data.osocId),
+        description: checkedSessionKey.data.description,
     });
 
     const roleList = [];
@@ -65,6 +66,7 @@ export async function createProject(
         start_date: createdProject.start_date.toString(),
         end_date: createdProject.end_date.toString(),
         osoc_id: createdProject.osoc_id,
+        description: createdProject.description,
         roles: roleList,
     });
 }

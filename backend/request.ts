@@ -606,7 +606,16 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId", "roles"],
+        [
+            "name",
+            "partner",
+            "start",
+            "end",
+            "positions",
+            "osocId",
+            "roles",
+            "description",
+        ],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -618,6 +627,7 @@ export async function parseNewProjectRequest(
             osocId: Number(req.body.osocId),
             positions: Number(req.body.positions),
             roles: req.body.roles,
+            description: req.body.description,
         }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
