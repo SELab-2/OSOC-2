@@ -11,7 +11,7 @@
     .header {
         flex-direction: column;
         height: auto;
-        padding-inline: 1rem;
+        padding-inline: 2rem;
     }
 
     .links {
