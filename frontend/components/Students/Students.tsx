@@ -47,7 +47,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
-        setStudents([...filteredStudents]);
+        setStudents(filteredStudents);
         if (!alwaysLimited) {
             if (selectedStudent < 0) {
                 setDisplay(Display.FULL);

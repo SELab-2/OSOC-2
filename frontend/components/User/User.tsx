@@ -8,14 +8,15 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types";
+import {AccountStatus, LoginUser, OsocEdition} from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
 
 export const User: React.FC<{
     user: LoginUser;
+    editions: OsocEdition[];
     removeUser: (user: LoginUser) => void;
-}> = ({ user, removeUser }) => {
+}> = ({ user, removeUser, editions }) => {
     const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);

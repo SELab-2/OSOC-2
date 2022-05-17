@@ -1,19 +1,19 @@
-import { NextPage } from "next";
-import React, { useContext, useEffect, useState } from "react";
-import { User } from "../components/User/User";
+import {NextPage} from "next";
+import React, {useContext, useEffect, useState} from "react";
+import {User} from "../components/User/User";
 import styles from "../styles/users.module.css";
-import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
+import {UserFilter} from "../components/Filter/UserFilter/UserFilter";
 import {
     AccountStatus,
-    LoginUser,
+    LoginUser, OsocEdition,
     Pagination,
     Sort,
     UserFilterParams,
 } from "../types";
 import SessionContext from "../contexts/sessionProvider";
-import { useRouter } from "next/router";
-import { Paginator } from "../components/Paginator/Paginator";
-import { useSockets } from "../contexts/socketProvider";
+import {useRouter} from "next/router";
+import {Paginator} from "../components/Paginator/Paginator";
+import {useSockets} from "../contexts/socketProvider";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -22,7 +22,7 @@ import { useSockets } from "../contexts/socketProvider";
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-    const { getSession } = useContext(SessionContext);
+    const {getSession} = useContext(SessionContext);
     const router = useRouter();
     const [pagination, setPagination] = useState<Pagination>({
         page: 0,
@@ -38,7 +38,9 @@ const Users: NextPage = () => {
         statusFilter: AccountStatus.NONE,
     });
 
-    const { socket } = useSockets();
+    const [osocEditions, setOsocEditions] = useState<OsocEdition[]>([]);
+
+    const {socket} = useSockets();
 
     useEffect(() => {
         return () => {
@@ -51,10 +53,12 @@ const Users: NextPage = () => {
     useEffect(() => {
         if (getSession) {
             // Only admins may see the manage users screen
-            getSession().then(({ isAdmin }) => {
+            getSession().then(({isAdmin, sessionKey}) => {
                 if (!isAdmin) {
-                    router.push("/").then();
+                    return router.push("/").then();
                 }
+
+                fetchAllOsocEditions(sessionKey).then();
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,6 +106,25 @@ const Users: NextPage = () => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, searchParams]);
+
+    /**
+     * Gets all osoc editions from the backend
+     * @param sessionKey
+     */
+    const fetchAllOsocEditions = async (sessionKey: string) => {
+        let response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                }
+            }
+        ).then((response) => response.json()).catch((reason) => console.log(reason));
+        console.log(response);
+    }
 
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
@@ -153,7 +176,7 @@ const Users: NextPage = () => {
             statusFilter: statusFilter,
         });
         // reset the page to the first page when manual searching!
-        setPagination({ page: 0, count: 0 });
+        setPagination({page: 0, count: 0});
         await search(
             {
                 nameFilter: nameFilter,
@@ -207,9 +230,9 @@ const Users: NextPage = () => {
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
 
-        const { sessionKey } = getSession
+        const {sessionKey} = getSession
             ? await getSession()
-            : { sessionKey: "" };
+            : {sessionKey: ""};
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/user/filter` + query,
             {
@@ -232,21 +255,21 @@ const Users: NextPage = () => {
 
     return (
         <div className={styles.body}>
-            <UserFilter search={filter} />
+            <UserFilter search={filter}/>
             <div>
                 {users !== undefined
                     ? users.map((user) => {
-                          return (
-                              <User
-                                  user={user}
-                                  key={user.login_user_id}
-                                  removeUser={removeUser}
-                              />
-                          );
-                      })
+                        return (
+                            <User
+                                user={user}
+                                key={user.login_user_id}
+                                removeUser={removeUser}
+                                editions={osocEditions}/>
+                        );
+                    })
                     : null}
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            <Paginator pagination={pagination} navigator={navigator}/>
         </div>
     );
 };
