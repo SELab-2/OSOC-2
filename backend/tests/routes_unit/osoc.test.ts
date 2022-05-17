@@ -183,12 +183,10 @@ test("Can get all the osoc editions", async () => {
     r.body = { sessionkey: "abcd" };
     await expect(osoc.listOsocEditions(r)).resolves.toStrictEqual({
         data: osocs,
-        pagination: { page: 0, count: 7 },
     });
     expectCall(reqMock.parseOsocAllRequest, r);
-    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
-    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
-    expectCall(utilMock.checkSessionKey, r.body);
+    expect(ormoMock.getAllOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.isAdmin, r.body);
 });
 
 test("Can filter the osoc editions", async () => {

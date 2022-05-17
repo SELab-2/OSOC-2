@@ -1034,8 +1034,9 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList
-        extends Paginable<InternalTypes.OsocEdition> {}
+    export interface OsocEditionList {
+        data: OsocEdition[];
+    }
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
