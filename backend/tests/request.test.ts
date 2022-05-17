@@ -5,10 +5,22 @@ import * as config from "../config.json";
 import * as Rq from "../request";
 import * as T from "../types";
 import { errors } from "../utility";
+import { idIsNumber } from "../request";
 
 function setSessionKey(req: express.Request, key: string): void {
     req.headers.authorization = config.global.authScheme + " " + key;
 }
+
+test("Id is number tests", () => {
+    expect(idIsNumber({ id: 1, sessionkey: "key" })).resolves.toStrictEqual({
+        id: 1,
+        sessionkey: "key",
+    });
+    const noNumber = parseInt("id");
+    expect(idIsNumber({ id: noNumber, sessionkey: "key" })).rejects.toBe(
+        errors.cookArgumentError()
+    );
+});
 
 test("Can parse Key-only requests", () => {
     const valid: express.Request = getMockReq();
@@ -1592,4 +1604,64 @@ test("Can parse self-modify requests", () => {
     });
 
     return Promise.all([valids, invalids, unauths].flat());
+});
+
+test("Can parse remove coach request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { project_user: 1 };
+    const noProjectUser: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseRemoveCoachRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        projectUserId: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noProjectUser };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseRemoveCoachRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse assign coach request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { login_user: 1 };
+    const noProjectUser: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseAssignCoachRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        loginUserId: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noProjectUser };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseAssignCoachRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
 });
