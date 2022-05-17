@@ -17,6 +17,7 @@ import { StudentOverview } from "../StudentOverview/StudentOverview";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
+import { useSockets } from "../../contexts/socketProvider";
 
 /**
  * Constructs the complete students page with filter included
@@ -42,6 +43,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     });
 
     const [loading, isLoading] = useState(false);
+    const { socket } = useSockets();
 
     /**
      * Updates the list of students and sets the selected student index
@@ -83,7 +85,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 }
             }
         }
-    }, [router.query, students]);
+    }, [router.query]); //TODO: student stond hier bij als dep is nodig om na refresh juiste student open te hebben maar dit zorgt voor andere bugs
 
     /**
      * We add a listener for keypresses
@@ -92,9 +94,24 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         document.body.addEventListener("keydown", handleKeyPress);
         return () => {
             document.body.removeEventListener("keydown", handleKeyPress);
+            socket.off("studentSuggestionCreated");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    /**
+     * update on websocket event if the student with the id that was changed is the student that is currently loaded
+     */
+    useEffect(() => {
+        socket.off("studentSuggestionCreated");
+        socket.on("studentSuggestionCreated", () => {
+            console.log("refetch");
+            console.log("inside");
+            if (params != undefined) {
+                search(params, pagination.page).then();
+            }
+        });
+    }, [socket, params, pagination]);
 
     /**
      * Closes the student overview if escape is pressed
@@ -155,15 +172,14 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     /**
      * Callback that the student overview uses to update a student's suggestion list
      * @param studentId
-     * @param evalutationsCoach
+     * @param evaluationsCoach
      */
     const updateStudentEvaluation = (
         studentId: number,
-        evalutationsCoach: Evaluation[]
+        evaluationsCoach: Evaluation[]
     ) => {
         if (selectedStudent !== -1) {
-            students[selectedStudent].evaluation.evaluations =
-                evalutationsCoach;
+            students[selectedStudent].evaluation.evaluations = evaluationsCoach;
         }
         setStudents([...students]);
     };

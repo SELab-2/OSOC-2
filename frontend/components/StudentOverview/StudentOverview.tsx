@@ -15,6 +15,7 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import Image from "next/image";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -30,6 +31,7 @@ export const StudentOverview: React.FC<{
     const [suggestBool, setSuggestBool] = useState(true);
     const [motivation, setMotivation] = useState("");
     const { getSession } = useContext(SessionContext);
+    const { socket } = useSockets();
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
@@ -59,7 +61,7 @@ export const StudentOverview: React.FC<{
     }, [student]);
 
     /**
-     * Call the `updateEvalutations` callback when the evaluations change
+     * Call the `updateEvaluations` callback when the evaluations change
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
@@ -93,7 +95,8 @@ export const StudentOverview: React.FC<{
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
             setMotivation("");
-            // The creation was succesfull, we can update the evaluation bar
+            socket.emit("studentSuggestionSent", student.student.student_id);
+            // The creation was successful, we can update the evaluation bar
             fetchEvals().then();
         }
     };
@@ -123,7 +126,8 @@ export const StudentOverview: React.FC<{
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
             setMotivation("");
-            // The creation was succesfull, we can update the evaluation bar
+            socket.emit("studentDecisionSent", student.student.student_id);
+            // The creation was successful, we can update the evaluation bar
             fetchEvals().then();
         }
     };

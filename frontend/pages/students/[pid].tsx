@@ -5,17 +5,43 @@ import { useContext, useEffect, useState } from "react";
 import { Student } from "../../types";
 import { StudentOverview } from "../../components/StudentOverview/StudentOverview";
 import styles from "../../components/StudentOverview/StudentOverview.module.scss";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Pid: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [student, setStudent] = useState<Student>();
     const { pid } = router.query; // pid is the student id
+    const { socket } = useSockets();
+
+    /**
+     * remove listeners on dismount
+     */
+    useEffect(() => {
+        return () => {
+            socket.off("studentSuggestionCreated");
+        };
+    }, []);
+
+    /**
+     * update on websocket event if the student with the id that was changed is the student that is currently loaded
+     */
+    useEffect(() => {
+        socket.off("studentSuggestionCreated");
+        socket.on("studentSuggestionCreated", (studentId: number) => {
+            console.log("refetch");
+            if (studentId === student?.student.student_id) {
+                console.log("inside");
+                fetchStudent().then();
+            }
+        });
+    }, [student, socket]);
 
     const fetchStudent = async () => {
         if (getSession !== undefined && pid !== undefined) {
             getSession().then(async ({ sessionKey }) => {
                 if (sessionKey !== "") {
+                    console.log("fetching from pid");
                     const response = await fetch(
                         `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`,
                         {
