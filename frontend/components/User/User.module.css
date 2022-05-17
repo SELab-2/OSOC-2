@@ -81,3 +81,7 @@
 .dropdownitem:hover {
     background-color: var(--neutral-150);
 }
+
+.active {
+    background-color: var(--succes-100);
+}

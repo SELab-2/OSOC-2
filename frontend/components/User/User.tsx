@@ -28,6 +28,9 @@ export const User: React.FC<{
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    // a set of edition ids the user is allowed to see
+    const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
+
     // needed for when an update is received via websockets
     useEffect(() => {
         setIsAdmin(user.is_admin);
@@ -40,6 +43,35 @@ export const User: React.FC<{
             setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
+
+    // load
+    useEffect(() => {
+        fetchUserEditions().then();
+    }, []);
+
+    const fetchUserEditions = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/years/${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (Array.isArray(response)) {
+            const ids = [];
+            for (const edition of response) {
+                ids.push(edition.osoc_id);
+            }
+            setUserEditions(new Set(ids));
+        }
+    };
 
     const setUserRole = async (
         route: string,
@@ -231,6 +263,31 @@ export const User: React.FC<{
         }
     };
 
+    const selectEdition = async (id: number) => {
+        const method = userEditions.has(id) ? "DELETE" : "POST";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        if (method === "DELETE") {
+            userEditions.delete(id);
+        } else {
+            userEditions.add(id);
+        }
+        setUserEditions(userEditions);
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/year/${userId}`, {
+            method: method,
+            body: JSON.stringify({
+                osoc_id: id,
+                login_user_id: user.login_user_id,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `auth/osoc2 ${sessionKey}`,
+            },
+        }).catch((reason) => console.log(reason));
+    };
+
     return (
         <div className={styles.row}>
             <div className={styles.name}>
@@ -258,8 +315,20 @@ export const User: React.FC<{
                                 {editions.map((edition) => {
                                     return (
                                         <div
+                                            onClick={() =>
+                                                selectEdition(edition.osoc_id)
+                                            }
                                             key={edition.osoc_id}
-                                            className={`dropdown-item ${styles.dropdownitem}`}
+                                            className={`dropdown-item ${
+                                                styles.dropdownitem
+                                            }
+                                            ${
+                                                userEditions.has(
+                                                    edition.osoc_id
+                                                )
+                                                    ? styles.active
+                                                    : ""
+                                            }`}
                                         >
                                             {edition.year}
                                         </div>
