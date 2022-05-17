@@ -651,7 +651,10 @@ export async function parseUpdateProjectRequest(
         "positions",
         "modifyRoles",
         "deleteRoles",
+        "addRoles",
         "description",
+        "addCoaches",
+        "removeCoaches",
     ];
 
     return hasFields(req, [], types.id).then(async () => {
@@ -670,7 +673,10 @@ export async function parseUpdateProjectRequest(
                     : Number(req.body.positions),
             modifyRoles: maybe<object>(req.body, "modifyRoles"),
             deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            addRoles: maybe<object>(req.body, "addRoles"),
             description: maybe<string>(req.body, "description"),
+            addCoaches: maybe<object>(req.body, "addCoaches"),
+            removecoaches: maybe<object>(req.body, "removeCoaches"),
         }).then(idIsNumber);
     });
 }
@@ -916,11 +922,11 @@ export async function parseRemoveAssigneeRequest(
 
 export async function parseRemoveCoachRequest(
     req: express.Request
-): Promise<Requests.RmDraftCoach> {
-    return hasFields(req, ["project_user"], types.id).then(() =>
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
-            projectUserId: req.body.project_user,
+            loginUserId: Number(req.body.loginUserId),
             id: Number(req.params.id),
         }).then(idIsNumber)
     );
@@ -928,11 +934,11 @@ export async function parseRemoveCoachRequest(
 
 export async function parseAssignCoachRequest(
     req: express.Request
-): Promise<Requests.DraftCoach> {
-    return hasFields(req, ["login_user"], types.id).then(() =>
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
-            loginUserId: req.body.login_user,
+            loginUserId: Number(req.body.loginUserId),
             id: Number(req.params.id),
         }).then(idIsNumber)
     );

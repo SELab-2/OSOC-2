@@ -1353,9 +1353,12 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        addRoles?: object;
+        modifyRoles?: object;
         deleteRoles?: object;
+        addRoles?: object;
         description?: string;
+        addCoaches?: object;
+        removeCoaches?: object;
     }
 
     export interface ProjectFilter extends PaginableRequest {
@@ -1437,11 +1440,7 @@ export namespace Requests {
         studentId: number;
     }
 
-    export interface RmDraftCoach extends IdRequest {
-        projectUserId: number;
-    }
-
-    export interface DraftCoach extends IdRequest {
+    export interface Coach extends IdRequest {
         loginUserId: number;
     }
 }

@@ -312,6 +312,10 @@ export async function modProject(
         });
     }
 
+    for (const coachId of checkedId.coaches) {
+        await ormPU.deleteProjectUser(coachId);
+    }
+
     return Promise.resolve({
         id: updatedProject.project_id,
         name: updatedProject.name,
@@ -511,8 +515,8 @@ export async function unAssignCoach(
                 .then((project_users) =>
                     project_users.filter(
                         (project_user) =>
-                            project_user.project_user_id ==
-                            checked.data.projectUserId
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
                     )
                 )
                 .then(async (found) => {
@@ -521,17 +525,15 @@ export async function unAssignCoach(
                             http: 400,
                             reason:
                                 "The coach with ID " +
-                                checked.data.projectUserId.toString() +
+                                checked.data.loginUserId.toString() +
                                 " is not assigned to project " +
                                 checked.data.id,
                         });
                     }
-
-                    for (const project_user of found) {
-                        await ormPU.deleteProjectUser(
-                            project_user.project_user_id
-                        );
-                    }
+                    await ormPU.deleteProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
 
                     return Promise.resolve({});
                 });
