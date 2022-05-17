@@ -54,6 +54,7 @@ export const User: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
+
         const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
@@ -96,35 +97,51 @@ export const User: React.FC<{
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
+        // when account is disabled and we set admin (== currently admin is disabled) => set account to activated
+        // when we disable admin (== currently enabled) but coach is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isAdmin || isCoach
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "admin",
             "admin",
             !isAdmin,
             isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
             setIsAdmin((isAdmin) => !isAdmin);
-            if (status === AccountStatus.DISABLED) {
-                await toggleStatus(e);
-            }
+            setStatus(statusToSet);
         }
     };
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
+        // when account is disabled and we set coach (== currently coach is disabled) => set account to activated
+        // when we disable coach (== currently enabled) but admin is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isCoach || isAdmin
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "coach",
             "coach",
             isAdmin,
             !isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
-            setIsCoach((isCoach) => !isCoach);
-            if (status === AccountStatus.DISABLED) {
-                await toggleStatus(e);
-            }
+            setIsCoach(!isCoach);
+            setStatus(statusToSet);
         }
     };
 
@@ -134,8 +151,8 @@ export const User: React.FC<{
             const response = await setUserRole(
                 "coach",
                 "disabled", // the account is still on activated => we disable the account
-                isAdmin,
-                isCoach,
+                false, // when the account is disabled we remove all the admin perms
+                false, // when the account is disabled we remove all the coach perms
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
@@ -148,10 +165,11 @@ export const User: React.FC<{
                 "coach",
                 "activated", // the account is still on disabled => we enable the account
                 isAdmin,
-                isCoach,
+                true, // when activating an account we always want to set the user to be a coach
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
+                setIsCoach(true);
                 setStatus(() => AccountStatus.ACTIVATED);
             }
         }

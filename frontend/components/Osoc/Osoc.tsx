@@ -10,7 +10,7 @@ export const Osoc: React.FC<{
 }> = ({ osoc, removeOsoc }) => {
     const [year] = useState<number>(osoc.year);
     const [projects] = useState<number>(osoc._count.project);
-    const { sessionKey } = useContext(SessionContext);
+    const { sessionKey, isAdmin } = useContext(SessionContext);
     const osocId = osoc.osoc_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -60,10 +60,13 @@ export const Osoc: React.FC<{
                 </p>
                 <button onClick={deleteOsoc}>DELETE</button>
             </Modal>
-            <button
-                className={`delete ${styles.delete}`}
-                onClick={() => setShowDeleteModal(true)}
-            />
+            {/* Only admins can delete osoc editions */}
+            {isAdmin ? (
+                <button
+                    className={`delete ${styles.delete}`}
+                    onClick={() => setShowDeleteModal(true)}
+                />
+            ) : null}
         </div>
     );
 };
