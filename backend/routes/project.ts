@@ -278,23 +278,39 @@ export async function modProject(
         description: checkedId.description,
     });
 
-    if (checkedId.modifyRoles !== undefined) {
-        for (const changeRolePositions of checkedId.modifyRoles.roles) {
-            const foundRole = await ormRole.getRole(changeRolePositions.id);
-            if (foundRole !== null) {
-                await ormPrRole.updateProjectRole({
-                    projectRoleId: changeRolePositions.id,
+    const oldProjectRoles = await ormPrRole.getProjectRoleNamesByProject(
+        checkedId.id
+    );
+
+    if (checkedId.roles !== undefined) {
+        loop1: for (const role of checkedId.roles.roles) {
+            for (const projectRole of oldProjectRoles) {
+                if (role.name === projectRole.role.name) {
+                    if (role.positions !== projectRole.positions) {
+                        if (role.positions === 0) {
+                            await ormPrRole.deleteProjectRole(
+                                projectRole.role_id
+                            );
+                        } else {
+                            await ormPrRole.updateProjectRole({
+                                projectRoleId: projectRole.project_role_id,
+                                projectId: checkedId.id,
+                                roleId: projectRole.role_id,
+                                positions: role.positions,
+                            });
+                        }
+                        continue loop1;
+                    }
+                }
+            }
+            const project_role = await ormRole.getRolesByName(role.name);
+            if (project_role !== null) {
+                await ormPrRole.createProjectRole({
                     projectId: checkedId.id,
-                    roleId: foundRole.role_id,
-                    positions: changeRolePositions.positions,
+                    roleId: project_role.role_id,
+                    positions: role.positions,
                 });
             }
-        }
-    }
-
-    if (checkedId.deleteRoles !== undefined) {
-        for (const deleteRoleId of checkedId.deleteRoles.roles) {
-            await ormPrRole.deleteProjectRole(deleteRoleId);
         }
     }
 
@@ -312,18 +328,24 @@ export async function modProject(
         });
     }
 
-    for (const coachId of checkedId.addCoaches) {
-        await ormPU.createProjectUser({
-            projectId: checkedId.id,
-            loginUserId: coachId,
-        });
+    if (checkedId.addCoaches !== undefined) {
+        for (const coachId of checkedId.addCoaches.coaches) {
+            await ormPU.createProjectUser({
+                projectId: checkedId.id,
+                loginUserId: coachId,
+            });
+        }
     }
 
-    for (const coachId of checkedId.removeCoaches) {
-        await ormPU.deleteProjectUser({
-            projectId: checkedId.id,
-            loginUserId: coachId,
-        });
+    console.log(checkedId.removeCoaches);
+    if (checkedId.removeCoaches !== undefined) {
+        console.log("hello");
+        for (const coachId of checkedId.removeCoaches.coaches) {
+            await ormPU.deleteProjectUser({
+                projectId: checkedId.id,
+                loginUserId: coachId,
+            });
+        }
     }
 
     const coachList = await ormPU.getUsersFor(Number(checkedId.id));

@@ -649,9 +649,7 @@ export async function parseUpdateProjectRequest(
         "start",
         "end",
         "positions",
-        "modifyRoles",
-        "deleteRoles",
-        "addRoles",
+        "roles",
         "description",
         "addCoaches",
         "removeCoaches",
@@ -671,12 +669,10 @@ export async function parseUpdateProjectRequest(
                 maybe(req.body, "positions") == undefined
                     ? undefined
                     : Number(req.body.positions),
-            modifyRoles: maybe<object>(req.body, "modifyRoles"),
-            deleteRoles: maybe<object>(req.body, "deleteRoles"),
-            addRoles: maybe<object>(req.body, "addRoles"),
+            roles: maybe<object>(req.body, "roles"),
             description: maybe<string>(req.body, "description"),
             addCoaches: maybe<object>(req.body, "addCoaches"),
-            removecoaches: maybe<object>(req.body, "removeCoaches"),
+            removeCoaches: maybe<object>(req.body, "removeCoaches"),
         }).then(idIsNumber);
     });
 }

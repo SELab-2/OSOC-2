@@ -1353,9 +1353,7 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        modifyRoles?: object;
-        deleteRoles?: object;
-        addRoles?: object;
+        roles?: object;
         description?: string;
         addCoaches?: object;
         removeCoaches?: object;
