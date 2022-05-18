@@ -1783,3 +1783,54 @@ test("Can parse assign coach request", () => {
 
     return Promise.all([valid, invalid]);
 });
+
+test("Can parse users permissions request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { osoc_id: 1, login_user_id: 1 };
+    const empty: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseUsersPermissionsRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        osoc_id: 1,
+        login_user_id: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...empty };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseUsersPermissionsRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse get users permissions request", () => {
+    const key = "key";
+    const id = 10;
+
+    const empty: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...empty };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseGetUserPermissionsRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+    });
+
+    return Promise.all([valid]);
+});

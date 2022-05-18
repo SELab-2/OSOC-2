@@ -1025,7 +1025,7 @@ export async function parseUsersPermissionsRequest(
 export async function parseGetUserPermissionsRequest(
     req: express.Request
 ): Promise<Requests.IdRequest> {
-    return hasFields(req, [], types.neither).then(() =>
+    return hasFields(req, [], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
