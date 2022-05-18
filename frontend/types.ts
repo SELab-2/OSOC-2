@@ -146,17 +146,17 @@ export interface Student {
                 role_id: number;
             }
         ];
-        attachment: [Attachment];
+        attachment: Attachment[];
         created_at: Date;
         edu_duration: string;
         edu_institute: string;
         edu_level: string;
         edu_year: string;
-        edus: [string];
+        edus: string[];
         email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
-        job_application_skill: [JobApplicationSkill];
+        job_application_skill: JobApplicationSkill[];
         osoc_id: number;
         responsibilities: string;
         student_coach: boolean;
