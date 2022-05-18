@@ -26,7 +26,7 @@ export const StudentOverview: React.FC<{
 }> = ({ student, year, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-    // the counter is used to check if the evaluations data is updated because putting
+    // the counter is used to check if the evaluations' data is updated because putting
     // the evaluations variable in the useEffect hook causes an infinite loop
     const [showSuggestionField, setShowSuggestionField] = useState(false);
     const [decision, setDecision] = useState<Decision>(Decision.YES);
@@ -66,7 +66,7 @@ export const StudentOverview: React.FC<{
     }, [student]);
 
     /**
-     * Call the `updateEvalutations` callback when the evaluations change
+     * Call the `updateEvaluations` callback when the evaluations change
      */
     useEffect(() => {
         if (updateEvaluations !== undefined) {
@@ -103,7 +103,11 @@ export const StudentOverview: React.FC<{
         if (response !== undefined) {
             if (response.success) {
                 setMotivation("");
-                // The creation was succesfull, we can update the evaluation bar
+                socket.emit(
+                    "studentSuggestionSent",
+                    student.student.student_id
+                );
+                // The creation was successful, we can update the evaluation bar
                 fetchEvals().then();
             } else {
                 if (notify) {
@@ -141,7 +145,8 @@ export const StudentOverview: React.FC<{
         if (response !== undefined) {
             if (response.success) {
                 setMotivation("");
-                // The creation was succesfull, we can update the evaluation bar
+                socket.emit("studentDecisionSent", student.student.student_id);
+                // The creation was successful, we can update the evaluation bar
                 fetchEvals().then();
             } else {
                 if (notify) {
