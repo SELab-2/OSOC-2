@@ -92,10 +92,15 @@ export const StudentOverview: React.FC<{
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
-            setMotivation("");
-            // The creation was succesfull, we can update the evaluation bar
-            fetchEvals().then();
+        if (response !== undefined) {
+            console.log(response);
+            if (response.success) {
+                setMotivation("");
+                // The creation was succesfull, we can update the evaluation bar
+                fetchEvals().then();
+            } else {
+                console.log(response);
+            }
         }
     };
 
@@ -124,10 +129,14 @@ export const StudentOverview: React.FC<{
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
-            setMotivation("");
-            // The creation was succesfull, we can update the evaluation bar
-            fetchEvals().then();
+        if (response !== undefined) {
+            if (response.success) {
+                setMotivation("");
+                // The creation was succesfull, we can update the evaluation bar
+                fetchEvals().then();
+            } else {
+                console.log(response);
+            }
         }
     };
 
