@@ -124,7 +124,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         const params = new URLSearchParams(window.location.search);
         params.delete("id");
         // push the url
-        router.push(`/students?${params.toString()}`).then();
+        router.push(`${window.location.pathname}?${params.toString()}`).then();
     };
 
     /**
@@ -141,7 +141,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         index: number
     ) => {
         e.preventDefault();
-
         if (e.ctrlKey || e.altKey || e.button == 1) {
             let url = `/students/${student_id}`;
             if (params?.osocYear) {
@@ -150,16 +149,27 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             window.open(url);
             return;
         }
-        // set the new id
-        const paramsQuery = new URLSearchParams(window.location.search);
-        paramsQuery.set("id", student_id.toString());
-        if (params?.osocYear) {
-            paramsQuery.set("year", params?.osocYear);
+        if (!alwaysLimited) {
+            // on the students page
+            if (e.ctrlKey || e.altKey || e.button == 1) {
+                let url = `/students/${student_id}`;
+                if (params?.osocYear) {
+                    url += `?year=${params?.osocYear}`;
+                }
+                window.open(url);
+                return;
+            }
+            // set the new id
+            const paramsQuery = new URLSearchParams(window.location.search);
+            paramsQuery.set("id", student_id.toString());
+            if (params?.osocYear) {
+                paramsQuery.set("year", params?.osocYear);
+            }
+            // push the url
+            router.push(`/students?${paramsQuery.toString()}`).then();
+            setDisplay(Display.LIMITED);
+            setSelectedStudent(index);
         }
-        // push the url
-        router.push(`/students?${paramsQuery.toString()}`).then();
-        setDisplay(Display.LIMITED);
-        setSelectedStudent(index);
     };
 
     // Maps student id's to their index in the student list, so that we can update the info
