@@ -29,10 +29,9 @@ const Pid: NextPage = () => {
     useEffect(() => {
         socket.off("studentSuggestionCreated");
         socket.on("studentSuggestionCreated", (studentId: number) => {
-            console.log("refetch");
             if (studentId === student?.student.student_id) {
-                console.log("inside");
-                fetchStudent().then();
+                const scrollPosition = window.scrollY;
+                fetchStudent().then(() => window.scrollTo(0, scrollPosition));
             }
         });
     }, [student, socket]);
@@ -41,7 +40,6 @@ const Pid: NextPage = () => {
         if (getSession !== undefined && pid !== undefined) {
             getSession().then(async ({ sessionKey }) => {
                 if (sessionKey !== "") {
-                    console.log("fetching from pid");
                     const response = await fetch(
                         `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`,
                         {

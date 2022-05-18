@@ -50,10 +50,12 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param filteredStudents
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
+        const scrollPosition = window.scrollY;
+        console.log("scroll " + scrollPosition);
         let index = -1;
         const searchParams = new URLSearchParams(window.location.search);
-        if (selectedStudent === -1) {
-            const id = searchParams.get("id");
+        const id = searchParams.get("id");
+        if (selectedStudent === -1 || id) {
             if (id !== null) {
                 const id_number = Number(id);
                 if (!isNaN(id_number)) {
@@ -67,8 +69,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                     }
                 }
             }
-        } else {
-            setSelectedStudent(selectedStudent);
         }
         setStudents([...filteredStudents]);
         if (!alwaysLimited) {
@@ -78,6 +78,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 setDisplay(Display.LIMITED);
             }
         }
+        window.scrollTo(0, scrollPosition);
+        console.log(window.scrollY);
     };
 
     /**
@@ -99,7 +101,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         socket.off("studentSuggestionCreated");
         socket.on("studentSuggestionCreated", () => {
             if (params != undefined) {
-                search(params, pagination.page).then();
+                filterAutomatic(params).then();
             }
         });
     }, [socket, params, pagination]);
@@ -112,12 +114,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (e.key === "Escape") {
             clearSelection();
         }
-        // TODO: moet hier niet setSelectedStudent(-1) komen?
-        // delete the id from the url
-        const params = new URLSearchParams(window.location.search);
-        params.delete("id");
-        // push the url
-        router.push(`/students?${params.toString()}`).then();
     };
 
     /**
@@ -195,7 +191,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     const filterManual = async (params: StudentFilterParams) => {
         setParams(params);
         clearSelection();
-
+        setSelectedStudent(-1);
         search(params, 0).then();
     };
 
@@ -204,6 +200,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param params
      */
     const filterAutomatic = async (params: StudentFilterParams) => {
+        console.log("AUTO");
         setParams(params);
         // get the current page
         const currentPageStr = new URLSearchParams(window.location.search).get(
@@ -226,6 +223,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param page
      */
     const search = async (params: StudentFilterParams, page: number) => {
+        const scrollPosition = window.scrollY;
+        console.log("SCROLL " + scrollPosition);
         if (loading) return;
         isLoading(true);
         const filters = [];
@@ -297,7 +296,9 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         isLoading(false);
         const id = new URLSearchParams(window.location.search).get("id");
         const frontendQuery = id !== null ? query + "&id=" + id : query;
-        router.push(`/students${frontendQuery}`).then();
+        router
+            .push(`${window.location.pathname}${frontendQuery}`)
+            .then(() => window.scrollTo(0, scrollPosition));
     };
 
     return (
