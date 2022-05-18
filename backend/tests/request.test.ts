@@ -356,15 +356,17 @@ test("Can parse update student request", () => {
 test("Can parse suggest student request", () => {
     const key = "my-session-key";
     const id = 9845;
-    const ys: T.Anything = { suggestion: "YES" };
-    const mb: T.Anything = { suggestion: "MAYBE" };
-    const no: T.Anything = { suggestion: "NO" };
+    const ys: T.Anything = { suggestion: "YES", job_application_id: 1 };
+    const mb: T.Anything = { suggestion: "MAYBE", job_application_id: 1 };
+    const no: T.Anything = { suggestion: "NO", job_application_id: 1 };
     const nr: T.Anything = {
         suggestion: "NO",
         reason: "I just don't like you",
+        job_application_id: 1,
     };
-    const i1: T.Anything = { suggestion: "TOMORROW" };
-    const i2: T.Anything = { suggestion: "no" }; // no caps
+    const i1: T.Anything = { suggestion: "TOMORROW", job_application_id: 1 };
+    const i2: T.Anything = { suggestion: "no", job_application_id: 1 }; // no caps
+    const i3: T.Anything = { suggestion: "NO" }; // no job application id
 
     const okays = [ys, mb, no, nr].map((x) => {
         const copy: T.Anything = { ...x };
@@ -384,7 +386,7 @@ test("Can parse suggest student request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const fails = [i1, i2].map((x) => {
+    const fails = [i1, i2, i3].map((x) => {
         const req: express.Request = getMockReq();
         req.params.id = id.toString();
         req.body = { ...x };
@@ -620,7 +622,7 @@ test("Can parse filter students request", () => {
         copy.pageSize = config.global.pageSize;
 
         if (!("osocYear" in req.body)) {
-            copy["osocYear"] = new Date().getFullYear();
+            copy["osocYear"] = undefined;
         }
         copy.sessionkey = key;
         return expect(
