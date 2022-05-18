@@ -319,11 +319,13 @@ export async function filterStudents(
 
     const studentlist: InternalTypes.Student[] = [];
 
-    let year = new Date().getFullYear();
+    let year;
     if (checkedSessionKey.data.osocYear === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
             year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
         }
     } else {
         year = checkedSessionKey.data.osocYear;
