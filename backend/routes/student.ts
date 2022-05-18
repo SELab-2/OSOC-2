@@ -31,8 +31,21 @@ export async function getStudent(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
+    let year;
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
+    const jobApplication = await ormJo.getJobApplicationByYearForStudent(
+        student.student_id,
+        year
     );
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
@@ -46,16 +59,6 @@ export async function getStudent(
         } else {
             return Promise.reject(errors.cookInvalidID());
         }
-    }
-
-    let year = new Date().getFullYear();
-    if (checkedSessionKey.data.year === undefined) {
-        const latestOsocYear = await ormOs.getLatestOsoc();
-        if (latestOsocYear !== null) {
-            year = latestOsocYear.year;
-        }
-    } else {
-        year = checkedSessionKey.data.year;
     }
 
     const evaluations = await ormJo.getEvaluationsByYearForStudent(
@@ -133,6 +136,8 @@ export async function createStudentSuggestion(
         student.student_id
     );
 
+    console.log(jobApplication);
+
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -148,6 +153,9 @@ export async function createStudentSuggestion(
     }
 
     const osocYear = await ormOs.getLatestOsoc();
+
+    console.log(osocYear);
+    console.log(jobApplication.job_application_id);
 
     if (osocYear == null) {
         return Promise.reject(errors.cookNoDataError());
@@ -303,25 +311,6 @@ export async function filterStudents(
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
-    const students = await ormSt.filterStudents(
-        {
-            currentPage: checkedSessionKey.data.currentPage,
-            pageSize: checkedSessionKey.data.pageSize,
-        },
-        checkedSessionKey.data.nameFilter,
-        checkedSessionKey.data.emailFilter,
-        checkedSessionKey.data.roleFilter,
-        checkedSessionKey.data.alumniFilter,
-        checkedSessionKey.data.coachFilter,
-        checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.osocYear,
-        checkedSessionKey.data.emailStatusFilter,
-        checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort
-    );
-
-    const studentlist: InternalTypes.Student[] = [];
-
     let year;
     if (checkedSessionKey.data.osocYear === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
@@ -334,9 +323,29 @@ export async function filterStudents(
         year = checkedSessionKey.data.osocYear;
     }
 
+    const students = await ormSt.filterStudents(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
+        checkedSessionKey.data.nameFilter,
+        checkedSessionKey.data.emailFilter,
+        checkedSessionKey.data.roleFilter,
+        checkedSessionKey.data.alumniFilter,
+        checkedSessionKey.data.coachFilter,
+        checkedSessionKey.data.statusFilter,
+        year,
+        checkedSessionKey.data.emailStatusFilter,
+        checkedSessionKey.data.nameSort,
+        checkedSessionKey.data.emailSort
+    );
+
+    const studentlist: InternalTypes.Student[] = [];
+
     for (const student of students.data) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-            student.student_id
+        const jobApplication = await ormJo.getJobApplicationByYearForStudent(
+            student.student_id,
+            year
         );
         if (jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
@@ -382,6 +391,8 @@ export async function filterStudents(
             roles: roles,
         });
     }
+
+    console.log(studentlist);
 
     return Promise.resolve({
         pagination: students.pagination,

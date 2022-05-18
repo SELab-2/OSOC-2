@@ -242,7 +242,9 @@ export async function getLatestJobApplicationOfStudent(studentId: number) {
         },
         orderBy: {
             // order descending == get newest first
-            created_at: "desc",
+            osoc: {
+                year: "desc",
+            },
         },
         include: {
             attachment: true,

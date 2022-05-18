@@ -464,7 +464,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    let osoc_year = new Date().getFullYear();
+    let osoc_year;
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
         if (isNaN(osoc_year)) return rejector();
@@ -987,7 +987,6 @@ export async function parseAcceptNewUserRequest(
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
-    console.log(parseInt(req.body.year));
     return hasFields(req, ["year"], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
