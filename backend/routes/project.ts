@@ -283,7 +283,6 @@ export async function modProject(
     let isOldRole = false;
     if (checkedId.roles !== undefined) {
         for (const role of checkedId.roles.roles) {
-            console.log(role);
             isOldRole = false;
             for (const projectRole of oldProjectRoles) {
                 if (role.name === projectRole.role.name) {
@@ -343,7 +342,6 @@ export async function modProject(
 
     console.log(checkedId.removeCoaches);
     if (checkedId.removeCoaches !== undefined) {
-        console.log("hello");
         for (const coachId of checkedId.removeCoaches.coaches) {
             await ormPU.deleteProjectUser({
                 projectId: checkedId.id,
