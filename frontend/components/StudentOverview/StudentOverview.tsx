@@ -37,7 +37,7 @@ export const StudentOverview: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest/` +
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest?` +
                 year,
             {
                 method: "GET",
