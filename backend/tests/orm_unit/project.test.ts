@@ -123,6 +123,7 @@ test("should create a project in the db with the given object, returns the new r
         partner: "Best partner",
         startDate: new Date("2022-07-13"),
         endDate: new Date("2022-08-31"),
+        description: "Description of the project",
     };
 
     prismaMock.project.create.mockResolvedValue(returnValue);
