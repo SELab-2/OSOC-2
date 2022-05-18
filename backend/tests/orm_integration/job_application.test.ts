@@ -462,18 +462,18 @@ it("should return the most recent job application of a student", async () => {
 
     const expected = {
         student_id: students[0].student_id,
-        student_volunteer_info: "I'd like to volunteer",
-        responsibilities: "no responsibilities2",
-        fun_fact: "this is a fun fact too",
-        student_coach: true,
+        student_volunteer_info: "no volunteer",
+        responsibilities: "no responsibilities",
+        fun_fact: "this is a fun fact",
+        student_coach: false,
         osoc_id: osocs[0].osoc_id,
-        edus: ["higher education"],
-        edu_level: "MaNaMa",
-        edu_duration: 8,
+        edus: ["basic education"],
+        edu_level: "higher education",
+        edu_duration: 5,
         edu_institute: "Ugent",
-        edu_year: "7",
-        email_status: email_status_enum.SENT,
-        created_at: new Date("December 20, 2021 03:24:00"),
+        edu_year: "4",
+        email_status: email_status_enum.DRAFT,
+        created_at: new Date("2021-12-17T13:24:00.000Z"),
     };
 
     const found = await getLatestJobApplicationOfStudent(expected.student_id);

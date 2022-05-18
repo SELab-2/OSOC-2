@@ -901,12 +901,13 @@ test("Can parse final decision request", () => {
     const key = "key";
     const id = 6969420420;
     const noData: T.Anything = {};
-    const dat2: T.Anything = { reply: "YES" };
-    const dat3: T.Anything = { reply: "NO" };
-    const dat4: T.Anything = { reply: "MAYBE" };
-    const dat5: T.Anything = { reply: "something" };
-    const dat6: T.Anything = { reply: "maybe" };
-    const dat7: T.Anything = { reply: "YES" };
+    const dat2: T.Anything = { reply: "YES", job_application_id: 1 };
+    const dat3: T.Anything = { reply: "NO", job_application_id: 1 };
+    const dat4: T.Anything = { reply: "MAYBE", job_application_id: 1 };
+    const dat5: T.Anything = { reply: "something", job_application_id: 1 };
+    const dat6: T.Anything = { reply: "maybe", job_application_id: 1 };
+    const dat7: T.Anything = { reply: "YES", job_application_id: 1 };
+    const dat8: T.Anything = { reply: "YES" };
 
     const p = [dat2, dat3, dat4].map((x) => {
         const r: express.Request = getMockReq();
@@ -923,7 +924,7 @@ test("Can parse final decision request", () => {
         ).resolves.toStrictEqual(x);
     });
 
-    const q = [noData, dat5, dat6].map((x) => {
+    const q = [noData, dat5, dat6, dat8].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
