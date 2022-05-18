@@ -76,6 +76,7 @@ export const StudentFilter: React.FC<{
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
 
+        // get all the arguments from the search string
         const nameFilter = urlParams.get("nameFilter");
         const emailFilter = urlParams.get("emailFilter");
         const nameSort = urlParams.get("nameSort");
@@ -85,7 +86,7 @@ export const StudentFilter: React.FC<{
         const statusFilter = urlParams.get("statusFilter");
         const osocYear = urlParams.get("osocYear");
         const emailStatus = urlParams.get("emailStatusFilter");
-        // const roleFilter = urlParams.get("roleFilter");
+        const roleFilter = urlParams.get("roleFilter");
 
         // parse all the arguments and set the state
         if (nameFilter !== null) {
@@ -128,6 +129,10 @@ export const StudentFilter: React.FC<{
         ) {
             setEmailStatus(emailStatus as EmailStatus);
         }
+        const newRoles = new Set(roleFilter?.split(","));
+        setSelectedRoles(newRoles);
+
+        // manually set all the parameters (can't use state yet because setting state is asynchronous)
         const params: StudentFilterParams = {
             nameFilter: nameFilter ? nameFilter : "",
             emailFilter: emailFilter ? emailFilter : "",
@@ -143,11 +148,12 @@ export const StudentFilter: React.FC<{
             emailStatus: emailStatus
                 ? (emailStatus as EmailStatus)
                 : EmailStatus.EMPTY,
-            selectedRoles: selectedRoles,
+            selectedRoles: newRoles,
         };
-        console.log(params);
+        // search
         searchAutomatic(params);
 
+        // execute the fetch roles
         fetchRoles().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
