@@ -16,8 +16,10 @@ const Pid: NextPage = () => {
         if (getSession !== undefined && pid !== undefined) {
             getSession().then(async ({ sessionKey }) => {
                 if (sessionKey !== "") {
+                    const query = year === undefined ? "" : "?year=" + year;
                     const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`,
+                        `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}` +
+                            query,
                         {
                             method: "GET",
                             headers: {
