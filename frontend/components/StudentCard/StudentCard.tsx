@@ -24,7 +24,10 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
     return (
         <div className={styles.body}>
             <header>
-                <h2>{student.student.person.name}</h2>
+                <div>
+                    <h2>{student.student.person.name}</h2>
+                    <h1>{student.evaluation.osoc.year}</h1>
+                </div>
                 {student.evaluation.evaluations.map((evaluation) => {
                     if (evaluation.is_final) {
                         return (
