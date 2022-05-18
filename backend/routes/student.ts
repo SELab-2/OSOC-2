@@ -10,7 +10,7 @@ import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionStudent, errors } from "../utility";
 import * as ormP from "../orm_functions/person";
 import { login_user, person } from "@prisma/client";
 
@@ -24,7 +24,9 @@ export async function getStudent(
     req: express.Request
 ): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -66,8 +68,6 @@ export async function getStudent(
         year
     );
 
-    console.log(evaluations);
-
     for (const job_application_skill of jobApplication.job_application_skill) {
         if (job_application_skill.language_id != null) {
             const language = await ormLa.getLanguage(
@@ -106,6 +106,7 @@ export async function deleteStudent(
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionStudent)
         .then(async (parsed) => {
             return ormSt
                 .deleteStudent(parsed.data.id)
@@ -127,11 +128,19 @@ export async function createStudentSuggestion(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
         return Promise.reject(errors.cookInvalidID());
+    }
+
+    const osocYear = await ormOs.getLatestOsoc();
+
+    if (osocYear == null) {
+        return Promise.reject(errors.cookNoDataError());
     }
 
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
@@ -144,15 +153,10 @@ export async function createStudentSuggestion(
 
     if (
         jobApplication.job_application_id !==
-        checkedSessionKey.data.job_application_id
+            checkedSessionKey.data.job_application_id ||
+        jobApplication.osoc.year !== osocYear.year
     ) {
         return Promise.reject(errors.cookWrongSuggestionYear());
-    }
-
-    const osocYear = await ormOs.getLatestOsoc();
-
-    if (osocYear == null) {
-        return Promise.reject(errors.cookNoDataError());
     }
 
     const suggestionsTotal = (
@@ -212,7 +216,9 @@ export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -256,7 +262,9 @@ export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
@@ -333,7 +341,8 @@ export async function filterStudents(
         year,
         checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort
+        checkedSessionKey.data.emailSort,
+        checkedSessionKey.userId
     );
 
     const studentlist: InternalTypes.Student[] = [];

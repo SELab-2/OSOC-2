@@ -6,6 +6,7 @@ import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
 import {
     AccountStatus,
     LoginUser,
+    OsocEdition,
     Pagination,
     Sort,
     UserFilterParams,
@@ -38,6 +39,8 @@ const Users: NextPage = () => {
         statusFilter: AccountStatus.NONE,
     });
 
+    const [osocEditions, setOsocEditions] = useState<OsocEdition[]>([]);
+
     const { socket } = useSockets();
 
     useEffect(() => {
@@ -51,10 +54,12 @@ const Users: NextPage = () => {
     useEffect(() => {
         if (getSession) {
             // Only admins may see the manage users screen
-            getSession().then(({ isAdmin }) => {
+            getSession().then(({ isAdmin, sessionKey }) => {
                 if (!isAdmin) {
-                    router.push("/").then();
+                    return router.push("/").then();
                 }
+
+                fetchAllOsocEditions(sessionKey).then();
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,6 +108,29 @@ const Users: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, searchParams]);
 
+    /**
+     * Gets all osoc editions from the backend
+     * @param sessionKey
+     */
+    const fetchAllOsocEditions = async (sessionKey: string) => {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((reason) => console.log(reason));
+        if (response !== undefined && response.success) {
+            setOsocEditions(response.data);
+        }
+    };
+
     const removeUser = (user: LoginUser) => {
         if (users !== undefined) {
             const index = users.indexOf(user, 0);
@@ -112,6 +140,7 @@ const Users: NextPage = () => {
             }
         }
     };
+
     const updateUsers = (users: Array<LoginUser>) => {
         setUsers(users);
     };
@@ -241,6 +270,7 @@ const Users: NextPage = () => {
                                   user={user}
                                   key={user.login_user_id}
                                   removeUser={removeUser}
+                                  editions={osocEditions}
                               />
                           );
                       })

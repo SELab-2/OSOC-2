@@ -39,12 +39,14 @@ export const StudentFilter: React.FC<{
         EmailStatus.EMPTY
     );
 
+    // set dropdowns active / inactive
+    const [rolesActive, setRolesActive] = useState<boolean>(false);
+    const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
+
     // Roles used in the dropdown
     const [roles, setRoles] = useState<Array<Role>>([]);
     // A set of active roles
     const [selectedRoles, setSelectedRoles] = useState<Set<string>>(new Set());
-    const [rolesActive, setRolesActive] = useState<boolean>(false);
-    const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
 
     const fetchRoles = async () => {
         const { sessionKey } = getSession
@@ -494,8 +496,6 @@ export const StudentFilter: React.FC<{
 
     const searchPress = (e: SyntheticEvent) => {
         e.preventDefault();
-        setEmailStatusActive(false);
-        setRolesActive(false);
         const params: StudentFilterParams = {
             nameFilter: nameFilter,
             emailFilter: emailFilter,
@@ -605,15 +605,19 @@ export const StudentFilter: React.FC<{
                     Student Coach Only
                 </button>
 
-                <div className={`dropdown ${rolesActive ? "is-active" : ""}`}>
+                <div
+                    className={`dropdown is-right ${
+                        rolesActive ? "is-active" : "is-hoverable"
+                    }`}
+                >
                     <div
+                        onClick={() => setRolesActive((prev) => !prev)}
                         data-testid={"rolesSelectedFilterDisplay"}
                         className={`dropdown-trigger ${
-                            rolesActive || selectedRoles.size > 0
-                                ? styles.active
-                                : styles.inactive
-                        } ${styles.dropdownTrigger}`}
-                        onClick={() => setRolesActive(!rolesActive)}
+                            selectedRoles.size === 0 && !rolesActive
+                                ? styles.inactive
+                                : styles.active
+                        }`}
                     >
                         {selectedRoles.size > 0
                             ? selectedRoles.size === 1
@@ -621,11 +625,7 @@ export const StudentFilter: React.FC<{
                                 : `${selectedRoles.size} roles selected`
                             : "No role selected"}
                         <div className={styles.triangleContainer}>
-                            <div
-                                className={`${rolesActive ? styles.up : ""} ${
-                                    styles.triangle
-                                }`}
-                            />
+                            <div className={styles.triangle} />
                         </div>
                     </div>
                     <div className="dropdown-menu">
@@ -653,8 +653,8 @@ export const StudentFilter: React.FC<{
                 </div>
 
                 <div
-                    className={`dropdown ${
-                        emailStatusActive ? "is-active" : ""
+                    className={`dropdown is-right ${
+                        emailStatusActive ? "is-active" : "is-hoverable"
                     }`}
                 >
                     <div
@@ -671,11 +671,7 @@ export const StudentFilter: React.FC<{
                             ? "No email selected"
                             : emailStatus}
                         <div className={styles.triangleContainer}>
-                            <div
-                                className={`${
-                                    emailStatusActive ? styles.up : ""
-                                } ${styles.triangle}`}
-                            />
+                            <div className={styles.triangle} />
                         </div>
                     </div>
                     <div className="dropdown-menu">

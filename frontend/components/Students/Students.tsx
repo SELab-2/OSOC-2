@@ -50,7 +50,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param filteredStudents
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
-        const scrollPosition = window.scrollY;
         let index = -1;
         const searchParams = new URLSearchParams(window.location.search);
         const id = searchParams.get("id");
@@ -77,7 +76,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 setDisplay(Display.LIMITED);
             }
         }
-        window.scrollTo(0, scrollPosition);
     };
 
     /**
@@ -205,7 +203,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param params
      */
     const filterAutomatic = async (params: StudentFilterParams) => {
-        console.log("AUTO");
         setParams(params);
         // get the current page
         const currentPageStr = new URLSearchParams(window.location.search).get(

@@ -22,7 +22,28 @@ import {
     deleteProjectByPartner,
     getProjectById,
     filterProjects,
+    getProjectYear,
 } from "../../orm_functions/project";
+import { account_status_enum } from "@prisma/client";
+import { errors } from "../../utility";
+
+const user_return = {
+    session_id: "50",
+    login_user_id: 1,
+    person_id: 0,
+    password: "password",
+    is_admin: false,
+    is_coach: false,
+    session_keys: ["key1", "key2"],
+    account_status: account_status_enum.DISABLED,
+    login_user_osoc: [
+        {
+            osoc: {
+                year: 2022,
+            },
+        },
+    ],
+};
 
 const returnValue = {
     project_id: 0,
@@ -232,6 +253,7 @@ test("should delete all the projects with the given partner name and return the 
 });
 
 test("should return all filtered projects by name", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(user_return);
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
@@ -241,7 +263,9 @@ test("should return all filtered projects by name", async () => {
             undefined,
             undefined,
             undefined,
-            undefined
+            undefined,
+            undefined,
+            0
         )
     ).resolves.toEqual({
         data: [filteredProject1],
@@ -250,6 +274,7 @@ test("should return all filtered projects by name", async () => {
 });
 
 test("should return all filtered projects by partner", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(user_return);
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
@@ -259,7 +284,9 @@ test("should return all filtered projects by partner", async () => {
             undefined,
             undefined,
             undefined,
-            undefined
+            undefined,
+            undefined,
+            0
         )
     ).resolves.toEqual({
         data: [filteredProject1],
@@ -268,6 +295,7 @@ test("should return all filtered projects by partner", async () => {
 });
 
 test("should return all filtered projects by assigned coaches", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(user_return);
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     await expect(
         filterProjects(
@@ -277,7 +305,9 @@ test("should return all filtered projects by assigned coaches", async () => {
             [1],
             undefined,
             undefined,
-            undefined
+            undefined,
+            undefined,
+            0
         )
     ).resolves.toEqual({
         data: [filteredProject1],
@@ -286,6 +316,7 @@ test("should return all filtered projects by assigned coaches", async () => {
 });
 
 test("should return all filtered projects by fully assigned status", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(user_return);
     prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
     prismaMock.contract.findMany.mockResolvedValue([
         {
@@ -305,12 +336,127 @@ test("should return all filtered projects by fully assigned status", async () =>
             undefined,
             true,
             undefined,
-            undefined
+            undefined,
+            undefined,
+            0
         )
     ).resolves.toEqual({
+        pagination: { count: 1, page: 0 },
         data: [filteredProject1],
-        pagination: { page: 0, count: 1 },
     });
+});
+
+test("should return all filtered projects sorted by the fully assigned status", async () => {
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject2,
+        filteredProject1,
+    ]);
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject2, filteredProject1],
+        pagination: { count: 2, page: 0 },
+    });
+
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject1,
+        filteredProject2,
+    ]);
+
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject1, filteredProject2],
+        pagination: { count: 2, page: 0 },
+    });
+});
+
+test("should return all filtered projects sorted by the fully assigned status", async () => {
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject2,
+        filteredProject1,
+    ]);
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject2, filteredProject1],
+        pagination: { count: 2, page: 0 },
+    });
+
+    prismaMock.project.findMany.mockResolvedValue([
+        filteredProject1,
+        filteredProject2,
+    ]);
+
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            "asc",
+            undefined,
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject1, filteredProject2],
+        pagination: { count: 2, page: 0 },
+    });
+});
+
+test("should return the year a project belongs to", async () => {
+    const val = {
+        project_id: 0,
+        description: "",
+        partner: "",
+        osoc: {
+            year: 2022,
+        },
+        start_date: new Date(),
+        end_date: new Date(),
+        name: "",
+        positions: 0,
+        osoc_id: 0,
+    };
+    prismaMock.project.findUnique.mockResolvedValue(val);
+    await expect(getProjectYear(0)).resolves.toEqual(2022);
+});
+
+test("should return the year a project belongs to", async () => {
+    prismaMock.project.findUnique.mockResolvedValue(null);
+    await expect(getProjectYear(0)).rejects.toBe(errors.cookInvalidID());
 });
 
 test("should return all filtered projects by fully assigned status (sortObject = [{ name: projectNameSort }])", async () => {
@@ -334,7 +480,8 @@ test("should return all filtered projects by fully assigned status (sortObject =
             true,
             undefined,
             undefined,
-            "asc"
+            "asc",
+            0
         )
     ).resolves.toEqual({
         data: [filteredProject1],
@@ -362,7 +509,9 @@ test("should return all filtered projects by fully assigned status (sortObject =
             undefined,
             true,
             undefined,
-            "asc"
+            "asc",
+            "desc",
+            0
         )
     ).resolves.toEqual({
         data: [filteredProject1],
@@ -391,7 +540,9 @@ test("should return all filtered projects by fully assigned status (sortObject =
             undefined,
             true,
             undefined,
-            "asc"
+            "asc",
+            "desc",
+            0
         )
     ).resolves.toEqual({
         data: [],

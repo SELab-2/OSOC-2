@@ -323,3 +323,34 @@ export async function setAdmin(loginUserId: number, isAdmin: boolean) {
         },
     });
 }
+
+/**
+ * get a list of years that should be visible for the login_user with given id
+ * @param loginUserId: the id of the loginUser for who we are checking
+ */
+export async function getOsocYearsForLoginUser(loginUserId: number) {
+    const years_object = await prisma.login_user.findUnique({
+        where: {
+            login_user_id: loginUserId,
+        },
+        select: {
+            login_user_osoc: {
+                select: {
+                    osoc: {
+                        select: {
+                            year: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    const years = [];
+    if (years_object && years_object.login_user_osoc) {
+        for (const obj of years_object.login_user_osoc) {
+            years.push(obj.osoc.year);
+        }
+    }
+    return years;
+}

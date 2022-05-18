@@ -9,6 +9,8 @@ import {
     FilterNumberArray,
     DBPagination,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
+import { errors } from "../utility";
 
 /**
  *
@@ -257,19 +259,30 @@ export async function deleteProjectByPartner(partner: string) {
  * @param osocYearFilter: the osoc year the project belongs to (or undefined if not filtering on year)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
+ * @param userId the id of the user who searches
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(
     page: DBPagination,
-    projectNameFilter: FilterString = undefined,
-    clientNameFilter: FilterString = undefined,
-    assignedCoachesFilterArray: FilterNumberArray = undefined,
-    fullyAssignedFilter: FilterBoolean = undefined,
-    osocYearFilter: number | undefined = undefined,
-    projectNameSort: FilterSort = undefined,
-    clientNameSort: FilterSort = undefined
+    projectNameFilter: FilterString,
+    clientNameFilter: FilterString,
+    assignedCoachesFilterArray: FilterNumberArray,
+    fullyAssignedFilter: FilterBoolean,
+    osocYearFilter: number | undefined,
+    projectNameSort: FilterSort,
+    clientNameSort: FilterSort,
+    userId: number
 ) {
+    const visibleYears = await getOsocYearsForLoginUser(userId);
+
     const projects = await prisma.project.findMany({
+        where: {
+            osoc: {
+                year: {
+                    in: visibleYears,
+                },
+            },
+        },
         include: {
             project_role: {
                 include: {
@@ -291,9 +304,6 @@ export async function filterProjects(
     }
 
     const actualFilter: Prisma.projectWhereInput = {
-        osoc: {
-            year: osocYearFilter,
-        },
         name: {
             contains: projectNameFilter,
             mode: "insensitive",
@@ -303,6 +313,11 @@ export async function filterProjects(
             mode: "insensitive",
         },
         project_user: assignedCoachesArray,
+        osoc: {
+            year: {
+                in: visibleYears,
+            },
+        },
     };
 
     // create the orderby object
@@ -372,4 +387,29 @@ export async function filterProjects(
         pagination: { page: page.currentPage, count: count },
         data: filtered_projects.slice(start, end),
     };
+}
+
+/**
+ * returns the year that a project belongs to
+ * @param projectId: id of the project whose year we are looking for
+ */
+export async function getProjectYear(projectId: number) {
+    const project = await prisma.project.findUnique({
+        where: {
+            project_id: projectId,
+        },
+        select: {
+            osoc: {
+                select: {
+                    year: true,
+                },
+            },
+        },
+    });
+
+    if (project === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    return project.osoc.year;
 }

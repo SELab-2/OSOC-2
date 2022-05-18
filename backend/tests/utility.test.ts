@@ -28,6 +28,10 @@ import * as project from "../orm_functions/project";
 jest.mock("../orm_functions/project");
 const projectMock = project as jest.Mocked<typeof project>;
 
+import * as osoc from "../orm_functions/osoc";
+jest.mock("../orm_functions/osoc");
+const osocMock = osoc as jest.Mocked<typeof osoc>;
+
 import * as crypto from "crypto";
 jest.mock("crypto");
 const cryptoMock = crypto as jest.Mocked<typeof crypto>;
@@ -35,7 +39,13 @@ const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 import * as config from "../config.json";
 import { ApiError, Anything } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import {
+    checkYearPermissionOsoc,
+    checkYearPermissionProject,
+    checkYearPermissionStudent,
+    errors,
+} from "../utility";
+import { account_status_enum } from "@prisma/client";
 
 interface Req {
     url: string;
@@ -653,11 +663,163 @@ test("utility.isAdmin can catch errors from the DB", async () => {
         Promise.reject({})
     );
 
-    expect(
+    await expect(
         util.isAdmin({
             sessionkey: "key",
         })
     ).rejects.toStrictEqual(util.errors.cookInsufficientRights());
+});
+
+test("the student is visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the student is NOT visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2021])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+});
+
+test("the project is visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2022));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the project is NOT visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2021));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+});
+
+test("the osoc edition is visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    osocMock.getOsocById.mockReset();
+    osocMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionOsoc(inputObj)).resolves.toEqual(inputObj);
+});
+
+test("the osoc edition is NOT visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    osocMock.getOsocById.mockReset();
+    osocMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2021,
+    });
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionOsoc(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
 });
 
 test("utility.refreshKey removes a key and replaces it", async () => {

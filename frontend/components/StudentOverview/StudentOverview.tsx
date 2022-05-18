@@ -42,7 +42,7 @@ export const StudentOverview: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
 
-        const query = year === "" ? "" : "?year=" + year;
+        const query = year === "" || year === undefined ? "" : "?year=" + year;
 
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest` +

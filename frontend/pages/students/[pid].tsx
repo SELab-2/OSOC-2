@@ -30,6 +30,7 @@ const Pid: NextPage = () => {
         socket.off("studentSuggestionCreated");
         socket.on("studentSuggestionCreated", (studentId: number) => {
             if (studentId === student?.student.student_id) {
+                console.log("received");
                 const scrollPosition = window.scrollY;
                 fetchStudent().then(() => window.scrollTo(0, scrollPosition));
             }

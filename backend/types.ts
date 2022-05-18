@@ -1038,8 +1038,9 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList
-        extends Paginable<InternalTypes.OsocEdition> {}
+    export interface OsocEditionList {
+        data: OsocEdition[];
+    }
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
@@ -1135,6 +1136,15 @@ export namespace Responses {
      * data.
      */
     export interface Project extends InternalTypes.Project {}
+
+    /**
+     *  A user permission response
+     * data.
+     */
+    export interface UserYearsPermissions {
+        osoc_id: number;
+        year: number;
+    }
 
     /**
      *  A project list response with contracts in it
@@ -1457,6 +1467,11 @@ export namespace Requests {
 
     export interface DraftCoach extends IdRequest {
         loginUserId: number;
+    }
+
+    export interface UserYearPermissions extends IdRequest {
+        login_user_id: number;
+        osoc_id: number;
     }
 }
 

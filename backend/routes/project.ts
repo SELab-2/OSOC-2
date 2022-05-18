@@ -11,8 +11,9 @@ import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
 import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
-// import { project_role } from "@prisma/client";
+import { checkYearPermissionProject, errors } from "../utility";
+import { getOsocById } from "../orm_functions/osoc";
+import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
 
 /**
  *  Attempts to create a new project in the system.
@@ -29,6 +30,15 @@ export async function createProject(
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
+    }
+
+    // check if the loginUser has the permissions to create a project for this osoc edition
+    const visibleYears = await getOsocYearsForLoginUser(
+        checkedSessionKey.userId
+    );
+    const osoc = await getOsocById(checkedSessionKey.data.osocId);
+    if (osoc && !visibleYears.includes(osoc.year)) {
+        return Promise.reject(errors.cookInsufficientRights());
     }
 
     const createdProject = await ormPr.createProject({
@@ -77,7 +87,7 @@ export async function createProject(
  */
 export async function listProjects(
     req: express.Request
-): Promise<Responses.ProjectListAndContracts> {
+): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseProjectAllRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
     if (checkedSessionKey.data == undefined) {
@@ -85,7 +95,21 @@ export async function listProjects(
     }
 
     const allProjects = [];
-    for (const project of await ormPr.getAllProjects()) {
+    const fetchedProjects = await ormPr.filterProjects(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        checkedSessionKey.userId
+    );
+    for (const project of fetchedProjects.data) {
         const roles = await ormPrRole.getProjectRolesByProject(
             project.project_id
         );
@@ -150,6 +174,7 @@ export async function listProjects(
     }
 
     return Promise.resolve({
+        pagination: fetchedProjects.pagination,
         data: allProjects,
     });
 }
@@ -164,7 +189,10 @@ export async function getProject(
     req: express.Request
 ): Promise<Responses.ProjectAndContracts> {
     const parsedRequest = await rq.parseSingleProjectRequest(req);
-    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
+    const checked = await util
+        .isAdmin(parsedRequest)
+        .then(checkYearPermissionProject)
+        .catch((res) => res);
     if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -244,7 +272,10 @@ export async function modProject(
     req: express.Request
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseUpdateProjectRequest(req);
-    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
+    const checked = await util
+        .isAdmin(parsedRequest)
+        .then(checkYearPermissionProject)
+        .catch((res) => res);
     if (checked.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -321,6 +352,7 @@ export async function deleteProject(
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
             return ormPr
@@ -341,6 +373,7 @@ export async function getDraftedStudents(
     return rq
         .parseGetDraftedStudentsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionProject)
         .then(async (parsed) => {
             const prName = await ormPr
                 .getProjectById(parsed.data.id)
@@ -423,6 +456,7 @@ export async function modProjectStudent(
     return rq
         .parseDraftStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionProject)
         .then(async (parsed) => {
             return ormCtr
                 .contractsByProject(parsed.data.id)
@@ -566,6 +600,7 @@ export async function unAssignStudent(
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionProject)
         .then(async (checked) => {
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
@@ -633,9 +668,20 @@ export async function getProjectConflicts(
     return rq
         .parseProjectConflictsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () => {
+        .then(async (parsedKeyRequest) => {
             return ormOsoc
                 .getNewestOsoc()
+                .then(async (osoc) => {
+                    // check if this last year is visible for the loginUser
+                    const visibleYears = await getOsocYearsForLoginUser(
+                        parsedKeyRequest.userId
+                    );
+
+                    if (osoc !== null && visibleYears.includes(osoc.year)) {
+                        return osoc;
+                    }
+                    return Promise.reject(errors.cookInsufficientRights());
+                })
                 .then((osoc) => util.getOrReject(osoc))
                 .then((osoc) =>
                     ormCtr.sortedContractsByOsocEdition(osoc.osoc_id)
@@ -775,7 +821,8 @@ export async function filterProjects(
         checkedSessionKey.data.fullyAssignedFilter,
         year,
         checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort
+        checkedSessionKey.data.clientNameSort,
+        checkedSessionKey.userId
     );
 
     const projectlist = [];

@@ -29,6 +29,7 @@ jest.mock("../../utility", () => {
         ...og,
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
+        checkYearPermissionStudent: jest.fn(),
     }; // we want to only mock checkSessionKey and isAdmin
 });
 const utilMock = util as jest.Mocked<typeof util>;
@@ -278,6 +279,10 @@ const latestJobApplication = [
             },
         ],
         language_id: 0,
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
     {
         job_application_id: 1,
@@ -321,6 +326,10 @@ const latestJobApplication = [
             },
         ],
         language_id: 1,
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
     {
         job_application_id: 2,
@@ -364,6 +373,10 @@ const latestJobApplication = [
             },
         ],
         language_id: 2,
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
 ];
 
@@ -636,9 +649,14 @@ beforeEach(() => {
     ormoMockLogin.getLoginUserById.mockImplementation((id) =>
         Promise.resolve(studentEvaluationsByYear[id].evaluation[0].login_user)
     );
+
+    utilMock.checkYearPermissionStudent.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 });
 
 afterEach(() => {
+    utilMock.checkYearPermissionStudent.mockReset();
     reqMock.parseStudentAllRequest.mockReset();
     reqMock.parseSingleStudentRequest.mockReset();
     reqMock.parseDeleteStudentRequest.mockReset();
@@ -770,6 +788,10 @@ test("Role wasn't found in getStudent", async () => {
         student_coach: true,
         student_id: 0,
         student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockRole.getRole.mockResolvedValue(null);
@@ -838,6 +860,10 @@ test("Year is defined in the getStudent request and skill language is invalid", 
         student_coach: true,
         student_id: 0,
         student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
@@ -901,6 +927,10 @@ test("Can create a student evaluation", async () => {
         attachment: [],
         job_application_skill: [],
         applied_role: [],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     r.body = {
@@ -1017,6 +1047,10 @@ test("No osoc year in the database for createStudentSuggestion", async () => {
                 job_application_id: 0,
             },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockOsoc.getLatestOsoc.mockResolvedValue(null);
@@ -1161,6 +1195,10 @@ test("Role wasn't found in filterStudents", async () => {
                 job_application_id: 0,
             },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockRole.getRole.mockResolvedValue(null);
@@ -1229,6 +1267,10 @@ test("Skill language is invalid for filterStudents", async () => {
                 job_application_id: 0,
             },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
@@ -1394,6 +1436,10 @@ test("Update evaluation in createStudentSuggestion", async () => {
         student_coach: true,
         student_id: 0,
         student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     utilMock.checkSessionKey.mockImplementation((v) =>
@@ -1475,6 +1521,10 @@ test("New evaluation in createStudentSuggestion", async () => {
         student_coach: true,
         student_id: 0,
         student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     });
 
     ormoMockEval.createEvaluationForStudent.mockResolvedValue({
