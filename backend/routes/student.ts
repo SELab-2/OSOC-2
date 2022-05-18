@@ -66,6 +66,8 @@ export async function getStudent(
         year
     );
 
+    console.log(evaluations);
+
     for (const job_application_skill of jobApplication.job_application_skill) {
         if (job_application_skill.language_id != null) {
             const language = await ormLa.getLanguage(
