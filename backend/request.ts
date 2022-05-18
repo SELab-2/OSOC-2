@@ -138,7 +138,7 @@ function maybe<T>(obj: Anything, key: string): T | undefined {
  *  @return A promise resolving with the object if it's valid, otherwise one
  * rejecting with an argument error.
  */
-function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
+export function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
     return isNaN(r.id) ? rejector() : Promise.resolve(r);
 }
 
@@ -151,7 +151,10 @@ function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
  *  @return A promise resolving with the object if it's valid, otherwise one
  * rejecting with an argument error.
  */
-function allNonNaN<T extends Anything>(keys: string[], obj: T): Promise<T> {
+export function allNonNaN<T extends Anything>(
+    keys: string[],
+    obj: T
+): Promise<T> {
     return keys.every((v) => {
         return obj[v] == undefined || !isNaN(obj[v] as number);
     })

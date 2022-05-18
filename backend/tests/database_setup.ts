@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import * as dbtypes from "@prisma/client";
 import prisma from "../prisma/prisma";
 import * as config from "../config.json";
