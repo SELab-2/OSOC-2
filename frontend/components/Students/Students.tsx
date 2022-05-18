@@ -17,6 +17,7 @@ import { StudentOverview } from "../StudentOverview/StudentOverview";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
+import { useSockets } from "../../contexts/socketProvider";
 
 /**
  * Constructs the complete students page with filter included
@@ -42,16 +43,34 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     });
 
     const [loading, isLoading] = useState(false);
+    const { socket } = useSockets();
 
     /**
      * Updates the list of students and sets the selected student index
      * @param filteredStudents
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
-        setSelectedStudent(selectedStudent);
-        setStudents(filteredStudents);
+        let index = -1;
+        const searchParams = new URLSearchParams(window.location.search);
+        const id = searchParams.get("id");
+        if (selectedStudent === -1 || id) {
+            if (id !== null) {
+                const id_number = Number(id);
+                if (!isNaN(id_number)) {
+                    for (let i = 0; i < filteredStudents.length; i++) {
+                        if (
+                            filteredStudents[i].student.student_id === id_number
+                        ) {
+                            setSelectedStudent(i);
+                            index = i;
+                        }
+                    }
+                }
+            }
+        }
+        setStudents([...filteredStudents]);
         if (!alwaysLimited) {
-            if (selectedStudent < 0) {
+            if (index < 0) {
                 setDisplay(Display.FULL);
             } else {
                 setDisplay(Display.LIMITED);
@@ -60,41 +79,28 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     };
 
     /**
-     * Set the selected student
-     * from the url parameter
-     */
-    useEffect(() => {
-        const id = router.query.id;
-        if (id !== undefined) {
-            const id_number = Number(id);
-            if (!isNaN(id_number)) {
-                for (let i = 0; i < students.length; i++) {
-                    if (students[i].student.student_id === id_number) {
-                        setSelectedStudent(i);
-                        if (!alwaysLimited) {
-                            if (selectedStudent < 0) {
-                                setDisplay(Display.FULL);
-                            } else {
-                                setDisplay(Display.LIMITED);
-                            }
-                        }
-                        return;
-                    }
-                }
-            }
-        }
-    }, [router.query, students]);
-
-    /**
      * We add a listener for keypresses
      */
     useEffect(() => {
         document.body.addEventListener("keydown", handleKeyPress);
         return () => {
             document.body.removeEventListener("keydown", handleKeyPress);
+            socket.off("studentSuggestionCreated");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    /**
+     * update on websocket event if the student with the id that was changed is the student that is currently loaded
+     */
+    useEffect(() => {
+        socket.off("studentSuggestionCreated");
+        socket.on("studentSuggestionCreated", () => {
+            if (params != undefined) {
+                filterAutomatic(params).then();
+            }
+        });
+    }, [socket, params, pagination]);
 
     /**
      * Closes the student overview if escape is pressed
@@ -104,7 +110,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (e.key === "Escape") {
             clearSelection();
         }
-        router.push(`/students`).then();
     };
 
     /**
@@ -115,7 +120,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             setDisplay(Display.FULL);
         }
         setSelectedStudent(-1);
-        router.push(`/students`).then();
+        // delete the id from the url
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        // push the url
+        router.push(`/students?${params.toString()}`).then();
     };
 
     /**
@@ -137,12 +146,16 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             window.open(`/students/${student_id}`);
             return;
         }
-        router.push(`/students?id=${student_id}`).then();
+        // set the new id
+        const params = new URLSearchParams(window.location.search);
+        params.set("id", student_id.toString());
+        // push the url
+        router.push(`/students?${params.toString()}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
 
-    // Maps student id's to their index in the student list, so that we can update the infor
+    // Maps student id's to their index in the student list, so that we can update the info
     // of just one student
     const id_to_index: Record<string, number> = {};
 
@@ -155,26 +168,49 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     /**
      * Callback that the student overview uses to update a student's suggestion list
      * @param studentId
-     * @param evalutationsCoach
+     * @param evaluationsCoach
      */
     const updateStudentEvaluation = (
         studentId: number,
-        evalutationsCoach: Evaluation[]
+        evaluationsCoach: Evaluation[]
     ) => {
         if (selectedStudent !== -1) {
-            students[selectedStudent].evaluation.evaluations =
-                evalutationsCoach;
+            students[selectedStudent].evaluation.evaluations = evaluationsCoach;
         }
         setStudents([...students]);
     };
 
     /**
-     * Called by the studentfilter to filter
+     * Called by the studentfilter to filter when a button is (manually) pressed => set page back to 0
      * @param params
      */
-    const filter = async (params: StudentFilterParams) => {
+    const filterManual = async (params: StudentFilterParams) => {
         setParams(params);
+        clearSelection();
+        setSelectedStudent(-1);
         search(params, 0).then();
+    };
+
+    /**
+     * Called by the studentfilter to filter when a websocket event is received. We need to keep track of the current page!
+     * @param params
+     */
+    const filterAutomatic = async (params: StudentFilterParams) => {
+        console.log("AUTO");
+        setParams(params);
+        // get the current page
+        const currentPageStr = new URLSearchParams(window.location.search).get(
+            "currentPage"
+        );
+        const currentPageInt =
+            currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
+                ? Number(currentPageStr)
+                : 0;
+        setPagination({
+            page: currentPageInt,
+            count: 0, //TODO: what value should this be? I thought this would have to be currentPageInt * pageSize + 1
+        });
+        search(params, currentPageInt).then();
     };
 
     /**
@@ -183,6 +219,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      * @param page
      */
     const search = async (params: StudentFilterParams, page: number) => {
+        const scrollPosition = window.scrollY;
+        console.log("SCROLL " + scrollPosition);
         if (loading) return;
         isLoading(true);
         const filters = [];
@@ -225,7 +263,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         filters.push(`currentPage=${page}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -253,6 +290,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         setFilteredStudents(response.data);
         setPagination(response.pagination);
         isLoading(false);
+        const id = new URLSearchParams(window.location.search).get("id");
+        const frontendQuery = id !== null ? query + "&id=" + id : query;
+        router
+            .push(`${window.location.pathname}${frontendQuery}`)
+            .then(() => window.scrollTo(0, scrollPosition));
     };
 
     return (
@@ -262,7 +304,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             }`}
         >
             <div>
-                <StudentFilter display={display} search={filter} />
+                <StudentFilter
+                    display={display}
+                    searchManual={filterManual}
+                    searchAutomatic={filterAutomatic}
+                />
                 <div className={styles.scrollView}>
                     <div className={styles.topShadowCaster} />
                     <div

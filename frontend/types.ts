@@ -219,6 +219,7 @@ export interface ServerToClientEvents {
     loginUserActivated: () => void;
     loginUserDisabled: () => void;
     registrationReceived: () => void;
+    studentSuggestionCreated: (studentId: number) => void;
 }
 
 /**
@@ -229,6 +230,8 @@ export interface ClientToServerEvents {
     activateUser: () => void;
     disableUser: () => void;
     submitRegistration: () => void;
+    studentSuggestionSent: (studentId: number) => void;
+    studentDecisionSent: (studentId: number) => void;
 }
 
 export interface ProjectPerson {
@@ -313,7 +316,7 @@ export interface OsocFilterParams {
 }
 
 /** The amount of items on a single page */
-export const pageSize = 25;
+export const pageSize = 10;
 
 /**
  * Interface for pagination
