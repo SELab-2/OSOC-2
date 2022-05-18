@@ -183,13 +183,17 @@ async function parsePaginationRequest(
 ): Promise<Requests.PaginableRequest> {
     return parseKeyRequest(req).then((parsed) => {
         let currentPage = 0;
+        let pageSize = config.global.pageSize;
         if ("currentPage" in req.body) {
             currentPage = Number(req.body.currentPage);
+        }
+        if ("pageSize" in req.body && !isNaN(Number(req.body.pageSize))) {
+            pageSize = req.body.pageSize;
         }
         return {
             ...parsed,
             currentPage: currentPage,
-            pageSize: config.global.pageSize,
+            pageSize: pageSize,
         };
     });
 }
