@@ -102,28 +102,19 @@ const filteredProject1: FilterProjects = {
 };
 
 const filteredProject2: FilterProjects = {
-    project_id: 2,
-    name: "project 2",
+    project_id: 1,
+    name: "project 1",
     osoc_id: 1,
-    partner: "partner 2",
-    start_date: new Date("2022-08-17"),
-    end_date: new Date("2022-08-29"),
-    positions: 9,
+    partner: "partner 1",
+    start_date: new Date("2022-08-13"),
+    end_date: new Date("2022-08-15"),
+    positions: 1,
     description: "description 1",
     project_role: [
         {
-            positions: 2,
+            positions: 1,
             role: {
                 name: "Front-end developer",
-            },
-            _count: {
-                contract: 1,
-            },
-        },
-        {
-            positions: 7,
-            role: {
-                name: "Back-end developer",
             },
             _count: {
                 contract: 0,
@@ -133,13 +124,13 @@ const filteredProject2: FilterProjects = {
     project_user: [
         {
             login_user: {
-                login_user_id: 3,
+                login_user_id: 1,
                 is_coach: true,
             },
         },
         {
             login_user: {
-                login_user_id: 4,
+                login_user_id: 2,
                 is_coach: true,
             },
         },
@@ -466,4 +457,95 @@ test("should return the year a project belongs to", async () => {
 test("should return the year a project belongs to", async () => {
     prismaMock.project.findUnique.mockResolvedValue(null);
     await expect(getProjectYear(0)).rejects.toBe(errors.cookInvalidID());
+});
+
+test("should return all filtered projects by fully assigned status (sortObject = [{ name: projectNameSort }])", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    prismaMock.contract.findMany.mockResolvedValue([
+        {
+            contract_id: 1,
+            student_id: 1,
+            project_role_id: 1,
+            information: "info",
+            created_by_login_user_id: 1,
+            contract_status: "APPROVED",
+        },
+    ]);
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            true,
+            undefined,
+            undefined,
+            "asc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
+});
+
+test("should return all filtered projects by fully assigned status (sortObject = [{ partner: clientNameSort }])", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject1]);
+    prismaMock.contract.findMany.mockResolvedValue([
+        {
+            contract_id: 1,
+            student_id: 1,
+            project_role_id: 1,
+            information: "info",
+            created_by_login_user_id: 1,
+            contract_status: "APPROVED",
+        },
+    ]);
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            true,
+            undefined,
+            "asc",
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [filteredProject1],
+        pagination: { page: 0, count: 1 },
+    });
+});
+
+test("should return all filtered projects by fully assigned status (sortObject = [{ partner: clientNameSort }])", async () => {
+    prismaMock.project.findMany.mockResolvedValue([filteredProject2]);
+    prismaMock.contract.findMany.mockResolvedValue([
+        {
+            contract_id: 1,
+            student_id: 1,
+            project_role_id: 1,
+            information: "info",
+            created_by_login_user_id: 1,
+            contract_status: "APPROVED",
+        },
+    ]);
+
+    await expect(
+        filterProjects(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            undefined,
+            true,
+            undefined,
+            "asc",
+            "desc",
+            0
+        )
+    ).resolves.toEqual({
+        data: [],
+        pagination: { page: 0, count: 0 },
+    });
 });
