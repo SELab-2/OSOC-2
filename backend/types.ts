@@ -721,9 +721,17 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        roles: object;
+        roles: { name: string; positions: number }[];
         description: string | null;
-        coaches: object;
+        coaches: {
+            login_user: {
+                person: person;
+                login_user_id: number;
+                is_admin: boolean;
+                is_coach: boolean;
+            };
+            project_user_id: number;
+        }[];
     }
 
     /**
@@ -1342,9 +1350,9 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        roles: object;
+        roles: { roles: { name: string; positions: number }[] };
         description: string;
-        coaches: object;
+        coaches: { coaches: number[] };
     }
 
     export interface ModProject extends IdRequest {
@@ -1353,10 +1361,10 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        roles?: object;
+        roles?: { roles: { name: string; positions: number }[] };
         description?: string;
-        addCoaches?: object;
-        removeCoaches?: object;
+        addCoaches?: { coaches: number[] };
+        removeCoaches?: { coaches: number[] };
     }
 
     export interface ProjectFilter extends PaginableRequest {

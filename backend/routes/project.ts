@@ -12,7 +12,6 @@ import * as rq from "../request";
 import { ApiError, InternalTypes, Responses, StringDict } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
-// import { project_role } from "@prisma/client";
 
 /**
  *  Attempts to create a new project in the system.
@@ -40,7 +39,7 @@ export async function createProject(
         description: checkedSessionKey.data.description,
     });
 
-    const roleList = [];
+    const roleList: { name: string; positions: number }[] = [];
 
     for (const role of checkedSessionKey.data.roles.roles) {
         let roleByName = await ormRole.getRolesByName(role.name);
@@ -59,15 +58,14 @@ export async function createProject(
         });
     }
 
-    const coachList = [];
-
-    for (const coachId of checkedSessionKey.data.coaches) {
-        const project_user = await ormPU.createProjectUser({
+    for (const coachId of checkedSessionKey.data.coaches.coaches) {
+        await ormPU.createProjectUser({
             projectId: createdProject.project_id,
-            loginUserId: Number(coachId),
+            loginUserId: coachId,
         });
-        coachList.push(project_user);
     }
+
+    const coaches = await ormPU.getUsersFor(createdProject.project_id);
 
     return Promise.resolve({
         id: createdProject.project_id,
@@ -78,7 +76,7 @@ export async function createProject(
         osoc_id: createdProject.osoc_id,
         description: createdProject.description,
         roles: roleList,
-        coaches: coachList,
+        coaches: coaches,
     });
 }
 
@@ -282,10 +280,14 @@ export async function modProject(
         checkedId.id
     );
 
+    let isOldRole = false;
     if (checkedId.roles !== undefined) {
-        loop1: for (const role of checkedId.roles.roles) {
+        for (const role of checkedId.roles.roles) {
+            console.log(role);
+            isOldRole = false;
             for (const projectRole of oldProjectRoles) {
                 if (role.name === projectRole.role.name) {
+                    isOldRole = true;
                     if (role.positions !== projectRole.positions) {
                         if (role.positions === 0) {
                             await ormPrRole.deleteProjectRole(
@@ -299,23 +301,25 @@ export async function modProject(
                                 positions: role.positions,
                             });
                         }
-                        continue loop1;
                     }
+                    break;
                 }
             }
-            const project_role = await ormRole.getRolesByName(role.name);
-            if (project_role !== null) {
-                await ormPrRole.createProjectRole({
-                    projectId: checkedId.id,
-                    roleId: project_role.role_id,
-                    positions: role.positions,
-                });
+            if (!isOldRole) {
+                const project_role = await ormRole.getRolesByName(role.name);
+                if (project_role !== null) {
+                    await ormPrRole.createProjectRole({
+                        projectId: checkedId.id,
+                        roleId: project_role.role_id,
+                        positions: role.positions,
+                    });
+                }
             }
         }
     }
 
     const projectRoles = await ormPrRole.getProjectRolesByProject(checkedId.id);
-    const roles = [];
+    const roles: { name: string; positions: number }[] = [];
     for (const projectRole of projectRoles) {
         const foundRole = await ormRole.getRole(projectRole.role_id);
         if (foundRole === null) {

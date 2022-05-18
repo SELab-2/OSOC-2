@@ -662,10 +662,16 @@ export async function parseUpdateProjectRequest(
             partner: maybe<string>(req.body, "partner"),
             start: maybe<Date>(req.body, "start"),
             end: maybe<Date>(req.body, "end"),
-            roles: maybe<object>(req.body, "roles"),
+            roles: maybe<{ roles: [{ name: string; positions: number }] }>(
+                req.body,
+                "roles"
+            ),
             description: maybe<string>(req.body, "description"),
-            addCoaches: maybe<object>(req.body, "addCoaches"),
-            removeCoaches: maybe<object>(req.body, "removeCoaches"),
+            addCoaches: maybe<{ coaches: [number] }>(req.body, "addCoaches"),
+            removeCoaches: maybe<{ coaches: [number] }>(
+                req.body,
+                "removeCoaches"
+            ),
         }).then(idIsNumber);
     });
 }
