@@ -80,11 +80,12 @@ export const StudentFilter: React.FC<{
         const emailFilter = urlParams.get("emailFilter");
         const nameSort = urlParams.get("nameSort");
         const emailSort = urlParams.get("emailSort");
-        const alumni = urlParams.get("alumni");
-        const studentCoach = urlParams.get("studentCoach");
+        const alumni = urlParams.get("alumniFilter");
+        const studentCoach = urlParams.get("coachFilter");
         const statusFilter = urlParams.get("statusFilter");
         const osocYear = urlParams.get("osocYear");
-        const emailStatus = urlParams.get("emailStatus");
+        const emailStatus = urlParams.get("emailStatusFilter");
+        // const roleFilter = urlParams.get("roleFilter");
 
         // parse all the arguments and set the state
         if (nameFilter !== null) {
@@ -476,7 +477,7 @@ export const StudentFilter: React.FC<{
             nameSort: nameSort,
             emailSort: emailSort,
             alumni: alumni,
-            studentCoach: !studentCoach,
+            studentCoach: studentCoach,
             statusFilter: statusFilter,
             osocYear: osocYear,
             emailStatus: emailStatus,
@@ -530,9 +531,9 @@ export const StudentFilter: React.FC<{
                     </div>
                     <input
                         data-testid={"firstNameInput"}
-                        value={nameFilter}
                         className={`input ${styles.input}`}
                         type="text"
+                        value={nameFilter}
                         placeholder="Search.."
                         onChange={(e) => setNameFilter(e.target.value)}
                     />
@@ -559,6 +560,7 @@ export const StudentFilter: React.FC<{
                         data-testid={"emailInput"}
                         className={`input ${styles.input}`}
                         type="text"
+                        value={emailFilter}
                         placeholder="Search.."
                         onChange={(e) => setEmailFilter(e.target.value)}
                     />
@@ -571,6 +573,7 @@ export const StudentFilter: React.FC<{
                         data-testid={"osocYearInput"}
                         className={`input ${styles.input}`}
                         type="text"
+                        value={osocYear}
                         placeholder="Search.."
                         onChange={(e) => setOsocYear(e.target.value)}
                     />
