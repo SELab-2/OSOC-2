@@ -36,9 +36,12 @@ export const StudentOverview: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
+
+        const query = year === undefined ? "" : "?year=" + year;
+
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest?` +
-                year,
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest` +
+                query,
             {
                 method: "GET",
                 headers: {

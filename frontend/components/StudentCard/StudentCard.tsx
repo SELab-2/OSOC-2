@@ -21,6 +21,8 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
         [Decision.NO]: ForbiddenIconColor,
     };
 
+    console.log("year: " + student.evaluation.osoc.year);
+
     return (
         <div className={styles.body}>
             <header>
