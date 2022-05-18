@@ -29,7 +29,7 @@ export const StudentOverview: React.FC<{
     const [decision, setDecision] = useState<Decision>(Decision.YES);
     const [suggestBool, setSuggestBool] = useState(true);
     const [motivation, setMotivation] = useState("");
-    const { getSession } = useContext(SessionContext);
+    const { getSession, isAdmin } = useContext(SessionContext);
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
@@ -47,7 +47,6 @@ export const StudentOverview: React.FC<{
             .then((response) => response.json())
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
-            console.log(response);
             setEvaluations(response.evaluation.evaluations);
         }
     };
@@ -86,6 +85,8 @@ export const StudentOverview: React.FC<{
                     id: student.student.student_id,
                     suggestion: decision,
                     reason: motivation,
+                    job_application_id:
+                        student.jobApplication.job_application_id,
                 }),
             }
         )
@@ -116,6 +117,8 @@ export const StudentOverview: React.FC<{
                     id: student.student.student_id,
                     reply: decision,
                     reason: motivation,
+                    job_application_id:
+                        student.jobApplication.job_application_id,
                 }),
             }
         )
@@ -260,7 +263,12 @@ export const StudentOverview: React.FC<{
                 <div className={styles.finaldecision}>
                     <h2>Status</h2>
                     <div className={styles.dropdown}>
-                        <button className={styles.dropbtn}>Set Status</button>
+                        {/* Only admins can make a final decision */}
+                        {isAdmin ? (
+                            <button className={styles.dropbtn}>
+                                Set Status
+                            </button>
+                        ) : null}
                         <div className={styles.dropdownContent}>
                             <a
                                 data-testid={"permanentYes"}
