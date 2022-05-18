@@ -308,18 +308,25 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(async () => {
-        const sug: unknown = req.body.suggestion;
-        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
-            return rejector();
+    return hasFields(req, ["suggestion", "job_application_id"], types.id).then(
+        async () => {
+            const sug: unknown = req.body.suggestion;
+            if (
+                sug != Decision.YES &&
+                sug != Decision.MAYBE &&
+                sug != Decision.NO
+            )
+                return rejector();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe<string>(req.body, "reason"),
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                suggestion: sug as InternalTypes.Suggestion,
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**

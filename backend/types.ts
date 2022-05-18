@@ -50,6 +50,10 @@ export interface Errors {
      */
     cookLockedRequest: () => ApiError;
     /**
+     * Cooks up a wrong suggestion request response.
+     */
+    cookWrongSuggestionYear: () => ApiError;
+    /**
      *  Cooks up a Non-existent Endpoint response.
      *  @param url The requested endpoint URL.
      */
@@ -1325,6 +1329,7 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
+        job_application_id: number;
         reason?: string;
     }
 

@@ -74,6 +74,12 @@
                 "http": 400,
                 "reason": "Failed to update your password. Perhaps you used an invalid key?"
             }
+        },
+        "studentSuggestion": {
+            "insufficientRights": {
+                "http": 403,
+                "reason": "Failed to create suggestion. Can only create suggestions for the most recent osoc edition."
+            }
         }
     },
 

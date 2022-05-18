@@ -129,6 +129,21 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
+
+    if (jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (
+        jobApplication.job_application_id !==
+        checkedSessionKey.data.job_application_id
+    ) {
+        return Promise.reject(errors.cookWrongSuggestionYear());
+    }
+
     const osocYear = await ormOs.getLatestOsoc();
 
     if (osocYear == null) {
@@ -146,14 +161,6 @@ export async function createStudentSuggestion(
                     checkedSessionKey.userId
             )
     );
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     let newEvaluation;
     if (suggestionsTotal.length > 0) {
