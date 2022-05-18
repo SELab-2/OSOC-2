@@ -45,15 +45,14 @@ export async function listOsocEditions(
     req: express.Request
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseOsocAllRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const osocEditions = await ormO.getAllOsoc();
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
+    if (checkedSessionKey.is_admin) {
+        const osocEditions = await ormO.getAllOsoc();
 
-    return Promise.resolve({ data: osocEditions });
+        return Promise.resolve({ data: osocEditions });
+    }
+
+    return Promise.reject(errors.cookInvalidID());
 }
 
 /**

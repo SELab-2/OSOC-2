@@ -189,6 +189,25 @@ test("Can get all the osoc editions", async () => {
     expectCall(utilMock.isAdmin, r.body);
 });
 
+test("Can't get all the osoc editions if you're a coach", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd" };
+
+    utilMock.isAdmin.mockImplementation((v) =>
+        Promise.resolve({
+            userId: 0,
+            data: v,
+            accountStatus: "ACTIVATED",
+            is_admin: false,
+            is_coach: true,
+        })
+    );
+
+    await expect(osoc.listOsocEditions(r)).rejects.toBe(errors.cookInvalidID());
+
+    utilMock.isAdmin.mockReset();
+});
+
 test("Can filter the osoc editions", async () => {
     const r = getMockReq();
     r.body = { sessionkey: "abcd", yearFilter: 2022 };
