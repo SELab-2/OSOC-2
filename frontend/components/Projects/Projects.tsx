@@ -86,7 +86,6 @@ export const Projects: React.FC = () => {
                 console.log(err);
             });
 
-        console.log(response);
         if (response !== undefined && response.success) {
             setProjects(response.data);
             setPagination(response.pagination);
@@ -116,10 +115,7 @@ export const Projects: React.FC = () => {
                     {projects.map((project) => {
                         return (
                             <div key={project.id} className={styles.card}>
-                                <ProjectCard
-                                    key={project.id}
-                                    project={project}
-                                />
+                                <ProjectCard project={project} />
                             </div>
                         );
                     })}
