@@ -17,6 +17,7 @@ import ExclamationIconColor from "../../public/images/exclamation_mark_color.png
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import Image from "next/image";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -34,6 +35,7 @@ export const StudentOverview: React.FC<{
     const [motivation, setMotivation] = useState("");
     const { getSession, isAdmin } = useContext(SessionContext);
     const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession

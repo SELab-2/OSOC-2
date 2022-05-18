@@ -153,13 +153,13 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             return;
         }
         // set the new id
-        const params = new URLSearchParams(window.location.search);
-        params.set("id", student_id.toString());
+        const paramsQuery = new URLSearchParams(window.location.search);
+        paramsQuery.set("id", student_id.toString());
         if (params?.osocYear) {
-            params.set("year", params?.osocYear);
+            paramsQuery.set("year", params?.osocYear);
         }
         // push the url
-        router.push(`/students?${params.toString()}`).then();
+        router.push(`/students?${paramsQuery.toString()}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
