@@ -30,10 +30,6 @@ export async function getStudent(
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
-        console.log(parsedRequest);
-        console.log(checkedSessionKey.data.id);
-        console.log(checkedSessionKey);
-        console.log("REJECTING");
         return Promise.reject(errors.cookInvalidID());
     }
 
