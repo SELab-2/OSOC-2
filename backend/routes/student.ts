@@ -265,8 +265,16 @@ export async function createStudentConfirmation(
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
         );
+
         if (jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
+        }
+
+        if (
+            jobApplication.job_application_id !==
+            checkedSessionKey.data.job_application_id
+        ) {
+            return Promise.reject(errors.cookWrongSuggestionYear());
         }
 
         await ormEv.createEvaluationForStudent({

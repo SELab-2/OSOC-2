@@ -568,22 +568,25 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, ["reply"], types.id).then(async () => {
-        if (
-            req.body.reply != Decision.YES &&
-            req.body.reply != Decision.MAYBE &&
-            req.body.reply != Decision.NO
-        ) {
-            return rejector();
-        }
+    return hasFields(req, ["reply", "job_application_id"], types.id).then(
+        async () => {
+            if (
+                req.body.reply != Decision.YES &&
+                req.body.reply != Decision.MAYBE &&
+                req.body.reply != Decision.NO
+            ) {
+                return rejector();
+            }
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            reason: maybe<string>(req.body, "reason"),
-            reply: req.body.reply,
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+                reply: req.body.reply,
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**

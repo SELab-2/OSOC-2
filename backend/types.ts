@@ -1335,6 +1335,7 @@ export namespace Requests {
 
     export interface Confirm extends IdRequest {
         reply: InternalTypes.Suggestion;
+        job_application_id: number;
         reason?: string;
     }
 
