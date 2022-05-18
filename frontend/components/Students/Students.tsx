@@ -134,10 +134,19 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         e.preventDefault();
 
         if (e.ctrlKey || e.altKey || e.button == 1) {
-            window.open(`/students/${student_id}`);
+            let url = `/students/${student_id}`;
+            if (params?.osocYear) {
+                url += `?year=${params?.osocYear}`;
+            }
+            window.open(url);
             return;
         }
-        router.push(`/students?id=${student_id}`).then();
+        let queryURL = `/students?id=${student_id}`;
+        if (params?.osocYear) {
+            queryURL += `&year=${params?.osocYear}`;
+        }
+
+        router.push(queryURL).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
@@ -311,6 +320,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 <StudentOverview
                     updateEvaluations={updateStudentEvaluation}
                     student={students[selectedStudent]}
+                    year={params?.osocYear}
                     clearSelection={clearSelection}
                 />
             ) : null}

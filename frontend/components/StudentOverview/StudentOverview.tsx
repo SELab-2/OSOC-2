@@ -18,9 +18,10 @@ import Image from "next/image";
 
 export const StudentOverview: React.FC<{
     student: Student;
+    year?: string;
     updateEvaluations?: (studentId: number, evalutations: Evaluation[]) => void;
     clearSelection?: () => void;
-}> = ({ student, updateEvaluations, clearSelection }) => {
+}> = ({ student, year, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations data is updated because putting
@@ -36,7 +37,8 @@ export const StudentOverview: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest/` +
+                year,
             {
                 method: "GET",
                 headers: {
