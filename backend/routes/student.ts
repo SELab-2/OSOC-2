@@ -136,14 +136,9 @@ export async function createStudentSuggestion(
         student.student_id
     );
 
-    console.log(jobApplication);
-
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
-
-    console.log(jobApplication.job_application_id);
-    console.log(checkedSessionKey.data.job_application_id);
 
     if (
         jobApplication.job_application_id !==
@@ -153,9 +148,6 @@ export async function createStudentSuggestion(
     }
 
     const osocYear = await ormOs.getLatestOsoc();
-
-    console.log(osocYear);
-    console.log(jobApplication.job_application_id);
 
     if (osocYear == null) {
         return Promise.reject(errors.cookNoDataError());
@@ -225,11 +217,13 @@ export async function getStudentSuggestions(
         return Promise.reject(errors.cookInvalidID());
     }
 
-    let year = new Date().getFullYear();
+    let year;
     if (checkedSessionKey.data.year === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
             year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
         }
     } else {
         year = checkedSessionKey.data.year;
@@ -391,8 +385,6 @@ export async function filterStudents(
             roles: roles,
         });
     }
-
-    console.log(studentlist);
 
     return Promise.resolve({
         pagination: students.pagination,
