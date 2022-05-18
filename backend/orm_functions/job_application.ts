@@ -292,6 +292,33 @@ export async function getJobApplicationByYear(year: number) {
 
 /**
  *
+ * @param studentId: the id of the student whose jobapplicatio we are searching
+ * @param year: the year that we are looking up all the job applications for
+ * @returns all the job applications associated with the given year
+ */
+export async function getJobApplicationByYearForStudent(
+    studentId: number,
+    year: number
+) {
+    return (
+        await prisma.job_application.findMany({
+            where: {
+                osoc: {
+                    year: year,
+                },
+                student_id: studentId,
+            },
+            include: {
+                attachment: true,
+                job_application_skill: true,
+                applied_role: true,
+            },
+        })
+    )[0]; // return the 0-th value because there is maximum 1 value!
+}
+
+/**
+ *
  * @param studentId: the student id
  * @param year: the year
  * @returns all the job applications associated with the given year
