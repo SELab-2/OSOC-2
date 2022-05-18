@@ -262,7 +262,7 @@ export interface Contract {
     contract_id: number;
     contract_status: string; // TODO: Make ENUM for this
     project_role: ProjectRole;
-    students: [Student];
+    student: Student;
 }
 
 export interface Project {

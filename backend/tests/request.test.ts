@@ -5,10 +5,32 @@ import * as config from "../config.json";
 import * as Rq from "../request";
 import * as T from "../types";
 import { errors } from "../utility";
+import { allNonNaN, idIsNumber } from "../request";
 
 function setSessionKey(req: express.Request, key: string): void {
     req.headers.authorization = config.global.authScheme + " " + key;
 }
+
+test("Id is number tests", () => {
+    expect(
+        allNonNaN(["year", "id"], { year: 2022, id: 2 })
+    ).resolves.toStrictEqual({ year: 2022, id: 2 });
+    const noNumber = parseInt("id");
+    expect(
+        allNonNaN(["year", "id"], { year: 2022, id: noNumber })
+    ).rejects.toBe(errors.cookArgumentError());
+});
+
+test("Ids are numbers tests", () => {
+    expect(idIsNumber({ id: 1, sessionkey: "key" })).resolves.toStrictEqual({
+        id: 1,
+        sessionkey: "key",
+    });
+    const noNumber = parseInt("id");
+    expect(idIsNumber({ id: noNumber, sessionkey: "key" })).rejects.toBe(
+        errors.cookArgumentError()
+    );
+});
 
 test("Can parse Key-only requests", () => {
     const valid: express.Request = getMockReq();
@@ -454,6 +476,7 @@ test("Can parse filter osocs request", () => {
 
     const i1: T.Anything = { yearSort: "sort" };
     const i2: T.Anything = { yearFilter: 2022, yearSort: "sort" };
+    const i3: T.Anything = { yearFilter: "year", yearSort: "asc" };
 
     const okays = [
         nothing,
@@ -479,7 +502,7 @@ test("Can parse filter osocs request", () => {
         });
     });
 
-    const fails = [i1, i2].map((x) => {
+    const fails = [i1, i2, i3].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
         setSessionKey(req, key);
@@ -554,6 +577,7 @@ test("Can parse filter students request", () => {
     const wrongEmailSort: T.Anything = { emailSort: "email" };
     const wrongAlumniFilter: T.Anything = { alumniFilter: "is_admin filter" };
     const wrongCoachFilter: T.Anything = { coachFilter: "is_coach filter" };
+    const wrongOsocYear: T.Anything = { osocYear: "year" };
 
     const okays = [
         [nothing, nothing],
@@ -611,6 +635,7 @@ test("Can parse filter students request", () => {
         wrongEmailStatus,
         wrongAlumniFilter,
         wrongCoachFilter,
+        wrongOsocYear,
     ].map((x) => {
         const req: express.Request = getMockReq();
         req.body = { ...x };
@@ -873,7 +898,7 @@ test("Can parse filter projects request", () => {
 test("Can parse final decision request", () => {
     const key = "key";
     const id = 6969420420;
-    const data: T.Anything = {};
+    const noData: T.Anything = {};
     const dat2: T.Anything = { reply: "YES" };
     const dat3: T.Anything = { reply: "NO" };
     const dat4: T.Anything = { reply: "MAYBE" };
@@ -881,7 +906,7 @@ test("Can parse final decision request", () => {
     const dat6: T.Anything = { reply: "maybe" };
     const dat7: T.Anything = { reply: "YES" };
 
-    const p = [data, dat2, dat3, dat4].map((x) => {
+    const p = [dat2, dat3, dat4].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
@@ -896,7 +921,7 @@ test("Can parse final decision request", () => {
         ).resolves.toStrictEqual(x);
     });
 
-    const q = [dat5, dat6].map((x) => {
+    const q = [noData, dat5, dat6].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
@@ -1045,10 +1070,27 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
     };
+    const d4: T.Anything = {
+        name: "Experiment One",
+        partner: "Simic Combine",
+        start: Date.now(),
+        end: Date.now(),
+        positions: 69,
+    };
+    const d5: T.Anything = {
+        name: "Experiment One",
+        partner: "Simic Combine",
+        description: "Project description",
+        start: Date.now(),
+        end: Date.now(),
+    };
 
     const req1: express.Request = getMockReq();
     const req2: express.Request = getMockReq();
     const req3: express.Request = getMockReq();
+    const req4: express.Request = getMockReq();
+    const req5: express.Request = getMockReq();
+    const req6: express.Request = getMockReq();
 
     req1.body = { ...d1 };
     req1.params.id = id.toString();
@@ -1059,6 +1101,13 @@ test("Can parse update project request", () => {
     req3.body = { ...d3 };
     req3.params.id = id.toString();
     setSessionKey(req3, key);
+    req4.body = { ...d4 };
+    req4.params.id = id.toString();
+    req5.body = { ...d1 };
+    setSessionKey(req5, key);
+    req6.body = { ...d5 };
+    req6.params.id = id.toString();
+    setSessionKey(req6, key);
 
     d1.id = id;
     d1.sessionkey = key;
@@ -1066,9 +1115,15 @@ test("Can parse update project request", () => {
     d3.id = id;
     d3.sessionkey = key;
     d3.end = undefined;
+    d3.addCoaches = undefined;
     d3.removeCoaches = undefined;
     d3.roles = undefined;
-    d3.addCoaches = undefined;
+    d4.id = id;
+    d5.id = id;
+    d5.sessionkey = key;
+    d5.removeCoaches = undefined;
+    d5.roles = undefined;
+    d5.addCoaches = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
@@ -1079,8 +1134,17 @@ test("Can parse update project request", () => {
     const p3: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req3)
     ).resolves.toStrictEqual(d3);
+    const p4: Promise<void> = expect(
+        Rq.parseUpdateProjectRequest(req4)
+    ).rejects.toBe(errors.cookUnauthenticated());
+    const p5: Promise<void> = expect(
+        Rq.parseUpdateProjectRequest(req5)
+    ).rejects.toBe(errors.cookArgumentError());
+    const p6: Promise<void> = expect(
+        Rq.parseUpdateProjectRequest(req6)
+    ).resolves.toStrictEqual(d5);
 
-    return Promise.all([p1, p2, p3]);
+    return Promise.all([p1, p2, p3, p4, p5, p6]);
 });
 
 test("Can parse draft student request", () => {
@@ -1574,4 +1638,64 @@ test("Can parse self-modify requests", () => {
     });
 
     return Promise.all([valids, invalids, unauths].flat());
+});
+
+test("Can parse remove coach request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { loginUserId: 1 };
+    const noProjectUser: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseRemoveCoachRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        loginUserId: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noProjectUser };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseRemoveCoachRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse assign coach request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { loginUserId: 1 };
+    const noProjectUser: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseAssignCoachRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        loginUserId: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...noProjectUser };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseAssignCoachRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
 });

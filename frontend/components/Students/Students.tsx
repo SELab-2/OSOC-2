@@ -17,16 +17,21 @@ import { StudentOverview } from "../StudentOverview/StudentOverview";
 import scrollStyles from "../ScrollView.module.scss";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
+import { useRouter } from "next/router";
 
 /**
  * Constructs the complete students page with filter included
  * @param alwaysLimited Whether or not the page should always be shown limited
+ * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
+ * @param updateParentStudents
  * @constructor
  */
-export const Students: React.FC<{ alwaysLimited: boolean }> = ({
-    alwaysLimited = false,
-}) => {
+export const Students: React.FC<{
+    alwaysLimited: boolean;
+    dragDisabled: boolean;
+}> = ({ alwaysLimited = false }) => {
+    const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
@@ -48,7 +53,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
-        setStudents([...filteredStudents]);
+        setStudents(filteredStudents);
         if (!alwaysLimited) {
             if (selectedStudent < 0) {
                 setDisplay(Display.FULL);
@@ -77,6 +82,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (e.key === "Escape") {
             clearSelection();
         }
+        router.push(`/students`).then();
     };
 
     /**
@@ -87,11 +93,12 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             setDisplay(Display.FULL);
         }
         setSelectedStudent(-1);
+        router.push(`/students`).then();
     };
 
     /**
      * Handles clicking on a student
-     * Ctrl + Click or Alt + Click should open the student on a seperate page /students/:id
+     * Ctrl + Click or Alt + Click should open the student on a separate page /students/:id
      * A normal click will upon on the same page and set the query parameter to /students?id=[id]
      * @param e
      * @param student_id
@@ -108,6 +115,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             window.open(`/students/${student_id}`);
             return;
         }
+        router.push(`/students?id=${student_id}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
@@ -245,7 +253,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             id_to_index[id] = index;
                             return (
                                 <div
-                                    key={student.student.student_id}
+                                    key={id}
                                     className={styles.card}
                                     onClick={(e) =>
                                         clickStudent(
@@ -271,6 +279,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                                 </div>
                             );
                         })}
+                        ;
                     </div>
                     <div className={scrollStyles.bottomShadowCaster} />
                 </div>

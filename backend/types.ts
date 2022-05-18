@@ -1328,7 +1328,8 @@ export namespace Requests {
     }
 
     export interface Confirm extends IdRequest {
-        reply?: InternalTypes.Suggestion;
+        reply: InternalTypes.Suggestion;
+        reason?: string;
     }
 
     export interface UpdateLoginUser extends IdRequest {
