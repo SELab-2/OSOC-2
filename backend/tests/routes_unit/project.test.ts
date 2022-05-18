@@ -408,6 +408,9 @@ beforeEach(() => {
     reqMock.parseProjectConflictsRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseDraftStudentRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -530,6 +533,17 @@ beforeEach(() => {
         })
     );
     ormCMock.sortedContractsByOsocEdition.mockResolvedValue(osocCtr);
+    ormCMock.createContract.mockImplementation((v) =>
+        Promise.resolve({
+            contract_id: 5,
+            loginUserId: v.loginUserId,
+            project_role_id: v.projectRoleId || 0,
+            student_id: v.studentId,
+            information: v.information || null,
+            created_by_login_user_id: v.loginUserId,
+            contract_status: v.contractStatus || "DRAFT",
+        })
+    );
 
     // project user orm
     ormPUMock.getUsersFor.mockResolvedValue([
@@ -565,6 +579,7 @@ beforeEach(() => {
 
     // osoc orm
     ormOMock.getNewestOsoc.mockResolvedValue({ osoc_id: 1, year: 2022 });
+    ormOMock.getLatestOsoc.mockResolvedValue({ osoc_id: 1, year: 2022 });
 });
 
 afterEach(() => {
@@ -583,6 +598,7 @@ afterEach(() => {
     reqMock.parseAssignCoachRequest.mockReset();
     reqMock.parseRemoveAssigneeRequest.mockReset();
     reqMock.parseProjectConflictsRequest.mockReset();
+    reqMock.parseDraftStudentRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
@@ -617,6 +633,7 @@ afterEach(() => {
     ormCMock.contractsForStudent.mockReset();
     ormCMock.removeContract.mockReset();
     ormCMock.sortedContractsByOsocEdition.mockReset();
+    ormCMock.createContract.mockReset();
 
     // project user orm
     ormPUMock.getUsersFor.mockReset();
@@ -629,6 +646,7 @@ afterEach(() => {
 
     // osoc orm
     ormOMock.getNewestOsoc.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -1157,4 +1175,95 @@ test("Can get project conflicts (1 elem)", async () => {
     expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
     expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
     expectCall(ormCMock.sortedContractsByOsocEdition, 1);
+});
+
+test("Can assign students", async () => {
+    const req = getMockReq();
+    req.body = {
+        studentId: 0,
+        id: 0,
+        sessionkey: "key",
+        role: "dev",
+    };
+
+    await expect(project.assignStudent(req)).resolves.toStrictEqual({
+        drafted: true,
+        role: "dev",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expectCall(ormCMock.createContract, {
+        studentId: req.body.studentId,
+        projectRoleId: 0,
+        loginUserId: 0,
+        contractStatus: "DRAFT",
+    });
+});
+
+test("Can't assign students (no places)", async () => {
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(0);
+    const req = getMockReq();
+    req.body = {
+        studentId: 0,
+        id: 0,
+        sessionkey: "key",
+        role: "dev",
+    };
+
+    await expect(project.assignStudent(req)).rejects.toStrictEqual({
+        http: 409,
+        reason: "There are no more free spaces for that role",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormCMock.createContract).not.toHaveBeenCalled();
+});
+
+test("Can't assign students (no such role)", async () => {
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = {
+        studentId: 0,
+        id: 0,
+        sessionkey: "key",
+        role: "dev",
+    };
+
+    await expect(project.assignStudent(req)).rejects.toStrictEqual({
+        http: 404,
+        reason: "That role doesn't exist",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormCMock.createContract).not.toHaveBeenCalled();
+});
+
+test("Can't assign students (already used)", async () => {
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: studcontr[0].project_role.project.osoc_id,
+        year: 2022,
+    });
+    const req = getMockReq();
+    req.body = {
+        studentId: 0,
+        id: 0,
+        sessionkey: "key",
+        role: "dev",
+    };
+
+    await expect(project.assignStudent(req)).rejects.toStrictEqual({
+        http: 409,
+        reason: "This student does already have a contract",
+    });
+    expectCall(reqMock.parseDraftStudentRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(ormCMock.contractsForStudent, req.body.studentId);
+    expect(ormCMock.createContract).not.toHaveBeenCalled();
 });

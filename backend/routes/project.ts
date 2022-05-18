@@ -733,10 +733,6 @@ export async function filterProjects(
 ): Promise<Responses.ProjectFilterList> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     let year = new Date().getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
