@@ -20,7 +20,7 @@
     "next-router-mock": "^0.6.9",
     "react": "18.1.0",
     "react-dom": "18.1.0",
-    "socket.io-client": "^4.5.0",
+    "socket.io-client": "^4.5.1",
     "validator": "^13.7.0"
   },
   "devDependencies": {
