@@ -2,10 +2,10 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { Project, Student } from "../../types";
+import { NotificationType, Project, Student } from "../../types";
 import { ProjectCard } from "../../components/ProjectCard/ProjectCard";
 import { Students } from "../../components/Students/Students";
-import styles from "../../styles/projects.module.scss";
+import styles from "./projects.module.scss";
 import {
     DragDropContext,
     Draggable,
@@ -13,6 +13,7 @@ import {
     DropResult,
 } from "react-beautiful-dnd";
 import { Modal } from "../../components/Modal/Modal";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Index: NextPage = () => {
     const router = useRouter();
@@ -23,6 +24,7 @@ const Index: NextPage = () => {
     const [currentProject, setCurrentProject] = useState<Project | null>(null);
     const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
+    const { notify } = useContext(NotificationContext);
 
     const fetchProjects = async () => {
         const { sessionKey } = getSession
@@ -40,20 +42,18 @@ const Index: NextPage = () => {
             .then((response) => response.json())
             .catch((error) => console.log(error));
         if (response !== undefined && response.success) {
-            console.log("aaa");
             setProjects(response.data);
-        } else {
-            setProjects([]);
         }
     };
 
     const handleButtonRole = async (e: SyntheticEvent) => {
         if (e.currentTarget.textContent) {
-            await addStudentProject(e.currentTarget.textContent);
+            await addStudentToProject(e.currentTarget.textContent);
         }
         setShowModal(false);
     };
-    const addStudentProject = async (role: string) => {
+
+    const addStudentToProject = async (role: string) => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -77,10 +77,15 @@ const Index: NextPage = () => {
             .then((response) => response.json())
             .catch((error) => console.log(error));
         console.log(response);
-        if (response !== undefined && response.success) {
+
+        if (response === undefined) return;
+
+        if (response.success) {
             await fetchProjects();
         } else {
-            setProjects([]);
+            if (response.reason !== undefined && notify !== undefined) {
+                notify(response.reason, NotificationType.WARNING, 3500);
+            }
         }
     };
 
@@ -124,7 +129,7 @@ const Index: NextPage = () => {
         <div>
             <button
                 onClick={() => {
-                    router.push("/projects/create");
+                    router.push("/projects/create").then();
                 }}
             >
                 Add Project
@@ -136,10 +141,10 @@ const Index: NextPage = () => {
                     title={`Remove student`}
                 >
                     <p>Please choose a role</p>
-                    {currentProject.roles.map((role) => {
+                    {currentProject.roles.map((role, index) => {
                         if (roleMap[role.name] < role.positions) {
                             return (
-                                <button onClick={handleButtonRole}>
+                                <button key={index} onClick={handleButtonRole}>
                                     {role.name}
                                 </button>
                             );
@@ -163,7 +168,7 @@ const Index: NextPage = () => {
                                     const id = project.id;
                                     return (
                                         <Draggable
-                                            key={"project:" + id.toString()}
+                                            key={project.id}
                                             draggableId={
                                                 "project:" + id.toString()
                                             }
@@ -179,9 +184,6 @@ const Index: NextPage = () => {
                                                     <ProjectCard
                                                         key={project.id}
                                                         project={project}
-                                                        updateProject={
-                                                            fetchProjects
-                                                        }
                                                     />
                                                 </div>
                                             )}
