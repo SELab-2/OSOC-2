@@ -42,6 +42,10 @@ import * as ormEv from "../../orm_functions/evaluation";
 jest.mock("../../orm_functions/evaluation");
 const ormEvMock = ormEv as jest.Mocked<typeof ormEv>;
 
+import * as ormO from "../../orm_functions/osoc";
+jest.mock("../../orm_functions/osoc");
+const ormOMock = ormO as jest.Mocked<typeof ormO>;
+
 import * as project from "../../routes/project";
 import { CreateProject } from "../../orm_functions/orm_types";
 
@@ -355,6 +359,15 @@ const evals = [
     },
 ];
 
+const osocCtr = [
+    { project_role: { project: projects[0] }, student_id: 0 },
+    { project_role: { project: projects[1] }, student_id: 0 },
+    { project_role: { project: projects[1] }, student_id: 1 },
+    { project_role: { project: projects[0] }, student_id: 2 },
+    { project_role: { project: projects[1] }, student_id: 2 },
+    { project_role: { project: projects[1] }, student_id: 3 },
+];
+
 function orDefault<T>(v: T | undefined, d: T): T {
     return v == undefined ? d : v;
 }
@@ -392,6 +405,9 @@ beforeEach(() => {
     reqMock.parseRemoveAssigneeRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseProjectConflictsRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -415,6 +431,9 @@ beforeEach(() => {
     utilMock.isValidID.mockImplementation((v) => Promise.resolve(v));
     utilMock.getOrDefault.mockImplementation((v, x) =>
         v == undefined || v == null ? x : v
+    );
+    utilMock.getOrReject.mockImplementation((v) =>
+        v == undefined || v == null ? Promise.reject({}) : Promise.resolve(v)
     );
 
     // project orm
@@ -510,6 +529,7 @@ beforeEach(() => {
             contract_status: "DRAFT",
         })
     );
+    ormCMock.sortedContractsByOsocEdition.mockResolvedValue(osocCtr);
 
     // project user orm
     ormPUMock.getUsersFor.mockResolvedValue([
@@ -542,6 +562,9 @@ beforeEach(() => {
             is_final: true,
         })
     );
+
+    // osoc orm
+    ormOMock.getNewestOsoc.mockResolvedValue({ osoc_id: 1, year: 2022 });
 });
 
 afterEach(() => {
@@ -559,12 +582,14 @@ afterEach(() => {
     reqMock.parseRemoveCoachRequest.mockReset();
     reqMock.parseAssignCoachRequest.mockReset();
     reqMock.parseRemoveAssigneeRequest.mockReset();
+    reqMock.parseProjectConflictsRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
     utilMock.checkSessionKey.mockReset();
     utilMock.isValidID.mockReset();
     utilMock.getOrDefault.mockReset();
+    utilMock.getOrReject.mockReset();
 
     // project orm
     ormPrMock.createProject.mockReset();
@@ -591,6 +616,7 @@ afterEach(() => {
     ormCMock.removeContract.mockReset();
     ormCMock.contractsForStudent.mockReset();
     ormCMock.removeContract.mockReset();
+    ormCMock.sortedContractsByOsocEdition.mockReset();
 
     // project user orm
     ormPUMock.getUsersFor.mockReset();
@@ -600,6 +626,9 @@ afterEach(() => {
     // evaluation orm
     ormEvMock.getEvaluationByPartiesFor.mockReset();
     ormEvMock.updateEvaluationForStudent.mockReset();
+
+    // osoc orm
+    ormOMock.getNewestOsoc.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -1061,4 +1090,71 @@ test("Can't un-assign students (no contracts)", async () => {
     expect(ormEvMock.getEvaluationByPartiesFor).not.toHaveBeenCalled();
     expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
     expect(ormCMock.removeContract).not.toHaveBeenCalled();
+});
+
+test("Can get project conflicts", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    const result = {
+        data: [
+            {
+                student: 0,
+                projects: osocCtr
+                    .filter((x) => x.student_id == 0)
+                    .map((x) => ({
+                        id: x.project_role.project.project_id,
+                        name: x.project_role.project.name,
+                    })),
+            },
+            {
+                student: 2,
+                projects: osocCtr
+                    .filter((x) => x.student_id == 2)
+                    .map((x) => ({
+                        id: x.project_role.project.project_id,
+                        name: x.project_role.project.name,
+                    })),
+            },
+        ],
+    };
+
+    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual(
+        result
+    );
+    expectCall(reqMock.parseProjectConflictsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
+    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
+});
+
+test("Can get project conflicts (empty)", async () => {
+    ormCMock.sortedContractsByOsocEdition.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual({
+        data: [],
+    });
+    expectCall(reqMock.parseProjectConflictsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
+    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
+});
+
+test("Can get project conflicts (1 elem)", async () => {
+    ormCMock.sortedContractsByOsocEdition.mockResolvedValue([osocCtr[0]]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual({
+        data: [],
+    });
+    expectCall(reqMock.parseProjectConflictsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
+    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
 });
