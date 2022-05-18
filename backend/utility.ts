@@ -43,6 +43,9 @@ export const errors: Errors = {
     cookPendingAccount() {
         return config.apiErrors.pendingAccount;
     },
+    cookWrongSuggestionYear() {
+        return config.apiErrors.studentSuggestion.insufficientRights;
+    },
 
     cookNonExistent(url: string) {
         return {

@@ -11,7 +11,7 @@ const Pid: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [student, setStudent] = useState<Student>();
-    const { pid } = router.query; // pid is the student id
+    const { pid, year } = router.query; // pid is the student id
     const { socket } = useSockets();
 
     /**
@@ -40,8 +40,10 @@ const Pid: NextPage = () => {
         if (getSession !== undefined && pid !== undefined) {
             getSession().then(async ({ sessionKey }) => {
                 if (sessionKey !== "") {
+                    const query = year === undefined ? "" : "?year=" + year;
                     const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}`,
+                        `${process.env.NEXT_PUBLIC_API_URL}/student/${pid}` +
+                            query,
                         {
                             method: "GET",
                             headers: {
@@ -67,7 +69,16 @@ const Pid: NextPage = () => {
     return (
         <div className={styles.studentPage}>
             {student !== undefined ? (
-                <StudentOverview student={student} />
+                <StudentOverview
+                    student={student}
+                    year={
+                        typeof year === "string"
+                            ? year
+                            : year
+                            ? year[0]
+                            : undefined
+                    }
+                />
             ) : null}
         </div>
     );

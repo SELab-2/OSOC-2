@@ -51,7 +51,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
      */
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         const scrollPosition = window.scrollY;
-        console.log("scroll " + scrollPosition);
         let index = -1;
         const searchParams = new URLSearchParams(window.location.search);
         const id = searchParams.get("id");
@@ -79,7 +78,6 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             }
         }
         window.scrollTo(0, scrollPosition);
-        console.log(window.scrollY);
     };
 
     /**
@@ -147,14 +145,21 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         e.preventDefault();
 
         if (e.ctrlKey || e.altKey || e.button == 1) {
-            window.open(`/students/${student_id}`);
+            let url = `/students/${student_id}`;
+            if (params?.osocYear) {
+                url += `?year=${params?.osocYear}`;
+            }
+            window.open(url);
             return;
         }
         // set the new id
-        const params = new URLSearchParams(window.location.search);
-        params.set("id", student_id.toString());
+        const paramsQuery = new URLSearchParams(window.location.search);
+        paramsQuery.set("id", student_id.toString());
+        if (params?.osocYear) {
+            paramsQuery.set("year", params?.osocYear);
+        }
         // push the url
-        router.push(`/students?${params.toString()}`).then();
+        router.push(`/students?${paramsQuery.toString()}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
@@ -361,6 +366,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 <StudentOverview
                     updateEvaluations={updateStudentEvaluation}
                     student={students[selectedStudent]}
+                    year={params?.osocYear}
                     clearSelection={clearSelection}
                 />
             ) : null}
