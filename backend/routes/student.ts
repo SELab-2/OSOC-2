@@ -150,6 +150,7 @@ export async function createStudentSuggestion(
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
         student.student_id
     );
+
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
     }
