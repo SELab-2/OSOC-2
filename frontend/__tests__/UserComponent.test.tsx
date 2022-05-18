@@ -57,7 +57,9 @@ describe("User component tests", () => {
     });
 
     test("Test for valid login person", async () => {
-        render(<User user={userAdminCoach} removeUser={removeUser} />);
+        render(
+            <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("userName")).toBeInTheDocument();
 
         expect(screen.getByTestId("userName").firstChild?.nodeValue).toBe(
@@ -73,7 +75,9 @@ describe("User component tests", () => {
     });
 
     test("test valid login person admin button", async () => {
-        render(<User user={userAdminCoach} removeUser={removeUser} />);
+        render(
+            <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("buttonIsAdmin")).toBeInTheDocument();
         expect(screen.getByTestId("imageIsAdmin")).toBeInTheDocument();
         expect(screen.getByAltText("Person is an admin")).toBeInTheDocument();
@@ -99,7 +103,9 @@ describe("User component tests", () => {
     });
 
     test("Test is coach for valid person", async () => {
-        render(<User user={userAdminCoach} removeUser={removeUser} />);
+        render(
+            <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("buttonIsCoach")).toBeInTheDocument();
         expect(screen.getByTestId("imageIsCoach")).toBeInTheDocument();
         expect(screen.getByAltText("Person is a coach")).toBeInTheDocument();
@@ -125,7 +131,9 @@ describe("User component tests", () => {
     });
 
     test("Test disable valid person", async () => {
-        render(<User user={userAdminCoach} removeUser={removeUser} />);
+        render(
+            <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("buttonStatus")).toBeInTheDocument();
         expect(screen.getByTestId("imageStatus")).toBeInTheDocument();
         expect(
@@ -156,7 +164,9 @@ describe("User component tests", () => {
     });
 
     test("Test delete person", async () => {
-        render(<User user={userAdminCoach} removeUser={removeUser} />);
+        render(
+            <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("buttonDelete")).toBeInTheDocument();
         await act(async () => {
             fetchMock.mockOnce(JSON.stringify({ success: true }));
@@ -167,7 +177,9 @@ describe("User component tests", () => {
     });
 
     test("Test for invalid person", async () => {
-        render(<User user={userInvalid} removeUser={removeUser} />);
+        render(
+            <User user={userInvalid} removeUser={removeUser} editions={[]} />
+        );
         expect(screen.getByTestId("pendingButton")).not.toBeNull();
         await act(async () => {
             fetchMock.mockOnce(
@@ -180,7 +192,9 @@ describe("User component tests", () => {
     });
 
     test("Test for disabled person admin", async () => {
-        render(<User user={userDisabled} removeUser={removeUser} />);
+        render(
+            <User user={userDisabled} removeUser={removeUser} editions={[]} />
+        );
 
         await act(async () => {
             fetchMock.mockOnce(
@@ -199,7 +213,9 @@ describe("User component tests", () => {
     });
 
     test("Test for disabled person coach", async () => {
-        render(<User user={userDisabled} removeUser={removeUser} />);
+        render(
+            <User user={userDisabled} removeUser={removeUser} editions={[]} />
+        );
 
         await act(async () => {
             fetchMock.mockOnce(

@@ -38,6 +38,10 @@ export const StudentFilter: React.FC<{
         EmailStatus.EMPTY
     );
 
+    // set dropdowns active / inactive
+    const [rolesActive, setRolesActive] = useState<boolean>(false);
+    const [emailActive, setEmailActive] = useState<boolean>(false);
+
     // Roles used in the dropdown
     const [roles, setRoles] = useState<Array<Role>>([]);
     // A set of active roles
@@ -306,11 +310,16 @@ export const StudentFilter: React.FC<{
                     Student Coach Only
                 </button>
 
-                <div className="dropdown is-right is-hoverable">
+                <div
+                    className={`dropdown is-right ${
+                        rolesActive ? "is-active" : "is-hoverable"
+                    }`}
+                >
                     <div
+                        onClick={() => setRolesActive((prev) => !prev)}
                         data-testid={"rolesSelectedFilterDisplay"}
                         className={`dropdown-trigger ${
-                            selectedRoles.size === 0
+                            selectedRoles.size === 0 && !rolesActive
                                 ? styles.inactive
                                 : styles.active
                         }`}
@@ -348,11 +357,16 @@ export const StudentFilter: React.FC<{
                     </div>
                 </div>
 
-                <div className="dropdown is-right is-hoverable">
+                <div
+                    className={`dropdown is-right ${
+                        emailActive ? "is-active" : "is-hoverable"
+                    }`}
+                >
                     <div
+                        onClick={() => setEmailActive((prev) => !prev)}
                         data-testid={"emailFilterDisplay"}
                         className={`dropdown-trigger ${
-                            emailStatus === EmailStatus.EMPTY
+                            emailStatus === EmailStatus.EMPTY && !emailActive
                                 ? styles.inactive
                                 : styles.active
                         }`}

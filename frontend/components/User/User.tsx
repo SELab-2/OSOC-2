@@ -30,6 +30,8 @@ export const User: React.FC<{
 
     // a set of edition ids the user is allowed to see
     const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
+    // dropdown open or closed
+    const [editionsActive, setEditionsActive] = useState<boolean>(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -309,9 +311,18 @@ export const User: React.FC<{
                         ACTIVATE
                     </button>
                 ) : (
-                    <div className="dropdown is-right is-hoverable">
+                    <div
+                        className={`dropdown is-right ${
+                            editionsActive ? "is-active" : "is-hoverable"
+                        }`}
+                    >
                         <div
-                            className={`dropdown-trigger ${triangle.inactive}`}
+                            onClick={() => setEditionsActive((prev) => !prev)}
+                            className={`dropdown-trigger ${
+                                editionsActive
+                                    ? triangle.active
+                                    : triangle.inactive
+                            }`}
                         >
                             Editions
                             <div className={triangle.triangleContainer}>
