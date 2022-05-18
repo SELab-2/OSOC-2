@@ -68,6 +68,9 @@ test("utility.errors.cook* work as expected", () => {
     expect(util.errors.cookUnauthenticated()).toBe(
         config.apiErrors.unauthenticated
     );
+    expect(util.errors.cookWrongSuggestionYear()).toBe(
+        config.apiErrors.studentSuggestion.insufficientRights
+    );
     expect(util.errors.cookInsufficientRights()).toBe(
         config.apiErrors.insufficientRights
     );
