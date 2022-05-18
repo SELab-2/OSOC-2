@@ -14,6 +14,7 @@ import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 import scrollStyles from "../ScrollView.module.scss";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
@@ -22,12 +23,16 @@ import { useRouter } from "next/router";
 /**
  * Constructs the complete students page with filter included
  * @param alwaysLimited Whether or not the page should always be shown limited
+ * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
+ * @param updateParentStudents
  * @constructor
  */
-export const Students: React.FC<{ alwaysLimited: boolean }> = ({
-    alwaysLimited = false,
-}) => {
+export const Students: React.FC<{
+    alwaysLimited: boolean;
+    dragDisabled: boolean;
+    updateParentStudents: (Students: Array<Student>) => void;
+}> = ({ alwaysLimited = false, dragDisabled, updateParentStudents }) => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
@@ -51,6 +56,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
     const setFilteredStudents = (filteredStudents: Array<Student>) => {
         setSelectedStudent(selectedStudent);
         setStudents([...filteredStudents]);
+        updateParentStudents([...filteredStudents]);
         if (!alwaysLimited) {
             if (selectedStudent < 0) {
                 setDisplay(Display.FULL);
@@ -167,6 +173,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 evalutationsCoach;
         }
         setStudents([...students]);
+        updateParentStudents([...students]);
     };
 
     /**
@@ -271,37 +278,63 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             display === Display.LIMITED ? styles.limited : ""
                         }`}
                     >
-                        {students.map((student, index) => {
-                            const id = student.student.student_id;
-                            id_to_index[id] = index;
-                            return (
-                                <div
-                                    key={student.student.student_id}
-                                    className={styles.card}
-                                    onClick={(e) =>
-                                        clickStudent(
-                                            e,
-                                            student.student.student_id,
-                                            index
-                                        )
-                                    }
-                                >
-                                    <StudentCard
-                                        student={student as Student}
-                                        display={display}
-                                    />
-                                    {student.evaluation.evaluations.filter(
-                                        (evaluation) => !evaluation.is_final
-                                    ).length > 0 ? (
-                                        <EvaluationBar
-                                            evaluations={
-                                                student.evaluation.evaluations
-                                            }
-                                        />
-                                    ) : null}
+                        <Droppable droppableId={"students"}>
+                            {(provided) => (
+                                <div ref={provided.innerRef}>
+                                    {students.map((student, index) => {
+                                        const id = student.student.student_id;
+                                        id_to_index[id] = index;
+                                        return (
+                                            <Draggable
+                                                key={"student:" + id.toString()}
+                                                draggableId={
+                                                    "student:" + id.toString()
+                                                }
+                                                index={index}
+                                                isDragDisabled={dragDisabled}
+                                            >
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className={styles.card}
+                                                        onClick={(e) =>
+                                                            clickStudent(
+                                                                e,
+                                                                student.student
+                                                                    .student_id,
+                                                                index
+                                                            )
+                                                        }
+                                                    >
+                                                        <StudentCard
+                                                            student={
+                                                                student as Student
+                                                            }
+                                                            display={display}
+                                                        />
+                                                        {student.evaluation.evaluations.filter(
+                                                            (evaluation) =>
+                                                                !evaluation.is_final
+                                                        ).length > 0 ? (
+                                                            <EvaluationBar
+                                                                evaluations={
+                                                                    student
+                                                                        .evaluation
+                                                                        .evaluations
+                                                                }
+                                                            />
+                                                        ) : null}
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        );
+                                    })}
+                                    {provided.placeholder}
                                 </div>
-                            );
-                        })}
+                            )}
+                        </Droppable>
                     </div>
                     <div className={scrollStyles.bottomShadowCaster} />
                 </div>
