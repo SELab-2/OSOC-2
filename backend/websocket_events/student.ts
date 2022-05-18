@@ -1,4 +1,3 @@
-/* istanbul ignore file */ // don't test this file because there is no real logic. Only the setup of listeners.
 import { Server, Socket } from "socket.io";
 import {
     ClientToServerEvents,
@@ -6,6 +5,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from "../types";
+/* istanbul ignore file */
 
 /**
  * function to register the listeners to the sockets.

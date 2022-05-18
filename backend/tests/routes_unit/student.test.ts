@@ -968,6 +968,7 @@ test("Can create a student confirmation", async () => {
         id: 0,
         reply: Decision.NO,
         reason: "You are not accepted for osoc",
+        job_application_id: 0,
     };
     await expect(student.createStudentConfirmation(r)).resolves.toStrictEqual(
         {}
@@ -991,11 +992,32 @@ test("Can create a student evaluation", async () => {
     ormoMockJob.getStudentEvaluationsTemp.mockReset();
     ormoMockJob.getStudentEvaluationsTemp.mockResolvedValue([]);
 
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibility0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.DRAFT,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [],
+        job_application_skill: [],
+        applied_role: [],
+    });
+
     r.body = {
         sessionkey: "abcd",
         id: 0,
         suggestion: "YES",
         reason: "You are not accepted for osoc",
+        job_application_id: 0,
     };
     await expect(student.createStudentSuggestion(r)).resolves.toStrictEqual({});
     expectCall(reqMock.parseSuggestStudentRequest, r);
@@ -1008,6 +1030,8 @@ test("Can create a student evaluation", async () => {
         motivation: "You are not accepted for osoc",
         isFinal: false,
     });
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
 });
 
 test("Fails if no student was found in createStudentSuggestion", async () => {
@@ -1038,6 +1062,7 @@ test("No osoc year in the database for createStudentSuggestion", async () => {
     r.body = {
         sessionkey: "abcd",
         suggestion: "YES",
+        job_application_id: 0,
     };
 
     r.params.id = id.toString();
@@ -1059,6 +1084,50 @@ test("No osoc year in the database for createStudentSuggestion", async () => {
             github_id: null,
         },
     });
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibiliy0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.DRAFT,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [
+            {
+                attachment_id: 0,
+                job_application_id: 0,
+                data: ["attachment0"],
+                type: [type_enum.MOTIVATION_STRING],
+            },
+        ],
+        job_application_skill: [
+            {
+                job_application_skill_id: 0,
+                job_application_id: 0,
+                skill: "skill0",
+                language_id: 0,
+                level: 3,
+                is_preferred: true,
+                is_best: true,
+            },
+        ],
+        applied_role: [
+            {
+                role_id: 0,
+                applied_role_id: 0,
+                job_application_id: 0,
+            },
+        ],
+    });
+
     ormoMockOsoc.getLatestOsoc.mockResolvedValue(null);
 
     await expect(student.createStudentSuggestion(r)).rejects.toBe(
@@ -1066,6 +1135,7 @@ test("No osoc year in the database for createStudentSuggestion", async () => {
     );
 
     ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
     ormoMock.getStudent.mockReset();
 });
 
@@ -1298,8 +1368,7 @@ test("Can filter students", async () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-        0
+        undefined
     );
 });
 
@@ -1548,6 +1617,7 @@ test("Update evaluation in createStudentSuggestion", async () => {
     r.body = {
         sessionkey: "abcd",
         suggestion: "YES",
+        job_application_id: 0,
     };
 
     r.params.id = id.toString();
@@ -1649,6 +1719,7 @@ test("New evaluation in createStudentSuggestion", async () => {
     r.body = {
         sessionkey: "abcd",
         suggestion: "YES",
+        job_application_id: 0,
     };
 
     r.params.id = id.toString();
@@ -1959,7 +2030,7 @@ test("Evaluations null in getStudent", async () => {
         },
     });
 
-    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+    ormoMockJob.getJobApplicationByYearForStudent.mockResolvedValue({
         applied_role: [],
         attachment: [],
         created_at: new Date("2022-03-14T22:10:00.000Z"),
@@ -2027,7 +2098,7 @@ test("Evaluations null in getStudent", async () => {
         roles: [],
     });
 
-    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockJob.getJobApplicationByYearForStudent.mockReset();
     ormoMock.getStudent.mockReset();
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();
 });
@@ -2082,7 +2153,7 @@ test("Evaluations null in filterStudents", async () => {
         ],
     });
 
-    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+    ormoMockJob.getJobApplicationByYearForStudent.mockResolvedValue({
         applied_role: [
             {
                 role_id: 0,
@@ -2191,7 +2262,7 @@ test("Evaluations null in filterStudents", async () => {
         ],
     });
 
-    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockJob.getJobApplicationByYearForStudent.mockReset();
     ormoMockRole.getRole.mockReset();
     ormoMock.filterStudents.mockReset();
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();

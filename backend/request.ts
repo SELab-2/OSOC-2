@@ -308,18 +308,25 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(async () => {
-        const sug: unknown = req.body.suggestion;
-        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
-            return rejector();
+    return hasFields(req, ["suggestion", "job_application_id"], types.id).then(
+        async () => {
+            const sug: unknown = req.body.suggestion;
+            if (
+                sug != Decision.YES &&
+                sug != Decision.MAYBE &&
+                sug != Decision.NO
+            )
+                return rejector();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe<string>(req.body, "reason"),
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                suggestion: sug as InternalTypes.Suggestion,
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**
@@ -457,7 +464,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    let osoc_year = new Date().getFullYear();
+    let osoc_year;
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
         if (isNaN(osoc_year)) return rejector();
@@ -561,22 +568,25 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, ["reply"], types.id).then(async () => {
-        if (
-            req.body.reply != Decision.YES &&
-            req.body.reply != Decision.MAYBE &&
-            req.body.reply != Decision.NO
-        ) {
-            return rejector();
-        }
+    return hasFields(req, ["reply", "job_application_id"], types.id).then(
+        async () => {
+            if (
+                req.body.reply != Decision.YES &&
+                req.body.reply != Decision.MAYBE &&
+                req.body.reply != Decision.NO
+            ) {
+                return rejector();
+            }
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            reason: maybe<string>(req.body, "reason"),
-            reply: req.body.reply,
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+                reply: req.body.reply,
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**

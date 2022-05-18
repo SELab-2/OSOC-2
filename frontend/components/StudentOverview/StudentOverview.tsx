@@ -1,10 +1,11 @@
 import {
-    Display,
-    Student,
-    Decision,
-    AttachmentType,
     Attachment,
+    AttachmentType,
+    Decision,
+    Display,
     Evaluation,
+    NotificationType,
+    Student,
 } from "../../types";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -15,13 +16,15 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import Image from "next/image";
+import { NotificationContext } from "../../contexts/notificationProvider";
 import { useSockets } from "../../contexts/socketProvider";
 
 export const StudentOverview: React.FC<{
     student: Student;
+    year?: string;
     updateEvaluations?: (studentId: number, evalutations: Evaluation[]) => void;
     clearSelection?: () => void;
-}> = ({ student, updateEvaluations, clearSelection }) => {
+}> = ({ student, year, updateEvaluations, clearSelection }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations' data is updated because putting
@@ -30,15 +33,20 @@ export const StudentOverview: React.FC<{
     const [decision, setDecision] = useState<Decision>(Decision.YES);
     const [suggestBool, setSuggestBool] = useState(true);
     const [motivation, setMotivation] = useState("");
-    const { getSession } = useContext(SessionContext);
+    const { getSession, isAdmin } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
+
+        const query = year === "" || year === undefined ? "" : "?year=" + year;
+
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest`,
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}/suggest` +
+                query,
             {
                 method: "GET",
                 headers: {
@@ -87,16 +95,27 @@ export const StudentOverview: React.FC<{
                     id: student.student.student_id,
                     suggestion: decision,
                     reason: motivation,
+                    job_application_id:
+                        student.jobApplication.job_application_id,
                 }),
             }
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
-            setMotivation("");
-            socket.emit("studentSuggestionSent", student.student.student_id);
-            // The creation was successful, we can update the evaluation bar
-            fetchEvals().then();
+        if (response !== undefined) {
+            if (response.success) {
+                setMotivation("");
+                socket.emit(
+                    "studentSuggestionSent",
+                    student.student.student_id
+                );
+                // The creation was successful, we can update the evaluation bar
+                fetchEvals().then();
+            } else {
+                if (notify) {
+                    notify(response.reason, NotificationType.WARNING, 3000);
+                }
+            }
         }
     };
 
@@ -118,16 +137,24 @@ export const StudentOverview: React.FC<{
                     id: student.student.student_id,
                     reply: decision,
                     reason: motivation,
+                    job_application_id:
+                        student.jobApplication.job_application_id,
                 }),
             }
         )
             .then((response) => response.json())
             .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
-            setMotivation("");
-            socket.emit("studentDecisionSent", student.student.student_id);
-            // The creation was successful, we can update the evaluation bar
-            fetchEvals().then();
+        if (response !== undefined) {
+            if (response.success) {
+                setMotivation("");
+                socket.emit("studentDecisionSent", student.student.student_id);
+                // The creation was successful, we can update the evaluation bar
+                fetchEvals().then();
+            } else {
+                if (notify) {
+                    notify(response.reason, NotificationType.WARNING, 3000);
+                }
+            }
         }
     };
 
@@ -263,7 +290,12 @@ export const StudentOverview: React.FC<{
                 <div className={styles.finaldecision}>
                     <h2>Status</h2>
                     <div className={styles.dropdown}>
-                        <button className={styles.dropbtn}>Set Status</button>
+                        {/* Only admins can make a final decision */}
+                        {isAdmin ? (
+                            <button className={styles.dropbtn}>
+                                Set Status
+                            </button>
+                        ) : null}
                         <div className={styles.dropdownContent}>
                             <a
                                 data-testid={"permanentYes"}
