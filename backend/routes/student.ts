@@ -137,6 +137,9 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    console.log(jobApplication.job_application_id);
+    console.log(checkedSessionKey.data.job_application_id);
+
     if (
         jobApplication.job_application_id !==
         checkedSessionKey.data.job_application_id
