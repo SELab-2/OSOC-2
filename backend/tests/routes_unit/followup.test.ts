@@ -68,6 +68,7 @@ type _appl = job_application & {
     attachment: attachment[];
     job_application_skill: job_application_skill[];
     applied_role: applied_role[];
+    osoc: osoc;
 };
 
 const jobapps: _appl[] = [
@@ -103,6 +104,10 @@ const jobapps: _appl[] = [
         applied_role: [
             { applied_role_id: 2, job_application_id: 0, role_id: 6 },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
     {
         job_application_id: 2,
@@ -136,6 +141,10 @@ const jobapps: _appl[] = [
         applied_role: [
             { applied_role_id: 2, job_application_id: 2, role_id: 6 },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
 ];
 

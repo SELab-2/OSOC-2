@@ -250,6 +250,7 @@ export async function getLatestJobApplicationOfStudent(studentId: number) {
             attachment: true,
             job_application_skill: true,
             applied_role: true,
+            osoc: true,
         },
     });
 }

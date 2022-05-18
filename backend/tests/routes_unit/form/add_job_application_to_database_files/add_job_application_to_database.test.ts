@@ -27,6 +27,7 @@ const jobApplication: job_application & {
     attachment: attachment[];
     job_application_skill: job_application_skill[];
     applied_role: applied_role[];
+    osoc: { osoc_id: number; year: number };
 } = {
     job_application_id: 1,
     student_id: 1,
@@ -45,6 +46,10 @@ const jobApplication: job_application & {
     attachment: [],
     job_application_skill: [],
     applied_role: [],
+    osoc: {
+        osoc_id: 0,
+        year: 2022,
+    },
 };
 
 // setup

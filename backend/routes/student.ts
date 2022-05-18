@@ -30,6 +30,10 @@ export async function getStudent(
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
+        console.log(parsedRequest);
+        console.log(checkedSessionKey.data.id);
+        console.log(checkedSessionKey);
+        console.log("REJECTING");
         return Promise.reject(errors.cookInvalidID());
     }
 
@@ -67,8 +71,6 @@ export async function getStudent(
         checkedSessionKey.data.id,
         year
     );
-
-    console.log(evaluations);
 
     for (const job_application_skill of jobApplication.job_application_skill) {
         if (job_application_skill.language_id != null) {
@@ -139,6 +141,12 @@ export async function createStudentSuggestion(
         return Promise.reject(errors.cookInvalidID());
     }
 
+    const osocYear = await ormOs.getLatestOsoc();
+
+    if (osocYear == null) {
+        return Promise.reject(errors.cookNoDataError());
+    }
+
     const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
         student.student_id
     );
@@ -149,15 +157,10 @@ export async function createStudentSuggestion(
 
     if (
         jobApplication.job_application_id !==
-        checkedSessionKey.data.job_application_id
+            checkedSessionKey.data.job_application_id ||
+        jobApplication.osoc.year !== osocYear.year
     ) {
         return Promise.reject(errors.cookWrongSuggestionYear());
-    }
-
-    const osocYear = await ormOs.getLatestOsoc();
-
-    if (osocYear == null) {
-        return Promise.reject(errors.cookNoDataError());
     }
 
     const suggestionsTotal = (
