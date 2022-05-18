@@ -1,0 +1,45 @@
+.body {
+  width: clamp(18rem, 80vw, 40rem);
+  margin-inline: auto;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalContent {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.modalContent > label {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rolesHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-block: 1rem;
+}
+
+.roles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.roles > label {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: center;
+}
+

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import * as supertest from "supertest";
 import * as server from "../../server";
 import * as ogConf from "../../config.json";

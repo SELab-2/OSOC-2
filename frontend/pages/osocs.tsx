@@ -3,7 +3,7 @@ import { OsocEdition, OsocFilterParams, Sort } from "../types";
 import { NextPage } from "next";
 import React, { useContext, useState } from "react";
 import styles from "../styles/users.module.css";
-import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
+import { OsocCreateFilter } from "../components/Filters/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
 import { Paginator } from "../components/Paginator/Paginator";
 import { Pagination } from "../types";

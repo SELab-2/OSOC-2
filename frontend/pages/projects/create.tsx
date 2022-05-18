@@ -4,6 +4,7 @@ import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
 import { OsocEdition } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
+import styles from "./create.module.scss";
 
 const Create: NextPage = () => {
     const router = useRouter();
@@ -34,6 +35,11 @@ const Create: NextPage = () => {
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
     const [osocs, setOsocs] = useState<OsocEdition[]>([]);
+
+    const updateNewRolePositions = (positions: string) => {
+        if (Number(positions) < 0) return; // Only allow positive values
+        setNewRolePositions(positions);
+    };
 
     const fetchRoles = async () => {
         if (getSession != undefined) {
@@ -115,7 +121,7 @@ const Create: NextPage = () => {
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         alert("Project succesfully created!");
-                        router.push("/projects");
+                        router.push("/projects").then();
                     }
                 }
             });
@@ -153,6 +159,7 @@ const Create: NextPage = () => {
     };
 
     const addRole = (name: string, positions: string) => {
+        if (Number(positions) < 0) return; // Only allow positive values
         const newRole: { [k: string]: string } = {};
         newRole[name] = positions;
         setRolePositions((rolePositions) => ({ ...rolePositions, ...newRole }));
@@ -197,85 +204,122 @@ const Create: NextPage = () => {
     };
 
     return (
-        <div>
-            <Modal
-                title="Type in the role name and the number of positions"
-                visible={visible}
-                handleClose={closer}
-            >
-                <label>Role: </label>
-                <input
-                    type="text"
-                    name="role_name"
-                    placeholder="name..."
-                    value={newRoleName}
-                    onChange={(e) => setNewRoleName(e.target.value)}
-                />
-                <br />
-                <label>Positions: </label>
-                <input
-                    type="number"
-                    name="role_positions"
-                    value={newRolePositions}
-                    onChange={(e) => setNewRolePositions(e.target.value)}
-                />
-                <br />
-                <button onClick={() => addNewRole()}>Add Role</button>
+        <div className={styles.body}>
+            <Modal title="Role Creation" visible={visible} handleClose={closer}>
+                <div className={styles.modalContent}>
+                    <p>
+                        Type in the new role and the amount of positions
+                        required
+                    </p>
+                    <label>
+                        Role:
+                        <input
+                            className="input"
+                            type="text"
+                            name="role_name"
+                            placeholder="name..."
+                            value={newRoleName}
+                            onChange={(e) => setNewRoleName(e.target.value)}
+                        />
+                    </label>
+
+                    <label>
+                        Positions:
+                        <input
+                            min={0}
+                            className="input"
+                            type="number"
+                            name="role_positions"
+                            value={newRolePositions}
+                            onChange={(e) =>
+                                updateNewRolePositions(e.target.value)
+                            }
+                        />
+                    </label>
+                    <button onClick={() => addNewRole()}>Add Role</button>
+                </div>
             </Modal>
-            <p>Project name</p>
-            <input
-                type="text"
-                name="project_name"
-                placeholder="name..."
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-            />
-            <p>Partner</p>
-            <input
-                type="text"
-                name="partner"
-                placeholder="partner..."
-                value={partner}
-                onChange={(e) => setPartner(e.target.value)}
-            />
-            <p>Osoc edition</p>
-            <input
-                type="text"
-                name="osoc_edition"
-                placeholder="year..."
-                value={osocEdition}
-                onChange={(e) => setOsocEdition(e.target.value)}
-            />
-            <p>Start date</p>
-            <input
-                type="date"
-                name="start_date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-            />
-            <p>End date</p>
-            <input
-                type="date"
-                name="end_date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-            />
-            <p>Change the amount of positions for the necessary roles:</p>
-            {Object.keys(rolePositions).map((role) => {
-                return (
-                    <div key={role}>
-                        <div>
-                            <label> {role}: </label>
+
+            <label>
+                <h1>Project name</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="project_name"
+                    placeholder="name..."
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Partner</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="partner"
+                    placeholder="partner..."
+                    value={partner}
+                    onChange={(e) => setPartner(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Osoc edition</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="osoc_edition"
+                    placeholder="year..."
+                    value={osocEdition}
+                    onChange={(e) => setOsocEdition(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Start date</h1>
+                <input
+                    className="input"
+                    type="date"
+                    name="start_date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>End date</h1>
+                <input
+                    className="input"
+                    type="date"
+                    name="end_date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                />
+            </label>
+
+            <div className={styles.rolesHeader}>
+                <p>Change the amount of positions for the necessary roles:</p>
+                <button onClick={() => setVisible(true)}>+ Add role</button>
+            </div>
+
+            <div className={styles.roles}>
+                {Object.keys(rolePositions).map((role, index) => {
+                    return (
+                        <label key={index}>
+                            <p>{role}:</p>
                             <input
+                                className="input"
                                 type="number"
                                 value={rolePositions[role]}
+                                min={0}
                                 onChange={(e) => addRole(role, e.target.value)}
                             />
-                        </div>
-                    </div>
-                );
-            })}
-            <a onClick={() => setVisible(true)}>Create a new role</a>
+                        </label>
+                    );
+                })}
+            </div>
+
             <br />
             <button onClick={handleConfirm}>CONFIRM</button>
         </div>

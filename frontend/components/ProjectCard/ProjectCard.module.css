@@ -1,0 +1,53 @@
+.body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.body > header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.left > div {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.left > div  > p {
+    align-self: end;
+    opacity: 80%;
+}
+
+.left > h3 {
+    opacity: 80%;
+}
+
+.coaches {
+    margin-inline: -0.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.roles {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-content: flex-end;
+    justify-content: flex-start;
+    align-items: flex-end;
+}

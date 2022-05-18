@@ -10,13 +10,15 @@ import {
     StudentStatus,
     Pagination,
 } from "../../types";
-import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
+import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
 import { Draggable, Droppable } from "react-beautiful-dnd";
+import scrollStyles from "../ScrollView.module.scss";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
+import { useRouter } from "next/router";
 
 /**
  * Constructs the complete students page with filter included
@@ -31,6 +33,7 @@ export const Students: React.FC<{
     dragDisabled: boolean;
     updateParentStudents: (Students: Array<Student>) => void;
 }> = ({ alwaysLimited = false, dragDisabled, updateParentStudents }) => {
+    const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
     // the index of the selected student if the given id matches with one of the fetched students
@@ -64,6 +67,32 @@ export const Students: React.FC<{
     };
 
     /**
+     * Set the selected student
+     * from the url parameter
+     */
+    useEffect(() => {
+        const id = router.query.id;
+        if (id !== undefined) {
+            const id_number = Number(id);
+            if (!isNaN(id_number)) {
+                for (let i = 0; i < students.length; i++) {
+                    if (students[i].student.student_id === id_number) {
+                        setSelectedStudent(i);
+                        if (!alwaysLimited) {
+                            if (selectedStudent < 0) {
+                                setDisplay(Display.FULL);
+                            } else {
+                                setDisplay(Display.LIMITED);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }, [router.query, students]);
+
+    /**
      * We add a listener for keypresses
      */
     useEffect(() => {
@@ -82,6 +111,7 @@ export const Students: React.FC<{
         if (e.key === "Escape") {
             clearSelection();
         }
+        router.push(`/students`).then();
     };
 
     /**
@@ -92,11 +122,12 @@ export const Students: React.FC<{
             setDisplay(Display.FULL);
         }
         setSelectedStudent(-1);
+        router.push(`/students`).then();
     };
 
     /**
      * Handles clicking on a student
-     * Ctrl + Click or Alt + Click should open the student on a seperate page /students/:id
+     * Ctrl + Click or Alt + Click should open the student on a separate page /students/:id
      * A normal click will upon on the same page and set the query parameter to /students?id=[id]
      * @param e
      * @param student_id
@@ -113,6 +144,7 @@ export const Students: React.FC<{
             window.open(`/students/${student_id}`);
             return;
         }
+        router.push(`/students?id=${student_id}`).then();
         setDisplay(Display.LIMITED);
         setSelectedStudent(index);
     };
@@ -239,8 +271,8 @@ export const Students: React.FC<{
         >
             <div>
                 <StudentFilter display={display} search={filter} />
-                <div className={styles.scrollView}>
-                    <div className={styles.topShadowCaster} />
+                <div className={scrollStyles.scrollView}>
+                    <div className={scrollStyles.topShadowCaster} />
                     <div
                         className={`${styles.studentCards} ${
                             display === Display.LIMITED ? styles.limited : ""
@@ -304,7 +336,7 @@ export const Students: React.FC<{
                             )}
                         </Droppable>
                     </div>
-                    <div className={styles.bottomShadowCaster} />
+                    <div className={scrollStyles.bottomShadowCaster} />
                 </div>
                 <Paginator pagination={pagination} navigator={navigator} />
             </div>

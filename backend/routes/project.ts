@@ -24,16 +24,12 @@ export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseNewProjectRequest(req);
-    console.log("check");
     const checkedSessionKey = await util
         .isAdmin(parsedRequest)
         .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
-
-    console.log("hierzo");
-    console.log(checkedSessionKey.data);
 
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
@@ -752,10 +748,9 @@ export async function assignStudent(
  */
 export async function filterProjects(
     req: express.Request
-): Promise<Responses.ProjectFilterList> {
+): Promise<Responses.ProjectListAndContracts> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    // .catch((res) => res);
     if (checkedSessionKey.data == undefined) {
         return Promise.reject(errors.cookInvalidID());
     }
@@ -784,27 +779,75 @@ export async function filterProjects(
         checkedSessionKey.data.clientNameSort
     );
 
-    const projectlist = [];
-
+    const allProjects = [];
     for (const project of projects.data) {
-        const contracts = await ormCtr.contractsByProject(project.project_id);
-        const users = await ormPU.getUsersFor(project.project_id);
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
+        );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
 
-        projectlist.push({
-            id: project.project_id,
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? contract.student
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
+        const users = await ormPU.getUsersFor(project.project_id);
+        allProjects.push({
+            id: Number(project.project_id),
             name: project.name,
             partner: project.partner,
-            start_date: project.start_date,
-            end_data: project.end_date,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
             osoc_id: project.osoc_id,
-            contracts: contracts,
+            description: project.description,
+            roles: projectRoles,
+            contracts: newContracts,
             coaches: users,
         });
     }
 
     return Promise.resolve({
         pagination: projects.pagination,
-        data: projectlist,
+        data: allProjects,
     });
 }
 
