@@ -215,11 +215,12 @@ enum contract_status_enum {
 }
 
 enum email_status_enum {
-  SCHEDULED
-  SENT
-  FAILED
-  NONE
-  DRAFT
+  APPLIED
+  AWAITING_PROJECT @map("AWAITING PROJECT")
+  APPROVED
+  CONTRACT_CONFIRMED @map("CONTRACT CONFIRMED")
+  CONTRACT_DECLINED @map("CONTRACT DECLINED")
+  REJECTED
 }
 
 enum type_enum {
