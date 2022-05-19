@@ -997,6 +997,73 @@ test("Can create a student evaluation", async () => {
     ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
 });
 
+test("Different job application id's in createStudentSuggestion", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+        suggestion: "YES",
+        reason: "You are not accepted for osoc",
+        job_application_id: 1,
+    };
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockOsoc.getLatestOsoc.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibility0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.APPROVED,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [],
+        job_application_skill: [],
+        applied_role: [],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
+    await expect(student.createStudentSuggestion(r)).rejects.toBe(
+        errors.cookWrongSuggestionYear()
+    );
+
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
+});
+
 test("Fails if no student was found in createStudentSuggestion", async () => {
     const r = getMockReq();
     const id = 1000;
@@ -1664,6 +1731,52 @@ test("Student was found in getStudentSuggestions", async () => {
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();
 });
 
+test("Student was found in getStudentSuggestions and latest osoc is null", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 2,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockOsoc.getLatestOsoc.mockResolvedValue(null);
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
+
+    await expect(student.getStudentSuggestions(r)).resolves.toStrictEqual({
+        evaluation: {
+            evaluations: [],
+            osoc: {
+                year: 2022,
+            },
+        },
+    });
+
+    ormoMock.getStudent.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
+});
+
 test("Fails if no student was found in createStudentConfirmation", async () => {
     const r = getMockReq();
     const id = 0;
@@ -2189,4 +2302,323 @@ test("Evaluations null in getStudent", async () => {
     ormoMock.getStudent.mockReset();
     ormoMockJob.getEvaluationsByYearForStudent.mockReset();
     ormoMockLanguage.getLanguage.mockReset();
+});
+
+test("Different job application id's in createStudentConfirmation", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+        id: 0,
+        suggestion: "YES",
+        reason: "You are not accepted for osoc",
+        job_application_id: 1,
+    };
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue({
+        job_application_id: 0,
+        student_id: 0,
+        responsibilities: "Responsibility0",
+        fun_fact: "Funfact0",
+        student_volunteer_info: "Volunteer0",
+        student_coach: true,
+        osoc_id: 0,
+        edus: ["Edu0"],
+        edu_level: "Master",
+        edu_duration: 5,
+        edu_year: "5",
+        edu_institute: "UGent",
+        email_status: email_status_enum.APPROVED,
+        created_at: new Date("2022-03-14 23:10:00+01"),
+        attachment: [],
+        job_application_skill: [],
+        applied_role: [],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
+    await expect(student.createStudentConfirmation(r)).rejects.toBe(
+        errors.cookWrongSuggestionYear()
+    );
+
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+});
+
+test("Job application is null for filterStudents and latest osoc is null", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+    };
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+    ormoMockOsoc.getLatestOsoc.mockResolvedValue(null);
+    ormoMockJob.getLatestJobApplicationOfStudent.mockResolvedValue(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getLatestJobApplicationOfStudent.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMock.filterStudents.mockReset();
+});
+
+test("Job application is null for filterStudents", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2022,
+    };
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+    ormoMockJob.getJobApplicationByYearForStudent.mockResolvedValue({
+        applied_role: [
+            {
+                role_id: 0,
+                applied_role_id: 0,
+                job_application_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 2,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "2",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 0,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+    });
+
+    ormoMockRole.getRole.mockResolvedValue(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getJobApplicationByYearForStudent.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMock.filterStudents.mockReset();
+    ormoMockRole.getRole.mockReset();
+});
+
+test("Skills fail for filterStudents", async () => {
+    const r = getMockReq();
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2022,
+    };
+
+    // override
+    ormoMock.filterStudents.mockResolvedValueOnce(filter_student);
+    ormoMockJob.getJobApplicationByYearForStudent.mockResolvedValue({
+        applied_role: [],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 2,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "2",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [
+            {
+                job_application_skill_id: 0,
+                job_application_id: 0,
+                skill: "skill0",
+                language_id: 0,
+                level: 3,
+                is_preferred: true,
+                is_best: true,
+            },
+            {
+                job_application_skill_id: 1,
+                job_application_id: 0,
+                skill: "skill1",
+                language_id: 1,
+                level: null,
+                is_preferred: true,
+                is_best: true,
+            },
+        ],
+        osoc_id: 0,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+    });
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue(null);
+
+    ormoMockLanguage.getLanguage.mockResolvedValueOnce({
+        language_id: 0,
+        name: "English",
+    });
+
+    ormoMockLanguage.getLanguage.mockResolvedValueOnce(null);
+
+    await expect(student.filterStudents(r)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    ormoMockJob.getJobApplicationByYearForStudent.mockReset();
+    ormoMockOsoc.getLatestOsoc.mockReset();
+    ormoMock.filterStudents.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
+    ormoMockLanguage.getLanguage.mockReset();
+});
+
+test("Evaluations not null in getStudent", async () => {
+    const r = getMockReq();
+    const id = 0;
+
+    r.body = {
+        sessionkey: "abcd",
+        year: 2022,
+    };
+
+    r.params.id = id.toString();
+
+    // override
+    ormoMock.getStudent.mockResolvedValueOnce({
+        student_id: 1,
+        person_id: 1,
+        gender: "Male",
+        pronouns: null,
+        phone_number: "0923418389",
+        nickname: null,
+        alumni: true,
+        person: {
+            person_id: 1,
+            email: "test@mail.com",
+            github: null,
+            name: "Name",
+            github_id: null,
+        },
+    });
+
+    ormoMockJob.getJobApplicationByYearForStudent.mockResolvedValue({
+        applied_role: [],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 5,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "5",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 0,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+    });
+
+    ormoMockJob.getEvaluationsByYearForStudent.mockResolvedValue({
+        evaluation: [
+            {
+                decision: decision_enum.YES,
+                is_final: false,
+                motivation: null,
+                evaluation_id: 0,
+                login_user: null,
+            },
+        ],
+    });
+
+    await expect(student.getStudent(r)).resolves.toStrictEqual({
+        student: {
+            student_id: 1,
+            person_id: 1,
+            gender: "Male",
+            pronouns: null,
+            phone_number: "0923418389",
+            nickname: null,
+            alumni: true,
+            person: {
+                person_id: 1,
+                email: "test@mail.com",
+                github: null,
+                name: "Name",
+                github_id: null,
+            },
+        },
+        jobApplication: {
+            applied_role: [],
+            attachment: [],
+            created_at: new Date("2022-03-14T22:10:00.000Z"),
+            edu_duration: 5,
+            edu_institute: "UGent",
+            edu_level: "Master",
+            edu_year: "5",
+            edus: ["Edu0"],
+            email_status: "APPLIED",
+            fun_fact: "Funfact0",
+            job_application_id: 0,
+            job_application_skill: [],
+            osoc_id: 0,
+            responsibilities: "Responsibiliy0",
+            student_coach: true,
+            student_id: 0,
+            student_volunteer_info: "Volunteer0",
+        },
+        evaluation: {
+            osoc: {
+                year: 2022,
+            },
+            evaluations: [
+                {
+                    decision: decision_enum.YES,
+                    is_final: false,
+                    motivation: null,
+                    evaluation_id: 0,
+                    login_user: null,
+                },
+            ],
+        },
+        evaluations: undefined,
+        roles: [],
+    });
+
+    ormoMockJob.getJobApplicationByYearForStudent.mockReset();
+    ormoMock.getStudent.mockReset();
+    ormoMockJob.getEvaluationsByYearForStudent.mockReset();
 });
