@@ -48,11 +48,13 @@ describe("student filter tests", () => {
         expect(
             screen.getByTestId("rolesSelectedFilterDisplay")
         ).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterDisplay")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterDraft")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterSent")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterFailed")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterScheduled")).toBeInTheDocument();
+        expect(screen.getByTestId("statusFilterDisplay")).toBeInTheDocument();
+        expect(screen.getByTestId("statusApplied")).toBeInTheDocument();
+        expect(screen.getByTestId("statusApproved")).toBeInTheDocument();
+        expect(screen.getByTestId("statusAwaiting")).toBeInTheDocument();
+        expect(screen.getByTestId("statusConfirmed")).toBeInTheDocument();
+        expect(screen.getByTestId("statusDeclined")).toBeInTheDocument();
+        expect(screen.getByTestId("statusRejected")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterYes")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterMaybe")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterNo")).toBeInTheDocument();
