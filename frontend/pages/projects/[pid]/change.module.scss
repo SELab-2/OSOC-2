@@ -4,41 +4,191 @@
     margin-bottom: clamp(1rem, 2vw, 2.5rem);
   }
   
-  .body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .modalContent {
-    display: grid;
-    grid-template-rows: repeat(3, 1fr);
-    gap: 1rem;
-  }
-  
-  .modalContent > label {
-    display: grid;
-    grid-template-columns: 1fr 4fr;
-    gap: 0.5rem;
-    align-items: center;
-  }
-  
-  .rolesHeader {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    margin-block: 1rem;
-  }
-  
-  .roles {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-  
-  .roles > label {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    align-items: center;
-  }
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalContent {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.modalContent > label {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.rolesHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-block: 1rem;
+}
+
+.roles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.roles > label {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: center;
+}
+
+/* We can create triangles using some magic CSS! */
+.triangleContainer {
+position: relative;
+height: 100%;
+width: 1em;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.triangle {
+margin: auto;
+position: relative;
+background-color: var(--primary-100);
+transition-duration: 0.2s;
+}
+
+.triangle:before,
+.triangle:after {
+content: '';
+position: absolute;
+background-color: inherit;
+}
+
+.triangle,
+.triangle:before,
+.triangle:after {
+width: 0.5em;
+height: 0.5em;
+border-top-right-radius: 30%;
+}
+
+.triangle.up {
+transform: rotate(60deg) skewX(-30deg) scale(1, .866) translate(33%, -33%);
+}
+
+.triangle {
+transform: skewX(-30deg) scale(1, .866) translate(33%, -33%);
+}
+
+.triangle:before {
+transform: rotate(-135deg) skewX(-45deg) scale(1.414, .707) translate(0, -50%);
+}
+
+.triangle:after {
+transform: rotate(135deg) skewY(-45deg) scale(.707, 1.414) translate(50%);
+}
+
+/*-----------------------*/
+/* Status filter buttons */
+/*-----------------------*/
+.buttons {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+align-items: center;
+}
+
+.buttonContainer {
+margin-inline: auto;
+transition: 0.2s;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0.5rem;
+}
+
+.buttonContainer p {
+font-size: 0.75rem;
+text-align: center;
+}
+
+.buttonContainer:hover {
+scale: 1.1;
+cursor: pointer;
+}
+
+.button {
+margin-block: 0.2rem;
+margin-inline: 0.5rem;
+}
+
+/* Filters that act like checkboxes */
+.inactive {
+background-color: transparent;
+border-radius: 0.4rem;
+border: 0.1rem solid rgba(10, 8, 57, 0.25);
+color: rgba(10, 8, 57, 0.25);
+font-weight: normal;
+transition-duration: 0.2s;
+font-size: large;
+}
+
+.inactive:hover {
+background-color: inherit;
+box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.active {
+background-color: var(--neutral-100);
+color: var(--primary-100);
+font-weight: normal;
+transition-duration: 0.2s;
+border: 0.1rem solid transparent;
+border-radius: 0.4rem;
+font-size: large;
+}
+
+.active:hover {
+background-color: var(--neutral-100);
+box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.dropdownTrigger {
+display: flex;
+flex-direction: row;
+align-items: center;
+height: 100%;
+padding-inline: 0.8rem;
+}
+
+
+.dropdownItem:hover {
+background-color: var(--neutral-150);
+}
+
+.selected {
+background-color: var(--succes-100);
+}
+
+.studentButtonsContainer {
+display: flex;
+flex-wrap: wrap;
+justify-content: flex-start;
+width: 100%;
+}
+
+.studentButtonsContainer button, .studentButtonsContainer div {
+margin-right: auto;
+}
+
+.studentButtonsContainer button:last-child {
+margin-right: 0;
+}
+
+.studentButtons {
+display: flex;
+gap: 1rem !important;
+justify-content: space-between;
+}

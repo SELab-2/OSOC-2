@@ -232,15 +232,12 @@ const Create: NextPage = () => {
     };
 
     const selectCoach = (id: number) => {
-        console.log(id);
-        console.log(selectedCoaches);
         if (selectedCoaches.includes(id)) {
             const index = selectedCoaches.indexOf(id);
             selectedCoaches.splice(index, 1);
         } else {
             selectedCoaches.push(id);
         }
-        console.log(selectedCoaches);
         setSelectedCoaches([...selectedCoaches]);
     };
 
