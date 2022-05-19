@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useContext, useState, SyntheticEvent } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
-import { OsocEdition, Project, Role } from "../../../types";
+import { OsocEdition, Project } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 
 const Change: NextPage = () => {
@@ -29,7 +29,7 @@ const Change: NextPage = () => {
     const [osocId, setOsocId] = useState<number>(0);
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
-    const [roles, setRoles] = useState<Role[]>([]);
+    const [roles, setRoles] = useState<string[]>([]);
     const [rolePositions, setRolePositions] = useState<{ [K: string]: string }>(
         {}
     );
@@ -76,7 +76,11 @@ const Change: NextPage = () => {
                     .then((response) => response.json())
                     .catch((error) => console.log(error));
                 if (response !== undefined && response.success) {
-                    setRoles(response.data);
+                    const roleList: string[] = [];
+                    for (const role of response.data) {
+                        roleList.push(role.name);
+                    }
+                    setRoles(roleList);
                 }
             });
         }
@@ -127,12 +131,6 @@ const Change: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.isReady]);
 
-    const addRole = (name: string, positions: string) => {
-        const newRole: { [k: string]: string } = {};
-        newRole[name] = positions;
-        setRolePositions((rolePositions) => ({ ...rolePositions, ...newRole }));
-    };
-
     const changeRole = (name: string, positions: string) => {
         rolePositions[name] = positions;
         setRolePositions((rolePositions) => ({ ...rolePositions }));
@@ -167,7 +165,8 @@ const Change: NextPage = () => {
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
                         setVisible(false);
-                        addRole(response.name, newRolePositions);
+                        changeRole(newRoleName, newRolePositions);
+                        roles.push(newRoleName);
                         setNewRoleName("");
                         setNewRolePositions("0");
                     }
@@ -192,11 +191,11 @@ const Change: NextPage = () => {
                             body: JSON.stringify({
                                 name: projectName,
                                 partner: partner,
-                                start: startDate,
-                                end: endDate,
+                                start: new Date(startDate),
+                                end: new Date(endDate),
                                 osocId: osocId,
-                                deleteRoles: { roles: getDeleteRoles() },
-                                modifyRoles: { roles: getModifyRoles() },
+                                roles: { roles: getRoleList() },
+                                coaches: { coaches: [] },
                             }),
                         }
                     )
@@ -211,58 +210,16 @@ const Change: NextPage = () => {
         }
     };
 
-    // const createBodyObject = () => {
-    //     const body = {};
-    //     body[name] = projectName;
-    //     body[partner] = partner;
-    //     body[start] = startDate,
-    //     body[end] = endDate,
-    //     body[osocId] = osocId,
-    //     const deleteRoles = getDeleteRoles();
-
-    //     const
-    // }
-
-    const getModifyRoles = () => {
-        const modifyRoles: { id: number; positions: number }[] = [];
-        Object.keys(rolePositions).map((role) => {
-            if (role in originalRoles) {
-                if (parseInt(rolePositions[role]) !== originalRoles[role]) {
-                    modifyRoles.push({
-                        id: getRoleId(role),
-                        positions: parseInt(rolePositions[role]),
-                    });
-                }
-            } else {
-                if (parseInt(rolePositions[role]) !== 0) {
-                    modifyRoles.push({
-                        id: getRoleId(role),
-                        positions: parseInt(rolePositions[role]),
-                    });
-                }
-            }
-        });
-    };
-
-    const getDeleteRoles = () => {
-        const deleteRoles: number[] = [];
-        Object.keys(rolePositions).map((role) => {
-            if (role in originalRoles) {
-                if (rolePositions[role] == "0") {
-                    deleteRoles.push(getRoleId(role));
-                }
-            }
-        });
-        return deleteRoles;
-    };
-
-    const getRoleId = (name: string) => {
-        for (const role of roles) {
-            if (role.name === name) {
-                return role.role_id;
-            }
+    const getRoleList = () => {
+        const roleList: { name: string; positions: number }[] = [];
+        for (const role in rolePositions) {
+            const obj = {
+                name: role,
+                positions: parseInt(rolePositions[role]),
+            };
+            roleList.push(obj);
         }
-        return -1; // role is not in the role list => not possible
+        return roleList;
     };
 
     const getOsocYear = () => {
@@ -369,19 +326,19 @@ const Change: NextPage = () => {
                 onChange={(e) => setEndDate(e.target.value)}
             />
             <p>Change the amount of positions for the necessary roles:</p>
-            {roles.map((role) => {
+            {roles.map((role, index) => {
                 return (
-                    <div key={role.role_id}>
+                    <div key={index}>
                         <div>
-                            <label> {role.name}: </label>
+                            <label> {role}: </label>
                             <input
                                 type="number"
-                                value={getRolePositions(role.name)}
+                                value={getRolePositions(role)}
                                 onChange={(e) =>
-                                    changeRole(role.name, e.target.value)
+                                    changeRole(role, e.target.value)
                                 }
                                 onBlur={(e) => {
-                                    checkUnfocus(role.name, e.target.value);
+                                    checkUnfocus(role, e.target.value);
                                 }}
                             />
                         </div>

@@ -290,7 +290,7 @@ export async function modProject(
                     if (role.positions !== projectRole.positions) {
                         if (role.positions === 0) {
                             await ormPrRole.deleteProjectRole(
-                                projectRole.role_id
+                                projectRole.project_role_id
                             );
                         } else {
                             await ormPrRole.updateProjectRole({
@@ -304,7 +304,7 @@ export async function modProject(
                     break;
                 }
             }
-            if (!isOldRole) {
+            if (!isOldRole && role.positions > 0) {
                 const project_role = await ormRole.getRolesByName(role.name);
                 if (project_role !== null) {
                     await ormPrRole.createProjectRole({
