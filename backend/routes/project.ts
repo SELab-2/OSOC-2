@@ -259,23 +259,27 @@ export async function modProject(
         description: checkedId.description,
     });
 
+    // current state (before change)
     const oldProjectRoles = await ormPrRole.getProjectRoleNamesByProject(
         checkedId.id
     );
 
     let isOldRole = false;
     if (checkedId.roles !== undefined) {
+        // iterate over roles which have been sent
         for (const role of checkedId.roles.roles) {
             isOldRole = false;
             for (const projectRole of oldProjectRoles) {
                 if (role.name === projectRole.role.name) {
                     isOldRole = true;
+                    // check if valid -> positions = 0 => delete
                     if (role.positions !== projectRole.positions) {
                         if (role.positions === 0) {
                             await ormPrRole.deleteProjectRole(
                                 projectRole.project_role_id
                             );
                         } else {
+                            // update #positions
                             await ormPrRole.updateProjectRole({
                                 projectRoleId: projectRole.project_role_id,
                                 projectId: checkedId.id,
@@ -287,6 +291,7 @@ export async function modProject(
                     break;
                 }
             }
+            // if new role: create
             if (!isOldRole && role.positions > 0) {
                 const project_role = await ormRole.getRolesByName(role.name);
                 if (project_role !== null) {
@@ -323,7 +328,6 @@ export async function modProject(
         }
     }
 
-    console.log(checkedId.removeCoaches);
     if (checkedId.removeCoaches !== undefined) {
         for (const coachId of checkedId.removeCoaches.coaches) {
             await ormPU.deleteProjectUser({
