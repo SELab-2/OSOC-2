@@ -188,7 +188,7 @@ async function parsePaginationRequest(
             currentPage = Number(req.body.currentPage);
         }
         if ("pageSize" in req.body && !isNaN(Number(req.body.pageSize))) {
-            pageSize = req.body.pageSize;
+            pageSize = Number(req.body.pageSize);
         }
         return {
             ...parsed,
