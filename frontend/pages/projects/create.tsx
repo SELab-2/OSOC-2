@@ -241,6 +241,18 @@ const Create: NextPage = () => {
         setSelectedCoaches([...selectedCoaches]);
     };
 
+    const checkUnfocus = (name: string, positions: string) => {
+        if (positions === "") {
+            addRole(name, "0");
+        }
+    };
+
+    const checkUnfocusNewRole = (positions: string) => {
+        if (positions === "") {
+            setNewRolePositions("0");
+        }
+    };
+
     return (
         <div className={styles.body}>
             <Modal title="Role Creation" visible={visible} handleClose={closer}>
@@ -272,6 +284,7 @@ const Create: NextPage = () => {
                             onChange={(e) =>
                                 updateNewRolePositions(e.target.value)
                             }
+                            onBlur={(e) => checkUnfocusNewRole(e.target.value)}
                         />
                     </label>
                     <button onClick={() => addNewRole()}>Add Role</button>
@@ -418,6 +431,9 @@ const Create: NextPage = () => {
                                 value={rolePositions[role]}
                                 min={0}
                                 onChange={(e) => addRole(role, e.target.value)}
+                                onBlur={(e) => {
+                                    checkUnfocus(role, e.target.value);
+                                }}
                             />
                         </label>
                     );
