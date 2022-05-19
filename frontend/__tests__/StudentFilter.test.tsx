@@ -49,7 +49,6 @@ describe("student filter tests", () => {
             screen.getByTestId("rolesSelectedFilterDisplay")
         ).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterDisplay")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterNone")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterDraft")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterSent")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterFailed")).toBeInTheDocument();
@@ -231,11 +230,6 @@ describe("student filter tests", () => {
     };
 
     test("test email filters", async () => {
-        await testEmailFilters(
-            "emailFilterNone",
-            "emailStatusFilter=NONE",
-            "NONE"
-        );
         await testEmailFilters(
             "emailFilterDraft",
             "emailStatusFilter=DRAFT",
