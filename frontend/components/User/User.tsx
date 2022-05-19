@@ -11,7 +11,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import { AccountStatus, LoginUser, OsocEdition } from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
-import triangle from "../Filter/Filter.module.css";
+import triangle from "../Filters/Filter.module.css";
 
 export const User: React.FC<{
     user: LoginUser;
