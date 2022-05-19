@@ -19,7 +19,7 @@ export const ProjectFilter: React.FC<{
         const params: ProjectFilterParams = {
             nameFilter: nameFilter,
             clientFilter: clientFilter,
-            nameSort: nameSort,
+            projectNameSort: nameSort,
             clientSort: clientSort,
             fullyAssigned: fullyAssigned,
             osocYear: osocYear,
@@ -31,7 +31,7 @@ export const ProjectFilter: React.FC<{
         const params: ProjectFilterParams = {
             nameFilter: nameFilter,
             clientFilter: clientFilter,
-            nameSort: nameSort,
+            projectNameSort: nameSort,
             clientSort: clientSort,
             fullyAssigned: fullyAssigned,
             osocYear: osocYear,

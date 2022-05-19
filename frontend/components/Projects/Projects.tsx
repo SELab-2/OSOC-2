@@ -49,8 +49,8 @@ export const Projects: React.FC = () => {
         if (params.nameFilter !== "") {
             filters.push(`projectNameFilter=${params.nameFilter}`);
         }
-        if (params.nameSort !== Sort.NONE) {
-            filters.push(`nameSort=${params.nameSort}`);
+        if (params.projectNameSort !== Sort.NONE) {
+            filters.push(`projectNameSort=${params.projectNameSort}`);
         }
         if (params.clientFilter !== "") {
             filters.push(`clientNameFilter=${params.clientFilter}`);
@@ -122,7 +122,11 @@ export const Projects: React.FC = () => {
                 </div>
                 <div className={scrollStyles.bottomShadowCaster} />
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            <Paginator
+                pagination={pagination}
+                navigator={navigator}
+                pageSize={10}
+            />
         </div>
-    );
+    ); // TODO: pageSize should be a variable and not hardcoded
 };
