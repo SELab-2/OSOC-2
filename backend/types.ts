@@ -686,6 +686,7 @@ export namespace InternalTypes {
         coach: boolean;
         admin: boolean;
         activated: string;
+        login_user_id: number;
     }
 
     /**
