@@ -1,6 +1,6 @@
 .header {
     box-shadow: 0 0 0.5rem 0.3rem rgba(0, 0, 0, 0.1);
-    padding-block: clamp(0.5rem, 1vw, 1.5rem);;
+    padding-block: clamp(0.5rem, 1vw, 1rem);;
     padding-inline: min(8rem, 16vw);
     display: flex;
     justify-content: space-between;

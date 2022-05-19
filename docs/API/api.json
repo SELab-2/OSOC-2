@@ -1214,7 +1214,7 @@
         "operationId": "create_project",
         "parameters": [
           {
-            "name": "end_date",
+            "name": "end",
             "in": "header",
             "description": "The end date of this project.",
             "required": true,
@@ -1284,7 +1284,7 @@
             }
           },
           {
-            "name": "start_date",
+            "name": "start",
             "in": "header",
             "description": "The start date of this project.",
             "required": true,
@@ -3889,6 +3889,10 @@
           "positions": {
             "type": "number"
           },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
           "roles": {
             "type": "array",
             "items": {
@@ -4479,9 +4483,6 @@
           "email": {
             "type": "string"
           },
-          "firstname": {
-            "type": "string"
-          },
           "github": {
             "type": "string",
             "nullable": true
@@ -4490,11 +4491,11 @@
             "type": "string",
             "nullable": true
           },
-          "lastname": {
-            "type": "string"
-          },
           "person_id": {
             "type": "number"
+          },
+          "name": {
+            "type": "string"
           }
         },
         "xml": {

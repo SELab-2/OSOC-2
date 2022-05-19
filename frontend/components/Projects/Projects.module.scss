@@ -1,31 +1,14 @@
-.students {
-  width: clamp(18rem, 94vw, 60rem);
-  margin-inline: auto;
-  margin-bottom: clamp(1rem, 2vw, 2.5rem);
-  position: relative;
-}
-
-.body > nav {
-  width: clamp(18rem, 94vw, 60rem);
-  margin-inline: auto;
-}
-
-.students.limited {
-  width: clamp(18rem, 94vw, 120rem);
-  display: grid;
-  grid-template-columns: 1fr 3fr;
+.projects {
+  flex-direction: column;
   gap: 2rem;
+  max-width: 60rem;
 }
 
-.students > div > nav {
-  margin-top: 1rem;
-  margin-inline: 2rem;
-}
-
-/* The style for the list of students */
-.studentCards {
+/* The style for the list of projects */
+.projectCards {
   display: flex;
   flex-direction: column;
+  width: 100%;
   gap: 1.5rem;
   max-height: 75rem;
   overflow-y: scroll;
@@ -35,15 +18,15 @@
 }
 
 @media (max-width: 800px) {
-  .students {
+  .projectCards {
     gap: 1rem !important;
   }
-  .students.limited {
+  .projectCards.limited {
     display: flex;
     flex-direction: column;
 
-    /* Scroll horizontal on small screens to still show the student overview not too far down */
-    .studentCards {
+    /* Scroll horizontal on small screens to still show the project overview not too far down */
+    .projectCards {
       flex-direction: row;
       overflow-y: hidden;
       overflow-x: scroll;

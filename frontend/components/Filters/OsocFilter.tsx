@@ -1,7 +1,7 @@
-import styles from "../Filter.module.css";
+import styles from "./Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { getNextSort, OsocFilterParams, Sort } from "../../../types";
-import SessionContext from "../../../contexts/sessionProvider";
+import { getNextSort, OsocFilterParams, Sort } from "../../types";
+import SessionContext from "../../contexts/sessionProvider";
 
 export const OsocCreateFilter: React.FC<{
     search: (params: OsocFilterParams) => void;

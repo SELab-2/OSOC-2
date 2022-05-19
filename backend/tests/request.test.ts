@@ -1012,8 +1012,8 @@ test("Can parse new project request", () => {
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
         osocId: 17,
+        description: "Project description",
         roles: {
             roles: [
                 {
@@ -1026,6 +1026,7 @@ test("Can parse new project request", () => {
                 },
             ],
         },
+        coaches: [1, 2],
     };
     const d2: T.Anything = {};
     const d3: T.Anything = {
@@ -1033,7 +1034,6 @@ test("Can parse new project request", () => {
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 420,
     };
 
     const req1: express.Request = getMockReq();
@@ -1070,7 +1070,7 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
         end: Date.now(),
-        modifyRoles: {
+        roles: {
             roles: [
                 {
                     id: 5,
@@ -1082,8 +1082,11 @@ test("Can parse update project request", () => {
                 },
             ],
         },
-        deleteRoles: {
-            roles: [1, 3],
+        addCoaches: {
+            coaches: [2, 3],
+        },
+        removeCoaches: {
+            coaches: [1],
         },
     };
     const d2: T.Anything = {};
@@ -1105,21 +1108,6 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
         end: Date.now(),
-        modifyRoles: {
-            roles: [
-                {
-                    id: 5,
-                    positions: 4,
-                },
-                {
-                    id: 2,
-                    positions: 6,
-                },
-            ],
-        },
-        deleteRoles: {
-            roles: [1, 3],
-        },
     };
 
     const req1: express.Request = getMockReq();
@@ -1152,11 +1140,15 @@ test("Can parse update project request", () => {
     d3.id = id;
     d3.sessionkey = key;
     d3.end = undefined;
-    d3.modifyRoles = undefined;
-    d3.deleteRoles = undefined;
+    d3.addCoaches = undefined;
+    d3.removeCoaches = undefined;
+    d3.roles = undefined;
     d4.id = id;
     d5.id = id;
     d5.sessionkey = key;
+    d5.removeCoaches = undefined;
+    d5.roles = undefined;
+    d5.addCoaches = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
@@ -1677,7 +1669,7 @@ test("Can parse remove coach request", () => {
     const key = "key";
     const id = 10;
 
-    const r1: T.Anything = { project_user: 1 };
+    const r1: T.Anything = { loginUserId: 1 };
     const noProjectUser: T.Anything = {};
 
     const req: express.Request = getMockReq();
@@ -1689,7 +1681,7 @@ test("Can parse remove coach request", () => {
     ).resolves.toStrictEqual({
         sessionkey: "key",
         id: 10,
-        projectUserId: 1,
+        loginUserId: 1,
     });
 
     const req2: express.Request = getMockReq();
@@ -1707,7 +1699,7 @@ test("Can parse assign coach request", () => {
     const key = "key";
     const id = 10;
 
-    const r1: T.Anything = { login_user: 1 };
+    const r1: T.Anything = { loginUserId: 1 };
     const noProjectUser: T.Anything = {};
 
     const req: express.Request = getMockReq();

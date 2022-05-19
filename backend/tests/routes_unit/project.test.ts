@@ -58,7 +58,7 @@ function newProject(v: CreateProject): prisma.project {
         name: v.name,
         osoc_id: 0,
         partner: v.partner,
-        description: "",
+        description: v.description,
         start_date: v.startDate,
         end_date: v.endDate,
     };
@@ -522,6 +522,16 @@ beforeEach(() => {
             role: { ...roles[v] },
         })
     );
+    ormPrRMock.getProjectRoleNamesByProject.mockImplementation((v) =>
+        Promise.resolve(
+            projectroles
+                .filter((x) => x.project_id == v)
+                .map((x) => ({
+                    ...x,
+                    role: roles[x.role_id],
+                }))
+        )
+    );
 
     // contract orm
     ormCMock.contractsByProject.mockImplementation((id) =>
@@ -568,12 +578,8 @@ beforeEach(() => {
     ormPUMock.getUsersFor.mockResolvedValue([
         { login_user: loginuser, project_user_id: 0 },
     ]);
-    ormPUMock.deleteProjectUser.mockImplementation((v) =>
-        Promise.resolve({
-            project_id: 0,
-            login_user_id: 0,
-            project_user_id: v,
-        })
+    ormPUMock.deleteProjectUser.mockImplementation(() =>
+        Promise.resolve({ count: 0 })
     );
     ormPUMock.createProjectUser.mockImplementation((v) =>
         Promise.resolve({
@@ -646,8 +652,10 @@ afterEach(() => {
     ormPrRMock.createProjectRole.mockReset();
     ormPrRMock.getProjectRolesByProject.mockReset();
     ormPrRMock.updateProjectRole.mockReset();
+    ormPrRMock.deleteProjectRole.mockReset();
     ormPrRMock.getNumberOfFreePositions.mockReset();
     ormPrRMock.getProjectRoleById.mockReset();
+    ormPrRMock.getProjectRoleNamesByProject.mockReset();
 
     // contract orm
     ormCMock.contractsByProject.mockReset();
@@ -684,6 +692,8 @@ test("Can create new projects", async () => {
         osocId: 0,
         name: "Operation Ivy",
         partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
         start: new Date("January 31, 1950"),
         end: new Date("November 15, 1952 23:30:00.0"),
         roles: {
@@ -691,6 +701,9 @@ test("Can create new projects", async () => {
                 { name: "dev", positions: 8 },
                 { name: "nuclear bomb engineer", positions: 2 },
             ],
+        },
+        coaches: {
+            coaches: [0],
         },
     };
 
@@ -702,6 +715,8 @@ test("Can create new projects", async () => {
         end_date: req.body.end.toString(),
         osoc_id: 0,
         roles: req.body.roles.roles,
+        description: req.body.description,
+        coaches: [{ login_user: loginuser, project_user_id: 0 }],
     });
     expectCall(reqMock.parseNewProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
@@ -711,6 +726,7 @@ test("Can create new projects", async () => {
         startDate: req.body.start,
         endDate: req.body.end,
         osocId: req.body.osocId,
+        description: req.body.description,
     });
     expect(ormRMock.getRolesByName).toHaveBeenCalledTimes(2);
     expectCall(ormRMock.createRole, req.body.roles.roles[1].name);
@@ -759,6 +775,7 @@ test("Can get single project", async () => {
 
     const res = {
         id: projects[0].project_id,
+        description: null,
         name: projects[0].name,
         partner: projects[0].partner,
         start_date: projects[0].start_date.toString(),
@@ -876,8 +893,13 @@ test("Can modify projects", async () => {
         partner: "new-partner",
         start: new Date(Date.now()),
         end: new Date(Date.now() + 1000),
-        modifyRoles: { roles: [{ id: 0, positions: 18 }] },
-        deleteRoles: { roles: [2] },
+        roles: {
+            roles: [
+                { name: "dev", positions: 101 },
+                { name: "frontend", positions: 0 },
+                { name: "backend", positions: 12 },
+            ],
+        },
         description: "The old partner sucked",
     };
 
@@ -903,6 +925,7 @@ test("Can modify projects", async () => {
                 positions: 7,
             },
         ],
+        coaches: [{ login_user: loginuser, project_user_id: 0 }],
     });
     expectCall(reqMock.parseUpdateProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
@@ -916,14 +939,16 @@ test("Can modify projects", async () => {
         osocId: req.body.osocId,
         description: req.body.description,
     });
-    expect(ormRMock.getRole).toHaveBeenCalledTimes(4);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(
+        projectroles.filter((x) => x.project_id == 0).length
+    );
     expectCall(ormPrRMock.updateProjectRole, {
-        projectRoleId: req.body.modifyRoles.roles[0].id,
+        projectRoleId: 0,
         projectId: req.body.id,
-        roleId: roles[req.body.modifyRoles.roles[0].id].role_id,
-        positions: req.body.modifyRoles.roles[0].positions,
+        roleId: roles[0].role_id,
+        positions: req.body.roles.roles[0].positions,
     });
-    expectCall(ormPrRMock.deleteProjectRole, req.body.deleteRoles.roles[0]);
+    expectCall(ormPrRMock.deleteProjectRole, 2);
     expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
 });
 
@@ -938,8 +963,9 @@ test("Can't modify projects (role failure)", async () => {
         partner: "new-partner",
         start: new Date(Date.now()),
         end: new Date(Date.now() + 1000),
-        modifyRoles: { roles: [{ id: 0, positions: 18 }] },
-        deleteRoles: { roles: [] },
+        roles: {
+            roles: [],
+        },
         description: "The old partner sucked",
     };
 
@@ -956,9 +982,9 @@ test("Can't modify projects (role failure)", async () => {
         osocId: req.body.osocId,
         description: req.body.description,
     });
-    expect(ormRMock.getRole).toHaveBeenCalledTimes(projects.length);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
     expect(ormPrRMock.updateProjectRole).not.toHaveBeenCalled();
-    expect(ormPrRMock.deleteProjectRole).toHaveBeenCalledTimes(1);
+    expect(ormPrRMock.deleteProjectRole).not.toHaveBeenCalled();
     expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
 });
 
@@ -1174,14 +1200,18 @@ test("Can un-assign coaches", async () => {
     req.body = {
         sessionkey: "key",
         id: 0,
-        projectUserId: 0,
+        loginUserId: 0,
     };
 
+    // await project.unAssignCoach(req);
     await expect(project.unAssignCoach(req)).resolves.toStrictEqual({});
     expectCall(reqMock.parseRemoveCoachRequest, req);
     expectCall(utilMock.checkSessionKey, req.body);
     expectCall(ormPUMock.getUsersFor, 0);
-    expectCall(ormPUMock.deleteProjectUser, 0);
+    expectCall(ormPUMock.deleteProjectUser, {
+        loginUserId: req.body.loginUserId,
+        projectId: req.body.id,
+    });
 });
 
 test("Can't un-assign coaches (invalid id)", async () => {
@@ -1189,7 +1219,7 @@ test("Can't un-assign coaches (invalid id)", async () => {
     req.body = {
         sessionkey: "key",
         id: 0,
-        projectUserId: 7,
+        loginUserId: 7,
     };
 
     await expect(project.unAssignCoach(req)).rejects.toStrictEqual({
@@ -1398,12 +1428,19 @@ test("Can filter projects", async () => {
     const res = projects.map((x) => ({
         id: x.project_id,
         name: x.name,
+        description: x.description,
         partner: x.partner,
-        start_date: x.start_date,
-        end_data: x.end_date,
+        start_date: x.start_date.toString(),
+        end_date: x.end_date.toString(),
         osoc_id: x.osoc_id,
         contracts: [],
         coaches: [],
+        roles: projectroles
+            .filter((y) => y.project_id == x.project_id)
+            .map((y) => ({
+                name: roles[y.role_id].name,
+                positions: y.positions,
+            })),
     }));
 
     await expect(project.filterProjects(req)).resolves.toStrictEqual({
@@ -1440,12 +1477,19 @@ test("Can filter projects (with osoc year)", async () => {
     const res = projects.map((x) => ({
         id: x.project_id,
         name: x.name,
+        description: x.description,
         partner: x.partner,
-        start_date: x.start_date,
-        end_data: x.end_date,
+        start_date: x.start_date.toString(),
+        end_date: x.end_date.toString(),
         osoc_id: x.osoc_id,
         contracts: [],
         coaches: [],
+        roles: projectroles
+            .filter((y) => y.project_id == x.project_id)
+            .map((y) => ({
+                name: roles[y.role_id].name,
+                positions: y.positions,
+            })),
     }));
 
     await expect(project.filterProjects(req)).resolves.toStrictEqual({
@@ -1473,7 +1517,7 @@ test("Can filter projects (with osoc year)", async () => {
     expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
 });
 
-test("Can filter projects", async () => {
+test("Can filter projects (with failing osoc orm)", async () => {
     ormOMock.getLatestOsoc.mockResolvedValue(null);
 
     ormCMock.contractsByProject.mockResolvedValue([]);
@@ -1484,12 +1528,19 @@ test("Can filter projects", async () => {
     const res = projects.map((x) => ({
         id: x.project_id,
         name: x.name,
+        description: x.description,
         partner: x.partner,
-        start_date: x.start_date,
-        end_data: x.end_date,
+        start_date: x.start_date.toString(),
+        end_date: x.end_date.toString(),
         osoc_id: x.osoc_id,
         contracts: [],
         coaches: [],
+        roles: projectroles
+            .filter((y) => y.project_id == x.project_id)
+            .map((y) => ({
+                name: roles[y.role_id].name,
+                positions: y.positions,
+            })),
     }));
 
     await expect(project.filterProjects(req)).resolves.toStrictEqual({
