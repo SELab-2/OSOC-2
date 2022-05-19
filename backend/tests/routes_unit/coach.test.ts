@@ -201,6 +201,7 @@ test("Can list all coaches", async () => {
         coach: val.is_coach,
         admin: val.is_admin,
         activated: val.account_status as string,
+        login_user_id: val.login_user_id,
     }));
 
     await expect(coach.listCoaches(req)).resolves.toStrictEqual({

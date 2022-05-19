@@ -120,7 +120,7 @@ test("should delete a person with the given id from the database", async () => {
             edu_duration: 0,
             edu_year: "",
             edu_institute: "",
-            email_status: email_status_enum.DRAFT,
+            email_status: email_status_enum.APPLIED,
             created_at: new Date(),
         },
     ]);

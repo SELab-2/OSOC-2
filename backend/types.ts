@@ -687,6 +687,7 @@ export namespace InternalTypes {
         coach: boolean;
         admin: boolean;
         activated: string;
+        login_user_id: number;
     }
 
     /**
@@ -1537,9 +1538,10 @@ export enum AccountStatus {
 }
 
 export enum EmailStatus {
-    SCHEDULED = "SCHEDULED",
-    SENT = "SENT",
-    FAILED = "FAILED",
-    NONE = "NONE",
-    DRAFT = "DRAFT",
+    APPLIED = "APPLIED",
+    APPROVED = "APPROVED",
+    AWAITING_PROJECT = "AWAITING_PROJECT",
+    CONTRACT_CONFIRMED = "CONTRACT_CONFIRMED",
+    CONTRACT_DECLINED = "CONTRACT_DECLINED",
+    REJECTED = "REJECTED",
 }
