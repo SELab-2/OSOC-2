@@ -279,7 +279,6 @@ export const Students: React.FC<{
                                 </div>
                             );
                         })}
-                        ;
                     </div>
                     <div className={scrollStyles.bottomShadowCaster} />
                 </div>
