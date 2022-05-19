@@ -5,6 +5,7 @@ import {
     email_status_enum,
     type_enum,
     person,
+    project_user,
 } from "@prisma/client";
 import express from "express";
 import { FilterSort } from "./orm_functions/orm_types";
@@ -1036,6 +1037,8 @@ export namespace Responses {
     export interface RoleList {
         data: InternalTypes.Role[];
     }
+
+    export interface ProjectUser extends project_user {}
 
     /**
      *

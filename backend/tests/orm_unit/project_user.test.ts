@@ -28,6 +28,10 @@ test("should return the loginusers associated with the project", async () => {
 });
 
 test("should delete the project user with the given id and return the deleted record", async () => {
-    prismaMock.project_user.delete.mockResolvedValue(returnValue);
-    await expect(deleteProjectUser(0)).resolves.toEqual(returnValue);
+    const returnCount = { count: 0 };
+
+    prismaMock.project_user.deleteMany.mockResolvedValue(returnCount);
+    await expect(
+        deleteProjectUser({ loginUserId: 0, projectId: 0 })
+    ).resolves.toEqual(returnCount);
 });
