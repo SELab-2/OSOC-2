@@ -48,12 +48,10 @@ export async function createProject(
     const roleList: { name: string; positions: number }[] = [];
 
     for (const role of checkedSessionKey.data.roles.roles) {
-        console.log(role.name);
         let roleByName = await ormRole.getRolesByName(role.name);
         if (roleByName === null) {
             roleByName = await ormRole.createRole(role.name);
         }
-        console.log(roleByName.role_id);
         const createdProjectRole = await ormPrRole.createProjectRole({
             projectId: createdProject.project_id,
             roleId: roleByName.role_id,
