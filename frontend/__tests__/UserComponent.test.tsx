@@ -75,6 +75,7 @@ describe("User component tests", () => {
     });
 
     test("test valid login person admin button", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
         );
@@ -87,7 +88,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsAdmin").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(
             screen.getByAltText("Person is not an admin")
         ).toBeInTheDocument();
@@ -96,13 +97,14 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonIsAdmin").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
         expect(
             screen.getByAltText("Person is not an admin")
         ).toBeInTheDocument();
     });
 
     test("Test is coach for valid person", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
         );
@@ -115,7 +117,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonIsCoach").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(
             screen.getByAltText("Person is not a coach")
         ).toBeInTheDocument();
@@ -124,13 +126,14 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonIsCoach").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
         expect(
             screen.getByAltText("Person is not a coach")
         ).toBeInTheDocument();
     });
 
     test("Test disable valid person", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
         );
@@ -146,7 +149,7 @@ describe("User component tests", () => {
             );
             screen.getByTestId("buttonStatus").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is disabled")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not a coach")
@@ -159,11 +162,12 @@ describe("User component tests", () => {
             fetchMock.mockOnce(JSON.stringify({ success: false }));
             screen.getByTestId("buttonStatus").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
         expect(screen.getByAltText("Person is disabled")).toBeInTheDocument();
     });
 
     test("Test delete person", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userAdminCoach} removeUser={removeUser} editions={[]} />
         );
@@ -173,10 +177,11 @@ describe("User component tests", () => {
             screen.getByTestId("buttonDelete").click();
             screen.getByTestId("confirmDelete").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 
     test("Test for invalid person", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userInvalid} removeUser={removeUser} editions={[]} />
         );
@@ -187,11 +192,12 @@ describe("User component tests", () => {
             );
             screen.getByTestId("pendingButton").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.queryByTestId("pendingButton")).not.toBeInTheDocument();
     });
 
     test("Test for disabled person admin", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userDisabled} removeUser={removeUser} editions={[]} />
         );
@@ -200,12 +206,9 @@ describe("User component tests", () => {
             fetchMock.mockOnce(
                 JSON.stringify({ id: -1, name: "testTest", success: true })
             );
-            fetchMock.mockOnce(
-                JSON.stringify({ id: -1, name: "testTest", success: true })
-            );
             screen.getByTestId("buttonIsAdmin").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is an admin")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")
@@ -213,6 +216,7 @@ describe("User component tests", () => {
     });
 
     test("Test for disabled person coach", async () => {
+        fetchMock.mockOnce(JSON.stringify({ success: true }));
         render(
             <User user={userDisabled} removeUser={removeUser} editions={[]} />
         );
@@ -221,12 +225,9 @@ describe("User component tests", () => {
             fetchMock.mockOnce(
                 JSON.stringify({ id: -1, name: "testTest", success: true })
             );
-            fetchMock.mockOnce(
-                JSON.stringify({ id: -1, name: "testTest", success: true })
-            );
             screen.getByTestId("buttonIsCoach").click();
         });
-        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         expect(screen.getByAltText("Person is a coach")).toBeInTheDocument();
         expect(
             screen.getByAltText("Person is not disabled")
