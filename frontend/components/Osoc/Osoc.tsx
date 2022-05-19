@@ -18,7 +18,7 @@ export const Osoc: React.FC<{
 
     const deleteOsoc = async (e: SyntheticEvent) => {
         e.preventDefault();
-        await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/osoc/` + osocId.toString(),
             {
                 method: "DELETE",
@@ -31,10 +31,9 @@ export const Osoc: React.FC<{
         )
             .then((response) => response.json())
             .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
+                if (json.success) {
+                    removeOsoc(osoc);
                 }
-                removeOsoc(osoc);
                 return json;
             })
             .catch((err) => {
@@ -47,10 +46,16 @@ export const Osoc: React.FC<{
                 }
                 return { success: false };
             });
-        if (notify) {
+        if (response && response.success && notify) {
             notify(
                 "Successfully deleted osoc edition!",
                 NotificationType.SUCCESS,
+                2000
+            );
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
                 2000
             );
         }

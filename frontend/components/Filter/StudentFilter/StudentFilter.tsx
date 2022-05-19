@@ -62,31 +62,17 @@ export const StudentFilter: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then((json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else return json;
-            })
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
-                return { success: false };
+                console.log(err);
             });
-        if (responseRoles.data !== undefined) {
+        if (responseRoles && responseRoles.data !== undefined) {
             setRoles(responseRoles.data);
-        } else {
-            if (notify) {
-                notify(
-                    "Something went wrong when fetching roles",
-                    NotificationType.ERROR,
-                    2000
-                );
-            }
+        } else if (responseRoles && !responseRoles.success && notify) {
+            notify(
+                "Something went wrong:" + responseRoles.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 

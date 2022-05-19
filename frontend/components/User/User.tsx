@@ -57,7 +57,7 @@ export const User: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
 
-        const res = await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -73,24 +73,10 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else {
-                    return json;
-                }
-            })
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
-                return { success: false };
+                console.log(err);
             });
-        if (res.success !== false) {
+        if (response.success !== false) {
             if (changed_val === "activated") {
                 socket.emit("activateUser");
             } else if (changed_val === "disabled") {
@@ -106,8 +92,14 @@ export const User: React.FC<{
                     2000
                 );
             }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
-        return res;
+        return response;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
@@ -209,7 +201,7 @@ export const User: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
-        await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
                 userId.toString(),
@@ -223,32 +215,25 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                }
-                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
-                socket.emit("updateRoleUser"); // this refreshes the manage users page
-                removeUser(user);
-                if (notify) {
-                    notify(
-                        `Successfully removed${user.person.name}!`,
-                        NotificationType.SUCCESS,
-                        2000
-                    );
-                }
-                return json;
-            })
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
-                return { success: false };
+                console.log(err);
             });
+        if (response && response.success && notify) {
+            socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+            socket.emit("updateRoleUser"); // this refreshes the manage users page
+            removeUser(user);
+            notify(
+                `Successfully removed${user.person.name}!`,
+                NotificationType.SUCCESS,
+                2000
+            );
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
+        }
     };
 
     return (

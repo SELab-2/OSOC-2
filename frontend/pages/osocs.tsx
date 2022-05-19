@@ -93,17 +93,17 @@ const Osocs: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
         if (response.data && response.pagination) {
             setEditions(response.data);
             setPagination(response.pagination);
+        } else if (!response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
         isLoading(false);
     };

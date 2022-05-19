@@ -26,16 +26,16 @@ const Projects: NextPage = () => {
                 )
                     .then((response) => response.json())
                     .catch((err) => {
-                        if (notify) {
-                            notify(
-                                "Something went wrong:" + err,
-                                NotificationType.ERROR,
-                                2000
-                            );
-                        }
+                        console.log(err);
                     });
                 if (response !== undefined && response.success) {
                     setProjects(response.data);
+                } else if (response && !response.success && notify) {
+                    notify(
+                        "Something went wrong:" + response.reason,
+                        NotificationType.ERROR,
+                        2000
+                    );
                 }
             });
         }

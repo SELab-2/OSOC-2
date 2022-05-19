@@ -89,15 +89,9 @@ export const OsocCreateFilter: React.FC<{
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
-        if (response.success) {
+        if (response && response.success) {
             const params: OsocFilterParams = {
                 yearFilter: yearFilter,
                 yearSort: yearSort,
@@ -110,6 +104,12 @@ export const OsocCreateFilter: React.FC<{
                     2000
                 );
             }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 

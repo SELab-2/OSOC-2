@@ -38,16 +38,16 @@ const SettingsPage: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
         if (response !== undefined && response.success) {
             setUser(response);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 

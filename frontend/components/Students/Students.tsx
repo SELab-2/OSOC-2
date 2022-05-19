@@ -244,24 +244,23 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
             }
         )
             .then((response) => response.json())
-            .then((json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else return json;
-            })
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
-                return { success: false };
+                console.log(err);
             });
-        if (response.data && response.pagination) {
+        if (
+            response &&
+            response.success &&
+            response.data &&
+            response.pagination
+        ) {
             setFilteredStudents(response.data);
             setPagination(response.pagination);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
         isLoading(false);
     };

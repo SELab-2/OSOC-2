@@ -133,36 +133,32 @@ export const Settings: React.FC<{
                 }
             )
                 .then((response) => response.json())
-                .catch((err) => {
+                .catch(() => {
                     setApplyError(
                         "Something went wrong while trying to execute your request."
                     );
-                    if (notify) {
-                        notify(
-                            "Something went wrong:" + err,
-                            NotificationType.ERROR,
-                            2000
-                        );
-                    }
                 });
-            if (response !== undefined) {
-                if (response.success) {
-                    if (setSessionKey) {
-                        setSessionKey(response.sessionkey);
-                    }
-                    await fetchUser();
-                    if (notify) {
-                        notify(
-                            "Your credentials are succesfully changed",
-                            NotificationType.SUCCESS,
-                            2000
-                        );
-                    }
-                } else {
-                    setApplyError(
-                        `Failed to apply changes. Please check all fields. ${response.reason}`
+            if (response && response.success) {
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey);
+                }
+                await fetchUser();
+                if (notify) {
+                    notify(
+                        "Your credentials are succesfully changed",
+                        NotificationType.SUCCESS,
+                        2000
                     );
                 }
+            } else if (response && !response.success && notify) {
+                setApplyError(
+                    `Failed to apply changes. Please check all fields. ${response.reason}`
+                );
+                notify(
+                    "Something went wrong:" + response.reason,
+                    NotificationType.ERROR,
+                    2000
+                );
             }
         }
     };

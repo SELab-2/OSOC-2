@@ -49,13 +49,7 @@ export const StudentOverview: React.FC<{
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
         if (
             response !== undefined &&
@@ -63,6 +57,12 @@ export const StudentOverview: React.FC<{
             Array.isArray(response.evaluation.evaluations)
         ) {
             setEvaluations(response.evaluation.evaluations);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
@@ -105,15 +105,9 @@ export const StudentOverview: React.FC<{
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
-        if (response !== undefined && response.success) {
+        if (response && response.success) {
             setMotivation("");
             // The creation was succesfull, we can update the evaluation bar
             fetchEvals().then();
@@ -124,6 +118,12 @@ export const StudentOverview: React.FC<{
                     2000
                 );
             }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
@@ -150,15 +150,9 @@ export const StudentOverview: React.FC<{
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
-        if (response !== undefined && response.success) {
+        if (response && response.success) {
             setMotivation("");
             // The creation was succesfull, we can update the evaluation bar
             await fetchEvals().then();
@@ -170,6 +164,12 @@ export const StudentOverview: React.FC<{
                     2000
                 );
             }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 

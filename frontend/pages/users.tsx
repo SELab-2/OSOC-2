@@ -226,16 +226,18 @@ const Users: NextPage = () => {
         )
             .then((response) => response.json())
             .catch((err) => {
-                if (notify) {
-                    notify(
-                        "Something went wrong:" + err,
-                        NotificationType.ERROR,
-                        2000
-                    );
-                }
+                console.log(err);
             });
-        updateUsers(response.data);
-        setPagination(response.pagination);
+        if (response.success && response.data && response.pagination) {
+            updateUsers(response.data);
+            setPagination(response.pagination);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
+        }
         isLoading(false);
     };
 
