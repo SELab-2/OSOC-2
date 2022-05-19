@@ -1670,7 +1670,7 @@ test("Can parse self-modify requests", () => {
 
 test("Can parse remove coach request", () => {
     const r1: T.Anything = {
-        project_user: 1,
+        loginUserId: 1,
     };
 
     const res: T.Requests.IdRequest = {
@@ -1705,7 +1705,7 @@ test("Can parse remove coach request", () => {
 
 test("Can parse remove coach request", () => {
     const r1: T.Anything = {
-        login_user: 1,
+        loginUserId: 1,
     };
 
     const res: T.Requests.IdRequest = {
