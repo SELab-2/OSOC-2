@@ -411,6 +411,9 @@ beforeEach(() => {
     reqMock.parseDraftStudentRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseFilterProjectsRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -461,6 +464,16 @@ beforeEach(() => {
     ormPrMock.getProjectById.mockImplementation((id) =>
         Promise.resolve(projects[id])
     );
+    ormPrMock.filterProjects.mockResolvedValue({
+        data: projects.map((x) => ({
+            ...x,
+            project_role: [{ role: { name: "role_1" }, positions: 15 }],
+            project_user: [
+                { login_user: { login_user_id: 1, is_coach: true } },
+            ],
+        })),
+        pagination: { page: 0, count: projects.length },
+    });
 
     // role orm
     ormRMock.getRolesByName.mockImplementation((rln) => {
@@ -599,6 +612,7 @@ afterEach(() => {
     reqMock.parseRemoveAssigneeRequest.mockReset();
     reqMock.parseProjectConflictsRequest.mockReset();
     reqMock.parseDraftStudentRequest.mockReset();
+    reqMock.parseFilterProjectsRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
@@ -613,6 +627,7 @@ afterEach(() => {
     ormPrMock.updateProject.mockReset();
     ormPrMock.deleteProject.mockReset();
     ormPrMock.getProjectById.mockReset();
+    ormPrMock.filterProjects.mockReset();
 
     // role orm
     ormRMock.getRolesByName.mockReset();
@@ -1266,4 +1281,132 @@ test("Can't assign students (already used)", async () => {
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
+});
+
+test("Can filter projects", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([]);
+    ormPUMock.getUsersFor.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    const res = projects.map((x) => ({
+        id: x.project_id,
+        name: x.name,
+        partner: x.partner,
+        start_date: x.start_date,
+        end_data: x.end_date,
+        osoc_id: x.osoc_id,
+        contracts: [],
+        coaches: [],
+    }));
+
+    await expect(project.filterProjects(req)).resolves.toStrictEqual({
+        data: res,
+        pagination: { count: projects.length, page: 0 },
+    });
+    expectCall(reqMock.parseFilterProjectsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expect(ormPr.filterProjects).toHaveBeenCalledTimes(1);
+    expect(ormPr.filterProjects).toHaveBeenCalledWith(
+        {
+            currentPage: undefined,
+            pageSize: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2022,
+        undefined,
+        undefined
+    );
+    expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
+    expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
+});
+
+test("Can filter projects (with osoc year)", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([]);
+    ormPUMock.getUsersFor.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key", osocYear: 2021 };
+
+    const res = projects.map((x) => ({
+        id: x.project_id,
+        name: x.name,
+        partner: x.partner,
+        start_date: x.start_date,
+        end_data: x.end_date,
+        osoc_id: x.osoc_id,
+        contracts: [],
+        coaches: [],
+    }));
+
+    await expect(project.filterProjects(req)).resolves.toStrictEqual({
+        data: res,
+        pagination: { count: projects.length, page: 0 },
+    });
+    expectCall(reqMock.parseFilterProjectsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getLatestOsoc).not.toHaveBeenCalled();
+    expect(ormPr.filterProjects).toHaveBeenCalledTimes(1);
+    expect(ormPr.filterProjects).toHaveBeenCalledWith(
+        {
+            currentPage: undefined,
+            pageSize: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        2021,
+        undefined,
+        undefined
+    );
+    expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
+    expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
+});
+
+test("Can filter projects", async () => {
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    ormCMock.contractsByProject.mockResolvedValue([]);
+    ormPUMock.getUsersFor.mockResolvedValue([]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    const res = projects.map((x) => ({
+        id: x.project_id,
+        name: x.name,
+        partner: x.partner,
+        start_date: x.start_date,
+        end_data: x.end_date,
+        osoc_id: x.osoc_id,
+        contracts: [],
+        coaches: [],
+    }));
+
+    await expect(project.filterProjects(req)).resolves.toStrictEqual({
+        data: res,
+        pagination: { count: projects.length, page: 0 },
+    });
+    expectCall(reqMock.parseFilterProjectsRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
+    expect(ormPr.filterProjects).toHaveBeenCalledTimes(1);
+    expect(ormPr.filterProjects).toHaveBeenCalledWith(
+        {
+            currentPage: undefined,
+            pageSize: undefined,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        1970,
+        undefined,
+        undefined
+    );
+    expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
+    expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
 });

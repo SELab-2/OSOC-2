@@ -734,7 +734,7 @@ export async function filterProjects(
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
-    let year = new Date().getFullYear();
+    let year = new Date(Date.now()).getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
