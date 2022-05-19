@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import CallableInstance from "callable-instance";
 import express from "express";
 import core from "express-serve-static-core";
