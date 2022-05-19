@@ -27,7 +27,8 @@ const Change: NextPage = () => {
 
     const [projectName, setProjectName] = useState<string>("");
     const [partner, setPartner] = useState<string>("");
-    const [osocId, setOsocId] = useState<number>(0);
+    const [osocId, setOsocId] = useState<string>("");
+    const [osocYear, setOsocYear] = useState<string>("");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
     const [roles, setRoles] = useState<string[]>([]);
@@ -111,7 +112,7 @@ const Change: NextPage = () => {
     const assignFields = (project: Project) => {
         setProjectName(project.name);
         setPartner(project.partner);
-        setOsocId(project.osoc_id);
+        setOsocId(project.osoc_id.toString());
         setStartDate(formatDate(project.start_date));
         setEndDate(formatDate(project.end_date));
         for (const role of project.roles) {
@@ -224,20 +225,25 @@ const Change: NextPage = () => {
     };
 
     const getOsocYear = () => {
-        for (const osoc of osocs) {
-            if (osoc.osoc_id === osocId) {
-                return osoc.year;
+        if (osocId != "") {
+            for (const osoc of osocs) {
+                if (osoc.osoc_id === Number(osocId)) {
+                    return osoc.year.toString();
+                }
             }
+        } else {
+            return osocYear;
         }
     };
 
     const getOsocId = (year: string) => {
         for (const osoc of osocs) {
             if (osoc.year === parseInt(year)) {
-                return osoc.osoc_id;
+                return osoc.osoc_id.toString();
             }
         }
-        return -1; //this is not possible
+        setOsocYear(year);
+        return "";
     };
 
     const getRolePositions = (name: string) => {
@@ -328,7 +334,7 @@ const Change: NextPage = () => {
                     type="text"
                     name="osoc_edition"
                     placeholder="year..."
-                    value={getOsocYear() || 0}
+                    value={getOsocYear() || ""}
                     onChange={(e) => {
                         setOsocId(getOsocId(e.target.value));
                     }}
