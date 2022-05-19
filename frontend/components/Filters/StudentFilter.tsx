@@ -149,7 +149,7 @@ export const StudentFilter: React.FC<{
                 osocYear && new RegExp("[0-9]+").test(osocYear) ? osocYear : "",
             emailStatus: emailStatus
                 ? (emailStatus as EmailStatus)
-                : EmailStatus.EMPTY,
+                : EmailStatus.NONE,
             selectedRoles: newRoles,
         };
         // search
