@@ -308,9 +308,9 @@ export async function filterProjects(
     // create the orderby object
     let sortObject;
     if (projectNameSort === undefined && clientNameSort !== undefined) {
-        sortObject = [{ name: projectNameSort }];
+        sortObject = [{ name: clientNameSort }];
     } else if (projectNameSort !== undefined && clientNameSort === undefined) {
-        sortObject = [{ partner: clientNameSort }];
+        sortObject = [{ partner: projectNameSort }];
     } else if (projectNameSort !== undefined && clientNameSort !== undefined) {
         sortObject = [{ name: projectNameSort }, { partner: clientNameSort }];
     }

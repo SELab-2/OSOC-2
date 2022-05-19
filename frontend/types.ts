@@ -332,7 +332,7 @@ export interface ProjectFilterParams {
     clientFilter: string;
     fullyAssigned: boolean;
     osocYear: string;
-    nameSort: Sort;
+    projectNameSort: Sort;
     clientSort: Sort;
 }
 
