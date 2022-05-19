@@ -233,7 +233,7 @@ describe("student filter tests", () => {
         await testEmailFilters(
             "emailFilterDraft",
             "emailStatusFilter=DRAFT",
-            "DRAFT"
+            "APPLIED"
         );
         await testEmailFilters(
             "emailFilterSent",
