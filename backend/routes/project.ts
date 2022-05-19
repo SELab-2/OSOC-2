@@ -770,9 +770,6 @@ export async function filterProjects(
 ): Promise<Responses.ProjectListAndContracts> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     let year = new Date(Date.now()).getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
@@ -783,8 +780,7 @@ export async function filterProjects(
     } else {
         year = checkedSessionKey.data.osocYear;
     }
-    console.log("data");
-    console.log(checkedSessionKey.data);
+
     const projects = await ormPr.filterProjects(
         {
             currentPage: checkedSessionKey.data.currentPage,

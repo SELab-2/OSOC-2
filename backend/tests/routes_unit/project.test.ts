@@ -9,6 +9,8 @@
 import { getMockReq } from "@jest-mock/express";
 import * as prisma from "@prisma/client";
 
+import { errors } from "../../utility";
+
 // import & mock
 import * as rq from "../../request";
 jest.mock("../../request");
@@ -37,6 +39,10 @@ const ormCMock = ormCtr as jest.Mocked<typeof ormCtr>;
 import * as ormPU from "../../orm_functions/project_user";
 jest.mock("../../orm_functions/project_user");
 const ormPUMock = ormPU as jest.Mocked<typeof ormPU>;
+
+import * as ormLU from "../../orm_functions/login_user";
+jest.mock("../../orm_functions/login_user");
+const ormLUMock = ormLU as jest.Mocked<typeof ormLU>;
 
 import * as ormEv from "../../orm_functions/evaluation";
 jest.mock("../../orm_functions/evaluation");
@@ -731,6 +737,43 @@ test("Can create new projects", async () => {
     expect(ormRMock.getRolesByName).toHaveBeenCalledTimes(2);
     expectCall(ormRMock.createRole, req.body.roles.roles[1].name);
     expect(ormPrRMock.createProjectRole).toHaveBeenCalledTimes(2);
+});
+
+test("Can create new projects (insufficient rights)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    ormLUMock.getOsocYearsForLoginUser.mockResolvedValue([2023]);
+
+    ormOMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    await expect(project.createProject(req)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+
+    ormLUMock.getOsocYearsForLoginUser.mockReset();
+    ormOMock.getOsocById.mockReset();
 });
 
 test("Can list all projects", async () => {
