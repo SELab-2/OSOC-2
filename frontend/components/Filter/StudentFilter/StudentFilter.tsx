@@ -411,7 +411,6 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.APPLIED}
                             </div>
                             <div
-                                data-testid={"emailFilterDraft"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
