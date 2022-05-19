@@ -414,6 +414,9 @@ beforeEach(() => {
     reqMock.parseFilterProjectsRequest.mockImplementation((v) =>
         Promise.resolve(v.body)
     );
+    reqMock.parseSingleProjectRequest.mockImplementation((v) =>
+        Promise.resolve(v.body)
+    );
 
     // util
     utilMock.isAdmin.mockImplementation((v) =>
@@ -474,6 +477,9 @@ beforeEach(() => {
         })),
         pagination: { page: 0, count: projects.length },
     });
+    ormPrMock.getProjectById.mockImplementation((id) =>
+        Promise.resolve(id < projects.length ? projects[id] : null)
+    );
 
     // role orm
     ormRMock.getRolesByName.mockImplementation((rln) => {
@@ -613,6 +619,7 @@ afterEach(() => {
     reqMock.parseProjectConflictsRequest.mockReset();
     reqMock.parseDraftStudentRequest.mockReset();
     reqMock.parseFilterProjectsRequest.mockReset();
+    reqMock.parseSingleProjectRequest.mockReset();
 
     // util
     utilMock.isAdmin.mockReset();
@@ -628,6 +635,7 @@ afterEach(() => {
     ormPrMock.deleteProject.mockReset();
     ormPrMock.getProjectById.mockReset();
     ormPrMock.filterProjects.mockReset();
+    ormPrMock.getProjectById.mockReset();
 
     // role orm
     ormRMock.getRolesByName.mockReset();
@@ -742,6 +750,120 @@ test("Can't list all projects (role failure)", async () => {
     expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
     expect(ormCMock.contractsByProject).not.toHaveBeenCalled();
     expect(ormPUMock.getUsersFor).not.toHaveBeenCalled();
+});
+
+test("Can get single project", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([contracts[0]]);
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 0 };
+
+    const res = {
+        id: projects[0].project_id,
+        name: projects[0].name,
+        partner: projects[0].partner,
+        start_date: projects[0].start_date.toString(),
+        end_date: projects[0].end_date.toString(),
+        osoc_id: projects[0].osoc_id,
+        roles: [
+            { name: roles[0].name, positions: projectroles[0].positions },
+            { name: roles[2].name, positions: projectroles[2].positions },
+            { name: roles[4].name, positions: projectroles[4].positions },
+        ],
+        coaches: [{ login_user: loginuser, project_user_id: 0 }],
+        contracts: [
+            {
+                contract_id: 0,
+                contract_status: "DRAFT",
+                login_user: {
+                    is_admin: true,
+                    is_coach: false,
+                    login_user_id: 0,
+                    person: {
+                        email: "karen@manager.com",
+                        github: null,
+                        github_id: null,
+                        name: "karen",
+                        person_id: 5,
+                    },
+                },
+                project_role: {
+                    positions: 3,
+                    project_id: 0,
+                    project_role_id: 0,
+                    role: {
+                        name: "dev",
+                        role_id: 0,
+                    },
+                    role_id: 0,
+                },
+                student: {
+                    evaluation: undefined,
+                    evaluations: undefined,
+                    jobApplication: undefined,
+                    roles: undefined,
+                    student: {
+                        alumni: false,
+                        gender: "one",
+                        nickname: null,
+                        person: {
+                            email: "jeff@gmail.com",
+                            github: null,
+                            github_id: null,
+                            name: "jeff",
+                            person_id: 0,
+                        },
+                        person_id: undefined,
+                        phone_number: "04",
+                        pronouns: null,
+                        student_id: 0,
+                    },
+                },
+            },
+        ],
+    };
+
+    await expect(project.getProject(req)).resolves.toStrictEqual(res);
+    expectCall(reqMock.parseSingleProjectRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
+    expectCall(ormPrMock.getProjectById, 0);
+    expectCall(ormCMock.contractsByProject, 0);
+    expectCall(ormPrRMock.getProjectRolesByProject, 0);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(3);
+    expectCall(ormPU.getUsersFor, 0);
+});
+
+test("Can't get single project (role error)", async () => {
+    ormCMock.contractsByProject.mockResolvedValue([contracts[0]]);
+    ormRMock.getRole.mockResolvedValue(null);
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 0 };
+
+    await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
+    expectCall(reqMock.parseSingleProjectRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
+    expectCall(ormPrMock.getProjectById, 0);
+    expectCall(ormCMock.contractsByProject, 0);
+    expectCall(ormPrRMock.getProjectRolesByProject, 0);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
+    expect(ormPU.getUsersFor).not.toHaveBeenCalled();
+});
+
+test("Can't get single project (ID error)", async () => {
+    ormPrMock.getProjectById.mockResolvedValue(null);
+    const req = getMockReq();
+    req.body = { sessionkey: "key", id: 0 };
+
+    await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
+    expectCall(reqMock.parseSingleProjectRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
+    expectCall(ormPrMock.getProjectById, 0);
+    expect(ormCMock.contractsByProject).not.toHaveBeenCalled();
+    expect(ormPrRMock.getProjectRolesByProject).not.toHaveBeenCalled();
+    expect(ormRMock.getRole).not.toHaveBeenCalled();
+    expect(ormPU.getUsersFor).not.toHaveBeenCalled();
 });
 
 test("Can modify projects", async () => {

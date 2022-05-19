@@ -154,12 +154,9 @@ export async function getProject(
     req: express.Request
 ): Promise<Responses.ProjectAndContracts> {
     const parsedRequest = await rq.parseSingleProjectRequest(req);
-    const checked = await util.isAdmin(parsedRequest).catch((res) => res);
-    if (checked.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-
-    const checkedId = await util.isValidID(checked.data, "project");
+    const checkedId = await util
+        .isAdmin(parsedRequest)
+        .then((v) => util.isValidID(v.data, "project"));
 
     const project = await ormPr.getProjectById(checkedId.id);
     if (project !== null) {
@@ -175,7 +172,7 @@ export async function getProject(
                 roles: undefined,
                 student:
                     contract.student === null
-                        ? contract.student
+                        ? null
                         : {
                               student_id: contract.student.student_id,
                               person_id: undefined,
