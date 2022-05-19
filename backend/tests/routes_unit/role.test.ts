@@ -107,6 +107,7 @@ afterEach(() => {
 test("Can create a new role", async () => {
     const r = getMockReq();
     r.body = { sessionkey: "abcd", name: "New role" };
+    ormoMock.getRolesByName.mockResolvedValue(null);
     await expect(role.createStudentRole(r)).resolves.toStrictEqual({
         name: "New role",
         id: 0,
@@ -117,6 +118,8 @@ test("Can create a new role", async () => {
         name: "New role",
         sessionkey: "abcd",
     });
+
+    ormoMock.getRolesByName.mockReset();
 });
 
 test("Can get all the roles", async () => {
