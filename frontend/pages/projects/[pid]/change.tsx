@@ -4,6 +4,7 @@ import { useEffect, useContext, useState, SyntheticEvent } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
 import { OsocEdition, Project } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
+import styles from "./change.module.scss";
 
 const Change: NextPage = () => {
     const router = useRouter();
@@ -259,79 +260,115 @@ const Change: NextPage = () => {
     };
 
     return (
-        <div>
-            <Modal
-                title="Type in the role name and the number of positions"
-                visible={visible}
-                handleClose={closer}
-            >
-                <label>Role: </label>
-                <input
-                    type="text"
-                    name="role_name"
-                    placeholder="name..."
-                    value={newRoleName}
-                    onChange={(e) => setNewRoleName(e.target.value)}
-                />
-                <br />
-                <label>Positions: </label>
-                <input
-                    type="number"
-                    name="role_positions"
-                    value={newRolePositions}
-                    onChange={(e) => setNewRolePositions(e.target.value)}
-                    onBlur={(e) => checkUnfocusNewRole(e.target.value)}
-                />
-                <br />
-                <button onClick={() => addNewRole()}>Add Role</button>
+        <div className={styles.body}>
+            <Modal title="Role Creation" visible={visible} handleClose={closer}>
+                <div className={styles.modalContent}>
+                    <p>
+                        Type in the new role and the amount of positions
+                        required
+                    </p>
+                    <label>
+                        Role:
+                        <input
+                            className="input"
+                            type="text"
+                            name="role_name"
+                            placeholder="name..."
+                            value={newRoleName}
+                            onChange={(e) => setNewRoleName(e.target.value)}
+                        />
+                    </label>
+
+                    <label>
+                        Positions:
+                        <input
+                            min={0}
+                            className="input"
+                            type="number"
+                            name="role_positions"
+                            value={newRolePositions}
+                            onChange={(e) =>
+                                setNewRolePositions(e.target.value)
+                            }
+                            onBlur={(e) => checkUnfocusNewRole(e.target.value)}
+                        />
+                    </label>
+                    <button onClick={() => addNewRole()}>Add Role</button>
+                </div>
             </Modal>
-            <p>Project name</p>
-            <input
-                type="text"
-                name="project_name"
-                placeholder="name..."
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-            />
-            <p>Partner</p>
-            <input
-                type="text"
-                name="partner"
-                placeholder="partner..."
-                value={partner}
-                onChange={(e) => setPartner(e.target.value)}
-            />
-            <p>Osoc edition</p>
-            <input
-                type="text"
-                name="osoc_edition"
-                placeholder="year..."
-                value={getOsocYear() || 0}
-                onChange={(e) => {
-                    setOsocId(getOsocId(e.target.value));
-                }}
-            />
-            <p>Start date</p>
-            <input
-                type="date"
-                name="start_date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-            />
-            <p>End date</p>
-            <input
-                type="date"
-                name="end_date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-            />
-            <p>Change the amount of positions for the necessary roles:</p>
-            {roles.map((role, index) => {
-                return (
-                    <div key={index}>
-                        <div>
-                            <label> {role}: </label>
+
+            <label>
+                <h1>Project name</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="project_name"
+                    placeholder="name..."
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Partner</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="partner"
+                    placeholder="partner..."
+                    value={partner}
+                    onChange={(e) => setPartner(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Osoc edition</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="osoc_edition"
+                    placeholder="year..."
+                    value={getOsocYear() || 0}
+                    onChange={(e) => {
+                        setOsocId(getOsocId(e.target.value));
+                    }}
+                />
+            </label>
+
+            <label>
+                <h1>Start date</h1>
+                <input
+                    className="input"
+                    type="date"
+                    name="start_date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>End date</h1>
+                <input
+                    className="input"
+                    type="date"
+                    name="end_date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                />
+            </label>
+
+            <div className={styles.rolesHeader}>
+                <p>Change the amount of positions for the necessary roles:</p>
+                <button onClick={() => setVisible(true)}>+ Add role</button>
+            </div>
+
+            <div className={styles.roles}>
+                {roles.map((role, index) => {
+                    return (
+                        <label key={index}>
+                            <p>{role}:</p>
                             <input
+                                className="input"
                                 type="number"
                                 value={getRolePositions(role)}
                                 onChange={(e) =>
@@ -341,10 +378,11 @@ const Change: NextPage = () => {
                                     checkUnfocus(role, e.target.value);
                                 }}
                             />
-                        </div>
-                    </div>
-                );
-            })}
+                        </label>
+                    );
+                })}
+            </div>
+
             <a onClick={() => setVisible(true)}>Create a new role</a>
             <br />
             <button onClick={handleConfirm}>CONFIRM</button>
