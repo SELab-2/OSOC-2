@@ -1,12 +1,10 @@
 import React from "react";
 import { Decision, Display, Student } from "../../types";
 import styles from "./StudentCard.module.scss";
-import { Role } from "../Labels/Roles";
-import { Study } from "../Labels/Studies";
 import { Diploma } from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
-import { LanguageAndSkill } from "../Labels/LanguageAndSkill";
+import { Label } from "../Labels/Label";
 import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
@@ -57,10 +55,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                         {student.jobApplication.job_application_skill.map(
                             (language, index) => {
                                 return (
-                                    <LanguageAndSkill
-                                        key={index}
-                                        language={language.skill}
-                                    />
+                                    <Label key={index} label={language.skill} />
                                 );
                             }
                         )}
@@ -68,7 +63,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                     <h6 className={styles.categoryTitle}>ROLES</h6>
                     <div className={styles.category}>
                         {student.roles.map((role, index) => (
-                            <Role key={index} role={role} />
+                            <Label key={index} label={role} />
                         ))}
                     </div>
                 </div>
@@ -87,7 +82,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                         <h6 className={styles.categoryTitle}>STUDIES</h6>
                         <div className={styles.category}>
                             {student.jobApplication.edus.map((study, index) => (
-                                <Study key={index} study={study} />
+                                <Label key={index} label={study} />
                             ))}
                         </div>
                     </div>

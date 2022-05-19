@@ -85,7 +85,7 @@ const jobapps: _appl[] = [
         edu_level: "noob",
         edu_year: "pro",
         edu_institute: "someones basement",
-        email_status: "SCHEDULED",
+        email_status: "AWAITING_PROJECT",
         created_at: new Date(Date.now()),
         job_application_skill: [
             {
@@ -122,7 +122,7 @@ const jobapps: _appl[] = [
         edu_level: "noob",
         edu_year: "pro",
         edu_institute: "someones basement",
-        email_status: "SCHEDULED",
+        email_status: "APPLIED",
         created_at: new Date(Date.now()),
         job_application_skill: [
             {

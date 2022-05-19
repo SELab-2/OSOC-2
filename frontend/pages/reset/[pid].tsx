@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import styles from "../../styles/login.module.scss";
+import styles from "../login/login.module.scss";
 import { SyntheticEvent, useEffect, useState } from "react";
 import isStrongPassword from "validator/lib/isStrongPassword";
 

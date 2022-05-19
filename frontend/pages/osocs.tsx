@@ -3,7 +3,7 @@ import { OsocEdition, OsocFilterParams, Sort } from "../types";
 import { NextPage } from "next";
 import React, { useContext, useState } from "react";
 import styles from "../styles/users.module.css";
-import { OsocCreateFilter } from "../components/Filter/OsocFilter/OsocFilter";
+import { OsocCreateFilter } from "../components/Filters/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
 import { Paginator } from "../components/Paginator/Paginator";
 import { Pagination } from "../types";
@@ -22,6 +22,8 @@ const Osocs: NextPage = () => {
         page: 0,
         count: 0,
     });
+    // 20 items per page
+    const pageSize = 20;
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
@@ -67,6 +69,7 @@ const Osocs: NextPage = () => {
         }
 
         filters.push(`currentPage=${page}`);
+        filters.push(`pageSize=${pageSize}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
 
@@ -88,8 +91,10 @@ const Osocs: NextPage = () => {
             .catch((err) => {
                 console.log(err);
             });
-        setEditions(response.data);
-        setPagination(response.pagination);
+        if (response.data !== undefined && response.pagination !== undefined) {
+            setEditions(response.data);
+            setPagination(response.pagination);
+        }
         isLoading(false);
     };
 
@@ -109,7 +114,11 @@ const Osocs: NextPage = () => {
                       })
                     : null}
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            <Paginator
+                pageSize={pageSize}
+                pagination={pagination}
+                navigator={navigator}
+            />
         </div>
     );
 };

@@ -10,10 +10,11 @@ import {
     StudentStatus,
     Pagination,
 } from "../../types";
-import { StudentFilter } from "../Filter/StudentFilter/StudentFilter";
+import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
 import { EvaluationBar } from "../StudentCard/EvaluationBar";
 import { StudentOverview } from "../StudentOverview/StudentOverview";
+import scrollStyles from "../ScrollView.module.scss";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
@@ -22,12 +23,15 @@ import { useSockets } from "../../contexts/socketProvider";
 /**
  * Constructs the complete students page with filter included
  * @param alwaysLimited Whether or not the page should always be shown limited
+ * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
+ * @param updateParentStudents
  * @constructor
  */
-export const Students: React.FC<{ alwaysLimited: boolean }> = ({
-    alwaysLimited = false,
-}) => {
+export const Students: React.FC<{
+    alwaysLimited: boolean;
+    dragDisabled: boolean;
+}> = ({ alwaysLimited = false }) => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const [students, setStudents] = useState<Student[]>([]);
@@ -41,7 +45,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         page: 0,
         count: 0,
     });
-
+    // 10 students per page
+    const pageSize = 10;
     const [loading, isLoading] = useState(false);
     const { socket } = useSockets();
 
@@ -272,11 +277,12 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         if (params.statusFilter !== StudentStatus.EMPTY) {
             filters.push(`statusFilter=${params.statusFilter}`);
         }
-        if (params.emailStatus !== EmailStatus.EMPTY) {
+        if (params.emailStatus !== EmailStatus.NONE) {
             filters.push(`emailStatusFilter=${params.emailStatus}`);
         }
 
         filters.push(`currentPage=${page}`);
+        filters.push(`pageSize=${pageSize}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         const { sessionKey } = getSession
@@ -303,8 +309,10 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 console.log(err);
                 return { success: false };
             });
-        setFilteredStudents(response.data);
-        setPagination(response.pagination);
+        if (response.data !== undefined && response.pagination !== undefined) {
+            setFilteredStudents(response.data);
+            setPagination(response.pagination);
+        }
         isLoading(false);
         const id = new URLSearchParams(window.location.search).get("id");
         const frontendQuery = id !== null ? query + "&id=" + id : query;
@@ -325,8 +333,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                     searchManual={filterManual}
                     searchAutomatic={filterAutomatic}
                 />
-                <div className={styles.scrollView}>
-                    <div className={styles.topShadowCaster} />
+                <div className={scrollStyles.scrollView}>
+                    <div className={scrollStyles.topShadowCaster} />
                     <div
                         className={`${styles.studentCards} ${
                             display === Display.LIMITED ? styles.limited : ""
@@ -337,7 +345,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             id_to_index[id] = index;
                             return (
                                 <div
-                                    key={student.student.student_id}
+                                    key={id}
                                     className={styles.card}
                                     onClick={(e) =>
                                         clickStudent(
@@ -364,9 +372,13 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                             );
                         })}
                     </div>
-                    <div className={styles.bottomShadowCaster} />
+                    <div className={scrollStyles.bottomShadowCaster} />
                 </div>
-                <Paginator pagination={pagination} navigator={navigator} />
+                <Paginator
+                    pageSize={pageSize}
+                    pagination={pagination}
+                    navigator={navigator}
+                />
             </div>
             {selectedStudent !== -1 &&
             students[selectedStudent] !== undefined ? (

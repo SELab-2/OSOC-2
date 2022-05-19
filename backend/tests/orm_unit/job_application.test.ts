@@ -32,7 +32,7 @@ const response = {
     edu_duration: 5,
     edu_year: "2025",
     edu_institute: "ugent",
-    email_status: email_status_enum.FAILED,
+    email_status: email_status_enum.REJECTED,
     created_at: new Date(),
 };
 
@@ -61,7 +61,7 @@ test("should delete job applications of student", async () => {
 test("should change the email status", async () => {
     prismaMock.job_application.update.mockResolvedValue(response);
     await expect(
-        changeEmailStatusOfJobApplication(0, email_status_enum.FAILED)
+        changeEmailStatusOfJobApplication(0, email_status_enum.REJECTED)
     ).resolves.toEqual(response);
 });
 
@@ -78,7 +78,7 @@ test("should create a job application", async () => {
         eduLevel: "good",
         eduYear: "2025",
         edus: ["good"],
-        emailStatus: email_status_enum.DRAFT,
+        emailStatus: email_status_enum.APPLIED,
         funFact: "cool",
         studentVolunteerInfo:
             "Yes, I can work with a student employment agreement in Belgium",

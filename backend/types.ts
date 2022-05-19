@@ -5,6 +5,7 @@ import {
     email_status_enum,
     type_enum,
     person,
+    project_user,
 } from "@prisma/client";
 import express from "express";
 import { FilterSort } from "./orm_functions/orm_types";
@@ -690,6 +691,7 @@ export namespace InternalTypes {
         coach: boolean;
         admin: boolean;
         activated: string;
+        login_user_id: number;
     }
 
     /**
@@ -725,7 +727,17 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        roles: object;
+        roles: { name: string; positions: number }[];
+        description: string | null;
+        coaches: {
+            login_user: {
+                person: person;
+                login_user_id: number;
+                is_admin: boolean;
+                is_coach: boolean;
+            };
+            project_user_id: number;
+        }[];
     }
 
     /**
@@ -763,11 +775,6 @@ export namespace InternalTypes {
         } | null;
         student: Student;
     }
-
-    /**
-     *  Represents a project, with all associated data.
-     */
-    export interface ProjectFilter {}
 
     /**
      *  Represents a person, with all associated data.
@@ -1035,6 +1042,8 @@ export namespace Responses {
         data: InternalTypes.Role[];
     }
 
+    export interface ProjectUser extends project_user {}
+
     /**
      *
      */
@@ -1159,12 +1168,6 @@ export namespace Responses {
         data: InternalTypes.ProjectAndContracts[];
     }
     export interface ProjectList extends Paginable<InternalTypes.Project> {}
-
-    /**
-     *  A project filter list is a list of projects
-     */
-    export interface ProjectFilterList
-        extends Paginable<InternalTypes.ProjectFilter> {}
 
     /**
      *  An admin list response is the keyed version of the list of admins.
@@ -1368,7 +1371,9 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        roles: object;
+        roles: { roles: { name: string; positions: number }[] };
+        description: string;
+        coaches: { coaches: number[] };
     }
 
     export interface ModProject extends IdRequest {
@@ -1377,9 +1382,10 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        addRoles?: object;
-        deleteRoles?: object;
+        roles?: { roles: { name: string; positions: number }[] };
         description?: string;
+        addCoaches?: { coaches: number[] };
+        removeCoaches?: { coaches: number[] };
     }
 
     export interface ProjectFilter extends PaginableRequest {
@@ -1461,11 +1467,7 @@ export namespace Requests {
         studentId: number;
     }
 
-    export interface RmDraftCoach extends IdRequest {
-        projectUserId: number;
-    }
-
-    export interface DraftCoach extends IdRequest {
+    export interface Coach extends IdRequest {
         loginUserId: number;
     }
 
@@ -1558,9 +1560,10 @@ export enum AccountStatus {
 }
 
 export enum EmailStatus {
-    SCHEDULED = "SCHEDULED",
-    SENT = "SENT",
-    FAILED = "FAILED",
-    NONE = "NONE",
-    DRAFT = "DRAFT",
+    APPLIED = "APPLIED",
+    APPROVED = "APPROVED",
+    AWAITING_PROJECT = "AWAITING_PROJECT",
+    CONTRACT_CONFIRMED = "CONTRACT_CONFIRMED",
+    CONTRACT_DECLINED = "CONTRACT_DECLINED",
+    REJECTED = "REJECTED",
 }

@@ -1,4 +1,4 @@
-import styles from "../Filter.module.css";
+import styles from "./Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import {
     Display,
@@ -8,15 +8,15 @@ import {
     Sort,
     StudentFilterParams,
     StudentStatus,
-} from "../../../types";
-import SessionContext from "../../../contexts/sessionProvider";
+} from "../../types";
+import SessionContext from "../../contexts/sessionProvider";
 import Image from "next/image";
-import CheckIconColor from "../../../public/images/green_check_mark_color.png";
-import CheckIcon from "../../../public/images/green_check_mark.png";
-import ExclamationIconColor from "../../../public/images/exclamation_mark_color.png";
-import ExclamationIcon from "../../../public/images/exclamation_mark.png";
-import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
+import CheckIconColor from "../../public/images/green_check_mark_color.png";
+import CheckIcon from "../../public/images/green_check_mark.png";
+import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
+import ExclamationIcon from "../../public/images/exclamation_mark.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 
 export const StudentFilter: React.FC<{
     searchManual: (params: StudentFilterParams) => void;
@@ -36,7 +36,7 @@ export const StudentFilter: React.FC<{
     );
     const [osocYear, setOsocYear] = useState<string>("");
     const [emailStatus, setEmailStatus] = useState<EmailStatus>(
-        EmailStatus.EMPTY
+        EmailStatus.NONE
     );
 
     // set dropdowns active / inactive
@@ -283,14 +283,14 @@ export const StudentFilter: React.FC<{
         searchManual(params);
     };
 
-    const toggleEmailNone = async (e: SyntheticEvent) => {
+    const toggleStatusApplied = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let newVal;
-        if (emailStatus !== EmailStatus.NONE) {
+        if (emailStatus !== EmailStatus.APPLIED) {
+            newVal = EmailStatus.APPLIED;
+        } else {
             newVal = EmailStatus.NONE;
-        } else {
-            newVal = EmailStatus.EMPTY;
         }
         setEmailStatus(newVal);
 
@@ -311,14 +311,14 @@ export const StudentFilter: React.FC<{
         searchManual(params);
     };
 
-    const toggleEmailDraft = async (e: SyntheticEvent) => {
+    const toggleStatusApproved = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let newVal;
-        if (emailStatus !== EmailStatus.DRAFT) {
-            newVal = EmailStatus.DRAFT;
+        if (emailStatus !== EmailStatus.APPROVED) {
+            newVal = EmailStatus.APPROVED;
         } else {
-            newVal = EmailStatus.EMPTY;
+            newVal = EmailStatus.NONE;
         }
         setEmailStatus(newVal);
 
@@ -339,14 +339,14 @@ export const StudentFilter: React.FC<{
         searchManual(params);
     };
 
-    const toggleEmailSent = async (e: SyntheticEvent) => {
+    const toggleStatusAwaiting = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let newVal;
-        if (emailStatus !== EmailStatus.SENT) {
-            newVal = EmailStatus.SENT;
+        if (emailStatus !== EmailStatus.AWAITING_PROJECT) {
+            newVal = EmailStatus.AWAITING_PROJECT;
         } else {
-            newVal = EmailStatus.EMPTY;
+            newVal = EmailStatus.NONE;
         }
         setEmailStatus(newVal);
 
@@ -367,14 +367,14 @@ export const StudentFilter: React.FC<{
         searchManual(params);
     };
 
-    const toggleEmailFailed = async (e: SyntheticEvent) => {
+    const toggleStatusConfirmed = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let newVal;
-        if (emailStatus !== EmailStatus.FAILED) {
-            newVal = EmailStatus.FAILED;
+        if (emailStatus !== EmailStatus.CONTRACT_CONFIRMED) {
+            newVal = EmailStatus.CONTRACT_CONFIRMED;
         } else {
-            newVal = EmailStatus.EMPTY;
+            newVal = EmailStatus.NONE;
         }
         setEmailStatus(newVal);
 
@@ -395,14 +395,42 @@ export const StudentFilter: React.FC<{
         searchManual(params);
     };
 
-    const toggleEmailScheduled = async (e: SyntheticEvent) => {
+    const toggleStatusDeclined = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         let newVal;
-        if (emailStatus !== EmailStatus.SCHEDULED) {
-            newVal = EmailStatus.SCHEDULED;
+        if (emailStatus !== EmailStatus.CONTRACT_DECLINED) {
+            newVal = EmailStatus.CONTRACT_DECLINED;
         } else {
-            newVal = EmailStatus.EMPTY;
+            newVal = EmailStatus.NONE;
+        }
+        setEmailStatus(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: statusFilter,
+            osocYear: osocYear,
+            emailStatus: newVal,
+            selectedRoles: selectedRoles,
+        };
+        searchManual(params);
+    };
+
+    const toggleStatusRejected = async (e: SyntheticEvent) => {
+        e.preventDefault();
+
+        let newVal;
+        if (emailStatus !== EmailStatus.REJECTED) {
+            newVal = EmailStatus.REJECTED;
+        } else {
+            newVal = EmailStatus.NONE;
         }
         setEmailStatus(newVal);
 
@@ -573,7 +601,7 @@ export const StudentFilter: React.FC<{
                 </div>
 
                 <div className={styles.query}>
-                    Osoc edition
+                    Osoc Edition
                     {/* Maybe dropdown */}
                     <input
                         data-testid={"osocYearInput"}
@@ -658,17 +686,17 @@ export const StudentFilter: React.FC<{
                     }`}
                 >
                     <div
-                        data-testid={"emailFilterDisplay"}
+                        data-testid={"statusFilterDisplay"}
                         className={`dropdown-trigger ${
                             emailStatusActive ||
-                            emailStatus !== EmailStatus.EMPTY
+                            emailStatus !== EmailStatus.NONE
                                 ? styles.active
                                 : styles.inactive
                         } ${styles.dropdownTrigger}`}
                         onClick={() => setEmailStatusActive(!emailStatusActive)}
                     >
-                        {emailStatus === EmailStatus.EMPTY
-                            ? "No email selected"
+                        {emailStatus === EmailStatus.NONE
+                            ? "No status selected"
                             : emailStatus}
                         <div className={styles.triangleContainer}>
                             <div className={styles.triangle} />
@@ -677,74 +705,88 @@ export const StudentFilter: React.FC<{
                     <div className="dropdown-menu">
                         <div className="dropdown-content">
                             <div
-                                data-testid={"emailFilterNone"}
+                                data-testid={"statusApplied"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
                             ${
-                                emailStatus === EmailStatus.NONE
+                                emailStatus === EmailStatus.APPLIED
                                     ? styles.selected
                                     : ""
                             }`}
-                                onClick={toggleEmailNone}
+                                onClick={toggleStatusApplied}
                             >
-                                {EmailStatus.NONE}
+                                {EmailStatus.APPLIED}
                             </div>
                             <div
-                                data-testid={"emailFilterDraft"}
+                                data-testid={"statusApproved"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
                             ${
-                                emailStatus === EmailStatus.DRAFT
+                                emailStatus === EmailStatus.APPROVED
                                     ? styles.selected
                                     : ""
                             }`}
-                                onClick={toggleEmailDraft}
+                                onClick={toggleStatusApproved}
                             >
-                                {EmailStatus.DRAFT}
+                                {EmailStatus.APPROVED}
                             </div>
                             <div
-                                data-testid={"emailFilterSent"}
+                                data-testid={"statusAwaiting"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
                             ${
-                                emailStatus === EmailStatus.SENT
+                                emailStatus === EmailStatus.AWAITING_PROJECT
                                     ? styles.selected
                                     : ""
                             }`}
-                                onClick={toggleEmailSent}
+                                onClick={toggleStatusAwaiting}
                             >
-                                {EmailStatus.SENT}
+                                {EmailStatus.AWAITING_PROJECT}
                             </div>
                             <div
-                                data-testid={"emailFilterFailed"}
+                                data-testid={"statusConfirmed"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
                             ${
-                                emailStatus === EmailStatus.FAILED
+                                emailStatus === EmailStatus.CONTRACT_CONFIRMED
                                     ? styles.selected
                                     : ""
                             }`}
-                                onClick={toggleEmailFailed}
+                                onClick={toggleStatusConfirmed}
                             >
-                                {EmailStatus.FAILED}
+                                {EmailStatus.CONTRACT_CONFIRMED}
                             </div>
                             <div
-                                data-testid={"emailFilterScheduled"}
+                                data-testid={"statusDeclined"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
                             ${
-                                emailStatus === EmailStatus.SCHEDULED
+                                emailStatus === EmailStatus.CONTRACT_DECLINED
                                     ? styles.selected
                                     : ""
                             }`}
-                                onClick={toggleEmailScheduled}
+                                onClick={toggleStatusDeclined}
                             >
-                                {EmailStatus.SCHEDULED}
+                                {EmailStatus.CONTRACT_DECLINED}
+                            </div>
+                            <div
+                                data-testid={"statusRejected"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.REJECTED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={toggleStatusRejected}
+                            >
+                                {EmailStatus.REJECTED}
                             </div>
                         </div>
                     </div>

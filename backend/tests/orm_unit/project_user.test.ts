@@ -1,5 +1,5 @@
 import { prismaMock } from "./singleton";
-import { CreateProjectUser } from "../../orm_functions/orm_types";
+import { ProjectUser } from "../../orm_functions/orm_types";
 import {
     createProjectUser,
     deleteProjectUser,
@@ -13,7 +13,7 @@ const returnValue = {
 };
 
 test("should create an project user in the db with the given object, returns the new record", async () => {
-    const projectUser: CreateProjectUser = {
+    const projectUser: ProjectUser = {
         loginUserId: 0,
         projectId: 0,
     };
@@ -28,6 +28,10 @@ test("should return the login users associated with the project", async () => {
 });
 
 test("should delete the project user with the given id and return the deleted record", async () => {
-    prismaMock.project_user.delete.mockResolvedValue(returnValue);
-    await expect(deleteProjectUser(0)).resolves.toEqual(returnValue);
+    const returnCount = { count: 0 };
+
+    prismaMock.project_user.deleteMany.mockResolvedValue(returnCount);
+    await expect(
+        deleteProjectUser({ loginUserId: 0, projectId: 0 })
+    ).resolves.toEqual(returnCount);
 });

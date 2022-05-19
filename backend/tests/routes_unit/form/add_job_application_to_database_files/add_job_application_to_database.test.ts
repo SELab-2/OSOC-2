@@ -41,7 +41,7 @@ const jobApplication: job_application & {
     edu_duration: 5,
     edu_year: "3rd",
     edu_institute: "Ghent university",
-    email_status: "DRAFT",
+    email_status: "APPLIED",
     created_at: new Date("December 17, 2021 03:24:00"),
     attachment: [],
     job_application_skill: [],
@@ -82,7 +82,7 @@ beforeEach(() => {
         edu_duration: 5,
         edu_year: "3rd",
         edu_institute: "Ghent university",
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         created_at: new Date("December 17, 2021 03:24:00"),
     });
 });
@@ -111,7 +111,7 @@ test("Insert a job application in the database, studentCoach not null", async ()
                 educationDuration: 5,
                 educationYear: "3rd",
                 educationInstitute: "Ghent university",
-                emailStatus: "DRAFT",
+                emailStatus: "AWAITING_PROJECT",
                 createdAt: "December 17, 2021 03:24:00",
             },
             {
@@ -137,7 +137,7 @@ test("Insert a job application in the database, studentCoach null", async () => 
                 educationDuration: 5,
                 educationYear: "3rd",
                 educationInstitute: "Ghent university",
-                emailStatus: "DRAFT",
+                emailStatus: "APPLIED",
                 createdAt: "December 17, 2021 03:24:00",
             },
             {

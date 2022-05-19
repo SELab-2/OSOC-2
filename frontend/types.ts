@@ -21,11 +21,12 @@ export enum FilterBoolean {
 
 export enum EmailStatus {
     NONE = "NONE",
-    DRAFT = "DRAFT",
-    SENT = "SENT",
-    FAILED = "FAILED",
-    SCHEDULED = "SCHEDULED",
-    EMPTY = "",
+    APPLIED = "APPLIED",
+    APPROVED = "APPROVED",
+    AWAITING_PROJECT = "AWAITING_PROJECT",
+    CONTRACT_CONFIRMED = "CONTRACT_CONFIRMED",
+    CONTRACT_DECLINED = "CONTRACT_DECLINED",
+    REJECTED = "REJECTED",
 }
 
 export enum StudentStatus {
@@ -196,6 +197,32 @@ export interface LoginUser {
     account_status: AccountStatus;
 }
 
+export interface Coach {
+    person_data: {
+        person_id: number;
+        email: string;
+        name: string;
+        github: string;
+    };
+    login_user_id: number;
+    is_coach: boolean;
+    is_admin: boolean;
+    account_status: AccountStatus;
+}
+
+export interface LoginUser {
+    person: {
+        person_id: number;
+        email: string;
+        name: string;
+        github: string;
+    };
+    login_user_id: number;
+    is_coach: boolean;
+    is_admin: boolean;
+    account_status: AccountStatus;
+}
+
 export interface OsocEdition {
     osoc_id: number;
     year: number;
@@ -236,11 +263,10 @@ export interface ClientToServerEvents {
 
 export interface ProjectPerson {
     email: string;
-    firstname: string;
     github: string;
     github_id: string;
-    lastname: string;
     person_id: number;
+    name: string;
 }
 
 export interface ProjectLoginUser {
@@ -266,7 +292,7 @@ export interface Contract {
     contract_id: number;
     contract_status: string; // TODO: Make ENUM for this
     project_role: ProjectRole;
-    students: [Student];
+    student: Student;
 }
 
 export interface Project {
@@ -278,6 +304,7 @@ export interface Project {
     partner: string;
     positions: number;
     start_date: string;
+    description: string | null;
     contracts: [Contract];
     roles: [
         {
@@ -300,6 +327,15 @@ export interface StudentFilterParams {
     selectedRoles: Set<string>;
 }
 
+export interface ProjectFilterParams {
+    nameFilter: string;
+    clientFilter: string;
+    fullyAssigned: boolean;
+    osocYear: string;
+    nameSort: Sort;
+    clientSort: Sort;
+}
+
 export interface UserFilterParams {
     nameFilter: string;
     emailFilter: string;
@@ -314,9 +350,6 @@ export interface OsocFilterParams {
     yearFilter: string;
     yearSort: Sort;
 }
-
-/** The amount of items on a single page */
-export const pageSize = 10;
 
 /**
  * Interface for pagination

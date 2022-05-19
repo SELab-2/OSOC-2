@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import styles from "../../styles/login.module.scss";
+import styles from "./login.module.scss";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 import { SyntheticEvent, useContext, useEffect, useState } from "react";

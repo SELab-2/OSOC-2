@@ -183,13 +183,17 @@ async function parsePaginationRequest(
 ): Promise<Requests.PaginableRequest> {
     return parseKeyRequest(req).then((parsed) => {
         let currentPage = 0;
+        let pageSize = config.global.pageSize;
         if ("currentPage" in req.body) {
             currentPage = Number(req.body.currentPage);
+        }
+        if ("pageSize" in req.body && !isNaN(Number(req.body.pageSize))) {
+            pageSize = Number(req.body.pageSize);
         }
         return {
             ...parsed,
             currentPage: currentPage,
-            pageSize: config.global.pageSize,
+            pageSize: pageSize,
         };
     });
 }
@@ -618,7 +622,16 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId", "roles"],
+        [
+            "name",
+            "partner",
+            "start",
+            "end",
+            "osocId",
+            "roles",
+            "description",
+            "coaches",
+        ],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -628,8 +641,9 @@ export async function parseNewProjectRequest(
             start: req.body.start,
             end: req.body.end,
             osocId: Number(req.body.osocId),
-            positions: Number(req.body.positions),
             roles: req.body.roles,
+            description: req.body.description,
+            coaches: req.body.coaches,
         }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
@@ -648,10 +662,10 @@ export async function parseUpdateProjectRequest(
         "partner",
         "start",
         "end",
-        "positions",
-        "modifyRoles",
-        "deleteRoles",
+        "roles",
         "description",
+        "addCoaches",
+        "removeCoaches",
     ];
 
     return hasFields(req, [], types.id).then(async () => {
@@ -664,13 +678,16 @@ export async function parseUpdateProjectRequest(
             partner: maybe<string>(req.body, "partner"),
             start: maybe<Date>(req.body, "start"),
             end: maybe<Date>(req.body, "end"),
-            positions:
-                maybe(req.body, "positions") == undefined
-                    ? undefined
-                    : Number(req.body.positions),
-            modifyRoles: maybe<object>(req.body, "modifyRoles"),
-            deleteRoles: maybe<object>(req.body, "deleteRoles"),
+            roles: maybe<{ roles: [{ name: string; positions: number }] }>(
+                req.body,
+                "roles"
+            ),
             description: maybe<string>(req.body, "description"),
+            addCoaches: maybe<{ coaches: [number] }>(req.body, "addCoaches"),
+            removeCoaches: maybe<{ coaches: [number] }>(
+                req.body,
+                "removeCoaches"
+            ),
         }).then(idIsNumber);
     });
 }
@@ -916,11 +933,11 @@ export async function parseRemoveAssigneeRequest(
 
 export async function parseRemoveCoachRequest(
     req: express.Request
-): Promise<Requests.RmDraftCoach> {
-    return hasFields(req, ["project_user"], types.id).then(() =>
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
-            projectUserId: req.body.project_user,
+            loginUserId: Number(req.body.loginUserId),
             id: Number(req.params.id),
         }).then(idIsNumber)
     );
@@ -928,11 +945,11 @@ export async function parseRemoveCoachRequest(
 
 export async function parseAssignCoachRequest(
     req: express.Request
-): Promise<Requests.DraftCoach> {
-    return hasFields(req, ["login_user"], types.id).then(() =>
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
-            loginUserId: req.body.login_user,
+            loginUserId: Number(req.body.loginUserId),
             id: Number(req.params.id),
         }).then(idIsNumber)
     );
