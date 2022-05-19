@@ -804,7 +804,7 @@ export async function jsonToJobApplication(
     const educationDuration = await getEducationDuration(form);
     const educationYear = await getEducationYear(form);
     const educationInstitute = await getEducationUniversity(form);
-    const emailStatus = "NONE";
+    const emailStatus = "APPLIED";
     let createdAt = new Date(Date.now()).toString();
     if (form.createdAt != undefined) {
         createdAt = form.createdAt;

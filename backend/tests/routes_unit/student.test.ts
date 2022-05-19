@@ -128,7 +128,7 @@ const filter_student = {
                     edu_duration: 5,
                     edu_year: "5",
                     edu_institute: "UGent",
-                    email_status: email_status_enum.DRAFT,
+                    email_status: email_status_enum.APPLIED,
                     created_at: new Date("2022-03-14 23:10:00+01"),
                     evaluation: [
                         {
@@ -249,7 +249,7 @@ const latestJobApplication = [
         edu_duration: 5,
         edu_year: "5",
         edu_institute: "UGent",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("2022-03-14 23:10:00+01"),
         attachment: [
             {
@@ -292,7 +292,7 @@ const latestJobApplication = [
         edu_duration: 5,
         edu_year: "5",
         edu_institute: "UGent",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("2022-03-14 23:10:00+01"),
         attachment: [
             {
@@ -335,7 +335,7 @@ const latestJobApplication = [
         edu_duration: 5,
         edu_year: "5",
         edu_institute: "UGent",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("2022-03-14 23:10:00+01"),
         attachment: [
             {
@@ -722,7 +722,7 @@ test("Can get a student by id", async () => {
             edu_level: "Master",
             edu_year: "5",
             edus: ["Edu0"],
-            email_status: "DRAFT",
+            email_status: "APPLIED",
             fun_fact: "Funfact0",
             job_application_id: 0,
             job_application_skill: [
@@ -863,7 +863,7 @@ test("Role wasn't found in getStudent", async () => {
         edu_level: "Master",
         edu_year: "5",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [],
@@ -921,7 +921,7 @@ test("Year is defined in the getStudent request and skill language is invalid", 
         edu_level: "Master",
         edu_year: "5",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [
@@ -1167,7 +1167,7 @@ test("Can filter students", async () => {
                     edu_level: "Master",
                     edu_year: "5",
                     edus: ["Edu0"],
-                    email_status: "DRAFT",
+                    email_status: "APPLIED",
                     fun_fact: "Funfact0",
                     job_application_id: 0,
                     job_application_skill: [
@@ -1219,7 +1219,7 @@ test("Can filter students", async () => {
                             edu_level: "Master",
                             edu_year: "5",
                             edus: ["Edu0"],
-                            email_status: "DRAFT",
+                            email_status: "APPLIED",
                             evaluation: [
                                 {
                                     decision: "YES",
@@ -1353,7 +1353,7 @@ test("Role wasn't found in filterStudents", async () => {
         edu_duration: 5,
         edu_year: "5",
         edu_institute: "UGent",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("2022-03-14 23:10:00+01"),
         attachment: [
             {
@@ -1421,7 +1421,7 @@ test("Skill language is invalid for filterStudents", async () => {
         edu_duration: 5,
         edu_year: "5",
         edu_institute: "UGent",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("2022-03-14 23:10:00+01"),
         attachment: [
             {
@@ -1604,7 +1604,7 @@ test("Update evaluation in createStudentSuggestion", async () => {
         edu_level: "Master",
         edu_year: "4",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [],
@@ -1684,7 +1684,7 @@ test("New evaluation in createStudentSuggestion", async () => {
         edu_level: "Master",
         edu_year: "5",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [],
@@ -1960,7 +1960,7 @@ test("Evaluations null in getStudent", async () => {
         edu_level: "Master",
         edu_year: "5",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [],
@@ -1999,7 +1999,7 @@ test("Evaluations null in getStudent", async () => {
             edu_level: "Master",
             edu_year: "5",
             edus: ["Edu0"],
-            email_status: "DRAFT",
+            email_status: "APPLIED",
             fun_fact: "Funfact0",
             job_application_id: 0,
             job_application_skill: [],
@@ -2089,7 +2089,7 @@ test("Evaluations null in filterStudents", async () => {
         edu_level: "Master",
         edu_year: "2",
         edus: ["Edu0"],
-        email_status: "DRAFT",
+        email_status: "APPLIED",
         fun_fact: "Funfact0",
         job_application_id: 0,
         job_application_skill: [],
@@ -2161,7 +2161,7 @@ test("Evaluations null in filterStudents", async () => {
                     edu_level: "Master",
                     edu_year: "2",
                     edus: ["Edu0"],
-                    email_status: "DRAFT",
+                    email_status: "APPLIED",
                     fun_fact: "Funfact0",
                     job_application_id: 0,
                     job_application_skill: [],

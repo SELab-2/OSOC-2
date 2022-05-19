@@ -48,12 +48,13 @@ describe("student filter tests", () => {
         expect(
             screen.getByTestId("rolesSelectedFilterDisplay")
         ).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterDisplay")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterNone")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterDraft")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterSent")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterFailed")).toBeInTheDocument();
-        expect(screen.getByTestId("emailFilterScheduled")).toBeInTheDocument();
+        expect(screen.getByTestId("statusFilterDisplay")).toBeInTheDocument();
+        expect(screen.getByTestId("statusApplied")).toBeInTheDocument();
+        expect(screen.getByTestId("statusApproved")).toBeInTheDocument();
+        expect(screen.getByTestId("statusAwaiting")).toBeInTheDocument();
+        expect(screen.getByTestId("statusConfirmed")).toBeInTheDocument();
+        expect(screen.getByTestId("statusDeclined")).toBeInTheDocument();
+        expect(screen.getByTestId("statusRejected")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterYes")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterMaybe")).toBeInTheDocument();
         expect(screen.getByTestId("emailFilterNo")).toBeInTheDocument();
@@ -221,40 +222,35 @@ describe("student filter tests", () => {
         valueDisplay: string
     ) => {
         await testButtonHelperFunction1(button, valueFilter);
-        expect(screen.getByTestId("emailFilterDisplay").textContent).toBe(
+        expect(screen.getByTestId("statusFilterDisplay").textContent).toBe(
             valueDisplay
         );
         await testButtonHelperFunction2(button);
-        expect(screen.getByTestId("emailFilterDisplay").textContent).toBe(
-            "No email selected"
+        expect(screen.getByTestId("statusFilterDisplay").textContent).toBe(
+            "No status selected"
         );
     };
 
-    test("test email filters", async () => {
+    test("test status filters", async () => {
         await testEmailFilters(
-            "emailFilterNone",
-            "emailStatusFilter=NONE",
-            "NONE"
+            "statusApplied",
+            "emailStatusFilter=APPLIED",
+            "APPLIED"
         );
         await testEmailFilters(
-            "emailFilterDraft",
-            "emailStatusFilter=DRAFT",
-            "DRAFT"
+            "statusApproved",
+            "emailStatusFilter=APPROVED",
+            "APPROVED"
         );
         await testEmailFilters(
-            "emailFilterSent",
-            "emailStatusFilter=SENT",
-            "SENT"
+            "statusAwaiting",
+            "emailStatusFilter=AWAITING_PROJECT",
+            "AWAITING_PROJECT"
         );
         await testEmailFilters(
-            "emailFilterFailed",
-            "emailStatusFilter=FAILED",
-            "FAILED"
-        );
-        await testEmailFilters(
-            "emailFilterScheduled",
-            "emailStatusFilter=SCHEDULED",
-            "SCHEDULED"
+            "statusConfirmed",
+            "emailStatusFilter=CONTRACT_CONFIRMED",
+            "CONTRACT_CONFIRMED"
         );
     });
 

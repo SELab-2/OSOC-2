@@ -21,11 +21,12 @@ export enum FilterBoolean {
 
 export enum EmailStatus {
     NONE = "NONE",
-    DRAFT = "DRAFT",
-    SENT = "SENT",
-    FAILED = "FAILED",
-    SCHEDULED = "SCHEDULED",
-    EMPTY = "",
+    APPLIED = "APPLIED",
+    APPROVED = "APPROVED",
+    AWAITING_PROJECT = "AWAITING_PROJECT",
+    CONTRACT_CONFIRMED = "CONTRACT_CONFIRMED",
+    CONTRACT_DECLINED = "CONTRACT_DECLINED",
+    REJECTED = "REJECTED",
 }
 
 export enum StudentStatus {
