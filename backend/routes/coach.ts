@@ -35,6 +35,7 @@ export async function listCoaches(
                         coach: val.is_coach,
                         admin: val.is_admin,
                         activated: val.account_status as string,
+                        login_user_id: val.login_user_id,
                     }))
                 )
                 .then((obj) =>
