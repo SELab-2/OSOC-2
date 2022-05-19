@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition } from "../../types";
+import { OsocEdition, LoginUser } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 
@@ -28,6 +28,7 @@ const Create: NextPage = () => {
     const [osocEdition, setOsocEdition] = useState<string>("");
     const [startDate, setStartDate] = useState<string>(formatDate());
     const [endDate, setEndDate] = useState<string>(formatDate());
+    const [description, setDescription] = useState<string>("");
     const [rolePositions, setRolePositions] = useState<{ [K: string]: string }>(
         {}
     );
@@ -35,6 +36,8 @@ const Create: NextPage = () => {
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
     const [osocs, setOsocs] = useState<OsocEdition[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [coaches, setCoaches] = useState<LoginUser[]>([]);
 
     const updateNewRolePositions = (positions: string) => {
         if (Number(positions) < 0) return; // Only allow positive values
@@ -87,9 +90,31 @@ const Create: NextPage = () => {
         }
     };
 
+    const fetchCoaches = async () => {
+        if (getSession != undefined) {
+            getSession().then(async ({ sessionKey }) => {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/coach/all`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `auth/osoc2 ${sessionKey}`,
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .catch((error) => console.log(error));
+                if (response !== undefined && response.success) {
+                    setCoaches(response.data);
+                }
+            });
+        }
+    };
+
     useEffect(() => {
         fetchRoles().then();
         fetchOsocs().then();
+        fetchCoaches().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -261,6 +286,18 @@ const Create: NextPage = () => {
                     placeholder="partner..."
                     value={partner}
                     onChange={(e) => setPartner(e.target.value)}
+                />
+            </label>
+
+            <label>
+                <h1>Short description</h1>
+                <input
+                    className="input"
+                    type="text"
+                    name="description"
+                    placeholder="description..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                 />
             </label>
 
