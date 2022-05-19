@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS osoc(
 
 
 /* enum used in job appliction for the email status */
-CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE', 'DRAFT');
+CREATE TYPE email_status_enum AS ENUM ('APPLIED', 'AWAITING PROJECT', 'APPROVED', 'CONTRACT CONFIRMED', 'CONTRACT DECLINED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS job_application (
     job_application_id        SERIAL               PRIMARY KEY,

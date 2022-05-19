@@ -196,7 +196,7 @@ export const Students: React.FC<{
         if (params.statusFilter !== StudentStatus.EMPTY) {
             filters.push(`statusFilter=${params.statusFilter}`);
         }
-        if (params.emailStatus !== EmailStatus.EMPTY) {
+        if (params.emailStatus !== EmailStatus.NONE) {
             filters.push(`emailStatusFilter=${params.emailStatus}`);
         }
 
