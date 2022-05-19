@@ -183,13 +183,17 @@ async function parsePaginationRequest(
 ): Promise<Requests.PaginableRequest> {
     return parseKeyRequest(req).then((parsed) => {
         let currentPage = 0;
+        let pageSize = config.global.pageSize;
         if ("currentPage" in req.body) {
             currentPage = Number(req.body.currentPage);
+        }
+        if ("pageSize" in req.body && !isNaN(Number(req.body.pageSize))) {
+            pageSize = Number(req.body.pageSize);
         }
         return {
             ...parsed,
             currentPage: currentPage,
-            pageSize: config.global.pageSize,
+            pageSize: pageSize,
         };
     });
 }
@@ -978,7 +982,6 @@ export async function parseAcceptNewUserRequest(
 export async function parseNewOsocEditionRequest(
     req: express.Request
 ): Promise<Requests.OsocEdition> {
-    console.log(parseInt(req.body.year));
     return hasFields(req, ["year"], types.neither).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),

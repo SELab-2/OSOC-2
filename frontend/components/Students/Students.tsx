@@ -40,7 +40,8 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         page: 0,
         count: 0,
     });
-
+    // 10 students per page
+    const pageSize = 10;
     const [loading, isLoading] = useState(false);
 
     /**
@@ -223,6 +224,7 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
         }
 
         filters.push(`currentPage=${page}`);
+        filters.push(`pageSize=${pageSize}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
 
@@ -250,8 +252,10 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                 console.log(err);
                 return { success: false };
             });
-        setFilteredStudents(response.data);
-        setPagination(response.pagination);
+        if (response.data !== undefined && response.pagination !== undefined) {
+            setFilteredStudents(response.data);
+            setPagination(response.pagination);
+        }
         isLoading(false);
     };
 
@@ -304,7 +308,11 @@ export const Students: React.FC<{ alwaysLimited: boolean }> = ({
                     </div>
                     <div className={styles.bottomShadowCaster} />
                 </div>
-                <Paginator pagination={pagination} navigator={navigator} />
+                <Paginator
+                    pageSize={pageSize}
+                    pagination={pagination}
+                    navigator={navigator}
+                />
             </div>
             {selectedStudent !== -1 &&
             students[selectedStudent] !== undefined ? (

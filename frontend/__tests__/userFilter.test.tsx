@@ -50,7 +50,7 @@ describe("user filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${sortReqVal}=asc&currentPage=0`
+            `undefined/user/filter?${sortReqVal}=asc&currentPage=0&pageSize=20`
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -58,7 +58,7 @@ describe("user filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${sortReqVal}=desc&currentPage=0`
+            `undefined/user/filter?${sortReqVal}=desc&currentPage=0&pageSize=20`
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -66,7 +66,7 @@ describe("user filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?currentPage=0`
+            `undefined/user/filter?currentPage=0&pageSize=20`
         );
 
         const test_val = "testvalue";
@@ -77,7 +77,7 @@ describe("user filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${inputReqVal}=${test_val}&currentPage=0`
+            `undefined/user/filter?${inputReqVal}=${test_val}&currentPage=0&pageSize=20`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId(input));
@@ -86,7 +86,7 @@ describe("user filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?currentPage=0`
+            `undefined/user/filter?currentPage=0&pageSize=20`
         );
     };
 
@@ -115,7 +115,7 @@ describe("user filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?${valueFilter}&currentPage=0`
+            `undefined/user/filter?${valueFilter}&currentPage=0&pageSize=20`
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -123,7 +123,7 @@ describe("user filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/user/filter?currentPage=0`
+            `undefined/user/filter?currentPage=0&pageSize=20`
         );
     };
     test("test buttons presses", async () => {

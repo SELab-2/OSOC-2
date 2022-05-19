@@ -69,7 +69,7 @@ describe("student filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?nameSort=asc&currentPage=0"
+            "undefined/student/filter?nameSort=asc&currentPage=0&pageSize=10"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -77,7 +77,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?nameSort=desc&currentPage=0"
+            "undefined/student/filter?nameSort=desc&currentPage=0&pageSize=10"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -85,7 +85,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?currentPage=0"
+            "undefined/student/filter?currentPage=0&pageSize=10"
         );
         const name_text = "first name";
         await act(async () => {
@@ -98,7 +98,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?nameFilter=${name_text}&currentPage=0`
+            `undefined/student/filter?nameFilter=${name_text}&currentPage=0&pageSize=10`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId("firstNameInput"));
@@ -107,7 +107,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?currentPage=0`
+            `undefined/student/filter?currentPage=0&pageSize=10`
         );
     });
 
@@ -119,7 +119,7 @@ describe("student filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?emailSort=asc&currentPage=0"
+            "undefined/student/filter?emailSort=asc&currentPage=0&pageSize=10"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -127,7 +127,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?emailSort=desc&currentPage=0"
+            "undefined/student/filter?emailSort=desc&currentPage=0&pageSize=10"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -135,7 +135,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/student/filter?currentPage=0"
+            "undefined/student/filter?currentPage=0&pageSize=10"
         );
         const name_text = "email";
         await act(async () => {
@@ -145,7 +145,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?emailFilter=${name_text}&currentPage=0`
+            `undefined/student/filter?emailFilter=${name_text}&currentPage=0&pageSize=10`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId("emailInput"));
@@ -154,7 +154,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?currentPage=0`
+            `undefined/student/filter?currentPage=0&pageSize=10`
         );
     });
 
@@ -167,7 +167,7 @@ describe("student filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?osocYear=${edition}&currentPage=0`
+            `undefined/student/filter?osocYear=${edition}&currentPage=0&pageSize=10`
         );
         await act(async () => {
             await fireEvent.clear(screen.getByTestId("osocYearInput"));
@@ -176,7 +176,7 @@ describe("student filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?currentPage=0`
+            `undefined/student/filter?currentPage=0&pageSize=10`
         );
     });
 
@@ -190,7 +190,7 @@ describe("student filter tests", () => {
         });
         const lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?${valueFilter}&currentPage=0`
+            `undefined/student/filter?${valueFilter}&currentPage=0&pageSize=10`
         );
     };
 
@@ -201,7 +201,7 @@ describe("student filter tests", () => {
         });
         const lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?currentPage=0`
+            `undefined/student/filter?currentPage=0&pageSize=10`
         );
     };
     const testButtonsFunction = async (button: string, valueFilter: string) => {
@@ -268,7 +268,7 @@ describe("student filter tests", () => {
         ).toBe(`1 role selected`);
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?roleFilter=${roles[0].name}&currentPage=0`
+            `undefined/student/filter?roleFilter=${roles[0].name}&currentPage=0&pageSize=10`
         );
         await act(async () => {
             screen.getByTestId(`testRoleItem=${roles[1].name}`).click();
@@ -280,7 +280,7 @@ describe("student filter tests", () => {
         ).toBe(`2 roles selected`);
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            `undefined/student/filter?roleFilter=${roles[0].name},${roles[1].name}&currentPage=0`
+            `undefined/student/filter?roleFilter=${roles[0].name},${roles[1].name}&currentPage=0&pageSize=10`
         );
     });
 });

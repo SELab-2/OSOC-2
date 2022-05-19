@@ -313,9 +313,6 @@ export interface OsocFilterParams {
     yearSort: Sort;
 }
 
-/** The amount of items on a single page */
-export const pageSize = 25;
-
 /**
  * Interface for pagination
  */

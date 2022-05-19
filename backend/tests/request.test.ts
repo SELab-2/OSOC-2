@@ -123,14 +123,22 @@ test("Can parse Key-ID requests", () => {
 
 test("Can parse pagination requests", () => {
     const valid: express.Request = getMockReq();
+    const valid_invpgsz: express.Request = getMockReq();
+    const valid_pgsz: express.Request = getMockReq();
     const invalid: express.Request = getMockReq();
     const wrongprop: express.Request = getMockReq();
     const validPg: express.Request = getMockReq();
 
     setSessionKey(valid, "hello I am a key");
     setSessionKey(validPg, "hello I am a key");
+    setSessionKey(valid_invpgsz, "hello I am a key");
+    setSessionKey(valid_pgsz, "hello I am a key");
     wrongprop.body.key = "hello I am a key as well";
     validPg.body.currentPage = 5;
+    valid_invpgsz.body.currentPage = 5;
+    valid_pgsz.body.currentPage = 5;
+    valid_invpgsz.body.pageSize = "String";
+    valid_pgsz.body.pageSize = 5;
     const size = config.global.pageSize;
 
     const calls = [
@@ -155,13 +163,31 @@ test("Can parse pagination requests", () => {
         })
     );
 
+    const paged_invpgsz = calls.map((call) =>
+        expect(call(valid_invpgsz)).resolves.toStrictEqual({
+            sessionkey: "hello I am a key",
+            currentPage: 5,
+            pageSize: size,
+        })
+    );
+
+    const paged_pgsz = calls.map((call) =>
+        expect(call(valid_pgsz)).resolves.toStrictEqual({
+            sessionkey: "hello I am a key",
+            currentPage: 5,
+            pageSize: 5,
+        })
+    );
+
     const failures = calls
         .flatMap((call) => [call(invalid), call(wrongprop)])
         .map((sub) =>
             expect(sub).rejects.toStrictEqual(errors.cookUnauthenticated())
         );
 
-    return Promise.all([successes, paged, failures].flat());
+    return Promise.all(
+        [successes, paged, failures, paged_invpgsz, paged_pgsz].flat()
+    );
 });
 
 test("Can parse update login user requests", () => {
