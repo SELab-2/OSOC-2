@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition, LoginUser } from "../../types";
+import { OsocEdition, Coach } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 
@@ -36,8 +36,9 @@ const Create: NextPage = () => {
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
     const [osocs, setOsocs] = useState<OsocEdition[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [coaches, setCoaches] = useState<LoginUser[]>([]);
+    const [coaches, setCoaches] = useState<Coach[]>([]);
+    const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
+    const [coachesActive, setCoachesActive] = useState<boolean>(false);
 
     const updateNewRolePositions = (positions: string) => {
         if (Number(positions) < 0) return; // Only allow positive values
@@ -139,6 +140,8 @@ const Create: NextPage = () => {
                                 osocId: getOsocId(osocEdition),
                                 positions: getTotalPositions(),
                                 roles: { roles: getRoleList() },
+                                description: description,
+                                coaches: { coaches: selectedCoaches },
                             }),
                         }
                     )
@@ -226,6 +229,19 @@ const Create: NextPage = () => {
                 }
             });
         }
+    };
+
+    const selectCoach = (id: number) => {
+        console.log(id);
+        console.log(selectedCoaches);
+        if (selectedCoaches.includes(id)) {
+            const index = selectedCoaches.indexOf(id);
+            selectedCoaches.splice(index, 1);
+        } else {
+            selectedCoaches.push(id);
+        }
+        console.log(selectedCoaches);
+        setSelectedCoaches([...selectedCoaches]);
     };
 
     return (
@@ -334,6 +350,60 @@ const Create: NextPage = () => {
                     onChange={(e) => setEndDate(e.target.value)}
                 />
             </label>
+
+            <div className={styles.rolesHeader}>
+                <p>Add coaches to the project: </p>
+                <div className={`dropdown ${coachesActive ? "is-active" : ""}`}>
+                    <div
+                        data-testid={"coachesSelectedFilterDisplay"}
+                        className={`dropdown-trigger ${
+                            coachesActive || selectedCoaches.length > 0
+                                ? styles.active
+                                : styles.inactive
+                        } ${styles.dropdownTrigger}`}
+                        onClick={() => setCoachesActive(!coachesActive)}
+                    >
+                        {selectedCoaches.length > 0
+                            ? selectedCoaches.length === 1
+                                ? `${selectedCoaches.length} coach selected`
+                                : `${selectedCoaches.length} coaches selected`
+                            : "No coaches selected"}
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${coachesActive ? styles.up : ""} ${
+                                    styles.triangle
+                                }`}
+                            />
+                        </div>
+                    </div>
+                    <div className="dropdown-menu">
+                        <div className="dropdown-content">
+                            {coaches !== undefined
+                                ? coaches.map((coach) => (
+                                      <div
+                                          data-testid={`testRoleItem=${coach.person_data.name}`}
+                                          className={`${
+                                              styles.dropdownItem
+                                          } dropdown-item ${
+                                              selectedCoaches.includes(
+                                                  coach.login_user_id
+                                              )
+                                                  ? styles.selected
+                                                  : ""
+                                          }`}
+                                          key={coach.login_user_id}
+                                          onClick={() =>
+                                              selectCoach(coach.login_user_id)
+                                          }
+                                      >
+                                          {coach.person_data.name}
+                                      </div>
+                                  ))
+                                : null}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div className={styles.rolesHeader}>
                 <p>Change the amount of positions for the necessary roles:</p>

@@ -197,6 +197,32 @@ export interface LoginUser {
     account_status: AccountStatus;
 }
 
+export interface Coach {
+    person_data: {
+        person_id: number;
+        email: string;
+        name: string;
+        github: string;
+    };
+    login_user_id: number;
+    is_coach: boolean;
+    is_admin: boolean;
+    account_status: AccountStatus;
+}
+
+export interface LoginUser {
+    person: {
+        person_id: number;
+        email: string;
+        name: string;
+        github: string;
+    };
+    login_user_id: number;
+    is_coach: boolean;
+    is_admin: boolean;
+    account_status: AccountStatus;
+}
+
 export interface OsocEdition {
     osoc_id: number;
     year: number;
