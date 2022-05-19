@@ -220,35 +220,35 @@ describe("student filter tests", () => {
         valueDisplay: string
     ) => {
         await testButtonHelperFunction1(button, valueFilter);
-        expect(screen.getByTestId("emailFilterDisplay").textContent).toBe(
+        expect(screen.getByTestId("statusFilterDisplay").textContent).toBe(
             valueDisplay
         );
         await testButtonHelperFunction2(button);
-        expect(screen.getByTestId("emailFilterDisplay").textContent).toBe(
-            "No email selected"
+        expect(screen.getByTestId("statusFilterDisplay").textContent).toBe(
+            "No status selected"
         );
     };
 
-    test("test email filters", async () => {
+    test("test status filters", async () => {
         await testEmailFilters(
-            "emailFilterDraft",
-            "emailStatusFilter=DRAFT",
+            "statusApplied",
+            "emailStatusFilter=APPLIED",
             "APPLIED"
         );
         await testEmailFilters(
-            "emailFilterSent",
-            "emailStatusFilter=SENT",
-            "SENT"
+            "statusApproved",
+            "emailStatusFilter=APPROVED",
+            "APPROVED"
         );
         await testEmailFilters(
-            "emailFilterFailed",
-            "emailStatusFilter=FAILED",
-            "FAILED"
+            "statusAwaiting",
+            "emailStatusFilter=AWAITING_PROJECT",
+            "AWAITING_PROJECT"
         );
         await testEmailFilters(
-            "emailFilterScheduled",
-            "emailStatusFilter=SCHEDULED",
-            "SCHEDULED"
+            "statusConfirmed",
+            "emailStatusFilter=CONTRACT_CONFIRMED",
+            "CONTRACT_CONFIRMED"
         );
     });
 

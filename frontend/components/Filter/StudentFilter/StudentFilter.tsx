@@ -374,7 +374,7 @@ export const StudentFilter: React.FC<{
                     }`}
                 >
                     <div
-                        data-testid={"emailFilterDisplay"}
+                        data-testid={"statusFilterDisplay"}
                         className={`dropdown-trigger ${
                             emailStatusActive ||
                             emailStatus !== EmailStatus.NONE
@@ -397,7 +397,7 @@ export const StudentFilter: React.FC<{
                     <div className="dropdown-menu">
                         <div className="dropdown-content">
                             <div
-                                data-testid={"emailFilterDraft"}
+                                data-testid={"statusApplied"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -411,6 +411,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.APPLIED}
                             </div>
                             <div
+                                data-testid={"statusApproved"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -424,7 +425,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.APPROVED}
                             </div>
                             <div
-                                data-testid={"emailFilterSent"}
+                                data-testid={"statusAwaiting"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -438,7 +439,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.AWAITING_PROJECT}
                             </div>
                             <div
-                                data-testid={"emailFilterFailed"}
+                                data-testid={"statusConfirmed"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -452,7 +453,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.CONTRACT_CONFIRMED}
                             </div>
                             <div
-                                data-testid={"emailFilterScheduled"}
+                                data-testid={"statusDeclined"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
@@ -466,6 +467,7 @@ export const StudentFilter: React.FC<{
                                 {EmailStatus.CONTRACT_DECLINED}
                             </div>
                             <div
+                                data-testid={"statusRejected"}
                                 className={`${
                                     styles.dropdownItem
                                 } dropdown-item 
