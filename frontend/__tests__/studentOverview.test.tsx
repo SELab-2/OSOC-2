@@ -148,9 +148,8 @@ describe("student filter tests", () => {
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
             `undefined/student/${student.student.student_id}/${query}`
         );
-        console.log(fetchMock.mock.calls);
         expect(fetchMock.mock.calls[lastLength][1]?.body).toBe(
-            `{"id":${student.student.student_id},"${mode}":"${decision}","reason":"${message}"}`
+            `{"id":${student.student.student_id},"${mode}":"${decision}","reason":"${message}","job_application_id":-1}`
         );
         fetchMock.mockClear();
     };
