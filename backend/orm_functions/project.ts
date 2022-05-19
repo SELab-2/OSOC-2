@@ -342,10 +342,6 @@ export async function filterProjects(
         },
     });
 
-    // if (filtered_projects.length === 0) {
-    //     return filtered_projects;
-    // }
-
     if (
         fullyAssignedFilter != undefined &&
         fullyAssignedFilter &&

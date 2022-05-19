@@ -5,6 +5,7 @@ import {
     email_status_enum,
     type_enum,
     person,
+    project_user,
 } from "@prisma/client";
 import express from "express";
 import { FilterSort } from "./orm_functions/orm_types";
@@ -1032,6 +1033,8 @@ export namespace Responses {
         data: InternalTypes.Role[];
     }
 
+    export interface ProjectUser extends project_user {}
+
     /**
      *
      */
@@ -1353,7 +1356,7 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        roles: object;
+        roles: { roles: { name: string; positions: number }[] };
     }
 
     export interface ModProject extends IdRequest {
@@ -1362,8 +1365,8 @@ export namespace Requests {
         start?: Date;
         end?: Date;
         osocId?: number;
-        addRoles?: object;
-        deleteRoles?: object;
+        modifyRoles?: { roles: { id: number; positions: number }[] };
+        deleteRoles?: { roles: number[] };
         description?: string;
     }
 

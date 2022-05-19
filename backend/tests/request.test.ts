@@ -1044,7 +1044,6 @@ test("Can parse update project request", () => {
         description: "Project description",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
         modifyRoles: {
             roles: [
                 {
@@ -1067,14 +1066,12 @@ test("Can parse update project request", () => {
         partner: "Simic Combine",
         description: "Project description",
         start: Date.now(),
-        positions: 420,
     };
     const d4: T.Anything = {
         name: "Experiment One",
         partner: "Simic Combine",
         start: Date.now(),
         end: Date.now(),
-        positions: 69,
     };
     const d5: T.Anything = {
         name: "Experiment One",
@@ -1134,7 +1131,6 @@ test("Can parse update project request", () => {
     d4.id = id;
     d5.id = id;
     d5.sessionkey = key;
-    d5.positions = undefined;
 
     const p1: Promise<void> = expect(
         Rq.parseUpdateProjectRequest(req1)
