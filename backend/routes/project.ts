@@ -9,7 +9,7 @@ import * as ormPU from "../orm_functions/project_user";
 import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
-import { ApiError, InternalTypes, Responses, StringDict } from "../types";
+import { ApiError, Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 
@@ -609,59 +609,6 @@ export async function unAssignStudent(
         });
 }
 
-export async function getProjectConflicts(
-    req: express.Request
-): Promise<Responses.ConflictList> {
-    // not implementing pagination as we don't expect the number of conflicts
-    // to be > 50 (2 * page size); which is kind of a minimum...
-    return rq
-        .parseProjectConflictsRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () => {
-            return ormOsoc
-                .getNewestOsoc()
-                .then((osoc) => util.getOrReject(osoc))
-                .then((osoc) =>
-                    ormCtr.sortedContractsByOsocEdition(osoc.osoc_id)
-                )
-                .then((contracts) => {
-                    if (contracts.length == 0 || contracts.length == 1)
-                        return Promise.resolve([]);
-                    const res: StringDict<typeof contracts> = {};
-                    let latestid = contracts[0].student_id;
-                    for (let i = 1; i < contracts.length; i++) {
-                        if (contracts[i].student_id == latestid) {
-                            const idStr: string =
-                                contracts[i].student_id?.toString() || "";
-                            if (!(idStr in res)) {
-                                res[idStr] = [contracts[i - 1], contracts[i]];
-                            } else {
-                                res[idStr].push(contracts[i]);
-                            }
-                        }
-                        latestid = contracts[i].student_id;
-                    }
-
-                    const arr: InternalTypes.Conflict[] = [];
-                    for (const idStr in res) {
-                        arr.push({
-                            student: Number(idStr),
-                            projects: res[idStr].map((p) => ({
-                                id: p.project_role.project.project_id,
-                                name: p.project_role.project.name,
-                            })),
-                        });
-                    }
-                    return Promise.resolve(arr);
-                })
-                .then((arr) =>
-                    Promise.resolve({
-                        data: arr,
-                    })
-                );
-        });
-}
-
 export async function assignStudent(
     req: express.Request
 ): Promise<Responses.ModProjectStudent> {
@@ -807,8 +754,6 @@ export function getRouter(): express.Router {
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
     util.route(router, "delete", "/:id/coach", unAssignCoach);
     util.route(router, "post", "/:id/coach", assignCoach);
-
-    util.route(router, "get", "/conflicts", getProjectConflicts);
 
     // TODO add project conflicts
     util.addAllInvalidVerbs(router, [

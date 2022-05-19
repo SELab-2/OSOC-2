@@ -728,6 +728,22 @@ test("Can list all projects", async () => {
     expect(ormPUMock.getUsersFor).toHaveBeenCalledTimes(projects.length);
 });
 
+test("Can't list all projects (role failure)", async () => {
+    ormRMock.getRole.mockResolvedValue(null);
+    const req = getMockReq();
+    req.body = { sessionkey: "key" };
+
+    await expect(project.listProjects(req)).rejects.toStrictEqual(undefined);
+    expectCall(reqMock.parseProjectAllRequest, req);
+    expectCall(utilMock.checkSessionKey, req.body);
+
+    expect(ormPrMock.getAllProjects).toHaveBeenCalledTimes(1);
+    expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
+    expect(ormCMock.contractsByProject).not.toHaveBeenCalled();
+    expect(ormPUMock.getUsersFor).not.toHaveBeenCalled();
+});
+
 test("Can modify projects", async () => {
     const req = getMockReq();
 
@@ -787,6 +803,41 @@ test("Can modify projects", async () => {
     });
     expectCall(ormPrRMock.deleteProjectRole, req.body.deleteRoles.roles[0]);
     expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+});
+
+test("Can't modify projects (role failure)", async () => {
+    ormRMock.getRole.mockResolvedValue(null);
+    const req = getMockReq();
+
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        name: "project-1",
+        partner: "new-partner",
+        start: new Date(Date.now()),
+        end: new Date(Date.now() + 1000),
+        modifyRoles: { roles: [{ id: 0, positions: 18 }] },
+        deleteRoles: { roles: [] },
+        description: "The old partner sucked",
+    };
+
+    await expect(project.modProject(req)).rejects.toStrictEqual(undefined);
+    expectCall(reqMock.parseUpdateProjectRequest, req);
+    expectCall(utilMock.isAdmin, req.body);
+    expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
+    expectCall(ormPrMock.updateProject, {
+        projectId: req.body.id,
+        name: req.body.name,
+        partner: req.body.partner,
+        startDate: req.body.start,
+        endDate: req.body.end,
+        osocId: req.body.osocId,
+        description: req.body.description,
+    });
+    expect(ormRMock.getRole).toHaveBeenCalledTimes(projects.length);
+    expect(ormPrRMock.updateProjectRole).not.toHaveBeenCalled();
+    expect(ormPrRMock.deleteProjectRole).toHaveBeenCalledTimes(1);
+    expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
 });
 
 test("Can delete projects", async () => {
@@ -1123,73 +1174,6 @@ test("Can't un-assign students (no contracts)", async () => {
     expect(ormEvMock.getEvaluationByPartiesFor).not.toHaveBeenCalled();
     expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
     expect(ormCMock.removeContract).not.toHaveBeenCalled();
-});
-
-test("Can get project conflicts", async () => {
-    const req = getMockReq();
-    req.body = { sessionkey: "key" };
-
-    const result = {
-        data: [
-            {
-                student: 0,
-                projects: osocCtr
-                    .filter((x) => x.student_id == 0)
-                    .map((x) => ({
-                        id: x.project_role.project.project_id,
-                        name: x.project_role.project.name,
-                    })),
-            },
-            {
-                student: 2,
-                projects: osocCtr
-                    .filter((x) => x.student_id == 2)
-                    .map((x) => ({
-                        id: x.project_role.project.project_id,
-                        name: x.project_role.project.name,
-                    })),
-            },
-        ],
-    };
-
-    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual(
-        result
-    );
-    expectCall(reqMock.parseProjectConflictsRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
-    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
-    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
-    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
-});
-
-test("Can get project conflicts (empty)", async () => {
-    ormCMock.sortedContractsByOsocEdition.mockResolvedValue([]);
-    const req = getMockReq();
-    req.body = { sessionkey: "key" };
-
-    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual({
-        data: [],
-    });
-    expectCall(reqMock.parseProjectConflictsRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
-    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
-    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
-    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
-});
-
-test("Can get project conflicts (1 elem)", async () => {
-    ormCMock.sortedContractsByOsocEdition.mockResolvedValue([osocCtr[0]]);
-    const req = getMockReq();
-    req.body = { sessionkey: "key" };
-
-    await expect(project.getProjectConflicts(req)).resolves.toStrictEqual({
-        data: [],
-    });
-    expectCall(reqMock.parseProjectConflictsRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
-    expect(ormOMock.getNewestOsoc).toHaveBeenCalledTimes(1);
-    expectCall(utilMock.getOrReject, { osoc_id: 1, year: 2022 });
-    expectCall(ormCMock.sortedContractsByOsocEdition, 1);
 });
 
 test("Can assign students", async () => {
