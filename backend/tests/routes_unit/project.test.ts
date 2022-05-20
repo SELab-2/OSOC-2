@@ -2568,6 +2568,7 @@ test("Assign student, project year not equal to latest osoc year", async () => {
         sessionkey: "some-key",
         studentId: 0,
         role: "dev",
+        jobApplicationId: 0,
     });
 
     ormOMock.getLatestOsoc.mockResolvedValue({
@@ -2615,6 +2616,7 @@ test("Assign student, project is null", async () => {
         sessionkey: "some-key",
         studentId: 0,
         role: "dev",
+        jobApplicationId: 0,
     });
 
     ormOMock.getLatestOsoc.mockResolvedValue({

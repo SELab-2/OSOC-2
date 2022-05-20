@@ -506,6 +506,7 @@ const Change: NextPage = () => {
                             <input
                                 className="input"
                                 type="number"
+                                min={0}
                                 value={getRolePositions(role)}
                                 onChange={(e) =>
                                     changeRole(role, e.target.value)

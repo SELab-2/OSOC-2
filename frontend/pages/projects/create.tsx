@@ -154,7 +154,7 @@ const Create: NextPage = () => {
                         alert("Project successfully created!");
                         socket.emit("projectCreated");
                     } else if (notify && response !== null) {
-                        notify(response.reason, NotificationType.ERROR, 2000);
+                        notify(response.reason, NotificationType.ERROR, 5000);
                     }
                     router.push("/projects").then();
                 }

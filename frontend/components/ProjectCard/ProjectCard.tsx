@@ -8,6 +8,7 @@ import { useDrop } from "react-dnd";
 import SessionContext from "../../contexts/sessionProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { Modal } from "../Modal/Modal";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const ProjectCard: React.FC<{
     project: Project;
@@ -19,6 +20,7 @@ export const ProjectCard: React.FC<{
     const { notify } = useContext(NotificationContext);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [droppedStudent, setDroppedStudent] = useState<Student>();
+    const { socket } = useSockets();
 
     const postAssign = async (student: Student, role: string) => {
         setShowModal(false);
@@ -37,6 +39,7 @@ export const ProjectCard: React.FC<{
                 body: JSON.stringify({
                     studentId: student.student.student_id,
                     role: role,
+                    jobApplicationId: student.jobApplication.job_application_id,
                 }),
             }
         )
@@ -46,11 +49,12 @@ export const ProjectCard: React.FC<{
             updateProject();
             if (notify) {
                 notify(
-                    `Succesfully assigned ${student.student.person.name} to ${project.name}`,
+                    `Successfully assigned ${student.student.person.name} to ${project.name}`,
                     NotificationType.SUCCESS,
                     2000
                 );
             }
+            socket.emit("projectModified", project.id);
         } else if (response !== undefined && !response.success) {
             if (notify) {
                 notify(
@@ -93,11 +97,12 @@ export const ProjectCard: React.FC<{
             updateProject();
             if (notify) {
                 notify(
-                    `Succesfully removed ${contract.student.student.person.name} from ${project.name}`,
+                    `Successfully removed ${contract.student.student.person.name} from ${project.name}`,
                     NotificationType.SUCCESS,
                     2000
                 );
             }
+            socket.emit("projectModified", project.id);
         } else if (response !== undefined && !response.success) {
             if (notify) {
                 notify(

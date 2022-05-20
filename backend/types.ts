@@ -1404,6 +1404,7 @@ export namespace Requests {
     export interface Draft extends IdRequest {
         studentId: number;
         role: string;
+        jobApplicationId: number;
     }
 
     export interface Followup extends IdRequest {

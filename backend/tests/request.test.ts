@@ -1173,8 +1173,9 @@ test("Can parse draft student request", () => {
     const d1: T.Anything = {
         studentId: 486453,
         role: "the useless one",
+        jobApplicationId: 0,
     };
-    const d2: T.Anything = { studentId: 486453 };
+    const d2: T.Anything = { studentId: 486453, jobApplicationId: 0 };
     const d3: T.Anything = { studentId: 486453, role: "the lazy one" };
 
     const r1: express.Request = getMockReq();
