@@ -396,6 +396,7 @@ export async function deleteProject(
         .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
+            console.log(parsed.id);
             return ormPr
                 .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
