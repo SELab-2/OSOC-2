@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import SessionContext from "../../contexts/sessionProvider";
 import { Pagination, Project, ProjectFilterParams, Sort } from "../../types";
@@ -7,6 +7,7 @@ import styles from "./Projects.module.scss";
 import scrollStyles from "../ScrollView.module.scss";
 import { ProjectFilter } from "../Filters/ProjectFilter";
 import { Paginator } from "../Paginator/Paginator";
+import { useSockets } from "../../contexts/socketProvider";
 
 /**
  * Projects page with project filter included
@@ -14,6 +15,7 @@ import { Paginator } from "../Paginator/Paginator";
  */
 export const Projects: React.FC = () => {
     const router = useRouter();
+    const { socket } = useSockets();
     const { getSession } = useContext(SessionContext);
     const [projects, setProjects] = useState<Project[]>([]);
 
@@ -27,6 +29,41 @@ export const Projects: React.FC = () => {
     const pageSize = 5;
 
     const [loading, isLoading] = useState(false);
+
+    /**
+     * the code in the return value is executed when leaving the page. This will remove the listeners
+     */
+    useEffect(() => {
+        return () => {
+            socket.off("projectWasCreatedOrDeleted");
+            socket.off("projectWasModified");
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        // remove earlier listeners
+        socket.off("projectWasCreatedOrDeleted");
+        socket.off("projectWasModified");
+
+        // add the new listeners
+        socket.on("projectWasCreatedOrDeleted", () => {
+            if (params !== undefined) {
+                filterAutomatic(params).then();
+            }
+        });
+        socket.on("projectWasModified", (projectId: number) => {
+            if (params !== undefined) {
+                for (const project of projects) {
+                    if (project.id === projectId) {
+                        filterAutomatic(params).then();
+                        break;
+                    }
+                }
+            }
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, params, pagination]);
 
     /**
      * Called by the studentfilter to filter

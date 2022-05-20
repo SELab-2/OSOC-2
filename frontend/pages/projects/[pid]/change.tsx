@@ -5,11 +5,13 @@ import SessionContext from "../../../contexts/sessionProvider";
 import { OsocEdition, Project, Coach } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 import styles from "./change.module.scss";
+import { useSockets } from "../../../contexts/socketProvider";
 
 const Change: NextPage = () => {
     const router = useRouter();
     const { pid } = router.query; // pid is the student id
     const { getSession } = useContext(SessionContext);
+    const { socket } = useSockets();
     const originalRoles: { [K: string]: number } = {};
 
     const formatDate = (date: string) => {
@@ -235,7 +237,16 @@ const Change: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        alert("Project succesfully changed!");
+                        alert("Project successfully changed!");
+                        const pidNumber =
+                            typeof pid === "string"
+                                ? Number(pid)
+                                : pid
+                                ? Number(pid[0])
+                                : NaN;
+                        if (!isNaN(pidNumber)) {
+                            socket.emit("projectModified", pidNumber);
+                        }
                         router.push("/projects").then();
                     }
                 }
