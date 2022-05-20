@@ -2526,3 +2526,135 @@ test("Can't get free spots for project role (number of free spots is null)", asy
     ormRMock.getRole.mockReset();
     ormPrRMock.getNumberOfFreePositions.mockReset();
 });
+
+test("Can't create new projects", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    ormLUMock.getOsocYearsForLoginUser.mockResolvedValue([2022]);
+
+    ormOMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    await expect(project.createProject(req)).rejects.toBe(
+        errors.cookWrongOsocYear()
+    );
+
+    ormLUMock.getOsocYearsForLoginUser.mockReset();
+    ormOMock.getOsocById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("Assign student, project year not equal to latest osoc year", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    reqMock.parseDraftStudentRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        studentId: 0,
+        role: "dev",
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockImplementation(() => {
+        return Promise.resolve(projects2[0]);
+    });
+
+    await expect(project.assignStudent(req)).rejects.toBe(
+        errors.cookWrongOsocYear()
+    );
+
+    reqMock.parseDraftStudentRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("Assign student, project is null", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    reqMock.parseDraftStudentRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        studentId: 0,
+        role: "dev",
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockResolvedValue(null);
+
+    await expect(project.assignStudent(req)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    reqMock.parseDraftStudentRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
