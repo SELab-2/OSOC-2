@@ -2757,12 +2757,12 @@ test("Assign coach, project is null", async () => {
 
     await expect(project.assignCoach(req)).rejects.toBe(errors.cookInvalidID());
 
-    reqMock.parseRemoveAssigneeRequest.mockReset();
+    reqMock.parseAssignCoachRequest.mockReset();
     ormPrMock.getProjectById.mockReset();
     ormOMock.getLatestOsoc.mockReset();
 });
 
-test("UnAssign student, latest osoc is null", async () => {
+test("Assign coach, latest osoc is null", async () => {
     const req = getMockReq();
     const id = 0;
     req.body = {
@@ -2786,7 +2786,70 @@ test("UnAssign student, latest osoc is null", async () => {
 
     await expect(project.assignCoach(req)).rejects.toBe(errors.cookInvalidID());
 
-    reqMock.parseRemoveAssigneeRequest.mockReset();
+    reqMock.parseAssignCoachRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("UnAssign coach, project is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        loginUserId: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseRemoveCoachRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        loginUserId: 0,
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockResolvedValue(null);
+
+    await expect(project.unAssignCoach(req)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    reqMock.parseRemoveCoachRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("UnAssign coach, latest osoc is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        loginUserId: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseRemoveCoachRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        loginUserId: 0,
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    ormPrMock.getProjectById.mockImplementation(() => {
+        return Promise.resolve(projects2[0]);
+    });
+
+    await expect(project.unAssignCoach(req)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    reqMock.parseRemoveCoachRequest.mockReset();
     ormPrMock.getProjectById.mockReset();
     ormOMock.getLatestOsoc.mockReset();
 });
