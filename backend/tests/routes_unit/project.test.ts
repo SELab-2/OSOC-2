@@ -1678,6 +1678,9 @@ test("Can modify a student on a project", async () => {
         Promise.resolve(v)
     );
 
+    const start = new Date();
+    const end = new Date();
+
     ormPrMock.updateProject.mockImplementation((v) =>
         Promise.resolve({
             project_id: v.projectId,
@@ -1685,8 +1688,8 @@ test("Can modify a student on a project", async () => {
             osoc_id: orDefault(v.osocId, 0),
             partner: orDefault(v.partner, "partner"),
             description: orDefault(v.description, null),
-            start_date: orDefault(v.startDate, new Date(1000000000)),
-            end_date: orDefault(v.endDate, new Date(10000000000)),
+            start_date: orDefault(v.startDate, start),
+            end_date: orDefault(v.endDate, end),
         })
     );
 
@@ -1709,10 +1712,8 @@ test("Can modify a student on a project", async () => {
         id: 0,
         name: "name",
         partner: "partner",
-        start_date:
-            "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
-        end_date:
-            "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+        start_date: start.toString(),
+        end_date: end.toString(),
         osoc_id: 0,
         roles: [],
         description: null,
@@ -1749,6 +1750,9 @@ test("Can filter projects (with osoc year)", async () => {
         pageSize: 1,
     });
 
+    const start = new Date();
+    const end = new Date();
+
     ormPrMock.filterProjects.mockResolvedValue({
         pagination: {
             page: 0,
@@ -1761,12 +1765,8 @@ test("Can filter projects (with osoc year)", async () => {
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date: new Date(
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
-                ),
-                end_date: new Date(
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
-                ),
+                start_date: start,
+                end_date: end,
                 project_role: [
                     {
                         positions: 3,
@@ -1865,10 +1865,8 @@ test("Can filter projects (with osoc year)", async () => {
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date:
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
-                end_date:
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+                start_date: start.toString(),
+                end_date: end.toString(),
                 id: 0,
                 coaches: [],
                 roles: [
@@ -2090,6 +2088,9 @@ test("Contract.student is null in filterProjects", async () => {
         pageSize: 1,
     });
 
+    const start = new Date();
+    const end = new Date();
+
     ormPrMock.filterProjects.mockResolvedValue({
         pagination: {
             page: 0,
@@ -2102,12 +2103,8 @@ test("Contract.student is null in filterProjects", async () => {
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date: new Date(
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
-                ),
-                end_date: new Date(
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
-                ),
+                start_date: start,
+                end_date: end,
                 project_role: [
                     {
                         positions: 3,
@@ -2192,10 +2189,8 @@ test("Contract.student is null in filterProjects", async () => {
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date:
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
-                end_date:
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+                start_date: start.toString(),
+                end_date: end.toString(),
                 id: 0,
                 coaches: [],
                 roles: [
@@ -2243,10 +2238,8 @@ test("Contract.student is null in filterProjects", async () => {
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date:
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
-                end_date:
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+                start_date: start.toString(),
+                end_date: end.toString(),
                 id: 0,
                 coaches: [],
                 roles: [
