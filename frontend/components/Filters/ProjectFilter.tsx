@@ -25,6 +25,7 @@ export const ProjectFilter: React.FC<{
             osocYear: osocYear,
         };
         search(params);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nameSort, clientSort, fullyAssigned]);
 
     const searchPress = () => {

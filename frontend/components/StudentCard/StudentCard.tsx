@@ -8,7 +8,7 @@ import { Label } from "../Labels/Label";
 import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
-import {useDrag} from "react-dnd";
+import { useDrag } from "react-dnd";
 
 export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
     student,
@@ -20,16 +20,16 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
         [Decision.NO]: ForbiddenIconColor,
     };
 
-    const [{ isDragging }, drag] = useDrag(() => ({
+    const [, drag] = useDrag(() => ({
         // "type" is required. It is used by the "accept" specification of drop targets.
-        type: 'Student',
+        type: "Student",
         item: student,
         // The collect function utilizes a "monitor" instance (see the Overview for what this is)
         // to pull important pieces of state from the DnD system.
         collect: (monitor) => ({
-            isDragging: monitor.isDragging()
-        })
-    }))
+            isDragging: monitor.isDragging(),
+        }),
+    }));
 
     return (
         <div className={styles.body} ref={drag}>

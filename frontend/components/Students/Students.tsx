@@ -107,6 +107,7 @@ export const Students: React.FC<{
                 filterAutomatic(params).then();
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, params, pagination]);
 
     /**
