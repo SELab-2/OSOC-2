@@ -147,17 +147,17 @@ export interface Student {
                 role_id: number;
             }
         ];
-        attachment: [Attachment];
+        attachment: Attachment[];
         created_at: Date;
         edu_duration: string;
         edu_institute: string;
         edu_level: string;
         edu_year: string;
-        edus: [string];
+        edus: string[];
         email_status: EmailStatus;
         fun_fact: string;
         job_application_id: number;
-        job_application_skill: [JobApplicationSkill];
+        job_application_skill: JobApplicationSkill[];
         osoc_id: number;
         responsibilities: string;
         student_coach: boolean;
@@ -246,6 +246,7 @@ export interface ServerToClientEvents {
     loginUserActivated: () => void;
     loginUserDisabled: () => void;
     registrationReceived: () => void;
+    studentSuggestionCreated: (studentId: number) => void;
 }
 
 /**
@@ -256,6 +257,8 @@ export interface ClientToServerEvents {
     activateUser: () => void;
     disableUser: () => void;
     submitRegistration: () => void;
+    studentSuggestionSent: (studentId: number) => void;
+    studentDecisionSent: (studentId: number) => void;
 }
 
 export interface ProjectPerson {
@@ -329,7 +332,7 @@ export interface ProjectFilterParams {
     clientFilter: string;
     fullyAssigned: boolean;
     osocYear: string;
-    nameSort: Sort;
+    projectNameSort: Sort;
     clientSort: Sort;
 }
 

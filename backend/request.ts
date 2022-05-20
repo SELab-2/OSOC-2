@@ -312,18 +312,25 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(async () => {
-        const sug: unknown = req.body.suggestion;
-        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
-            return rejector();
+    return hasFields(req, ["suggestion", "job_application_id"], types.id).then(
+        async () => {
+            const sug: unknown = req.body.suggestion;
+            if (
+                sug != Decision.YES &&
+                sug != Decision.MAYBE &&
+                sug != Decision.NO
+            )
+                return rejector();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe<string>(req.body, "reason"),
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                suggestion: sug as InternalTypes.Suggestion,
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**
@@ -461,7 +468,7 @@ export async function parseFilterStudentsRequest(
         }
     }
 
-    let osoc_year = new Date().getFullYear();
+    let osoc_year;
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
         if (isNaN(osoc_year)) return rejector();
@@ -565,22 +572,25 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, ["reply"], types.id).then(async () => {
-        if (
-            req.body.reply != Decision.YES &&
-            req.body.reply != Decision.MAYBE &&
-            req.body.reply != Decision.NO
-        ) {
-            return rejector();
-        }
+    return hasFields(req, ["reply", "job_application_id"], types.id).then(
+        async () => {
+            if (
+                req.body.reply != Decision.YES &&
+                req.body.reply != Decision.MAYBE &&
+                req.body.reply != Decision.NO
+            ) {
+                return rejector();
+            }
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            reason: maybe<string>(req.body, "reason"),
-            reply: req.body.reply,
-        }).then(idIsNumber);
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+                reply: req.body.reply,
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**
@@ -765,11 +775,12 @@ export async function parseSetFollowupStudentRequest(
     return hasFields(req, ["type"], types.id).then(async () => {
         const type: string = req.body.type;
         if (
-            type != "SCHEDULED" &&
-            type != "SENT" &&
-            type != "FAILED" &&
-            type != "NONE" &&
-            type != "DRAFT"
+            type != "APPLIED" &&
+            type != "AWAITING_PROJECT" &&
+            type != "APPROVED" &&
+            type != "CONTRACT_CONFIRMED" &&
+            type != "CONTRACT_DECLINED" &&
+            type != "REJECTED"
         )
             return rejector();
 
@@ -999,6 +1010,44 @@ export async function parseNewOsocEditionRequest(
             sessionkey: getSessionKey(req),
             year: parseInt(req.body.year),
         }).then((obj) => allNonNaN(["year"], obj))
+    );
+}
+
+/**
+ *  Parses a request to `POST/DELETE /user/year/:id`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseUsersPermissionsRequest(
+    req: express.Request
+): Promise<Requests.UserYearPermissions> {
+    return hasFields(req, ["osoc_id", "login_user_id"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            id: Number(req.params.id),
+            osoc_id: parseInt(req.body.osoc_id),
+            login_user_id: parseInt(req.body.login_user_id),
+        })
+            .then((obj) => allNonNaN(["osoc_id", "login_user_id"], obj))
+            .then(idIsNumber)
+    );
+}
+
+/**
+ *  Parses a request to `GET /user/years`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseGetUserPermissionsRequest(
+    req: express.Request
+): Promise<Requests.IdRequest> {
+    return hasFields(req, [], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            id: Number(req.params.id),
+        }).then(idIsNumber)
     );
 }
 

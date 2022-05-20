@@ -8,14 +8,22 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types";
+import {
+    AccountStatus,
+    LoginUser,
+    OsocEdition,
+    NotificationType,
+} from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
+import triangle from "../Filters/Filter.module.css";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const User: React.FC<{
     user: LoginUser;
+    editions: OsocEdition[];
     removeUser: (user: LoginUser) => void;
-}> = ({ user, removeUser }) => {
+}> = ({ user, removeUser, editions }) => {
     const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
@@ -25,6 +33,12 @@ export const User: React.FC<{
     const { socket } = useSockets();
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { notify } = useContext(NotificationContext);
+
+    // a set of edition ids the user is allowed to see
+    const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
+    // dropdown open or closed
+    const [editionsActive, setEditionsActive] = useState<boolean>(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -38,6 +52,35 @@ export const User: React.FC<{
             setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
+
+    // load
+    useEffect(() => {
+        fetchUserEditions().then();
+    }, []);
+
+    const fetchUserEditions = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/years/${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (Array.isArray(response)) {
+            const ids = [];
+            for (const edition of response) {
+                ids.push(edition.osoc_id);
+            }
+            setUserEditions(new Set(ids));
+        }
+    };
 
     const setUserRole = async (
         route: string,
@@ -55,7 +98,7 @@ export const User: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
 
-        const res = await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -71,18 +114,10 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else {
-                    return json;
-                }
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (res.success !== false) {
+        if (response.success !== false) {
             if (changed_val === "activated") {
                 socket.emit("activateUser");
             } else if (changed_val === "disabled") {
@@ -91,8 +126,21 @@ export const User: React.FC<{
             // also emit that there has been a change in general so that the manage users screen will update
             // other changes are changes to the enum roles
             socket.emit("updateRoleUser");
+            if (notify) {
+                notify(
+                    `Successfully updated ${name} authorities`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
-        return res;
+        return response;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
@@ -208,31 +256,64 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                }
-                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
-                socket.emit("updateRoleUser"); // this refreshes the manage users page
-                removeUser(user);
-                return json;
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (response.success) {
+        if (response && response.success && notify) {
+            socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+            socket.emit("updateRoleUser"); // this refreshes the manage users page
             removeUser(user);
-            return response;
-        } else {
-            return { success: false };
+            notify(
+                `Successfully removed${user.person.name}!`,
+                NotificationType.SUCCESS,
+                2000
+            );
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
+    };
+
+    const selectEdition = async (id: number) => {
+        const method = userEditions.has(id) ? "DELETE" : "POST";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        if (method === "DELETE") {
+            userEditions.delete(id);
+        } else {
+            userEditions.add(id);
+        }
+        setUserEditions(new Set(userEditions));
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/year/${userId}`, {
+            method: method,
+            body: JSON.stringify({
+                osoc_id: id,
+                login_user_id: user.login_user_id,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `auth/osoc2 ${sessionKey}`,
+            },
+        }).catch((reason) => {
+            console.log(reason);
+            if (method === "POST") {
+                userEditions.delete(id);
+            } else {
+                userEditions.add(id);
+            }
+            setUserEditions(new Set(userEditions));
+        });
     };
 
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p data-testid={"userName"}>{name}</p>
+                <div data-testid={"userName"}>{name}</div>
                 {status === AccountStatus.PENDING ? (
                     <button
                         data-testid={"pendingButton"}
@@ -241,10 +322,56 @@ export const User: React.FC<{
                     >
                         ACTIVATE
                     </button>
-                ) : null}
+                ) : (
+                    <div
+                        className={`dropdown is-right ${
+                            editionsActive ? "is-active" : "is-hoverable"
+                        }`}
+                    >
+                        <div
+                            onClick={() => setEditionsActive((prev) => !prev)}
+                            className={`dropdown-trigger ${
+                                editionsActive
+                                    ? triangle.active
+                                    : triangle.inactive
+                            }`}
+                        >
+                            Editions
+                            <div className={triangle.triangleContainer}>
+                                <div className={triangle.triangle} />
+                            </div>
+                        </div>
+                        <div className={`dropdown-menu ${styles.dropdownmenu}`}>
+                            <div className="dropdown-content">
+                                {editions.map((edition) => {
+                                    return (
+                                        <div
+                                            onClick={() =>
+                                                selectEdition(edition.osoc_id)
+                                            }
+                                            key={edition.osoc_id}
+                                            className={`dropdown-item ${
+                                                styles.dropdownitem
+                                            }
+                                            ${
+                                                userEditions.has(
+                                                    edition.osoc_id
+                                                )
+                                                    ? styles.active
+                                                    : ""
+                                            }`}
+                                        >
+                                            {edition.year}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <p data-testid={"userEmail"}>{email}</p>
+            <div data-testid={"userEmail"}>{email}</div>
             <div className={styles.buttons}>
                 <div
                     data-testid={"buttonIsAdmin"}

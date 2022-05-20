@@ -1,8 +1,9 @@
 import React, { SyntheticEvent, useContext, useState } from "react";
-import { LoginUser } from "../../types";
+import { LoginUser, NotificationType } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import styles from "../../pages/login/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const Settings: React.FC<{
     person: LoginUser;
@@ -17,6 +18,7 @@ export const Settings: React.FC<{
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [applyError, setApplyError] = useState<string>("");
     const { getSession, setSessionKey } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
     /**
      * Gets called everytime the new password input field's value changes
@@ -131,24 +133,32 @@ export const Settings: React.FC<{
                 }
             )
                 .then((response) => response.json())
-                .catch((err) => {
+                .catch(() => {
                     setApplyError(
                         "Something went wrong while trying to execute your request."
                     );
-                    console.log(err);
                 });
-            if (response !== undefined) {
-                if (response.success) {
-                    if (setSessionKey) {
-                        setSessionKey(response.sessionkey);
-                    }
-                    fetchUser();
-                    // TODO notify succes
-                } else {
-                    setApplyError(
-                        `Failed to apply changes. Please check all fields. ${response.reason}`
+            if (response && response.success) {
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey);
+                }
+                await fetchUser();
+                if (notify) {
+                    notify(
+                        "Your credentials are succesfully changed",
+                        NotificationType.SUCCESS,
+                        2000
                     );
                 }
+            } else if (response && !response.success && notify) {
+                setApplyError(
+                    `Failed to apply changes. Please check all fields. ${response.reason}`
+                );
+                notify(
+                    "Something went wrong:" + response.reason,
+                    NotificationType.ERROR,
+                    2000
+                );
             }
         }
     };

@@ -31,6 +31,9 @@ const bcryptMock = bcrypt as jest.Mocked<typeof bcrypt>;
 import * as ormLU from "../../orm_functions/login_user";
 jest.mock("../../orm_functions/login_user");
 const ormLUMock = ormLU as jest.Mocked<typeof ormLU>;
+import * as ormLuOs from "../../orm_functions/login_user_osoc";
+jest.mock("../../orm_functions/login_user_osoc");
+const ormLuOsMock = ormLuOs as jest.Mocked<typeof ormLuOs>;
 import * as ormP from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
 const ormPMock = ormP as jest.Mocked<typeof ormP>;
@@ -39,6 +42,7 @@ jest.mock("../../orm_functions/session_key");
 const ormSKMock = ormSK as jest.Mocked<typeof ormSK>;
 
 import * as user from "../../routes/user";
+import { errors } from "../../utility";
 
 const users: (login_user & { person: person })[] = [
     {
@@ -581,4 +585,125 @@ test("Can modify self (no name change)", async () => {
         password: "abcde",
     });
     expect(ormPMock.updatePerson).not.toHaveBeenCalled();
+});
+
+test("Create user permission", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "abcd",
+        osoc_id: 0,
+        login_user_id: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseUsersPermissionsRequest.mockResolvedValue({
+        sessionkey: "abcd",
+        osoc_id: 0,
+        login_user_id: 0,
+        id: 0,
+    });
+
+    ormLuOsMock.addOsocToUser.mockResolvedValue({
+        login_user_osoc_id: 0,
+        login_user_id: 0,
+        osoc_id: 0,
+    });
+
+    await expect(user.createUserPermission(req)).resolves.toStrictEqual({});
+
+    reqMock.parseUsersPermissionsRequest.mockReset();
+    ormLuOsMock.addOsocToUser.mockReset();
+});
+
+test("Delete user permission", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "abcd",
+        osoc_id: 0,
+        login_user_id: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseUsersPermissionsRequest.mockResolvedValue({
+        sessionkey: "abcd",
+        osoc_id: 0,
+        login_user_id: 0,
+        id: 0,
+    });
+
+    ormLuOsMock.removeOsocFromUser.mockResolvedValue({
+        count: 1,
+    });
+
+    await expect(user.deleteUserPermission(req)).resolves.toStrictEqual({});
+
+    reqMock.parseUsersPermissionsRequest.mockReset();
+    ormLuOsMock.removeOsocFromUser.mockReset();
+});
+
+test("Get year permissions, no admin", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "abcd",
+    };
+
+    req.params.id = id.toString();
+
+    utilMock.isAdmin.mockImplementation((v) => {
+        return Promise.resolve({
+            data: v,
+            userId: 7,
+            accountStatus: "ACTIVATED",
+            is_admin: false,
+            is_coach: true,
+        });
+    });
+
+    await expect(user.getYearPermissions(req)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+
+    utilMock.isAdmin.mockReset();
+});
+
+test("Get year permissions, no admin", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "abcd",
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseGetUserPermissionsRequest.mockResolvedValue({
+        sessionkey: "abcd",
+        id: 0,
+    });
+
+    ormLuOsMock.getOsocYearsForLoginUserById.mockResolvedValue([
+        {
+            login_user_osoc_id: 0,
+            login_user_id: 0,
+            osoc_id: 0,
+            osoc: {
+                osoc_id: 0,
+                year: 2022,
+            },
+        },
+    ]);
+
+    await expect(user.getYearPermissions(req)).resolves.toStrictEqual([
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ]);
+
+    reqMock.parseGetUserPermissionsRequest.mockReset();
+    ormLuOsMock.getOsocYearsForLoginUserById.mockReset();
 });

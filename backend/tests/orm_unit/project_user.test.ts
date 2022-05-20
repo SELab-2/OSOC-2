@@ -22,7 +22,7 @@ test("should create an project user in the db with the given object, returns the
     await expect(createProjectUser(projectUser)).resolves.toEqual(returnValue);
 });
 
-test("should return the loginusers associated with the project", async () => {
+test("should return the login users associated with the project", async () => {
     prismaMock.project_user.findMany.mockResolvedValue([returnValue]);
     await expect(getUsersFor(0)).resolves.toEqual([returnValue]);
 });

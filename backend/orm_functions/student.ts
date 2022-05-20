@@ -7,8 +7,10 @@ import {
     FilterBoolean,
     UpdateStudent,
     FilterStringArray,
+    FilterNumber,
     DBPagination,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
 import { deletePersonFromDB } from "./person";
 
 /**
@@ -142,21 +144,38 @@ export async function searchStudentByGender(gender: string) {
  * @param osocYear: the osoc year the application belongs to (or undefined if not filtering on year)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
+ * @param loginUserId the id of the loginUser that is searching
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
     pagination: DBPagination,
-    nameFilter: FilterString = undefined,
-    emailFilter: FilterString = undefined,
-    roleFilterArray: FilterStringArray = undefined,
-    alumniFilter: FilterBoolean = undefined,
-    coachFilter: FilterBoolean = undefined,
-    statusFilter: decision_enum | undefined = undefined,
-    osocYear: number | undefined = undefined,
-    emailStatusFilter: email_status_enum | undefined = undefined,
-    nameSort: FilterSort = undefined,
-    emailSort: FilterSort = undefined
+    nameFilter: FilterString,
+    emailFilter: FilterString,
+    roleFilterArray: FilterStringArray,
+    alumniFilter: FilterBoolean,
+    coachFilter: FilterBoolean,
+    statusFilter: decision_enum | undefined,
+    osocYear: FilterNumber,
+    emailStatusFilter: email_status_enum | undefined,
+    nameSort: FilterSort,
+    emailSort: FilterSort,
+    loginUserId: number
 ) {
+    const yearsAllowedToSee = await getOsocYearsForLoginUser(loginUserId);
+    let searchYears;
+    if (osocYear !== undefined) {
+        if (!yearsAllowedToSee.includes(osocYear)) {
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
+        } else {
+            searchYears = [osocYear];
+        }
+    } else {
+        searchYears = yearsAllowedToSee;
+    }
+
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
     let evaluationFilter;
@@ -177,7 +196,9 @@ export async function filterStudents(
                 email_status: emailStatusFilter,
                 student_coach: coachFilter,
                 osoc: {
-                    year: osocYear,
+                    year: {
+                        in: searchYears,
+                    },
                 },
                 applied_role: {
                     some: {
@@ -239,4 +260,33 @@ export async function filterStudents(
         pagination: { page: pagination.currentPage, count: count },
         data: data,
     };
+}
+
+/**
+ * @param studentId: the id of the student whose job application years we are searching
+ * @returns a list of all the years the student has applied for
+ */
+export async function getAppliedYearsForStudent(studentId: number) {
+    const student = await prisma.student.findUnique({
+        where: {
+            student_id: studentId,
+        },
+        select: {
+            job_application: {
+                select: {
+                    osoc: {
+                        select: {
+                            year: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (student === null) {
+        return [];
+    }
+
+    return student.job_application.map((app) => app.osoc.year);
 }
