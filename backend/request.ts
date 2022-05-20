@@ -705,22 +705,9 @@ export async function parseFilterProjectsRequest(
     for (const filter of [
         maybe(req.body, "projectNameSort"),
         maybe(req.body, "clientNameSort"),
-        maybe(req.body, "fullyAssignedSort"), //TODO: niet meer nodig?
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();
-        }
-    }
-
-    let assignedCoachesFilterArray = maybe<number[]>(
-        req.body,
-        "assignedCoachesFilterArray"
-    );
-    if ("assignedCoachesFilterArray" in req.body) {
-        if (typeof req.body.assignedCoachesFilterArray === "string") {
-            assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
-                .split(",")
-                .map((num: string) => parseInt(num));
         }
     }
 
@@ -732,13 +719,17 @@ export async function parseFilterProjectsRequest(
         fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
     }
 
+    let year;
+    if ("osocYear" in req.body && !isNaN(Number(req.body.osocYear))) {
+        year = parseInt(req.body.osocYear);
+    }
+
     return Promise.resolve({
         ...paginated,
         projectNameFilter: maybe(req.body, "projectNameFilter"),
         clientNameFilter: maybe(req.body, "clientNameFilter"),
-        assignedCoachesFilterArray: assignedCoachesFilterArray,
         fullyAssignedFilter: fullyAssignedFilter,
-        osocYear: maybe(req.body, "osocYear"),
+        osocYear: year,
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
     });

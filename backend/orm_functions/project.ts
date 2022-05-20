@@ -4,7 +4,6 @@ import {
     CreateProject,
     DBPagination,
     FilterBoolean,
-    FilterNumberArray,
     FilterSort,
     FilterString,
     UpdateProject,
@@ -239,7 +238,6 @@ export async function deleteProjectByPartner(partner: string) {
  * @param page current page and page size
  * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
- * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
  * @param osocYearFilter: the osoc year the project belongs to (or undefined if not filtering on year)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
@@ -251,7 +249,6 @@ export async function filterProjects(
     page: DBPagination,
     projectNameFilter: FilterString,
     clientNameFilter: FilterString,
-    assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
     osocYearFilter: number | undefined,
     projectNameSort: FilterSort,
@@ -279,15 +276,6 @@ export async function filterProjects(
         },
     });
 
-    let assignedCoachesArray = undefined;
-    if (assignedCoachesFilterArray !== undefined) {
-        assignedCoachesArray = {
-            some: {
-                login_user_id: { in: assignedCoachesFilterArray },
-            },
-        };
-    }
-
     const actualFilter: Prisma.projectWhereInput = {
         name: {
             contains: projectNameFilter,
@@ -297,7 +285,6 @@ export async function filterProjects(
             contains: clientNameFilter,
             mode: "insensitive",
         },
-        project_user: assignedCoachesArray,
         osoc: {
             year: {
                 in: visibleYears,

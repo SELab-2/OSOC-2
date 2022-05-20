@@ -111,7 +111,6 @@ export async function listProjects(
         undefined,
         undefined,
         undefined,
-        undefined,
         checkedSessionKey.userId
     );
     for (const project of fetchedProjects.data) {
@@ -771,15 +770,20 @@ export async function filterProjects(
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
-    let year = new Date(Date.now()).getFullYear();
+    let year;
     if (checkedSessionKey.data.osocYear === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
             year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
         }
     } else {
         year = checkedSessionKey.data.osocYear;
     }
+
+    console.log(typeof year);
+    console.log(year);
 
     const projects = await ormPr.filterProjects(
         {
@@ -788,7 +792,6 @@ export async function filterProjects(
         },
         checkedSessionKey.data.projectNameFilter,
         checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
         checkedSessionKey.data.fullyAssignedFilter,
         year,
         checkedSessionKey.data.projectNameSort,

@@ -1391,7 +1391,6 @@ export namespace Requests {
     export interface ProjectFilter extends PaginableRequest {
         projectNameFilter?: string;
         clientNameFilter?: string;
-        assignedCoachesFilterArray?: number[];
         fullyAssignedFilter?: boolean;
         osocYear?: number;
         projectNameSort?: FilterSort;
