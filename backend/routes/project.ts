@@ -545,9 +545,8 @@ export async function modProjectStudent(
                             });
                         });
                 })
-                .then((res) =>
-                    ormPrRole.getProjectRoleById(res.project_role_id)
-                )
+                .then((res) => util.getOrReject(res.project_role_id))
+                .then((res) => ormPrRole.getProjectRoleById(res))
                 .then((res) =>
                     Promise.resolve({
                         drafted: true,
