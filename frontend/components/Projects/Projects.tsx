@@ -24,7 +24,7 @@ export const Projects: React.FC = () => {
     });
 
     // 5 projects per page
-    const pageSize = 1;
+    const pageSize = 5;
 
     const [loading, isLoading] = useState(false);
 
