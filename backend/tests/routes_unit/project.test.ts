@@ -1408,32 +1408,6 @@ test("Can un-assign students", async () => {
     utilMock.checkYearPermissionProject.mockReset();
 });
 
-test("Can't un-assign students (multiple evals)", async () => {
-    const req = getMockReq();
-    req.body = {
-        sessionkey: "key",
-        id: 0,
-        studentId: 0,
-    };
-
-    utilMock.checkYearPermissionProject.mockImplementation((v) =>
-        Promise.resolve(v)
-    );
-
-    await expect(project.unAssignStudent(req)).rejects.toStrictEqual({
-        http: 400,
-        reason: "Multiple evaluations match.",
-    });
-    expectCall(reqMock.parseRemoveAssigneeRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
-    expectCall(ormCMock.contractsForStudent, req.body.studentId);
-    expect(ormEvMock.getEvaluationByPartiesFor).toHaveBeenCalledTimes(1);
-    expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
-    expect(ormCMock.removeContract).not.toHaveBeenCalled();
-
-    utilMock.checkYearPermissionProject.mockReset();
-});
-
 test("Can't un-assign students (no contracts)", async () => {
     ormCMock.contractsForStudent.mockResolvedValue([]);
     const req = getMockReq();
