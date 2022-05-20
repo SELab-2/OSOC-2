@@ -39,7 +39,7 @@ describe("Osoc filter tests", () => {
         });
         let lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearSort=asc&currentPage=0"
+            "undefined/osoc/filter?yearSort=asc&currentPage=0&pageSize=20"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -47,7 +47,7 @@ describe("Osoc filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearSort=desc&currentPage=0"
+            "undefined/osoc/filter?yearSort=desc&currentPage=0&pageSize=20"
         );
         await act(async () => {
             fetchMock.mockOnce(response);
@@ -55,7 +55,7 @@ describe("Osoc filter tests", () => {
         });
         lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?currentPage=0"
+            "undefined/osoc/filter?currentPage=0&pageSize=20"
         );
     });
 
@@ -67,7 +67,7 @@ describe("Osoc filter tests", () => {
         });
         const lastLength = fetchMock.mock.calls.length - 1;
         expect(fetchMock.mock.calls[lastLength][0]).toBe(
-            "undefined/osoc/filter?yearFilter=2020&currentPage=0"
+            "undefined/osoc/filter?yearFilter=2020&currentPage=0&pageSize=20"
         );
     });
 });

@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import React, { useContext, useEffect, useState } from "react";
 import { User } from "../components/User/User";
 import styles from "../styles/users.module.css";
-import { UserFilter } from "../components/Filter/UserFilter/UserFilter";
+import { UserFilter } from "../components/Filters/UserFilter";
 import {
     AccountStatus,
     LoginUser,
@@ -30,6 +30,8 @@ const Users: NextPage = () => {
         page: 0,
         count: 0,
     });
+    // 20 users per page
+    const pageSize = 20;
     const [searchParams, setSearchParams] = useState<UserFilterParams>({
         nameFilter: "",
         emailFilter: "",
@@ -207,6 +209,7 @@ const Users: NextPage = () => {
         }
 
         filters.push(`currentPage=${currentPage}`);
+        filters.push(`pageSize=${pageSize}`);
 
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
 
@@ -257,7 +260,11 @@ const Users: NextPage = () => {
                       })
                     : null}
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            <Paginator
+                pageSize={pageSize}
+                pagination={pagination}
+                navigator={navigator}
+            />
         </div>
     );
 };

@@ -287,7 +287,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_duration: 5,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: email_status_enum.DRAFT,
+            email_status: email_status_enum.APPLIED,
             created_at: new Date("December 25, 2021 14:24:00"),
         },
         {
@@ -302,7 +302,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_duration: 8,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: email_status_enum.SENT,
+            email_status: email_status_enum.APPROVED,
             created_at: new Date("December 31, 2021 03:24:00"),
         },
     ];
@@ -337,15 +337,15 @@ it("should update the email status of the job application", async () => {
         edu_duration: 5,
         edu_institute: "Ugent",
         edu_year: "3",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("December 25, 2021 14:24:00"),
     };
     const changed = await changeEmailStatusOfJobApplication(
         applics[2].job_application_id,
-        email_status_enum.SENT
+        email_status_enum.APPROVED
     );
     job_application_check(applic, changed);
-    expect(changed).toHaveProperty("email_status", email_status_enum.SENT);
+    expect(changed).toHaveProperty("email_status", email_status_enum.APPROVED);
     expect(changed).toHaveProperty(
         "job_application_id",
         applics[2].job_application_id
@@ -371,7 +371,7 @@ it("should delete the job application", async () => {
         edu_duration: 5,
         edu_institute: "Ugent",
         edu_year: "3",
-        email_status: email_status_enum.SENT,
+        email_status: email_status_enum.APPROVED,
         created_at: new Date("December 25, 2021 14:24:00"),
     };
 
@@ -401,7 +401,7 @@ it("should create a new job_application", async () => {
         edu_duration: 3,
         edu_institute: "Hogent",
         edu_year: "2",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("January 2, 2022 14:24:00"),
     };
 
@@ -417,7 +417,7 @@ it("should create a new job_application", async () => {
         eduDuration: 3,
         eduInstitute: "Hogent",
         eduYear: "2",
-        emailStatus: email_status_enum.DRAFT,
+        emailStatus: email_status_enum.APPLIED,
         createdAt: "January 2, 2022 14:24:00",
     };
 
@@ -472,7 +472,7 @@ it("should return the most recent job application of a student", async () => {
         edu_duration: 8,
         edu_institute: "Ugent",
         edu_year: "7",
-        email_status: email_status_enum.SENT,
+        email_status: email_status_enum.APPROVED,
         created_at: new Date("December 20, 2021 03:24:00"),
     };
 

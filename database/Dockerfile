@@ -1,4 +1,4 @@
-FROM postgres:14.2
+FROM postgres:14.3
 
 RUN apt-get update && apt-get -y install git build-essential postgresql-server-dev-14
 

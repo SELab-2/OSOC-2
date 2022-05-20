@@ -1,13 +1,13 @@
-import styles from "../Filter.module.css";
+import styles from "./Filter.module.css";
 import React, { SyntheticEvent, useEffect, useState } from "react";
 import Image from "next/image";
-import AdminIconColor from "../../../public/images/admin_icon_color.png";
-import AdminIcon from "../../../public/images/admin_icon.png";
-import CoachIconColor from "../../../public/images/coach_icon_color.png";
-import CoachIcon from "../../../public/images/coach_icon.png";
-import ForbiddenIcon from "../../../public/images/forbidden_icon.png";
-import ForbiddenIconColor from "../../../public/images/forbidden_icon_color.png";
-import { AccountStatus, getNextSort, Sort } from "../../../types";
+import AdminIconColor from "../../public/images/admin_icon_color.png";
+import AdminIcon from "../../public/images/admin_icon.png";
+import CoachIconColor from "../../public/images/coach_icon_color.png";
+import CoachIcon from "../../public/images/coach_icon.png";
+import ForbiddenIcon from "../../public/images/forbidden_icon.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import { AccountStatus, getNextSort, Sort } from "../../types";
 import { useRouter } from "next/router";
 
 export const UserFilter: React.FC<{

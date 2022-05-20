@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import * as dbtypes from "@prisma/client";
 import prisma from "../prisma/prisma";
 import * as config from "../config.json";
@@ -139,7 +140,7 @@ export function jobApplicationsData(
             edu_duration: 5,
             edu_institute: "Ugent",
             edu_year: "4",
-            email_status: dbtypes.email_status_enum.DRAFT,
+            email_status: dbtypes.email_status_enum.APPLIED,
             created_at: new Date("December 17, 2021 14:24:00"),
         },
         {
@@ -154,7 +155,7 @@ export function jobApplicationsData(
             edu_duration: 8,
             edu_institute: "Ugent",
             edu_year: "7",
-            email_status: dbtypes.email_status_enum.SENT,
+            email_status: dbtypes.email_status_enum.APPROVED,
             created_at: new Date("December 20, 2021 03:24:00"),
         },
         {
@@ -169,7 +170,7 @@ export function jobApplicationsData(
             edu_duration: 5,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: dbtypes.email_status_enum.DRAFT,
+            email_status: dbtypes.email_status_enum.APPLIED,
             created_at: new Date("December 25, 2021 14:24:00"),
         },
         {
@@ -184,7 +185,7 @@ export function jobApplicationsData(
             edu_duration: 8,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: dbtypes.email_status_enum.SENT,
+            email_status: dbtypes.email_status_enum.APPROVED,
             created_at: new Date("December 31, 2021 03:24:00"),
         },
     ];

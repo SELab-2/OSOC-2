@@ -1,12 +1,12 @@
-import styles from "../Filter.module.css";
+import styles from "./Filter.module.css";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import {
     getNextSort,
     NotificationType,
     OsocFilterParams,
     Sort,
-} from "../../../types";
-import SessionContext from "../../../contexts/sessionProvider";
+} from "../../types";
+import SessionContext from "../../contexts/sessionProvider";
 import { NotificationContext } from "../../../contexts/notificationProvider";
 
 export const OsocCreateFilter: React.FC<{

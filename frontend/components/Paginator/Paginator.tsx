@@ -1,10 +1,11 @@
-import { pageSize, Pagination } from "../../types";
+import { Pagination } from "../../types";
 import React from "react";
 
 export const Paginator: React.FC<{
+    pageSize: number;
     pagination: Pagination;
     navigator: (page: number) => void;
-}> = ({ pagination, navigator }) => {
+}> = ({ pageSize, pagination, navigator }) => {
     const paginator = [];
     const pages = Math.ceil(pagination.count / pageSize);
     for (let i = 0; i < pages; i++) {

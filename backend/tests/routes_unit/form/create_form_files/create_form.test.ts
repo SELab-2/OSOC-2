@@ -50,7 +50,7 @@ const jobApplication: job_application = {
     edu_duration: 3,
     edu_year: "3",
     edu_institute: "UGent",
-    email_status: "NONE",
+    email_status: "APPLIED",
     created_at: new Date("2022-04-14T18:15:30.245Z"),
 };
 

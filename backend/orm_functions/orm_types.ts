@@ -364,6 +364,10 @@ export interface CreateProject {
      * the end date of the project
      */
     endDate: Date;
+    /**
+     * a short description of the project
+     */
+    description: string;
 }
 
 /**
@@ -636,7 +640,7 @@ export interface AddStudentToProject {
 /**
  * interface for the object needed to create a project user
  */
-export interface CreateProjectUser {
+export interface ProjectUser {
     /**
      * the id of the project this user belongs to
      */

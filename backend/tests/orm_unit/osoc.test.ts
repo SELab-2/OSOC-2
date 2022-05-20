@@ -131,7 +131,7 @@ test("should delete everything associated with the give osoc edition", async () 
             edu_duration: 0,
             edu_year: "",
             edu_institute: "",
-            email_status: email_status_enum.DRAFT,
+            email_status: email_status_enum.APPLIED,
             created_at: new Date(),
         },
     ]);
@@ -191,6 +191,28 @@ test("should return filtered list of osocs", async () => {
     const res = await filterOsocs(
         { currentPage: 0, pageSize: 25 },
         2022,
+        undefined
+    );
+    expect(res.pagination).toStrictEqual({ page: 0, count: undefined });
+    res.data.forEach((val) => {
+        expect(val).toHaveProperty("osoc_id");
+        expect(val).toHaveProperty("year");
+    });
+    expect(prismaMock.osoc.findMany).toBeCalledTimes(1);
+});
+
+test("should return filtered list of osocs (yearFilter is undefined)", async () => {
+    const expected = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
+
+    prismaMock.osoc.findMany.mockResolvedValue(expected);
+    const res = await filterOsocs(
+        { currentPage: 0, pageSize: 25 },
+        undefined,
         undefined
     );
     expect(res.pagination).toStrictEqual({ page: 0, count: undefined });

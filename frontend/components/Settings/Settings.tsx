@@ -1,7 +1,7 @@
 import React, { SyntheticEvent, useContext, useState } from "react";
 import { LoginUser, NotificationType } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
-import styles from "../../styles/login.module.scss";
+import styles from "../../pages/login/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import { NotificationContext } from "../../contexts/notificationProvider";
 
