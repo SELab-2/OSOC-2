@@ -54,6 +54,7 @@ const ormOMock = ormO as jest.Mocked<typeof ormO>;
 
 import * as project from "../../routes/project";
 import { CreateProject } from "../../orm_functions/orm_types";
+import { contract_status_enum } from "@prisma/client";
 
 const realDateNow = Date.now.bind(global.Date);
 const dateNowStub = jest.fn(() => 123456789);
@@ -1726,4 +1727,199 @@ test("Can modify a student on a project", async () => {
     ormPUMock.deleteProjectUser.mockReset();
     ormPUMock.getUsersFor.mockReset();
     ormPrMock.updateProject.mockReset();
+});
+
+test.only("Can filter projects (with osoc year)", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "key", projectNameFilter: "project" };
+
+    reqMock.parseFilterProjectsRequest.mockResolvedValue({
+        sessionkey: "key",
+        projectNameFilter: "project",
+        clientNameFilter: undefined,
+        fullyAssignedFilter: undefined,
+        osocYear: undefined,
+        projectNameSort: undefined,
+        clientNameSort: undefined,
+        currentPage: 0,
+        pageSize: 1,
+    });
+
+    ormPrMock.filterProjects.mockResolvedValue({
+        pagination: {
+            page: 0,
+            count: 1,
+        },
+        data: [
+            {
+                project_id: 0,
+                osoc_id: 0,
+                name: "name",
+                partner: "partner",
+                description: null,
+                start_date: new Date(
+                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                end_date: new Date(
+                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                project_role: [
+                    {
+                        positions: 3,
+                        role: {
+                            name: "Front-end developer",
+                        },
+                    },
+                    {
+                        positions: 5,
+                        role: {
+                            name: "Back-end developer",
+                        },
+                    },
+                ],
+                project_user: [
+                    {
+                        login_user: {
+                            login_user_id: 1,
+                            is_coach: true,
+                        },
+                    },
+                    {
+                        login_user: {
+                            login_user_id: 2,
+                            is_coach: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    });
+
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+        {
+            project_role_id: 1,
+            project_id: 0,
+            role_id: 1,
+            positions: 5,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValueOnce({
+        role_id: 0,
+        name: "Front-end developer",
+    });
+
+    ormRMock.getRole.mockResolvedValueOnce({
+        role_id: 1,
+        name: "Back-end developer",
+    });
+
+    ormCMock.contractsByProject.mockResolvedValue([
+        {
+            contract_id: 0,
+            contract_status: contract_status_enum.APPROVED,
+            student: {
+                student_id: 0,
+                gender: "Male",
+                pronouns: null,
+                phone_number: "0461719074",
+                nickname: null,
+                alumni: false,
+                person: {
+                    name: "name",
+                    person_id: 0,
+                    email: "mail@mail.com",
+                    github: null,
+                    github_id: null,
+                },
+            },
+            project_role: {
+                project_id: 0,
+                role: {
+                    name: "Front-end developer",
+                },
+                project_role_id: 0,
+                role_id: 0,
+                positions: 3,
+            },
+            login_user: null,
+        },
+    ]);
+
+    ormPUMock.getUsersFor.mockResolvedValue([]);
+
+    await expect(project.filterProjects(req)).resolves.toStrictEqual({
+        data: [
+            {
+                project_id: 0,
+                osoc_id: 0,
+                name: "name",
+                partner: "partner",
+                description: null,
+                start_date: new Date(
+                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                end_date: new Date(
+                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                id: 0,
+                coaches: [],
+                roles: [
+                    {
+                        positions: 3,
+                        name: "Front-end developer",
+                    },
+                    {
+                        positions: 5,
+                        name: "Back-end developer",
+                    },
+                ],
+                contracts: [
+                    {
+                        contract_id: 0,
+                        contract_status: contract_status_enum.APPROVED,
+                        student: {
+                            student_id: 0,
+                            gender: "Male",
+                            pronouns: null,
+                            phone_number: "0461719074",
+                            nickname: null,
+                            alumni: false,
+                            person: {
+                                name: "name",
+                                person_id: 0,
+                                email: "mail@mail.com",
+                                github: null,
+                                github_id: null,
+                            },
+                        },
+                        project_role: {
+                            project_id: 0,
+                            role: {
+                                name: "Front-end developer",
+                            },
+                            project_role_id: 0,
+                            role_id: 0,
+                            positions: 3,
+                        },
+                        login_user: null,
+                    },
+                ],
+            },
+        ],
+        pagination: { count: 1, page: 0 },
+    });
+
+    reqMock.parseFilterProjectsRequest.mockReset();
+    ormPrMock.filterProjects.mockReset();
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
+    ormCMock.contractsByProject.mockReset();
+    ormPUMock.getUsersFor.mockReset();
 });
