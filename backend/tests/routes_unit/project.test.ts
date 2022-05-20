@@ -2731,3 +2731,62 @@ test("UnAssign student, latest osoc is null", async () => {
     ormOMock.getLatestOsoc.mockReset();
     utilMock.checkYearPermissionProject.mockReset();
 });
+
+test("Assign coach, project is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        loginUserId: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseAssignCoachRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        loginUserId: 0,
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockResolvedValue(null);
+
+    await expect(project.assignCoach(req)).rejects.toBe(errors.cookInvalidID());
+
+    reqMock.parseRemoveAssigneeRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("UnAssign student, latest osoc is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        loginUserId: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseAssignCoachRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        loginUserId: 0,
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    ormPrMock.getProjectById.mockImplementation(() => {
+        return Promise.resolve(projects2[0]);
+    });
+
+    await expect(project.assignCoach(req)).rejects.toBe(errors.cookInvalidID());
+
+    reqMock.parseRemoveAssigneeRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
