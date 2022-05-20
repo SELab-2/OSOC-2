@@ -51,6 +51,9 @@ export const errors: Errors = {
     cookWrongSuggestionYear() {
         return config.apiErrors.studentSuggestion.insufficientRights;
     },
+    cookWrongOsocYear() {
+        return config.apiErrors.modifyProject.insufficientRights;
+    },
 
     cookNonExistent(url: string) {
         return {

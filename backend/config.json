@@ -80,6 +80,12 @@
                 "http": 403,
                 "reason": "Failed to create suggestion. Can only create suggestions for the most recent osoc edition."
             }
+        },
+        "modifyProject": {
+            "insufficientRights": {
+                "http": 403,
+                "reason": "Failed to modify project. Can only modify projects of the most recent osoc edition."
+            }
         }
     },
 

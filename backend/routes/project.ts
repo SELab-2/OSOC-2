@@ -288,7 +288,7 @@ export async function modProject(
     }
 
     if (osoc === null || jobApplication.osoc.year !== osoc.year) {
-        return Promise.reject(errors.cookWrongSuggestionYear());
+        return Promise.reject(errors.cookWrongOsocYear());
     }
 
     const updatedProject = await ormPr.updateProject({
