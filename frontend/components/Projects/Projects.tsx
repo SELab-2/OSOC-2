@@ -23,6 +23,9 @@ export const Projects: React.FC = () => {
         count: 0,
     });
 
+    // 5 projects per page
+    const pageSize = 1;
+
     const [loading, isLoading] = useState(false);
 
     /**
@@ -69,6 +72,8 @@ export const Projects: React.FC = () => {
         }
 
         filters.push(`currentPage=${page}`);
+        filters.push(`pageSize=${pageSize}`);
+
         const query = filters.length > 0 ? `?${filters.join("&")}` : "";
         const { sessionKey } = getSession
             ? await getSession()
@@ -97,6 +102,13 @@ export const Projects: React.FC = () => {
 
         // these are the search parameters we just sent
         const newSearchParams = new URLSearchParams(query);
+
+        // set the page filter unique for the student to keep track of it in the frontend
+        newSearchParams.delete("currentPage");
+        newSearchParams.delete("pageSize");
+        newSearchParams.set("currentPageProject", page.toString());
+        newSearchParams.set("pageSizeProject", pageSize.toString());
+
         // we have to change the parameter name of osocYear to osocYearProject to prevent conflicts with the selected year for the student filter
         const setYear = newSearchParams.get("osocYear");
         if (setYear !== null) {
@@ -105,7 +117,6 @@ export const Projects: React.FC = () => {
 
         // get the current active search parameters, we'll update this value
         const updatedSearchParams = new URLSearchParams(window.location.search);
-        console.log("orig p: " + updatedSearchParams.toString());
         // overwrite the values that are present in the new and old parameters
         newSearchParams.forEach((value, key) => {
             updatedSearchParams.set(key, value);
@@ -126,8 +137,6 @@ export const Projects: React.FC = () => {
             }
         });
 
-        console.log("updated p: " + updatedSearchParams.toString());
-        console.log("new p: " + newSearchParams.toString());
         router
             .push(
                 `${window.location.pathname}?${updatedSearchParams.toString()}`
@@ -167,8 +176,8 @@ export const Projects: React.FC = () => {
             <Paginator
                 pagination={pagination}
                 navigator={navigator}
-                pageSize={10}
+                pageSize={pageSize}
             />
         </div>
-    ); // TODO: pageSize should be a variable and not hardcoded
+    );
 };

@@ -221,7 +221,7 @@ export const Students: React.FC<{
         setParams(params);
         // get the current page
         const currentPageStr = new URLSearchParams(window.location.search).get(
-            "currentPage"
+            "currentPageStudent"
         );
         const currentPageInt =
             currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
@@ -321,6 +321,12 @@ export const Students: React.FC<{
         if (id !== null) {
             newSearchParams.set("id", id);
         }
+        // set the page filter unique for the student to keep track of it in the frontend
+        newSearchParams.delete("currentPage");
+        newSearchParams.delete("pageSize");
+        newSearchParams.set("currentPageStudent", page.toString());
+        newSearchParams.set("pageSizeStudent", pageSize.toString());
+
         // we have to change the parameter name of osocYear to osocYear student to prevent conflicts with the selected year in the projects screen for projects
         const setYear = newSearchParams.get("osocYear");
         if (setYear !== null) {
@@ -329,7 +335,6 @@ export const Students: React.FC<{
 
         // get the current active search parameters, we'll update this value
         const updatedSearchParams = new URLSearchParams(window.location.search);
-        console.log("orig s: " + updatedSearchParams.toString());
         // overwrite the values that are present in the new and old parameters
         newSearchParams.forEach((value, key) => {
             updatedSearchParams.set(key, value);
@@ -354,9 +359,6 @@ export const Students: React.FC<{
                 updatedSearchParams.delete(key);
             }
         });
-
-        console.log("updated s: " + updatedSearchParams.toString());
-        console.log("new s: " + newSearchParams.toString());
 
         router
             .push(
