@@ -6,11 +6,13 @@ import { Coach, NotificationType } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Create: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
 
     const formatDate = () => {
         const date = new Date();
@@ -133,6 +135,7 @@ const Create: NextPage = () => {
                                 2000
                             );
                         }
+                        socket.emit("projectCreated");
                         router.push("/projects").then();
                     }
                 }

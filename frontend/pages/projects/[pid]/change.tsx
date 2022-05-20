@@ -6,11 +6,13 @@ import { Project, Coach, NotificationType } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 import styles from "./change.module.scss";
 import { NotificationContext } from "../../../contexts/notificationProvider";
+import { useSockets } from "../../../contexts/socketProvider";
 
 const Change: NextPage = () => {
     const router = useRouter();
     const { pid } = router.query; // pid is the student id
     const { getSession } = useContext(SessionContext);
+    const { socket } = useSockets();
     const originalRoles: { [K: string]: number } = {};
     const { notify } = useContext(NotificationContext);
 
@@ -216,6 +218,15 @@ const Change: NextPage = () => {
                                 NotificationType.SUCCESS,
                                 2000
                             );
+                        }
+                        const pidNumber =
+                            typeof pid === "string"
+                                ? Number(pid)
+                                : pid
+                                ? Number(pid[0])
+                                : NaN;
+                        if (!isNaN(pidNumber)) {
+                            socket.emit("projectModified", pidNumber);
                         }
                         router.push("/projects").then();
                     }

@@ -15,6 +15,7 @@ import {
 } from "./types";
 import { registerLoginUserHandlers } from "./websocket_events/login_user";
 import { registerStudentHandlers } from "./websocket_events/student";
+import { registerProjectHandlers } from "./websocket_events/project";
 
 export const app: express.Application = express();
 export const port: number = config.global.port;
@@ -57,4 +58,5 @@ config.global.homes.forEach((home) => util.addInvalidVerbs(app, home + "/"));
 io.on("connection", (socket) => {
     registerLoginUserHandlers(io, socket);
     registerStudentHandlers(io, socket);
+    registerProjectHandlers(io, socket);
 });
