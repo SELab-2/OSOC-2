@@ -125,8 +125,7 @@ export const Projects: React.FC = () => {
             </div>
             <Paginator pageSize={pageSize} pagination={pagination}
                 navigator={navigator}
-                pageSize={10}
             />
         </div>
-    ); // TODO: pageSize should be a variable and not hardcoded
+    );
 };
