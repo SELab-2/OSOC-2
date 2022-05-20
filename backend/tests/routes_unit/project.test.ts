@@ -2853,3 +2853,103 @@ test("UnAssign coach, latest osoc is null", async () => {
     ormPrMock.getProjectById.mockReset();
     ormOMock.getLatestOsoc.mockReset();
 });
+
+test("Modify projects, latest osoc is null", async () => {
+    const req = getMockReq();
+
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        name: "project-1",
+        partner: "new-partner",
+        start: new Date(Date.now()),
+        end: new Date(Date.now() + 1000),
+        roles: {
+            roles: [
+                { name: "dev", positions: 101 },
+                { name: "frontend", positions: 0 },
+                { name: "backend", positions: 12 },
+            ],
+        },
+        description: "The old partner sucked",
+    };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    await expect(project.modProject(req)).rejects.toBe(
+        errors.cookWrongOsocYear()
+    );
+
+    utilMock.checkYearPermissionProject.mockReset();
+    ormJMock.getJobApplication.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("Modify projects, job application is null", async () => {
+    const req = getMockReq();
+
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        name: "project-1",
+        partner: "new-partner",
+        start: new Date(Date.now()),
+        end: new Date(Date.now() + 1000),
+        roles: {
+            roles: [
+                { name: "dev", positions: 101 },
+                { name: "frontend", positions: 0 },
+                { name: "backend", positions: 12 },
+            ],
+        },
+        description: "The old partner sucked",
+    };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
+    ormJMock.getJobApplication.mockResolvedValue(null);
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    await expect(project.modProject(req)).rejects.toBe(errors.cookInvalidID());
+
+    utilMock.checkYearPermissionProject.mockReset();
+    ormJMock.getJobApplication.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
