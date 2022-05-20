@@ -1731,14 +1731,18 @@ test("Can modify a student on a project", async () => {
 
 test("Can filter projects (with osoc year)", async () => {
     const req = getMockReq();
-    req.body = { sessionkey: "key", projectNameFilter: "project" };
+    req.body = {
+        sessionkey: "key",
+        projectNameFilter: "project",
+        osocYear: 2022,
+    };
 
     reqMock.parseFilterProjectsRequest.mockResolvedValue({
         sessionkey: "key",
         projectNameFilter: "project",
         clientNameFilter: undefined,
         fullyAssignedFilter: undefined,
-        osocYear: undefined,
+        osocYear: 2022,
         projectNameSort: undefined,
         clientNameSort: undefined,
         currentPage: 0,
@@ -1926,4 +1930,142 @@ test("Can filter projects (with osoc year)", async () => {
     ormRMock.getRole.mockReset();
     ormCMock.contractsByProject.mockReset();
     ormPUMock.getUsersFor.mockReset();
+});
+
+test("No filtered projects", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "key", projectNameFilter: "project" };
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    reqMock.parseFilterProjectsRequest.mockResolvedValue({
+        sessionkey: "key",
+        projectNameFilter: "project",
+        clientNameFilter: undefined,
+        fullyAssignedFilter: undefined,
+        osocYear: undefined,
+        projectNameSort: undefined,
+        clientNameSort: undefined,
+        currentPage: 0,
+        pageSize: 1,
+    });
+
+    ormPrMock.filterProjects.mockResolvedValue({
+        pagination: {
+            page: 0,
+            count: 1,
+        },
+        data: [],
+    });
+
+    await expect(project.filterProjects(req)).resolves.toStrictEqual({
+        data: [],
+        pagination: { count: 1, page: 0 },
+    });
+
+    reqMock.parseFilterProjectsRequest.mockReset();
+    ormPrMock.filterProjects.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("No role found in filterProjects", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        projectNameFilter: "project",
+        osocYear: 2022,
+    };
+
+    reqMock.parseFilterProjectsRequest.mockResolvedValue({
+        sessionkey: "key",
+        projectNameFilter: "project",
+        clientNameFilter: undefined,
+        fullyAssignedFilter: undefined,
+        osocYear: 2022,
+        projectNameSort: undefined,
+        clientNameSort: undefined,
+        currentPage: 0,
+        pageSize: 1,
+    });
+
+    ormPrMock.filterProjects.mockResolvedValue({
+        pagination: {
+            page: 0,
+            count: 1,
+        },
+        data: [
+            {
+                project_id: 0,
+                osoc_id: 0,
+                name: "name",
+                partner: "partner",
+                description: null,
+                start_date: new Date(
+                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                end_date: new Date(
+                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
+                ),
+                project_role: [
+                    {
+                        positions: 3,
+                        role: {
+                            name: "Front-end developer",
+                        },
+                    },
+                    {
+                        positions: 5,
+                        role: {
+                            name: "Back-end developer",
+                        },
+                    },
+                ],
+                project_user: [
+                    {
+                        login_user: {
+                            login_user_id: 1,
+                            is_coach: true,
+                        },
+                    },
+                    {
+                        login_user: {
+                            login_user_id: 2,
+                            is_coach: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    });
+
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+        {
+            project_role_id: 1,
+            project_id: 0,
+            role_id: 1,
+            positions: 5,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValueOnce({
+        role_id: 0,
+        name: "Front-end developer",
+    });
+
+    ormRMock.getRole.mockResolvedValueOnce(null);
+
+    await expect(project.filterProjects(req)).rejects.toBe(
+        errors.cookNoDataError()
+    );
+
+    reqMock.parseFilterProjectsRequest.mockReset();
+    ormPrMock.filterProjects.mockReset();
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
 });
