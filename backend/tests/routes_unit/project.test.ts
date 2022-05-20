@@ -2236,6 +2236,57 @@ test("Contract.student is null in filterProjects", async () => {
         pagination: { count: 1, page: 0 },
     });
 
+    await expect(project.listProjects(req)).resolves.toStrictEqual({
+        data: [
+            {
+                osoc_id: 0,
+                name: "name",
+                partner: "partner",
+                description: null,
+                start_date:
+                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
+                end_date:
+                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+                id: 0,
+                coaches: [],
+                roles: [
+                    {
+                        positions: 3,
+                        name: "dev",
+                    },
+                    {
+                        positions: 5,
+                        name: "backend",
+                    },
+                ],
+                contracts: [
+                    {
+                        contract_id: 0,
+                        contract_status: contract_status_enum.APPROVED,
+                        student: {
+                            evaluation: undefined,
+                            evaluations: undefined,
+                            jobApplication: undefined,
+                            roles: undefined,
+                            student: null,
+                        },
+                        project_role: {
+                            project_id: 0,
+                            role: {
+                                name: "Front-end developer",
+                            },
+                            project_role_id: 0,
+                            role_id: 0,
+                            positions: 3,
+                        },
+                        login_user: null,
+                    },
+                ],
+            },
+        ],
+        pagination: { count: 1, page: 0 },
+    });
+
     reqMock.parseFilterProjectsRequest.mockReset();
     ormPrMock.filterProjects.mockReset();
     ormPrRMock.getProjectRolesByProject.mockReset();
@@ -2294,6 +2345,32 @@ test("Can't get free spots for project role", async () => {
 
     ormPrRMock.getProjectRolesByProject.mockReset();
     ormRMock.getRole.mockReset();
+});
+
+test("Can't get free spots for project role (number of free spots is null)", async () => {
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValue({
+        role_id: 0,
+        name: "Developer",
+    });
+
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(null);
+
+    await expect(project.getFreeSpotsFor("Developer", 0)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
+    ormPrRMock.getNumberOfFreePositions.mockReset();
 });
 
 test("Can't get free spots for project role (number of free spots is null)", async () => {

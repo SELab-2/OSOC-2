@@ -418,7 +418,8 @@ export async function getDraftedStudents(
         .then(async (parsed) => {
             const prName = await ormPr
                 .getProjectById(parsed.data.id)
-                .then((pr) => pr?.name);
+                .then(util.getOrReject)
+                .then((pr) => pr.name);
 
             return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
                 Promise.resolve({
