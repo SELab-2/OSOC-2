@@ -705,7 +705,7 @@ export async function parseFilterProjectsRequest(
     for (const filter of [
         maybe(req.body, "projectNameSort"),
         maybe(req.body, "clientNameSort"),
-        maybe(req.body, "fullyAssignedSort"),
+        maybe(req.body, "fullyAssignedSort"), //TODO: niet meer nodig?
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();

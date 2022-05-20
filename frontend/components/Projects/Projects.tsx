@@ -42,6 +42,9 @@ export const Projects: React.FC = () => {
      */
     const search = async (params: ProjectFilterParams, page: number) => {
         if (loading) return;
+
+        const scrollPosition = window.scrollY;
+
         isLoading(true);
 
         const filters = [];
@@ -91,6 +94,45 @@ export const Projects: React.FC = () => {
             setPagination(response.pagination);
         }
         isLoading(false);
+
+        // these are the search parameters we just sent
+        const newSearchParams = new URLSearchParams(query);
+        // we have to change the parameter name of osocYear to osocYearProject to prevent conflicts with the selected year for the student filter
+        const setYear = newSearchParams.get("osocYear");
+        if (setYear !== null) {
+            newSearchParams.set("osocYearProject", setYear);
+        }
+
+        // get the current active search parameters, we'll update this value
+        const updatedSearchParams = new URLSearchParams(window.location.search);
+        console.log("orig p: " + updatedSearchParams.toString());
+        // overwrite the values that are present in the new and old parameters
+        newSearchParams.forEach((value, key) => {
+            updatedSearchParams.set(key, value);
+        });
+
+        const projectFilterKeys = new Set([
+            "projectYearFilter",
+            "projectNameSort",
+            "projectNameFilter",
+            "clientNameSort",
+            "clientNameFilter",
+            "fullyAssignedFilter",
+        ]);
+        // delete the values that are not present anymore in the new filter and are project related
+        updatedSearchParams.forEach((_, key) => {
+            if (!newSearchParams.has(key) && projectFilterKeys.has(key)) {
+                updatedSearchParams.delete(key);
+            }
+        });
+
+        console.log("updated p: " + updatedSearchParams.toString());
+        console.log("new p: " + newSearchParams.toString());
+        router
+            .push(
+                `${window.location.pathname}?${updatedSearchParams.toString()}`
+            )
+            .then(() => window.scrollTo(0, scrollPosition));
     };
 
     const navigator = (page: number) => {

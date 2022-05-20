@@ -86,14 +86,13 @@ export const StudentFilter: React.FC<{
         const alumni = urlParams.get("alumniFilter");
         const studentCoach = urlParams.get("coachFilter");
         const statusFilter = urlParams.get("statusFilter");
-        const osocYear = urlParams.get("osocYear");
+        const osocYear = urlParams.get("osocYearStudent");
         const emailStatus = urlParams.get("emailStatusFilter");
         const roleFilter = urlParams.get("roleFilter");
 
         // parse all the arguments and set the state
         if (nameFilter !== null) {
             setNameFilter(nameFilter);
-            console.log(nameFilter);
         }
         if (emailFilter !== null) {
             setEmailFilter(emailFilter);
