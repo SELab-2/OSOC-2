@@ -2243,3 +2243,81 @@ test("Contract.student is null in filterProjects", async () => {
     ormCMock.contractsByProject.mockReset();
     ormPUMock.getUsersFor.mockReset();
 });
+
+test("Can get free spots for project role", async () => {
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValue({
+        role_id: 0,
+        name: "Developer",
+    });
+
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(3);
+
+    await expect(
+        project.getFreeSpotsFor("Developer", 0)
+    ).resolves.toStrictEqual({
+        role: 0,
+        count: 3,
+    });
+
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
+    ormPrRMock.getNumberOfFreePositions.mockReset();
+});
+
+test("Can't get free spots for project role", async () => {
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValue({
+        role_id: 0,
+        name: "Developer",
+    });
+
+    await expect(project.getFreeSpotsFor("dev", 0)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
+});
+
+test("Can't get free spots for project role (number of free spots is null)", async () => {
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([
+        {
+            project_role_id: 0,
+            project_id: 0,
+            role_id: 0,
+            positions: 3,
+        },
+    ]);
+
+    ormRMock.getRole.mockResolvedValue({
+        role_id: 0,
+        name: "Developer",
+    });
+
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(null);
+
+    await expect(project.getFreeSpotsFor("Developer", 0)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormRMock.getRole.mockReset();
+    ormPrRMock.getNumberOfFreePositions.mockReset();
+});
