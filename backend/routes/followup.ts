@@ -5,6 +5,9 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
+import { checkYearPermissionStudent, errors } from "../utility";
+import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
+import { getOsocById } from "../orm_functions/osoc";
 
 /**
  *  Attempts to list all followups in the system.
@@ -18,10 +21,21 @@ export async function listFollowups(
     return rq
         .parseFollowupAllRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(() =>
+        .then((parsedKeyRequest) =>
             ormOsoc
                 .getLatestOsoc()
                 .then((osoc) => util.getOrReject(osoc))
+                .then(async (osoc) => {
+                    // check if this last year is visible for the loginUser
+                    const visibleYears = await getOsocYearsForLoginUser(
+                        parsedKeyRequest.userId
+                    );
+
+                    if (osoc !== null && visibleYears.includes(osoc.year)) {
+                        return osoc;
+                    }
+                    return Promise.reject(errors.cookInsufficientRights());
+                })
                 .then(async (osoc) =>
                     ormJA
                         .getJobApplicationByYear(osoc.year)
@@ -57,6 +71,18 @@ export async function getFollowup(
             ormJA
                 .getLatestJobApplicationOfStudent(checked.data.id)
                 .then((data) => util.getOrReject(data))
+                .then(async (data) => {
+                    // check if this last year is visible for the loginUser
+                    const visibleYears = await getOsocYearsForLoginUser(
+                        checked.userId
+                    );
+                    const osoc = await getOsocById(data.osoc_id);
+
+                    if (osoc !== null && visibleYears.includes(osoc.year)) {
+                        return data;
+                    }
+                    return Promise.reject(errors.cookInsufficientRights());
+                })
                 .then((ja) =>
                     Promise.resolve({
                         student: ja.student_id,
@@ -79,6 +105,7 @@ export async function updateFollowup(
     return rq
         .parseSetFollowupStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionStudent)
         .then((checked) =>
             ormJA
                 .getLatestJobApplicationOfStudent(checked.data.id)

@@ -2,8 +2,9 @@ import express from "express";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionOsoc, errors } from "../utility";
 import * as ormO from "../orm_functions/osoc";
+import { addOsocToUser } from "../orm_functions/login_user_osoc";
 
 /**
  *  Attempts to create a new project in the system.
@@ -18,14 +19,19 @@ export async function createOsocEdition(
         .parseNewOsocEditionRequest(req)
         .then((parsed) => util.isAdmin(parsed))
         .then(async (parsed) => {
-            return ormO.createOsoc(parsed.data.year).then((osoc) =>
-                Promise.resolve({
-                    data: {
-                        id: osoc.osoc_id,
-                        year: osoc.year,
-                    },
-                })
-            );
+            const osoc = await ormO.createOsoc(parsed.data.year);
+            // the loginUser (an admin) created this osoc edition. The user is immediately registered as someone who should see this osoc edition
+            const added = await addOsocToUser(parsed.userId, osoc.osoc_id);
+            if (!added) {
+                // this error only happens if shomething in the database goes wrong even though we just checked all the necessary data is there
+                return Promise.reject(errors.cookServerError());
+            }
+            return Promise.resolve({
+                data: {
+                    id: osoc.osoc_id,
+                    year: osoc.year,
+                },
+            });
         });
 }
 
@@ -39,18 +45,14 @@ export async function listOsocEditions(
     req: express.Request
 ): Promise<Responses.OsocEditionList> {
     const parsedRequest = await rq.parseOsocAllRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const osocEditions = await ormO.filterOsocs({
-        pageSize: parsedRequest.pageSize,
-        currentPage: parsedRequest.currentPage,
-    });
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
+    if (checkedSessionKey.is_admin) {
+        const osocEditions = await ormO.getAllOsoc();
 
-    return Promise.resolve(osocEditions);
+        return Promise.resolve({ data: osocEditions });
+    }
+
+    return Promise.reject(errors.cookInvalidID());
 }
 
 /**
@@ -71,7 +73,8 @@ export async function filterYear(
             pageSize: parsedRequest.pageSize,
         },
         checkedSessionKey.data.yearFilter,
-        checkedSessionKey.data.yearSort
+        checkedSessionKey.data.yearSort,
+        checkedSessionKey.userId
     );
 
     return Promise.resolve(osocs);
@@ -88,6 +91,7 @@ export async function deleteOsocEditionRequest(
     return rq
         .parseDeleteOsocEditionRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionOsoc)
         .then(async (parsed) => {
             return ormO
                 .deleteOsocFromDB(parsed.data.id)

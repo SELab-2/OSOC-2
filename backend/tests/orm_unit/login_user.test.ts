@@ -21,6 +21,7 @@ import {
     setAdmin,
     filterLoginUsers,
     deleteLoginUserFromDB,
+    getOsocYearsForLoginUser,
 } from "../../orm_functions/login_user";
 
 // mock that is used to mock the deletePersonFromDB function
@@ -37,6 +38,13 @@ const response = {
     is_coach: false,
     session_keys: ["key1", "key2"],
     account_status: account_status_enum.DISABLED,
+    login_user_osoc: [
+        {
+            osoc: {
+                year: 2022,
+            },
+        },
+    ],
 };
 
 const returnValue = {
@@ -132,7 +140,6 @@ test("should delete all data of a login_user", async () => {
 
     await deleteLoginUserFromDB(0);
     expect(personORMMock.deletePersonFromDB).toBeCalledTimes(1);
-    expect(prismaMock.login_user.findUnique).toBeCalledTimes(1);
 });
 
 test("should return the login_user with given id", async () => {
@@ -187,4 +194,9 @@ test("should return the updated login_user", async () => {
 test("should return the updated login_user", async () => {
     prismaMock.login_user.update.mockResolvedValue(response);
     await expect(setAdmin(0, true)).resolves.toEqual(response);
+});
+
+test("should return a list of years that should be visible", async () => {
+    prismaMock.login_user.findUnique.mockResolvedValue(response);
+    await expect(getOsocYearsForLoginUser(0)).resolves.toEqual([2022]);
 });

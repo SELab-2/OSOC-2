@@ -73,6 +73,10 @@ INSERT INTO attachment(job_application_id, data, type)VALUES
 ((SELECT job_application_id from job_application WHERE fun_fact = 'I am a very funny fact'),
 '{I really need the money}', '{MOTIVATION_STRING}');
 
+/* Insert into the login_user_osoc table */
+INSERT INTO login_user_osoc(login_user_id, osoc_id) VALUES ((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 4),
+(SELECT osoc_id FROM osoc WHERE year = 2022));
+
 /* Insert data into template table */
 INSERT INTO template_email(owner_id, name, content)VALUES
 ((SELECT login_user_id FROM login_user WHERE is_admin = TRUE AND person_id = 2), 'Some Template', '<p>I am a template</p>');

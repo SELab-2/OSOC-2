@@ -27,6 +27,11 @@ describe("student filter tests", () => {
             fetchMock.mockOnce(
                 JSON.stringify({
                     success: true,
+                })
+            );
+            fetchMock.mockOnce(
+                JSON.stringify({
+                    success: true,
                     data: roles,
                 })
             );
@@ -255,6 +260,7 @@ describe("student filter tests", () => {
     });
 
     test("test filtering on roles", async () => {
+        console.log(fetchMock.mock.calls);
         expect(
             screen.getByTestId("rolesSelectedFilterDisplay").textContent
         ).toBe(`No role selected`);

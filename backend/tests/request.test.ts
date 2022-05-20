@@ -382,15 +382,17 @@ test("Can parse update student request", () => {
 test("Can parse suggest student request", () => {
     const key = "my-session-key";
     const id = 9845;
-    const ys: T.Anything = { suggestion: "YES" };
-    const mb: T.Anything = { suggestion: "MAYBE" };
-    const no: T.Anything = { suggestion: "NO" };
+    const ys: T.Anything = { suggestion: "YES", job_application_id: 1 };
+    const mb: T.Anything = { suggestion: "MAYBE", job_application_id: 1 };
+    const no: T.Anything = { suggestion: "NO", job_application_id: 1 };
     const nr: T.Anything = {
         suggestion: "NO",
         reason: "I just don't like you",
+        job_application_id: 1,
     };
-    const i1: T.Anything = { suggestion: "TOMORROW" };
-    const i2: T.Anything = { suggestion: "no" }; // no caps
+    const i1: T.Anything = { suggestion: "TOMORROW", job_application_id: 1 };
+    const i2: T.Anything = { suggestion: "no", job_application_id: 1 }; // no caps
+    const i3: T.Anything = { suggestion: "NO" }; // no job application id
 
     const okays = [ys, mb, no, nr].map((x) => {
         const copy: T.Anything = { ...x };
@@ -410,7 +412,7 @@ test("Can parse suggest student request", () => {
         ).resolves.toStrictEqual(copy);
     });
 
-    const fails = [i1, i2].map((x) => {
+    const fails = [i1, i2, i3].map((x) => {
         const req: express.Request = getMockReq();
         req.params.id = id.toString();
         req.body = { ...x };
@@ -646,7 +648,7 @@ test("Can parse filter students request", () => {
         copy.pageSize = config.global.pageSize;
 
         if (!("osocYear" in req.body)) {
-            copy["osocYear"] = new Date().getFullYear();
+            copy["osocYear"] = undefined;
         }
         copy.sessionkey = key;
         return expect(
@@ -925,12 +927,13 @@ test("Can parse final decision request", () => {
     const key = "key";
     const id = 6969420420;
     const noData: T.Anything = {};
-    const dat2: T.Anything = { reply: "YES" };
-    const dat3: T.Anything = { reply: "NO" };
-    const dat4: T.Anything = { reply: "MAYBE" };
-    const dat5: T.Anything = { reply: "something" };
-    const dat6: T.Anything = { reply: "maybe" };
-    const dat7: T.Anything = { reply: "YES" };
+    const dat2: T.Anything = { reply: "YES", job_application_id: 1 };
+    const dat3: T.Anything = { reply: "NO", job_application_id: 1 };
+    const dat4: T.Anything = { reply: "MAYBE", job_application_id: 1 };
+    const dat5: T.Anything = { reply: "something", job_application_id: 1 };
+    const dat6: T.Anything = { reply: "maybe", job_application_id: 1 };
+    const dat7: T.Anything = { reply: "YES", job_application_id: 1 };
+    const dat8: T.Anything = { reply: "YES" };
 
     const p = [dat2, dat3, dat4].map((x) => {
         const r: express.Request = getMockReq();
@@ -947,7 +950,7 @@ test("Can parse final decision request", () => {
         ).resolves.toStrictEqual(x);
     });
 
-    const q = [noData, dat5, dat6].map((x) => {
+    const q = [noData, dat5, dat6, dat8].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         r.params.id = id.toString();
@@ -1225,15 +1228,16 @@ test("Can parse mark as followed up request", () => {
     const key = "my-key-arrived-but";
     const id = 78945312;
 
-    const sc: T.Anything = { type: "SCHEDULED" };
-    const st: T.Anything = { type: "SENT" };
-    const fl: T.Anything = { type: "FAILED" };
-    const no: T.Anything = { type: "NONE" };
-    const dr: T.Anything = { type: "DRAFT" };
+    const sc: T.Anything = { type: "APPLIED" };
+    const st: T.Anything = { type: "AWAITING_PROJECT" };
+    const fl: T.Anything = { type: "APPROVED" };
+    const no: T.Anything = { type: "CONTRACT_CONFIRMED" };
+    const dr: T.Anything = { type: "CONTRACT_DECLINED" };
+    const rj: T.Anything = { type: "REJECTED" };
     const i1: T.Anything = { type: "invalid" };
     const i3: T.Anything = {};
 
-    const okays = [sc, st, fl, no, dr].map((x) => {
+    const okays = [sc, st, fl, no, dr, rj].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         setSessionKey(r, key);
@@ -1666,6 +1670,76 @@ test("Can parse self-modify requests", () => {
 });
 
 test("Can parse remove coach request", () => {
+    const r1: T.Anything = {
+        loginUserId: 1,
+    };
+
+    const res: T.Requests.IdRequest = {
+        sessionkey: "Hello I am a key",
+        id: 20123,
+    };
+
+    const req1: express.Request = getMockReq();
+    req1.body = { ...r1 };
+
+    const req2: express.Request = getMockReq();
+    req2.body = {};
+
+    setSessionKey(req1, res.sessionkey);
+    req1.params.id = res.id.toString();
+    setSessionKey(req2, res.sessionkey);
+    req2.params.id = res.id.toString();
+
+    const prom1: Promise<void> = expect(
+        Rq.parseRemoveCoachRequest(req1)
+    ).resolves.toStrictEqual({
+        sessionkey: "Hello I am a key",
+        loginUserId: 1,
+        id: 20123,
+    });
+    const prom2: Promise<void> = expect(
+        Rq.parseRemoveCoachRequest(req2)
+    ).rejects.toBe(errors.cookArgumentError());
+
+    return Promise.all([prom1, prom2]);
+});
+
+test("Can parse remove coach request", () => {
+    const r1: T.Anything = {
+        loginUserId: 1,
+    };
+
+    const res: T.Requests.IdRequest = {
+        sessionkey: "Hello I am a key",
+        id: 20123,
+    };
+
+    const req1: express.Request = getMockReq();
+    req1.body = { ...r1 };
+
+    const req2: express.Request = getMockReq();
+    req2.body = {};
+
+    setSessionKey(req1, res.sessionkey);
+    req1.params.id = res.id.toString();
+    setSessionKey(req2, res.sessionkey);
+    req2.params.id = res.id.toString();
+
+    const prom1: Promise<void> = expect(
+        Rq.parseAssignCoachRequest(req1)
+    ).resolves.toStrictEqual({
+        sessionkey: "Hello I am a key",
+        loginUserId: 1,
+        id: 20123,
+    });
+    const prom2: Promise<void> = expect(
+        Rq.parseAssignCoachRequest(req2)
+    ).rejects.toBe(errors.cookArgumentError());
+
+    return Promise.all([prom1, prom2]);
+});
+
+test("Can parse remove coach request", () => {
     const key = "key";
     const id = 10;
 
@@ -1723,4 +1797,55 @@ test("Can parse assign coach request", () => {
     );
 
     return Promise.all([valid, invalid]);
+});
+
+test("Can parse users permissions request", () => {
+    const key = "key";
+    const id = 10;
+
+    const r1: T.Anything = { osoc_id: 1, login_user_id: 1 };
+    const empty: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...r1 };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseUsersPermissionsRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+        osoc_id: 1,
+        login_user_id: 1,
+    });
+
+    const req2: express.Request = getMockReq();
+    req2.body = { ...empty };
+    req.params.id = id.toString();
+    setSessionKey(req2, key);
+    const invalid = expect(Rq.parseUsersPermissionsRequest(req2)).rejects.toBe(
+        errors.cookArgumentError()
+    );
+
+    return Promise.all([valid, invalid]);
+});
+
+test("Can parse get users permissions request", () => {
+    const key = "key";
+    const id = 10;
+
+    const empty: T.Anything = {};
+
+    const req: express.Request = getMockReq();
+    req.body = { ...empty };
+    req.params.id = id.toString();
+    setSessionKey(req, key);
+    const valid = expect(
+        Rq.parseGetUserPermissionsRequest(req)
+    ).resolves.toStrictEqual({
+        sessionkey: "key",
+        id: 10,
+    });
+
+    return Promise.all([valid]);
 });

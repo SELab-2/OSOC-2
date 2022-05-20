@@ -27,7 +27,12 @@ import * as ormP from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
 const ormPMock = ormP as jest.Mocked<typeof ormP>;
 
+import * as ormSe from "../../orm_functions/session_key";
+jest.mock("../../orm_functions/session_key");
+const ormSeMock = ormSe as jest.Mocked<typeof ormSe>;
+
 import * as admin from "../../routes/admin";
+import { errors } from "../../utility";
 
 const people: (login_user & { person: person })[] = [
     {
@@ -202,6 +207,69 @@ test("Can modify a single admin (1).", async () => {
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
 
+test("Can't modify yourself as an admin", async () => {
+    const req = getMockReq();
+    req.body = { id: 0, sessionkey: "abcd" };
+    await expect(admin.modAdmin(req)).rejects.toBe(errors.cookInvalidID());
+});
+
+test("Can modify a single admin and update the login user twice", async () => {
+    const req = getMockReq();
+    req.body = {
+        id: 7,
+        sessionkey: "abcd",
+        isAdmin: false,
+        isCoach: false,
+        accountStatus: "PENDING",
+    };
+    const res = { id: 7, name: "Jeffrey Jan" };
+
+    ormLMock.updateLoginUser.mockImplementationOnce(() =>
+        Promise.resolve({
+            person: {
+                person_id: 1,
+                name: "Jeffrey Jan",
+                email: "jeffrey@jan.be",
+                github: null,
+                github_id: null,
+            },
+            is_coach: false,
+            is_admin: false,
+            login_user_id: 7,
+            person_id: 1,
+            password: "jeffreyForEver",
+            account_status: "PENDING",
+        })
+    );
+
+    ormLMock.updateLoginUser.mockImplementationOnce(() =>
+        Promise.resolve({
+            person: {
+                person_id: 1,
+                name: "Jeffrey Jan",
+                email: "jeffrey@jan.be",
+                github: null,
+                github_id: null,
+            },
+            is_coach: false,
+            is_admin: false,
+            login_user_id: 7,
+            person_id: 1,
+            password: "jeffreyForEver",
+            account_status: "DISABLED",
+        })
+    );
+
+    ormSeMock.removeAllKeysForLoginUserId.mockResolvedValue(
+        Promise.resolve({ count: 1 })
+    );
+
+    await expect(admin.modAdmin(req)).resolves.toStrictEqual(res);
+
+    ormLMock.updateLoginUser.mockReset();
+    ormSeMock.removeAllKeysForLoginUserId.mockReset();
+});
+
 test("Can modify a single admin (2).", async () => {
     const req = getMockReq();
     req.body = {
@@ -234,4 +302,20 @@ test("Can delete admins", async () => {
     expectCall(reqMock.parseDeleteAdminRequest, req);
     expectCall(ormLMock.deleteLoginUserFromDB, req.body.id);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+});
+
+test("Can't delete yourself as an admin", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "abcd" };
+    const id = 0;
+    req.params.id = id.toString();
+
+    reqMock.parseDeleteAdminRequest.mockResolvedValue({
+        sessionkey: "abcd",
+        id: 0,
+    });
+
+    await expect(admin.deleteAdmin(req)).rejects.toBe(errors.cookInvalidID());
+
+    reqMock.parseDeleteAdminRequest.mockReset();
 });
