@@ -51,6 +51,10 @@ export interface Errors {
      */
     cookLockedRequest: () => ApiError;
     /**
+     * Cooks up a wrong suggestion request response.
+     */
+    cookWrongSuggestionYear: () => ApiError;
+    /**
      *  Cooks up a Non-existent Endpoint response.
      *  @param url The requested endpoint URL.
      */
@@ -1043,8 +1047,9 @@ export namespace Responses {
     /**
      *
      */
-    export interface OsocEditionList
-        extends Paginable<InternalTypes.OsocEdition> {}
+    export interface OsocEditionList {
+        data: OsocEdition[];
+    }
 
     /**
      *  A osoc edition response is the keyed version of the osoc edition and their associated
@@ -1140,6 +1145,15 @@ export namespace Responses {
      * data.
      */
     export interface Project extends InternalTypes.Project {}
+
+    /**
+     *  A user permission response
+     * data.
+     */
+    export interface UserYearsPermissions {
+        osoc_id: number;
+        year: number;
+    }
 
     /**
      *  A project list response with contracts in it
@@ -1328,11 +1342,13 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
+        job_application_id: number;
         reason?: string;
     }
 
     export interface Confirm extends IdRequest {
         reply: InternalTypes.Suggestion;
+        job_application_id: number;
         reason?: string;
     }
 
@@ -1454,6 +1470,11 @@ export namespace Requests {
     export interface Coach extends IdRequest {
         loginUserId: number;
     }
+
+    export interface UserYearPermissions extends IdRequest {
+        login_user_id: number;
+        osoc_id: number;
+    }
 }
 
 /**
@@ -1497,6 +1518,7 @@ export interface ServerToClientEvents {
     loginUserActivated: () => void;
     loginUserDisabled: () => void;
     registrationReceived: () => void;
+    studentSuggestionCreated: (studentId: number) => void;
 }
 
 /**
@@ -1507,6 +1529,8 @@ export interface ClientToServerEvents {
     activateUser: () => void;
     disableUser: () => void;
     submitRegistration: () => void;
+    studentSuggestionSent: (studentId: number) => void;
+    studentDecisionSent: (studentId: number) => void;
 }
 
 /**

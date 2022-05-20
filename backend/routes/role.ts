@@ -3,6 +3,7 @@ import { Responses } from "../types";
 import * as rq from "../request";
 import * as util from "../utility";
 import * as ormRo from "../orm_functions/role";
+import * as ormRole from "../orm_functions/role";
 
 /**
  *  Attempts to list all roles in the system.
@@ -38,8 +39,14 @@ export async function createStudentRole(
         .parseStudentRoleRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (parsed) => {
-            return ormRo.createRole(parsed.data.name).then((role) => {
-                return Promise.resolve({ name: role.name, id: role.role_id });
+            let roleByName = await ormRole.getRolesByName(parsed.data.name);
+            if (roleByName === null) {
+                roleByName = await ormRole.createRole(parsed.data.name);
+            }
+
+            return Promise.resolve({
+                name: roleByName.name,
+                id: roleByName.role_id,
             });
         });
 }

@@ -6,7 +6,6 @@ import {
     getJobApplication,
     getJobApplicationByYear,
     getLatestApplicationRolesForStudent,
-    getLatestJobApplicationOfStudent,
     getStudentEvaluationsFinal,
     getStudentEvaluationsTemp,
     getStudentEvaluationsTotal,
@@ -453,45 +452,6 @@ function getDataAssociatedWithApplication(
         }),
     ]);
 }
-
-it("should return the most recent job application of a student", async () => {
-    const [students, osocs] = await Promise.all([
-        prisma.student.findMany(),
-        prisma.osoc.findMany(),
-    ]);
-
-    const expected = {
-        student_id: students[0].student_id,
-        student_volunteer_info: "I'd like to volunteer",
-        responsibilities: "no responsibilities2",
-        fun_fact: "this is a fun fact too",
-        student_coach: true,
-        osoc_id: osocs[0].osoc_id,
-        edus: ["higher education"],
-        edu_level: "MaNaMa",
-        edu_duration: 8,
-        edu_institute: "Ugent",
-        edu_year: "7",
-        email_status: email_status_enum.APPROVED,
-        created_at: new Date("December 20, 2021 03:24:00"),
-    };
-
-    const found = await getLatestJobApplicationOfStudent(expected.student_id);
-
-    const [attachments, applied_roles, job_application_skill] =
-        await getDataAssociatedWithApplication(found?.job_application_id);
-
-    if (found) {
-        job_application_check(expected, found);
-    }
-    expect(found).toHaveProperty("email_status", expected.email_status);
-    expect(found).toHaveProperty("attachment", attachments);
-    expect(found).toHaveProperty(
-        "job_application_skill",
-        job_application_skill
-    );
-    expect(found).toHaveProperty("applied_role", applied_roles);
-});
 
 it("should return the job application", async () => {
     const applications = await prisma.job_application.findMany();

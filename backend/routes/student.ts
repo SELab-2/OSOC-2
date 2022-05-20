@@ -10,7 +10,7 @@ import * as ormOs from "../orm_functions/osoc";
 import * as rq from "../request";
 import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionStudent, errors } from "../utility";
 import * as ormP from "../orm_functions/person";
 import { login_user, person } from "@prisma/client";
 
@@ -24,15 +24,30 @@ export async function getStudent(
     req: express.Request
 ): Promise<Responses.Student> {
     const parsedRequest = await rq.parseSingleStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
+    let year;
+    if (checkedSessionKey.data.year === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
+        }
+    } else {
+        year = checkedSessionKey.data.year;
+    }
+
+    const jobApplication = await ormJo.getJobApplicationByYearForStudent(
+        student.student_id,
+        year
     );
     if (jobApplication == null) {
         return Promise.reject(errors.cookInvalidID());
@@ -46,16 +61,6 @@ export async function getStudent(
         } else {
             return Promise.reject(errors.cookInvalidID());
         }
-    }
-
-    let year = new Date().getFullYear();
-    if (checkedSessionKey.data.year === undefined) {
-        const latestOsocYear = await ormOs.getLatestOsoc();
-        if (latestOsocYear !== null) {
-            year = latestOsocYear.year;
-        }
-    } else {
-        year = checkedSessionKey.data.year;
     }
 
     const evaluations = await ormJo.getEvaluationsByYearForStudent(
@@ -101,6 +106,7 @@ export async function deleteStudent(
     return rq
         .parseDeleteStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionStudent)
         .then(async (parsed) => {
             return ormSt
                 .deleteStudent(parsed.data.id)
@@ -122,7 +128,9 @@ export async function createStudentSuggestion(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseSuggestStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
@@ -133,6 +141,22 @@ export async function createStudentSuggestion(
 
     if (osocYear == null) {
         return Promise.reject(errors.cookNoDataError());
+    }
+
+    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
+        student.student_id
+    );
+
+    if (jobApplication == null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (
+        jobApplication.job_application_id !==
+            checkedSessionKey.data.job_application_id ||
+        jobApplication.osoc.year !== osocYear.year
+    ) {
+        return Promise.reject(errors.cookWrongSuggestionYear());
     }
 
     const suggestionsTotal = (
@@ -146,13 +170,6 @@ export async function createStudentSuggestion(
                     checkedSessionKey.userId
             )
     );
-
-    const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-        student.student_id
-    );
-    if (jobApplication == null) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     let newEvaluation;
     if (suggestionsTotal.length > 0) {
@@ -199,18 +216,22 @@ export async function getStudentSuggestions(
     req: express.Request
 ): Promise<Responses.AllStudentEvaluationsResponse> {
     const parsedRequest = await rq.parseGetSuggestionsStudentRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const student = await ormSt.getStudent(checkedSessionKey.data.id);
     if (student == null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    let year = new Date().getFullYear();
+    let year;
     if (checkedSessionKey.data.year === undefined) {
         const latestOsocYear = await ormOs.getLatestOsoc();
         if (latestOsocYear !== null) {
             year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
         }
     } else {
         year = checkedSessionKey.data.year;
@@ -241,7 +262,9 @@ export async function createStudentConfirmation(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFinalizeDecisionRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+    const checkedSessionKey = await util
+        .checkSessionKey(parsedRequest)
+        .then(checkYearPermissionStudent);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
@@ -254,8 +277,16 @@ export async function createStudentConfirmation(
         const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
             student.student_id
         );
+
         if (jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());
+        }
+
+        if (
+            jobApplication.job_application_id !==
+            checkedSessionKey.data.job_application_id
+        ) {
+            return Promise.reject(errors.cookWrongSuggestionYear());
         }
 
         await ormEv.createEvaluationForStudent({
@@ -284,6 +315,18 @@ export async function filterStudents(
     const parsedRequest = await rq.parseFilterStudentsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
+    let year;
+    if (checkedSessionKey.data.osocYear === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
+        }
+    } else {
+        year = checkedSessionKey.data.osocYear;
+    }
+
     const students = await ormSt.filterStudents(
         {
             currentPage: checkedSessionKey.data.currentPage,
@@ -295,27 +338,19 @@ export async function filterStudents(
         checkedSessionKey.data.alumniFilter,
         checkedSessionKey.data.coachFilter,
         checkedSessionKey.data.statusFilter,
-        checkedSessionKey.data.osocYear,
+        year,
         checkedSessionKey.data.emailStatusFilter,
         checkedSessionKey.data.nameSort,
-        checkedSessionKey.data.emailSort
+        checkedSessionKey.data.emailSort,
+        checkedSessionKey.userId
     );
 
     const studentlist: InternalTypes.Student[] = [];
 
-    let year = new Date().getFullYear();
-    if (checkedSessionKey.data.osocYear === undefined) {
-        const latestOsocYear = await ormOs.getLatestOsoc();
-        if (latestOsocYear !== null) {
-            year = latestOsocYear.year;
-        }
-    } else {
-        year = checkedSessionKey.data.osocYear;
-    }
-
     for (const student of students.data) {
-        const jobApplication = await ormJo.getLatestJobApplicationOfStudent(
-            student.student_id
+        const jobApplication = await ormJo.getJobApplicationByYearForStudent(
+            student.student_id,
+            year
         );
         if (jobApplication == null) {
             return Promise.reject(errors.cookInvalidID());

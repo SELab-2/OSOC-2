@@ -9,6 +9,8 @@
 import { getMockReq } from "@jest-mock/express";
 import * as prisma from "@prisma/client";
 
+import { errors } from "../../utility";
+
 // import & mock
 import * as rq from "../../request";
 jest.mock("../../request");
@@ -37,6 +39,10 @@ const ormCMock = ormCtr as jest.Mocked<typeof ormCtr>;
 import * as ormPU from "../../orm_functions/project_user";
 jest.mock("../../orm_functions/project_user");
 const ormPUMock = ormPU as jest.Mocked<typeof ormPU>;
+
+import * as ormLU from "../../orm_functions/login_user";
+jest.mock("../../orm_functions/login_user");
+const ormLUMock = ormLU as jest.Mocked<typeof ormLU>;
 
 import * as ormEv from "../../orm_functions/evaluation";
 jest.mock("../../orm_functions/evaluation");
@@ -733,6 +739,43 @@ test("Can create new projects", async () => {
     expect(ormPrRMock.createProjectRole).toHaveBeenCalledTimes(2);
 });
 
+test("Can create new projects (insufficient rights)", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    ormLUMock.getOsocYearsForLoginUser.mockResolvedValue([2023]);
+
+    ormOMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    await expect(project.createProject(req)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+
+    ormLUMock.getOsocYearsForLoginUser.mockReset();
+    ormOMock.getOsocById.mockReset();
+});
+
 test("Can list all projects", async () => {
     const req = getMockReq();
     req.body = { sessionkey: "key" };
@@ -743,7 +786,7 @@ test("Can list all projects", async () => {
     expectCall(reqMock.parseProjectAllRequest, req);
     expectCall(utilMock.checkSessionKey, req.body);
 
-    expect(ormPrMock.getAllProjects).toHaveBeenCalledTimes(1);
+    expect(ormPrMock.getAllProjects).toHaveBeenCalledTimes(0);
     expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(
         projects.length
     );
@@ -761,7 +804,7 @@ test("Can't list all projects (role failure)", async () => {
     expectCall(reqMock.parseProjectAllRequest, req);
     expectCall(utilMock.checkSessionKey, req.body);
 
-    expect(ormPrMock.getAllProjects).toHaveBeenCalledTimes(1);
+    expect(ormPrMock.getAllProjects).toHaveBeenCalledTimes(0);
     expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
     expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
     expect(ormCMock.contractsByProject).not.toHaveBeenCalled();
@@ -839,6 +882,10 @@ test("Can get single project", async () => {
         ],
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.getProject(req)).resolves.toStrictEqual(res);
     expectCall(reqMock.parseSingleProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
@@ -848,6 +895,8 @@ test("Can get single project", async () => {
     expectCall(ormPrRMock.getProjectRolesByProject, 0);
     expect(ormRMock.getRole).toHaveBeenCalledTimes(3);
     expectCall(ormPU.getUsersFor, 0);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't get single project (role error)", async () => {
@@ -855,6 +904,10 @@ test("Can't get single project (role error)", async () => {
     ormRMock.getRole.mockResolvedValue(null);
     const req = getMockReq();
     req.body = { sessionkey: "key", id: 0 };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseSingleProjectRequest, req);
@@ -865,12 +918,18 @@ test("Can't get single project (role error)", async () => {
     expectCall(ormPrRMock.getProjectRolesByProject, 0);
     expect(ormRMock.getRole).toHaveBeenCalledTimes(1);
     expect(ormPU.getUsersFor).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't get single project (ID error)", async () => {
     ormPrMock.getProjectById.mockResolvedValue(null);
     const req = getMockReq();
     req.body = { sessionkey: "key", id: 0 };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseSingleProjectRequest, req);
@@ -881,6 +940,8 @@ test("Can't get single project (ID error)", async () => {
     expect(ormPrRMock.getProjectRolesByProject).not.toHaveBeenCalled();
     expect(ormRMock.getRole).not.toHaveBeenCalled();
     expect(ormPU.getUsersFor).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can modify projects", async () => {
@@ -902,6 +963,10 @@ test("Can modify projects", async () => {
         },
         description: "The old partner sucked",
     };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     await expect(project.modProject(req)).resolves.toStrictEqual({
         description: req.body.description,
@@ -950,6 +1015,8 @@ test("Can modify projects", async () => {
     });
     expectCall(ormPrRMock.deleteProjectRole, 2);
     expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't modify projects (role failure)", async () => {
@@ -969,6 +1036,10 @@ test("Can't modify projects (role failure)", async () => {
         description: "The old partner sucked",
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.modProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseUpdateProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
@@ -986,6 +1057,8 @@ test("Can't modify projects (role failure)", async () => {
     expect(ormPrRMock.updateProjectRole).not.toHaveBeenCalled();
     expect(ormPrRMock.deleteProjectRole).not.toHaveBeenCalled();
     expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can delete projects", async () => {
@@ -995,11 +1068,17 @@ test("Can delete projects", async () => {
         id: 0,
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.deleteProject(req)).resolves.toStrictEqual({});
     expectCall(reqMock.parseDeleteProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
     expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
     expectCall(ormPrMock.deleteProject, 0);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can get students drafted for project", async () => {
@@ -1013,6 +1092,10 @@ test("Can get students drafted for project", async () => {
         .filter((x) => x.project_role.project_id == 0)
         .map((x) => ({ student: x.student, status: x.contract_status }));
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.getDraftedStudents(req)).resolves.toStrictEqual({
         students: students,
         id: 0,
@@ -1023,6 +1106,8 @@ test("Can get students drafted for project", async () => {
     expectCall(ormPrMock.getProjectById, 0);
     expectCall(ormCMock.contractsByProject, 0);
     expect(utilMock.getOrDefault).toHaveBeenCalledTimes(1);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can get free spots for project role", async () => {
@@ -1076,6 +1161,10 @@ test("Can modify a student on a project", async () => {
         role: "frontend",
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.modProjectStudent(req)).resolves.toStrictEqual({
         drafted: true,
         role: "frontend",
@@ -1091,6 +1180,8 @@ test("Can modify a student on a project", async () => {
         projectRoleId: 2,
     });
     expectCall(ormPrRole.getProjectRoleById, 2);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can modify a student on a project (create project role)", async () => {
@@ -1101,6 +1192,10 @@ test("Can modify a student on a project (create project role)", async () => {
         studentId: 0,
         role: "backend",
     };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     await expect(project.modProjectStudent(req)).resolves.toStrictEqual({
         drafted: true,
@@ -1121,6 +1216,8 @@ test("Can modify a student on a project (create project role)", async () => {
         projectRoleId: 0,
     });
     expectCall(ormPrRole.getProjectRoleById, 0);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't modify a student on a project (no spots)", async () => {
@@ -1134,6 +1231,10 @@ test("Can't modify a student on a project (no spots)", async () => {
         role: "frontend",
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
         http: 409,
         reason: "Can't add this role to the student. There are no more vacant spots.",
@@ -1145,6 +1246,8 @@ test("Can't modify a student on a project (no spots)", async () => {
     expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
     expect(ormCMock.updateContract).not.toHaveBeenCalled();
     expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't modify a student on a project (ambiguous)", async () => {
@@ -1158,6 +1261,10 @@ test("Can't modify a student on a project (ambiguous)", async () => {
         role: "frontend",
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
         http: 409,
         reason: "The request is ambiguous.",
@@ -1169,6 +1276,8 @@ test("Can't modify a student on a project (ambiguous)", async () => {
     expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
     expect(ormCMock.updateContract).not.toHaveBeenCalled();
     expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't modify a student on a project (not assigned)", async () => {
@@ -1182,6 +1291,10 @@ test("Can't modify a student on a project (not assigned)", async () => {
         role: "frontend",
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.modProjectStudent(req)).rejects.toStrictEqual({
         http: 204,
         reason: "The selected student is not assigned to this project.",
@@ -1193,6 +1306,8 @@ test("Can't modify a student on a project (not assigned)", async () => {
     expect(ormPrRMock.createProjectRole).not.toHaveBeenCalled();
     expect(ormCMock.updateContract).not.toHaveBeenCalled();
     expect(ormPrRole.getProjectRoleById).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can un-assign coaches", async () => {
@@ -1278,6 +1393,10 @@ test("Can un-assign students", async () => {
         studentId: 0,
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.unAssignStudent(req)).resolves.toStrictEqual({});
     expectCall(reqMock.parseRemoveAssigneeRequest, req);
     expectCall(utilMock.checkSessionKey, req.body);
@@ -1285,6 +1404,8 @@ test("Can un-assign students", async () => {
     expect(ormEvMock.getEvaluationByPartiesFor).toHaveBeenCalledTimes(2);
     expect(ormEvMock.updateEvaluationForStudent).toHaveBeenCalledTimes(2);
     expect(ormCMock.removeContract).toHaveBeenCalledTimes(2);
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't un-assign students (multiple evals)", async () => {
@@ -1294,6 +1415,10 @@ test("Can't un-assign students (multiple evals)", async () => {
         id: 0,
         studentId: 0,
     };
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     await expect(project.unAssignStudent(req)).rejects.toStrictEqual({
         http: 400,
@@ -1305,6 +1430,8 @@ test("Can't un-assign students (multiple evals)", async () => {
     expect(ormEvMock.getEvaluationByPartiesFor).toHaveBeenCalledTimes(1);
     expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
     expect(ormCMock.removeContract).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can't un-assign students (no contracts)", async () => {
@@ -1316,6 +1443,10 @@ test("Can't un-assign students (no contracts)", async () => {
         studentId: 0,
     };
 
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
     await expect(project.unAssignStudent(req)).rejects.toStrictEqual({
         http: 400,
         reason: "The student with ID 0 is not assigned to project 0",
@@ -1326,6 +1457,8 @@ test("Can't un-assign students (no contracts)", async () => {
     expect(ormEvMock.getEvaluationByPartiesFor).not.toHaveBeenCalled();
     expect(ormEvMock.updateEvaluationForStudent).not.toHaveBeenCalled();
     expect(ormCMock.removeContract).not.toHaveBeenCalled();
+
+    utilMock.checkYearPermissionProject.mockReset();
 });
 
 test("Can assign students", async () => {
@@ -1462,7 +1595,8 @@ test("Can filter projects", async () => {
         undefined,
         2022,
         undefined,
-        undefined
+        undefined,
+        0
     );
     expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
     expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
@@ -1511,7 +1645,8 @@ test("Can filter projects (with osoc year)", async () => {
         undefined,
         2021,
         undefined,
-        undefined
+        undefined,
+        0
     );
     expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
     expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
@@ -1562,7 +1697,8 @@ test("Can filter projects (with failing osoc orm)", async () => {
         undefined,
         1970,
         undefined,
-        undefined
+        undefined,
+        0
     );
     expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
     expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);

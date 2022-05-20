@@ -12,9 +12,10 @@ import {
     deleteOsocFromDB,
     getNewestOsoc,
     filterOsocs,
+    getOsocById,
 } from "../../orm_functions/osoc";
 import { UpdateOsoc } from "../../orm_functions/orm_types";
-import { email_status_enum } from "@prisma/client";
+import { account_status_enum, email_status_enum } from "@prisma/client";
 
 const returnValue = {
     osoc_id: 0,
@@ -136,6 +137,7 @@ test("should delete everything associated with the give osoc edition", async () 
         },
     ]);
     prismaMock.project_user.deleteMany.mockResolvedValue({ count: 0 });
+    prismaMock.login_user_osoc.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.contract.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.project_role.deleteMany.mockResolvedValue({ count: 0 });
     prismaMock.project.deleteMany.mockResolvedValue({ count: 0 });
@@ -155,6 +157,7 @@ test("should delete everything associated with the give osoc edition", async () 
     expect(prismaMock.project_role.findMany).toBeCalledTimes(1);
     expect(prismaMock.job_application.findMany).toBeCalledTimes(1);
     expect(prismaMock.project_user.deleteMany).toBeCalledTimes(1);
+    expect(prismaMock.login_user_osoc.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.contract.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.project_role.deleteMany).toBeCalledTimes(1);
     expect(prismaMock.project.deleteMany).toBeCalledTimes(1);
@@ -187,11 +190,70 @@ test("should return filtered list of osocs", async () => {
         },
     ];
 
+    const user_response = {
+        session_id: "50",
+        login_user_id: 1,
+        person_id: 0,
+        password: "password",
+        is_admin: false,
+        is_coach: false,
+        session_keys: ["key1", "key2"],
+        account_status: account_status_enum.DISABLED,
+        login_user_osoc: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+        ],
+    };
+    prismaMock.login_user.findUnique.mockResolvedValue(user_response);
     prismaMock.osoc.findMany.mockResolvedValue(expected);
     const res = await filterOsocs(
         { currentPage: 0, pageSize: 25 },
         2022,
-        undefined
+        undefined,
+        0
+    );
+    res.data.forEach((val) => {
+        expect(val).toHaveProperty("osoc_id");
+        expect(val).toHaveProperty("year");
+    });
+    expect(prismaMock.osoc.findMany).toBeCalledTimes(1);
+});
+
+test("should return filtered list of osocs", async () => {
+    const expected = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
+
+    const user_response = {
+        session_id: "50",
+        login_user_id: 1,
+        person_id: 0,
+        password: "password",
+        is_admin: false,
+        is_coach: false,
+        session_keys: ["key1", "key2"],
+        account_status: account_status_enum.DISABLED,
+        login_user_osoc: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+        ],
+    };
+    prismaMock.login_user.findUnique.mockResolvedValue(user_response);
+    prismaMock.osoc.findMany.mockResolvedValue(expected);
+    const res = await filterOsocs(
+        { currentPage: 0, pageSize: 25 },
+        2022,
+        undefined,
+        0
     );
     expect(res.pagination).toStrictEqual({ page: 0, count: undefined });
     res.data.forEach((val) => {
@@ -199,6 +261,55 @@ test("should return filtered list of osocs", async () => {
         expect(val).toHaveProperty("year");
     });
     expect(prismaMock.osoc.findMany).toBeCalledTimes(1);
+});
+
+test("should return filtered list of osocs", async () => {
+    const expected = [
+        {
+            osoc_id: 0,
+            year: 2022,
+        },
+    ];
+
+    const user_response = {
+        session_id: "50",
+        login_user_id: 1,
+        person_id: 0,
+        password: "password",
+        is_admin: false,
+        is_coach: false,
+        session_keys: ["key1", "key2"],
+        account_status: account_status_enum.DISABLED,
+        login_user_osoc: [
+            {
+                osoc: {
+                    year: 0,
+                },
+            },
+        ],
+    };
+    prismaMock.login_user.findUnique.mockResolvedValue(user_response);
+    prismaMock.osoc.findMany.mockResolvedValue(expected);
+    const res = await filterOsocs(
+        { currentPage: 0, pageSize: 25 },
+        2022,
+        undefined,
+        0
+    );
+    res.data.forEach((val) => {
+        expect(val).toHaveProperty("osoc_id");
+        expect(val).toHaveProperty("year");
+    });
+    expect(prismaMock.osoc.findMany).toBeCalledTimes(0);
+});
+
+test("should return the found osoc edition", async () => {
+    const osoc = {
+        osoc_id: 0,
+        year: 0,
+    };
+    prismaMock.osoc.findUnique.mockResolvedValue(osoc);
+    await expect(getOsocById(0)).resolves.toEqual(osoc);
 });
 
 test("should return filtered list of osocs (yearFilter is undefined)", async () => {
@@ -213,7 +324,8 @@ test("should return filtered list of osocs (yearFilter is undefined)", async () 
     const res = await filterOsocs(
         { currentPage: 0, pageSize: 25 },
         undefined,
-        undefined
+        undefined,
+        0
     );
     expect(res.pagination).toStrictEqual({ page: 0, count: undefined });
     res.data.forEach((val) => {

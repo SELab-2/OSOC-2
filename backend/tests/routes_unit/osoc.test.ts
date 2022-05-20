@@ -22,7 +22,8 @@ jest.mock("../../utility", () => {
         ...og,
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
-    }; // we want to only mock checkSessionKey and isAdmin
+        checkYearPermissionOsoc: jest.fn(),
+    }; // we want to only mock checkSessionKey, isAdmin and checkYearPermissionOsoc
 });
 const utilMock = util as jest.Mocked<typeof util>;
 
@@ -32,6 +33,11 @@ jest.mock("../../orm_functions/osoc");
 const ormoMock = ormo as jest.Mocked<typeof ormo>;
 
 import * as osoc from "../../routes/osoc";
+
+import * as ormlo from "../../orm_functions/login_user_osoc";
+import { errors } from "../../utility";
+jest.mock("../../orm_functions/login_user_osoc");
+const ormloMock = ormlo as jest.Mocked<typeof ormlo>;
 
 function expectCall<T, U>(func: T, val: U) {
     expect(func).toHaveBeenCalledTimes(1);
@@ -96,6 +102,9 @@ beforeEach(() => {
             ? Promise.resolve(keyData(v).abcd)
             : Promise.reject(util.errors.cookInsufficientRights())
     );
+    utilMock.checkYearPermissionOsoc.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     ormoMock.createOsoc.mockImplementation((y) =>
         Promise.resolve({ osoc_id: 0, year: y })
@@ -116,6 +125,12 @@ beforeEach(() => {
         }
     );
     ormoMock.deleteOsocFromDB.mockImplementation(() => Promise.resolve());
+
+    ormloMock.addOsocToUser.mockResolvedValue({
+        login_user_osoc_id: 0,
+        login_user_id: 0,
+        osoc_id: 0,
+    });
 });
 
 afterEach(() => {
@@ -126,11 +141,14 @@ afterEach(() => {
 
     utilMock.checkSessionKey.mockReset();
     utilMock.isAdmin.mockReset();
+    utilMock.checkYearPermissionOsoc.mockReset();
 
     ormoMock.createOsoc.mockReset();
     ormoMock.getAllOsoc.mockReset();
     ormoMock.filterOsocs.mockReset();
     ormoMock.deleteOsocFromDB.mockReset();
+
+    ormloMock.addOsocToUser.mockReset();
 });
 
 test("Can create osoc edition", async () => {
@@ -145,17 +163,49 @@ test("Can create osoc edition", async () => {
     expectNoCall(utilMock.checkSessionKey);
 });
 
+test("osoc create fails because of database error when connecting loginUser to osoc", async () => {
+    const r = getMockReq();
+    ormloMock.addOsocToUser.mockReset(); // resetting this mock will trigger the fail
+    r.body = { sessionkey: "abcd", year: 2059 };
+
+    await expect(osoc.createOsocEdition(r)).rejects.toBe(
+        errors.cookServerError()
+    );
+
+    expectCall(reqMock.parseNewOsocEditionRequest, r);
+    expectCall(utilMock.isAdmin, r.body);
+    expectCall(ormoMock.createOsoc, 2059);
+    expectNoCall(utilMock.checkSessionKey);
+});
+
 test("Can get all the osoc editions", async () => {
     const r = getMockReq();
     r.body = { sessionkey: "abcd" };
     await expect(osoc.listOsocEditions(r)).resolves.toStrictEqual({
         data: osocs,
-        pagination: { page: 0, count: 7 },
     });
     expectCall(reqMock.parseOsocAllRequest, r);
-    expect(ormoMock.getAllOsoc).toHaveBeenCalledTimes(0);
-    expect(ormoMock.filterOsocs).toHaveBeenCalledTimes(1);
-    expectCall(utilMock.checkSessionKey, r.body);
+    expect(ormoMock.getAllOsoc).toHaveBeenCalledTimes(1);
+    expectCall(utilMock.isAdmin, r.body);
+});
+
+test("Can't get all the osoc editions if you're a coach", async () => {
+    const r = getMockReq();
+    r.body = { sessionkey: "abcd" };
+
+    utilMock.isAdmin.mockImplementation((v) =>
+        Promise.resolve({
+            userId: 0,
+            data: v,
+            accountStatus: "ACTIVATED",
+            is_admin: false,
+            is_coach: true,
+        })
+    );
+
+    await expect(osoc.listOsocEditions(r)).rejects.toBe(errors.cookInvalidID());
+
+    utilMock.isAdmin.mockReset();
 });
 
 test("Can filter the osoc editions", async () => {
@@ -170,7 +220,8 @@ test("Can filter the osoc editions", async () => {
     expect(ormoMock.filterOsocs).toHaveBeenCalledWith(
         { currentPage: undefined, pageSize: undefined },
         2022,
-        undefined
+        undefined,
+        0
     );
     expectCall(utilMock.checkSessionKey, r.body);
 });

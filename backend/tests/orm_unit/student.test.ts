@@ -6,11 +6,12 @@ import {
     deleteStudentFromDB,
     filterStudents,
     getAllStudents,
+    getAppliedYearsForStudent,
     getStudent,
     searchStudentByGender,
     updateStudent,
 } from "../../orm_functions/student";
-import { decision_enum } from "@prisma/client";
+import { account_status_enum, decision_enum } from "@prisma/client";
 
 // mock that is used to mock the deletePersonFromDB function
 import * as personORM from "../../orm_functions/person";
@@ -109,7 +110,6 @@ test("should return the students that succeed to the filtered fields", async () 
     ];
 
     prismaMock.student.findMany.mockResolvedValue(returnval);
-
     await expect(
         filterStudents(
             { currentPage: 0, pageSize: 25 },
@@ -122,12 +122,10 @@ test("should return the students that succeed to the filtered fields", async () 
             2022,
             undefined,
             undefined,
-            undefined
+            undefined,
+            0
         )
-    ).resolves.toEqual({
-        data: returnval,
-        pagination: { count: undefined, page: 0 },
-    });
+    ).resolves.toEqual({ data: [], pagination: { count: 0, page: 0 } });
 });
 
 test("should return the students that succeed to the filtered fields but with a status filter", async () => {
@@ -157,10 +155,151 @@ test("should return the students that succeed to the filtered fields but with a 
             2022,
             undefined,
             undefined,
-            undefined
+            undefined,
+            0
+        )
+    ).resolves.toEqual({ data: [], pagination: { count: 0, page: 0 } });
+});
+
+test("should return the students that succeed to the filtered fields but with a status filter", async () => {
+    const returnval = [
+        {
+            student_id: 0,
+            person_id: 0,
+            gender: "",
+            pronouns: "",
+            phone_number: "",
+            nickname: "",
+            alumni: false,
+        },
+    ];
+
+    prismaMock.student.findMany.mockResolvedValue(returnval);
+
+    await expect(
+        filterStudents(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            [""],
+            undefined,
+            undefined,
+            decision_enum.MAYBE,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            0
         )
     ).resolves.toEqual({
-        data: returnval,
+        data: [
+            {
+                alumni: false,
+                gender: "",
+                nickname: "",
+                person_id: 0,
+                phone_number: "",
+                pronouns: "",
+                student_id: 0,
+            },
+        ],
         pagination: { count: undefined, page: 0 },
     });
+});
+
+test("should return the students that succeed to the filtered fields but with a status filter", async () => {
+    const returnval = [
+        {
+            student_id: 0,
+            person_id: 0,
+            gender: "",
+            pronouns: "",
+            phone_number: "",
+            nickname: "",
+            alumni: false,
+        },
+    ];
+
+    const user_response = {
+        session_id: "50",
+        login_user_id: 1,
+        person_id: 0,
+        password: "password",
+        is_admin: false,
+        is_coach: false,
+        session_keys: ["key1", "key2"],
+        account_status: account_status_enum.DISABLED,
+        login_user_osoc: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+        ],
+    };
+
+    prismaMock.student.findMany.mockResolvedValue(returnval);
+    prismaMock.login_user.findUnique.mockResolvedValue(user_response);
+
+    await expect(
+        filterStudents(
+            { currentPage: 0, pageSize: 25 },
+            undefined,
+            undefined,
+            [""],
+            undefined,
+            undefined,
+            undefined,
+            2022,
+            undefined,
+            undefined,
+            undefined,
+            0
+        )
+    ).resolves.toEqual({
+        data: [
+            {
+                alumni: false,
+                gender: "",
+                nickname: "",
+                person_id: 0,
+                phone_number: "",
+                pronouns: "",
+                student_id: 0,
+            },
+        ],
+        pagination: { count: undefined, page: 0 },
+    });
+});
+
+test("should return a list with the applied years", async () => {
+    const val = {
+        job_application: [
+            {
+                osoc: {
+                    year: 2022,
+                },
+            },
+            {
+                osoc: {
+                    year: 2023,
+                },
+            },
+        ],
+        student_id: 0,
+        person_id: 0,
+        gender: "",
+        pronouns: "",
+        phone_number: "",
+        nickname: "",
+        alumni: false,
+    };
+
+    prismaMock.student.findUnique.mockResolvedValue(val);
+    await expect(getAppliedYearsForStudent(0)).resolves.toEqual([2022, 2023]);
+});
+
+test("should return the empty list of visible years because the student does not exist", async () => {
+    prismaMock.student.findUnique.mockResolvedValue(null);
+    await expect(getAppliedYearsForStudent(0)).resolves.toEqual([]);
 });

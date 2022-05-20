@@ -6,6 +6,7 @@ import {
     deleteJobApplicationsFromStudent,
     getJobApplication,
     getJobApplicationByYear,
+    getJobApplicationByYearForStudent,
     getLatestApplicationRolesForStudent,
     getLatestJobApplicationOfStudent,
     getStudentEvaluationsFinal,
@@ -113,6 +114,13 @@ test("should return all job applications of the given year", async () => {
 test("should return the latest roles this student has applied for", async () => {
     prismaMock.job_application.findFirst.mockResolvedValue(response);
     await expect(getLatestApplicationRolesForStudent(0)).resolves.toEqual(
+        response
+    );
+});
+
+test("should return the job application of a student (for a certain year)", async () => {
+    prismaMock.job_application.findMany.mockResolvedValue([response]);
+    await expect(getJobApplicationByYearForStudent(0, 2022)).resolves.toEqual(
         response
     );
 });

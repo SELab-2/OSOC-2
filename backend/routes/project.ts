@@ -11,7 +11,9 @@ import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
 import { ApiError, Responses } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionProject, errors } from "../utility";
+import { getOsocById } from "../orm_functions/osoc";
+import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
 
 /**
  *  Attempts to create a new project in the system.
@@ -24,6 +26,15 @@ export async function createProject(
 ): Promise<Responses.Project> {
     const parsedRequest = await rq.parseNewProjectRequest(req);
     const checkedSessionKey = await util.isAdmin(parsedRequest);
+
+    // check if the loginUser has the permissions to create a project for this osoc edition
+    const visibleYears = await getOsocYearsForLoginUser(
+        checkedSessionKey.userId
+    );
+    const osoc = await getOsocById(checkedSessionKey.data.osocId);
+    if (osoc && !visibleYears.includes(osoc.year)) {
+        return Promise.reject(errors.cookInsufficientRights());
+    }
 
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
@@ -84,10 +95,26 @@ export async function createProject(
 export async function listProjects(
     req: express.Request
 ): Promise<Responses.ProjectListAndContracts> {
-    await rq.parseProjectAllRequest(req).then(util.checkSessionKey);
+    const checkedSessionKey = await rq
+        .parseProjectAllRequest(req)
+        .then(util.checkSessionKey);
 
     const allProjects = [];
-    for (const project of await ormPr.getAllProjects()) {
+    const fetchedProjects = await ormPr.filterProjects(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        checkedSessionKey.userId
+    );
+    for (const project of fetchedProjects.data) {
         const roles = await ormPrRole.getProjectRolesByProject(
             project.project_id
         );
@@ -153,6 +180,7 @@ export async function listProjects(
     }
 
     return Promise.resolve({
+        pagination: fetchedProjects.pagination,
         data: allProjects,
     });
 }
@@ -169,6 +197,7 @@ export async function getProject(
     const parsedRequest = await rq.parseSingleProjectRequest(req);
     const checkedId = await util
         .isAdmin(parsedRequest)
+        .then(checkYearPermissionProject)
         .then((v) => util.isValidID(v.data, "project"));
 
     const project = await ormPr.getProjectById(checkedId.id);
@@ -247,6 +276,7 @@ export async function modProject(
     const checkedId = await rq
         .parseUpdateProjectRequest(req)
         .then(util.isAdmin)
+        .then(checkYearPermissionProject)
         .then((checked) => util.isValidID(checked.data, "project"));
 
     const updatedProject = await ormPr.updateProject({
@@ -364,6 +394,7 @@ export async function deleteProject(
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
             return ormPr
@@ -384,6 +415,7 @@ export async function getDraftedStudents(
     return rq
         .parseGetDraftedStudentsRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionProject)
         .then(async (parsed) => {
             const prName = await ormPr
                 .getProjectById(parsed.data.id)
@@ -465,6 +497,7 @@ export async function modProjectStudent(
     return rq
         .parseDraftStudentRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionProject)
         .then(async (parsed) => {
             return ormCtr
                 .contractsByProject(parsed.data.id)
@@ -606,6 +639,7 @@ export async function unAssignStudent(
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionProject)
         .then(async (checked) => {
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
@@ -736,9 +770,6 @@ export async function filterProjects(
 ): Promise<Responses.ProjectListAndContracts> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
     const checkedSessionKey = await util.checkSessionKey(parsedRequest);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
 
     let year = new Date(Date.now()).getFullYear();
     if (checkedSessionKey.data.osocYear === undefined) {
@@ -761,7 +792,8 @@ export async function filterProjects(
         checkedSessionKey.data.fullyAssignedFilter,
         year,
         checkedSessionKey.data.projectNameSort,
-        checkedSessionKey.data.clientNameSort
+        checkedSessionKey.data.clientNameSort,
+        checkedSessionKey.userId
     );
 
     const allProjects = [];
