@@ -2658,3 +2658,76 @@ test("Assign student, project is null", async () => {
     ormPrMock.getProjectById.mockReset();
     ormOMock.getLatestOsoc.mockReset();
 });
+
+test("UnAssign student, project is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        student: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseRemoveAssigneeRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        studentId: 0,
+    });
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockResolvedValue(null);
+
+    await expect(project.unAssignStudent(req)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    reqMock.parseRemoveAssigneeRequest.mockReset();
+    utilMock.checkYearPermissionProject.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+});
+
+test("UnAssign student, latest osoc is null", async () => {
+    const req = getMockReq();
+    const id = 0;
+    req.body = {
+        sessionkey: "some-key",
+        student: 0,
+    };
+
+    req.params.id = id.toString();
+
+    reqMock.parseRemoveAssigneeRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        studentId: 0,
+    });
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
+    ormOMock.getLatestOsoc.mockResolvedValue(null);
+
+    ormPrMock.getProjectById.mockImplementation(() => {
+        return Promise.resolve(projects2[0]);
+    });
+
+    await expect(project.unAssignStudent(req)).rejects.toBe(
+        errors.cookInvalidID()
+    );
+
+    reqMock.parseRemoveAssigneeRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+    utilMock.checkYearPermissionProject.mockReset();
+});
