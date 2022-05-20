@@ -37,6 +37,12 @@ export async function createProject(
         return Promise.reject(errors.cookInsufficientRights());
     }
 
+    const latestOsoc = await ormOsoc.getLatestOsoc();
+
+    if (latestOsoc === null || osoc === null || osoc.year !== latestOsoc.year) {
+        return Promise.reject(errors.cookWrongOsocYear());
+    }
+
     const createdProject = await ormPr.createProject({
         name: checkedSessionKey.data.name,
         partner: checkedSessionKey.data.partner,

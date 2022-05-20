@@ -238,7 +238,6 @@ const Change: NextPage = () => {
                     )
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
-                    console.log(response);
                     if (response !== undefined && response.success) {
                         alert("Project successfully changed!");
                         const pidNumber =
