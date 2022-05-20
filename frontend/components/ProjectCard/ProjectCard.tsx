@@ -43,8 +43,8 @@ export const ProjectCard: React.FC<{
             .then((response) => response.json())
             .catch((err) => console.log(err));
         if (response !== undefined && response.success) {
+            updateProject();
             if (notify) {
-                updateProject();
                 notify(
                     `Succesfully assigned ${student.student.person.name} to ${project.name}`,
                     NotificationType.SUCCESS,
@@ -90,6 +90,7 @@ export const ProjectCard: React.FC<{
             .then((response) => response.json())
             .catch((err) => console.log(err));
         if (response !== undefined && response.success) {
+            updateProject();
             if (notify) {
                 notify(
                     `Succesfully removed ${contract.student.student.person.name} from ${project.name}`,
