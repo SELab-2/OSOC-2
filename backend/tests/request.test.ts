@@ -1228,15 +1228,16 @@ test("Can parse mark as followed up request", () => {
     const key = "my-key-arrived-but";
     const id = 78945312;
 
-    const sc: T.Anything = { type: "SCHEDULED" };
-    const st: T.Anything = { type: "SENT" };
-    const fl: T.Anything = { type: "FAILED" };
-    const no: T.Anything = { type: "NONE" };
-    const dr: T.Anything = { type: "DRAFT" };
+    const sc: T.Anything = { type: "APPLIED" };
+    const st: T.Anything = { type: "AWAITING_PROJECT" };
+    const fl: T.Anything = { type: "APPROVED" };
+    const no: T.Anything = { type: "CONTRACT_CONFIRMED" };
+    const dr: T.Anything = { type: "CONTRACT_DECLINED" };
+    const rj: T.Anything = { type: "REJECTED" };
     const i1: T.Anything = { type: "invalid" };
     const i3: T.Anything = {};
 
-    const okays = [sc, st, fl, no, dr].map((x) => {
+    const okays = [sc, st, fl, no, dr, rj].map((x) => {
         const r: express.Request = getMockReq();
         r.body = { ...x };
         setSessionKey(r, key);

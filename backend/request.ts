@@ -775,11 +775,12 @@ export async function parseSetFollowupStudentRequest(
     return hasFields(req, ["type"], types.id).then(async () => {
         const type: string = req.body.type;
         if (
-            type != "SCHEDULED" &&
-            type != "SENT" &&
-            type != "FAILED" &&
-            type != "NONE" &&
-            type != "DRAFT"
+            type != "APPLIED" &&
+            type != "AWAITING_PROJECT" &&
+            type != "APPROVED" &&
+            type != "CONTRACT_CONFIRMED" &&
+            type != "CONTRACT_DECLINED" &&
+            type != "REJECTED"
         )
             return rejector();
 
