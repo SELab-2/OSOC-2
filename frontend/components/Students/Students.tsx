@@ -9,6 +9,7 @@ import {
     StudentFilterParams,
     StudentStatus,
     Pagination,
+    NotificationType,
 } from "../../types";
 import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -19,13 +20,13 @@ import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
 import { useSockets } from "../../contexts/socketProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 /**
  * Constructs the complete students page with filter included
  * @param alwaysLimited Whether or not the page should always be shown limited
  * @param dragDisabled Whether or not the components are draggable
  * for in the projects panel for example
- * @param updateParentStudents
  * @constructor
  */
 export const Students: React.FC<{
@@ -49,6 +50,7 @@ export const Students: React.FC<{
     const pageSize = 10;
     const [loading, isLoading] = useState(false);
     const { socket } = useSockets();
+    const { notify } = useContext(NotificationContext);
 
     /**
      * Updates the list of students and sets the selected student index
@@ -301,18 +303,23 @@ export const Students: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then((json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else return json;
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (response.data !== undefined && response.pagination !== undefined) {
+        if (
+            response &&
+            response.success &&
+            response.data &&
+            response.pagination
+        ) {
             setFilteredStudents(response.data);
             setPagination(response.pagination);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
         isLoading(false);
         const id = new URLSearchParams(window.location.search).get("id");

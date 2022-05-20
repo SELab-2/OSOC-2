@@ -113,19 +113,15 @@ const Index: NextPage = () => {
                 }
             )
                 .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        setLoginBackendError(`Failed to login. ${json.reason}`);
-                        return { success: false };
-                    } else return json;
-                })
                 .catch(() => {
                     setLoginBackendError(
                         `Something went wrong while trying to login.`
                     );
                     return { success: false };
                 });
-
+            if (response && !response.success) {
+                setLoginBackendError(`Failed to login. ${response.reason}`);
+            }
             // The user is succesfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
                 if (setSessionKey) {
@@ -329,11 +325,19 @@ const Index: NextPage = () => {
                 }
             )
                 .then((res) => res.json())
-                .catch((error) => console.log(error));
+                .catch((err) => {
+                    console.log(err);
+                });
             if (response.success) {
                 setPasswordResetMailError("");
                 setShowPasswordReset(false);
-                // TODO -- Notification
+                if (notify) {
+                    notify(
+                        "Successfully sent a recovery email.!",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
             } else {
                 setPasswordResetMailError(response.reason);
             }

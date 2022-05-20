@@ -55,9 +55,21 @@ export const StudentOverview: React.FC<{
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
+            .catch((err) => {
+                console.log(err);
+            });
+        if (
+            response !== undefined &&
+            response.success &&
+            Array.isArray(response.evaluation.evaluations)
+        ) {
             setEvaluations(response.evaluation.evaluations);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
@@ -111,6 +123,13 @@ export const StudentOverview: React.FC<{
                 );
                 // The creation was successful, we can update the evaluation bar
                 fetchEvals().then();
+                if (notify) {
+                    notify(
+                        "Successfully made the final decision.",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
             } else {
                 if (notify) {
                     notify(response.reason, NotificationType.WARNING, 3000);
@@ -150,9 +169,20 @@ export const StudentOverview: React.FC<{
                 socket.emit("studentDecisionSent", student.student.student_id);
                 // The creation was successful, we can update the evaluation bar
                 fetchEvals().then();
+                if (notify) {
+                    notify(
+                        "Successfully made a suggestion.",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
             } else {
                 if (notify) {
-                    notify(response.reason, NotificationType.WARNING, 3000);
+                    notify(
+                        "Something went wrong:" + response.reason,
+                        NotificationType.ERROR,
+                        2000
+                    );
                 }
             }
         }
