@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useContext, useState, SyntheticEvent } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
-import { OsocEdition, Project, Coach } from "../../../types";
+import { Project, Coach } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 import styles from "./change.module.scss";
 
@@ -27,8 +27,6 @@ const Change: NextPage = () => {
 
     const [projectName, setProjectName] = useState<string>("");
     const [partner, setPartner] = useState<string>("");
-    const [osocId, setOsocId] = useState<string>("");
-    const [osocYear, setOsocYear] = useState<string>("");
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
     const [roles, setRoles] = useState<string[]>([]);
@@ -38,7 +36,6 @@ const Change: NextPage = () => {
     const [visible, setVisible] = useState<boolean>(false);
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
-    const [osocs, setOsocs] = useState<OsocEdition[]>([]);
     const [coaches, setCoaches] = useState<Coach[]>([]);
     const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
     const [coachesActive, setCoachesActive] = useState<boolean>(false);
@@ -92,27 +89,6 @@ const Change: NextPage = () => {
         }
     };
 
-    const fetchOsocs = async () => {
-        if (getSession != undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `auth/osoc2 ${sessionKey}`,
-                        },
-                    }
-                )
-                    .then((response) => response.json())
-                    .catch((error) => console.log(error));
-                if (response !== undefined && response.success) {
-                    setOsocs(response.data);
-                }
-            });
-        }
-    };
-
     const fetchCoaches = async () => {
         if (getSession != undefined) {
             getSession().then(async ({ sessionKey }) => {
@@ -137,7 +113,6 @@ const Change: NextPage = () => {
     const assignFields = (project: Project) => {
         setProjectName(project.name);
         setPartner(project.partner);
-        setOsocId(project.osoc_id.toString());
         setStartDate(formatDate(project.start_date));
         setEndDate(formatDate(project.end_date));
         for (const role of project.roles) {
@@ -157,7 +132,6 @@ const Change: NextPage = () => {
         if (router.isReady) {
             fetchProject().then();
             fetchRoles().then();
-            fetchOsocs().then();
             fetchCoaches().then();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -225,7 +199,6 @@ const Change: NextPage = () => {
                                 partner: partner,
                                 start: new Date(startDate),
                                 end: new Date(endDate),
-                                osocId: osocId,
                                 roles: { roles: getRoleList() },
                                 addCoaches: { coaches: getAddCoaches() },
                                 removeCoaches: { coaches: getRemoveCoaches() },
@@ -273,28 +246,6 @@ const Change: NextPage = () => {
             roleList.push(obj);
         }
         return roleList;
-    };
-
-    const getOsocYear = () => {
-        if (osocId != "") {
-            for (const osoc of osocs) {
-                if (osoc.osoc_id === Number(osocId)) {
-                    return osoc.year.toString();
-                }
-            }
-        } else {
-            return osocYear;
-        }
-    };
-
-    const getOsocId = (year: string) => {
-        for (const osoc of osocs) {
-            if (osoc.year === parseInt(year)) {
-                return osoc.osoc_id.toString();
-            }
-        }
-        setOsocYear(year);
-        return "";
     };
 
     const getRolePositions = (name: string) => {
@@ -385,20 +336,6 @@ const Change: NextPage = () => {
                     placeholder="partner..."
                     value={partner}
                     onChange={(e) => setPartner(e.target.value)}
-                />
-            </label>
-
-            <label>
-                <h1>Osoc edition</h1>
-                <input
-                    className="input"
-                    type="text"
-                    name="osoc_edition"
-                    placeholder="year..."
-                    value={getOsocYear() || ""}
-                    onChange={(e) => {
-                        setOsocId(getOsocId(e.target.value));
-                    }}
                 />
             </label>
 

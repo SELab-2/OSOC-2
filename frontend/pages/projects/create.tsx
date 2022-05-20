@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition, Coach } from "../../types";
+import { Coach } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 
@@ -25,8 +25,6 @@ const Create: NextPage = () => {
 
     const [projectName, setProjectName] = useState<string>("");
     const [partner, setPartner] = useState<string>("");
-    const [selectedOsocEdition, setSelectedOsocEdition] = useState<number>(-1);
-    const [osocsActive, setOsocsActive] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>(formatDate());
     const [endDate, setEndDate] = useState<string>(formatDate());
     const [description, setDescription] = useState<string>("");
@@ -36,7 +34,6 @@ const Create: NextPage = () => {
     const [visible, setVisible] = useState<boolean>(false);
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
-    const [osocs, setOsocs] = useState<OsocEdition[]>([]);
     const [coaches, setCoaches] = useState<Coach[]>([]);
     const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
     const [coachesActive, setCoachesActive] = useState<boolean>(false);
@@ -71,27 +68,6 @@ const Create: NextPage = () => {
         }
     };
 
-    const fetchOsocs = async () => {
-        if (getSession != undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `auth/osoc2 ${sessionKey}`,
-                        },
-                    }
-                )
-                    .then((response) => response.json())
-                    .catch((error) => console.log(error));
-                if (response !== undefined && response.success) {
-                    setOsocs(response.data);
-                }
-            });
-        }
-    };
-
     const fetchCoaches = async () => {
         if (getSession != undefined) {
             getSession().then(async ({ sessionKey }) => {
@@ -115,7 +91,6 @@ const Create: NextPage = () => {
 
     useEffect(() => {
         fetchRoles().then();
-        fetchOsocs().then();
         fetchCoaches().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -138,7 +113,7 @@ const Create: NextPage = () => {
                                 partner: partner,
                                 start: startDate,
                                 end: endDate,
-                                osocId: selectedOsocEdition,
+                                osocId: 1,
                                 positions: getTotalPositions(),
                                 roles: { roles: getRoleList() },
                                 description: description,
@@ -154,14 +129,6 @@ const Create: NextPage = () => {
                     }
                 }
             });
-        }
-    };
-
-    const getOsocYear = () => {
-        for (const osoc of osocs) {
-            if (osoc.osoc_id === selectedOsocEdition) {
-                return osoc.year;
-            }
         }
     };
 
@@ -240,14 +207,6 @@ const Create: NextPage = () => {
             selectedCoaches.push(id);
         }
         setSelectedCoaches([...selectedCoaches]);
-    };
-
-    const selectOsocEdition = (id: number) => {
-        if (selectedOsocEdition === id) {
-            setSelectedOsocEdition(-1); // deselect
-        } else {
-            setSelectedOsocEdition(id);
-        }
     };
 
     const checkUnfocus = (name: string, positions: string) => {
@@ -357,58 +316,6 @@ const Create: NextPage = () => {
                     onChange={(e) => setEndDate(e.target.value)}
                 />
             </label>
-
-            <div className={styles.rolesHeader}>
-                <p>Select an osoc edition: </p>
-                <div className={`dropdown ${osocsActive ? "is-active" : ""}`}>
-                    <div
-                        data-testid={"coachesSelectedFilterDisplay"}
-                        className={`dropdown-trigger ${
-                            osocsActive || selectedOsocEdition > 0
-                                ? styles.active
-                                : styles.inactive
-                        } ${styles.dropdownTrigger}`}
-                        onClick={() => setOsocsActive(!osocsActive)}
-                    >
-                        {selectedOsocEdition > 0
-                            ? `edition ${getOsocYear()}`
-                            : "No edition selected"}
-                        <div className={styles.triangleContainer}>
-                            <div
-                                className={`${osocsActive ? styles.up : ""} ${
-                                    styles.triangle
-                                }`}
-                            />
-                        </div>
-                    </div>
-                    <div className="dropdown-menu">
-                        <div className="dropdown-content">
-                            {osocs !== undefined
-                                ? osocs.map((osoc) => (
-                                      <div
-                                          data-testid={`testRoleItem=${osoc.year}`}
-                                          className={`${
-                                              styles.dropdownItem
-                                          } dropdown-item ${
-                                              osoc.osoc_id ===
-                                              selectedOsocEdition
-                                                  ? styles.selected
-                                                  : ""
-                                          }`}
-                                          key={osoc.osoc_id}
-                                          onClick={() => {
-                                              selectOsocEdition(osoc.osoc_id);
-                                              setOsocsActive(false);
-                                          }}
-                                      >
-                                          {osoc.year}
-                                      </div>
-                                  ))
-                                : null}
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div className={styles.rolesHeader}>
                 <p>Add coaches to the project: </p>
