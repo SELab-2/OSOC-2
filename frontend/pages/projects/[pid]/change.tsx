@@ -238,6 +238,7 @@ const Change: NextPage = () => {
                     )
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
+                    console.log(response);
                     if (response !== undefined && response.success) {
                         alert("Project successfully changed!");
                         const pidNumber =
@@ -249,18 +250,8 @@ const Change: NextPage = () => {
                         if (!isNaN(pidNumber)) {
                             socket.emit("projectModified", pidNumber);
                         }
-                    } else if (
-                        notify &&
-                        response !== null &&
-                        response.http === 403
-                    ) {
-                        notify(response.reason, NotificationType.WARNING, 2000);
-                    } else if (notify) {
-                        notify(
-                            "Something went wrong while trying to edit project",
-                            NotificationType.ERROR,
-                            2000
-                        );
+                    } else if (notify && response !== null) {
+                        notify(response.reason, NotificationType.ERROR, 2000);
                     }
                     router.push("/projects").then();
                 }
