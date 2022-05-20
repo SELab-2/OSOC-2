@@ -79,6 +79,7 @@ export const ProjectFilter: React.FC<{
             osocYear: osocYear,
         };
         searchManual(params);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     };
 
     const toggleNameSort = async (e: SyntheticEvent) => {
