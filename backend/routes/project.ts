@@ -14,6 +14,7 @@ import * as util from "../utility";
 import { checkYearPermissionProject, errors } from "../utility";
 import { getOsocById } from "../orm_functions/osoc";
 import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
+import * as ormJo from "../orm_functions/job_application";
 
 /**
  *  Attempts to create a new project in the system.
@@ -277,6 +278,18 @@ export async function modProject(
         .then(util.isAdmin)
         .then(checkYearPermissionProject)
         .then((checked) => util.isValidID(checked.data, "project"));
+
+    const jobApplication = await ormJo.getJobApplication(checkedId.id);
+
+    const osoc = await ormOsoc.getLatestOsoc();
+
+    if (jobApplication === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (osoc === null || jobApplication.osoc.year !== osoc.year) {
+        return Promise.reject(errors.cookWrongSuggestionYear());
+    }
 
     const updatedProject = await ormPr.updateProject({
         projectId: checkedId.id,
