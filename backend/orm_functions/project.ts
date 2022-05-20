@@ -255,13 +255,27 @@ export async function filterProjects(
     clientNameSort: FilterSort,
     userId: number
 ) {
-    const visibleYears = await getOsocYearsForLoginUser(userId);
+    const yearsAllowedToSee = await getOsocYearsForLoginUser(userId);
+
+    let searchYears;
+    if (osocYearFilter !== undefined) {
+        if (!yearsAllowedToSee.includes(osocYearFilter)) {
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
+        } else {
+            searchYears = [osocYearFilter];
+        }
+    } else {
+        searchYears = yearsAllowedToSee;
+    }
 
     const projects = await prisma.project.findMany({
         where: {
             osoc: {
                 year: {
-                    in: visibleYears,
+                    in: searchYears,
                 },
             },
         },
@@ -287,7 +301,7 @@ export async function filterProjects(
         },
         osoc: {
             year: {
-                in: visibleYears,
+                in: searchYears,
             },
         },
     };
