@@ -247,6 +247,8 @@ export interface ServerToClientEvents {
     loginUserDisabled: () => void;
     registrationReceived: () => void;
     studentSuggestionCreated: (studentId: number) => void;
+    projectWasCreatedOrDeleted: () => void;
+    projectWasModified: (projectId: number) => void;
 }
 
 /**
@@ -259,6 +261,8 @@ export interface ClientToServerEvents {
     submitRegistration: () => void;
     studentSuggestionSent: (studentId: number) => void;
     studentDecisionSent: (studentId: number) => void;
+    projectCreated: () => void;
+    projectModified: (projectId: number) => void;
 }
 
 export interface ProjectPerson {
@@ -290,7 +294,7 @@ export interface ProjectRole {
 
 export interface Contract {
     contract_id: number;
-    contract_status: string; // TODO: Make ENUM for this
+    contract_status: string; //TODO: Make ENUM for this
     project_role: ProjectRole;
     student: Student;
 }

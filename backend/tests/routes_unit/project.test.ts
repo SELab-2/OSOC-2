@@ -1592,7 +1592,6 @@ test("Can filter projects", async () => {
         undefined,
         undefined,
         undefined,
-        undefined,
         2022,
         undefined,
         undefined,
@@ -1642,60 +1641,7 @@ test("Can filter projects (with osoc year)", async () => {
         undefined,
         undefined,
         undefined,
-        undefined,
         2021,
-        undefined,
-        undefined,
-        0
-    );
-    expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
-    expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
-});
-
-test("Can filter projects (with failing osoc orm)", async () => {
-    ormOMock.getLatestOsoc.mockResolvedValue(null);
-
-    ormCMock.contractsByProject.mockResolvedValue([]);
-    ormPUMock.getUsersFor.mockResolvedValue([]);
-    const req = getMockReq();
-    req.body = { sessionkey: "key" };
-
-    const res = projects.map((x) => ({
-        id: x.project_id,
-        name: x.name,
-        description: x.description,
-        partner: x.partner,
-        start_date: x.start_date.toString(),
-        end_date: x.end_date.toString(),
-        osoc_id: x.osoc_id,
-        contracts: [],
-        coaches: [],
-        roles: projectroles
-            .filter((y) => y.project_id == x.project_id)
-            .map((y) => ({
-                name: roles[y.role_id].name,
-                positions: y.positions,
-            })),
-    }));
-
-    await expect(project.filterProjects(req)).resolves.toStrictEqual({
-        data: res,
-        pagination: { count: projects.length, page: 0 },
-    });
-    expectCall(reqMock.parseFilterProjectsRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
-    expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
-    expect(ormPr.filterProjects).toHaveBeenCalledTimes(1);
-    expect(ormPr.filterProjects).toHaveBeenCalledWith(
-        {
-            currentPage: undefined,
-            pageSize: undefined,
-        },
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        1970,
         undefined,
         undefined,
         0
