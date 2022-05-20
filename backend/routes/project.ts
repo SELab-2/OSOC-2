@@ -398,7 +398,7 @@ export async function deleteProject(
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
             return ormPr
-                .deleteProject(parsed.id)
+                .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
         });
 }

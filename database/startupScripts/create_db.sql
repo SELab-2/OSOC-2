@@ -150,9 +150,9 @@ CREATE TABLE IF NOT EXISTS project_role (
 CREATE TYPE contract_status_enum AS ENUM ('DRAFT', 'APPROVED', 'CANCELLED', 'WAIT_APPROVAL', 'SIGNED', 'SENT');
 
 CREATE TABLE IF NOT EXISTS contract(
-   contract_id                 SERIAL                  PRIMARY KEY,
-   student_id                  INT                     REFERENCES student (student_id) ON DELETE SET NULL,
-   project_role_id             SERIAL                  NOT NULL REFERENCES project_role (project_role_id),
+   contract_id                 SERIAL               PRIMARY KEY,
+   student_id                  INT                  REFERENCES student (student_id) ON DELETE SET NULL,
+   project_role_id             INT                  REFERENCES project_role (project_role_id) ON DELETE SET NULL,
    information                 TEXT,
    created_by_login_user_id    INT                  REFERENCES login_user (login_user_id)  ON DELETE SET NULL,
    contract_status             contract_status_enum    NOT NULL

@@ -88,27 +88,25 @@ model language {
 }
 
 model login_user {
-  login_user_id   Int                 @id @default(autoincrement())
-  person_id       Int                 @unique @default(autoincrement())
-  password        String?             @db.VarChar(60)
-  is_admin        Boolean
-  is_coach        Boolean
-  account_status  account_status_enum
-  person          person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
-  contract        contract[]
-  evaluation      evaluation[]
-  login_user_osoc login_user_osoc[]
-  password_reset  password_reset?
-  project_user    project_user[]
-  session_keys    session_keys[]
-  template_email  template_email[]
+  login_user_id  Int                 @id @default(autoincrement())
+  person_id      Int                 @unique @default(autoincrement())
+  password       String?             @db.VarChar(60)
+  is_admin       Boolean
+  is_coach       Boolean
+  account_status account_status_enum
+  person         person              @relation(fields: [person_id], references: [person_id], onDelete: NoAction, onUpdate: NoAction)
+  contract       contract[]
+  evaluation     evaluation[]
+  password_reset password_reset?
+  project_user   project_user[]
+  session_keys   session_keys[]
+  template_email template_email[]
 }
 
 model osoc {
   osoc_id         Int               @id @default(autoincrement())
   year            Int               @unique @db.SmallInt
   job_application job_application[]
-  login_user_osoc login_user_osoc[]
   project         project[]
 }
 
@@ -199,16 +197,6 @@ model template_email {
   login_user        login_user? @relation(fields: [owner_id], references: [login_user_id], onUpdate: NoAction)
 
   @@unique([owner_id, name])
-}
-
-model login_user_osoc {
-  login_user_osoc_id Int        @id @default(autoincrement())
-  login_user_id      Int
-  osoc_id            Int
-  login_user         login_user @relation(fields: [login_user_id], references: [login_user_id], onDelete: NoAction, onUpdate: NoAction)
-  osoc               osoc       @relation(fields: [osoc_id], references: [osoc_id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([login_user_id, osoc_id])
 }
 
 enum decision_enum {
