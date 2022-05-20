@@ -1,8 +1,9 @@
 import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
-import { AccountStatus, LoginUser } from "../types";
+import { AccountStatus, LoginUser, NotificationType } from "../types";
 import { Settings } from "../components/Settings/Settings";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 const SettingsPage: NextPage = () => {
     const { getSession } = useContext(SessionContext);
@@ -21,6 +22,7 @@ const SettingsPage: NextPage = () => {
     };
 
     const [user, setUser] = useState<LoginUser>(defaultUser);
+    const { notify } = useContext(NotificationContext);
 
     const fetchUser = async () => {
         const { sessionKey } =
@@ -35,9 +37,17 @@ const SettingsPage: NextPage = () => {
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
+            .catch((err) => {
+                console.log(err);
+            });
         if (response !== undefined && response.success) {
             setUser(response);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 

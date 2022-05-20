@@ -9,6 +9,7 @@ import {
     StudentFilterParams,
     StudentStatus,
     Pagination,
+    NotificationType,
 } from "../../types";
 import { StudentFilter } from "../Filters/StudentFilter";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -18,6 +19,7 @@ import scrollStyles from "../ScrollView.module.scss";
 import SessionContext from "../../contexts/sessionProvider";
 import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 /**
  * Constructs the complete students page with filter included
@@ -47,6 +49,7 @@ export const Students: React.FC<{
     // 10 students per page
     const pageSize = 10;
     const [loading, isLoading] = useState(false);
+    const { notify } = useContext(NotificationContext);
 
     /**
      * Updates the list of students and sets the selected student index
@@ -221,18 +224,23 @@ export const Students: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then((json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else return json;
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (response.data !== undefined && response.pagination !== undefined) {
+        if (
+            response &&
+            response.success &&
+            response.data &&
+            response.pagination
+        ) {
             setFilteredStudents(response.data);
             setPagination(response.pagination);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
         isLoading(false);
     };

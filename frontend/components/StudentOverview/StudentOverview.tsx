@@ -5,6 +5,7 @@ import {
     AttachmentType,
     Attachment,
     Evaluation,
+    NotificationType,
 } from "../../types";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { StudentCard } from "../StudentCard/StudentCard";
@@ -15,6 +16,7 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import Image from "next/image";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -28,6 +30,7 @@ export const StudentOverview: React.FC<{
     const [suggestBool, setSuggestBool] = useState(true);
     const [motivation, setMotivation] = useState("");
     const { getSession } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
@@ -43,10 +46,21 @@ export const StudentOverview: React.FC<{
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
-            console.log(response);
+            .catch((err) => {
+                console.log(err);
+            });
+        if (
+            response !== undefined &&
+            response.success &&
+            Array.isArray(response.evaluation.evaluations)
+        ) {
             setEvaluations(response.evaluation.evaluations);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
@@ -88,11 +102,26 @@ export const StudentOverview: React.FC<{
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
+            .catch((err) => {
+                console.log(err);
+            });
+        if (response && response.success) {
             setMotivation("");
             // The creation was succesfull, we can update the evaluation bar
             fetchEvals().then();
+            if (notify) {
+                notify(
+                    "Successfully made the final decision.",
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
@@ -118,11 +147,27 @@ export const StudentOverview: React.FC<{
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
-        if (response !== undefined && response.success) {
+            .catch((err) => {
+                console.log(err);
+            });
+        if (response && response.success) {
             setMotivation("");
             // The creation was succesfull, we can update the evaluation bar
-            fetchEvals().then();
+            await fetchEvals().then();
+
+            if (notify) {
+                notify(
+                    "Successfully made a suggestion.",
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
