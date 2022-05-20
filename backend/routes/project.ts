@@ -755,7 +755,7 @@ export async function assignStudent(
                 .then(() => ormRole.getRole(r.role))
         )
         .then(util.getOrReject)
-        .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
+        .then((r) => Promise.resolve({ drafted: true, role: r.name }));
 }
 
 /**
