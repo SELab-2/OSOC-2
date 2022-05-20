@@ -7,6 +7,7 @@ import {
     AccountStatus,
     LoginUser,
     OsocEdition,
+    NotificationType,
     Pagination,
     Sort,
     UserFilterParams,
@@ -15,6 +16,7 @@ import SessionContext from "../contexts/sessionProvider";
 import { useRouter } from "next/router";
 import { Paginator } from "../components/Paginator/Paginator";
 import { useSockets } from "../contexts/socketProvider";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 /**
  * The `manage users` page, only accessible for admins
@@ -44,6 +46,7 @@ const Users: NextPage = () => {
     const [osocEditions, setOsocEditions] = useState<OsocEdition[]>([]);
 
     const { socket } = useSockets();
+    const { notify } = useContext(NotificationContext);
 
     useEffect(() => {
         return () => {
@@ -257,8 +260,16 @@ const Users: NextPage = () => {
             .catch((err) => {
                 console.log(err);
             });
-        updateUsers(response.data);
-        setPagination(response.pagination);
+        if (response.success && response.data && response.pagination) {
+            updateUsers(response.data);
+            setPagination(response.pagination);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
+        }
         isLoading(false);
     };
 

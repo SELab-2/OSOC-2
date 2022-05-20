@@ -8,10 +8,16 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser, OsocEdition } from "../../types";
+import {
+    AccountStatus,
+    LoginUser,
+    OsocEdition,
+    NotificationType,
+} from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
 import triangle from "../Filters/Filter.module.css";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const User: React.FC<{
     user: LoginUser;
@@ -27,6 +33,7 @@ export const User: React.FC<{
     const { socket } = useSockets();
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { notify } = useContext(NotificationContext);
 
     // a set of edition ids the user is allowed to see
     const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
@@ -91,7 +98,7 @@ export const User: React.FC<{
             ? await getSession()
             : { sessionKey: "" };
 
-        const res = await fetch(
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -107,18 +114,10 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else {
-                    return json;
-                }
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (res.success !== false) {
+        if (response.success !== false) {
             if (changed_val === "activated") {
                 socket.emit("activateUser");
             } else if (changed_val === "disabled") {
@@ -127,8 +126,21 @@ export const User: React.FC<{
             // also emit that there has been a change in general so that the manage users screen will update
             // other changes are changes to the enum roles
             socket.emit("updateRoleUser");
+            if (notify) {
+                notify(
+                    `Successfully updated ${name} authorities`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
-        return res;
+        return response;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
@@ -244,24 +256,24 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                }
-                socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
-                socket.emit("updateRoleUser"); // this refreshes the manage users page
-                removeUser(user);
-                return json;
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (response.success) {
+        if (response && response.success && notify) {
+            socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+            socket.emit("updateRoleUser"); // this refreshes the manage users page
             removeUser(user);
-            return response;
-        } else {
-            return { success: false };
+            notify(
+                `Successfully removed${user.person.name}!`,
+                NotificationType.SUCCESS,
+                2000
+            );
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
