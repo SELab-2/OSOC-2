@@ -33,9 +33,30 @@ export const Projects: React.FC = () => {
      * Resets the pagination
      * @param params
      */
-    const filter = async (params: ProjectFilterParams) => {
+    const filterManual = async (params: ProjectFilterParams) => {
         setParams(params);
         search(params, 0).then();
+    };
+
+    /**
+     * Called by the studentfilter to filter when a websocket event is received. We need to keep track of the current page!
+     * @param params
+     */
+    const filterAutomatic = async (params: ProjectFilterParams) => {
+        setParams(params);
+        // get the current page
+        const currentPageStr = new URLSearchParams(window.location.search).get(
+            "currentPageProject"
+        );
+        const currentPageInt =
+            currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
+                ? Number(currentPageStr)
+                : 0;
+        setPagination({
+            page: currentPageInt,
+            count: 0, //TODO: what value should this be? I thought this would have to be currentPageInt * pageSize + 1
+        });
+        search(params, currentPageInt).then();
     };
 
     /**
@@ -159,7 +180,10 @@ export const Projects: React.FC = () => {
             >
                 Add Project
             </button>
-            <ProjectFilter search={filter} />
+            <ProjectFilter
+                searchManual={filterManual}
+                searchAutomatic={filterAutomatic}
+            />
             <div className={scrollStyles.scrollView}>
                 <div className={scrollStyles.topShadowCaster} />
                 <div className={styles.projectCards}>

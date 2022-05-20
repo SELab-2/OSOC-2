@@ -3,8 +3,9 @@ import React, { SyntheticEvent, useEffect, useState } from "react";
 import { getNextSort, ProjectFilterParams, Sort } from "../../types";
 
 export const ProjectFilter: React.FC<{
-    search: (params: ProjectFilterParams) => void;
-}> = ({ search }) => {
+    searchManual: (params: ProjectFilterParams) => void;
+    searchAutomatic: (params: ProjectFilterParams) => void;
+}> = ({ searchManual, searchAutomatic }) => {
     const [projectNameFilter, setProjectNameFilter] = useState<string>("");
     const [clientFilter, setClientFilter] = useState<string>("");
     const [fullyAssigned, setFullyAssigned] = useState<boolean>(false);
@@ -64,7 +65,7 @@ export const ProjectFilter: React.FC<{
             clientSort: clientNameSort ? (clientNameSort as Sort) : Sort.NONE,
         };
 
-        search(params);
+        searchAutomatic(params);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -77,7 +78,7 @@ export const ProjectFilter: React.FC<{
             fullyAssigned: fullyAssigned,
             osocYear: osocYear,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleNameSort = async (e: SyntheticEvent) => {
@@ -93,7 +94,7 @@ export const ProjectFilter: React.FC<{
             fullyAssigned: fullyAssigned,
             osocYear: osocYear,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleClientSort = async (e: SyntheticEvent) => {
@@ -109,7 +110,7 @@ export const ProjectFilter: React.FC<{
             fullyAssigned: fullyAssigned,
             osocYear: osocYear,
         };
-        search(params);
+        searchManual(params);
     };
 
     const toggleFullyAssigned = async (e: SyntheticEvent) => {
@@ -125,7 +126,7 @@ export const ProjectFilter: React.FC<{
             fullyAssigned: !fullyAssigned,
             osocYear: osocYear,
         };
-        search(params);
+        searchManual(params);
     };
 
     return (
