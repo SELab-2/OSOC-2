@@ -2,15 +2,17 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useContext, useState, SyntheticEvent } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
-import { Project, Coach } from "../../../types";
+import { Project, Coach, NotificationType } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 import styles from "./change.module.scss";
+import { NotificationContext } from "../../../contexts/notificationProvider";
 
 const Change: NextPage = () => {
     const router = useRouter();
     const { pid } = router.query; // pid is the student id
     const { getSession } = useContext(SessionContext);
     const originalRoles: { [K: string]: number } = {};
+    const { notify } = useContext(NotificationContext);
 
     const formatDate = (date: string) => {
         const full_date = new Date(date);
@@ -208,7 +210,13 @@ const Change: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        alert("Project succesfully changed!");
+                        if (notify) {
+                            notify(
+                                "Project succesfully changed!",
+                                NotificationType.SUCCESS,
+                                2000
+                            );
+                        }
                         router.push("/projects").then();
                     }
                 }

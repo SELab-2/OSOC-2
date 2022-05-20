@@ -2,13 +2,15 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { Coach } from "../../types";
+import { Coach, NotificationType } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Create: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
     const formatDate = () => {
         const date = new Date();
@@ -124,7 +126,13 @@ const Create: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        alert("Project succesfully created!");
+                        if (notify) {
+                            notify(
+                                "Project succesfully created!",
+                                NotificationType.SUCCESS,
+                                2000
+                            );
+                        }
                         router.push("/projects").then();
                     }
                 }
