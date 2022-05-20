@@ -823,12 +823,6 @@ test("Can parse filter projects request", () => {
     const clientNameFilter = {
         clientNameFilter: "Client name",
     };
-    const assignedCoachesFilterArray = {
-        assignedCoachesFilterArray: [1, 2],
-    };
-    const assignedCoachesFilterString = {
-        assignedCoachesFilterArray: "1,2",
-    };
     const fullyAssignedFilterString = {
         fullyAssignedFilter: "true",
     };
@@ -858,7 +852,6 @@ test("Can parse filter projects request", () => {
     const okays = [
         [nothing, nothing],
         [fullyAssignedFilterString, fullyAssignedFilterBoolean],
-        [assignedCoachesFilterString, assignedCoachesFilterArray],
         [projectNameFilter, projectNameFilter],
         [clientNameFilter, clientNameFilter],
         [osocYear, osocYear],
@@ -872,7 +865,6 @@ test("Can parse filter projects request", () => {
         [
             "projectNameFilter",
             "clientNameFilter",
-            "assignedCoachesFilterArray",
             "fullyAssignedFilter",
             "osocYear",
             "projectNameSort",
@@ -906,7 +898,6 @@ test("Can parse filter projects request", () => {
     const unauth = [
         nothing,
         fullyAssignedFilterString,
-        assignedCoachesFilterString,
         projectNameFilter,
         clientNameFilter,
         osocYear,

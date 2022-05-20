@@ -247,6 +247,8 @@ export interface ServerToClientEvents {
     loginUserDisabled: () => void;
     registrationReceived: () => void;
     studentSuggestionCreated: (studentId: number) => void;
+    projectWasCreatedOrDeleted: () => void;
+    projectWasModified: (projectId: number) => void;
 }
 
 /**
@@ -259,6 +261,8 @@ export interface ClientToServerEvents {
     submitRegistration: () => void;
     studentSuggestionSent: (studentId: number) => void;
     studentDecisionSent: (studentId: number) => void;
+    projectCreated: () => void;
+    projectModified: (projectId: number) => void;
 }
 
 export interface ProjectPerson {

@@ -5,11 +5,12 @@ import SessionContext from "../../contexts/sessionProvider";
 import { OsocEdition, Coach } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Create: NextPage = () => {
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
-
+    const { socket } = useSockets();
     const formatDate = () => {
         const date = new Date();
         return [
@@ -148,6 +149,8 @@ const Create: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
+                        alert("Project successfully created!");
+                        socket.emit("projectCreated");
                         router.push("/projects").then();
                     }
                 }
