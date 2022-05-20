@@ -1729,7 +1729,7 @@ test("Can modify a student on a project", async () => {
     ormPrMock.updateProject.mockReset();
 });
 
-test.only("Can filter projects (with osoc year)", async () => {
+test("Can filter projects (with osoc year)", async () => {
     const req = getMockReq();
     req.body = { sessionkey: "key", projectNameFilter: "project" };
 
@@ -1857,17 +1857,14 @@ test.only("Can filter projects (with osoc year)", async () => {
     await expect(project.filterProjects(req)).resolves.toStrictEqual({
         data: [
             {
-                project_id: 0,
                 osoc_id: 0,
                 name: "name",
                 partner: "partner",
                 description: null,
-                start_date: new Date(
-                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)"
-                ),
-                end_date: new Date(
-                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)"
-                ),
+                start_date:
+                    "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
+                end_date:
+                    "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
                 id: 0,
                 coaches: [],
                 roles: [
@@ -1885,18 +1882,25 @@ test.only("Can filter projects (with osoc year)", async () => {
                         contract_id: 0,
                         contract_status: contract_status_enum.APPROVED,
                         student: {
-                            student_id: 0,
-                            gender: "Male",
-                            pronouns: null,
-                            phone_number: "0461719074",
-                            nickname: null,
-                            alumni: false,
-                            person: {
-                                name: "name",
-                                person_id: 0,
-                                email: "mail@mail.com",
-                                github: null,
-                                github_id: null,
+                            evaluation: undefined,
+                            evaluations: undefined,
+                            jobApplication: undefined,
+                            roles: undefined,
+                            student: {
+                                student_id: 0,
+                                gender: "Male",
+                                pronouns: null,
+                                phone_number: "0461719074",
+                                nickname: null,
+                                alumni: false,
+                                person_id: undefined,
+                                person: {
+                                    name: "name",
+                                    person_id: 0,
+                                    email: "mail@mail.com",
+                                    github: null,
+                                    github_id: null,
+                                },
                             },
                         },
                         project_role: {
