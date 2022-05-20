@@ -116,14 +116,26 @@ export const Projects: React.FC = () => {
                     {projects.map((project) => {
                         return (
                             <div key={project.id} className={styles.card}>
-                                <ProjectCard project={project} />
+                                <ProjectCard
+                                    updateProject={() => {
+                                        if (params !== undefined) {
+                                            search(
+                                                params,
+                                                pagination.page
+                                            ).then();
+                                        }
+                                    }}
+                                    project={project}
+                                />
                             </div>
                         );
                     })}
                 </div>
                 <div className={scrollStyles.bottomShadowCaster} />
             </div>
-            <Paginator pageSize={pageSize} pagination={pagination}
+            <Paginator
+                pageSize={pageSize}
+                pagination={pagination}
                 navigator={navigator}
             />
         </div>

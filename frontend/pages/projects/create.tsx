@@ -148,7 +148,6 @@ const Create: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        alert("Project succesfully created!");
                         router.push("/projects").then();
                     }
                 }

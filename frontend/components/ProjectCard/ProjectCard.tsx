@@ -1,28 +1,34 @@
-import React, {useContext, useEffect, useState} from "react";
-import {useRouter} from "next/router";
-import {Contract, NotificationType, Project, Student} from "../../types";
+import React, { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { Contract, NotificationType, Project, Student } from "../../types";
 import styles from "./ProjectCard.module.css";
-import {Label} from "../Labels/Label";
-import {ProjectRole} from "../Labels/ProjectRole";
-import {useDrop} from "react-dnd";
+import { Label } from "../Labels/Label";
+import { ProjectRole } from "../Labels/ProjectRole";
+import { useDrop } from "react-dnd";
 import SessionContext from "../../contexts/sessionProvider";
-import {NotificationContext} from "../../contexts/notificationProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
+import { Modal } from "../Modal/Modal";
 
-export const ProjectCard: React.FC<{ project: Project }> = ({project}) => {
+export const ProjectCard: React.FC<{
+    project: Project;
+    updateProject: () => void;
+}> = ({ project, updateProject }) => {
     const router = useRouter();
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
-    const {getSession} = useContext(SessionContext);
-    const {notify} = useContext(NotificationContext);
+    const { getSession } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [droppedStudent, setDroppedStudent] = useState<Student>();
 
-    const dropStudent = async (item: any) => {
-        const student: Student = item as Student;
-        const {sessionKey} = getSession
+    const postAssign = async (student: Student, role: string) => {
+        setShowModal(false);
+        const { sessionKey } = getSession
             ? await getSession()
-            : {sessionKey: ""};
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
             {
-                method: 'POST',
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
@@ -30,64 +36,91 @@ export const ProjectCard: React.FC<{ project: Project }> = ({project}) => {
                 },
                 body: JSON.stringify({
                     studentId: student.student.student_id,
-                    role: 'Developer'
-                })
+                    role: role,
+                }),
             }
-        ).then((response) => response.json()).catch((err) => console.log(err));
+        )
+            .then((response) => response.json())
+            .catch((err) => console.log(err));
         if (response !== undefined && response.success) {
             if (notify) {
-                notify(`Succesfully assigned ${student.student.person.name} to ${project.name}`, NotificationType.SUCCESS, 2000)
+                updateProject();
+                notify(
+                    `Succesfully assigned ${student.student.person.name} to ${project.name}`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
             }
         } else if (response !== undefined && !response.success) {
             if (notify) {
-                notify(`Could not assign ${student.student.person.name} to ${project.name}:
-                ${response.reason}`, NotificationType.ERROR, 3000)
+                notify(
+                    `Could not assign ${student.student.person.name} to ${project.name}:
+                ${response.reason}`,
+                    NotificationType.ERROR,
+                    3000
+                );
             }
         }
-    }
+    };
+
+    const dropStudent = async (item: unknown) => {
+        const student: Student = item as Student;
+        setShowModal(true);
+        setDroppedStudent(student);
+    };
 
     const removeStudent = async (contract: Contract) => {
-        const {sessionKey} = getSession
+        const { sessionKey } = getSession
             ? await getSession()
-            : {sessionKey: ""};
+            : { sessionKey: "" };
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
             {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                     Authorization: `auth/osoc2 ${sessionKey}`,
                 },
                 body: JSON.stringify({
-                    student: contract.student.student.student_id
-                })
+                    student: contract.student.student.student_id,
+                }),
             }
-        ).then((response) => response.json()).catch((err) => console.log(err));
+        )
+            .then((response) => response.json())
+            .catch((err) => console.log(err));
         if (response !== undefined && response.success) {
             if (notify) {
-                notify(`Succesfully removed ${contract.student.student.person.name} from ${project.name}`, NotificationType.SUCCESS, 2000)
+                notify(
+                    `Succesfully removed ${contract.student.student.person.name} from ${project.name}`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
             }
         } else if (response !== undefined && !response.success) {
             if (notify) {
-                notify(`Could not remove ${contract.student.student.person.name} from ${project.name}:
-                ${response.reason}`, NotificationType.ERROR, 3000)
+                notify(
+                    `Could not remove ${contract.student.student.person.name} from ${project.name}:
+                ${response.reason}`,
+                    NotificationType.ERROR,
+                    3000
+                );
             }
         }
-    }
+    };
 
-    const [{canDrop, isOver}, drop] = useDrop(() => ({
+    const [{ isOver }, drop] = useDrop(() => ({
         // The type (or types) to accept - strings or symbols
-        accept: 'Student',
+        accept: "Student",
         // Props to collect
         collect: (monitor) => ({
             isOver: monitor.isOver(),
-            canDrop: monitor.canDrop()
+            canDrop: monitor.canDrop(),
         }),
-        drop: (item, monitor) => {
+        drop: (item) => {
             dropStudent(item).then();
-        }
-    }))
+        },
+    }));
 
     const calculateRoleMap = () => {
         const map: { [K: string]: number } = {};
@@ -109,7 +142,37 @@ export const ProjectCard: React.FC<{ project: Project }> = ({project}) => {
     };
 
     return (
-        <div className={styles.body} ref={drop}>
+        <div
+            className={`${styles.body} ${isOver ? styles.over : ""}`}
+            ref={drop}
+        >
+            <Modal
+                handleClose={() => setShowModal(false)}
+                title="Assign Student"
+                visible={showModal}
+            >
+                <p>
+                    Choose one of the following roles you want to assign the
+                    student to:
+                </p>
+                {project.roles.map((role, index) => {
+                    return (
+                        <button
+                            key={index}
+                            onClick={() => {
+                                if (droppedStudent !== undefined) {
+                                    postAssign(
+                                        droppedStudent,
+                                        role.name
+                                    ).then();
+                                }
+                            }}
+                        >
+                            {role.name}
+                        </button>
+                    );
+                })}
+            </Modal>
             <header>
                 <div className={styles.left}>
                     <div>
@@ -151,15 +214,27 @@ export const ProjectCard: React.FC<{ project: Project }> = ({project}) => {
                 <div className={styles.assignees}>
                     {project.contracts.map((contract) => {
                         return (
-                            <div className={`${styles.assignee} ${styles.card}`} key={contract.contract_id}>
+                            <div
+                                className={`${styles.assignee} ${styles.card}`}
+                                key={contract.contract_id}
+                            >
                                 <div>
-                                    <h1>{contract.student.student.person.name}</h1>
+                                    <h1>
+                                        {contract.student.student.person.name}
+                                    </h1>
                                     <div className={styles.assigneeBody}>
-                                        <Label label={contract.project_role.role.name}/>
+                                        <Label
+                                            label={
+                                                contract.project_role.role.name
+                                            }
+                                        />
                                         <p>{contract.login_user.person.name}</p>
                                     </div>
                                 </div>
-                                <button className={`${styles.delete} delete`} onClick={() => removeStudent(contract)} />
+                                <button
+                                    className={`${styles.delete} delete`}
+                                    onClick={() => removeStudent(contract)}
+                                />
                             </div>
                         );
                     })}
