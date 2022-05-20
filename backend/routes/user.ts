@@ -418,9 +418,7 @@ export async function createUserPermission(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseUsersPermissionsRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch(() => Promise.reject(errors.cookInsufficientRights()));
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
 
     await ormLuOs.addOsocToUser(
         checkedSessionKey.data.login_user_id,
@@ -440,9 +438,7 @@ export async function deleteUserPermission(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseUsersPermissionsRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch(() => Promise.reject(errors.cookInsufficientRights()));
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
 
     await ormLuOs.removeOsocFromUser(
         checkedSessionKey.data.login_user_id,
@@ -462,13 +458,12 @@ export async function getYearPermissions(
     req: express.Request
 ): Promise<Responses.UserYearsPermissions[]> {
     const parsedRequest = await rq.parseGetUserPermissionsRequest(req);
-    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
     const isAdminCheck = await util.isAdmin(parsedRequest);
 
     if (isAdminCheck.is_admin) {
         const years = await ormLuOs.getOsocYearsForLoginUserById(
-            checkedSessionKey.data.id
+            isAdminCheck.data.id
         );
 
         return Promise.resolve(
