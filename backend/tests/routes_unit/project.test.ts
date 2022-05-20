@@ -24,6 +24,10 @@ import * as ormPr from "../../orm_functions/project";
 jest.mock("../../orm_functions/project");
 const ormPrMock = ormPr as jest.Mocked<typeof ormPr>;
 
+import * as ormJ from "../../orm_functions/job_application";
+jest.mock("../../orm_functions/job_application");
+const ormJMock = ormJ as jest.Mocked<typeof ormJ>;
+
 import * as ormRole from "../../orm_functions/role";
 jest.mock("../../orm_functions/role");
 const ormRMock = ormRole as jest.Mocked<typeof ormRole>;
@@ -130,6 +134,35 @@ const projects: prisma.project[] = [
         description: "def not a project for jefke",
         start_date: new Date(Date.now()),
         end_date: new Date(Date.now()),
+    },
+];
+
+const projects2: (prisma.project & { osoc: prisma.osoc })[] = [
+    {
+        project_id: 0,
+        name: "sample project",
+        osoc_id: 0,
+        partner: "jefke",
+        description: null,
+        start_date: new Date(Date.now()),
+        end_date: new Date(Date.now()),
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    },
+    {
+        project_id: 1,
+        name: "other project",
+        osoc_id: 0,
+        partner: "not jefke",
+        description: "def not a project for jefke",
+        start_date: new Date(Date.now()),
+        end_date: new Date(Date.now()),
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
 ];
 
@@ -472,7 +505,7 @@ beforeEach(() => {
         Promise.resolve(projects[0])
     );
     ormPrMock.getProjectById.mockImplementation((id) =>
-        Promise.resolve(projects[id])
+        Promise.resolve(projects2[id])
     );
     ormPrMock.filterProjects.mockResolvedValue({
         data: projects.map((x) => ({
@@ -485,7 +518,7 @@ beforeEach(() => {
         pagination: { page: 0, count: projects.length },
     });
     ormPrMock.getProjectById.mockImplementation((id) =>
-        Promise.resolve(id < projects.length ? projects[id] : null)
+        Promise.resolve(id < projects2.length ? projects2[id] : null)
     );
 
     // role orm
@@ -508,6 +541,10 @@ beforeEach(() => {
             positions: v.positions,
         })
     );
+    ormOMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
     ormPrRMock.getProjectRolesByProject.mockImplementation((id) =>
         Promise.resolve(projectroles.filter((x) => x.project_id === id))
     );
@@ -685,6 +722,7 @@ afterEach(() => {
     // osoc orm
     ormOMock.getNewestOsoc.mockReset();
     ormOMock.getLatestOsoc.mockReset();
+    ormOMock.getOsocById.mockReset();
 });
 
 function expectCall<T, U>(func: T, val: U) {
@@ -714,6 +752,8 @@ test("Can create new projects", async () => {
         },
     };
 
+    ormLUMock.getOsocYearsForLoginUser.mockResolvedValue([2022]);
+
     await expect(project.createProject(req)).resolves.toStrictEqual({
         id: 0,
         name: req.body.name,
@@ -738,6 +778,8 @@ test("Can create new projects", async () => {
     expect(ormRMock.getRolesByName).toHaveBeenCalledTimes(2);
     expectCall(ormRMock.createRole, req.body.roles.roles[1].name);
     expect(ormPrRMock.createProjectRole).toHaveBeenCalledTimes(2);
+
+    ormLUMock.getOsocYearsForLoginUser.mockReset();
 });
 
 test("Can create new projects (insufficient rights)", async () => {
@@ -969,6 +1011,36 @@ test("Can modify projects", async () => {
         Promise.resolve(v)
     );
 
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
     await expect(project.modProject(req)).resolves.toStrictEqual({
         description: req.body.description,
         start_date: req.body.start.toString(),
@@ -1018,6 +1090,7 @@ test("Can modify projects", async () => {
     expectCall(ormPrRMock.getProjectRolesByProject, req.body.id);
 
     utilMock.checkYearPermissionProject.mockReset();
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can't modify projects (role failure)", async () => {
@@ -1041,6 +1114,36 @@ test("Can't modify projects (role failure)", async () => {
         Promise.resolve(v)
     );
 
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
     await expect(project.modProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseUpdateProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
@@ -1060,6 +1163,7 @@ test("Can't modify projects (role failure)", async () => {
     expect(ormPrRMock.getProjectRolesByProject).toHaveBeenCalledTimes(1);
 
     utilMock.checkYearPermissionProject.mockReset();
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can delete projects", async () => {
@@ -1706,6 +1810,36 @@ test("Can modify a student on a project", async () => {
         count: 1,
     });
 
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
     ormPUMock.getUsersFor.mockResolvedValue([]);
 
     await expect(project.modProject(req)).resolves.toStrictEqual({
@@ -1728,6 +1862,7 @@ test("Can modify a student on a project", async () => {
     ormPUMock.deleteProjectUser.mockReset();
     ormPUMock.getUsersFor.mockReset();
     ormPrMock.updateProject.mockReset();
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can filter projects (with osoc year)", async () => {
