@@ -291,9 +291,6 @@ it("should return the filtered projects", async () => {
         { currentPage: 0, pageSize: 25 },
         filteredProject1.name,
         filteredProject1.partner,
-        filteredProject1.project_user.map(
-            (user) => user.login_user.login_user_id
-        ),
         filteredProject1.positions === sumRoles,
         2022,
         "asc",

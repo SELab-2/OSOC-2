@@ -102,11 +102,17 @@ export const Students: React.FC<{
      */
     useEffect(() => {
         socket.off("studentSuggestionCreated");
-        socket.on("studentSuggestionCreated", () => {
-            if (params != undefined) {
-                filterAutomatic(params).then();
+        socket.on("studentSuggestionCreated", (studentId: number) => {
+            if (params !== undefined) {
+                for (const student of students) {
+                    if (student.student.student_id === studentId) {
+                        filterAutomatic(params).then();
+                        break;
+                    }
+                }
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, params, pagination]);
 
     /**
@@ -223,7 +229,7 @@ export const Students: React.FC<{
         setParams(params);
         // get the current page
         const currentPageStr = new URLSearchParams(window.location.search).get(
-            "currentPage"
+            "currentPageStudent"
         );
         const currentPageInt =
             currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
@@ -242,9 +248,10 @@ export const Students: React.FC<{
      * @param page
      */
     const search = async (params: StudentFilterParams, page: number) => {
-        const scrollPosition = window.scrollY;
-        console.log("SCROLL " + scrollPosition);
         if (loading) return;
+
+        const scrollPosition = window.scrollY;
+
         isLoading(true);
         const filters = [];
 
@@ -322,9 +329,54 @@ export const Students: React.FC<{
         }
         isLoading(false);
         const id = new URLSearchParams(window.location.search).get("id");
-        const frontendQuery = id !== null ? query + "&id=" + id : query;
+        // in the frontend we also keep the id of the selected student overview. This way overview stays open.
+        const newSearchParams = new URLSearchParams(query);
+        if (id !== null) {
+            newSearchParams.set("id", id);
+        }
+        // set the page filter unique for the student to keep track of it in the frontend
+        newSearchParams.delete("currentPage");
+        newSearchParams.delete("pageSize");
+        newSearchParams.set("currentPageStudent", page.toString());
+        newSearchParams.set("pageSizeStudent", pageSize.toString());
+
+        // we have to change the parameter name of osocYear to osocYear student to prevent conflicts with the selected year in the projects screen for projects
+        const setYear = newSearchParams.get("osocYear");
+        if (setYear !== null) {
+            newSearchParams.set("osocYearStudent", setYear);
+        }
+
+        // get the current active search parameters, we'll update this value
+        const updatedSearchParams = new URLSearchParams(window.location.search);
+        // overwrite the values that are present in the new and old parameters
+        newSearchParams.forEach((value, key) => {
+            updatedSearchParams.set(key, value);
+        });
+
+        const studentFilterKeys = new Set([
+            "nameFilter",
+            "emailFilter",
+            "nameSort",
+            "emailSort",
+            "alumniFilter",
+            "coachFilter",
+            "statusFilter",
+            "osocYearStudent",
+            "emailStatusFilter",
+            "roleFilter",
+        ]);
+
+        // delete the values that are not present anymore in the new filter
+        updatedSearchParams.forEach((_, key) => {
+            if (!newSearchParams.has(key) && studentFilterKeys.has(key)) {
+                updatedSearchParams.delete(key);
+            }
+        });
+
         router
-            .push(`${window.location.pathname}${frontendQuery}`)
+            .push(
+                `${window.location.pathname}?${updatedSearchParams.toString()}`
+            )
             .then(() => window.scrollTo(0, scrollPosition));
     };
 

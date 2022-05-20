@@ -1391,7 +1391,6 @@ export namespace Requests {
     export interface ProjectFilter extends PaginableRequest {
         projectNameFilter?: string;
         clientNameFilter?: string;
-        assignedCoachesFilterArray?: number[];
         fullyAssignedFilter?: boolean;
         osocYear?: number;
         projectNameSort?: FilterSort;
@@ -1519,6 +1518,8 @@ export interface ServerToClientEvents {
     loginUserDisabled: () => void;
     registrationReceived: () => void;
     studentSuggestionCreated: (studentId: number) => void;
+    projectWasCreatedOrDeleted: () => void;
+    projectWasModified: (projectId: number) => void;
 }
 
 /**
@@ -1531,6 +1532,11 @@ export interface ClientToServerEvents {
     submitRegistration: () => void;
     studentSuggestionSent: (studentId: number) => void;
     studentDecisionSent: (studentId: number) => void;
+    projectCreated: () => void;
+    projectModified: (projectId: number) => void;
+    coachAssignedToProjectChange: (projectId: number) => void;
+    studentAssignedToProjectChange: (projectId: number) => void;
+    projectDeleted: () => void;
 }
 
 /**
