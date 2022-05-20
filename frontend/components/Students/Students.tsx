@@ -102,11 +102,17 @@ export const Students: React.FC<{
      */
     useEffect(() => {
         socket.off("studentSuggestionCreated");
-        socket.on("studentSuggestionCreated", () => {
-            if (params != undefined) {
-                filterAutomatic(params).then();
+        socket.on("studentSuggestionCreated", (studentId: number) => {
+            if (params !== undefined) {
+                for (const student of students) {
+                    if (student.student.student_id === studentId) {
+                        filterAutomatic(params).then();
+                        break;
+                    }
+                }
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, params, pagination]);
 
     /**

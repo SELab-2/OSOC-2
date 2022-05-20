@@ -782,9 +782,6 @@ export async function filterProjects(
         year = checkedSessionKey.data.osocYear;
     }
 
-    console.log(typeof year);
-    console.log(year);
-
     const projects = await ormPr.filterProjects(
         {
             currentPage: checkedSessionKey.data.currentPage,

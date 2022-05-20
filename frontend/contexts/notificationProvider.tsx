@@ -27,6 +27,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
         // Every time the notifications change we set an interval
         // Delete the oldest notfication after it's duration
         if (notifications.length > 0 && interval === undefined) {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             interval = setInterval(
                 () => deleteNotification(notifications.length - 1),
                 notifications[notifications.length - 1].duration
