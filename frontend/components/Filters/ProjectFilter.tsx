@@ -151,6 +151,7 @@ export const ProjectFilter: React.FC<{
                 <input
                     className={`input ${styles.input}`}
                     type="text"
+                    value={projectNameFilter}
                     placeholder="Search.."
                     onChange={(e) => setProjectNameFilter(e.target.value)}
                 />
@@ -174,6 +175,7 @@ export const ProjectFilter: React.FC<{
                 <input
                     className={`input ${styles.input}`}
                     type="text"
+                    value={clientFilter}
                     placeholder="Search.."
                     onChange={(e) => setClientFilter(e.target.value)}
                 />
@@ -185,6 +187,7 @@ export const ProjectFilter: React.FC<{
                 <input
                     className={`input ${styles.input}`}
                     type="text"
+                    value={osocYear}
                     placeholder="Search.."
                     onChange={(e) => setOsocYear(e.target.value)}
                 />
