@@ -418,7 +418,8 @@ export async function getDraftedStudents(
         .then(async (parsed) => {
             const prName = await ormPr
                 .getProjectById(parsed.data.id)
-                .then((pr) => pr?.name);
+                .then(util.getOrReject)
+                .then((pr) => pr.name);
 
             return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
                 Promise.resolve({
@@ -755,7 +756,7 @@ export async function assignStudent(
                 .then(() => ormRole.getRole(r.role))
         )
         .then(util.getOrReject)
-        .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
+        .then((r) => Promise.resolve({ drafted: true, role: r.name }));
 }
 
 /**
