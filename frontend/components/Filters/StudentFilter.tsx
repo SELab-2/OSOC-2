@@ -18,7 +18,7 @@ import ExclamationIconColor from "../../public/images/exclamation_mark_color.png
 import ExclamationIcon from "../../public/images/exclamation_mark.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import { NotificationContext } from "../../../contexts/notificationProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const StudentFilter: React.FC<{
     search: (params: StudentFilterParams) => void;

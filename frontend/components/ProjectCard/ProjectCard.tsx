@@ -1,13 +1,93 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { Project } from "../../types";
+import React, {useContext, useEffect, useState} from "react";
+import {useRouter} from "next/router";
+import {Contract, NotificationType, Project, Student} from "../../types";
 import styles from "./ProjectCard.module.css";
-import { Label } from "../Labels/Label";
-import { ProjectRole } from "../Labels/ProjectRole";
+import {Label} from "../Labels/Label";
+import {ProjectRole} from "../Labels/ProjectRole";
+import {useDrop} from "react-dnd";
+import SessionContext from "../../contexts/sessionProvider";
+import {NotificationContext} from "../../contexts/notificationProvider";
 
-export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+export const ProjectCard: React.FC<{ project: Project }> = ({project}) => {
     const router = useRouter();
     const [roleMap, setRoleMap] = useState<{ [K: string]: number }>({});
+    const {getSession} = useContext(SessionContext);
+    const {notify} = useContext(NotificationContext);
+
+    const dropStudent = async (item: any) => {
+        const student: Student = item as Student;
+        const {sessionKey} = getSession
+            ? await getSession()
+            : {sessionKey: ""};
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
+            {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+                body: JSON.stringify({
+                    studentId: student.student.student_id,
+                    role: 'Developer'
+                })
+            }
+        ).then((response) => response.json()).catch((err) => console.log(err));
+        if (response !== undefined && response.success) {
+            if (notify) {
+                notify(`Succesfully assigned ${student.student.person.name} to ${project.name}`, NotificationType.SUCCESS, 2000)
+            }
+        } else if (response !== undefined && !response.success) {
+            if (notify) {
+                notify(`Could not assign ${student.student.person.name} to ${project.name}:
+                ${response.reason}`, NotificationType.ERROR, 3000)
+            }
+        }
+    }
+
+    const removeStudent = async (contract: Contract) => {
+        const {sessionKey} = getSession
+            ? await getSession()
+            : {sessionKey: ""};
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
+            {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+                body: JSON.stringify({
+                    student: contract.student.student.student_id
+                })
+            }
+        ).then((response) => response.json()).catch((err) => console.log(err));
+        if (response !== undefined && response.success) {
+            if (notify) {
+                notify(`Succesfully removed ${contract.student.student.person.name} from ${project.name}`, NotificationType.SUCCESS, 2000)
+            }
+        } else if (response !== undefined && !response.success) {
+            if (notify) {
+                notify(`Could not remove ${contract.student.student.person.name} from ${project.name}:
+                ${response.reason}`, NotificationType.ERROR, 3000)
+            }
+        }
+    }
+
+    const [{canDrop, isOver}, drop] = useDrop(() => ({
+        // The type (or types) to accept - strings or symbols
+        accept: 'Student',
+        // Props to collect
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop()
+        }),
+        drop: (item, monitor) => {
+            dropStudent(item).then();
+        }
+    }))
 
     const calculateRoleMap = () => {
         const map: { [K: string]: number } = {};
@@ -29,7 +109,7 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
     };
 
     return (
-        <div className={styles.body}>
+        <div className={styles.body} ref={drop}>
             <header>
                 <div className={styles.left}>
                     <div>
@@ -66,17 +146,28 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
                 </div>
             </header>
 
-            <div className={styles.assignees}>
-                <h1>Assignees</h1>
-                {project.contracts.map((contract) => {
-                    return (
-                        <p key={contract.project_role.project_role_id}>hello</p>
-                    );
-                })}
+            <div>
+                <h2>Assignees</h2>
+                <div className={styles.assignees}>
+                    {project.contracts.map((contract) => {
+                        return (
+                            <div className={`${styles.assignee} ${styles.card}`} key={contract.contract_id}>
+                                <div>
+                                    <h1>{contract.student.student.person.name}</h1>
+                                    <div className={styles.assigneeBody}>
+                                        <Label label={contract.project_role.role.name}/>
+                                        <p>{contract.login_user.person.name}</p>
+                                    </div>
+                                </div>
+                                <button className={`${styles.delete} delete`} onClick={() => removeStudent(contract)} />
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
             <div className={styles.description}>
-                <h1>Project Description</h1>
+                <h2>Project Description</h2>
                 <p>{project.description}</p>
             </div>
 

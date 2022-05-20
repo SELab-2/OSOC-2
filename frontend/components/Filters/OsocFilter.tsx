@@ -7,7 +7,7 @@ import {
     Sort,
 } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
-import { NotificationContext } from "../../../contexts/notificationProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const OsocCreateFilter: React.FC<{
     search: (params: OsocFilterParams) => void;

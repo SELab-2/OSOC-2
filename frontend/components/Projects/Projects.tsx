@@ -24,6 +24,7 @@ export const Projects: React.FC = () => {
     });
 
     const [loading, isLoading] = useState(false);
+    const pageSize = 5;
 
     /**
      * Called by the studentfilter to filter
@@ -122,7 +123,7 @@ export const Projects: React.FC = () => {
                 </div>
                 <div className={scrollStyles.bottomShadowCaster} />
             </div>
-            <Paginator pagination={pagination} navigator={navigator} />
+            <Paginator pageSize={pageSize} pagination={pagination} navigator={navigator} />
         </div>
     );
 };
