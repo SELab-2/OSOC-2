@@ -25,7 +25,8 @@ const Create: NextPage = () => {
 
     const [projectName, setProjectName] = useState<string>("");
     const [partner, setPartner] = useState<string>("");
-    const [osocEdition, setOsocEdition] = useState<string>("");
+    const [selectedOsocEdition, setSelectedOsocEdition] = useState<number>(-1);
+    const [osocsActive, setOsocsActive] = useState<boolean>(false);
     const [startDate, setStartDate] = useState<string>(formatDate());
     const [endDate, setEndDate] = useState<string>(formatDate());
     const [description, setDescription] = useState<string>("");
@@ -137,7 +138,7 @@ const Create: NextPage = () => {
                                 partner: partner,
                                 start: startDate,
                                 end: endDate,
-                                osocId: getOsocId(osocEdition),
+                                osocId: selectedOsocEdition,
                                 positions: getTotalPositions(),
                                 roles: { roles: getRoleList() },
                                 description: description,
@@ -156,10 +157,10 @@ const Create: NextPage = () => {
         }
     };
 
-    const getOsocId = (year: string) => {
+    const getOsocYear = () => {
         for (const osoc of osocs) {
-            if (osoc.year === parseInt(year)) {
-                return osoc.osoc_id;
+            if (osoc.osoc_id === selectedOsocEdition) {
+                return osoc.year;
             }
         }
     };
@@ -239,6 +240,14 @@ const Create: NextPage = () => {
             selectedCoaches.push(id);
         }
         setSelectedCoaches([...selectedCoaches]);
+    };
+
+    const selectOsocEdition = (id: number) => {
+        if (selectedOsocEdition === id) {
+            setSelectedOsocEdition(-1); // deselect
+        } else {
+            setSelectedOsocEdition(id);
+        }
     };
 
     const checkUnfocus = (name: string, positions: string) => {
@@ -328,18 +337,6 @@ const Create: NextPage = () => {
             </label>
 
             <label>
-                <h1>Osoc edition</h1>
-                <input
-                    className="input"
-                    type="text"
-                    name="osoc_edition"
-                    placeholder="year..."
-                    value={osocEdition}
-                    onChange={(e) => setOsocEdition(e.target.value)}
-                />
-            </label>
-
-            <label>
                 <h1>Start date</h1>
                 <input
                     className="input"
@@ -360,6 +357,58 @@ const Create: NextPage = () => {
                     onChange={(e) => setEndDate(e.target.value)}
                 />
             </label>
+
+            <div className={styles.rolesHeader}>
+                <p>Select an osoc edition: </p>
+                <div className={`dropdown ${osocsActive ? "is-active" : ""}`}>
+                    <div
+                        data-testid={"coachesSelectedFilterDisplay"}
+                        className={`dropdown-trigger ${
+                            osocsActive || selectedOsocEdition > 0
+                                ? styles.active
+                                : styles.inactive
+                        } ${styles.dropdownTrigger}`}
+                        onClick={() => setOsocsActive(!osocsActive)}
+                    >
+                        {selectedOsocEdition > 0
+                            ? `edition ${getOsocYear()}`
+                            : "No edition selected"}
+                        <div className={styles.triangleContainer}>
+                            <div
+                                className={`${osocsActive ? styles.up : ""} ${
+                                    styles.triangle
+                                }`}
+                            />
+                        </div>
+                    </div>
+                    <div className="dropdown-menu">
+                        <div className="dropdown-content">
+                            {osocs !== undefined
+                                ? osocs.map((osoc) => (
+                                      <div
+                                          data-testid={`testRoleItem=${osoc.year}`}
+                                          className={`${
+                                              styles.dropdownItem
+                                          } dropdown-item ${
+                                              osoc.osoc_id ===
+                                              selectedOsocEdition
+                                                  ? styles.selected
+                                                  : ""
+                                          }`}
+                                          key={osoc.osoc_id}
+                                          onClick={() => {
+                                              selectOsocEdition(osoc.osoc_id);
+                                              setOsocsActive(false);
+                                          }}
+                                      >
+                                          {osoc.year}
+                                      </div>
+                                  ))
+                                : null}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div className={styles.rolesHeader}>
                 <p>Add coaches to the project: </p>
