@@ -46,6 +46,9 @@ export async function getProjectById(projectId: number) {
         where: {
             project_id: projectId,
         },
+        include: {
+            osoc: true,
+        },
     });
 }
 

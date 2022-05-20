@@ -584,6 +584,18 @@ export async function unAssignCoach(
         .parseRemoveCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
+
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
             return ormPU
                 .getUsersFor(Number(checked.data.id))
                 .then((project_users) =>
@@ -621,6 +633,18 @@ export async function assignCoach(
         .parseAssignCoachRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
+
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
             return ormPU
                 .getUsersFor(Number(checked.data.id))
                 .then((project_users) =>
@@ -660,6 +684,18 @@ export async function unAssignStudent(
         .then((parsed) => util.checkSessionKey(parsed))
         .then(checkYearPermissionProject)
         .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
+
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
                 .then((ctrs) =>
@@ -742,6 +778,16 @@ export async function assignStudent(
     const latestOsoc = await ormOsoc
         .getLatestOsoc()
         .then((osoc) => util.getOrReject(osoc));
+
+    const project = await ormPr.getProjectById(checked.data.id);
+
+    if (project === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (project.osoc.year !== latestOsoc.year) {
+        return Promise.reject(errors.cookWrongOsocYear());
+    }
     // check if no contracts yet
     await ormCtr
         .contractsForStudent(checked.data.studentId)
