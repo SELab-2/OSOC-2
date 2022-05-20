@@ -642,6 +642,16 @@ export async function unAssignStudent(
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
                 .then((ctrs) =>
+                    Promise.all(
+                        ctrs.map((x) =>
+                            util.getOrReject(x.project_role).then((y) => ({
+                                ...x,
+                                project_role: y,
+                            }))
+                        )
+                    )
+                )
+                .then((ctrs) =>
                     ctrs.filter(
                         (contr) =>
                             contr.project_role.project_id == checked.data.id
@@ -725,9 +735,10 @@ export async function assignStudent(
     await ormCtr
         .contractsForStudent(checked.data.studentId)
         .then((data) =>
-            data.filter(
-                (x) => x.project_role.project.osoc_id == latestOsoc.osoc_id
-            )
+            Promise.all(data.map((x) => util.getOrReject(x.project_role)))
+        )
+        .then((data) =>
+            data.filter((x) => x.project.osoc_id == latestOsoc.osoc_id)
         )
         .then((filtered) =>
             filtered.length > 0
