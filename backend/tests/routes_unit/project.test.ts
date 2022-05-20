@@ -1649,3 +1649,81 @@ test("Can filter projects (with osoc year)", async () => {
     expect(ormCMock.contractsByProject).toHaveBeenCalledTimes(projects.length);
     expect(ormPU.getUsersFor).toHaveBeenCalledTimes(projects.length);
 });
+
+test("Can modify a student on a project", async () => {
+    ormPrRMock.getNumberOfFreePositions.mockResolvedValue(0);
+
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "key",
+        id: 0,
+        studentId: 0,
+        role: "frontend",
+    };
+
+    reqMock.parseUpdateProjectRequest.mockResolvedValue({
+        sessionkey: "key",
+        id: 0,
+        name: "name",
+        addCoaches: {
+            coaches: [0],
+        },
+        removeCoaches: {
+            coaches: [0],
+        },
+    });
+
+    utilMock.checkYearPermissionProject.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
+
+    ormPrMock.updateProject.mockImplementation((v) =>
+        Promise.resolve({
+            project_id: v.projectId,
+            name: orDefault(v.name, "name"),
+            osoc_id: orDefault(v.osocId, 0),
+            partner: orDefault(v.partner, "partner"),
+            description: orDefault(v.description, null),
+            start_date: orDefault(v.startDate, new Date(1000000000)),
+            end_date: orDefault(v.endDate, new Date(10000000000)),
+        })
+    );
+
+    ormPrRMock.getProjectRoleNamesByProject.mockResolvedValue([]);
+    ormPrRMock.getProjectRolesByProject.mockResolvedValue([]);
+
+    ormPUMock.createProjectUser.mockResolvedValue({
+        project_user_id: 0,
+        login_user_id: 0,
+        project_id: 0,
+    });
+
+    ormPUMock.deleteProjectUser.mockResolvedValue({
+        count: 1,
+    });
+
+    ormPUMock.getUsersFor.mockResolvedValue([]);
+
+    await expect(project.modProject(req)).resolves.toStrictEqual({
+        id: 0,
+        name: "name",
+        partner: "partner",
+        start_date:
+            "Mon Jan 12 1970 14:46:40 GMT+0100 (Central European Standard Time)",
+        end_date:
+            "Sun Apr 26 1970 18:46:40 GMT+0100 (Central European Standard Time)",
+        osoc_id: 0,
+        roles: [],
+        description: null,
+        coaches: [],
+    });
+
+    utilMock.checkYearPermissionProject.mockReset();
+    reqMock.parseUpdateProjectRequest.mockReset();
+    ormPrRMock.getProjectRoleNamesByProject.mockReset();
+    ormPrRMock.getProjectRolesByProject.mockReset();
+    ormPUMock.createProjectUser.mockReset();
+    ormPUMock.deleteProjectUser.mockReset();
+    ormPUMock.getUsersFor.mockReset();
+    ormPrMock.updateProject.mockReset();
+});
