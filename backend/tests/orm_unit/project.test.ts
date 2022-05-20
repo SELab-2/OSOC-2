@@ -265,7 +265,6 @@ test("should return all filtered projects by name", async () => {
             undefined,
             undefined,
             undefined,
-            undefined,
             0
         )
     ).resolves.toEqual({
@@ -286,7 +285,6 @@ test("should return all filtered projects by partner", async () => {
             undefined,
             undefined,
             undefined,
-            undefined,
             0
         )
     ).resolves.toEqual({
@@ -303,7 +301,6 @@ test("should return all filtered projects by assigned coaches", async () => {
             { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
-            [1],
             undefined,
             undefined,
             undefined,
@@ -334,7 +331,6 @@ test("should return all filtered projects by fully assigned status", async () =>
             { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
-            undefined,
             true,
             undefined,
             undefined,
@@ -360,7 +356,6 @@ test("should return all filtered projects sorted by the fully assigned status", 
             undefined,
             undefined,
             undefined,
-            undefined,
             "desc",
             0
         )
@@ -377,7 +372,6 @@ test("should return all filtered projects sorted by the fully assigned status", 
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
-            undefined,
             undefined,
             undefined,
             undefined,
@@ -405,7 +399,6 @@ test("should return all filtered projects sorted by the fully assigned status", 
             undefined,
             undefined,
             undefined,
-            undefined,
             "desc",
             0
         )
@@ -422,7 +415,6 @@ test("should return all filtered projects sorted by the fully assigned status", 
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
-            undefined,
             undefined,
             undefined,
             undefined,
@@ -477,7 +469,6 @@ test("should return all filtered projects by fully assigned status (sortObject =
             { currentPage: 0, pageSize: 25 },
             undefined,
             undefined,
-            undefined,
             true,
             undefined,
             undefined,
@@ -505,7 +496,6 @@ test("should return all filtered projects by fully assigned status (sortObject =
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
-            undefined,
             undefined,
             undefined,
             true,
@@ -536,7 +526,6 @@ test("should return all filtered projects by fully assigned status (sortObject =
     await expect(
         filterProjects(
             { currentPage: 0, pageSize: 25 },
-            undefined,
             undefined,
             undefined,
             true,
