@@ -20,6 +20,7 @@ import Image from "next/image";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { useSockets } from "../../contexts/socketProvider";
 import { defaultUser } from "../../defaultUser";
+import { useRouter } from "next/router";
 import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const StudentOverview: React.FC<{
@@ -46,6 +47,7 @@ export const StudentOverview: React.FC<{
         EmailStatus.NONE
     );
     const [deleteModal, setDeleteModal] = useState<boolean>(false);
+    const router = useRouter();
 
     if (student === null) {
         student = defaultUser;
@@ -335,6 +337,9 @@ export const StudentOverview: React.FC<{
             // We need to let the encompassing component know the current student was deleted
             if (studentDeleted !== undefined) {
                 studentDeleted();
+            } else {
+                // if we are in the separate window (not with the student list) => redirect to the student list page
+                router.push("/students").then();
             }
         } else if (response.reason) {
             if (notify) {
