@@ -504,6 +504,7 @@ beforeEach(() => {
     ormPrMock.deleteProject.mockImplementation(() =>
         Promise.resolve(projects[0])
     );
+    ormPrMock.deleteProjectFromDB.mockImplementation(() => Promise.resolve());
     ormPrMock.getProjectById.mockImplementation((id) =>
         Promise.resolve(projects2[id])
     );
@@ -683,6 +684,7 @@ afterEach(() => {
     ormPrMock.getAllProjects.mockReset();
     ormPrMock.updateProject.mockReset();
     ormPrMock.deleteProject.mockReset();
+    ormPrMock.deleteProjectFromDB.mockReset();
     ormPrMock.getProjectById.mockReset();
     ormPrMock.filterProjects.mockReset();
     ormPrMock.getProjectById.mockReset();
@@ -1181,7 +1183,7 @@ test("Can delete projects", async () => {
     expectCall(reqMock.parseDeleteProjectRequest, req);
     expectCall(utilMock.isAdmin, req.body);
     expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
-    expectCall(ormPrMock.deleteProject, 0);
+    expectCall(ormPrMock.deleteProjectFromDB, 0);
 
     utilMock.checkYearPermissionProject.mockReset();
 });

@@ -2,17 +2,18 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition, Coach, NotificationType } from "../../types";
+import { Coach, NotificationType, AccountStatus } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
-import { useSockets } from "../../contexts/socketProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { useSockets } from "../../contexts/socketProvider";
 
 const Create: NextPage = () => {
-    const { notify } = useContext(NotificationContext);
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
+
     const formatDate = () => {
         const date = new Date();
         return [
@@ -28,7 +29,6 @@ const Create: NextPage = () => {
 
     const [projectName, setProjectName] = useState<string>("");
     const [partner, setPartner] = useState<string>("");
-    const [osocEdition, setOsocEdition] = useState<string>("");
     const [startDate, setStartDate] = useState<string>(formatDate());
     const [endDate, setEndDate] = useState<string>(formatDate());
     const [description, setDescription] = useState<string>("");
@@ -38,14 +38,41 @@ const Create: NextPage = () => {
     const [visible, setVisible] = useState<boolean>(false);
     const [newRoleName, setNewRoleName] = useState<string>("");
     const [newRolePositions, setNewRolePositions] = useState<string>("0");
-    const [osocs, setOsocs] = useState<OsocEdition[]>([]);
     const [coaches, setCoaches] = useState<Coach[]>([]);
     const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
     const [coachesActive, setCoachesActive] = useState<boolean>(false);
+    const [osocId, setOsoscId] = useState<number>(0);
+    const [osocYear, setOsocYear] = useState<number>(0);
 
     const updateNewRolePositions = (positions: string) => {
         if (Number(positions) < 0) return; // Only allow positive values
         setNewRolePositions(positions);
+    };
+
+    const fetchCoaches = async () => {
+        if (getSession != undefined) {
+            getSession().then(async ({ sessionKey }) => {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/coach/all`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `auth/osoc2 ${sessionKey}`,
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .catch((error) => console.log(error));
+                if (response !== undefined && response.success) {
+                    for (const coach of response.data) {
+                        if (coach.activated === AccountStatus.ACTIVATED) {
+                            coaches.push(coach);
+                        }
+                    }
+                    setCoaches([...coaches]);
+                }
+            });
+        }
     };
 
     const fetchRoles = async () => {
@@ -73,7 +100,7 @@ const Create: NextPage = () => {
         }
     };
 
-    const fetchOsocs = async () => {
+    const fetchLatestOsocEdition = async () => {
         if (getSession != undefined) {
             getSession().then(async ({ sessionKey }) => {
                 const response = await fetch(
@@ -88,28 +115,16 @@ const Create: NextPage = () => {
                     .then((response) => response.json())
                     .catch((error) => console.log(error));
                 if (response !== undefined && response.success) {
-                    setOsocs(response.data);
-                }
-            });
-        }
-    };
-
-    const fetchCoaches = async () => {
-        if (getSession != undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/coach/all`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `auth/osoc2 ${sessionKey}`,
-                        },
+                    let latestYearId = 0;
+                    let latestYear = 0;
+                    for (const osoc of response.data) {
+                        if (osoc.year > latestYear) {
+                            latestYearId = osoc.osoc_id;
+                            latestYear = osoc.year;
+                        }
                     }
-                )
-                    .then((response) => response.json())
-                    .catch((error) => console.log(error));
-                if (response !== undefined && response.success) {
-                    setCoaches(response.data);
+                    setOsoscId(latestYearId);
+                    setOsocYear(latestYear);
                 }
             });
         }
@@ -117,8 +132,8 @@ const Create: NextPage = () => {
 
     useEffect(() => {
         fetchRoles().then();
-        fetchOsocs().then();
         fetchCoaches().then();
+        fetchLatestOsocEdition().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -140,7 +155,7 @@ const Create: NextPage = () => {
                                 partner: partner,
                                 start: startDate,
                                 end: endDate,
-                                osocId: getOsocId(osocEdition),
+                                osocId: osocId,
                                 positions: getTotalPositions(),
                                 roles: { roles: getRoleList() },
                                 description: description,
@@ -151,7 +166,13 @@ const Create: NextPage = () => {
                         .then((response) => response.json())
                         .catch((error) => console.log(error));
                     if (response !== undefined && response.success) {
-                        alert("Project successfully created!");
+                        if (notify) {
+                            notify(
+                                "Project succesfully created!",
+                                NotificationType.SUCCESS,
+                                2000
+                            );
+                        }
                         socket.emit("projectCreated");
                     } else if (notify && response !== null) {
                         notify(response.reason, NotificationType.ERROR, 5000);
@@ -159,14 +180,6 @@ const Create: NextPage = () => {
                     router.push("/projects").then();
                 }
             });
-        }
-    };
-
-    const getOsocId = (year: string) => {
-        for (const osoc of osocs) {
-            if (osoc.year === parseInt(year)) {
-                return osoc.osoc_id;
-            }
         }
     };
 
@@ -297,6 +310,8 @@ const Create: NextPage = () => {
                 </div>
             </Modal>
 
+            <p>OSOC Edition: {osocYear}</p>
+
             <label>
                 <h1>Project name</h1>
                 <input
@@ -330,18 +345,6 @@ const Create: NextPage = () => {
                     placeholder="description..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                />
-            </label>
-
-            <label>
-                <h1>Osoc edition</h1>
-                <input
-                    className="input"
-                    type="text"
-                    name="osoc_edition"
-                    placeholder="year..."
-                    value={osocEdition}
-                    onChange={(e) => setOsocEdition(e.target.value)}
                 />
             </label>
 
