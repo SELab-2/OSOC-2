@@ -88,3 +88,18 @@
 .delete {
     padding: 0;
 }
+
+.description {
+    max-height: fit-content;
+}
+
+.description > p {
+    word-break: break-all;
+}
+
+.buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}

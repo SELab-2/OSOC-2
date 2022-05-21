@@ -26,12 +26,12 @@ model attachment {
 model contract {
   contract_id              Int                  @id @default(autoincrement())
   student_id               Int?
-  project_role_id          Int                  @default(autoincrement())
+  project_role_id          Int?
   information              String?
   created_by_login_user_id Int?
   contract_status          contract_status_enum
   login_user               login_user?          @relation(fields: [created_by_login_user_id], references: [login_user_id], onUpdate: NoAction)
-  project_role             project_role         @relation(fields: [project_role_id], references: [project_role_id], onDelete: NoAction, onUpdate: NoAction)
+  project_role             project_role?        @relation(fields: [project_role_id], references: [project_role_id], onUpdate: NoAction)
   student                  student?             @relation(fields: [student_id], references: [student_id], onUpdate: NoAction)
 }
 
