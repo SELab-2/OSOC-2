@@ -29,6 +29,7 @@ jobs:
       - name: Coverage Report
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
+          test-script: npm test
           working-directory: frontend
           skip-step: install
           annotations: failed-tests
