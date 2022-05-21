@@ -93,13 +93,10 @@ export const StudentOverview: React.FC<{
     useEffect(() => {
         setEvaluations([]);
         fetchEvals().then();
+        setEmailStatus(student.jobApplication.email_status);
+        setStudentcard(student);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [student]);
-
-    useEffect(() => {
-        setEmailStatus(student.jobApplication.email_status);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     /**
      * Call the `updateEvaluations` callback when the evaluations change
