@@ -5,7 +5,6 @@ import {
     ServerToClientEvents,
     SocketData,
 } from "../types";
-import {student} from "@prisma/client";
 /* istanbul ignore file */
 
 /**
