@@ -36,8 +36,10 @@ export const StudentOverview: React.FC<{
     const { getSession, isAdmin } = useContext(SessionContext);
     const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
+    const [studentcard, setStudentcard] = useState<Student>(student);
 
     const fetchEvals = async () => {
+        console.log("fetching");
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -64,6 +66,14 @@ export const StudentOverview: React.FC<{
             Array.isArray(response.evaluation.evaluations)
         ) {
             setEvaluations(response.evaluation.evaluations);
+            setStudentcard((student) => {
+                return {
+                    evaluation: response.evaluation,
+                    jobApplication: student.jobApplication,
+                    roles: student.roles,
+                    student: student.student,
+                };
+            });
         } else if (response && !response.success && notify) {
             notify(
                 "Something went wrong:" + response.reason,
@@ -313,7 +323,7 @@ export const StudentOverview: React.FC<{
                 />
             ) : null}
             <div className={styles.studentCard}>
-                <StudentCard student={student} display={Display.FULL} />
+                <StudentCard student={studentcard} display={Display.FULL} />
             </div>
 
             <div className={styles.body}>
