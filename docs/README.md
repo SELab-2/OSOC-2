@@ -1,5 +1,5 @@
-# Documentations
-This folder contains all the required documentations:
+# Documentation
+This folder contains all the required documentation:
 - [Mock Ups](Mock%20Ups)
 - [Domain Model](Domain%20Model)
 - [Use Cases](Use%20cases.pdf)
