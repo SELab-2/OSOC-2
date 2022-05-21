@@ -49,7 +49,7 @@ export const Osoc: React.FC<{
                 return { success: false };
             });
         if (response && response.success && notify) {
-            socket.emit("osocDeleted", osocId);
+            socket.emit("osocDeleted");
             notify(
                 "Successfully deleted osoc edition!",
                 NotificationType.SUCCESS,
