@@ -19,6 +19,7 @@ import {
     deleteProject,
     updateProject,
     deleteProjectByOsocEdition,
+    deleteProjectFromDB,
     deleteProjectByPartner,
     getProjectById,
     filterProjects,
@@ -538,4 +539,12 @@ test("should return all filtered projects by fully assigned status (sortObject =
         data: [],
         pagination: { page: 0, count: 0 },
     });
+});
+
+test("should delete project", async () => {
+    const count = { count: 1 };
+    prismaMock.project_user.deleteMany.mockResolvedValue(count);
+    prismaMock.project_role.deleteMany.mockResolvedValue(count);
+    prismaMock.project.delete.mockResolvedValue(returnValue);
+    await expect(deleteProjectFromDB(0)).resolves.toEqual(undefined);
 });
