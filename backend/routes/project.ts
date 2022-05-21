@@ -900,7 +900,6 @@ export function getRouter(): express.Router {
     util.route(router, "delete", "/:id/coach", unAssignCoach);
     util.route(router, "post", "/:id/coach", assignCoach);
 
-    // TODO add project conflicts
     util.addAllInvalidVerbs(router, [
         "/",
         "/all",
