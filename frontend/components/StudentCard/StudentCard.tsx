@@ -1,23 +1,64 @@
 import React from "react";
-import { Display, Student } from "../../types";
+import { Decision, Display, Student } from "../../types";
 import styles from "./StudentCard.module.scss";
-import { Role } from "../Labels/Roles";
-import { Study } from "../Labels/Studies";
 import { Diploma } from "../Labels/Diploma";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
-import { LanguageAndSkill } from "../Labels/LanguageAndSkill";
+import { Label } from "../Labels/Label";
+import CheckIconColor from "../../public/images/green_check_mark_color.png";
+import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
+import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
+import { useDrag } from "react-dnd";
+import { defaultUser } from "../../defaultUser";
 
 export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
     student,
     display,
 }) => {
+    if (student === null) {
+        student = defaultUser;
+    }
+
+    const decision_to_image = {
+        [Decision.YES]: CheckIconColor,
+        [Decision.MAYBE]: ExclamationIconColor,
+        [Decision.NO]: ForbiddenIconColor,
+    };
+
+    const [, drag] = useDrag(() => ({
+        // "type" is required. It is used by the "accept" specification of drop targets.
+        type: "Student",
+        item: student,
+        // The collect function utilizes a "monitor" instance (see the Overview for what this is)
+        // to pull important pieces of state from the DnD system.
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    }));
+
     return (
-        <div className={styles.body}>
-            <h2>
-                {" "}
-                {`${student.student.person.firstname} ${student.student.person.lastname}`}
-            </h2>
+        <div className={styles.body} ref={drag}>
+            <header>
+                <div>
+                    <h2>{student.student.person.name}</h2>
+                    <h1>{student.evaluation.osoc.year}</h1>
+                </div>
+                {student.evaluation.evaluations.map((evaluation) => {
+                    if (evaluation.is_final) {
+                        return (
+                            <Image
+                                key={evaluation.evaluation_id}
+                                className={styles.buttonImage}
+                                src={decision_to_image[evaluation.decision]}
+                                width={30}
+                                height={30}
+                                alt={"Final Decision"}
+                            />
+                        );
+                    }
+                })}
+            </header>
+
             <div
                 className={`${
                     display === Display.FULL ? styles.grid : styles.limited
@@ -31,10 +72,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                         {student.jobApplication.job_application_skill.map(
                             (language, index) => {
                                 return (
-                                    <LanguageAndSkill
-                                        key={index}
-                                        language={language.skill}
-                                    />
+                                    <Label key={index} label={language.skill} />
                                 );
                             }
                         )}
@@ -42,7 +80,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                     <h6 className={styles.categoryTitle}>ROLES</h6>
                     <div className={styles.category}>
                         {student.roles.map((role, index) => (
-                            <Role key={index} role={role} />
+                            <Label key={index} label={role} />
                         ))}
                     </div>
                 </div>
@@ -61,7 +99,7 @@ export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
                         <h6 className={styles.categoryTitle}>STUDIES</h6>
                         <div className={styles.category}>
                             {student.jobApplication.edus.map((study, index) => (
-                                <Study key={index} study={study} />
+                                <Label key={index} label={study} />
                             ))}
                         </div>
                     </div>

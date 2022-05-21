@@ -1,8 +1,18 @@
 /* The styling for a standalone student page */
 .studentPage {
-  width: clamp(18rem, 92vw, 60rem);
+  width: clamp(18rem, 92vw, 90rem);
   margin-inline: auto;
   margin-bottom: clamp(1rem, 2vw, 2.5rem);
+}
+
+/* The button to close the overview */
+.close {
+  position: relative;
+  left: 90%;
+  top: 3rem;
+}
+
+@media (max-width: 800px) {
 }
 
 .body {
@@ -11,6 +21,10 @@
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-start;
+}
+
+.studentCard {
+  padding-right: 8vw;
 }
 
 /* Dropdown Button */
@@ -58,10 +72,12 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 .suggestionbuttons {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .suggestionbuttons button {
@@ -94,6 +110,10 @@
   gap: 1rem;
 }
 
+.jobapplication div {
+  display: flex;
+  flex-direction: column;
+}
 .jobapplication div a {
   font-weight: lighter;
 }
@@ -108,4 +128,273 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* We can create triangles using some magic CSS! */
+.triangleContainer {
+  position: relative;
+  height: 100%;
+  width: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.triangle {
+  margin: auto;
+  position: relative;
+  background-color: var(--primary-100);
+  transition-duration: 0.2s;
+}
+
+.triangle:before,
+.triangle:after {
+  content: '';
+  position: absolute;
+  background-color: inherit;
+}
+
+.triangle,
+.triangle:before,
+.triangle:after {
+  width: 0.5em;
+  height: 0.5em;
+  border-top-right-radius: 30%;
+}
+
+.triangle.up {
+  transform: rotate(60deg) skewX(-30deg) scale(1, .866) translate(33%, -33%);
+}
+
+.triangle {
+  transform: skewX(-30deg) scale(1, .866) translate(33%, -33%);
+}
+
+.triangle:before {
+  transform: rotate(-135deg) skewX(-45deg) scale(1.414, .707) translate(0, -50%);
+}
+
+.triangle:after {
+  transform: rotate(135deg) skewY(-45deg) scale(.707, 1.414) translate(50%);
+}
+
+.dot {
+  width: 0.5em;
+  height: 0.5em;
+  background-color: var(--primary-100);
+  border-radius: 0.5em;
+  transition-duration: 0.2s;
+  transform: translate(33%, 0);
+}
+
+/* The filter container */
+.userfilter, .studentfilter, .osocfilter, .projectfilter {
+  background-color: var(--neutral-150);
+  border-radius: 0.5rem;
+}
+
+.userfilter {
+  margin-inline: -0.2rem;
+  padding: 0 0.2rem;
+}
+
+.studentfilter, .projectfilter {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.studentfilterinputs, .projectfilterinput {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+}
+
+.contents {
+  display: contents;
+}
+
+.studentfilter div, .osocfilter div, .userfilter div, .projectfilter div {
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+/* The form containing the filters */
+.form {
+  display: grid;
+  grid-gap: 2rem;
+  grid-template-columns: 1.5fr 1.5fr 0.75fr;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+@media (max-width: 800px) {
+  .form {
+      display: flex;
+      flex-wrap: wrap;
+      grid-gap: 0.5rem;
+  }
+
+  .query {
+      width: 100%;
+      flex-wrap: wrap;
+  }
+
+  .studentfilterinputs {
+      display: contents;
+  }
+}
+
+/* The query and the label for the query */
+.form .query, .query div, .query {
+  display: flex;
+  align-items: center;
+}
+
+.query {
+  justify-content: space-between;
+  min-width: 10rem;
+}
+
+.query div {
+  user-select: none; /* We want the user to be able to click on the label to sort without selecting the text */
+}
+
+.query div:hover {
+  cursor: pointer;
+}
+
+/* The filter text input fields */
+.input {
+  border: none;
+  background-color: var(--neutral-100);
+  height: 2.5rem;
+  border-radius: 1rem;
+  transition-duration: 0.2s;
+}
+
+.input:focus {
+  border: 0.1rem solid var(--succes-100)
+}
+
+/*-----------------------*/
+/* Status filter buttons */
+/*-----------------------*/
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+}
+
+.buttonContainer {
+  margin-inline: auto;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.buttonContainer p {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.buttonContainer:hover {
+  scale: 1.1;
+  cursor: pointer;
+}
+
+.button {
+  margin-block: 0.2rem;
+  margin-inline: 0.5rem;
+}
+
+/* Filters that act like checkboxes */
+.inactive {
+  background-color: transparent;
+  border: 0.1rem solid rgba(10, 8, 57, 0.25);
+  color: rgba(10, 8, 57, 0.25);
+}
+
+.inactive:hover {
+  background-color: inherit;
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.active, .inactive {
+  font-size: large;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-inline: 1.5rem;
+  transition-duration: 0.2s;
+  border-radius: 0.4rem;
+  font-weight: normal;
+  min-height: 2.5rem;
+  gap: 0.5rem;
+}
+
+.active {
+  background-color: var(--neutral-100);
+  color: var(--primary-100);
+  border: 0.1rem solid transparent;
+}
+
+.active:hover {
+  background-color: var(--neutral-100);
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.25);
+}
+
+.dropdownTrigger {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+  padding-inline: 0.8rem;
+}
+
+
+.dropdownItem:hover {
+  background-color: var(--neutral-150);
+}
+
+.selected {
+  background-color: var(--succes-100);
+}
+
+.studentButtonsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.studentButtonsContainer button, .studentButtonsContainer div {
+  margin-right: auto;
+}
+
+.studentButtonsContainer button:last-child {
+  margin-right: 0;
+}
+
+.studentButtons {
+  display: flex;
+  gap: 1rem !important;
+  justify-content: space-between;
+}
+
+.delete {
+  margin-left: 1rem;
+  background-color: var(--error-100);
+}
+
+.dropdowns {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 4vw;
 }

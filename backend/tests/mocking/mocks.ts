@@ -1,8 +1,10 @@
+/* istanbul ignore file */
+
 import CallableInstance from "callable-instance";
 import express from "express";
 import core from "express-serve-static-core";
 import { setTimeout } from "timers/promises";
-
+/* istanbul ignore file */ // jest should ignore this file for coverage and testing because it is just setup
 type Call = (
     req: express.Request,
     res: express.Response,
@@ -151,7 +153,6 @@ export class MockedRouter
             if (cb == undefined) {
                 throw getInvalidVerbEndpointError(verb, ep);
             } else {
-                console.log("[mockedRouter]: returning await...");
                 return await Promise.resolve().then(
                     async () =>
                         await cb(req, res, function () {

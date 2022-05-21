@@ -2,8 +2,7 @@ CREATE TABLE IF NOT EXISTS person(
    person_id    SERIAL             PRIMARY KEY,
    email        VARCHAR(320)       UNIQUE, /* max email length is 320 characters */
    github       TEXT               UNIQUE,
-   firstname    TEXT               NOT NULL,
-   lastname     TEXT               NOT NULL,
+   "name"     TEXT               NOT NULL,
    github_id    TEXT               UNIQUE,
    CONSTRAINT login CHECK (email IS NOT NULL OR (github IS NOT NULL AND github_id IS NOT NULL)),
    CONSTRAINT email_check CHECK (email is NULL or email LIKE '%_@__%.__%')
@@ -46,7 +45,7 @@ CREATE TYPE account_status_enum as ENUM ('ACTIVATED', 'PENDING', 'DISABLED');
 CREATE TABLE IF NOT EXISTS login_user(
     login_user_id    SERIAL     PRIMARY KEY,
     person_id        SERIAL     NOT NULL UNIQUE REFERENCES person(person_id),
-    "password"         TEXT     NULL,
+    "password"       VARCHAR(60)     NULL,
     is_admin         BOOLEAN NOT NULL,
     is_coach         BOOLEAN NOT NULL,
     account_status   account_status_enum NOT NULL,
@@ -78,11 +77,11 @@ CREATE TABLE IF NOT EXISTS osoc(
 
 
 /* enum used in job appliction for the email status */
-CREATE TYPE email_status_enum AS ENUM ('SCHEDULED', 'SENT', 'FAILED', 'NONE', 'DRAFT');
+CREATE TYPE email_status_enum AS ENUM ('APPLIED', 'AWAITING PROJECT', 'APPROVED', 'CONTRACT CONFIRMED', 'CONTRACT DECLINED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS job_application (
     job_application_id        SERIAL               PRIMARY KEY,
-    student_id                SERIAL               NOT NULL REFERENCES student(student_id),
+    student_id                INT                  REFERENCES student(student_id) ON DELETE SET NULL,
     student_volunteer_info    TEXT                 NOT NULL,
     responsibilities          TEXT,
     fun_fact                  TEXT                 NOT NULL,
@@ -103,7 +102,7 @@ CREATE TYPE decision_enum AS ENUM ('YES', 'NO', 'MAYBE');
 
 CREATE TABLE IF NOT EXISTS evaluation (
     evaluation_id         SERIAL           PRIMARY KEY,
-    login_user_id         SERIAL           NOT NULL REFERENCES login_user(login_user_id),
+    login_user_id         INT              REFERENCES login_user(login_user_id)  ON DELETE SET NULL,
     job_application_id    SERIAL           NOT NULL REFERENCES job_application(job_application_id),
     decision              decision_enum    NOT NULL,
     motivation            TEXT,
@@ -125,9 +124,7 @@ CREATE TABLE IF NOT EXISTS project (
    description   TEXT,
    start_date    DATE             NOT NULL,
    end_date      DATE             NOT NULL,
-   positions     SMALLINT         NOT NULL,
-   CONSTRAINT dates CHECK (start_date <= end_date),
-   CONSTRAINT valid_positions CHECK (positions > 0)
+   CONSTRAINT dates CHECK (start_date <= end_date)
 );
 
 
@@ -151,11 +148,11 @@ CREATE TABLE IF NOT EXISTS project_role (
 CREATE TYPE contract_status_enum AS ENUM ('DRAFT', 'APPROVED', 'CANCELLED', 'WAIT_APPROVAL', 'SIGNED', 'SENT');
 
 CREATE TABLE IF NOT EXISTS contract(
-   contract_id                 SERIAL                  PRIMARY KEY,
-   student_id                  SERIAL                  NOT NULL REFERENCES student (student_id),
-   project_role_id             SERIAL                  NOT NULL REFERENCES project_role (project_role_id),
+   contract_id                 SERIAL               PRIMARY KEY,
+   student_id                  INT                  REFERENCES student (student_id) ON DELETE SET NULL,
+   project_role_id             INT                  REFERENCES project_role (project_role_id) ON DELETE SET NULL,
    information                 TEXT,
-   created_by_login_user_id    SERIAL                  NOT NULL REFERENCES login_user (login_user_id),
+   created_by_login_user_id    INT                  REFERENCES login_user (login_user_id)  ON DELETE SET NULL,
    contract_status             contract_status_enum    NOT NULL
 );
 
@@ -196,12 +193,19 @@ CREATE TABLE IF NOT EXISTS attachment(
 
 CREATE TABLE IF NOT EXISTS template_email(
    template_email_id      SERIAL      PRIMARY KEY,
-   owner_id               SERIAL      NOT NULL REFERENCES login_user(login_user_id),
+   owner_id               INT         REFERENCES login_user(login_user_id) ON DELETE SET NULL,
    name                   TEXT        NOT NULL,
    content                TEXT        NOT NULL,
    subject                TEXT,
    cc                     TEXT,
    UNIQUE(owner_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS login_user_osoc(
+    login_user_osoc_id      SERIAL      PRIMARY KEY,
+    login_user_id           INT         NOT NULL REFERENCES login_user(login_user_id),
+    osoc_id                 INT         NOT NULL REFERENCES osoc(osoc_id),
+    unique(login_user_id, osoc_id)
 );
 
 /* Create database extension for job scheduler pg_cron */

@@ -1,12 +1,12 @@
 import prisma from "../prisma/prisma";
 
-import { CreateProjectUser } from "./orm_types";
+import { ProjectUser } from "./orm_types";
 
 /**
  *
  * @param projectUser: project user object with the needed information
  */
-export async function createProjectUser(projectUser: CreateProjectUser) {
+export async function createProjectUser(projectUser: ProjectUser) {
     const result = await prisma.project_user.create({
         data: {
             login_user_id: projectUser.loginUserId,
@@ -24,6 +24,7 @@ export async function getUsersFor(project: number) {
     return await prisma.project_user.findMany({
         where: { project_id: project },
         select: {
+            project_user_id: true,
             login_user: {
                 select: {
                     login_user_id: true,
@@ -32,6 +33,20 @@ export async function getUsersFor(project: number) {
                     person: true,
                 },
             },
+        },
+    });
+}
+
+/**
+ *
+ * @returns a promise with the deleted record inside
+ * @param projectUser: object that describes the connection between a project and a login user.
+ */
+export async function deleteProjectUser(projectUser: ProjectUser) {
+    return await prisma.project_user.deleteMany({
+        where: {
+            project_id: projectUser.projectId,
+            login_user_id: projectUser.loginUserId,
         },
     });
 }

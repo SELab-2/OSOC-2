@@ -1,6 +1,8 @@
 import prisma from "../../prisma/prisma";
 import { deleteAppliedRolesByJobApplication } from "../../orm_functions/applied_role";
 
+import "../integration_setup";
+
 it("should delete the applied roles for the job application", async () => {
     const [job_applications, roles] = await Promise.all([
         prisma.job_application.findMany(),

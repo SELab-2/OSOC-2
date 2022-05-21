@@ -1,7 +1,11 @@
 import {
     account_status_enum,
+    contract_status_enum,
+    decision_enum,
     email_status_enum,
     type_enum,
+    person,
+    project_user,
 } from "@prisma/client";
 import express from "express";
 import { FilterSort } from "./orm_functions/orm_types";
@@ -47,6 +51,14 @@ export interface Errors {
      */
     cookLockedRequest: () => ApiError;
     /**
+     * Cooks up a wrong suggestion request response.
+     */
+    cookWrongSuggestionYear: () => ApiError;
+    /**
+     * Cooks up a wrong osoc request response.
+     */
+    cookWrongOsocYear: () => ApiError;
+    /**
      *  Cooks up a Non-existent Endpoint response.
      *  @param url The requested endpoint URL.
      */
@@ -91,7 +103,28 @@ export namespace InternalTypes {
      */
     export type Suggestion = "YES" | "MAYBE" | "NO";
 
-    export interface SuggestionInfo {}
+    export interface SuggestionInfo {
+        /**
+         *  The evaluation id.
+         */
+        evaluation_id: number;
+        /**
+         *  The name of the login user.
+         */
+        senderName: string | undefined;
+        /**
+         *  The reason why the decision was made.
+         */
+        reason: string | null;
+        /**
+         *  The ID.
+         */
+        decision: decision_enum;
+        /**
+         *  The ID.
+         */
+        isFinal: boolean;
+    }
 
     /**
      *  Represents a response that only contains an ID.
@@ -101,6 +134,11 @@ export namespace InternalTypes {
          *  The ID.
          */
         id: number;
+    }
+
+    export interface Role {
+        role_id: number;
+        name: string;
     }
 
     /**
@@ -123,13 +161,9 @@ export namespace InternalTypes {
          */
         person_id: number;
         /**
-         *  The firstname of this person.
+         *  The name of this person.
          */
-        firstname: string;
-        /**
-         *  The lastname of this person.
-         */
-        lastname: string;
+        name: string;
         /**
          *  The email of this person.
          */
@@ -141,13 +175,9 @@ export namespace InternalTypes {
      */
     export interface FormPerson {
         /**
-         *  The firstname of this person.
+         *  The name of this person.
          */
-        birthName: string;
-        /**
-         *  The lastname of this person.
-         */
-        lastName: string;
+        name: string;
         /**
          *  The email of this person.
          */
@@ -158,18 +188,363 @@ export namespace InternalTypes {
      *  Represents a student, with all associated data. Does not correspond to a
      * student in the database.
      */
-    export interface Student {}
+    export interface Student {
+        student: StudentField | null;
+        jobApplication: StudentJobApplication | undefined;
+        evaluation: StudentEvaluation | undefined;
+        evaluations: StudentsAllEvaluations[] | undefined;
+        roles: string[] | undefined;
+    }
+
+    /**
+     *  The person entity for a student
+     */
+    interface StudentPerson {
+        /**
+         *  The name of this student.
+         */
+        name: string;
+        /**
+         *  The person id of this student.
+         */
+        person_id: number;
+        /**
+         *  The email of this student.
+         */
+        email: string | null;
+        /**
+         *  The GitHub of this student.
+         */
+        github: string | null;
+        /**
+         *  The GitHub id of this student.
+         */
+        github_id: string | null;
+    }
+
+    /**
+     *  The student entity for a student
+     */
+    interface StudentField {
+        /**
+         *  The student id of this student.
+         */
+        student_id: number;
+        /**
+         *  The person id of this student.
+         */
+        person_id: number | undefined;
+        /**
+         *  The person fields.
+         */
+        person: StudentPerson;
+        /**
+         *  The alumni status of this student.
+         */
+        alumni: boolean;
+        /**
+         *  The nickname of this student.
+         */
+        nickname: string | null;
+        /**
+         *  The gender of this student.
+         */
+        gender: string;
+        /**
+         *  The pronouns of this student.
+         */
+        pronouns: string | null;
+        /**
+         *  The phone number of this student.
+         */
+        phone_number: string;
+    }
+
+    /**
+     *  A student job application.
+     */
+    interface StudentJobApplication {
+        /**
+         *  The job application id
+         */
+        job_application_id: number;
+        /**
+         *  The id of this student
+         */
+        student_id: number | null;
+        /**
+         *  The id of the osoc edition
+         */
+        osoc_id: number;
+        /**
+         *  The responsibilities
+         */
+        responsibilities: string | null;
+        /**
+         *  The date
+         */
+        created_at: Date;
+        /**
+         *  The duration
+         */
+        edu_duration: number | null;
+        /**
+         *  The institute of the student
+         */
+        edu_institute: string | null;
+        /**
+         *  The level of the education of this student
+         */
+        edu_level: string;
+        /**
+         *  The education year
+         */
+        edu_year: string | null;
+        /**
+         *  The educations of the student
+         */
+        edus: string[];
+        /**
+         *  The email status of the student
+         */
+        email_status: email_status_enum;
+        /**
+         *  The fun fact
+         */
+        fun_fact: string;
+        /**
+         *  True if this student wants to be a student-coach, else false
+         */
+        student_coach: boolean;
+        /**
+         *  The volunteer info
+         */
+        student_volunteer_info: string;
+        /**
+         *  The job application skills
+         */
+        job_application_skill: StudentJobApplicationSkill[];
+        /**
+         *  The job application applied roles
+         */
+        applied_role: StudentAppliedRole[];
+        /**
+         *  The job application attachments
+         */
+        attachment: StudentAttachment[];
+    }
+
+    /**
+     *  The job application skill.
+     */
+    interface StudentJobApplicationSkill {
+        /**
+         *  The skill
+         */
+        skill: string | null;
+        /**
+         *  The id of the job application
+         */
+        job_application_id: number;
+        /**
+         *  The id of the skill
+         */
+        job_application_skill_id: number;
+        /**
+         *  The id of the language
+         */
+        language_id: number | null;
+        /**
+         *  True if this skill is the best skill, else false
+         */
+        is_best: boolean;
+        /**
+         *  True if this skill is the preferred skill, else false
+         */
+        is_preferred: boolean;
+        /**
+         *  The level of the skill
+         */
+        level: number | null;
+    }
+
+    /**
+     *  An applied role.
+     */
+    interface StudentAppliedRole {
+        /**
+         *  The id of the job application
+         */
+        job_application_id: number;
+        /**
+         *  The id of the role
+         */
+        role_id: number;
+        /**
+         *  The id of the applied role
+         */
+        applied_role_id: number;
+    }
+
+    /**
+     *  A job application attachment.
+     */
+    interface StudentAttachment {
+        /**
+         *  The id of the job application
+         */
+        job_application_id: number;
+        /**
+         *  The id of the attachment
+         */
+        attachment_id: number;
+        /**
+         *  The data of the attachment
+         */
+        data: string[];
+        /**
+         *  The data types
+         */
+        type: type_enum[];
+    }
+
+    /**
+     *  The evaluation
+     */
+    interface StudentEvaluation {
+        /**
+         *  The id of the evaluation
+         */
+        evaluations: StudentEvaluationsField[];
+        osoc: StudentOsocYear;
+    }
+
+    /**
+     *  The osoc year.
+     */
+    interface StudentOsocYear {
+        /**
+         *  The osoc year
+         */
+        year: number;
+    }
+
+    /**
+     *  The evaluation field for /student/all.
+     */
+    interface StudentsAllEvaluations {
+        /**
+         *  The evaluation
+         */
+        evaluation: StudentsAllEvaluationField[];
+        /**
+         *  The osoc year
+         */
+        osoc: StudentOsocYear;
+    }
+
+    /**
+     *  The evaluation field for /student/all.
+     */
+    interface StudentsAllEvaluationField extends StudentEvaluationsField {
+        /**
+         *  The id of the evaluation
+         */
+        login_user: StudentEvaluationsLoginUser | null;
+    }
+
+    /**
+     *  The login user that belongs to an evaluation.
+     */
+    interface StudentEvaluationsLoginUser {
+        /**
+         *  The id of the login_user
+         */
+        login_user_id: number;
+        /**
+         *  The person
+         */
+        person: StudentEvaluationsLoginUserPerson;
+    }
+
+    /**
+     *  The login user (person) that belongs to an evaluation.
+     */
+    interface StudentEvaluationsLoginUserPerson {
+        /**
+         *  The name of the login user
+         */
+        name: string;
+        /**
+         *  The person id
+         */
+        person_id: number;
+        /**
+         *  The email of this login user
+         */
+        email: string | null;
+        /**
+         *  The GitHub of this login user
+         */
+        github: string | null;
+    }
+
+    /**
+     *  All student evaluations
+     */
+    export interface AllStudentsEvaluations {
+        /**
+         *  The evaluations
+         */
+        evaluation: AllStudentsEvaluationsField;
+    }
+
+    /**
+     *  All student evaluations field
+     */
+    interface AllStudentsEvaluationsField {
+        /**
+         *  The evaluations
+         */
+        evaluations: StudentsAllEvaluationField[];
+        /**
+         *  The osoc year
+         */
+        osoc: StudentOsocYear;
+    }
+
+    /**
+     *  The evaluations field.
+     */
+    interface StudentEvaluationsField {
+        /**
+         *  The id of the evaluation
+         */
+        evaluation_id: number;
+        /**
+         *  The decision
+         */
+        decision: decision_enum;
+        /**
+         *  The reason of the decision
+         */
+        motivation: string | null;
+        /**
+         *  True if the decision is final, else false
+         */
+        is_final: boolean;
+    }
 
     /**
      *  Represents a form-student, with all associated data.
      */
     export interface FormStudent {
         /**
-         *  The firstname of this person.
+         *  The pronouns of this person.
          */
         pronouns: string | null;
         /**
-         *  The lastname of this person.
+         *  The gender of this person.
          */
         gender: string;
         /**
@@ -289,7 +664,18 @@ export namespace InternalTypes {
     /**
      *  Represents a user, with all associated data.
      */
-    export interface User {}
+    export interface User {
+        person: {
+            person_id: number;
+            email: string;
+            name: string;
+            github: string;
+        };
+        login_user_id: number;
+        is_coach: boolean;
+        is_admin: boolean;
+        account_status: AccountStatus;
+    }
 
     /**
      *  Represents an osoc edition, with all associated data.
@@ -309,6 +695,7 @@ export namespace InternalTypes {
         coach: boolean;
         admin: boolean;
         activated: string;
+        login_user_id: number;
     }
 
     /**
@@ -344,13 +731,64 @@ export namespace InternalTypes {
         partner: string;
         start_date: string;
         end_date: string;
-        positions: number;
+        roles: { name: string; positions: number }[];
+        description: string | null;
+        coaches: {
+            login_user: {
+                person: person;
+                login_user_id: number;
+                is_admin: boolean;
+                is_coach: boolean;
+            };
+            project_user_id: number;
+        }[];
     }
 
     /**
      *  Represents a project, with all associated data.
      */
-    export interface ProjectFilter {}
+    export interface ProjectAndContracts {
+        id: number;
+        name: string;
+        partner: string;
+        start_date: string;
+        end_date: string;
+        roles: object;
+        contracts: Contract[];
+        coaches: object;
+    }
+
+    /**
+     *  Represents a contract, with all associated data.
+     */
+    export interface Contract {
+        project_role: {
+            project_role_id: number;
+            project_id: number;
+            role_id: number;
+            positions: number;
+            role: { name: string };
+        } | null;
+        contract_id: number;
+        contract_status: contract_status_enum;
+        login_user: {
+            person: person;
+            login_user_id: number;
+            is_admin: boolean;
+            is_coach: boolean;
+        } | null;
+        student: Student;
+    }
+
+    /**
+     *  Represents a person, with all associated data.
+     */
+    export interface StudentRole {
+        /**
+         *  The role id.
+         */
+        role_id: number;
+    }
 
     /**
      *  Represents the drafted students of a project. Usually these will only
@@ -368,7 +806,55 @@ export namespace InternalTypes {
         /**
          *  The students.
          */
-        students: Student[];
+        students: ProjectStudent[];
+    }
+
+    /**
+     *  Represents a student of a project.
+     */
+    interface ProjectStudent {
+        /**
+         *  The contract status
+         */
+        status: contract_status_enum;
+        /**
+         *  The student info
+         */
+        student: ProjectStudentField | null;
+    }
+
+    /**
+     *  The student entity field for a project
+     */
+    interface ProjectStudentField {
+        /**
+         *  The student id of this student.
+         */
+        student_id: number;
+        /**
+         *  The person fields.
+         */
+        person: StudentPerson;
+        /**
+         *  The alumni status of this student.
+         */
+        alumni: boolean;
+        /**
+         *  The nickname of this student.
+         */
+        nickname: string | null;
+        /**
+         *  The gender of this student.
+         */
+        gender: string;
+        /**
+         *  The pronouns of this student.
+         */
+        pronouns: string | null;
+        /**
+         *  The phone number of this student.
+         */
+        phone_number: string;
     }
 
     /**
@@ -412,7 +898,7 @@ export namespace InternalTypes {
 
     export interface ShortTemplate {
         id: number;
-        owner: number;
+        owner: number | null;
         name: string;
     }
 
@@ -421,7 +907,7 @@ export namespace InternalTypes {
     }
 
     export interface FollowupStatus {
-        student: number;
+        student: number | null;
         status: email_status_enum;
         application: number;
     }
@@ -441,6 +927,15 @@ export interface WithUserID<T> {
  */
 export namespace Responses {
     /**
+     *  A paginable response holds, besides a data array, also the current page
+     * number and the total number of objects in the database
+     */
+    export interface Paginable<T> {
+        pagination: { page: number; count: number };
+        data: T[];
+    }
+
+    /**
      *  A response consisting of only a session key.
      */
     export interface Key {
@@ -457,8 +952,7 @@ export namespace Responses {
     /**
      *  A response consisting of and id and boolean.
      */
-    export interface Id_alumni {
-        id: number;
+    export interface Id_alumni extends Id {
         hasAlreadyTakenPart: boolean;
     }
 
@@ -469,6 +963,14 @@ export namespace Responses {
     export interface Login extends Key {
         is_admin: boolean;
         is_coach: boolean;
+    }
+
+    /**
+     *  A GitHub login response differs from a normal login response by the added
+     * is_signup field, which should tell the client that this user was newly created.
+     */
+    export interface GithubLogin extends Login {
+        is_signup: boolean;
     }
 
     /**
@@ -493,6 +995,11 @@ export namespace Responses {
     export interface Student extends InternalTypes.Student {}
 
     /**
+     *  Represents a contract, with all associated data.
+     */
+    export interface Contract extends InternalTypes.Contract {}
+
+    /**
      *  A form-student.
      */
     export interface FormStudent extends InternalTypes.FormStudent {}
@@ -514,26 +1021,38 @@ export namespace Responses {
      */
     export interface User extends InternalTypes.User {}
 
+    export interface AllStudentEvaluationsResponse
+        extends InternalTypes.AllStudentsEvaluations {}
+
     /**
      *  A studentList response is the keyed version of a list of students and their
      * associated data.
      */
-    export interface StudentList {
-        data: InternalTypes.Student[];
+    export interface StudentList extends Paginable<InternalTypes.Student> {}
+
+    /**
+     *  StudentRoles are a list of roles.
+     */
+    export interface StudentRoles {
+        data: InternalTypes.StudentRole[];
     }
 
     /**
      *
      */
-    export interface UserList {
-        data: InternalTypes.User[];
+    export interface UserList extends Paginable<InternalTypes.User> {}
+
+    export interface RoleList {
+        data: InternalTypes.Role[];
     }
+
+    export interface ProjectUser extends project_user {}
 
     /**
      *
      */
     export interface OsocEditionList {
-        data: InternalTypes.OsocEdition[];
+        data: OsocEdition[];
     }
 
     /**
@@ -564,11 +1083,11 @@ export namespace Responses {
     }
 
     /**
-     *  A student response is the keyed version of the student and their associated
+     *  The suggestion info
      * data.
      */
     export interface SuggestionInfo {
-        data: InternalTypes.SuggestionInfo[];
+        data: InternalTypes.SuggestionInfo;
     }
 
     /**
@@ -632,18 +1151,27 @@ export namespace Responses {
     export interface Project extends InternalTypes.Project {}
 
     /**
-     *  A project list response is the keyed version of a list of projects
+     *  A user permission response
+     * data.
      */
-    export interface ProjectList {
-        data: InternalTypes.Project[];
+    export interface UserYearsPermissions {
+        osoc_id: number;
+        year: number;
     }
 
     /**
-     *  A project filter list is a list of projects
+     *  A project list response with contracts in it
      */
-    export interface ProjectFilterList {
-        data: InternalTypes.ProjectFilter;
+    export interface ProjectAndContracts
+        extends InternalTypes.ProjectAndContracts {}
+
+    /**
+     *  A project list response is the keyed version of a list of projects
+     */
+    export interface ProjectListAndContracts {
+        data: InternalTypes.ProjectAndContracts[];
     }
+    export interface ProjectList extends Paginable<InternalTypes.Project> {}
 
     /**
      *  An admin list response is the keyed version of the list of admins.
@@ -675,18 +1203,6 @@ export namespace Responses {
     }
 
     /**
-     *  An EvaluationCoach response.
-     */
-    export interface EvaluationCoach {
-        evaluation_id: number;
-        senderFirstname: string;
-        senderLastname: string;
-        reason: string | null;
-        decision: InternalTypes.Suggestion;
-        isFinal: boolean;
-    }
-
-    /**
      *  A conflictList response is the keyed version of a list of conflicts.
      */
     export interface ConflictList {
@@ -712,17 +1228,6 @@ export namespace Responses {
     export type OrError<T> = ApiError | T;
 
     /**
-     *  An API response is one of the previous response types.
-     *  @deprecated Not up to date
-     */
-    export type ApiResponse =
-        | Empty
-        | Key
-        | PartialStudent
-        | IdNameList
-        | ConflictList;
-
-    /**
      *  Either an error while parsing the form or a data value.
      */
     export interface FormResponse<T> {
@@ -734,6 +1239,11 @@ export namespace Responses {
 }
 
 export namespace Requests {
+    export interface PaginableRequest extends KeyRequest {
+        currentPage: number;
+        pageSize: number; // will be filled in by the parser using the config
+    }
+
     export interface Login {
         name: string;
         pass: string;
@@ -770,9 +1280,35 @@ export namespace Requests {
         name?: string;
     }
 
-    export interface StudentFilter extends KeyRequest {}
+    export interface StudentFilterParameters {
+        osocYear?: number;
+        nameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[] | string;
+        alumniFilter?: boolean | string;
+        coachFilter?: boolean | string;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        nameSort?: string;
+        emailSort?: string;
+        alumniSort?: string;
+    }
 
-    export interface UserFilter extends KeyRequest {
+    export interface StudentFilter extends PaginableRequest {
+        osocYear?: number;
+        nameFilter?: string;
+        emailFilter?: string;
+        roleFilter?: string[];
+        alumniFilter?: boolean;
+        coachFilter?: boolean;
+        statusFilter?: decision_enum;
+        emailStatusFilter?: email_status_enum;
+        nameSort?: FilterSort;
+        emailSort?: FilterSort;
+        alumniSort?: FilterSort;
+    }
+
+    export interface UserFilter extends PaginableRequest {
         sessionkey: string;
         nameFilter?: string;
         emailFilter?: string;
@@ -783,7 +1319,10 @@ export namespace Requests {
         isAdminFilter?: boolean;
     }
 
-    export interface OsocFilter extends KeyRequest {}
+    export interface OsocFilter extends PaginableRequest {
+        yearFilter?: number;
+        yearSort?: FilterSort;
+    }
 
     export interface OsocEdition extends KeyRequest {
         year: number;
@@ -791,8 +1330,7 @@ export namespace Requests {
 
     export interface UpdateStudent extends IdRequest {
         emailOrGithub?: string;
-        firstName?: string;
-        lastName?: string;
+        name?: string;
         gender?: string;
         pronouns?: string;
         nickname?: string;
@@ -808,11 +1346,14 @@ export namespace Requests {
 
     export interface Suggest extends IdRequest {
         suggestion: InternalTypes.Suggestion;
+        job_application_id: number;
         reason?: string;
     }
 
     export interface Confirm extends IdRequest {
-        reply?: InternalTypes.Suggestion;
+        reply: InternalTypes.Suggestion;
+        job_application_id: number;
+        reason?: string;
     }
 
     export interface UpdateLoginUser extends IdRequest {
@@ -823,8 +1364,7 @@ export namespace Requests {
     }
 
     export interface UserRequest {
-        firstName: string;
-        lastName: string;
+        name: string;
         email: string;
         pass: string;
     }
@@ -835,7 +1375,9 @@ export namespace Requests {
         partner: string;
         start: Date;
         end: Date;
-        positions: number;
+        roles: { roles: { name: string; positions: number }[] };
+        description: string;
+        coaches: { coaches: number[] };
     }
 
     export interface ModProject extends IdRequest {
@@ -843,15 +1385,26 @@ export namespace Requests {
         partner?: string;
         start?: Date;
         end?: Date;
-        positions?: number;
         osocId?: number;
+        roles?: { roles: { name: string; positions: number }[] };
+        description?: string;
+        addCoaches?: { coaches: number[] };
+        removeCoaches?: { coaches: number[] };
     }
 
-    export interface ProjectFilter extends KeyRequest {}
+    export interface ProjectFilter extends PaginableRequest {
+        projectNameFilter?: string;
+        clientNameFilter?: string;
+        fullyAssignedFilter?: boolean;
+        osocYear?: number;
+        projectNameSort?: FilterSort;
+        clientNameSort?: FilterSort;
+    }
 
     export interface Draft extends IdRequest {
         studentId: number;
         role: string;
+        jobApplicationId: number;
     }
 
     export interface Followup extends IdRequest {
@@ -917,6 +1470,15 @@ export namespace Requests {
     export interface RmDraftStudent extends IdRequest {
         studentId: number;
     }
+
+    export interface Coach extends IdRequest {
+        loginUserId: number;
+    }
+
+    export interface UserYearPermissions extends IdRequest {
+        login_user_id: number;
+        osoc_id: number;
+    }
 }
 
 /**
@@ -933,9 +1495,7 @@ export type Table = "project" | "student";
  *  A route callback is a function taking an Express js request and returning a
  * promise (resolving to an API response).
  */
-export type RouteCallback<T extends Responses.ApiResponse> = (
-    req: express.Request
-) => Promise<T>;
+export type RouteCallback<T> = (req: express.Request) => Promise<T>;
 
 /**
  *  Helper type for unsafe type checks.
@@ -959,13 +1519,34 @@ export interface Email {
  */
 export interface ServerToClientEvents {
     loginUserUpdated: () => void;
+    loginUserActivated: () => void;
+    loginUserDisabled: () => void;
+    registrationReceived: () => void;
+    studentSuggestionCreated: (studentId: number) => void;
+    studentWasDeleted: (studentId: number) => void;
+    projectWasCreatedOrDeleted: () => void;
+    projectWasModified: (projectId: number) => void;
+    osocWasCreatedOrDeleted: () => void;
 }
 
 /**
  * types for socket.io when sending something from the client to the server
  */
 export interface ClientToServerEvents {
-    updateUser: (loginUserId: number) => void;
+    updateRoleUser: () => void;
+    activateUser: () => void;
+    disableUser: () => void;
+    submitRegistration: () => void;
+    studentSuggestionSent: (studentId: number) => void;
+    studentDecisionSent: (studentId: number) => void;
+    studentDelete: (studentId: number) => void;
+    projectCreated: () => void;
+    projectModified: (projectId: number) => void;
+    coachAssignedToProjectChange: (projectId: number) => void;
+    studentAssignedToProjectChange: (projectId: number) => void;
+    projectDeleted: () => void;
+    osocDeleted: () => void;
+    osocCreated: () => void;
 }
 
 /**
@@ -986,4 +1567,19 @@ export enum Decision {
     YES = "YES",
     MAYBE = "MAYBE",
     NO = "NO",
+}
+
+export enum AccountStatus {
+    ACTIVATED = "ACTIVATED",
+    PENDING = "PENDING",
+    DISABLED = "DISABLED",
+}
+
+export enum EmailStatus {
+    APPLIED = "APPLIED",
+    APPROVED = "APPROVED",
+    AWAITING_PROJECT = "AWAITING_PROJECT",
+    CONTRACT_CONFIRMED = "CONTRACT_CONFIRMED",
+    CONTRACT_DECLINED = "CONTRACT_DECLINED",
+    REJECTED = "REJECTED",
 }

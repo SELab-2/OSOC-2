@@ -11,6 +11,8 @@ import {
 import { CreateContract, UpdateContract } from "../../orm_functions/orm_types";
 import { contract_status_enum } from "@prisma/client";
 
+import "../integration_setup";
+
 const contract1: UpdateContract = {
     contractId: 0,
     information: "Contract details",
@@ -40,8 +42,12 @@ it("should create 1 new contract linked to a student", async () => {
         const created_contract = await createContract(contract);
         contract1.contractId = created_contract.contract_id;
         contract2.contractId = created_contract.contract_id;
-        contract1.loginUserId = created_contract.created_by_login_user_id;
-        contract2.loginUserId = created_contract.created_by_login_user_id;
+        if (created_contract.created_by_login_user_id) {
+            contract1.loginUserId = created_contract.created_by_login_user_id;
+        }
+        if (created_contract.created_by_login_user_id) {
+            contract2.loginUserId = created_contract.created_by_login_user_id;
+        }
         expect(created_contract).toHaveProperty(
             "contract_id",
             contract1.contractId

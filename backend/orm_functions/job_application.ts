@@ -30,8 +30,7 @@ export async function getStudentEvaluationsTotal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -75,8 +74,7 @@ export async function getStudentEvaluationsFinal(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -120,8 +118,7 @@ export async function getStudentEvaluationsTemp(studentId: number) {
                             person: {
                                 select: {
                                     person_id: true,
-                                    firstname: true,
-                                    lastname: true,
+                                    name: true,
                                     email: true,
                                     github: true,
                                 },
@@ -245,12 +242,15 @@ export async function getLatestJobApplicationOfStudent(studentId: number) {
         },
         orderBy: {
             // order descending == get newest first
-            created_at: "desc",
+            osoc: {
+                year: "desc",
+            },
         },
         include: {
             attachment: true,
             job_application_skill: true,
             applied_role: true,
+            osoc: true,
         },
     });
 }
@@ -269,6 +269,7 @@ export async function getJobApplication(jobApplicationId: number) {
             attachment: true,
             job_application_skill: true,
             applied_role: true,
+            osoc: true,
         },
     });
 }
@@ -289,6 +290,73 @@ export async function getJobApplicationByYear(year: number) {
             attachment: true,
             job_application_skill: true,
             applied_role: true,
+        },
+    });
+}
+
+/**
+ *
+ * @param studentId: the id of the student whose jobapplicatio we are searching
+ * @param year: the year that we are looking up all the job applications for
+ * @returns all the job applications associated with the given year
+ */
+export async function getJobApplicationByYearForStudent(
+    studentId: number,
+    year: number
+) {
+    return (
+        await prisma.job_application.findMany({
+            where: {
+                osoc: {
+                    year: year,
+                },
+                student_id: studentId,
+            },
+            include: {
+                attachment: true,
+                job_application_skill: true,
+                applied_role: true,
+            },
+        })
+    )[0]; // return the 0-th value because there is maximum 1 value!
+}
+
+/**
+ *
+ * @param studentId: the student id
+ * @param year: the year
+ * @returns all the job applications associated with the given year
+ */
+export async function getEvaluationsByYearForStudent(
+    studentId: number,
+    year: number
+) {
+    return await prisma.job_application.findFirst({
+        where: {
+            student_id: studentId,
+            osoc: {
+                year: year,
+            },
+        },
+        select: {
+            evaluation: {
+                select: {
+                    evaluation_id: true,
+                    decision: true,
+                    motivation: true,
+                    is_final: true,
+                    login_user: {
+                        select: {
+                            person: true,
+                            account_status: true,
+                            login_user_id: true,
+                            person_id: true,
+                            is_admin: true,
+                            is_coach: true,
+                        },
+                    },
+                },
+            },
         },
     });
 }

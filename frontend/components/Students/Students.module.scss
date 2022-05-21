@@ -1,0 +1,63 @@
+.students {
+  width: clamp(18rem, 94vw, 60rem);
+  margin-inline: auto;
+  margin-bottom: clamp(1rem, 2vw, 2.5rem);
+  position: relative;
+}
+
+.body > nav {
+  width: clamp(18rem, 94vw, 60rem);
+  margin-inline: auto;
+}
+
+.students.limited {
+  width: clamp(18rem, 94vw, 120rem);
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 2rem;
+}
+
+.students > div > nav {
+  margin-top: 1rem;
+  margin-inline: 2rem;
+}
+
+/* The style for the list of students */
+.studentCards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 75rem;
+  overflow-y: scroll;
+  padding-block: 4rem;
+  padding-inline: 2rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 800px) {
+  .students {
+    gap: 1rem !important;
+  }
+  .students.limited {
+    display: flex;
+    flex-direction: column;
+
+    /* Scroll horizontal on small screens to still show the student overview not too far down */
+    .studentCards {
+      flex-direction: row;
+      overflow-y: hidden;
+      overflow-x: scroll;
+      padding-block: 1rem;
+    }
+  }
+}
+
+/* The actual card as a container */
+.card {
+  box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 100%;
+}

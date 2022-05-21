@@ -37,11 +37,12 @@ let login_user_update: UpdateLoginUser = {
     accountStatus: "ACTIVATED",
 };
 
+import "../integration_setup";
+
 it("should create 1 new login user", async () => {
     const person0: CreatePerson = {
         email: "login_user@email.be",
-        firstname: "login_firstname",
-        lastname: "login_lastname",
+        name: "login_name",
     };
 
     const created_person = await createPerson(person0);

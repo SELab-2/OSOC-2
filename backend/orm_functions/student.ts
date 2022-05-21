@@ -1,4 +1,4 @@
-import { decision_enum, email_status_enum } from "@prisma/client";
+import { decision_enum, email_status_enum, Prisma } from "@prisma/client";
 import prisma from "../prisma/prisma";
 import {
     CreateStudent,
@@ -7,7 +7,11 @@ import {
     FilterBoolean,
     UpdateStudent,
     FilterStringArray,
+    FilterNumber,
+    DBPagination,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
+import { deletePersonFromDB } from "./person";
 
 /**
  *
@@ -96,6 +100,23 @@ export async function deleteStudent(studentId: number) {
 
 /**
  *
+ * @param studentId the student whose info we are deleting from the database. all related records are deleted too!
+ */
+export async function deleteStudentFromDB(studentId: number) {
+    // search the student to get the personId
+    const student = await prisma.student.findUnique({
+        where: {
+            student_id: studentId,
+        },
+    });
+    if (student) {
+        // call the delete
+        await deletePersonFromDB(student.person_id);
+    }
+}
+
+/**
+ *
  * @param gender: This is the gender of the persons we are looking, can be firstname as lastname
  * @returns: a list of all the person objects in the database that match
  */
@@ -112,8 +133,8 @@ export async function searchStudentByGender(gender: string) {
 
 /**
  *
- * @param firstNameFilter firstname that we are filtering on (or undefined if not filtering on name)
- * @param lastNameFilter firstname that we are filtering on (or undefined if not filtering on name)
+ * @param pagination object representing the pagination
+ * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
  * @param roleFilterArray role that we are filtering on (or undefined if not filtering on role)
  * @param alumniFilter alumni status that we are filtering on (or undefined if not filtering on alumni status)
@@ -121,27 +142,40 @@ export async function searchStudentByGender(gender: string) {
  * @param statusFilter decision status that we are filtering on (or undefined if not filtering on status)
  * @param emailStatusFilter email status that we are filtering on (or undefined if not filtering on email status)
  * @param osocYear: the osoc year the application belongs to (or undefined if not filtering on year)
- * @param firstNameSort asc or desc if we want to sort on firstname, undefined if we are not sorting on firstname
- * @param lastNameSort asc or desc if we want to sort on lastname, undefined if we are not sorting on lastname
+ * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
- * @param alumniSort asc or desc if we are sorting on alumni status, undefined if we are not sorting on alumni status
+ * @param loginUserId the id of the loginUser that is searching
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterStudents(
-    firstNameFilter: FilterString,
-    lastNameFilter: FilterString,
+    pagination: DBPagination,
+    nameFilter: FilterString,
     emailFilter: FilterString,
     roleFilterArray: FilterStringArray,
     alumniFilter: FilterBoolean,
     coachFilter: FilterBoolean,
     statusFilter: decision_enum | undefined,
-    osocYear: number,
+    osocYear: FilterNumber,
     emailStatusFilter: email_status_enum | undefined,
-    firstNameSort: FilterSort,
-    lastNameSort: FilterSort,
+    nameSort: FilterSort,
     emailSort: FilterSort,
-    alumniSort: FilterSort
+    loginUserId: number
 ) {
+    const yearsAllowedToSee = await getOsocYearsForLoginUser(loginUserId);
+    let searchYears;
+    if (osocYear !== undefined) {
+        if (!yearsAllowedToSee.includes(osocYear)) {
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
+        } else {
+            searchYears = [osocYear];
+        }
+    } else {
+        searchYears = yearsAllowedToSee;
+    }
+
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
     let evaluationFilter;
@@ -149,56 +183,55 @@ export async function filterStudents(
         evaluationFilter = {
             some: {
                 decision: statusFilter,
+                is_final: true,
             },
         };
     } else {
         evaluationFilter = undefined;
     }
 
-    console.log(alumniFilter);
-    return await prisma.student.findMany({
-        where: {
-            job_application: {
-                some: {
-                    email_status: emailStatusFilter,
-                    student_coach: coachFilter,
-                    osoc: {
-                        year: osocYear,
+    const filter: Prisma.studentWhereInput = {
+        job_application: {
+            some: {
+                email_status: emailStatusFilter,
+                student_coach: coachFilter,
+                osoc: {
+                    year: {
+                        in: searchYears,
                     },
-                    applied_role: {
-                        some: {
-                            role: {
-                                name: { in: roleFilterArray },
-                            },
+                },
+                applied_role: {
+                    some: {
+                        role: {
+                            name: { in: roleFilterArray },
                         },
                     },
-                    evaluation: evaluationFilter,
                 },
+                evaluation: evaluationFilter,
             },
-            person: {
-                firstname: {
-                    contains: firstNameFilter,
-                    mode: "insensitive",
-                },
-                lastname: {
-                    contains: lastNameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
-            },
-            alumni: alumniFilter,
         },
-        orderBy: {
-            person: {
-                firstname: firstNameSort,
-                lastname: lastNameSort,
-                email: emailSort,
+        person: {
+            name: {
+                contains: nameFilter,
+                mode: "insensitive",
             },
-            alumni: alumniSort,
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
         },
+        alumni: alumniFilter,
+    };
+
+    const count = await prisma.student.count({ where: filter });
+    const data = await prisma.student.findMany({
+        where: filter,
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
+        orderBy: [
+            { person: { name: nameSort } },
+            { person: { email: emailSort } },
+        ],
         include: {
             person: true,
             job_application: {
@@ -222,4 +255,38 @@ export async function filterStudents(
             },
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
+}
+
+/**
+ * @param studentId: the id of the student whose job application years we are searching
+ * @returns a list of all the years the student has applied for
+ */
+export async function getAppliedYearsForStudent(studentId: number) {
+    const student = await prisma.student.findUnique({
+        where: {
+            student_id: studentId,
+        },
+        select: {
+            job_application: {
+                select: {
+                    osoc: {
+                        select: {
+                            year: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    if (student === null) {
+        return [];
+    }
+
+    return student.job_application.map((app) => app.osoc.year);
 }

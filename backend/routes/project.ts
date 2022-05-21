@@ -6,11 +6,16 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as ormPr from "../orm_functions/project";
 import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
+import * as ormC from "../orm_functions/contract";
+import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
-import { InternalTypes, Responses, StringDict } from "../types";
+import { ApiError, Responses } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import { checkYearPermissionProject, errors } from "../utility";
+import { getOsocById } from "../orm_functions/osoc";
+import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
+import { getJobApplication } from "../orm_functions/job_application";
 
 /**
  *  Attempts to create a new project in the system.
@@ -21,31 +26,72 @@ import { errors } from "../utility";
 export async function createProject(
     req: express.Request
 ): Promise<Responses.Project> {
-    return rq
-        .parseNewProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
-            return ormPr
-                .createProject({
-                    name: parsed.data.name,
-                    partner: parsed.data.partner,
-                    startDate: new Date(parsed.data.start),
-                    endDate: new Date(parsed.data.end),
-                    positions: Number(parsed.data.positions),
-                    osocId: Number(parsed.data.osocId),
-                })
-                .then((project) =>
-                    Promise.resolve({
-                        id: project.project_id,
-                        name: project.name,
-                        partner: project.partner,
-                        start_date: project.start_date.toString(),
-                        end_date: project.end_date.toString(),
-                        positions: project.positions,
-                        osoc_id: project.osoc_id,
-                    })
-                );
+    const parsedRequest = await rq.parseNewProjectRequest(req);
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
+
+    // check if the loginUser has the permissions to create a project for this osoc edition
+    const visibleYears = await getOsocYearsForLoginUser(
+        checkedSessionKey.userId
+    );
+    const osoc = await getOsocById(checkedSessionKey.data.osocId);
+    if (osoc && !visibleYears.includes(osoc.year)) {
+        return Promise.reject(errors.cookInsufficientRights());
+    }
+
+    const latestOsoc = await ormOsoc.getLatestOsoc();
+
+    if (latestOsoc === null || osoc === null || osoc.year !== latestOsoc.year) {
+        return Promise.reject(errors.cookWrongOsocYear());
+    }
+
+    const createdProject = await ormPr.createProject({
+        name: checkedSessionKey.data.name,
+        partner: checkedSessionKey.data.partner,
+        startDate: new Date(checkedSessionKey.data.start),
+        endDate: new Date(checkedSessionKey.data.end),
+        osocId: Number(checkedSessionKey.data.osocId),
+        description: checkedSessionKey.data.description,
+    });
+
+    const roleList: { name: string; positions: number }[] = [];
+
+    for (const role of checkedSessionKey.data.roles.roles) {
+        let roleByName = await ormRole.getRolesByName(role.name);
+        if (roleByName === null) {
+            roleByName = await ormRole.createRole(role.name);
+        }
+        const createdProjectRole = await ormPrRole.createProjectRole({
+            projectId: createdProject.project_id,
+            roleId: roleByName.role_id,
+            positions: role.positions,
         });
+
+        roleList.push({
+            name: role.name,
+            positions: createdProjectRole.positions,
+        });
+    }
+
+    for (const coachId of checkedSessionKey.data.coaches.coaches) {
+        await ormPU.createProjectUser({
+            projectId: createdProject.project_id,
+            loginUserId: coachId,
+        });
+    }
+
+    const coaches = await ormPU.getUsersFor(createdProject.project_id);
+
+    return Promise.resolve({
+        id: createdProject.project_id,
+        name: createdProject.name,
+        partner: createdProject.partner,
+        start_date: createdProject.start_date.toString(),
+        end_date: createdProject.end_date.toString(),
+        osoc_id: createdProject.osoc_id,
+        description: createdProject.description,
+        roles: roleList,
+        coaches: coaches,
+    });
 }
 
 /**
@@ -56,42 +102,94 @@ export async function createProject(
  */
 export async function listProjects(
     req: express.Request
-): Promise<Responses.ProjectList> {
-    return rq
+): Promise<Responses.ProjectListAndContracts> {
+    const checkedSessionKey = await rq
         .parseProjectAllRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () =>
-            ormPr
-                .getAllProjects()
-                .then((obj) =>
-                    Promise.all(
-                        obj.map(async (val) => {
-                            const students = await ormCtr.contractsByProject(
-                                val.project_id
-                            );
-                            const users = await ormPU.getUsersFor(
-                                val.project_id
-                            );
-                            return Promise.resolve({
-                                id: Number(val.project_id),
-                                name: val.name,
-                                partner: val.partner,
-                                start_date: val.start_date.toString(),
-                                end_date: val.end_date.toString(),
-                                positions: val.positions,
-                                osoc_id: val.osoc_id,
-                                students: students,
-                                coaches: users,
-                            });
-                        })
-                    )
-                )
-                .then((obj) =>
-                    Promise.resolve({
-                        data: obj,
-                    })
-                )
+        .then(util.checkSessionKey);
+
+    const allProjects = [];
+    const fetchedProjects = await ormPr.filterProjects(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        checkedSessionKey.userId
+    );
+    for (const project of fetchedProjects.data) {
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
         );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
+
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? contract.student
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
+        const users = await ormPU.getUsersFor(project.project_id);
+        allProjects.push({
+            id: Number(project.project_id),
+            name: project.name,
+            partner: project.partner,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
+            osoc_id: project.osoc_id,
+            description: project.description,
+            roles: projectRoles,
+            contracts: newContracts,
+            coaches: users,
+        });
+    }
+
+    return Promise.resolve({
+        pagination: fetchedProjects.pagination,
+        data: allProjects,
+    });
 }
 
 /**
@@ -102,67 +200,205 @@ export async function listProjects(
  */
 export async function getProject(
     req: express.Request
-): Promise<Responses.Project> {
-    return rq
-        .parseSingleProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) => util.isValidID(parsed.data, "project"))
-        .then(async (parsed) =>
-            ormPr.getProjectById(parsed.id).then(async (obj) => {
-                if (obj !== null) {
-                    const students = await ormCtr.contractsByProject(
-                        obj.project_id
-                    );
-                    const users = await ormPU.getUsersFor(obj.project_id);
-                    return Promise.resolve({
-                        id: Number(obj.project_id),
-                        name: obj.name,
-                        partner: obj.partner,
-                        start_date: obj.start_date.toString(),
-                        end_date: obj.end_date.toString(),
-                        positions: obj.positions,
-                        osoc_id: obj.osoc_id,
-                        students: students,
-                        coaches: users,
-                    });
-                } else {
-                    return Promise.reject(errors.cookInvalidID());
-                }
-            })
+): Promise<Responses.ProjectAndContracts> {
+    const parsedRequest = await rq.parseSingleProjectRequest(req);
+    const checkedId = await util
+        .isAdmin(parsedRequest)
+        .then(checkYearPermissionProject)
+        .then((v) => util.isValidID(v.data, "project"));
+
+    const project = await ormPr.getProjectById(checkedId.id);
+    if (project !== null) {
+        const contracts = await ormCtr.contractsByProject(project.project_id);
+
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? null
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
         );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
+
+        const users = await ormPU.getUsersFor(project.project_id);
+
+        return Promise.resolve({
+            id: Number(project.project_id),
+            name: project.name,
+            partner: project.partner,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
+            osoc_id: project.osoc_id,
+            description: project.description,
+            roles: projectRoles,
+            contracts: newContracts,
+            coaches: users,
+        });
+    }
+
+    return Promise.reject(errors.cookInvalidID());
 }
 
 export async function modProject(
     req: express.Request
 ): Promise<Responses.Project> {
-    return rq
+    const checkedId = await rq
         .parseUpdateProjectRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then((parsed) => util.isValidID(parsed.data, "project"))
-        .then(async (parsed) => {
-            // UPDATING LOGIC
-            return ormPr
-                .updateProject({
-                    projectId: parsed.id,
-                    name: parsed.name,
-                    partner: parsed.partner,
-                    startDate: parsed.start,
-                    endDate: parsed.end,
-                    positions: parsed.positions,
-                    osocId: parsed.osocId,
-                })
-                .then((project) =>
-                    Promise.resolve({
-                        id: project.project_id,
-                        name: project.name,
-                        partner: project.partner,
-                        start_date: project.start_date.toString(),
-                        end_date: project.end_date.toString(),
-                        positions: project.positions,
-                        osoc_id: project.osoc_id,
-                    })
-                );
+        .then(util.isAdmin)
+        .then(checkYearPermissionProject)
+        .then((checked) => util.isValidID(checked.data, "project"));
+
+    const project = await ormPr.getProjectById(checkedId.id);
+
+    const osoc = await ormOsoc.getLatestOsoc();
+
+    if (project === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (osoc === null || project.osoc.year !== osoc.year) {
+        return Promise.reject(errors.cookWrongOsocYear());
+    }
+
+    const updatedProject = await ormPr.updateProject({
+        projectId: checkedId.id,
+        name: checkedId.name,
+        partner: checkedId.partner,
+        startDate: checkedId.start,
+        endDate: checkedId.end,
+        osocId: checkedId.osocId,
+        description: checkedId.description,
+    });
+
+    // current state (before change)
+    const oldProjectRoles = await ormPrRole.getProjectRoleNamesByProject(
+        checkedId.id
+    );
+
+    let isOldRole = false;
+    if (checkedId.roles !== undefined) {
+        // iterate over roles which have been sent
+        for (const role of checkedId.roles.roles) {
+            isOldRole = false;
+            for (const projectRole of oldProjectRoles) {
+                if (role.name === projectRole.role.name) {
+                    isOldRole = true;
+                    // check if valid -> positions = 0 => delete
+                    if (role.positions !== projectRole.positions) {
+                        if (role.positions === 0) {
+                            await ormPrRole.deleteProjectRole(
+                                projectRole.project_role_id
+                            );
+                        } else {
+                            // update #positions
+                            await ormPrRole.updateProjectRole({
+                                projectRoleId: projectRole.project_role_id,
+                                projectId: checkedId.id,
+                                roleId: projectRole.role_id,
+                                positions: role.positions,
+                            });
+                        }
+                    }
+                    break;
+                }
+            }
+            // if new role: create
+            if (!isOldRole && role.positions > 0) {
+                const project_role = await ormRole.getRolesByName(role.name);
+                if (project_role !== null) {
+                    await ormPrRole.createProjectRole({
+                        projectId: checkedId.id,
+                        roleId: project_role.role_id,
+                        positions: role.positions,
+                    });
+                }
+            }
+        }
+    }
+
+    const projectRoles = await ormPrRole.getProjectRolesByProject(checkedId.id);
+    const roles: { name: string; positions: number }[] = [];
+    for (const projectRole of projectRoles) {
+        const foundRole = await ormRole.getRole(projectRole.role_id);
+        if (foundRole === null) {
+            return Promise.reject(errors.cookNoDataError());
+        }
+
+        roles.push({
+            name: foundRole.name,
+            positions: projectRole.positions,
         });
+    }
+
+    if (checkedId.addCoaches !== undefined) {
+        for (const coachId of checkedId.addCoaches.coaches) {
+            await ormPU.createProjectUser({
+                projectId: checkedId.id,
+                loginUserId: coachId,
+            });
+        }
+    }
+
+    if (checkedId.removeCoaches !== undefined) {
+        for (const coachId of checkedId.removeCoaches.coaches) {
+            await ormPU.deleteProjectUser({
+                projectId: checkedId.id,
+                loginUserId: coachId,
+            });
+        }
+    }
+
+    const coachList = await ormPU.getUsersFor(Number(checkedId.id));
+
+    return Promise.resolve({
+        id: updatedProject.project_id,
+        name: updatedProject.name,
+        partner: updatedProject.partner,
+        start_date: updatedProject.start_date.toString(),
+        end_date: updatedProject.end_date.toString(),
+        osoc_id: updatedProject.osoc_id,
+        roles: roles,
+        description: updatedProject.description,
+        coaches: coachList,
+    });
 }
 
 /**
@@ -177,52 +413,39 @@ export async function deleteProject(
     return rq
         .parseDeleteProjectRequest(req)
         .then((parsed) => util.isAdmin(parsed))
+        .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
+            const [project, latestOsoc] = await Promise.all([
+                ormPr.getProjectById(parsed.id),
+                ormOsoc.getLatestOsoc(),
+            ]);
+
+            if (project === null || latestOsoc === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (project.osoc.year === latestOsoc.year) {
+                for (const contract of await ormC.contractsByProject(
+                    parsed.id
+                )) {
+                    await ormCtr.removeContract(contract.contract_id);
+                }
+            }
             return ormPr
-                .deleteProject(parsed.id)
+                .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
-        });
-}
-
-/**
- *  Attempts to get all drafted students in the system for a project.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function getDraftedStudents(
-    req: express.Request
-): Promise<Responses.ProjectDraftedStudents> {
-    return rq
-        .parseGetDraftedStudentsRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async (parsed) => {
-            const prName = await ormPr
-                .getProjectById(parsed.data.id)
-                .then((pr) => pr?.name);
-
-            return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
-                Promise.resolve({
-                    id: parsed.data.id,
-                    name: util.getOrDefault(prName, "(unnamed project)"),
-                    students: arr.map((obj) => ({
-                        student: obj.student,
-                        status: obj.contract_status,
-                    })),
-                })
-            );
         });
 }
 
 export async function getFreeSpotsFor(
     role: string,
     project: number
-): Promise<{ count: number; role: number }> {
+): Promise<{ count: number; role_id: number; project_role_id: number }> {
     return ormPrRole
         .getProjectRolesByProject(project)
-        .then((roles) =>
-            Promise.all(
+        .then((roles) => {
+            return Promise.all(
                 roles.map(async (r) =>
                     ormRole.getRole(r.role_id).then((upd) =>
                         Promise.resolve({
@@ -232,11 +455,12 @@ export async function getFreeSpotsFor(
                         })
                     )
                 )
-            )
-        )
-        .then((roles) => roles.filter((r) => r.block?.name == role))
+            );
+        })
+        .then((roles) => {
+            return roles.filter((r) => r.block?.name == role);
+        })
         .then(async (rest) => {
-            console.log("Resulting roles: " + JSON.stringify(rest));
             if (rest.length != 1) return Promise.reject();
             return ormPrRole
                 .getNumberOfFreePositions(rest[0].project_role_id)
@@ -244,7 +468,8 @@ export async function getFreeSpotsFor(
                     if (n == null) return Promise.reject();
                     return Promise.resolve({
                         count: n,
-                        role: rest[0].project_role_id,
+                        role_id: rest[0].role_id,
+                        project_role_id: rest[0].project_role_id,
                     });
                 });
         });
@@ -253,7 +478,7 @@ export async function getFreeSpotsFor(
 export async function createProjectRoleFor(
     project: number,
     role: string
-): Promise<{ count: number; role: number }> {
+): Promise<{ count: number; project_role_id: number }> {
     return ormRole
         .getRolesByName(role)
         .then((r) => {
@@ -269,82 +494,109 @@ export async function createProjectRoleFor(
             });
         })
         .then((res) =>
-            Promise.resolve({ count: res.positions, role: res.project_role_id })
+            Promise.resolve({
+                count: res.positions,
+                project_role_id: res.project_role_id,
+            })
         );
 }
 
-export async function modProjectStudent(
+export async function unAssignCoach(
     req: express.Request
-): Promise<Responses.ModProjectStudent> {
+): Promise<Responses.Empty> {
     return rq
-        .parseDraftStudentRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(async (parsed) => {
-            console.log(
-                "Attempting to modify project " +
-                    parsed.data.id +
-                    " by moving student " +
-                    parsed.data.studentId +
-                    " to role `" +
-                    parsed.data.role +
-                    "`"
-            );
-            return ormCtr
-                .contractsByProject(parsed.data.id)
-                .then((arr) =>
-                    arr.filter(
-                        (v) => v.student.student_id == parsed.data.studentId
+        .parseRemoveCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
+
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
                     )
                 )
-                .then((arr) => {
-                    if (arr.length == 0) {
+                .then(async (found) => {
+                    if (found.length == 0) {
                         return Promise.reject({
-                            http: 204,
-                            reason: "The selected student is not assigned to this project.",
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is not assigned to project " +
+                                checked.data.id,
                         });
                     }
+                    await ormPU.deleteProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
 
-                    if (arr.length > 1) {
-                        return Promise.reject({
-                            http: 409,
-                            reason: "The request is ambiguous.",
-                        });
-                    }
+                    return Promise.resolve({});
+                });
+        });
+}
 
-                    return Promise.resolve(arr[0]);
-                })
-                .then(async (ctr) => {
-                    return getFreeSpotsFor(parsed.data.role, parsed.data.id)
-                        .catch(() =>
-                            createProjectRoleFor(
-                                parsed.data.id,
-                                parsed.data.role
-                            )
-                        )
-                        .then((remaining) => {
-                            if (remaining.count <= 0) {
-                                return Promise.reject({
-                                    http: 409,
-                                    reason: "Can't add this role to the student. There are no more vacant spots.",
-                                });
-                            }
+export async function assignCoach(
+    req: express.Request
+): Promise<Responses.ProjectUser> {
+    return rq
+        .parseAssignCoachRequest(req)
+        .then((parsed) => util.checkSessionKey(parsed))
+        .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
 
-                            return ormCtr.updateContract({
-                                contractId: ctr.contract_id,
-                                loginUserId: parsed.userId,
-                                projectRoleId: remaining.role,
-                            });
-                        });
-                })
-                .then((res) =>
-                    ormPrRole.getProjectRoleById(res.project_role_id)
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
+            return ormPU
+                .getUsersFor(Number(checked.data.id))
+                .then((project_users) =>
+                    project_users.filter(
+                        (project_user) =>
+                            project_user.login_user.login_user_id ==
+                            checked.data.loginUserId
+                    )
                 )
-                .then((res) =>
-                    Promise.resolve({
-                        drafted: true,
-                        role: util.getOrDefault(res?.role.name, ""),
-                    })
-                );
+                .then(async (found) => {
+                    if (found.length != 0) {
+                        return Promise.reject({
+                            http: 400,
+                            reason:
+                                "The coach with ID " +
+                                checked.data.loginUserId.toString() +
+                                " is already assigned to project " +
+                                checked.data.id,
+                        });
+                    }
+
+                    const project_user = await ormPU.createProjectUser({
+                        projectId: checked.data.id,
+                        loginUserId: checked.data.loginUserId,
+                    });
+
+                    return Promise.resolve(project_user);
+                });
         });
 }
 
@@ -354,9 +606,32 @@ export async function unAssignStudent(
     return rq
         .parseRemoveAssigneeRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionProject)
         .then(async (checked) => {
+            const project = await ormPr.getProjectById(checked.data.id);
+
+            const osoc = await ormOsoc.getLatestOsoc();
+
+            if (project === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (osoc === null || project.osoc.year !== osoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
+                .then((ctrs) =>
+                    Promise.all(
+                        ctrs.map((x) =>
+                            util.getOrReject(x.project_role).then((y) => ({
+                                ...x,
+                                project_role: y,
+                            }))
+                        )
+                    )
+                )
                 .then((ctrs) =>
                     ctrs.filter(
                         (contr) =>
@@ -379,89 +654,117 @@ export async function unAssignStudent(
                         await ormEv
                             .getEvaluationByPartiesFor(
                                 checked.userId,
-                                contr.student.student_id,
+                                contr.student?.student_id,
                                 contr.project_role.project.osoc_id
                             )
-                            .then((evl) => {
-                                if (evl.length != 1) {
-                                    return Promise.reject({
-                                        http: 400,
-                                        reason: "Multiple evaluations match.",
+                            .then(async (evl) => {
+                                for (let i = 0; i < evl.length; i++) {
+                                    await ormEv.updateEvaluationForStudent({
+                                        evaluation_id: evl[i].evaluation_id,
+                                        loginUserId: checked.userId,
+                                        motivation:
+                                            util.getOrDefault(
+                                                evl[i].motivation,
+                                                ""
+                                            ) +
+                                            " [Removed assignee from project " +
+                                            checked.data.id +
+                                            "]",
                                     });
                                 }
-
-                                return ormEv.updateEvaluationForStudent({
-                                    evaluation_id: evl[0].evaluation_id,
-                                    loginUserId: checked.userId,
-                                    motivation:
-                                        util.getOrDefault(
-                                            evl[0].motivation,
-                                            ""
-                                        ) +
-                                        " [Removed assignee from project " +
-                                        checked.data.id +
-                                        "]",
-                                });
                             })
                             .then(() =>
                                 ormCtr.removeContract(contr.contract_id)
                             );
                     }
-
                     return Promise.resolve({});
                 });
         });
 }
 
-export async function getProjectConflicts(
+export async function assignStudent(
     req: express.Request
-): Promise<Responses.ConflictList> {
-    return rq
-        .parseProjectConflictsRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(async () => {
-            return ormOsoc
-                .getNewestOsoc()
-                .then((osoc) => util.getOrReject(osoc))
-                .then((osoc) =>
-                    ormCtr.sortedContractsByOsocEdition(osoc.osoc_id)
-                )
-                .then((contracts) => {
-                    if (contracts.length == 0 || contracts.length == 1)
-                        return Promise.resolve([]);
-                    const res: StringDict<typeof contracts> = {};
-                    let latestid = contracts[0].student_id;
-                    for (let i = 1; i < contracts.length; i++) {
-                        if (contracts[i].student_id == latestid) {
-                            const idStr: string =
-                                contracts[i].student_id.toString();
-                            if (!(idStr in res)) {
-                                res[idStr] = [contracts[i - 1], contracts[i]];
-                            } else {
-                                res[idStr].push(contracts[i]);
-                            }
-                        }
-                        latestid = contracts[i].student_id;
-                    }
+): Promise<Responses.ModProjectStudent> {
+    const alreadyContract: ApiError = {
+        http: 409,
+        reason: "This student does already have a contract",
+    };
+    const nonexist: ApiError = {
+        http: 404,
+        reason: "That role doesn't exist",
+    };
+    const noplace: ApiError = {
+        http: 409,
+        reason: "There are no more free spaces for that role",
+    };
 
-                    const arr: InternalTypes.Conflict[] = [];
-                    for (const idStr in res) {
-                        arr.push({
-                            student: Number(idStr),
-                            projects: res[idStr].map((p) => ({
-                                id: p.project_role.project.project_id,
-                                name: p.project_role.project.name,
-                            })),
-                        });
-                    }
-                    return Promise.resolve(arr);
-                })
-                .then((arr) =>
-                    Promise.resolve({
-                        data: arr,
-                    })
-                );
+    // authenticate, parse, ...
+    const checked = await rq
+        .parseDraftStudentRequest(req)
+        .then((parsed) => util.isAdmin(parsed));
+
+    // check if edition is ready
+    const latestOsoc = await ormOsoc
+        .getLatestOsoc()
+        .then((osoc) => util.getOrReject(osoc));
+
+    const jobApplication = await getJobApplication(
+        checked.data.jobApplicationId
+    );
+    const project = await ormPr.getProjectById(checked.data.id);
+
+    if (project === null || jobApplication === null) {
+        return Promise.reject(errors.cookInvalidID());
+    }
+
+    if (project.osoc.year !== jobApplication.osoc.year) {
+        return Promise.reject({
+            http: 403,
+            reason: "Student application and project are from different osoc editions",
         });
+    }
+
+    if (project.osoc.year !== latestOsoc.year) {
+        return Promise.reject(errors.cookWrongOsocYear());
+    }
+
+    // check if no contracts yet
+    await ormCtr
+        .contractsForStudent(checked.data.studentId)
+        .then((data) =>
+            Promise.all(data.map((x) => util.getOrReject(x.project_role)))
+        )
+        .then((data) => {
+            return data.filter((x) => x.project.osoc_id === latestOsoc.osoc_id);
+        })
+        .then((filtered) => {
+            return filtered.length > 0
+                ? Promise.reject(alreadyContract)
+                : Promise.resolve();
+        });
+
+    // get project role
+    // then create contract
+    // then assign
+    return getFreeSpotsFor(checked.data.role, checked.data.id)
+        .catch(() => Promise.reject(nonexist))
+        .then((r) =>
+            r.count > 0 ? Promise.resolve(r) : Promise.reject(noplace)
+        )
+        .then((r) =>
+            ormCtr
+                .createContract({
+                    studentId: checked.data.studentId,
+                    projectRoleId: r.project_role_id,
+                    loginUserId: checked.userId,
+                    contractStatus: "DRAFT",
+                })
+                .then(() => {
+                    return ormRole.getRole(r.role_id);
+                })
+        )
+        .then(util.getOrReject)
+        .then((r) => Promise.resolve({ drafted: true, role: r.name }));
 }
 
 /**
@@ -472,46 +775,105 @@ export async function getProjectConflicts(
  */
 export async function filterProjects(
     req: express.Request
-): Promise<Responses.ProjectFilterList> {
+): Promise<Responses.ProjectListAndContracts> {
     const parsedRequest = await rq.parseFilterProjectsRequest(req);
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
+
+    let year;
+    if (checkedSessionKey.data.osocYear === undefined) {
+        const latestOsocYear = await ormOs.getLatestOsoc();
+        if (latestOsocYear !== null) {
+            year = latestOsocYear.year;
+        } else {
+            year = new Date().getFullYear();
+        }
+    } else {
+        year = checkedSessionKey.data.osocYear;
     }
 
     const projects = await ormPr.filterProjects(
+        {
+            currentPage: checkedSessionKey.data.currentPage,
+            pageSize: checkedSessionKey.data.pageSize,
+        },
         checkedSessionKey.data.projectNameFilter,
         checkedSessionKey.data.clientNameFilter,
-        checkedSessionKey.data.assignedCoachesFilterArray,
         checkedSessionKey.data.fullyAssignedFilter,
+        year,
         checkedSessionKey.data.projectNameSort,
         checkedSessionKey.data.clientNameSort,
-        checkedSessionKey.data.fullyAssignedSort
+        checkedSessionKey.userId
     );
 
-    const projectlist = [];
+    const allProjects = [];
+    for (const project of projects.data) {
+        const roles = await ormPrRole.getProjectRolesByProject(
+            project.project_id
+        );
+        const projectRoles = [];
+        for (const role of roles) {
+            const foundRole = await ormRole.getRole(role.role_id);
+            if (foundRole === null) {
+                return Promise.reject(errors.cookNoDataError());
+            }
+            projectRoles.push({
+                name: foundRole.name,
+                positions: role.positions,
+            });
+        }
 
-    for (const project of projects) {
         const contracts = await ormCtr.contractsByProject(project.project_id);
-        const users = await ormPU.getUsersFor(project.project_id);
 
-        projectlist.push({
-            id: project.project_id,
+        const newContracts: Responses.Contract[] = [];
+
+        contracts.forEach((contract) => {
+            const newStudentField = {
+                evaluations: undefined,
+                evaluation: undefined,
+                jobApplication: undefined,
+                roles: undefined,
+                student:
+                    contract.student === null
+                        ? contract.student
+                        : {
+                              student_id: contract.student.student_id,
+                              person_id: undefined,
+                              person: contract.student.person,
+                              alumni: contract.student.alumni,
+                              nickname: contract.student.nickname,
+                              gender: contract.student.gender,
+                              pronouns: contract.student.pronouns,
+                              phone_number: contract.student.phone_number,
+                          },
+            };
+
+            newContracts.push({
+                project_role: contract.project_role,
+                contract_id: contract.contract_id,
+                contract_status: contract.contract_status,
+                login_user: contract.login_user,
+                student: newStudentField,
+            });
+        });
+
+        const users = await ormPU.getUsersFor(project.project_id);
+        allProjects.push({
+            id: Number(project.project_id),
             name: project.name,
             partner: project.partner,
-            start_date: project.start_date,
-            end_data: project.end_date,
-            positions: project.positions,
+            start_date: project.start_date.toString(),
+            end_date: project.end_date.toString(),
             osoc_id: project.osoc_id,
-            contracts: contracts,
+            description: project.description,
+            roles: projectRoles,
+            contracts: newContracts,
             coaches: users,
         });
     }
 
     return Promise.resolve({
-        data: projectlist,
+        pagination: projects.pagination,
+        data: allProjects,
     });
 }
 
@@ -533,12 +895,10 @@ export function getRouter(): express.Router {
     util.route(router, "post", "/:id", modProject);
     util.route(router, "delete", "/:id", deleteProject);
 
-    util.route(router, "get", "/:id/draft", getDraftedStudents);
-    util.route(router, "post", "/:id/draft", modProjectStudent);
-
+    util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);
-
-    util.route(router, "get", "/conflicts", getProjectConflicts);
+    util.route(router, "delete", "/:id/coach", unAssignCoach);
+    util.route(router, "post", "/:id/coach", assignCoach);
 
     // TODO add project conflicts
     util.addAllInvalidVerbs(router, [

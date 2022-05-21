@@ -8,22 +8,41 @@ import ForbiddenIcon from "../../public/images/forbidden_icon.png";
 import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
-import { AccountStatus, LoginUser } from "../../types";
+import {
+    AccountStatus,
+    LoginUser,
+    OsocEdition,
+    NotificationType,
+} from "../../types";
 import { useSockets } from "../../contexts/socketProvider";
+import { Modal } from "../Modal/Modal";
+import triangle from "../Filters/Filter.module.css";
+import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const User: React.FC<{
     user: LoginUser;
+    editions: OsocEdition[];
     removeUser: (user: LoginUser) => void;
-}> = ({ user, removeUser }) => {
-    const [name] = useState<string>(user.person.firstname);
+}> = ({ user, removeUser, editions }) => {
+    if (user == null) {
+        user = defaultLoginUser;
+    }
+    const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);
     const [isCoach, setIsCoach] = useState<boolean>(user.is_coach);
     const [status, setStatus] = useState<AccountStatus>(user.account_status);
-    const { sessionKey } = useContext(SessionContext);
+    const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const userId = user.login_user_id;
-    const personId = user.person_id;
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { notify } = useContext(NotificationContext);
+
+    // a set of edition ids the user is allowed to see
+    const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
+    // dropdown open or closed
+    const [editionsActive, setEditionsActive] = useState<boolean>(false);
 
     // needed for when an update is received via websockets
     useEffect(() => {
@@ -34,9 +53,39 @@ export const User: React.FC<{
 
     useEffect(() => {
         if (!isAdmin && !isCoach) {
-            setStatus(AccountStatus.DISABLED);
+            setStatus(() => AccountStatus.DISABLED);
         }
     }, [isAdmin, isCoach]);
+
+    // load
+    useEffect(() => {
+        fetchUserEditions().then();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const fetchUserEditions = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/years/${userId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (Array.isArray(response)) {
+            const ids = [];
+            for (const edition of response) {
+                ids.push(edition.osoc_id);
+            }
+            setUserEditions(new Set(ids));
+        }
+    };
 
     const setUserRole = async (
         route: string,
@@ -50,7 +99,11 @@ export const User: React.FC<{
             isAdmin: admin_bool,
             accountStatus: status_enum,
         });
-        const res = await fetch(
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 route +
                 "/" +
@@ -66,48 +119,82 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                } else {
-                    return json;
-                }
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
-        if (res.success !== false) {
-            socket.emit("updateUser", userId);
+        if (response.success !== false) {
+            if (changed_val === "activated") {
+                socket.emit("activateUser");
+            } else if (changed_val === "disabled") {
+                socket.emit("disableUser");
+            }
+            // also emit that there has been a change in general so that the manage users screen will update
+            // other changes are changes to the enum roles
+            socket.emit("updateRoleUser");
+            if (notify) {
+                notify(
+                    `Successfully updated ${name} authorities`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
-        return res;
+        return response;
     };
 
     const toggleIsAdmin = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
+        // when account is disabled and we set admin (== currently admin is disabled) => set account to activated
+        // when we disable admin (== currently enabled) but coach is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isAdmin || isCoach
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "admin",
             "admin",
             !isAdmin,
             isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
-            setIsAdmin(!isAdmin);
+            setIsAdmin((isAdmin) => !isAdmin);
+            setStatus(statusToSet);
         }
     };
 
     const toggleIsCoach = async (e: SyntheticEvent) => {
         e.preventDefault();
+        // don't do anything to the roles when the account is still pending
+        if (status === AccountStatus.PENDING) {
+            return;
+        }
+        // when account is disabled and we set coach (== currently coach is disabled) => set account to activated
+        // when we disable coach (== currently enabled) but admin is still active => keep account active, otherwise disable the account
+        const statusToSet =
+            !isCoach || isAdmin
+                ? AccountStatus.ACTIVATED
+                : AccountStatus.DISABLED;
         const response = await setUserRole(
             "coach",
             "coach",
             isAdmin,
             !isCoach,
-            status
+            statusToSet
         );
         if (response.success) {
             setIsCoach(!isCoach);
+            setStatus(statusToSet);
         }
     };
 
@@ -116,24 +203,27 @@ export const User: React.FC<{
         if (status === AccountStatus.ACTIVATED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
-                isAdmin,
-                isCoach,
+                "disabled", // the account is still on activated => we disable the account
+                false, // when the account is disabled we remove all the admin perms
+                false, // when the account is disabled we remove all the coach perms
                 AccountStatus.DISABLED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.DISABLED);
+                setStatus(() => AccountStatus.DISABLED);
+                setIsAdmin(() => false);
+                setIsCoach(() => false);
             }
         } else if (status === AccountStatus.DISABLED) {
             const response = await setUserRole(
                 "coach",
-                "activated",
+                "activated", // the account is still on disabled => we enable the account
                 isAdmin,
-                isCoach,
+                true, // when activating an account we always want to set the user to be a coach
                 AccountStatus.ACTIVATED
             );
             if (response && response.success) {
-                setStatus(AccountStatus.ACTIVATED);
+                setIsCoach(true);
+                setStatus(() => AccountStatus.ACTIVATED);
             }
         }
     };
@@ -142,7 +232,7 @@ export const User: React.FC<{
         e.preventDefault();
         const response = await setUserRole(
             "coach",
-            "enum",
+            "activated",
             isAdmin,
             isCoach,
             AccountStatus.ACTIVATED
@@ -154,10 +244,13 @@ export const User: React.FC<{
 
     const deleteUser = async (e: SyntheticEvent) => {
         e.preventDefault();
-        await fetch(
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/` +
                 "admin/" +
-                personId.toString(),
+                userId.toString(),
             {
                 method: "DELETE",
                 headers: {
@@ -168,57 +261,171 @@ export const User: React.FC<{
             }
         )
             .then((response) => response.json())
-            .then(async (json) => {
-                if (!json.success) {
-                    return { success: false };
-                }
-                removeUser(user);
-                return json;
-            })
             .catch((err) => {
                 console.log(err);
-                return { success: false };
             });
+        if (response && response.success && notify) {
+            socket.emit("disableUser"); // disable and remove user both should trigger a refresh to check if the account is still valid
+            socket.emit("updateRoleUser"); // this refreshes the manage users page
+            removeUser(user);
+            notify(
+                `Successfully removed${user.person.name}!`,
+                NotificationType.SUCCESS,
+                2000
+            );
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
+        }
+    };
+
+    const selectEdition = async (id: number) => {
+        const method = userEditions.has(id) ? "DELETE" : "POST";
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        if (method === "DELETE") {
+            userEditions.delete(id);
+        } else {
+            userEditions.add(id);
+        }
+        setUserEditions(new Set(userEditions));
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/year/${userId}`, {
+            method: method,
+            body: JSON.stringify({
+                osoc_id: id,
+                login_user_id: user.login_user_id,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `auth/osoc2 ${sessionKey}`,
+            },
+        }).catch((reason) => {
+            console.log(reason);
+            if (method === "POST") {
+                userEditions.delete(id);
+            } else {
+                userEditions.add(id);
+            }
+            setUserEditions(new Set(userEditions));
+        });
     };
 
     return (
         <div className={styles.row}>
             <div className={styles.name}>
-                <p>{name}</p>
+                <div data-testid={"userName"}>{name}</div>
                 {status === AccountStatus.PENDING ? (
-                    <button className={styles.pending} onClick={activateUser}>
+                    <button
+                        data-testid={"pendingButton"}
+                        className={styles.pending}
+                        onClick={activateUser}
+                    >
                         ACTIVATE
                     </button>
-                ) : null}
+                ) : (
+                    <div
+                        className={`dropdown is-right ${
+                            editionsActive ? "is-active" : "is-hoverable"
+                        }`}
+                    >
+                        <div
+                            onClick={() => setEditionsActive((prev) => !prev)}
+                            className={`dropdown-trigger ${
+                                editionsActive
+                                    ? triangle.active
+                                    : triangle.inactive
+                            }`}
+                        >
+                            Editions
+                            <div className={triangle.triangleContainer}>
+                                <div className={triangle.triangle} />
+                            </div>
+                        </div>
+                        <div className={`dropdown-menu ${styles.dropdownmenu}`}>
+                            <div className="dropdown-content">
+                                {editions.map((edition) => {
+                                    return (
+                                        <div
+                                            onClick={() =>
+                                                selectEdition(edition.osoc_id)
+                                            }
+                                            key={edition.osoc_id}
+                                            className={`dropdown-item ${
+                                                styles.dropdownitem
+                                            }
+                                            ${
+                                                userEditions.has(
+                                                    edition.osoc_id
+                                                )
+                                                    ? styles.active
+                                                    : ""
+                                            }`}
+                                        >
+                                            {edition.year}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <p>{email}</p>
+            <div data-testid={"userEmail"}>{email}</div>
             <div className={styles.buttons}>
-                <div className={styles.buttonContainer} onClick={toggleIsAdmin}>
+                <div
+                    data-testid={"buttonIsAdmin"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsAdmin}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsAdmin"}
                             className={styles.buttonImage}
                             width={30}
                             height={30}
                             src={isAdmin ? AdminIconColor : AdminIcon}
-                            alt={"Admin"}
+                            alt={
+                                isAdmin
+                                    ? "Person is an admin"
+                                    : "Person is not an admin"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleIsCoach}>
+                <div
+                    data-testid={"buttonIsCoach"}
+                    className={styles.buttonContainer}
+                    onClick={toggleIsCoach}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageIsCoach"}
                             className={styles.buttonImage}
                             src={isCoach ? CoachIconColor : CoachIcon}
                             width={30}
                             height={30}
-                            alt={"Coach"}
+                            alt={
+                                isCoach
+                                    ? "Person is a coach"
+                                    : "Person is not a coach"
+                            }
                         />
                     </div>
                 </div>
-                <div className={styles.buttonContainer} onClick={toggleStatus}>
+                <div
+                    data-testid={"buttonStatus"}
+                    className={styles.buttonContainer}
+                    onClick={toggleStatus}
+                >
                     <div className={styles.button}>
                         <Image
+                            data-testid={"imageStatus"}
                             className={styles.buttonImage}
                             src={
                                 status === AccountStatus.DISABLED
@@ -227,14 +434,33 @@ export const User: React.FC<{
                             }
                             width={30}
                             height={30}
-                            alt={"Disabled"}
+                            alt={
+                                status === AccountStatus.DISABLED
+                                    ? "Person is disabled"
+                                    : "Person is not disabled"
+                            }
                         />
                     </div>
                 </div>
             </div>
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete User ${name}`}
+            >
+                <p>
+                    You are about to delete an osoc user! Deleting an osoc user
+                    cannot be undone and will result in data loss. Are you
+                    certain that you wish to delete osoc user {name}?
+                </p>
+                <button data-testid={"confirmDelete"} onClick={deleteUser}>
+                    DELETE
+                </button>
+            </Modal>
             <button
+                data-testid={"buttonDelete"}
                 className={`delete ${styles.delete}`}
-                onClick={deleteUser}
+                onClick={() => setShowDeleteModal(true)}
             />
         </div>
     );

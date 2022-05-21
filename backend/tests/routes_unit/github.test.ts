@@ -43,7 +43,7 @@ beforeEach(() => {
                 ? {
                       github: "@my_github",
                       person_id: 69,
-                      firstname: "my",
+                      name: "my",
                       login_user: {
                           password: null,
                           login_user_id: 420,
@@ -59,18 +59,17 @@ beforeEach(() => {
     ormPMock.updatePerson.mockImplementation((u) =>
         Promise.resolve({
             person_id: u.personId,
-            firstname: u.firstname != null ? u.firstname : "jeff",
+            name: u.name != null ? u.name : "jeff",
             email: u.email != null ? u.email : null,
             github: u.github != null ? u.github : "@my_acct",
             github_id: "784",
-            lastname: u.lastname != null ? u.lastname : "",
+            lastname: u.name != null ? u.name : "",
         })
     );
     ormPMock.createPerson.mockImplementation((p) =>
         Promise.resolve({
             person_id: 1234,
-            firstname: p.firstname,
-            lastname: p.lastname,
+            name: p.name,
             github: orNull(p.github),
             github_id: orNull(p.github_id),
             email: orNull(p.email),
@@ -127,12 +126,14 @@ function expectNoCall<T>(func: T) {
 }
 
 test("Can generate and validate states", () => {
-    expect(github.checkState(github.genState())).toBe(true);
+    expect(
+        github.checkState(github.genState(process.env.FRONTEND as string))
+    ).toBe(process.env.FRONTEND as string);
 });
 
 test("A state is valid only once", () => {
-    const state = github.genState();
-    expect(github.checkState(state)).toBe(true);
+    const state = github.genState(process.env.FRONTEND as string);
+    expect(github.checkState(state)).toBe(process.env.FRONTEND as string);
     expect(github.checkState(state)).toBe(false);
 });
 
@@ -144,10 +145,10 @@ test("ghIdentity correctly redirects", async () => {
         "state=";
     utilMock.redirect.mockReset();
     utilMock.redirect.mockImplementation(async (_, url) => {
-        await expect(url).toBe(exp + github.states[0]);
+        expect(url).toBe(exp + Object.keys(github.states)[0]);
     });
 
-    await github.ghIdentity(getMockRes().res);
+    await github.ghIdentity(getMockReq(), getMockRes().res);
 });
 
 test("Can parse GH login", async () => {
@@ -180,7 +181,7 @@ test("Can detect if name changes are required", () => {
     const base_person = {
         github: "",
         person_id: 78645312,
-        firstname: "",
+        name: "",
         login_user: null,
     };
 
@@ -193,33 +194,38 @@ test("Can detect if name changes are required", () => {
     expect(
         github.githubNameChange(
             { ...base_login, name: "abcd" },
-            { ...base_person, firstname: "cdef" }
+            { ...base_person, name: "cdef" }
         )
     ).toBeTruthy();
     expect(
         github.githubNameChange(
             { ...base_login, login: "abcd", name: "cdef" },
-            { ...base_person, github: "cdef", firstname: "cdef" }
+            { ...base_person, github: "cdef", name: "cdef" }
         )
     ).toBeTruthy();
     expect(
         github.githubNameChange(
             { ...base_login, login: "cdef", name: "abcd" },
-            { ...base_person, github: "cdef", firstname: "cdef" }
+            { ...base_person, github: "cdef", name: "cdef" }
         )
     ).toBeTruthy();
 
     expect(
         github.githubNameChange(
             { ...base_login, login: "abcd", name: "cdef" },
-            { ...base_person, github: "abcd", firstname: "cdef" }
+            { ...base_person, github: "abcd", name: "cdef" }
         )
     ).toBeFalsy();
 });
 
 test("Can login if the account exists", async () => {
     const input = { login: "@my_github", name: "my", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -235,7 +241,12 @@ test("Can login if the account exists", async () => {
 
 test("Can login if the account exists and update username", async () => {
     const input = { login: "@my_github", name: "alo", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -248,7 +259,7 @@ test("Can login if the account exists and update username", async () => {
     expect(ormP.updatePerson).toHaveBeenCalledWith({
         personId: 69,
         github: "@my_github",
-        firstname: "alo",
+        name: "alo",
     });
     expectNoCall(ormLU.createLoginUser);
     expectNoCall(ormP.createPerson);
@@ -256,7 +267,12 @@ test("Can login if the account exists and update username", async () => {
 
 test("Can login if the account exists and update github handle", async () => {
     const input = { login: "@jefke", name: "my", id: "69" };
-    const output = { sessionkey: "abcd", is_admin: true, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: true,
+        is_coach: true,
+        is_signup: false,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -269,7 +285,7 @@ test("Can login if the account exists and update github handle", async () => {
     expect(ormP.updatePerson).toHaveBeenCalledWith({
         personId: 69,
         github: "@jefke",
-        firstname: "my",
+        name: "my",
     });
     expectNoCall(ormLU.createLoginUser);
     expectNoCall(ormP.createPerson);
@@ -277,7 +293,12 @@ test("Can login if the account exists and update github handle", async () => {
 
 test("Can register if account doesn't exist", async () => {
     const input = { login: "@jefke", name: "my", id: "-69" };
-    const output = { sessionkey: "abcd", is_admin: false, is_coach: true };
+    const output = {
+        sessionkey: "abcd",
+        is_admin: false,
+        is_coach: true,
+        is_signup: true,
+    };
     const f = new Date(Date.now());
     f.setDate(f.getDate() + session_key.valid_period);
 
@@ -285,8 +306,7 @@ test("Can register if account doesn't exist", async () => {
     expectCall(ormPMock.getPasswordPersonByGithub, "-69");
     expectCall(ormP.createPerson, {
         github: "@jefke",
-        firstname: "my",
-        lastname: "",
+        name: "my",
         github_id: "-69",
     });
     expectCall(ormLU.createLoginUser, {
@@ -301,7 +321,7 @@ test("Can register if account doesn't exist", async () => {
     expectNoCall(ormP.updatePerson);
 });
 
-test("Login/Register fails if the request is incorrect", async () => {
+test("Login/Register test_fails if the request is incorrect", async () => {
     const req = getMockReq();
     const res = getMockRes().res;
 
@@ -351,13 +371,16 @@ test("Can exchange access token for session key", async () => {
     });
 
     utilMock.redirect.mockImplementation(async (_, url) => {
-        expect(url).toBe(process.env.FRONTEND + "/login/abcd");
+        expect(url).toBe(process.env.FRONTEND + "/login/abcd?is_signup=false");
         return Promise.resolve();
     });
 
     const req = getMockReq();
     const res = getMockRes().res;
-    req.query = { code: code, state: github.genState() };
+    req.query = {
+        code: code,
+        state: github.genState(process.env.FRONTEND as string),
+    };
     return expect(
         github.ghExchangeAccessToken(req, res)
     ).resolves.not.toThrow();
@@ -377,8 +400,87 @@ test("Can handle internet issues", async () => {
 
     const req = getMockReq();
     const res = getMockRes().res;
-    req.query = { code: "code", state: github.genState() };
+    req.query = {
+        code: "code",
+        state: github.genState(process.env.FRONTEND as string),
+    };
     return expect(
         github.ghExchangeAccessToken(req, res)
+    ).resolves.not.toThrow();
+});
+
+test("Can handle database failures", async () => {
+    ormPMock.getPasswordPersonByGithub.mockReset();
+    ormPMock.getPasswordPersonByGithub.mockRejectedValue({ some: "error" });
+
+    await expect(
+        github.ghSignupOrLogin({ login: "", name: "", id: "" })
+    ).rejects.toStrictEqual({ some: "error" });
+});
+
+test("Can handle different frontend", async () => {
+    const code = "abcdefghijklmnopqrstuvwxyz";
+    const url = "https://other.url";
+    const codeIdx = Object.keys(github.states).length;
+
+    axiosMock.post.mockImplementation((url, body, conf) => {
+        expect(url).toBe("https://github.com/login/oauth/access_token");
+        expect(conf).toHaveProperty("headers.Accept", "application/json");
+        expect(body).toStrictEqual({
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_SECRET,
+            code: code as string,
+            redirect_uri:
+                github.getHome() + config.global.preferred + "/github/login",
+        });
+        return Promise.resolve({ data: { access_token: "some_token" } });
+    });
+
+    axiosMock.get.mockImplementation((url, conf) => {
+        expect(url).toBe("https://api.github.com/user");
+        expect(conf).toHaveProperty(
+            "headers.Authorization",
+            "token some_token"
+        );
+
+        return Promise.resolve({
+            data: { login: "@my_github", name: "my", id: 69 },
+        });
+    });
+
+    let expUrl = "";
+
+    utilMock.redirect.mockImplementation(async (_, url) => {
+        if (expUrl == "") {
+            expUrl =
+                "https://github.com/login/oauth/authorize?client_id=undefined" +
+                "&allow_signup=true&redirect_uri=undefined%2Fapi-osoc%2Fgithub%2Fchallenge" +
+                "&state=" +
+                Object.keys(github.states)[codeIdx];
+        }
+
+        expect(url).toBe(expUrl);
+        // expect(url).toBe(process.env.FRONTEND + "/login/abcd?is_signup=false");
+        return Promise.resolve();
+    });
+
+    const req1 = getMockReq();
+    const res1 = getMockRes().res;
+
+    req1.body = { callback: url };
+
+    await github.ghIdentity(req1, res1);
+    const state = Object.keys(github.states)[codeIdx];
+
+    expUrl = url + "/login/abcd?is_signup=false";
+
+    const req2 = getMockReq();
+    const res2 = getMockRes().res;
+    req2.query = {
+        code: code,
+        state: state,
+    };
+    return expect(
+        github.ghExchangeAccessToken(req2, res2)
     ).resolves.not.toThrow();
 });

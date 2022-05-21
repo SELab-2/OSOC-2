@@ -27,14 +27,18 @@ import * as ormP from "../../orm_functions/person";
 jest.mock("../../orm_functions/person");
 const ormPMock = ormP as jest.Mocked<typeof ormP>;
 
+import * as ormSe from "../../orm_functions/session_key";
+jest.mock("../../orm_functions/session_key");
+const ormSeMock = ormSe as jest.Mocked<typeof ormSe>;
+
 import * as admin from "../../routes/admin";
+import { errors } from "../../utility";
 
 const people: (login_user & { person: person })[] = [
     {
         person: {
             person_id: 1,
-            firstname: "Jeffrey",
-            lastname: "Jan",
+            name: "Jeffrey Jan",
             email: "jeffrey@jan.be",
             github: null,
             github_id: null,
@@ -49,8 +53,7 @@ const people: (login_user & { person: person })[] = [
     {
         person: {
             person_id: 2,
-            firstname: "Jan",
-            lastname: "Jeffrey",
+            name: "Jan Jeffrey",
             email: null,
             github: "@jan_jeffrey",
             github_id: "9846516845",
@@ -111,6 +114,10 @@ beforeEach(() => {
         if (v != 1 && v != 2) return Promise.reject();
         return Promise.resolve(v == 1 ? people[0] : people[1]);
     });
+    ormLMock.deleteLoginUserFromDB.mockImplementation((id) => {
+        if (id !== 1 && id !== 2) return Promise.reject();
+        return Promise.resolve();
+    });
     ormPMock.deletePersonById.mockImplementation((v) => {
         if (v != 1 && v != 2) return Promise.reject();
         return Promise.resolve(v == 1 ? people[0].person : people[1].person);
@@ -126,8 +133,7 @@ beforeEach(() => {
             person_id: 1,
             email: "test@email.com",
             github: null,
-            firstname: "test",
-            lastname: "test",
+            name: "test",
             github_id: null,
         },
     });
@@ -146,6 +152,7 @@ afterEach(() => {
 
     ormLMock.searchAllAdminLoginUsers.mockReset();
     ormLMock.deleteLoginUserByPersonId.mockReset();
+    ormLMock.deleteLoginUserFromDB.mockReset();
     ormLMock.updateLoginUser.mockReset();
     ormPMock.deletePersonById.mockReset();
 });
@@ -165,7 +172,7 @@ test("Can list all admins.", async () => {
     const res = people.map((val) => ({
         person_data: {
             id: val.person.person_id,
-            name: val.person.firstname + " " + val.person.lastname,
+            name: val.person.name,
             email: val.person.email,
             github: val.person.github,
         },
@@ -200,6 +207,69 @@ test("Can modify a single admin (1).", async () => {
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
 });
 
+test("Can't modify yourself as an admin", async () => {
+    const req = getMockReq();
+    req.body = { id: 0, sessionkey: "abcd" };
+    await expect(admin.modAdmin(req)).rejects.toBe(errors.cookInvalidID());
+});
+
+test("Can modify a single admin and update the login user twice", async () => {
+    const req = getMockReq();
+    req.body = {
+        id: 7,
+        sessionkey: "abcd",
+        isAdmin: false,
+        isCoach: false,
+        accountStatus: "PENDING",
+    };
+    const res = { id: 7, name: "Jeffrey Jan" };
+
+    ormLMock.updateLoginUser.mockImplementationOnce(() =>
+        Promise.resolve({
+            person: {
+                person_id: 1,
+                name: "Jeffrey Jan",
+                email: "jeffrey@jan.be",
+                github: null,
+                github_id: null,
+            },
+            is_coach: false,
+            is_admin: false,
+            login_user_id: 7,
+            person_id: 1,
+            password: "jeffreyForEver",
+            account_status: "PENDING",
+        })
+    );
+
+    ormLMock.updateLoginUser.mockImplementationOnce(() =>
+        Promise.resolve({
+            person: {
+                person_id: 1,
+                name: "Jeffrey Jan",
+                email: "jeffrey@jan.be",
+                github: null,
+                github_id: null,
+            },
+            is_coach: false,
+            is_admin: false,
+            login_user_id: 7,
+            person_id: 1,
+            password: "jeffreyForEver",
+            account_status: "DISABLED",
+        })
+    );
+
+    ormSeMock.removeAllKeysForLoginUserId.mockResolvedValue(
+        Promise.resolve({ count: 1 })
+    );
+
+    await expect(admin.modAdmin(req)).resolves.toStrictEqual(res);
+
+    ormLMock.updateLoginUser.mockReset();
+    ormSeMock.removeAllKeysForLoginUserId.mockReset();
+});
+
 test("Can modify a single admin (2).", async () => {
     const req = getMockReq();
     req.body = {
@@ -230,7 +300,22 @@ test("Can delete admins", async () => {
     await expect(admin.deleteAdmin(req)).resolves.toStrictEqual(res);
     expectCall(utilMock.isAdmin, req.body);
     expectCall(reqMock.parseDeleteAdminRequest, req);
-    expectCall(ormLMock.deleteLoginUserByPersonId, req.body.id);
-    expectCall(ormPMock.deletePersonById, req.body.id);
+    expectCall(ormLMock.deleteLoginUserFromDB, req.body.id);
     expect(utilMock.mutable).toHaveBeenCalledTimes(1);
+});
+
+test("Can't delete yourself as an admin", async () => {
+    const req = getMockReq();
+    req.body = { sessionkey: "abcd" };
+    const id = 0;
+    req.params.id = id.toString();
+
+    reqMock.parseDeleteAdminRequest.mockResolvedValue({
+        sessionkey: "abcd",
+        id: 0,
+    });
+
+    await expect(admin.deleteAdmin(req)).rejects.toBe(errors.cookInvalidID());
+
+    reqMock.parseDeleteAdminRequest.mockReset();
 });

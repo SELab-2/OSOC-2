@@ -1,0 +1,21 @@
+.notification {
+  animation: fadein 0.5s;
+  z-index: 999;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.success {
+  background-color: var(--succes-100);
+}
+
+.warning {
+  background-color: var(--warning-100);
+}
+
+.error {
+  background-color: var(--error-100);
+}

@@ -1,9 +1,10 @@
 import React, { SyntheticEvent, useContext, useState } from "react";
-import { LoginUser } from "../../types";
+import { LoginUser, NotificationType } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
-import crypto from "crypto";
-import styles from "../../styles/login.module.scss";
+import styles from "../../pages/login/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
+import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const Settings: React.FC<{
     person: LoginUser;
@@ -12,12 +13,17 @@ export const Settings: React.FC<{
     const [newName, setNewName] = useState<string>("");
     const [currPassword, setCurrPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
+    const [retypePassword, setRetypePassword] = useState<string>("");
     const [currPasswordError, setCurrPasswordError] = useState<string>("");
     const [newPasswordError, setNewPasswordError] = useState<string>("");
     const [newPasswordScore, setNewPasswordScore] = useState<number>(0);
     const [applyError, setApplyError] = useState<string>("");
     const { getSession, setSessionKey } = useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
 
+    if (person === null) {
+        person = defaultLoginUser;
+    }
     /**
      * Gets called everytime the new password input field's value changes
      * Calculates the password score and set the corresponding error messages
@@ -30,6 +36,10 @@ export const Settings: React.FC<{
         setNewPasswordScore(score);
         setNewPasswordError("");
         setNewPassword(password);
+    };
+
+    const updateRetypePass = (password: string) => {
+        setRetypePassword(password);
     };
 
     /**
@@ -79,6 +89,9 @@ export const Settings: React.FC<{
         } else if (currPassword !== "" && newPasswordScore < 20) {
             setNewPasswordError("Please provide a secure enough password");
             error = true;
+        } else if (newPassword !== retypePassword) {
+            setNewPasswordError("Passwords do not match");
+            error = true;
         } else {
             setNewPasswordError("");
         }
@@ -94,17 +107,6 @@ export const Settings: React.FC<{
             setApplyError("");
         }
 
-        const { sessionKey } =
-            getSession != undefined ? await getSession() : { sessionKey: "" };
-        const encryptedOldPassword = crypto
-            .createHash("sha256")
-            .update(currPassword)
-            .digest("hex");
-        const encryptedNewPassword = crypto
-            .createHash("sha256")
-            .update(newPassword)
-            .digest("hex");
-
         // We dynamically build the body
         const body: Record<string, unknown> = {};
         if (newName !== "") {
@@ -113,12 +115,15 @@ export const Settings: React.FC<{
 
         if (currPassword !== "" && newPassword !== "") {
             body.pass = {
-                oldpass: encryptedOldPassword,
-                newpass: encryptedNewPassword,
+                oldpass: currPassword,
+                newpass: newPassword,
             };
         }
 
         if (body !== {}) {
+            const { sessionKey } = getSession
+                ? await getSession()
+                : { sessionKey: "" };
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
                 {
@@ -132,25 +137,32 @@ export const Settings: React.FC<{
                 }
             )
                 .then((response) => response.json())
-                .catch((err) => {
+                .catch(() => {
                     setApplyError(
                         "Something went wrong while trying to execute your request."
                     );
-                    console.log(err);
                 });
-            console.log(response);
-            if (response !== undefined) {
-                if (response.success) {
-                    if (setSessionKey) {
-                        setSessionKey(response.sessionkey);
-                    }
-                    fetchUser();
-                    // TODO notify succes
-                } else {
-                    setApplyError(
-                        `Failed to apply changes. Please check all fields. ${response.reason}`
+            if (response && response.success) {
+                if (setSessionKey) {
+                    setSessionKey(response.sessionkey);
+                }
+                await fetchUser();
+                if (notify) {
+                    notify(
+                        "Your credentials are successfully changed",
+                        NotificationType.SUCCESS,
+                        2000
                     );
                 }
+            } else if (response && !response.success && notify) {
+                setApplyError(
+                    `Failed to apply changes. Please check all fields. ${response.reason}`
+                );
+                notify(
+                    "Something went wrong:" + response.reason,
+                    NotificationType.ERROR,
+                    2000
+                );
             }
         }
     };
@@ -158,22 +170,30 @@ export const Settings: React.FC<{
     return (
         <div className={styles.body}>
             <form className={styles.form}>
-                <label className={styles.label}>
-                    Current Name: {person.person.firstname}
+                <label data-testid={"personName"} className={styles.label}>
+                    Current Name: {person.person.name}
                 </label>
-                <label className={styles.label}>
+                <label data-testid={"labelNewName"} className={styles.label}>
                     New Name
-                    <input onChange={(e) => setNewName(e.target.value)} />
+                    <input
+                        data-testid={"inputNewName"}
+                        onChange={(e) => setNewName(e.target.value)}
+                    />
                 </label>
 
-                <label className={styles.label}>
+                <label
+                    data-testid={"labelCurrentPassword"}
+                    className={styles.label}
+                >
                     Current Password
                     <input
+                        data-testid={"inputCurrentPassword"}
                         type="password"
                         onChange={(e) => setCurrPassword(e.target.value)}
                     />
                 </label>
                 <p
+                    data-testid={"errorCurrPass"}
                     className={`${styles.textFieldError} ${
                         currPasswordError !== "" ? styles.anim : ""
                     }`}
@@ -181,9 +201,13 @@ export const Settings: React.FC<{
                     {currPasswordError}
                 </p>
 
-                <label className={styles.label}>
+                <label
+                    data-testid={"labelNewPassword"}
+                    className={styles.label}
+                >
                     New Password
                     <input
+                        data-testid={"inputNewPassword"}
                         type="password"
                         onChange={(e) => updateNewPassword(e.target.value)}
                     />
@@ -204,6 +228,7 @@ export const Settings: React.FC<{
                             Password strength:
                         </p>
                         <p
+                            data-testid={"newPassScoreError"}
                             className={`${
                                 styles.textFieldError
                             } ${scoreToStyle()}`}
@@ -213,6 +238,7 @@ export const Settings: React.FC<{
                     </div>
                 ) : (
                     <p
+                        data-testid={"newPassError"}
                         className={`${styles.textFieldError} ${
                             newPasswordError !== "" ? styles.anim : ""
                         }`}
@@ -220,8 +246,22 @@ export const Settings: React.FC<{
                         {newPasswordError}
                     </p>
                 )}
-                <button onClick={changeUser}>Apply Changes</button>
+                <label
+                    data-testid={"labelRetypeNewPassword"}
+                    className={styles.label}
+                >
+                    Retype New Password
+                    <input
+                        data-testid={"inputRetypeNewPassword"}
+                        type="password"
+                        onChange={(e) => updateRetypePass(e.target.value)}
+                    />
+                </label>
+                <button data-testid={"confirmButton"} onClick={changeUser}>
+                    Apply Changes
+                </button>
                 <p
+                    data-testid={"pErrorPassword"}
                     className={`${styles.textFieldError} ${
                         applyError !== "" ? styles.anim : ""
                     }`}

@@ -1,6 +1,4 @@
 {
-    "port": 4096,
-
     "apiErrors": {
         "invalidID": {
             "http": 204,
@@ -76,6 +74,18 @@
                 "http": 400,
                 "reason": "Failed to update your password. Perhaps you used an invalid key?"
             }
+        },
+        "studentSuggestion": {
+            "insufficientRights": {
+                "http": 403,
+                "reason": "Failed to create suggestion. Can only create suggestions for the most recent osoc edition."
+            }
+        },
+        "modifyProject": {
+            "insufficientRights": {
+                "http": 403,
+                "reason": "Failed to modify project. Can only modify projects of the most recent osoc edition."
+            }
         }
     },
 
@@ -85,11 +95,17 @@
         ],
         "preferred": "/api-osoc",
         "authScheme": "auth/osoc2",
-        "defaultUserId": 3
+        "defaultUserId": 3,
+        "port": 4096,
+        "pageSize": 10
     },
 
     "email": {
         "from": "'OSOC2 Account Recovery' <osoc2.be@gmail.com>",
         "header": "OSOC2 Recovery Code"
+    },
+
+    "encryption": {
+        "encryptionRounds": 8
     }
 }

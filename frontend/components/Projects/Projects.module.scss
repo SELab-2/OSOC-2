@@ -1,0 +1,46 @@
+.projects {
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 60rem;
+}
+
+/* The style for the list of projects */
+.projectCards {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.5rem;
+  max-height: 75rem;
+  overflow-y: scroll;
+  padding-block: 4rem;
+  padding-inline: 2rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 800px) {
+  .projectCards {
+    gap: 1rem !important;
+  }
+  .projectCards.limited {
+    display: flex;
+    flex-direction: column;
+
+    /* Scroll horizontal on small screens to still show the project overview not too far down */
+    .projectCards {
+      flex-direction: row;
+      overflow-y: hidden;
+      overflow-x: scroll;
+      padding-block: 1rem;
+    }
+  }
+}
+
+/* The actual card as a container */
+.card {
+  box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  width: 100%;
+}

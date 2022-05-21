@@ -28,6 +28,10 @@ import * as project from "../orm_functions/project";
 jest.mock("../orm_functions/project");
 const projectMock = project as jest.Mocked<typeof project>;
 
+import * as osoc from "../orm_functions/osoc";
+jest.mock("../orm_functions/osoc");
+const osocMock = osoc as jest.Mocked<typeof osoc>;
+
 import * as crypto from "crypto";
 jest.mock("crypto");
 const cryptoMock = crypto as jest.Mocked<typeof crypto>;
@@ -35,27 +39,17 @@ const cryptoMock = crypto as jest.Mocked<typeof crypto>;
 import * as config from "../config.json";
 import { ApiError, Anything } from "../types";
 import * as util from "../utility";
-import { errors } from "../utility";
+import {
+    checkYearPermissionOsoc,
+    checkYearPermissionProject,
+    checkYearPermissionStudent,
+    errors,
+} from "../utility";
+import { account_status_enum } from "@prisma/client";
 
 interface Req {
     url: string;
     verb: string;
-}
-
-function genPromises(): Promise<unknown>[] {
-    const data: unknown[] = [
-        6,
-        "abc",
-        { key: "value" },
-        { complex: { object: "with", array: [1, 2, 3, 4] } },
-    ];
-    const promises: Promise<unknown>[] = data.map((val) =>
-        util.debug(val).then((res) => {
-            expect(res).toBe(val);
-            return res;
-        })
-    );
-    return promises;
 }
 
 function obtainResponse() {
@@ -74,6 +68,9 @@ test("utility.errors.cook* work as expected", () => {
     expect(util.errors.cookUnauthenticated()).toBe(
         config.apiErrors.unauthenticated
     );
+    expect(util.errors.cookWrongSuggestionYear()).toBe(
+        config.apiErrors.studentSuggestion.insufficientRights
+    );
     expect(util.errors.cookInsufficientRights()).toBe(
         config.apiErrors.insufficientRights
     );
@@ -83,6 +80,9 @@ test("utility.errors.cook* work as expected", () => {
     );
     expect(util.errors.cookPendingAccount()).toBe(
         config.apiErrors.pendingAccount
+    );
+    expect(util.errors.cookWrongOsocYear()).toBe(
+        config.apiErrors.modifyProject.insufficientRights
     );
 
     // annoying ones
@@ -155,19 +155,6 @@ test("utility.errors.cook* work as expected", () => {
     }));
     mimeExpect.forEach((m) =>
         expect(util.errors.cookNonJSON(m.mime)).toStrictEqual(m.err)
-    );
-});
-
-test("utility.debug returns identical", () => {
-    return Promise.all(genPromises());
-});
-
-test("utility.debug logs their data", () => {
-    const logSpy = jest.spyOn(console, "log");
-    return Promise.all(
-        genPromises().map((it) =>
-            it.then((val) => expect(logSpy).toHaveBeenCalledWith(val))
-        )
     );
 });
 
@@ -254,8 +241,6 @@ test("utility.addInvalidVerbs adds verbs", () => {
     // please someone check this?
     expect(routerSpy).toHaveBeenCalledTimes(1);
 });
-
-// we need to check line_#117 but I have no idea on how to do that...
 
 test("utility.logRequest logs request and passes control", () => {
     const writeSpy = jest.spyOn(console, "log");
@@ -376,8 +361,7 @@ test("utility.checkSessionKey works on valid session key", async () => {
         is_coach: false,
         account_status: "ACTIVATED",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -401,7 +385,7 @@ test("utility.checkSessionKey works on valid session key", async () => {
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on valid session key (pending)", async () => {
+test("utility.checkSessionKey test_fails on valid session key (pending)", async () => {
     login_userMock.getLoginUserById.mockReset();
     session_keyMock.checkSessionKey.mockReset();
     login_userMock.getLoginUserById.mockResolvedValue({
@@ -412,8 +396,7 @@ test("utility.checkSessionKey fails on valid session key (pending)", async () =>
         is_coach: false,
         account_status: "PENDING",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -443,8 +426,7 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
         is_coach: false,
         account_status: "PENDING",
         person: {
-            firstname: "Bob",
-            lastname: "Test",
+            name: "Bob",
             email: "bob.test@mail.com",
             github: "bob.test@github.com",
             person_id: 987654321,
@@ -468,7 +450,67 @@ test("utility.checkSessionKey works on valid session key (pending,false)", async
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
 });
 
-test("utility.checkSessionKey fails on invalid session key", async () => {
+test("utility.checkSessionKey test_fails on valid session key (disabled)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            name: "Bob",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey test_fails on valid session key (disabled, false)", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    session_keyMock.checkSessionKey.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue({
+        login_user_id: 123456789,
+        person_id: 987654321,
+        password: "pass",
+        is_admin: true,
+        is_coach: false,
+        account_status: "DISABLED",
+        person: {
+            name: "Bob",
+            email: "bob.test@mail.com",
+            github: "bob.test@github.com",
+            person_id: 987654321,
+            github_id: "46845",
+        },
+    });
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456789,
+    });
+    const obj = { sessionkey: "key" };
+
+    await expect(util.checkSessionKey(obj, false)).rejects.toStrictEqual(
+        errors.cookLockedRequest()
+    );
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey test_fails on invalid session key (1)", async () => {
     session_keyMock.checkSessionKey.mockReset();
     session_keyMock.checkSessionKey.mockRejectedValue(new Error());
 
@@ -480,6 +522,33 @@ test("utility.checkSessionKey fails on invalid session key", async () => {
 
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
     expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey test_fails on invalid session key (2)", async () => {
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue(null);
+
+    await expect(
+        util.checkSessionKey({
+            sessionkey: "key",
+        })
+    ).rejects.toStrictEqual(util.errors.cookUnauthenticated());
+
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledTimes(1);
+    expect(session_keyMock.checkSessionKey).toHaveBeenCalledWith("key");
+});
+
+test("utility.checkSessionKey test_fails on non-existent users", async () => {
+    login_userMock.getLoginUserById.mockReset();
+    login_userMock.getLoginUserById.mockResolvedValue(null);
+    session_keyMock.checkSessionKey.mockReset();
+    session_keyMock.checkSessionKey.mockResolvedValue({
+        login_user_id: 123456,
+    });
+
+    return expect(
+        util.checkSessionKey({ sessionkey: "123" }, false)
+    ).rejects.toStrictEqual(errors.cookUnauthenticated());
 });
 
 test(
@@ -507,8 +576,7 @@ test(
                         is_coach: false,
                         account_status: "ACTIVATED",
                         person: {
-                            firstname: "firstname",
-                            lastname: "lastname",
+                            name: "firstname",
                             email: "email@hotmail.com",
                             github: "hiethub",
                             person_id: 1,
@@ -523,8 +591,7 @@ test(
                     is_coach: false,
                     account_status: "ACTIVATED",
                     person: {
-                        firstname: "firstname",
-                        lastname: "lastname",
+                        name: "firstname",
                         email: "email@mail.com",
                         github: "hiethub",
                         person_id: 0,
@@ -547,8 +614,7 @@ test(
                         is_coach: false,
                         account_status: "ACTIVATED",
                         person: {
-                            lastname: "lastname",
-                            firstname: "firstname",
+                            name: "firstname",
                             github: "hiethub",
                             person_id: 0,
                             email: "email@mail.com",
@@ -603,11 +669,163 @@ test("utility.isAdmin can catch errors from the DB", async () => {
         Promise.reject({})
     );
 
-    expect(
+    await expect(
         util.isAdmin({
             sessionkey: "key",
         })
     ).rejects.toStrictEqual(util.errors.cookInsufficientRights());
+});
+
+test("the student is visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the student is NOT visible for the loginUser", async () => {
+    studentMock.getAppliedYearsForStudent.mockReset();
+    studentMock.getAppliedYearsForStudent.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2021])
+    );
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionStudent(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+});
+
+test("the project is visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2022));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).resolves.toEqual(
+        inputObj
+    );
+});
+
+test("the project is NOT visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    projectMock.getProjectYear.mockReset();
+    projectMock.getProjectYear.mockResolvedValue(Promise.resolve(2021));
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionProject(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+});
+
+test("the osoc edition is visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    osocMock.getOsocById.mockReset();
+    osocMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2022,
+    });
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionOsoc(inputObj)).resolves.toEqual(inputObj);
+});
+
+test("the osoc edition is NOT visible for the loginUser", async () => {
+    login_userMock.getOsocYearsForLoginUser.mockReset();
+    login_userMock.getOsocYearsForLoginUser.mockResolvedValue(
+        Promise.resolve([2022])
+    );
+    osocMock.getOsocById.mockReset();
+    osocMock.getOsocById.mockResolvedValue({
+        osoc_id: 0,
+        year: 2021,
+    });
+
+    const inputObj = {
+        data: {
+            id: 0,
+            sessionkey: "",
+        },
+        userId: 0,
+        is_coach: false,
+        is_admin: true,
+        accountStatus: account_status_enum.DISABLED,
+    };
+
+    await expect(checkYearPermissionOsoc(inputObj)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
 });
 
 test("utility.refreshKey removes a key and replaces it", async () => {
@@ -776,10 +994,7 @@ test("utility.addAllInvalidVerbs adds multiple callbacks", () => {
 
 test("utility.route installs exactly one route", async () => {
     const router = getMockRouter();
-    const cb = () => {
-        console.log("RETURNING");
-        return Promise.resolve({ sessionkey: "abcd", data: {} });
-    };
+    const cb = () => Promise.resolve({ sessionkey: "abcd", data: {} });
     const path = "/";
     const verb = "get";
 
@@ -796,49 +1011,6 @@ test("utility.route installs exactly one route", async () => {
         .then(() => router(req1, res1))
         .then(() => {
             expect(res1.status).toHaveBeenCalledWith(500);
-        });
-
-    // incorrect ep
-    const req2 = getMockReq();
-    const res2 = getMockRes().res;
-    req2.path = "/test";
-    req2.method = "get";
-    expect(
-        Promise.resolve().then(() => router(req2, res2))
-    ).rejects.toStrictEqual(getInvalidEndpointError("/test"));
-
-    // incorrect verb/ep
-    const req3 = getMockReq();
-    const res3 = getMockRes().res;
-    req3.path = path;
-    req3.method = "post";
-    expect(
-        Promise.resolve().then(() => router(req3, res3))
-    ).rejects.toStrictEqual(getInvalidVerbEndpointError("post", "/"));
-});
-
-test("utility.routeKeyOnly installs exactly one route", async () => {
-    const router = getMockRouter();
-    const cb = () => {
-        console.log("RETURNING");
-        return Promise.resolve({ sessionkey: "abcd", data: {} });
-    };
-    const path = "/";
-    const verb = "get";
-
-    util.routeKeyOnly(router, verb, path, cb);
-
-    // correct
-    const req1 = getMockReq();
-    const res1 = getMockRes().res;
-    req1.path = path;
-    req1.method = verb;
-
-    // shouldn't throw
-    await Promise.resolve()
-        .then(() => router(req1, res1))
-        .then(() => {
-            expect(res1.status).toHaveBeenCalledWith(200);
         });
 
     // incorrect ep
@@ -879,8 +1051,7 @@ test("utility.isValidID checks IDs", async () => {
                     email: null,
                     github: null,
                     github_id: null,
-                    firstname: "jeffrey",
-                    lastname: "jan",
+                    name: "jeffrey jan",
                 },
             });
         }
@@ -898,6 +1069,10 @@ test("utility.isValidID checks IDs", async () => {
                 start_date: new Date(Date.now()),
                 end_date: new Date(Date.now()),
                 positions: 42069,
+                osoc: {
+                    osoc_id: 516645164126546,
+                    year: 2022,
+                },
             });
         }
         return Promise.resolve(null);
@@ -964,6 +1139,39 @@ test("utility.setupRedirect sets up a single redirect", async () => {
         res3,
         getInvalidVerbEndpointError("post", "/")
     );
+});
+
+test("utility.queryToBody copies queries to body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = {};
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody: query has priority over body", () => {
+    const req = getMockReq();
+    const query = { key: "value", key2: "value2" };
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual(query);
+    expect(req.query).toStrictEqual(query);
+});
+
+test("utility.queryToBody can handle empty query", () => {
+    const req = getMockReq();
+    const query = {};
+    req.query = { ...query };
+    req.body = { key: "othervalue" };
+
+    util.queryToBody(req);
+    expect(req.body).toStrictEqual({ key: "othervalue" });
+    expect(req.query).toStrictEqual({});
 });
 
 test("utility.mutable should check if a user is mutable", async () => {

@@ -1,29 +1,31 @@
 import prisma from "../prisma/prisma";
+import { Prisma } from "@prisma/client";
 import {
     CreateProject,
-    UpdateProject,
-    FilterString,
-    FilterSort,
+    DBPagination,
     FilterBoolean,
-    FilterNumberArray,
+    FilterSort,
+    FilterString,
+    UpdateProject,
 } from "./orm_types";
+import { getOsocYearsForLoginUser } from "./login_user";
+import { errors } from "../utility";
 
 /**
  *
  * @param project: project object with the needed information
  */
 export async function createProject(project: CreateProject) {
-    const result = await prisma.project.create({
+    return await prisma.project.create({
         data: {
             name: project.name,
             osoc_id: project.osocId,
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
+            description: project.description,
         },
     });
-    return result;
 }
 
 /**
@@ -31,8 +33,7 @@ export async function createProject(project: CreateProject) {
  * @returns a list of all the project objects in the database
  */
 export async function getAllProjects() {
-    const result = await prisma.project.findMany();
-    return result;
+    return await prisma.project.findMany();
 }
 
 /**
@@ -41,12 +42,14 @@ export async function getAllProjects() {
  * @returns: object with all the info about this project
  */
 export async function getProjectById(projectId: number) {
-    const result = prisma.project.findUnique({
+    return prisma.project.findUnique({
         where: {
             project_id: projectId,
         },
+        include: {
+            osoc: true,
+        },
     });
-    return result;
 }
 
 /**
@@ -55,12 +58,11 @@ export async function getProjectById(projectId: number) {
  * @returns: object with all the info about this project
  */
 export async function getProjectByName(projectName: string) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             name: projectName,
         },
     });
-    return result;
 }
 
 /**
@@ -69,12 +71,11 @@ export async function getProjectByName(projectName: string) {
  * @returns: all projects with all the info
  */
 export async function getProjectsByOsocEdition(osocId: number) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             osoc_id: osocId,
         },
     });
-    return result;
 }
 
 /**
@@ -83,12 +84,11 @@ export async function getProjectsByOsocEdition(osocId: number) {
  * @returns all the project objects for that partner
  */
 export async function getProjectsByPartner(partner: string) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             partner: partner,
         },
     });
-    return result;
 }
 
 /**
@@ -97,12 +97,11 @@ export async function getProjectsByPartner(partner: string) {
  * @returns all the projects with a matching start date in the database
  */
 export async function getProjectsByStartDate(startDate: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             start_date: startDate,
         },
     });
-    return result;
 }
 
 /**
@@ -111,14 +110,13 @@ export async function getProjectsByStartDate(startDate: Date) {
  * @returns all the projects that started after the supplied date
  */
 export async function getProjectsStartedAfterDate(date: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             start_date: {
                 gte: date,
             },
         },
     });
-    return result;
 }
 
 /**
@@ -127,14 +125,13 @@ export async function getProjectsStartedAfterDate(date: Date) {
  * @returns all the projects that started before the supplied date
  */
 export async function getProjectsStartedBeforeDate(date: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             start_date: {
                 lte: date,
             },
         },
     });
-    return result;
 }
 
 /**
@@ -143,12 +140,11 @@ export async function getProjectsStartedBeforeDate(date: Date) {
  * @returns all the projects with a matching end date in the database
  */
 export async function getProjectsByEndDate(endDate: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             end_date: endDate,
         },
     });
-    return result;
 }
 
 /**
@@ -157,14 +153,13 @@ export async function getProjectsByEndDate(endDate: Date) {
  * @returns all the projects that ended after the supplied date
  */
 export async function getProjectsEndedAfterDate(date: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             end_date: {
                 gte: date,
             },
         },
     });
-    return result;
 }
 
 /**
@@ -173,60 +168,13 @@ export async function getProjectsEndedAfterDate(date: Date) {
  * @returns all the projects that ended before the supplied date
  */
 export async function getProjectsEndedBeforeDate(date: Date) {
-    const result = prisma.project.findMany({
+    return prisma.project.findMany({
         where: {
             end_date: {
                 lte: date,
             },
         },
     });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have the exact amount of positions
- */
-export async function getProjectsByNumberPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: positions,
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have less positions
- */
-export async function getProjectsLessPositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                lt: positions,
-            },
-        },
-    });
-    return result;
-}
-
-/**
- *
- * @param positions: this is the number of positions in the project
- * @returns all the project objects that have more positions
- */
-export async function getProjectsMorePositions(positions: number) {
-    const result = prisma.project.findMany({
-        where: {
-            positions: {
-                gt: positions,
-            },
-        },
-    });
-    return result;
 }
 
 /**
@@ -235,7 +183,7 @@ export async function getProjectsMorePositions(positions: number) {
  * @returns the updated entry in the database
  */
 export async function updateProject(project: UpdateProject) {
-    const result = await prisma.project.update({
+    return await prisma.project.update({
         where: {
             project_id: project.projectId,
         },
@@ -245,10 +193,9 @@ export async function updateProject(project: UpdateProject) {
             partner: project.partner,
             start_date: project.startDate,
             end_date: project.endDate,
-            positions: project.positions,
+            description: project.description,
         },
     });
-    return result;
 }
 
 /**
@@ -257,12 +204,11 @@ export async function updateProject(project: UpdateProject) {
  * @returns return deleted project, with all its fields
  */
 export async function deleteProject(projectId: number) {
-    const result = await prisma.project.delete({
+    return await prisma.project.delete({
         where: {
             project_id: projectId,
         },
     });
-    return result;
 }
 
 /**
@@ -271,12 +217,11 @@ export async function deleteProject(projectId: number) {
  * @returns returns batch payload object, with holds count of number of deleted objects
  */
 export async function deleteProjectByOsocEdition(osocId: number) {
-    const result = await prisma.project.deleteMany({
+    return await prisma.project.deleteMany({
         where: {
             osoc_id: osocId,
         },
     });
-    return result;
 }
 
 /**
@@ -285,35 +230,58 @@ export async function deleteProjectByOsocEdition(osocId: number) {
  * @returns returns batch payload object, with holds count of number of deleted objects
  */
 export async function deleteProjectByPartner(partner: string) {
-    const result = await prisma.project.deleteMany({
+    return await prisma.project.deleteMany({
         where: {
             partner: partner,
         },
     });
-    return result;
 }
 
 /**
- *
+ * @param page current page and page size
  * @param projectNameFilter project name that we are filtering on (or undefined if not filtering on name)
  * @param clientNameFilter client name that we are filtering on (or undefined if not filtering on name)
- * @param assignedCoachesFilterArray assigned coaches that we are filtering on (or undefined if not filtering on assigned coaches)
  * @param fullyAssignedFilter fully assigned status that we are filtering on (or undefined if not filtering on assigned)
+ * @param osocYearFilter: the osoc year the project belongs to (or undefined if not filtering on year)
  * @param projectNameSort asc or desc if we want to sort on project name, undefined if we are not sorting on project name
  * @param clientNameSort asc or desc if we want to sort on client name, undefined if we are not sorting on client name
- * @param fullyAssignedSort asc or desc if we are sorting on fully assigned, undefined if we are not sorting on fully assigned
+ * @param userId the id of the user who searches
  * @returns the filtered students with their person data and other filter fields in a promise
  */
 export async function filterProjects(
+    page: DBPagination,
     projectNameFilter: FilterString,
     clientNameFilter: FilterString,
-    assignedCoachesFilterArray: FilterNumberArray,
     fullyAssignedFilter: FilterBoolean,
+    osocYearFilter: number | undefined,
     projectNameSort: FilterSort,
     clientNameSort: FilterSort,
-    fullyAssignedSort: FilterSort
+    userId: number
 ) {
+    const yearsAllowedToSee = await getOsocYearsForLoginUser(userId);
+
+    let searchYears;
+    if (osocYearFilter !== undefined) {
+        if (!yearsAllowedToSee.includes(osocYearFilter)) {
+            return Promise.resolve({
+                pagination: { page: 0, count: 0 },
+                data: [],
+            });
+        } else {
+            searchYears = [osocYearFilter];
+        }
+    } else {
+        searchYears = yearsAllowedToSee;
+    }
+
     const projects = await prisma.project.findMany({
+        where: {
+            osoc: {
+                year: {
+                    in: searchYears,
+                },
+            },
+        },
         include: {
             project_role: {
                 include: {
@@ -325,31 +293,35 @@ export async function filterProjects(
         },
     });
 
-    let assignedCoachesArray = undefined;
-    if (assignedCoachesFilterArray !== undefined) {
-        assignedCoachesArray = {
-            some: {
-                login_user_id: { in: assignedCoachesFilterArray },
+    const actualFilter: Prisma.projectWhereInput = {
+        name: {
+            contains: projectNameFilter,
+            mode: "insensitive",
+        },
+        partner: {
+            contains: clientNameFilter,
+            mode: "insensitive",
+        },
+        osoc: {
+            year: {
+                in: searchYears,
             },
-        };
+        },
+    };
+
+    // create the orderby object
+    let sortObject;
+    if (projectNameSort === undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: clientNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort === undefined) {
+        sortObject = [{ partner: projectNameSort }];
+    } else if (projectNameSort !== undefined && clientNameSort !== undefined) {
+        sortObject = [{ name: projectNameSort }, { partner: clientNameSort }];
     }
 
-    const filtered_projects = await prisma.project.findMany({
-        where: {
-            name: {
-                contains: projectNameFilter,
-                mode: "insensitive",
-            },
-            partner: {
-                contains: clientNameFilter,
-                mode: "insensitive",
-            },
-            project_user: assignedCoachesArray,
-        },
-        orderBy: {
-            name: projectNameSort,
-            partner: clientNameSort,
-        },
+    let filtered_projects = await prisma.project.findMany({
+        where: actualFilter,
+        orderBy: sortObject,
         include: {
             project_user: {
                 select: {
@@ -379,72 +351,77 @@ export async function filterProjects(
         fullyAssignedFilter &&
         filtered_projects.length !== 0
     ) {
-        return filtered_projects.filter((project) => {
-            const project_found = projects.find(
+        filtered_projects = filtered_projects.filter((project) => {
+            const project_found = projects.filter(
                 (elem) => elem.project_id === project.project_id
             );
 
-            if (project_found != undefined) {
-                let sum = 0;
-                for (const c of project_found.project_role) {
-                    sum += c._count.contract;
-                }
-                return project.positions === sum;
+            for (const c of project_found[0].project_role) {
+                if (c._count.contract < c.positions) return false;
             }
 
-            return false;
+            return true;
         });
     }
 
-    if (fullyAssignedSort == "desc" || fullyAssignedSort == "asc") {
-        filtered_projects.sort((x, y) => {
-            const project_x_found = projects.find(
-                (elem) => elem.project_id === x.project_id
-            );
+    const count = filtered_projects.length;
+    const start = page.currentPage * page.pageSize;
+    const end = start + page.pageSize;
 
-            const project_y_found = projects.find(
-                (elem) => elem.project_id === y.project_id
-            );
+    return {
+        pagination: { page: page.currentPage, count: count },
+        data: filtered_projects.slice(start, end),
+    };
+}
 
-            if (project_x_found != undefined && project_y_found != undefined) {
-                let sum_x = 0;
-                for (const c of project_x_found.project_role) {
-                    sum_x += c._count.contract;
-                }
+/**
+ * returns the year that a project belongs to
+ * @param projectId: id of the project whose year we are looking for
+ */
+export async function getProjectYear(projectId: number) {
+    const project = await prisma.project.findUnique({
+        where: {
+            project_id: projectId,
+        },
+        select: {
+            osoc: {
+                select: {
+                    year: true,
+                },
+            },
+        },
+    });
 
-                let sum_y = 0;
-                for (const c of project_y_found.project_role) {
-                    sum_y += c._count.contract;
-                }
-
-                const fullyAssignedX = x.positions === sum_x ? 1 : 0;
-                const fullyAssignedY = y.positions === sum_y ? 1 : 0;
-
-                return fullyAssignedX - fullyAssignedY;
-            }
-
-            return 0;
-        });
+    if (project === null) {
+        return Promise.reject(errors.cookInvalidID());
     }
 
-    if (fullyAssignedSort == "desc") {
-        filtered_projects.reverse();
-    }
+    return project.osoc.year;
+}
 
-    /*if (fullyAssignedSort == "asc") {
-        filtered_projects.sort(
-            (x, y) =>
-                +(x.positions == projects[x.project_id]._sum.positions) -
-                +(y.positions == projects[y.project_id]._sum.positions)
-        );
-    }
-    if (fullyAssignedSort == "desc") {
-        filtered_projects.sort(
-            (x, y) =>
-                +(x.positions == projects[x.project_id]._sum.positions) -
-                +(y.positions == projects[y.project_id]._sum.positions)
-        );
-        filtered_projects.reverse();
-    }*/
-    return filtered_projects;
+/**
+ * This query executes a full delete of all data associated with the project.
+ * This includes all projectUser AND projectrole data that is associated with this project!
+ * @param projectId: the id of the project we want to delete
+ * @returns the deleted record from the person-table in a promise or an error in a promise if the person was not found
+ */
+export async function deleteProjectFromDB(projectId: number) {
+    await Promise.all([
+        prisma.project_user.deleteMany({
+            where: {
+                project_id: projectId,
+            },
+        }),
+        prisma.project_role.deleteMany({
+            where: {
+                project_id: projectId,
+            },
+        }),
+    ]);
+
+    await prisma.project.delete({
+        where: {
+            project_id: projectId,
+        },
+    });
 }

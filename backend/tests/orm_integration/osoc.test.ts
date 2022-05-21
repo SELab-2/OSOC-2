@@ -11,6 +11,8 @@ import {
 } from "../../orm_functions/osoc";
 import prisma from "../../prisma/prisma";
 
+import "../integration_setup";
+
 it("should create a new osoc edition", async () => {
     const newOsoc = await createOsoc(2024);
     expect(newOsoc).toHaveProperty("year", 2024);

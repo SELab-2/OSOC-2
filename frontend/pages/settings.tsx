@@ -1,31 +1,28 @@
 import { NextPage } from "next";
 import SessionContext from "../contexts/sessionProvider";
 import { useContext, useEffect, useState } from "react";
-import { AccountStatus, LoginUser } from "../types";
+import { AccountStatus, LoginUser, NotificationType } from "../types";
 import { Settings } from "../components/Settings/Settings";
-import { useRouter } from "next/router";
+import { NotificationContext } from "../contexts/notificationProvider";
 
 const SettingsPage: NextPage = () => {
     const { getSession } = useContext(SessionContext);
-    const router = useRouter();
 
     const defaultUser: LoginUser = {
         person: {
             person_id: -1,
             email: "",
-            firstname: "",
-            lastname: "",
+            name: "",
             github: "",
-            github_id: 0,
         },
         login_user_id: -1,
-        person_id: -1,
         is_admin: false,
         is_coach: false,
         account_status: AccountStatus.DISABLED,
     };
 
     const [user, setUser] = useState<LoginUser>(defaultUser);
+    const { notify } = useContext(NotificationContext);
 
     const fetchUser = async () => {
         const { sessionKey } =
@@ -40,22 +37,22 @@ const SettingsPage: NextPage = () => {
             }
         )
             .then((response) => response.json())
-            .catch((error) => console.log(error));
+            .catch((err) => {
+                console.log(err);
+            });
         if (response !== undefined && response.success) {
-            setUser(response.data.login_user);
+            setUser(response);
+        } else if (response && !response.success && notify) {
+            notify(
+                "Something went wrong:" + response.reason,
+                NotificationType.ERROR,
+                2000
+            );
         }
     };
 
     useEffect(() => {
-        if (getSession !== undefined) {
-            getSession().then(({ sessionKey }) => {
-                if (sessionKey === "") {
-                    router.push("/login").then();
-                } else {
-                    fetchUser().then();
-                }
-            });
-        }
+        fetchUser().then();
         // We do not want to reload the data when the data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

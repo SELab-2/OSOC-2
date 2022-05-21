@@ -2,6 +2,7 @@
 import express from "express";
 
 import * as ormP from "../orm_functions/person";
+import * as ormLU from "../orm_functions/login_user";
 import * as ormSt from "../orm_functions/student";
 import * as ormOs from "../orm_functions/osoc";
 import * as ormJo from "../orm_functions/job_application";
@@ -17,6 +18,9 @@ import { type_enum } from "@prisma/client";
 import * as validator from "validator";
 import * as rq from "../request";
 import * as config from "./form_keys.json";
+import * as T from "../types";
+import fs from "fs";
+import path from "path";
 
 /**
  *  This function searches a question with a given key in the form.
@@ -80,7 +84,7 @@ export function checkQuestionsExist(
     questions: Responses.FormResponse<Requests.Question>[]
 ): boolean {
     const checkErrorInForm: Responses.FormResponse<Requests.Question>[] =
-        questions.filter((dataError) => dataError.data == null);
+        questions.filter((dataError) => dataError.data === null);
     return checkErrorInForm.length === 0;
 }
 
@@ -97,11 +101,16 @@ export function getBirthName(form: Requests.Form): Promise<string> {
     const questionBirthName: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.birthName);
     const questionsExist: boolean = checkQuestionsExist([questionBirthName]);
-    if (!questionsExist || questionBirthName.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionBirthName.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(questionBirthName.data.value as string);
+    return Promise.resolve(
+        (questionBirthName.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -114,11 +123,16 @@ export function getLastName(form: Requests.Form): Promise<string> {
     const questionLastName: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.lastName);
     const questionsExist: boolean = checkQuestionsExist([questionLastName]);
-    if (!questionsExist || questionLastName.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionLastName.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(questionLastName.data.value as string);
+    return Promise.resolve(
+        (questionLastName.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -127,21 +141,42 @@ export function getLastName(form: Requests.Form): Promise<string> {
  *  @returns See the API documentation. Successes are passed using
  *  `Promise.resolve`, failures using `Promise.reject`.
  */
-export function getEmail(form: Requests.Form): Promise<string> {
+export async function getEmail(form: Requests.Form): Promise<string> {
     const questionEmail: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.emailAddress);
     const questionsExist: boolean = checkQuestionsExist([questionEmail]);
     if (
         !questionsExist ||
-        questionEmail.data?.value == null ||
-        !validator.default.isEmail(questionEmail.data.value as string)
+        (questionEmail.data as Requests.Question).value == null ||
+        !validator.default.isEmail(
+            (questionEmail.data as Requests.Question).value as string
+        )
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
+    const normalizedEmail = validator.default
+        .normalizeEmail(
+            (questionEmail.data as Requests.Question).value as string
+        )
+        .toString();
+
+    const personFound = await ormP.searchPersonByLogin(normalizedEmail);
+    if (personFound.length !== 0) {
+        const loginUserFound = await ormLU.searchLoginUserByPerson(
+            personFound[0].person_id
+        );
+
+        if (loginUserFound !== null) {
+            return Promise.reject(errors.cookInsufficientRights());
+        }
+    }
+
     return Promise.resolve(
         validator.default
-            .normalizeEmail(questionEmail.data.value as string)
+            .normalizeEmail(
+                (questionEmail.data as Requests.Question).value as string
+            )
             .toString()
     );
 }
@@ -160,8 +195,7 @@ export async function jsonToPerson(
     const email = await getEmail(form);
 
     return Promise.resolve({
-        birthName: birthName,
-        lastName: lastName,
+        name: (birthName + " " + lastName).trim(),
         email: email,
     });
 }
@@ -188,14 +222,17 @@ export function getPronouns(form: Requests.Form): Promise<string | null> {
         questionPreferredPronouns,
         questionEnterPronouns,
     ]);
-    if (!questionsExist || questionPronouns.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionPronouns.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     let pronouns = "";
 
     const wordInAnswer: Responses.FormResponse<boolean> = checkWordInAnswer(
-        questionPronouns.data,
+        questionPronouns.data as Requests.Question,
         "yes"
     );
 
@@ -210,22 +247,31 @@ export function getPronouns(form: Requests.Form): Promise<string | null> {
             );
         if (
             chosenOption.data == null ||
-            chosenOption.data?.id.length === 0 ||
-            questionPreferredPronouns.data?.value == null ||
-            checkWordInAnswer(questionPreferredPronouns.data, "other").data ==
-                null
+            (chosenOption.data as Requests.Option).id.length === 0 ||
+            (questionPreferredPronouns.data as Requests.Question).value ==
+                null ||
+            checkWordInAnswer(
+                questionPreferredPronouns.data as Requests.Question,
+                "other"
+            ).data == null
         ) {
             return Promise.reject(util.errors.cookArgumentError());
         } else if (
-            !checkWordInAnswer(questionPreferredPronouns.data, "other").data &&
-            chosenOption.data?.text != undefined
+            !checkWordInAnswer(
+                questionPreferredPronouns.data as Requests.Question,
+                "other"
+            ).data &&
+            (chosenOption.data as Requests.Option).text != undefined
         ) {
             pronouns = chosenOption.data.text;
         } else {
-            if (questionEnterPronouns.data?.value == null) {
+            if (
+                (questionEnterPronouns.data as Requests.Question).value == null
+            ) {
                 return Promise.resolve(null);
             }
-            pronouns = questionEnterPronouns.data.value as string;
+            pronouns = (questionEnterPronouns.data as Requests.Question)
+                .value as string;
         }
     }
 
@@ -242,12 +288,15 @@ export function getGender(form: Requests.Form): Promise<string> {
     const questionGender: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.gender);
     const questionsExist: boolean = checkQuestionsExist([questionGender]);
-    if (!questionsExist || questionGender.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionGender.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const chosenGender: Responses.FormResponse<Requests.Option> =
-        filterChosenOption(questionGender.data);
+        filterChosenOption(questionGender.data as Requests.Question);
 
     if (chosenGender.data == null || chosenGender.data.id.length === 0) {
         return Promise.reject(errors.cookArgumentError());
@@ -266,11 +315,16 @@ export function getPhoneNumber(form: Requests.Form): Promise<string> {
     const questionPhoneNumber: Responses.FormResponse<Requests.Question> =
         filterQuestion(form, config.phoneNumber);
     const questionsExist: boolean = checkQuestionsExist([questionPhoneNumber]);
-    if (!questionsExist || questionPhoneNumber.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionPhoneNumber.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(questionPhoneNumber.data.value as string);
+    return Promise.resolve(
+        (questionPhoneNumber.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -289,17 +343,24 @@ export function getNickname(form: Requests.Form): Promise<string | null> {
         questionCheckNickname,
         questionEnterNickname,
     ]);
-    if (!questionsExist || questionCheckNickname.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionCheckNickname.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     let nickname = null;
-    const addNickName = checkWordInAnswer(questionCheckNickname.data, "yes");
+    const addNickName = checkWordInAnswer(
+        questionCheckNickname.data as Requests.Question,
+        "yes"
+    );
     if (addNickName.data != null && addNickName.data) {
-        if (questionEnterNickname.data?.value == null) {
+        if ((questionEnterNickname.data as Requests.Question).value == null) {
             return Promise.reject(errors.cookArgumentError());
         }
-        nickname = questionEnterNickname.data.value as string;
+        nickname = (questionEnterNickname.data as Requests.Question)
+            .value as string;
     }
 
     return Promise.resolve(nickname);
@@ -317,12 +378,15 @@ export function getAlumni(form: Requests.Form): Promise<boolean> {
 
     const questionsExist: boolean = checkQuestionsExist([questionCheckAlumni]);
 
-    if (!questionsExist || questionCheckAlumni.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionCheckAlumni.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const wordInAnswer: boolean | null = checkWordInAnswer(
-        questionCheckAlumni.data,
+        questionCheckAlumni.data as Requests.Question,
         "yes"
     ).data;
 
@@ -380,11 +444,17 @@ export function getResponsibilities(
         return Promise.reject(errors.cookArgumentError());
     }
 
-    if (questionCheckResponsibilities.data?.value == undefined) {
+    if (
+        (questionCheckResponsibilities.data as Requests.Question).value ==
+        undefined
+    ) {
         return Promise.resolve(null);
     }
 
-    return Promise.resolve(questionCheckResponsibilities.data?.value as string);
+    return Promise.resolve(
+        (questionCheckResponsibilities.data as Requests.Question)
+            .value as string
+    );
 }
 
 /**
@@ -399,11 +469,16 @@ export function getFunFact(form: Requests.Form): Promise<string> {
 
     const questionsExist: boolean = checkQuestionsExist([questionFunFact]);
 
-    if (!questionsExist || questionFunFact.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionFunFact.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(questionFunFact.data.value as string);
+    return Promise.resolve(
+        (questionFunFact.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -420,12 +495,17 @@ export function getVolunteerInfo(form: Requests.Form): Promise<string> {
         questionCheckVolunteerInfo,
     ]);
 
-    if (!questionsExist || questionCheckVolunteerInfo.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionCheckVolunteerInfo.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const chosenVolunteerInfo: Responses.FormResponse<Requests.Option> =
-        filterChosenOption(questionCheckVolunteerInfo.data);
+        filterChosenOption(
+            questionCheckVolunteerInfo.data as Requests.Question
+        );
 
     if (
         chosenVolunteerInfo.data == null ||
@@ -456,12 +536,15 @@ export function isStudentCoach(
             questionStudentCoach,
         ]);
 
-        if (!questionsExist || questionStudentCoach.data?.value == null) {
+        if (
+            !questionsExist ||
+            (questionStudentCoach.data as Requests.Question).value == null
+        ) {
             return Promise.reject(errors.cookArgumentError());
         }
 
         const wordInAnswer: boolean | null = checkWordInAnswer(
-            questionStudentCoach.data,
+            questionStudentCoach.data as Requests.Question,
             "yes"
         ).data;
 
@@ -490,22 +573,29 @@ export function getEducations(form: Requests.Form): Promise<string[]> {
 
     if (
         !questionsExist ||
-        questionCheckEducations.data?.value == null ||
-        (questionCheckEducations.data.value as string[]).length === 0 ||
-        (questionCheckEducations.data.value as string[]).length > 2
+        (questionCheckEducations.data as Requests.Question).value == null ||
+        ((questionCheckEducations.data as Requests.Question).value as string[])
+            .length === 0 ||
+        ((questionCheckEducations.data as Requests.Question).value as string[])
+            .length > 2
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const educations: string[] = [];
 
-    const questionValue = questionCheckEducations.data.value as string[];
+    const questionValue = (questionCheckEducations.data as Requests.Question)
+        .value as string[];
 
     for (let i = 0; i < questionValue.length; i++) {
-        if (questionCheckEducations.data.options != undefined) {
-            const filteredOption = questionCheckEducations.data.options.filter(
-                (option) => option.id === questionValue?.[i]
-            );
+        if (
+            (questionCheckEducations.data as Requests.Question).options !=
+            undefined
+        ) {
+            const filteredOption = (
+                (questionCheckEducations.data as Requests.Question)
+                    .options as Requests.Option[]
+            ).filter((option) => option.id === questionValue[i]);
             if (filteredOption.length !== 1) {
                 return Promise.reject(errors.cookArgumentError());
             }
@@ -518,12 +608,15 @@ export function getEducations(form: Requests.Form): Promise<string[]> {
 
                 if (
                     !questionsExistOther ||
-                    questionCheckOther.data?.value == null
+                    (questionCheckOther.data as Requests.Question).value == null
                 ) {
                     return Promise.reject(errors.cookArgumentError());
                 }
 
-                educations.push(questionCheckOther.data.value as string);
+                educations.push(
+                    (questionCheckOther.data as Requests.Question)
+                        .value as string
+                );
             } else {
                 educations.push(filteredOption[0].text);
             }
@@ -549,21 +642,29 @@ export function getEducationLevel(form: Requests.Form): Promise<string> {
 
     if (
         !questionsExist ||
-        questionCheckEducationLevel.data?.value == null ||
-        (questionCheckEducationLevel.data.value as string[]).length !== 1
+        (questionCheckEducationLevel.data as Requests.Question).value == null ||
+        (
+            (questionCheckEducationLevel.data as Requests.Question)
+                .value as string[]
+        ).length !== 1
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     let educationLevel;
 
-    const educationLevelValue = questionCheckEducationLevel.data
-        ?.value as string[];
+    const educationLevelValue = (
+        questionCheckEducationLevel.data as Requests.Question
+    ).value as string[];
 
-    if (questionCheckEducationLevel.data.options != undefined) {
-        const filteredOption = questionCheckEducationLevel.data.options.filter(
-            (option) => option.id === educationLevelValue?.[0]
-        );
+    if (
+        (questionCheckEducationLevel.data as Requests.Question).options !=
+        undefined
+    ) {
+        const filteredOption = (
+            (questionCheckEducationLevel.data as Requests.Question)
+                .options as Requests.Option[]
+        ).filter((option) => option.id === educationLevelValue[0]);
         if (filteredOption.length !== 1) {
             return Promise.reject(errors.cookArgumentError());
         }
@@ -576,12 +677,13 @@ export function getEducationLevel(form: Requests.Form): Promise<string> {
 
             if (
                 !questionsExistOther ||
-                questionCheckOther.data?.value == null
+                (questionCheckOther.data as Requests.Question).value == null
             ) {
                 return Promise.reject(errors.cookArgumentError());
             }
 
-            educationLevel = questionCheckOther.data.value as string;
+            educationLevel = (questionCheckOther.data as Requests.Question)
+                .value as string;
         } else {
             educationLevel = filteredOption[0].text;
         }
@@ -612,11 +714,13 @@ export function getEducationDuration(
         return Promise.reject(errors.cookArgumentError());
     }
 
-    if (questionEducationDuration.data?.value == null) {
+    if ((questionEducationDuration.data as Requests.Question).value == null) {
         return Promise.resolve(null);
     }
 
-    return Promise.resolve(Number(questionEducationDuration.data?.value));
+    return Promise.resolve(
+        Number((questionEducationDuration.data as Requests.Question).value)
+    );
 }
 
 /**
@@ -637,11 +741,13 @@ export function getEducationYear(form: Requests.Form): Promise<string | null> {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    if (questionEducationYear.data?.value == null) {
+    if ((questionEducationYear.data as Requests.Question).value == null) {
         return Promise.resolve(null);
     }
 
-    return Promise.resolve(questionEducationYear.data.value as string);
+    return Promise.resolve(
+        (questionEducationYear.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -664,11 +770,13 @@ export function getEducationUniversity(
         return Promise.reject(errors.cookArgumentError());
     }
 
-    if (questionEducationUniversity.data?.value == null) {
+    if ((questionEducationUniversity.data as Requests.Question).value == null) {
         return Promise.resolve(null);
     }
 
-    return Promise.resolve(questionEducationUniversity.data.value as string);
+    return Promise.resolve(
+        (questionEducationUniversity.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -696,7 +804,7 @@ export async function jsonToJobApplication(
     const educationDuration = await getEducationDuration(form);
     const educationYear = await getEducationYear(form);
     const educationInstitute = await getEducationUniversity(form);
-    const emailStatus = "NONE";
+    const emailStatus = "APPLIED";
     let createdAt = new Date(Date.now()).toString();
     if (form.createdAt != undefined) {
         createdAt = form.createdAt;
@@ -735,12 +843,17 @@ export function getMostFluentLanguage(form: Requests.Form): Promise<string> {
         questionMostFluentLanguage,
     ]);
 
-    if (!questionsExist || questionMostFluentLanguage.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionMostFluentLanguage.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const chosenLanguage: Responses.FormResponse<Requests.Option> =
-        filterChosenOption(questionMostFluentLanguage.data);
+        filterChosenOption(
+            questionMostFluentLanguage.data as Requests.Question
+        );
 
     if (chosenLanguage.data == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -755,11 +868,15 @@ export function getMostFluentLanguage(form: Requests.Form): Promise<string> {
             questionCheckOther,
         ]);
 
-        if (!questionsExistOther || questionCheckOther.data?.value == null) {
+        if (
+            !questionsExistOther ||
+            (questionCheckOther.data as Requests.Question).value == null
+        ) {
             return Promise.reject(errors.cookArgumentError());
         }
 
-        language = questionCheckOther.data.value as string;
+        language = (questionCheckOther.data as Requests.Question)
+            .value as string;
     } else {
         language = chosenLanguage.data.text;
     }
@@ -779,12 +896,15 @@ export function getEnglishLevel(form: Requests.Form): Promise<number> {
 
     const questionsExist: boolean = checkQuestionsExist([questionEnglishLevel]);
 
-    if (!questionsExist || questionEnglishLevel.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionEnglishLevel.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const chosenLanguage: Responses.FormResponse<Requests.Option> =
-        filterChosenOption(questionEnglishLevel.data);
+        filterChosenOption(questionEnglishLevel.data as Requests.Question);
 
     if (chosenLanguage.data == null) {
         return Promise.reject(errors.cookArgumentError());
@@ -815,11 +935,16 @@ export function getBestSkill(form: Requests.Form): Promise<string> {
 
     const questionsExist: boolean = checkQuestionsExist([questionBestSkill]);
 
-    if (!questionsExist || questionBestSkill.data?.value == null) {
+    if (
+        !questionsExist ||
+        (questionBestSkill.data as Requests.Question).value == null
+    ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    return Promise.resolve(questionBestSkill.data.value as string);
+    return Promise.resolve(
+        (questionBestSkill.data as Requests.Question).value as string
+    );
 }
 
 /**
@@ -871,22 +996,29 @@ export function getCV(
         return Promise.reject(errors.cookArgumentError());
     }
     if (
-        questionCVUpload.data?.value == null &&
-        questionCVLink.data?.value == null
+        (questionCVUpload.data as Requests.Question).value == null &&
+        (questionCVLink.data as Requests.Question).value == null
     ) {
         return Promise.resolve({ data: [], types: [] });
     }
 
-    if (questionCVLink.data?.value != null) {
-        if ((questionCVLink.data?.value as string).trim() != "") {
-            links.push(questionCVLink.data?.value as string);
+    if ((questionCVLink.data as Requests.Question).value != null) {
+        if (
+            (
+                (questionCVLink.data as Requests.Question).value as string
+            ).trim() != ""
+        ) {
+            links.push(
+                (questionCVLink.data as Requests.Question).value as string
+            );
             types.push("CV_URL");
         }
     }
 
-    const cvUploadValue = questionCVUpload.data?.value as Requests.FormValues[];
+    const cvUploadValue = (questionCVUpload.data as Requests.Question)
+        .value as Requests.FormValues[];
 
-    if (questionCVUpload.data?.value != null) {
+    if ((questionCVUpload.data as Requests.Question).value != null) {
         for (let linkIndex = 0; linkIndex < cvUploadValue.length; linkIndex++) {
             if (
                 (cvUploadValue[linkIndex] as Requests.FormValues).url ==
@@ -937,23 +1069,32 @@ export function getPortfolio(
     }
 
     if (
-        questionPortfolioUpload.data?.value == null &&
-        questionPortfolioLink.data?.value == null
+        (questionPortfolioUpload.data as Requests.Question).value == null &&
+        (questionPortfolioLink.data as Requests.Question).value == null
     ) {
         return Promise.resolve({ data: [], types: [] });
     }
 
-    if (questionPortfolioLink.data?.value != null) {
-        if ((questionPortfolioLink.data?.value as string).trim() != "") {
-            links.push(questionPortfolioLink.data?.value as string);
+    if ((questionPortfolioLink.data as Requests.Question).value != null) {
+        if (
+            (
+                (questionPortfolioLink.data as Requests.Question)
+                    .value as string
+            ).trim() != ""
+        ) {
+            links.push(
+                (questionPortfolioLink.data as Requests.Question)
+                    .value as string
+            );
             types.push("PORTFOLIO_URL");
         }
     }
 
-    const portfolioUploadValue = questionPortfolioUpload.data
-        ?.value as Requests.FormValues[];
+    const portfolioUploadValue = (
+        questionPortfolioUpload.data as Requests.Question
+    ).value as Requests.FormValues[];
 
-    if (questionPortfolioUpload.data?.value != null) {
+    if ((questionPortfolioUpload.data as Requests.Question).value != null) {
         for (
             let linkIndex = 0;
             linkIndex < portfolioUploadValue.length;
@@ -1012,24 +1153,33 @@ export function getMotivation(
     }
 
     if (
-        questionMotivationUpload.data?.value == null &&
-        questionMotivationLink.data?.value == null &&
-        questionMotivationString.data?.value == null
+        (questionMotivationUpload.data as Requests.Question).value == null &&
+        (questionMotivationLink.data as Requests.Question).value == null &&
+        (questionMotivationString.data as Requests.Question).value == null
     ) {
         return Promise.resolve({ data: [], types: [] });
     }
 
-    if (questionMotivationLink.data?.value != null) {
-        if ((questionMotivationLink.data?.value as string).trim() != "") {
-            data.push(questionMotivationLink.data?.value as string);
+    if ((questionMotivationLink.data as Requests.Question).value != null) {
+        if (
+            (
+                (questionMotivationLink.data as Requests.Question)
+                    .value as string
+            ).trim() != ""
+        ) {
+            data.push(
+                (questionMotivationLink.data as Requests.Question)
+                    .value as string
+            );
             types.push("MOTIVATION_URL");
         }
     }
 
-    const motivationUploadValue = questionMotivationUpload.data
-        ?.value as Requests.FormValues[];
+    const motivationUploadValue = (
+        questionMotivationUpload.data as Requests.Question
+    ).value as Requests.FormValues[];
 
-    if (questionMotivationUpload.data?.value != null) {
+    if ((questionMotivationUpload.data as Requests.Question).value != null) {
         for (
             let linkIndex = 0;
             linkIndex < motivationUploadValue.length;
@@ -1056,10 +1206,18 @@ export function getMotivation(
         }
     }
 
-    if (questionMotivationString.data?.value != null) {
-        if ((questionMotivationString.data?.value as string).trim() != "") {
-            data.push(questionMotivationString.data?.value as string);
-            types.push("MOTIVATION_URL");
+    if ((questionMotivationString.data as Requests.Question).value != null) {
+        if (
+            (
+                (questionMotivationString.data as Requests.Question)
+                    .value as string
+            ).trim() != ""
+        ) {
+            data.push(
+                (questionMotivationString.data as Requests.Question)
+                    .value as string
+            );
+            types.push("MOTIVATION_STRING");
         }
     }
 
@@ -1103,22 +1261,29 @@ export function getAppliedRoles(form: Requests.Form): Promise<string[]> {
 
     if (
         !questionsExist ||
-        questionAppliedRoles.data?.value == null ||
-        (questionAppliedRoles.data.value as string[]).length === 0 ||
-        (questionAppliedRoles.data.value as string[]).length > 2
+        (questionAppliedRoles.data as Requests.Question).value == null ||
+        ((questionAppliedRoles.data as Requests.Question).value as string[])
+            .length === 0 ||
+        ((questionAppliedRoles.data as Requests.Question).value as string[])
+            .length > 2
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
-    const appliedRolesValue = questionAppliedRoles.data?.value as string[];
+    const appliedRolesValue = (questionAppliedRoles.data as Requests.Question)
+        .value as string[];
 
     const appliedRoles: string[] = [];
 
     for (let i = 0; i < appliedRolesValue.length; i++) {
-        if (questionAppliedRoles.data.options != undefined) {
-            const filteredOption = questionAppliedRoles.data.options.filter(
-                (option) => option.id === appliedRolesValue?.[i]
-            );
+        if (
+            (questionAppliedRoles.data as Requests.Question).options !=
+            undefined
+        ) {
+            const filteredOption = (
+                (questionAppliedRoles.data as Requests.Question)
+                    .options as Requests.Option[]
+            ).filter((option) => option.id === appliedRolesValue[i]);
             if (filteredOption.length !== 1) {
                 return Promise.reject(errors.cookArgumentError());
             }
@@ -1131,12 +1296,15 @@ export function getAppliedRoles(form: Requests.Form): Promise<string[]> {
 
                 if (
                     !questionsExistOther ||
-                    questionCheckOther.data?.value == null
+                    (questionCheckOther.data as Requests.Question).value == null
                 ) {
                     return Promise.reject(errors.cookArgumentError());
                 }
 
-                appliedRoles.push(questionCheckOther.data.value as string);
+                appliedRoles.push(
+                    (questionCheckOther.data as Requests.Question)
+                        .value as string
+                );
             } else {
                 appliedRoles.push(filteredOption[0].text);
             }
@@ -1180,16 +1348,14 @@ export async function addPersonToDatabase(
     if (checkIfEmailInDb.length > 0) {
         await ormP.updatePerson({
             personId: checkIfEmailInDb[0].person_id,
-            firstname: formResponse.birthName,
-            lastname: formResponse.lastName,
+            name: formResponse.name,
             github: null,
             email: formResponse.email,
         });
         personId = checkIfEmailInDb[0].person_id;
     } else {
         const person = await ormP.createPerson({
-            firstname: formResponse.birthName,
-            lastname: formResponse.lastName,
+            name: formResponse.name,
             email: formResponse.email,
         });
         personId = person.person_id;
@@ -1443,6 +1609,7 @@ export async function addRolesToDatabase(
             const created_role = await ormRo.createRole(
                 formResponse.roles[role_index]
             );
+
             await ormAppRo.createAppliedRole({
                 jobApplicationId: job_application_id,
                 roleId: created_role.role_id,
@@ -1468,9 +1635,6 @@ export async function createForm(
     req: express.Request
 ): Promise<Responses.Empty> {
     const parsedRequest = await rq.parseFormRequest(req);
-    if (parsedRequest.data.fields == undefined) {
-        return Promise.reject(errors.cookArgumentError());
-    }
 
     const questionInBelgium: Responses.FormResponse<Requests.Question> =
         filterQuestion(parsedRequest, config.liveInBelgium);
@@ -1483,16 +1647,19 @@ export async function createForm(
     ]);
     if (
         !questionsExist ||
-        questionInBelgium.data?.value == null ||
-        questionCanWorkEnough.data?.value == null
+        (questionInBelgium.data as Requests.Question).value == null ||
+        (questionCanWorkEnough.data as Requests.Question).value == null
     ) {
         return Promise.reject(errors.cookArgumentError());
     }
 
     const wordInAnswerInBelgium: Responses.FormResponse<boolean> =
-        checkWordInAnswer(questionInBelgium.data, "yes");
+        checkWordInAnswer(questionInBelgium.data as Requests.Question, "yes");
     const wordInAnswerCanWorkEnough: Responses.FormResponse<boolean> =
-        checkWordInAnswer(questionCanWorkEnough.data, "yes");
+        checkWordInAnswer(
+            questionCanWorkEnough.data as Requests.Question,
+            "yes"
+        );
 
     if (
         wordInAnswerInBelgium.data == null ||
@@ -1536,6 +1703,15 @@ export async function createForm(
     }
 
     return Promise.resolve({});
+}
+
+export async function readFile(
+    directoryPart: string | null,
+    file: string
+): Promise<T.Requests.Form> {
+    const readFile = (path: string) => fs.readFileSync(path, "utf8");
+    const fileData = readFile(path.join(__dirname, `${directoryPart}/${file}`));
+    return Promise.resolve(JSON.parse(fileData));
 }
 
 /**

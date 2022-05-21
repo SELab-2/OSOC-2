@@ -1,8 +1,7 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import styles from "../../styles/login.module.scss";
+import styles from "../login/login.module.scss";
 import { SyntheticEvent, useEffect, useState } from "react";
-import crypto from "crypto";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 /**
@@ -109,16 +108,11 @@ const Pid: NextPage = () => {
         }
 
         if (!error) {
-            // We encrypt the password before sending it to the backend api
-            const encryptedPassword = crypto
-                .createHash("sha256")
-                .update(newPassword)
-                .digest("hex");
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/reset/${pid}`,
                 {
                     method: "POST",
-                    body: JSON.stringify({ password: encryptedPassword }),
+                    body: JSON.stringify({ password: newPassword }),
                     headers: {
                         "Content-Type": "application/json",
                         Accept: "application/json",

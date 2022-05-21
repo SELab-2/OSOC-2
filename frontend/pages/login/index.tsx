@@ -1,24 +1,27 @@
 import type { NextPage } from "next";
-import styles from "../../styles/login.module.scss";
+import styles from "./login.module.scss";
 import Image from "next/image";
 import GitHubLogo from "../../public/images/github-logo.svg";
 import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { useRouter } from "next/router";
 
-import * as crypto from "crypto";
 import SessionContext from "../../contexts/sessionProvider";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import * as validator from "validator";
-import { AccountStatus } from "../../types";
+import { AccountStatus, NotificationType } from "../../types";
+import { useSockets } from "../../contexts/socketProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Index: NextPage = () => {
     const router = useRouter();
     const { getSession, setSessionKey, setIsAdmin, setIsCoach } =
         useContext(SessionContext);
+    const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
 
-    // Sets an error message when the `loginError` query paramater is present
+    // Sets an error message when the `loginError` query parameter is present
     useEffect(() => {
         if (getSession) {
             getSession().then(({ sessionKey }) => {
@@ -79,7 +82,6 @@ const Index: NextPage = () => {
         e.preventDefault();
 
         let error = false;
-
         if (loginEmail === "") {
             setLoginEmailError("Email cannot be empty");
             error = true;
@@ -96,18 +98,12 @@ const Index: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            // We encrypt the password before sending it to the backend api
-            const encryptedPassword = crypto
-                .createHash("sha256")
-                .update(loginPassword)
-                .digest("hex");
-
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/login`,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        pass: encryptedPassword,
+                        pass: loginPassword,
                         name: loginEmail,
                     }),
                     headers: {
@@ -117,20 +113,16 @@ const Index: NextPage = () => {
                 }
             )
                 .then((response) => response.json())
-                .then((json) => {
-                    if (!json.success) {
-                        setLoginBackendError(`Failed to login. ${json.reason}`);
-                        return { success: false };
-                    } else return json;
-                })
                 .catch(() => {
                     setLoginBackendError(
                         `Something went wrong while trying to login.`
                     );
                     return { success: false };
                 });
-
-            // The user is succesfully logged in and we can use the sessionkey provided by the backend
+            if (response && !response.success) {
+                setLoginBackendError(`Failed to login. ${response.reason}`);
+            }
+            // The user is successfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey);
@@ -140,6 +132,9 @@ const Index: NextPage = () => {
                 }
                 if (setIsCoach) {
                     setIsCoach(response.is_coach);
+                }
+                if (notify) {
+                    notify("Login successful!", NotificationType.SUCCESS, 2000);
                 }
                 if (response.account_status === AccountStatus.ACTIVATED) {
                     router.push("/students").then();
@@ -243,18 +238,14 @@ const Index: NextPage = () => {
 
         // Fields are not empty
         if (!error) {
-            const encryptedPassword = crypto
-                .createHash("sha256")
-                .update(registerPassword)
-                .digest("hex");
             const response = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/user/request`,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        firstName: registerName.trim(),
+                        name: registerName.trim(),
                         email: registerEmail,
-                        pass: encryptedPassword,
+                        pass: registerPassword,
                     }),
                     headers: {
                         "Content-Type": "application/json",
@@ -283,6 +274,7 @@ const Index: NextPage = () => {
             if (response.success) {
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey);
+                    socket.emit("submitRegistration");
                 }
                 await router.push("/pending");
             }
@@ -293,7 +285,7 @@ const Index: NextPage = () => {
      * When the users want to login with github we follow the github web authentication application flow
      * https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
      *
-     * Redirect to homepage upon succes
+     * Redirect to homepage upon success
      *
      * @param e - The event triggering this function call
      */
@@ -333,11 +325,19 @@ const Index: NextPage = () => {
                 }
             )
                 .then((res) => res.json())
-                .catch((error) => console.log(error));
+                .catch((err) => {
+                    console.log(err);
+                });
             if (response.success) {
                 setPasswordResetMailError("");
                 setShowPasswordReset(false);
-                // TODO -- Notification
+                if (notify) {
+                    notify(
+                        "Successfully sent a recovery email.!",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
             } else {
                 setPasswordResetMailError(response.reason);
             }
@@ -372,6 +372,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Email
                             <input
+                                data-testid={"inputEmailLogin"}
                                 type="text"
                                 name="loginEmail"
                                 value={loginEmail}
@@ -379,6 +380,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"loginEmailError"}
                             className={`${styles.textFieldError} ${
                                 loginEmailError !== "" ? styles.anim : ""
                             }`}
@@ -388,6 +390,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Password
                             <input
+                                data-testid={"inputPassLogin"}
                                 type="password"
                                 name="loginPassword"
                                 value={loginPassword}
@@ -397,6 +400,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"loginPasswordError"}
                             className={`${styles.textFieldError} ${
                                 loginPasswordError !== "" ? styles.anim : ""
                             }`}
@@ -409,10 +413,15 @@ const Index: NextPage = () => {
                         <Modal
                             handleClose={closeModal}
                             visible={showPasswordReset}
-                            title="Please enter your email below and we will send you a link to reset your password."
+                            title="Password Reset"
                         >
+                            <p>
+                                Please enter your email below and we will send
+                                you a link to reset your password.
+                            </p>
                             <label className={styles.label}>
                                 <input
+                                    data-testid={"forgotPassInput"}
                                     type="text"
                                     name="loginEmail"
                                     value={passwordResetMail}
@@ -422,6 +431,7 @@ const Index: NextPage = () => {
                                 />
                             </label>
                             <p
+                                data-testid={"forgotPassError"}
                                 className={`${styles.textFieldError} ${
                                     passwordResetMailError !== ""
                                         ? styles.anim
@@ -430,10 +440,21 @@ const Index: NextPage = () => {
                             >
                                 {passwordResetMailError}
                             </p>
-                            <button onClick={resetPassword}>CONFIRM</button>
+                            <button
+                                data-testid={"forgotPassConfirm"}
+                                onClick={resetPassword}
+                            >
+                                CONFIRM
+                            </button>
                         </Modal>
-                        <button onClick={(e) => submitLogin(e)}>LOG IN</button>
+                        <button
+                            data-testid={"loginButton"}
+                            onClick={(e) => submitLogin(e)}
+                        >
+                            LOG IN
+                        </button>
                         <p
+                            data-testid={"backendErrorLogin"}
                             className={`${styles.textFieldError} ${
                                 loginBackendError !== "" ? styles.anim : ""
                             }`}
@@ -446,6 +467,7 @@ const Index: NextPage = () => {
                             <div />
                         </div>
                         <div
+                            data-testid={"githubLogin"}
                             className={styles.githubContainer}
                             onClick={(e) => githubLogin(e)}
                         >
@@ -474,6 +496,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Name
                             <input
+                                data-testid={"nameRegister"}
                                 type="text"
                                 name="registerName"
                                 value={registerName}
@@ -483,6 +506,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorNameRegister"}
                             className={`${styles.textFieldError} ${
                                 registerNameError !== "" ? styles.anim : ""
                             }`}
@@ -492,6 +516,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Email
                             <input
+                                data-testid={"emailRegister"}
                                 type="text"
                                 name="registerEmail"
                                 value={registerEmail}
@@ -501,6 +526,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorEmailRegister"}
                             className={`${styles.textFieldError} ${
                                 registerEmailError !== "" ? styles.anim : ""
                             }`}
@@ -510,6 +536,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Password
                             <input
+                                data-testid={"passwordRegister"}
                                 type="password"
                                 name="registerPassword"
                                 value={registerPassword}
@@ -528,6 +555,7 @@ const Index: NextPage = () => {
                                 }}
                             >
                                 <p
+                                    data-testid={"passStrength"}
                                     className={`${
                                         styles.textFieldError
                                     } ${scoreToStyle()}`}
@@ -544,6 +572,7 @@ const Index: NextPage = () => {
                             </div>
                         ) : (
                             <p
+                                data-testid={"passRegisterError"}
                                 className={`${styles.textFieldError} ${
                                     registerPasswordError !== ""
                                         ? styles.anim
@@ -556,6 +585,7 @@ const Index: NextPage = () => {
                         <label className={styles.label}>
                             Confirm Password
                             <input
+                                data-testid={"rePasswordRegister"}
                                 type="password"
                                 name="registerConfirmPassword"
                                 value={registerConfirmPassword}
@@ -565,6 +595,7 @@ const Index: NextPage = () => {
                             />
                         </label>
                         <p
+                            data-testid={"errorRePasswordRegister"}
                             className={`${styles.textFieldError} ${
                                 registerConfirmPasswordError !== ""
                                     ? styles.anim
@@ -573,10 +604,14 @@ const Index: NextPage = () => {
                         >
                             {registerConfirmPasswordError}
                         </p>
-                        <button onClick={(e) => submitRegister(e)}>
+                        <button
+                            data-testid={"registerButton"}
+                            onClick={(e) => submitRegister(e)}
+                        >
                             REGISTER
                         </button>
                         <p
+                            data-testid={"errorBackendRegister"}
                             className={`${styles.textFieldError} ${
                                 registerBackendError !== "" ? styles.anim : ""
                             }`}

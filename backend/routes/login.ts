@@ -8,12 +8,8 @@ import {
 import { parseLoginRequest, parseLogoutRequest } from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
-
+import * as bcrypt from "bcrypt";
 import * as session_key from "./session_key.json";
-
-function orDefault<T>(v: T | undefined, def: T): T {
-    return v == undefined || false ? def : v;
-}
 
 /**
  *  Attempts to log a user into the system.
@@ -22,38 +18,56 @@ function orDefault<T>(v: T | undefined, def: T): T {
  * `Promise.resolve`, failures using `Promise.reject`.
  */
 export async function login(req: express.Request): Promise<Responses.Login> {
-    console.log("Calling login endpoint " + JSON.stringify(req.body));
     return parseLoginRequest(req).then((parsed) =>
         getPasswordPersonByEmail(parsed.name).then(async (pass) => {
+            // check if all the fields are filled in (== not null or undefined)
             if (
                 pass == null ||
                 pass.login_user == null ||
-                pass?.login_user?.password != parsed.pass
+                pass.login_user.password == null
             ) {
                 return Promise.reject({
                     http: 409,
                     reason: "Invalid e-mail or password.",
                 });
+            } else {
+                const data = {
+                    id: pass.login_user.login_user_id,
+                    password: pass.login_user.password,
+                    status: pass.login_user.account_status,
+                    admin: pass.login_user.is_admin,
+                    coach: pass.login_user.is_coach,
+                };
+                // check if the passwords match!
+                const valid = await bcrypt.compare(parsed.pass, data.password);
+                if (!valid) {
+                    return Promise.reject({
+                        http: 409,
+                        reason: "Invalid e-mail or password.",
+                    });
+                }
+                if (data.status == "DISABLED") {
+                    return Promise.reject({
+                        http: 409,
+                        reason: "Account is disabled.",
+                    });
+                }
+                const key: string = util.generateKey();
+                const futureDate = new Date(Date.now());
+                futureDate.setDate(
+                    futureDate.getDate() + session_key.valid_period
+                );
+                return addSessionKey(
+                    pass.login_user.login_user_id,
+                    key,
+                    futureDate
+                ).then((ins) => ({
+                    sessionkey: ins.session_key,
+                    is_admin: data.admin,
+                    is_coach: data.coach,
+                    account_status: data.status,
+                }));
             }
-            if (pass?.login_user?.account_status == "DISABLED") {
-                return Promise.reject({
-                    http: 409,
-                    reason: "Account is disabled.",
-                });
-            }
-            const key: string = util.generateKey();
-            const futureDate = new Date();
-            futureDate.setDate(futureDate.getDate() + session_key.valid_period);
-            return addSessionKey(
-                pass.login_user.login_user_id,
-                key,
-                futureDate
-            ).then((ins) => ({
-                sessionkey: ins.session_key,
-                is_admin: orDefault(pass?.login_user?.is_admin, false),
-                is_coach: orDefault(pass?.login_user?.is_coach, false),
-                account_status: pass?.login_user?.account_status,
-            }));
         })
     );
 }

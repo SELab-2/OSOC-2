@@ -29,7 +29,8 @@ jest.mock("../../utility", () => {
         ...og,
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
-    }; // we want to only mock checkSessionKey and isAdmin
+        checkYearPermissionStudent: jest.fn(),
+    }; // we want to only mock checkSessionKey, isAdmin and checkYearPermissionStudent
 });
 export const utilMock = util as jest.Mocked<typeof util>;
 
@@ -42,7 +43,12 @@ import * as osoc_ from "../../orm_functions/osoc";
 jest.mock("../../orm_functions/osoc");
 const osocMock = osoc_ as jest.Mocked<typeof osoc_>;
 
+import * as login_user_orm from "../../orm_functions/login_user";
+jest.mock("../../orm_functions/login_user");
+const ormlMock = login_user_orm as jest.Mocked<typeof login_user_orm>;
+
 import * as followup from "../../routes/followup";
+import { errors } from "../../utility";
 
 function expectCall<T, U>(func: T, val: U) {
     expect(func).toHaveBeenCalledTimes(1);
@@ -62,6 +68,7 @@ type _appl = job_application & {
     attachment: attachment[];
     job_application_skill: job_application_skill[];
     applied_role: applied_role[];
+    osoc: osoc;
 };
 
 const jobapps: _appl[] = [
@@ -78,7 +85,7 @@ const jobapps: _appl[] = [
         edu_level: "noob",
         edu_year: "pro",
         edu_institute: "someones basement",
-        email_status: "SCHEDULED",
+        email_status: "AWAITING_PROJECT",
         created_at: new Date(Date.now()),
         job_application_skill: [
             {
@@ -97,6 +104,10 @@ const jobapps: _appl[] = [
         applied_role: [
             { applied_role_id: 2, job_application_id: 0, role_id: 6 },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
     {
         job_application_id: 2,
@@ -111,7 +122,7 @@ const jobapps: _appl[] = [
         edu_level: "noob",
         edu_year: "pro",
         edu_institute: "someones basement",
-        email_status: "SCHEDULED",
+        email_status: "APPLIED",
         created_at: new Date(Date.now()),
         job_application_skill: [
             {
@@ -130,6 +141,10 @@ const jobapps: _appl[] = [
         applied_role: [
             { applied_role_id: 2, job_application_id: 2, role_id: 6 },
         ],
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
     },
 ];
 
@@ -161,9 +176,14 @@ beforeEach(() => {
             is_coach: true,
         })
     );
+    utilMock.checkYearPermissionStudent.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     osocMock.getLatestOsoc.mockResolvedValue(osocdat);
+    osocMock.getOsocById.mockResolvedValue(osocdat);
     jappMock.getJobApplicationByYear.mockResolvedValue(jobapps);
+    jappMock.getJobApplication.mockResolvedValue(jobapps[0]);
     jappMock.getLatestJobApplicationOfStudent.mockImplementation((v) =>
         v == 5
             ? Promise.resolve(jobapps[0])
@@ -178,6 +198,8 @@ beforeEach(() => {
             ? Promise.resolve({ ...jobapps[1], email_status: u })
             : Promise.reject()
     );
+
+    ormlMock.getOsocYearsForLoginUser.mockResolvedValue([2022]);
 });
 
 afterEach(() => {
@@ -187,28 +209,16 @@ afterEach(() => {
 
     utilMock.checkSessionKey.mockReset();
     utilMock.isAdmin.mockReset();
+    utilMock.checkYearPermissionStudent.mockReset();
 
     osocMock.getLatestOsoc.mockReset();
+    osocMock.getOsocById.mockReset();
     jappMock.getJobApplicationByYear.mockReset();
+    jappMock.getJobApplication.mockReset();
     jappMock.getLatestJobApplicationOfStudent.mockReset();
     jappMock.changeEmailStatusOfJobApplication.mockReset();
-});
 
-test("Can get all followup data", async () => {
-    const req: express.Request = getMockReq();
-
-    await expect(followup.listFollowups(req)).resolves.toStrictEqual({
-        data: jobapps.map((x) => ({
-            student: x.student_id,
-            application: x.job_application_id,
-            status: x.email_status,
-        })),
-    });
-    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
-    expectCall(reqMock.parseFollowupAllRequest, req);
-    expect(osocMock.getLatestOsoc).toHaveBeenCalledTimes(1);
-    expectCall(jappMock.getJobApplicationByYear, osocdat.year);
-    expectNoCall(utilMock.isAdmin);
+    ormlMock.getOsocYearsForLoginUser.mockReset();
 });
 
 test("Can get single followup", async () => {
@@ -220,7 +230,22 @@ test("Can get single followup", async () => {
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
-    expectCall(jappMock.getLatestJobApplicationOfStudent, 5);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
+    expectNoCall(utilMock.isAdmin);
+});
+
+test("Cannot get single followup because invalid year permissions", async () => {
+    const req: express.Request = getMockReq();
+    // set the visible years NOT to 2022
+    ormlMock.getOsocYearsForLoginUser.mockReset();
+    ormlMock.getOsocYearsForLoginUser.mockResolvedValue([2000, 2001]);
+
+    await expect(followup.getFollowup(req)).rejects.toBe(
+        errors.cookInsufficientRights()
+    );
+    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
+    expectCall(reqMock.parseGetFollowupStudentRequest, req);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
     expectNoCall(utilMock.isAdmin);
 });
 

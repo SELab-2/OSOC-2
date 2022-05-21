@@ -1,12 +1,12 @@
 import { account_status_enum } from "@prisma/client";
+import * as prisma from "@prisma/client";
 import express from "express";
 import * as validator from "validator";
 
 import * as ormLU from "../orm_functions/login_user";
-import * as ormL from "../orm_functions/login_user";
 import * as ormP from "../orm_functions/person";
 import * as rq from "../request";
-import { Responses } from "../types";
+import { AccountStatus, Responses } from "../types";
 import * as util from "../utility";
 import { errors } from "../utility";
 import * as session_key from "./session_key.json";
@@ -15,6 +15,8 @@ import {
     removeAllKeysForUser,
 } from "../orm_functions/session_key";
 import * as config from "../config.json";
+import * as bcrypt from "bcrypt";
+import * as ormLuOs from "../orm_functions/login_user_osoc";
 
 /**
  *  Attempts to list all students in the system.
@@ -26,28 +28,29 @@ export async function listUsers(
     req: express.Request
 ): Promise<Responses.UserList> {
     const parsedRequest = await rq.parseUserAllRequest(req);
-    const checkedSessionKey = await util
-        .isAdmin(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
-    const loginUsers = await ormL.getAllLoginUsers();
+    await util.isAdmin(parsedRequest);
+    // const loginUsers = await ormL.getAllLoginUsers();
+    const loginUsers = await ormLU.filterLoginUsers({
+        currentPage: parsedRequest.currentPage,
+        pageSize: parsedRequest.pageSize,
+    });
 
-    loginUsers.map((val) => ({
-        person_data: {
-            id: val.person.person_id,
-            name: val.person.firstname,
-            email: val.person.email,
-            github: val.person.github,
+    const updated = loginUsers.data.map((val) => ({
+        person: {
+            person_id: val.person.person_id,
+            name: val.person.name,
+            email: val.person.email === null ? "" : val.person.email,
+            github: val.person.github === null ? "" : val.person.github,
         },
-        coach: val.is_coach,
-        admin: val.is_admin,
-        activated: val.account_status as string,
+        is_coach: val.is_coach,
+        is_admin: val.is_admin,
+        account_status: val.account_status as AccountStatus,
+        login_user_id: val.login_user_id,
     }));
 
     return Promise.resolve({
-        data: loginUsers,
+        pagination: loginUsers.pagination,
+        data: updated,
     });
 }
 
@@ -60,60 +63,69 @@ export async function listUsers(
 export async function createUserRequest(
     req: express.Request
 ): Promise<Responses.Id> {
-    return rq.parseRequestUserRequest(req).then(async (parsed) => {
-        if (parsed.pass == undefined) {
-            console.log(" -> WARNING user request without password");
-            return Promise.reject(util.errors.cookArgumentError());
-        }
-        return ormP
-            .createPerson({
-                firstname: parsed.firstName,
-                lastname: "",
-                email: validator.default
-                    .normalizeEmail(parsed.email)
-                    .toString(),
-            })
-            .then((person) => {
-                console.log("Created a person: " + person);
-                return ormLU.createLoginUser({
-                    personId: person.person_id,
-                    password: parsed.pass,
-                    isAdmin: false,
-                    isCoach: true,
-                    accountStatus: "PENDING",
-                });
-            })
-            .then((user) => {
-                const key: string = util.generateKey();
-                const futureDate = new Date();
-                futureDate.setDate(
-                    futureDate.getDate() + session_key.valid_period
-                );
-                return addSessionKey(user.login_user_id, key, futureDate);
-            })
-            .then((user) => {
-                console.log("Attached a login user: " + user);
-                return Promise.resolve({
-                    id: user.login_user_id,
-                    sessionkey: user.session_key,
-                });
-            })
-            .catch((e) => {
-                if ("code" in e && e.code == "P2002") {
-                    return Promise.reject({
-                        http: 400,
-                        reason: "Can't register the same email address twice.",
-                    });
-                }
-                return Promise.reject(e);
+    const parsedRequest = await rq.parseRequestUserRequest(req);
+
+    const foundPerson = await ormP.searchPersonByLogin(
+        validator.default.normalizeEmail(parsedRequest.email).toString()
+    );
+
+    let person: prisma.person;
+
+    if (foundPerson.length !== 0) {
+        const foundLoginUser = await ormLU.searchLoginUserByPerson(
+            foundPerson[0].person_id
+        );
+        if (foundLoginUser !== null) {
+            return Promise.reject({
+                http: 400,
+                reason: "Can't register the same email address twice.",
             });
+        }
+
+        person = await ormP.updatePerson({
+            personId: foundPerson[0].person_id,
+            name: parsedRequest.name,
+        });
+    } else {
+        person = await ormP.createPerson({
+            name: parsedRequest.name,
+            email: validator.default
+                .normalizeEmail(parsedRequest.email)
+                .toString(),
+        });
+    }
+
+    const hash = await bcrypt.hash(
+        parsedRequest.pass,
+        config.encryption.encryptionRounds
+    );
+
+    const loginUser = await ormLU.createLoginUser({
+        personId: person.person_id,
+        password: hash,
+        isAdmin: false,
+        isCoach: true,
+        accountStatus: "PENDING",
+    });
+
+    const key: string = util.generateKey();
+    const futureDate = new Date(Date.now());
+    futureDate.setDate(futureDate.getDate() + session_key.valid_period);
+    const addedKey = await addSessionKey(
+        loginUser.login_user_id,
+        key,
+        futureDate
+    );
+
+    return Promise.resolve({
+        id: addedKey.login_user_id,
+        sessionkey: addedKey.session_key,
     });
 }
 
 export async function setAccountStatus(
     person_id: number,
     stat: account_status_enum,
-    key: string,
     is_admin: boolean,
     is_coach: boolean
 ): Promise<Responses.PartialUser> {
@@ -130,10 +142,9 @@ export async function setAccountStatus(
                   })
         )
         .then((res) => {
-            console.log(res.person.firstname);
             return Promise.resolve({
                 id: res.person_id,
-                name: res.person.firstname + " " + res.person.lastname,
+                name: res.person.name,
             });
         });
 }
@@ -152,7 +163,7 @@ export async function createUserAcceptance(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -162,7 +173,6 @@ export async function createUserAcceptance(
                         return setAccountStatus(
                             parsed.data.id,
                             "ACTIVATED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
@@ -192,7 +202,7 @@ export async function deleteUserRequest(
         .then((parsed) => util.isAdmin(parsed))
         .then((parsed) => util.mutable(parsed, parsed.data.id))
         .then(async (parsed) => {
-            return ormL
+            return ormLU
                 .searchLoginUserByPerson(parsed.data.id)
                 .then((logUs) => {
                     if (
@@ -202,7 +212,6 @@ export async function deleteUserRequest(
                         return setAccountStatus(
                             parsed.data.id,
                             "DISABLED",
-                            parsed.data.sessionkey,
                             parsed.data.is_admin
                                 .toString()
                                 .toLowerCase()
@@ -234,6 +243,10 @@ export async function filterUsers(
         .then(async (parsed) => {
             return ormLU
                 .filterLoginUsers(
+                    {
+                        currentPage: parsed.data.currentPage,
+                        pageSize: parsed.data.pageSize,
+                    },
                     parsed.data.nameFilter,
                     parsed.data.emailFilter,
                     parsed.data.nameSort,
@@ -243,18 +256,28 @@ export async function filterUsers(
                     parsed.data.isAdminFilter
                 )
                 .then((users) => {
-                    users.map((val) => ({
-                        person_data: {
-                            id: val.person.person_id,
-                            name: val.person.firstname,
-                            email: val.person.email,
-                            github: val.person.github,
+                    const udat = users.data.map((val) => ({
+                        person: {
+                            person_id: val.person.person_id,
+                            name: val.person.name,
+                            email:
+                                val.person.email === null
+                                    ? ""
+                                    : val.person.email,
+                            github:
+                                val.person.github === null
+                                    ? ""
+                                    : val.person.github,
                         },
-                        coach: val.is_coach,
-                        admin: val.is_admin,
-                        activated: val.account_status as string,
+                        is_coach: val.is_coach,
+                        is_admin: val.is_admin,
+                        account_status: val.account_status as AccountStatus,
+                        login_user_id: val.login_user_id,
                     }));
-                    return Promise.resolve({ data: users });
+                    return Promise.resolve({
+                        data: udat,
+                        pagination: users.pagination,
+                    });
                 });
         });
 }
@@ -269,32 +292,59 @@ export async function userModSelf(
     return rq
         .parseUserModSelfRequest(req)
         .then((parsed) => util.checkSessionKey(parsed, false))
-        .then((checked) => {
+        .then(async (checked) => {
             return ormLU
                 .getLoginUserById(checked.userId)
                 .then((user) => util.getOrReject(user))
-                .then((user) => {
+                .then(async (user) => {
+                    // only change the password if an old and new password is given
+                    let valid = true;
                     if (
-                        checked.data.pass != undefined &&
-                        user.password != checked.data.pass.oldpass
-                    )
-                        return Promise.reject();
+                        checked.data.pass !== null &&
+                        checked.data.pass !== undefined &&
+                        user.password !== null
+                    ) {
+                        valid = await bcrypt.compare(
+                            checked.data.pass?.oldpass,
+                            user.password
+                        );
+                    }
+                    // the old password to compare to was not as expected => return error
+                    if (!valid) {
+                        return Promise.reject({
+                            http: 409,
+                            reason: "Old password is incorrect. Didn't update password.",
+                        });
+                    }
                     return Promise.resolve(user);
                 })
-                .then((user) =>
-                    ormLU.updateLoginUser({
-                        loginUserId: checked.userId,
-                        accountStatus: user.account_status,
-                        password: checked.data.pass?.newpass,
-                    })
-                )
+                .then(async (user) => {
+                    if (
+                        checked.data.pass !== null &&
+                        checked.data.pass !== undefined &&
+                        checked.data.pass.oldpass !== null &&
+                        checked.data.pass.oldpass !== undefined &&
+                        checked.data.pass.newpass !== null &&
+                        checked.data.pass.newpass !== undefined
+                    ) {
+                        return ormLU.updateLoginUser({
+                            loginUserId: checked.userId,
+                            accountStatus: user.account_status,
+                            password: await bcrypt.hash(
+                                checked.data.pass?.newpass,
+                                config.encryption.encryptionRounds
+                            ),
+                        });
+                    }
+                    return Promise.resolve(user);
+                })
                 .then((user) => Promise.resolve(user.person))
-                .then((person) => {
+                .then(async (person) => {
                     if (checked.data.name != undefined) {
                         return ormP
                             .updatePerson({
                                 personId: person.person_id,
-                                firstname: checked.data.name,
+                                name: checked.data.name,
                             })
                             .then(() => Promise.resolve());
                     }
@@ -302,7 +352,7 @@ export async function userModSelf(
                 })
                 .then(() => Promise.resolve(checked));
         })
-        .then((checked) => {
+        .then(async (checked) => {
             if (checked.data.pass == undefined) {
                 return Promise.resolve({ sessionkey: checked.data.sessionkey });
             }
@@ -332,28 +382,103 @@ export async function getCurrentUser(
 ): Promise<Responses.User> {
     const parsedRequest = await rq.parseCurrentUserRequest(req);
 
-    const checkedSessionKey = await util
-        .checkSessionKey(parsedRequest)
-        .catch((res) => res);
-    if (checkedSessionKey.data == undefined) {
-        return Promise.reject(errors.cookInvalidID());
-    }
+    const checkedSessionKey = await util.checkSessionKey(parsedRequest);
 
-    const login_user = await ormL
+    const login_user = await ormLU
         .getLoginUserById(checkedSessionKey.userId)
         .then((obj) => util.getOrReject(obj));
-    login_user.password = null;
 
-    return Promise.resolve({
-        data: {
-            login_user: login_user,
+    const user = {
+        person: {
+            person_id: login_user.person.person_id,
+            name: login_user.person.name,
+            email:
+                login_user.person.email === null ? "" : login_user.person.email,
+            github:
+                login_user.person.github === null
+                    ? ""
+                    : login_user.person.github,
         },
-        sessionkey: checkedSessionKey.data.sessionkey,
-    }).then((obj) => {
-        console.log(JSON.stringify(obj));
-        return Promise.resolve(obj);
-    });
+        is_coach: login_user.is_coach,
+        is_admin: login_user.is_admin,
+        account_status: login_user.account_status as AccountStatus,
+        login_user_id: login_user.login_user_id,
+    };
+
+    return Promise.resolve(user);
 }
+
+/**
+ *  Attempts to create a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function createUserPermission(
+    req: express.Request
+): Promise<Responses.Empty> {
+    const parsedRequest = await rq.parseUsersPermissionsRequest(req);
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
+
+    await ormLuOs.addOsocToUser(
+        checkedSessionKey.data.login_user_id,
+        checkedSessionKey.data.osoc_id
+    );
+
+    return Promise.resolve({});
+}
+
+/**
+ *  Attempts to delte a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function deleteUserPermission(
+    req: express.Request
+): Promise<Responses.Empty> {
+    const parsedRequest = await rq.parseUsersPermissionsRequest(req);
+    const checkedSessionKey = await util.isAdmin(parsedRequest);
+
+    await ormLuOs.removeOsocFromUser(
+        checkedSessionKey.data.login_user_id,
+        checkedSessionKey.data.osoc_id
+    );
+
+    return Promise.resolve({});
+}
+
+/**
+ *  Attempts to delte a user permission in the system.
+ *  @param req The Express.js request to extract all required data from.
+ *  @returns See the API documentation. Successes are passed using
+ * `Promise.resolve`, failures using `Promise.reject`.
+ */
+export async function getYearPermissions(
+    req: express.Request
+): Promise<Responses.UserYearsPermissions[]> {
+    const parsedRequest = await rq.parseGetUserPermissionsRequest(req);
+
+    const isAdminCheck = await util.isAdmin(parsedRequest);
+
+    if (isAdminCheck.is_admin) {
+        const years = await ormLuOs.getOsocYearsForLoginUserById(
+            isAdminCheck.data.id
+        );
+
+        return Promise.resolve(
+            years.map((year) => {
+                return {
+                    osoc_id: year.osoc_id,
+                    year: year.osoc.year,
+                };
+            })
+        );
+    }
+
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
 /**
  *  Gets the router for all `/user/` related endpoints.
  *  @returns An Express.js {@link express.Router} routing all `/user/`
@@ -368,6 +493,11 @@ export function getRouter(): express.Router {
 
     util.route(router, "get", "/self", getCurrentUser);
     util.route(router, "post", "/self", userModSelf);
+
+    util.route(router, "post", "/year/:id", createUserPermission);
+    util.route(router, "delete", "/year/:id", deleteUserPermission);
+
+    util.route(router, "get", "/years/:id", getYearPermissions);
 
     router.post("/request", (req, res) =>
         util.respOrErrorNoReinject(res, createUserRequest(req))

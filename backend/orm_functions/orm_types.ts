@@ -5,18 +5,20 @@ import {
     account_status_enum,
 } from "@prisma/client";
 
+/***/
+export interface DBPagination {
+    currentPage: number;
+    pageSize: number;
+}
+
 /**
  * interface for the object needed to create a person
  */
 export interface CreatePerson {
     /**
-     * the person's firstname
+     * the person's name
      */
-    firstname: string;
-    /**
-     * the person's lastname
-     */
-    lastname: string;
+    name: string;
 
     /**
      * the person's github account, only one of github/email can be used
@@ -37,17 +39,13 @@ export interface CreatePerson {
  */
 export interface UpdatePerson {
     /**
-     * the person who's info we are updating
+     * the person whose info we are updating
      */
     personId: number;
     /**
-     * undefined if unchanged or new firstname
+     * undefined if unchanged or new name
      */
-    firstname?: string;
-    /**
-     * undefined if unchanged or the new lastname
-     */
-    lastname?: string;
+    name?: string;
     /**
      * undefined if unchanged or the new github
      */
@@ -367,9 +365,9 @@ export interface CreateProject {
      */
     endDate: Date;
     /**
-     * the amount of people who need to assigned to the project
+     * a short description of the project
      */
-    positions: number;
+    description: string;
 }
 
 /**
@@ -401,9 +399,87 @@ export interface UpdateProject {
      */
     endDate?: Date;
     /**
-     * undefined if unchanged or the new number of positions of the project
+     * undefined if unchanged or the new description of the project
      */
-    positions?: number;
+    description?: string;
+}
+
+/**
+ * interface for the filtered projects
+ */
+export interface FilterProjects {
+    /**
+     * the id of the project
+     */
+    project_id: number;
+    /**
+     * the name of the project
+     */
+    name: string;
+    /**
+     * the id of the osoc edition this project belongs to
+     */
+    osoc_id: number;
+    /**
+     * the partner of this project
+     */
+    partner: string;
+    /**
+     * the start date of the project
+     */
+    start_date: Date;
+    /**
+     * the end date of the project
+     */
+    end_date: Date;
+    /**
+     * the amount of people who need to assigned to the project
+     */
+    positions: number;
+    /**
+     * the description of this project
+     */
+    description: string;
+    /**
+     * the roles of this project
+     */
+    project_role: FilterProjectsRole[];
+    /**
+     * the users who belong to this project
+     */
+    project_user: FilterProjectsLoginUser[];
+}
+
+/**
+ * interface for the filtered roles
+ */
+export interface FilterProjectsRole {
+    /**
+     * the number of positions for this role
+     */
+    positions: number;
+    /**
+     * the role name
+     */
+    role: {
+        name: string;
+    };
+    _count: {
+        contract: number;
+    };
+}
+
+/**
+ * interface for the filtered login users
+ */
+export interface FilterProjectsLoginUser {
+    /**
+     * the login user
+     */
+    login_user: {
+        login_user_id: number;
+        is_coach: boolean;
+    };
 }
 
 /**
@@ -564,7 +640,7 @@ export interface AddStudentToProject {
 /**
  * interface for the object needed to create a project user
  */
-export interface CreateProjectUser {
+export interface ProjectUser {
     /**
      * the id of the project this user belongs to
      */

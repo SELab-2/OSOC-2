@@ -6,14 +6,16 @@ import {
     getJobApplication,
     getJobApplicationByYear,
     getLatestApplicationRolesForStudent,
-    getLatestJobApplicationOfStudent,
     getStudentEvaluationsFinal,
     getStudentEvaluationsTemp,
     getStudentEvaluationsTotal,
+    getEvaluationsByYearForStudent,
 } from "../../orm_functions/job_application";
 import prisma from "../../prisma/prisma";
 import { decision_enum, email_status_enum } from "@prisma/client";
 import { CreateJobApplication } from "../../orm_functions/orm_types";
+
+import "../integration_setup";
 
 /**
  * aid function to compare most fields of the expected job application and the found job application
@@ -23,7 +25,7 @@ import { CreateJobApplication } from "../../orm_functions/orm_types";
 function job_application_check(
     expected: {
         job_application_id?: number;
-        student_id: number;
+        student_id: number | null;
         student_volunteer_info: string;
         responsibilities: string | null;
         fun_fact: string | null;
@@ -36,10 +38,10 @@ function job_application_check(
         edu_year: string | null;
         created_at: Date;
         email_status: email_status_enum;
-    },
+    } | null,
     found: {
         job_application_id: number;
-        student_id: number;
+        student_id: number | null;
         student_volunteer_info: string;
         responsibilities: string | null;
         fun_fact: string | null;
@@ -54,6 +56,18 @@ function job_application_check(
         email_status: email_status_enum;
     }
 ) {
+    if (expected == null) {
+        expect("SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
+    if (found.student_id == null) {
+        expect("FOUND STUDENT ID SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
+    if (expected.student_id == null) {
+        expect("EXPECTED STUDENT ID SHOULD NOT BE NULL").toBeFalsy(); // fail!
+        return;
+    }
     expect(found).toHaveProperty("student_id", expected.student_id);
     expect(found).toHaveProperty(
         "student_volunteer_info",
@@ -115,19 +129,16 @@ it("should return all student evaluations for the student with given id", async 
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "firstname"
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
+                "name"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "lastname"
-            );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }
@@ -168,19 +179,16 @@ it("should return all final student evaluations for the student with given id", 
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "firstname"
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
+                "name"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "lastname"
-            );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }
@@ -222,19 +230,16 @@ it("should return all suggestion evaluations for the student with given id", asy
             expect(found_eval.evaluation[i].login_user).toHaveProperty(
                 "login_user_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "firstname"
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
+                "name"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
-                "lastname"
-            );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "person_id"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "github"
             );
-            expect(found_eval.evaluation[i].login_user.person).toHaveProperty(
+            expect(found_eval.evaluation[i].login_user?.person).toHaveProperty(
                 "email"
             );
         }
@@ -281,7 +286,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_duration: 5,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: email_status_enum.DRAFT,
+            email_status: email_status_enum.APPLIED,
             created_at: new Date("December 25, 2021 14:24:00"),
         },
         {
@@ -296,7 +301,7 @@ it("should delete all the job applications of the given student", async () => {
             edu_duration: 8,
             edu_institute: "Ugent",
             edu_year: "3",
-            email_status: email_status_enum.SENT,
+            email_status: email_status_enum.APPROVED,
             created_at: new Date("December 31, 2021 03:24:00"),
         },
     ];
@@ -331,50 +336,19 @@ it("should update the email status of the job application", async () => {
         edu_duration: 5,
         edu_institute: "Ugent",
         edu_year: "3",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("December 25, 2021 14:24:00"),
     };
     const changed = await changeEmailStatusOfJobApplication(
         applics[2].job_application_id,
-        email_status_enum.SENT
+        email_status_enum.APPROVED
     );
     job_application_check(applic, changed);
-    expect(changed).toHaveProperty("email_status", email_status_enum.SENT);
+    expect(changed).toHaveProperty("email_status", email_status_enum.APPROVED);
     expect(changed).toHaveProperty(
         "job_application_id",
         applics[2].job_application_id
     );
-});
-
-it("should delete the job application", async () => {
-    const [students, osocs, applics] = await Promise.all([
-        prisma.student.findMany(),
-        prisma.osoc.findMany(),
-        prisma.job_application.findMany(),
-    ]);
-
-    const app = {
-        student_id: students[2].student_id,
-        student_volunteer_info: "no volunteer",
-        responsibilities: "no responsibilities",
-        fun_fact: "this is a fun fact",
-        student_coach: false,
-        osoc_id: osocs[0].osoc_id,
-        edus: ["something something"],
-        edu_level: "higher education",
-        edu_duration: 5,
-        edu_institute: "Ugent",
-        edu_year: "3",
-        email_status: email_status_enum.SENT,
-        created_at: new Date("December 25, 2021 14:24:00"),
-    };
-
-    const deleted = await deleteJobApplication(applics[3].job_application_id);
-    job_application_check(app, deleted);
-    expect(deleted).toHaveProperty("email_status", app.email_status);
-    await prisma.job_application.create({
-        data: app,
-    });
 });
 
 it("should create a new job_application", async () => {
@@ -395,7 +369,7 @@ it("should create a new job_application", async () => {
         edu_duration: 3,
         edu_institute: "Hogent",
         edu_year: "2",
-        email_status: email_status_enum.DRAFT,
+        email_status: email_status_enum.APPLIED,
         created_at: new Date("January 2, 2022 14:24:00"),
     };
 
@@ -411,7 +385,7 @@ it("should create a new job_application", async () => {
         eduDuration: 3,
         eduInstitute: "Hogent",
         eduYear: "2",
-        emailStatus: email_status_enum.DRAFT,
+        emailStatus: email_status_enum.APPLIED,
         createdAt: "January 2, 2022 14:24:00",
     };
 
@@ -447,45 +421,6 @@ function getDataAssociatedWithApplication(
         }),
     ]);
 }
-
-it("should return the most recent job application of a student", async () => {
-    const [students, osocs] = await Promise.all([
-        prisma.student.findMany(),
-        prisma.osoc.findMany(),
-    ]);
-
-    const expected = {
-        student_id: students[0].student_id,
-        student_volunteer_info: "I'd like to volunteer",
-        responsibilities: "no responsibilities2",
-        fun_fact: "this is a fun fact too",
-        student_coach: true,
-        osoc_id: osocs[0].osoc_id,
-        edus: ["higher education"],
-        edu_level: "MaNaMa",
-        edu_duration: 8,
-        edu_institute: "Ugent",
-        edu_year: "7",
-        email_status: email_status_enum.SENT,
-        created_at: new Date("December 20, 2021 03:24:00"),
-    };
-
-    const found = await getLatestJobApplicationOfStudent(expected.student_id);
-
-    const [attachments, applied_roles, job_application_skill] =
-        await getDataAssociatedWithApplication(found?.job_application_id);
-
-    if (found) {
-        job_application_check(expected, found);
-    }
-    expect(found).toHaveProperty("email_status", expected.email_status);
-    expect(found).toHaveProperty("attachment", attachments);
-    expect(found).toHaveProperty(
-        "job_application_skill",
-        job_application_skill
-    );
-    expect(found).toHaveProperty("applied_role", applied_roles);
-});
 
 it("should return the job application", async () => {
     const applications = await prisma.job_application.findMany();
@@ -524,4 +459,17 @@ it("should return all job applications of a year", async () => {
 
     // only 3 applications for the given osoc edition
     expect(found.length).toEqual(3);
+});
+
+it("should return the job application of a student in the (specified) year", async () => {
+    const found = await getEvaluationsByYearForStudent(1, 2022);
+
+    if (found !== null) {
+        found.evaluation.forEach((ev) => {
+            expect(ev).toHaveProperty("decision");
+            expect(ev).toHaveProperty("evaluation_id");
+            expect(ev).toHaveProperty("is_final");
+            expect(ev).toHaveProperty("motivation");
+        });
+    }
 });

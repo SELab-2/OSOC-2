@@ -14,12 +14,16 @@ import {
     Errors,
     InternalTypes,
     Requests,
-    Responses,
     RouteCallback,
     Table,
     Verb,
     WithUserID,
 } from "./types";
+import { getOsocYearsForLoginUser } from "./orm_functions/login_user";
+import { getAppliedYearsForStudent } from "./orm_functions/student";
+import IdRequest = Requests.IdRequest;
+import { getProjectYear } from "./orm_functions/project";
+import { getOsocById } from "./orm_functions/osoc";
 
 /**
  *  The API error cooking functions. HTTP error codes are loaded from
@@ -43,6 +47,12 @@ export const errors: Errors = {
     },
     cookPendingAccount() {
         return config.apiErrors.pendingAccount;
+    },
+    cookWrongSuggestionYear() {
+        return config.apiErrors.studentSuggestion.insufficientRights;
+    },
+    cookWrongOsocYear() {
+        return config.apiErrors.modifyProject.insufficientRights;
     },
 
     cookNonExistent(url: string) {
@@ -97,18 +107,6 @@ export function getSessionKey(req: express.Request): string {
         );
     }
     return authHeader.replace(config.global.authScheme + " ", "");
-}
-
-/**
- *  Promise-based debugging function. Logs the data, then passes it through
- * (using `Promise.resolve`).
- *
- *  @param data The data to log and pass through.
- *  @returns A `Promise<typeof data>` resolving with the given data.
- */
-export function debug(data: unknown): Promise<typeof data> {
-    console.log(data);
-    return Promise.resolve(data);
 }
 
 /**
@@ -210,9 +208,9 @@ export function logRequest(
  *  @param prom The promise with the data or error.
  *  @returns An empty promise (`Promise<void>`).
  */
-export async function respOrErrorNoReinject(
+export async function respOrErrorNoReinject<T extends Record<keyof T, unknown>>(
     res: express.Response,
-    prom: Promise<Responses.ApiResponse>
+    prom: Promise<T>
 ): Promise<void> {
     const isError = (err: Anything): boolean => {
         return err != undefined && "http" in err && "reason" in err;
@@ -220,15 +218,10 @@ export async function respOrErrorNoReinject(
 
     return prom
         .then((data) => {
-            console.log(data);
             return Promise.resolve(data);
         })
-        .then(
-            (data: Responses.ApiResponse): Promise<void> =>
-                replySuccess(res, data as typeof data)
-        )
+        .then((data): Promise<void> => replySuccess(res, data as typeof data))
         .catch((err: unknown): Promise<void> => {
-            console.log(err);
             if (isError(err as Anything))
                 return replyError(res, err as ApiError);
             console.log("UNCAUGHT ERROR " + JSON.stringify(err));
@@ -248,10 +241,10 @@ export async function respOrErrorNoReinject(
  * that's Keyed).
  *  @returns An empty promise (`Promise<void>`).
  */
-export async function respOrError<T>(
+export async function respOrError<T extends Record<keyof T, unknown>>(
     req: express.Request,
     res: express.Response,
-    prom: Promise<Responses.ApiResponse & T>
+    prom: Promise<T>
 ): Promise<void> {
     return respOrErrorNoReinject(
         res,
@@ -361,6 +354,69 @@ export async function isAdmin<T extends Requests.KeyRequest>(
 }
 
 /**
+ * returns the userData in a promise if the loginUser should be able to see the requested student
+ * Otherwise it returns a rejection with insufficient rights.
+ *
+ * @param userData: object that contains the studentId whose data is queried and the id of the loginUser that is querying the data
+ */
+export async function checkYearPermissionStudent<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the years that the student applied in
+    const studentAppliedYears = await getAppliedYearsForStudent(
+        userData.data.id
+    );
+
+    // check if the student has a job application that is inside the visible years
+    if (studentAppliedYears.some((year) => visibleYears.indexOf(year) >= 0)) {
+        return userData;
+    }
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
+ * returns the userData object if the user is allowed to see the project
+ * Otherwise it returns an insufficient rights error.
+ * @param userData: object with the userId and projectId
+ */
+export async function checkYearPermissionProject<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the year that the project belongs to
+    const projectYear = await getProjectYear(userData.data.id);
+
+    // check if the project year is inside the visible years for the user
+    if (visibleYears.includes(projectYear)) {
+        return userData;
+    }
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
+ * returns the userData object if the user is allowed to see the osoc edition
+ * Otherwise it returns an insufficient rights error.
+ * @param userData: object with the userId and osocID
+ */
+export async function checkYearPermissionOsoc<T extends IdRequest>(
+    userData: WithUserID<T>
+): Promise<WithUserID<T>> {
+    // get the years that are visible for the loginUser
+    const visibleYears = await getOsocYearsForLoginUser(userData.userId);
+    // get the year that the project belongs to
+    const osoc = await getOsocById(userData.data.id);
+
+    // check if the project year is inside the visible years for the user
+    if (osoc !== null && visibleYears.includes(osoc.year)) {
+        return userData;
+    }
+    return Promise.reject(errors.cookInsufficientRights());
+}
+
+/**
  *  Generates a new session key.
  *  @returns The newly generated session key.
  */
@@ -415,7 +471,7 @@ export async function refreshAndInjectKey<T>(
  *  @param path The (relative) route path.
  *  @param callback The function which will respond.
  */
-export function route<T extends Responses.ApiResponse>(
+export function route<T extends Record<keyof T, unknown>>(
     router: express.Router,
     verb: Verb,
     path: string,
@@ -423,35 +479,6 @@ export function route<T extends Responses.ApiResponse>(
 ): void {
     router[verb](path, (req: express.Request, res: express.Response) =>
         respOrError(req, res, callback(req))
-    );
-}
-
-/**
- *  Contains all boilerplate to install a route with a path and HTTP verb for a
- * route that returns only an updated session key.
- *  @param router The router to install to.
- *  @param verb The HTTP verb.
- *  @param path The (relative) route path.
- *  @param callback The function which will respond.
- *  @deprecated Use route instead.
- */
-export function routeKeyOnly(
-    router: express.Router,
-    verb: Verb,
-    path: string,
-    callback: RouteCallback<Responses.Key>
-): void {
-    console.log("[WARNING]: routeKeyOnly is deprecated. Use route instead.");
-    console.log("Stack trace:");
-    console.log("------------");
-    console.log(new Error().stack);
-    router[verb](path, (req: express.Request, res: express.Response) =>
-        respOrErrorNoReinject(
-            res,
-            callback(req)
-                .then((toupd) => refreshKey(toupd.sessionkey))
-                .then(() => Promise.resolve({}))
-        )
     );
 }
 

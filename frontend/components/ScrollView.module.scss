@@ -1,0 +1,46 @@
+.scrollView {
+  position: relative;
+  z-index: 0;
+}
+
+@media (max-width: 800px) {
+  .scrollView {
+    display: flex;
+  }
+
+  .topShadowCaster, .bottomShadowCaster {
+    margin-inline: auto;
+    width: 3rem !important;
+    height: 100%;
+    z-index: 1;
+    position: absolute;
+  }
+
+  .topShadowCaster {
+    margin-left: -1rem !important;
+    background: linear-gradient(90deg, var(--neutral-100), transparent) !important;
+  }
+  .bottomShadowCaster {
+    background: linear-gradient(-90deg, var(--neutral-100), transparent) !important;
+    margin-top: 0 !important;
+    margin-right: -1rem !important;
+    right: 0;
+    top: 0 !important;
+  }
+}
+
+.topShadowCaster, .bottomShadowCaster {
+  margin-inline: auto;
+  min-height: 3rem;
+  width: 100%;
+  z-index: 1;
+  position: absolute;
+}
+.topShadowCaster {
+  background: linear-gradient(180deg, var(--neutral-100), transparent);
+}
+.bottomShadowCaster {
+  background: linear-gradient(0deg, var(--neutral-100), transparent);
+  margin-top: -2rem;
+  top: 100%;
+}

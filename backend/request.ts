@@ -3,12 +3,15 @@ import express from "express";
 import * as validator from "validator";
 
 import * as config from "./config.json";
+import { FilterSort } from "./orm_functions/orm_types";
 import {
     Anything,
     Decision,
     FollowupType,
     InternalTypes,
     Requests,
+    EmailStatus,
+    AccountStatus,
 } from "./types";
 import { errors, getSessionKey } from "./utility";
 
@@ -42,6 +45,15 @@ const types: RequestTypes = {
  *  @template T The type the promise would resolve to.
  *  @returns A Promise rejecting with an Argument Error.
  */
+function checkStringBoolean(value: string): boolean {
+    return value === "true" || value === "false";
+}
+
+/**
+ *  Rejects a promise with an argument error.
+ *  @template T The type the promise would resolve to.
+ *  @returns A Promise rejecting with an Argument Error.
+ */
 function rejector<T>(): Promise<T> {
     return Promise.reject(errors.cookArgumentError());
 }
@@ -57,13 +69,6 @@ function rejector<T>(): Promise<T> {
 function anyHasFields(obj: Anything, fields: string[]): boolean {
     for (const f of fields) {
         if (!(f in obj)) {
-            console.log(
-                "!!! Missing argument " +
-                    f +
-                    " in `" +
-                    JSON.stringify(obj) +
-                    "`!!!"
-            );
             return false;
         }
     }
@@ -99,9 +104,7 @@ function hasFields(
             return Promise.reject(errors.cookUnauthenticated());
         }
     }
-    // if ((reqType == types.key || reqType == types.id) &&
-    //     (!("sessionkey" in req.body) || req.body.sessionkey == undefined))
-    //   return Promise.reject(errors.cookUnauthenticated());
+
     if (reqType == types.id && !("id" in req.params)) return rejector();
     return anyHasFields(req.body, fields) ? Promise.resolve() : rejector();
 }
@@ -128,6 +131,38 @@ function maybe<T>(obj: Anything, key: string): T | undefined {
 }
 
 /**
+ *  Resolves with the given object if the `object.id` is a valid number
+ * (not NaN), otherwise, returns the rejector.
+ *  @template T The type of object to validate (should be an IdRequest).
+ *  @param r The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+export function idIsNumber<T extends Requests.IdRequest>(r: T): Promise<T> {
+    return isNaN(r.id) ? rejector() : Promise.resolve(r);
+}
+
+/**
+ *  Resolves with the given object if none of the keys is a NaN value (they can
+ * be undefined) in the given object; otherwise, returns the rejector.
+ *  @template T The type of object to validate.
+ *  @param keys The keys to check.
+ *  @param obj The object to validate.
+ *  @return A promise resolving with the object if it's valid, otherwise one
+ * rejecting with an argument error.
+ */
+export function allNonNaN<T extends Anything>(
+    keys: string[],
+    obj: T
+): Promise<T> {
+    return keys.every((v) => {
+        return obj[v] == undefined || !isNaN(obj[v] as number);
+    })
+        ? Promise.resolve(obj)
+        : rejector();
+}
+
+/**
  *  Parses a key-only request.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -143,6 +178,26 @@ async function parseKeyRequest(
     );
 }
 
+async function parsePaginationRequest(
+    req: express.Request
+): Promise<Requests.PaginableRequest> {
+    return parseKeyRequest(req).then((parsed) => {
+        let currentPage = 0;
+        let pageSize = config.global.pageSize;
+        if ("currentPage" in req.body) {
+            currentPage = Number(req.body.currentPage);
+        }
+        if ("pageSize" in req.body && !isNaN(Number(req.body.pageSize))) {
+            pageSize = Number(req.body.pageSize);
+        }
+        return {
+            ...parsed,
+            currentPage: currentPage,
+            pageSize: pageSize,
+        };
+    });
+}
+
 /**
  *  Parses a request requiring both a key and an ID.
  *  @param req The request to check.
@@ -156,7 +211,7 @@ async function parseKeyIdRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
     );
 }
 
@@ -169,7 +224,7 @@ async function parseKeyIdRequest(
 async function parseUpdateLoginUser(
     req: express.Request
 ): Promise<Requests.UpdateLoginUser> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
@@ -179,7 +234,7 @@ async function parseUpdateLoginUser(
                 req.body,
                 "accountStatus"
             ) as account_status_enum,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -215,8 +270,7 @@ export async function parseUpdateStudentRequest(
 ): Promise<Requests.UpdateStudent> {
     const bodyF = [
         "emailOrGithub",
-        "firstName",
-        "lastName",
+        "name",
         "gender",
         "pronouns",
         "phone",
@@ -225,23 +279,28 @@ export async function parseUpdateStudentRequest(
         "education",
     ];
 
-    return hasFields(req, [], types.id).then(() => {
-        if (!atLeastOneField(req, bodyF)) return rejector();
+    return hasFields(req, [], types.id)
+        .then(() => {
+            if (!atLeastOneField(req, bodyF))
+                return rejector<Requests.UpdateStudent>();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            emailOrGithub: maybe(req.body, "emailOrGithub"),
-            firstName: maybe(req.body, "firstName"),
-            lastName: maybe(req.body, "lastName"),
-            gender: maybe(req.body, "gender"),
-            pronouns: maybe(req.body, "pronouns"),
-            phone: maybe(req.body, "phone"),
-            education: maybe(req.body, "education"),
-            alumni: maybe(req.body, "alumni"),
-            nickname: maybe(req.body, "nickname"),
-        });
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                emailOrGithub: maybe<string>(req.body, "emailOrGithub"),
+                name: maybe<string>(req.body, "name"),
+                gender: maybe<string>(req.body, "gender"),
+                pronouns: maybe<string>(req.body, "pronouns"),
+                phone: maybe<string>(req.body, "phone"),
+                education: maybe<Requests.UpdateStudent["education"]>(
+                    req.body,
+                    "education"
+                ),
+                alumni: maybe<boolean>(req.body, "alumni"),
+                nickname: maybe<string>(req.body, "nickname"),
+            });
+        })
+        .then(idIsNumber);
 }
 
 /**
@@ -253,18 +312,25 @@ export async function parseUpdateStudentRequest(
 export async function parseSuggestStudentRequest(
     req: express.Request
 ): Promise<Requests.Suggest> {
-    return hasFields(req, ["suggestion"], types.id).then(() => {
-        const sug: unknown = req.body.suggestion;
-        if (sug != Decision.YES && sug != Decision.MAYBE && sug != Decision.NO)
-            return rejector();
+    return hasFields(req, ["suggestion", "job_application_id"], types.id).then(
+        async () => {
+            const sug: unknown = req.body.suggestion;
+            if (
+                sug != Decision.YES &&
+                sug != Decision.MAYBE &&
+                sug != Decision.NO
+            )
+                return rejector();
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            suggestion: sug as InternalTypes.Suggestion,
-            reason: maybe(req.body, "reason"),
-        });
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                suggestion: sug as InternalTypes.Suggestion,
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**
@@ -274,6 +340,31 @@ export async function parseSuggestStudentRequest(
  * Argument or Unauthenticated error.
  */
 export async function parseGetSuggestionsStudentRequest(
+    req: express.Request
+): Promise<Requests.YearId> {
+    return hasFields(req, [], types.id).then(async () => {
+        if ("year" in req.body) {
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                year: Number(req.body.year),
+            }).then((o) => allNonNaN(["id", "year"], o));
+        } else {
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+            }).then(idIsNumber);
+        }
+    });
+}
+
+/**
+ *  Parses a request to `GET /student/<id>`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseSingleStudentRequest(
     req: express.Request
 ): Promise<Requests.YearId> {
     return hasFields(req, [], types.id).then(() => {
@@ -301,9 +392,11 @@ export async function parseGetSuggestionsStudentRequest(
 export async function parseFilterOsocsRequest(
     req: express.Request
 ): Promise<Requests.OsocFilter> {
-    let year = maybe(req.body, "yearFilter");
+    const authenticated = await parsePaginationRequest(req); // enforce authentication
+    let year = maybe<number>(req.body, "yearFilter");
     if ("yearFilter" in req.body) {
-        year = parseInt(req.body.yearFilter);
+        year = Number(req.body.yearFilter);
+        if (isNaN(year)) return rejector();
     }
 
     for (const filter of [maybe(req.body, "yearSort")]) {
@@ -313,9 +406,9 @@ export async function parseFilterOsocsRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...authenticated,
         yearFilter: year,
-        yearSort: maybe(req.body, "yearSort"),
+        yearSort: maybe<FilterSort>(req.body, "yearSort"),
     });
 }
 
@@ -328,13 +421,23 @@ export async function parseFilterOsocsRequest(
 export async function parseFilterStudentsRequest(
     req: express.Request
 ): Promise<Requests.StudentFilter> {
-    let mail = maybe(req.body, "emailFilter");
-    let roles = maybe(req.body, "roleFilter");
+    const paged = await parsePaginationRequest(req); // ensure authentication
+
+    let mail = maybe<string>(req.body, "emailFilter");
+    let roles: string[] | undefined = undefined; // = maybe(req.body, "roleFilter");
     if (
-        "statusFilter" in req.body &&
-        req.body.statusFilter !== Decision.YES &&
-        req.body.statusFilter !== Decision.MAYBE &&
-        req.body.statusFilter !== Decision.NO
+        ("statusFilter" in req.body &&
+            !Object.values(Decision).includes(
+                req.body.statusFilter as unknown as Decision
+            )) ||
+        ("emailStatusFilter" in req.body &&
+            !Object.values(EmailStatus).includes(
+                req.body.emailStatusFilter as unknown as EmailStatus
+            )) ||
+        ("alumniFilter" in req.body &&
+            !checkStringBoolean(req.body.alumniFilter.toString())) ||
+        ("coachFilter" in req.body &&
+            !checkStringBoolean(req.body.coachFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -351,49 +454,46 @@ export async function parseFilterStudentsRequest(
     }
 
     if ("roleFilter" in req.body) {
-        roles = req.body.roleFilter.split(",");
+        if (typeof req.body.roleFilter === "string")
+            roles = req.body.roleFilter.split(",");
+        else roles = req.body.roleFilter as string[];
     }
 
     for (const filter of [
-        maybe(req.body, "firstNameSort"),
-        maybe(req.body, "lastNameSort"),
+        maybe(req.body, "nameSort"),
         maybe(req.body, "emailSort"),
-        maybe(req.body, "roleSort"),
-        maybe(req.body, "alumniSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();
         }
     }
 
-    let osoc_year = new Date().getFullYear();
+    let osoc_year;
     if ("osocYear" in req.body) {
         osoc_year = Number(req.body.osocYear);
+        if (isNaN(osoc_year)) return rejector();
     }
 
-    let alumniFilter = maybe(req.body, "alumniFilter");
+    let alumniFilter: boolean | undefined = undefined;
     if ("alumniFilter" in req.body) {
-        alumniFilter = Boolean(req.body.alumniFilter);
+        alumniFilter = req.body.alumniFilter.toString() === "true";
     }
-    let coachFilter = maybe(req.body, "coachFilter");
+    let coachFilter: boolean | undefined = undefined;
     if ("coachFilter" in req.body) {
-        coachFilter = Boolean(req.body.coachFilter);
+        coachFilter = req.body.coachFilter.toString() === "true";
     }
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paged,
         osocYear: osoc_year,
-        firstNameFilter: maybe(req.body, "firstNameFilter"),
-        lastNameFilter: maybe(req.body, "lastNameFilter"),
+        nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         roleFilter: roles,
         alumniFilter: alumniFilter,
         coachFilter: coachFilter,
         statusFilter: maybe(req.body, "statusFilter"),
         emailStatusFilter: maybe(req.body, "emailStatusFilter"),
-        firstNameSort: maybe(req.body, "firstNameSort"),
-        lastNameSort: maybe(req.body, "lastNameSort"),
+        nameSort: maybe(req.body, "nameSort"),
         emailSort: maybe(req.body, "emailSort"),
-        alumniSort: maybe(req.body, "alumniSort"),
     });
 }
 
@@ -406,20 +506,18 @@ export async function parseFilterStudentsRequest(
 export async function parseFilterUsersRequest(
     req: express.Request
 ): Promise<Requests.UserFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     let mail = undefined;
-    let isCoachFilter = undefined;
-    if ("isCoachFilter" in req.body) {
-        isCoachFilter = req.body.isCoachFilter === "true";
-    }
-    let isAdminFilter = undefined;
-    if ("isAdminFilter" in req.body) {
-        isAdminFilter = req.body.isAdminFilter === "true";
-    }
+
     if (
-        "statusFilter" in req.body &&
-        req.body.statusFilter !== "ACTIVATED" &&
-        req.body.statusFilter !== "PENDING" &&
-        req.body.statusFilter !== "DISABLED"
+        ("statusFilter" in req.body &&
+            !Object.values(AccountStatus).includes(
+                req.body.statusFilter as unknown as AccountStatus
+            )) ||
+        ("isCoachFilter" in req.body &&
+            !checkStringBoolean(req.body.isCoachFilter.toString())) ||
+        ("isAdminFilter" in req.body &&
+            !checkStringBoolean(req.body.isAdminFilter.toString()))
     ) {
         return rejector();
     } else {
@@ -435,6 +533,15 @@ export async function parseFilterUsersRequest(
         }
     }
 
+    let isCoachFilter = undefined;
+    if ("isCoachFilter" in req.body) {
+        isCoachFilter = req.body.isCoachFilter.toString() === "true";
+    }
+    let isAdminFilter = undefined;
+    if ("isAdminFilter" in req.body) {
+        isAdminFilter = req.body.isAdminFilter.toString() === "true";
+    }
+
     for (const filter of [
         maybe(req.body, "nameSort"),
         maybe(req.body, "emailSort"),
@@ -445,7 +552,7 @@ export async function parseFilterUsersRequest(
     }
 
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         nameFilter: maybe(req.body, "nameFilter"),
         emailFilter: mail,
         statusFilter: maybe(req.body, "statusFilter"),
@@ -465,23 +572,25 @@ export async function parseFilterUsersRequest(
 export async function parseFinalizeDecisionRequest(
     req: express.Request
 ): Promise<Requests.Confirm> {
-    return hasFields(req, [], types.id).then(() => {
-        if ("reply" in req.body) {
+    return hasFields(req, ["reply", "job_application_id"], types.id).then(
+        async () => {
             if (
                 req.body.reply != Decision.YES &&
                 req.body.reply != Decision.MAYBE &&
                 req.body.reply != Decision.NO
-            )
+            ) {
                 return rejector();
-        }
+            }
 
-        return Promise.resolve({
-            sessionkey: getSessionKey(req),
-            id: Number(req.params.id),
-            reason: maybe(req.body, "reason"),
-            reply: maybe(req.body, "reply"),
-        });
-    });
+            return Promise.resolve({
+                sessionkey: getSessionKey(req),
+                id: Number(req.params.id),
+                job_application_id: req.body.job_application_id,
+                reason: maybe<string>(req.body, "reason"),
+                reply: req.body.reply,
+            }).then(idIsNumber);
+        }
+    );
 }
 
 /**
@@ -493,14 +602,12 @@ export async function parseFinalizeDecisionRequest(
 export async function parseRequestUserRequest(
     req: express.Request
 ): Promise<Requests.UserRequest> {
-    return hasFields(req, ["firstName", "email", "pass"], types.neither).then(
-        () =>
-            Promise.resolve({
-                firstName: req.body.firstName,
-                lastName: "",
-                email: req.body.email,
-                pass: req.body.pass,
-            })
+    return hasFields(req, ["name", "email", "pass"], types.neither).then(() =>
+        Promise.resolve({
+            name: req.body.name,
+            email: req.body.email,
+            pass: req.body.pass,
+        })
     );
 }
 
@@ -515,7 +622,16 @@ export async function parseNewProjectRequest(
 ): Promise<Requests.Project> {
     return hasFields(
         req,
-        ["name", "partner", "start", "end", "positions", "osocId"],
+        [
+            "name",
+            "partner",
+            "start",
+            "end",
+            "osocId",
+            "roles",
+            "description",
+            "coaches",
+        ],
         types.key
     ).then(() =>
         Promise.resolve({
@@ -524,9 +640,11 @@ export async function parseNewProjectRequest(
             partner: req.body.partner,
             start: req.body.start,
             end: req.body.end,
-            osocId: req.body.osocId,
-            positions: req.body.positions,
-        })
+            osocId: Number(req.body.osocId),
+            roles: req.body.roles,
+            description: req.body.description,
+            coaches: req.body.coaches,
+        }).then((o) => allNonNaN(["positions", "osocId"], o))
     );
 }
 
@@ -539,20 +657,38 @@ export async function parseNewProjectRequest(
 export async function parseUpdateProjectRequest(
     req: express.Request
 ): Promise<Requests.ModProject> {
-    const options = ["name", "partner", "start", "end", "positions"];
+    const options = [
+        "name",
+        "partner",
+        "start",
+        "end",
+        "roles",
+        "description",
+        "addCoaches",
+        "removeCoaches",
+    ];
 
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, options)) return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            partner: maybe(req.body, "partner"),
-            start: maybe(req.body, "start"),
-            end: maybe(req.body, "end"),
-            positions: maybe(req.body, "positions"),
-        });
+            name: maybe<string>(req.body, "name"),
+            partner: maybe<string>(req.body, "partner"),
+            start: maybe<Date>(req.body, "start"),
+            end: maybe<Date>(req.body, "end"),
+            roles: maybe<{ roles: [{ name: string; positions: number }] }>(
+                req.body,
+                "roles"
+            ),
+            description: maybe<string>(req.body, "description"),
+            addCoaches: maybe<{ coaches: [number] }>(req.body, "addCoaches"),
+            removeCoaches: maybe<{ coaches: [number] }>(
+                req.body,
+                "removeCoaches"
+            ),
+        }).then(idIsNumber);
     });
 }
 
@@ -565,43 +701,37 @@ export async function parseUpdateProjectRequest(
 export async function parseFilterProjectsRequest(
     req: express.Request
 ): Promise<Requests.ProjectFilter> {
+    const paginated = await parsePaginationRequest(req); // enforce authentication
     for (const filter of [
         maybe(req.body, "projectNameSort"),
         maybe(req.body, "clientNameSort"),
-        maybe(req.body, "fullyAssignedSort"),
     ]) {
         if (filter != undefined && filter !== "asc" && filter !== "desc") {
             return rejector();
         }
     }
 
-    let assignedCoachesFilterArray = maybe(
-        req.body,
-        "assignedCoachesFilterArray"
-    );
-    if ("assignedCoachesFilterArray" in req.body) {
-        if (typeof req.body.assignedCoachesFilterArray === "string") {
-            assignedCoachesFilterArray = req.body.assignedCoachesFilterArray
-                .slice(1, -1)
-                .split(",")
-                .map((num: string) => Number(num));
-        }
-    }
-
-    let fullyAssignedFilter = maybe(req.body, "fullyAssignedFilter");
+    let fullyAssignedFilter = maybe<boolean>(req.body, "fullyAssignedFilter");
     if ("fullyAssignedFilter" in req.body) {
+        if (!checkStringBoolean(req.body.fullyAssignedFilter.toString())) {
+            return rejector();
+        }
         fullyAssignedFilter = req.body.fullyAssignedFilter === "true";
     }
 
+    let year;
+    if ("osocYear" in req.body && !isNaN(Number(req.body.osocYear))) {
+        year = parseInt(req.body.osocYear);
+    }
+
     return Promise.resolve({
-        sessionkey: getSessionKey(req),
+        ...paginated,
         projectNameFilter: maybe(req.body, "projectNameFilter"),
         clientNameFilter: maybe(req.body, "clientNameFilter"),
-        assignedCoachesFilterArray: assignedCoachesFilterArray,
         fullyAssignedFilter: fullyAssignedFilter,
+        osocYear: year,
         projectNameSort: maybe(req.body, "projectNameSort"),
         clientNameSort: maybe(req.body, "clientNameSort"),
-        fullyAssignedSort: maybe(req.body, "fullyAssignedSort"),
     });
 }
 
@@ -614,13 +744,18 @@ export async function parseFilterProjectsRequest(
 export async function parseDraftStudentRequest(
     req: express.Request
 ): Promise<Requests.Draft> {
-    return hasFields(req, ["studentId", "role"], types.id).then(() =>
+    return hasFields(
+        req,
+        ["studentId", "role", "jobApplicationId"],
+        types.id
+    ).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            studentId: req.body.studentId,
+            studentId: Number(req.body.studentId),
+            jobApplicationId: Number(req.body.jobApplicationId),
             role: req.body.role,
-        })
+        }).then((o) => allNonNaN(["id", "studentId", "jobApplicationId"], o))
     );
 }
 
@@ -633,14 +768,15 @@ export async function parseDraftStudentRequest(
 export async function parseSetFollowupStudentRequest(
     req: express.Request
 ): Promise<Requests.Followup> {
-    return hasFields(req, ["type"], types.id).then(() => {
+    return hasFields(req, ["type"], types.id).then(async () => {
         const type: string = req.body.type;
         if (
-            type != "SCHEDULED" &&
-            type != "SENT" &&
-            type != "FAILED" &&
-            type != "NONE" &&
-            type != "DRAFT"
+            type != "APPLIED" &&
+            type != "AWAITING_PROJECT" &&
+            type != "APPROVED" &&
+            type != "CONTRACT_CONFIRMED" &&
+            type != "CONTRACT_DECLINED" &&
+            type != "REJECTED"
         )
             return rejector();
 
@@ -648,7 +784,7 @@ export async function parseSetFollowupStudentRequest(
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             type: type as FollowupType,
-        });
+        }).then(idIsNumber);
     });
 }
 
@@ -681,18 +817,18 @@ export async function parseNewTemplateRequest(
 export async function parseUpdateTemplateRequest(
     req: express.Request
 ): Promise<Requests.ModTemplate> {
-    return hasFields(req, [], types.id).then(() => {
+    return hasFields(req, [], types.id).then(async () => {
         if (!atLeastOneField(req, ["name", "subject", "cc", "content"]))
             return rejector();
 
         return Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
-            name: maybe(req.body, "name"),
-            subject: maybe(req.body, "subject"),
-            cc: maybe(req.body, "cc"),
-            content: maybe(req.body, "content"),
-        });
+            name: maybe<string>(req.body, "name"),
+            subject: maybe<string>(req.body, "subject"),
+            cc: maybe<string>(req.body, "cc"),
+            content: maybe<string>(req.body, "content"),
+        }).then(idIsNumber);
     });
 }
 
@@ -731,11 +867,17 @@ export async function parseFormRequest(
 export async function parseRequestResetRequest(
     req: express.Request
 ): Promise<Requests.ReqReset> {
-    return hasFields(req, ["email"], types.neither).then(() =>
-        Promise.resolve({
-            email: validator.default.normalizeEmail(req.body.email).toString(),
-        })
-    );
+    return hasFields(req, ["email"], types.neither).then(() => {
+        if (validator.default.isEmail(req.body.email)) {
+            return Promise.resolve({
+                email: validator.default
+                    .normalizeEmail(req.body.email)
+                    .toString(),
+            });
+        }
+
+        return Promise.reject(errors.cookArgumentError());
+    });
 }
 
 export async function parseCheckResetCodeRequest(
@@ -766,7 +908,7 @@ export async function parseResetPasswordRequest(
 export async function parseStudentRoleRequest(
     req: express.Request
 ): Promise<Requests.Role> {
-    return hasFields(req, ["name"], types.neither).then(() =>
+    return hasFields(req, ["name"], types.key).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             name: req.body.name,
@@ -782,7 +924,31 @@ export async function parseRemoveAssigneeRequest(
             sessionkey: getSessionKey(req),
             studentId: req.body.student,
             id: Number(req.params.id),
-        })
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseRemoveCoachRequest(
+    req: express.Request
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            loginUserId: Number(req.body.loginUserId),
+            id: Number(req.params.id),
+        }).then(idIsNumber)
+    );
+}
+
+export async function parseAssignCoachRequest(
+    req: express.Request
+): Promise<Requests.Coach> {
+    return hasFields(req, ["loginUserId"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            loginUserId: Number(req.body.loginUserId),
+            id: Number(req.params.id),
+        }).then(idIsNumber)
     );
 }
 
@@ -828,7 +994,7 @@ export async function parseAcceptNewUserRequest(
             id: Number(req.params.id),
             is_admin: req.body.is_admin,
             is_coach: req.body.is_coach,
-        })
+        }).then(idIsNumber)
     );
 }
 
@@ -839,7 +1005,45 @@ export async function parseNewOsocEditionRequest(
         Promise.resolve({
             sessionkey: getSessionKey(req),
             year: parseInt(req.body.year),
+        }).then((obj) => allNonNaN(["year"], obj))
+    );
+}
+
+/**
+ *  Parses a request to `POST/DELETE /user/year/:id`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseUsersPermissionsRequest(
+    req: express.Request
+): Promise<Requests.UserYearPermissions> {
+    return hasFields(req, ["osoc_id", "login_user_id"], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            id: Number(req.params.id),
+            osoc_id: parseInt(req.body.osoc_id),
+            login_user_id: parseInt(req.body.login_user_id),
         })
+            .then((obj) => allNonNaN(["osoc_id", "login_user_id"], obj))
+            .then(idIsNumber)
+    );
+}
+
+/**
+ *  Parses a request to `GET /user/years`.
+ *  @param req The request to check.
+ *  @returns A Promise resolving to the parsed data or rejecting with an
+ * Argument or Unauthenticated error.
+ */
+export async function parseGetUserPermissionsRequest(
+    req: express.Request
+): Promise<Requests.IdRequest> {
+    return hasFields(req, [], types.id).then(() =>
+        Promise.resolve({
+            sessionkey: getSessionKey(req),
+            id: Number(req.params.id),
+        }).then(idIsNumber)
     );
 }
 
@@ -848,11 +1052,6 @@ export async function parseNewOsocEditionRequest(
  * {@link parseKeyRequest}.
  */
 export const parseLogoutRequest = parseKeyRequest;
-/**
- *  A request to `GET /student/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseStudentAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /roles/all` only requires a session key
  * {@link parseKeyRequest}.
@@ -873,16 +1072,6 @@ export const parseGetAllCoachRequestsRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseAdminAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /user/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseUserAllRequest = parseKeyRequest;
-/**
- *  A request to `GET /project/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseProjectAllRequest = parseKeyRequest;
 /**
  *  A request to `GET /project/conflicts` only requires a session key
  * {@link parseKeyRequest}.
@@ -913,12 +1102,6 @@ export const parseCurrentUserRequest = parseKeyRequest;
  * {@link parseKeyRequest}.
  */
 export const parseVerifyRequest = parseKeyRequest;
-
-/**
- *  A request to `GET /student/<id>` only requires a session key and an ID
- * {@link parseKeyIdRequest}.
- */
-export const parseSingleStudentRequest = parseKeyIdRequest;
 /**
  *  A request to `DELETE /student/<id>` only requires a session key and an ID
  * {@link parseKeyIdRequest}.
@@ -997,11 +1180,6 @@ export const parseUpdateCoachRequest = parseUpdateLoginUser;
  */
 export const parseUpdateAdminRequest = parseUpdateLoginUser;
 /**
- *  A request to `GET /osoc/all` only requires a session key
- * {@link parseKeyRequest}.
- */
-export const parseOsocAllRequest = parseKeyRequest;
-/**
  *  Parses a request to `POST /osoc/`.
  *  @param req The request to check.
  *  @returns A Promise resolving to the parsed data or rejecting with an
@@ -1012,3 +1190,28 @@ export const parseOsocAllRequest = parseKeyRequest;
  * {@link parseKeyIdRequest}.
  */
 export const parseDeleteOsocEditionRequest = parseKeyIdRequest;
+
+/**
+ *  A request to `GET /user/all` only requires a session key and optionally the
+ * current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseUserAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /project/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseProjectAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /student/all` only requires a session key and optionally
+ * the current page numer
+ * {@link parsePaginationRequest}.
+ */
+export const parseStudentAllRequest = parsePaginationRequest;
+/**
+ *  A request to `GET /osoc/all` only requires a session key and optionally the
+ * current page number
+ * {@link parseKeyRequest}.
+ */
+export const parseOsocAllRequest = parsePaginationRequest;

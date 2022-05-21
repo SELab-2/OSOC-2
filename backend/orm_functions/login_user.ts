@@ -2,12 +2,14 @@ import prisma from "../prisma/prisma";
 
 import {
     CreateLoginUser,
+    DBPagination,
     FilterBoolean,
     FilterSort,
     FilterString,
     UpdateLoginUser,
 } from "./orm_types";
-import { account_status_enum } from "@prisma/client";
+import { account_status_enum, Prisma } from "@prisma/client";
+import { deletePersonFromDB } from "./person";
 
 /**
  *
@@ -195,6 +197,20 @@ export async function deleteLoginUserByPersonId(personId: number) {
 
 /**
  *
+ * @param loginUserId the login user whose info we are deleting from the database
+ */
+export async function deleteLoginUserFromDB(loginUserId: number) {
+    // search the personId
+    const loginUser = await getLoginUserById(loginUserId);
+
+    if (loginUser) {
+        // call the delete
+        await deletePersonFromDB(loginUser.person_id);
+    }
+}
+
+/**
+ *
  * @param loginUserId: the id of the loginUser we are searching
  * @returns promise with the found data, or promise with null inside if no
  *     loginUser has the given id
@@ -212,8 +228,6 @@ export async function getLoginUserById(loginUserId: number) {
  *
  * @param nameFilter name that we are filtering on (or undefined if not filtering on name)
  * @param emailFilter email that we are filtering on (or undefined if not filtering on email)
- * @param coachFilter coachstatus that we are filtering on (or undefined if not filtering on coach)
- * @param adminFilter adminstatus that we are filtering on (or undefined if not filtering on admin)
  * @param nameSort asc or desc if we want to sort on name, undefined if we are not sorting on name
  * @param emailSort asc or desc if we are sorting on email, undefined if we are not sorting on email
  * @param statusFilter a given email status to filter on or undefined if we are not filtering on a status
@@ -223,39 +237,49 @@ export async function getLoginUserById(loginUserId: number) {
  */
 
 export async function filterLoginUsers(
-    nameFilter: FilterString,
-    emailFilter: FilterString,
-    nameSort: FilterSort,
-    emailSort: FilterSort,
-    statusFilter: account_status_enum | undefined,
-    isCoach: FilterBoolean,
-    isAdmin: FilterBoolean
+    pagination: DBPagination,
+    nameFilter: FilterString = undefined,
+    emailFilter: FilterString = undefined,
+    nameSort: FilterSort = undefined,
+    emailSort: FilterSort = undefined,
+    statusFilter: account_status_enum | undefined = undefined,
+    isCoach: FilterBoolean = undefined,
+    isAdmin: FilterBoolean = undefined
 ) {
-    // execute the query
-    return await prisma.login_user.findMany({
-        where: {
-            person: {
-                firstname: {
-                    contains: nameFilter,
-                    mode: "insensitive",
-                },
-                email: {
-                    contains: emailFilter,
-                    mode: "insensitive",
-                },
+    const filter: Prisma.login_userWhereInput = {
+        person: {
+            name: {
+                contains: nameFilter,
+                mode: "insensitive",
             },
-            account_status: statusFilter,
-            is_coach: isCoach,
-            is_admin: isAdmin,
+            email: {
+                contains: emailFilter,
+                mode: "insensitive",
+            },
         },
+        account_status: statusFilter,
+        is_coach: isCoach,
+        is_admin: isAdmin,
+    };
+    const count = await prisma.login_user.count({ where: filter });
+    // execute the query
+    const data = await prisma.login_user.findMany({
+        skip: pagination.currentPage * pagination.pageSize,
+        take: pagination.pageSize,
+        where: filter,
         orderBy: [
-            { person: { firstname: nameSort } },
+            { person: { name: nameSort } },
             { person: { email: emailSort } },
         ],
         include: {
             person: true,
         },
     });
+
+    return {
+        pagination: { page: pagination.currentPage, count: count },
+        data: data,
+    };
 }
 
 /**
@@ -298,4 +322,35 @@ export async function setAdmin(loginUserId: number, isAdmin: boolean) {
             person: true,
         },
     });
+}
+
+/**
+ * get a list of years that should be visible for the login_user with given id
+ * @param loginUserId: the id of the loginUser for who we are checking
+ */
+export async function getOsocYearsForLoginUser(loginUserId: number) {
+    const years_object = await prisma.login_user.findUnique({
+        where: {
+            login_user_id: loginUserId,
+        },
+        select: {
+            login_user_osoc: {
+                select: {
+                    osoc: {
+                        select: {
+                            year: true,
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    const years = [];
+    if (years_object && years_object.login_user_osoc) {
+        for (const obj of years_object.login_user_osoc) {
+            years.push(obj.osoc.year);
+        }
+    }
+    return years;
 }

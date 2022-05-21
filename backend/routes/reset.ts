@@ -11,6 +11,7 @@ import * as rq from "../request";
 import { Email, Responses } from "../types";
 import * as util from "../utility";
 import * as session_key from "./session_key.json";
+import * as bcrypt from "bcrypt";
 
 export async function sendMail(mail: Email) {
     const oauthclient = new gapi.Auth.OAuth2Client(
@@ -31,7 +32,10 @@ export async function sendMail(mail: Email) {
                 );
             }
         })
-        .catch((e) => console.log("Email error:" + JSON.stringify(e)));
+        .catch((e) => {
+            console.log("Email error:" + JSON.stringify(e));
+            return Promise.reject(config.apiErrors.reset.sendEmail);
+        });
 
     const transp = nodemailer.createTransport({
         service: "gmail",
@@ -84,18 +88,12 @@ export async function requestReset(
                     util.generateKey(),
                     date
                 )
-                .catch((e) => {
-                    console.log(e);
-                    return Promise.reject();
-                })
                 .then(async (code) => {
                     return sendMail({
                         to: parsed.email,
                         subject: config.email.header,
                         html: createEmail(code.reset_id),
-                    }).then((data) => {
-                        console.log(data);
-                        nodemailer.getTestMessageUrl(data);
+                    }).then(() => {
                         return Promise.resolve({});
                     });
                 });
@@ -141,6 +139,12 @@ export async function resetPassword(
             if (code == null || code.valid_until < new Date(Date.now()))
                 return Promise.reject(util.errors.cookArgumentError());
 
+            // calculate the hash of the new password
+            const hash = await bcrypt.hash(
+                parsed.password,
+                config.encryption.encryptionRounds
+            );
+
             return ormLU
                 .getLoginUserById(code.login_user_id)
                 .then((user) => {
@@ -150,11 +154,10 @@ export async function resetPassword(
                         isAdmin: user.is_admin,
                         isCoach: user.is_coach,
                         accountStatus: user?.account_status,
-                        password: parsed.password,
+                        password: hash,
                     });
                 })
                 .then((user) => {
-                    console.log(JSON.stringify(user));
                     const futureDate = new Date();
                     futureDate.setDate(
                         futureDate.getDate() + session_key.valid_period

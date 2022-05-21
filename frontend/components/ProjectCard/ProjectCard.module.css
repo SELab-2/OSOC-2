@@ -1,0 +1,105 @@
+.body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.body > header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.left > div {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.left > div  > p {
+    align-self: end;
+    opacity: 80%;
+}
+
+.left > h3 {
+    opacity: 80%;
+}
+
+.coaches {
+    margin-inline: -0.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.roles {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-content: flex-end;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+/* The actual card as a container */
+.card {
+    box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    width: 100%;
+}
+
+.assignees {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-start;
+}
+
+.assignee {
+    padding: 0.6rem;
+    width: auto;
+    display: flex;
+    gap: 0.6rem;
+    flex-direction: row;
+    align-items: center;
+}
+
+.assigneeBody {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.delete {
+    padding: 0;
+}
+
+.description {
+    max-height: fit-content;
+}
+
+.description > p {
+    word-break: break-all;
+}
+
+.buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}

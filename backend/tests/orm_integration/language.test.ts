@@ -19,6 +19,8 @@ const language2: UpdateLanguage = {
     name: "German",
 };
 
+import "../integration_setup";
+
 it("should create 1 new language with", async () => {
     const created_language = await createLanguage("English");
     language1.languageId = created_language.language_id;
