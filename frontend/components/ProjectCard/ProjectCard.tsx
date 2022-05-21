@@ -134,6 +134,7 @@ export const ProjectCard: React.FC<{
         if (response !== undefined && response.success) {
             updateProject();
             if (notify) {
+                socket.emit("projectDeleted");
                 notify(
                     `Project '${project.name}' successfully deleted!`,
                     NotificationType.SUCCESS,
