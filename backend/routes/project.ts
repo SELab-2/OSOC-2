@@ -6,6 +6,7 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as ormPr from "../orm_functions/project";
 import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
+import * as ormC from "../orm_functions/contract";
 import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
@@ -416,7 +417,22 @@ export async function deleteProject(
         .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
-            console.log(parsed.id);
+            const [project, latestOsoc] = await Promise.all([
+                ormPr.getProjectById(parsed.id),
+                ormOsoc.getLatestOsoc(),
+            ]);
+
+            if (project === null || latestOsoc === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (project.osoc.year === latestOsoc.year) {
+                for (const contract of await ormC.contractsByProject(
+                    parsed.id
+                )) {
+                    await ormCtr.removeContract(contract.contract_id);
+                }
+            }
             return ormPr
                 .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
