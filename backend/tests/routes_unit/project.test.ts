@@ -1217,7 +1217,8 @@ test("Can get students drafted for project", async () => {
 
 test("Can get free spots for project role", async () => {
     await expect(project.getFreeSpotsFor("dev", 0)).resolves.toStrictEqual({
-        role: 0,
+        role_id: 0,
+        project_role_id: 0,
         count: 2,
     });
     expectCall(ormPrRMock.getProjectRolesByProject, 0);
@@ -1237,7 +1238,7 @@ test("Can't get free spots for nonexistent project role", async () => {
 test("Can create a new project role", async () => {
     await expect(
         project.createProjectRoleFor(0, roles[1].name)
-    ).resolves.toStrictEqual({ count: 1, role: 0 });
+    ).resolves.toStrictEqual({ count: 1, project_role_id: 0 });
     expectCall(ormRMock.getRolesByName, roles[1].name);
     expectCall(ormPrRMock.createProjectRole, {
         projectId: 0,
@@ -2549,7 +2550,8 @@ test("Can get free spots for project role", async () => {
     await expect(
         project.getFreeSpotsFor("Developer", 0)
     ).resolves.toStrictEqual({
-        role: 0,
+        project_role_id: 0,
+        role_id: 0,
         count: 3,
     });
 

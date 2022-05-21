@@ -457,11 +457,11 @@ export async function getDraftedStudents(
 export async function getFreeSpotsFor(
     role: string,
     project: number
-): Promise<{ count: number; role: number }> {
+): Promise<{ count: number; role_id: number; project_role_id: number }> {
     return ormPrRole
         .getProjectRolesByProject(project)
-        .then((roles) =>
-            Promise.all(
+        .then((roles) => {
+            return Promise.all(
                 roles.map(async (r) =>
                     ormRole.getRole(r.role_id).then((upd) =>
                         Promise.resolve({
@@ -471,9 +471,11 @@ export async function getFreeSpotsFor(
                         })
                     )
                 )
-            )
-        )
-        .then((roles) => roles.filter((r) => r.block?.name == role))
+            );
+        })
+        .then((roles) => {
+            return roles.filter((r) => r.block?.name == role);
+        })
         .then(async (rest) => {
             if (rest.length != 1) return Promise.reject();
             return ormPrRole
@@ -482,7 +484,8 @@ export async function getFreeSpotsFor(
                     if (n == null) return Promise.reject();
                     return Promise.resolve({
                         count: n,
-                        role: rest[0].project_role_id,
+                        role_id: rest[0].role_id,
+                        project_role_id: rest[0].project_role_id,
                     });
                 });
         });
@@ -491,7 +494,7 @@ export async function getFreeSpotsFor(
 export async function createProjectRoleFor(
     project: number,
     role: string
-): Promise<{ count: number; role: number }> {
+): Promise<{ count: number; project_role_id: number }> {
     return ormRole
         .getRolesByName(role)
         .then((r) => {
@@ -507,7 +510,10 @@ export async function createProjectRoleFor(
             });
         })
         .then((res) =>
-            Promise.resolve({ count: res.positions, role: res.project_role_id })
+            Promise.resolve({
+                count: res.positions,
+                project_role_id: res.project_role_id,
+            })
         );
 }
 
@@ -562,7 +568,7 @@ export async function modProjectStudent(
                             return ormCtr.updateContract({
                                 contractId: ctr.contract_id,
                                 loginUserId: parsed.userId,
-                                projectRoleId: remaining.role,
+                                projectRoleId: remaining.project_role_id,
                             });
                         });
                 })
@@ -798,16 +804,16 @@ export async function assignStudent(
     // check if no contracts yet
     await ormCtr
         .contractsForStudent(checked.data.studentId)
-        .then((data) =>
-            data.filter(
-                (x) => x.project_role.project.osoc_id == latestOsoc.osoc_id
-            )
-        )
-        .then((filtered) =>
-            filtered.length > 0
+        .then((data) => {
+            return data.filter(
+                (x) => x.project_role.project.osoc_id === latestOsoc.osoc_id
+            );
+        })
+        .then((filtered) => {
+            return filtered.length > 0
                 ? Promise.reject(alreadyContract)
-                : Promise.resolve()
-        );
+                : Promise.resolve();
+        });
 
     // get project role
     // then create contract
@@ -821,11 +827,13 @@ export async function assignStudent(
             ormCtr
                 .createContract({
                     studentId: checked.data.studentId,
-                    projectRoleId: r.role,
+                    projectRoleId: r.project_role_id,
                     loginUserId: checked.userId,
                     contractStatus: "DRAFT",
                 })
-                .then(() => ormRole.getRole(r.role))
+                .then(() => {
+                    return ormRole.getRole(r.role_id);
+                })
         )
         .then(util.getOrReject)
         .then((r) => Promise.resolve({ drafted: true, role: r.name }));
