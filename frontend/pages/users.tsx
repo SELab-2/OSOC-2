@@ -107,8 +107,7 @@ const Users: NextPage = () => {
                     statusFilter: searchParams.statusFilter,
                 },
                 pagination.page
-            ).then();
-            window.scrollTo(0, scrollPosition);
+            ).then(() => window.scrollTo(0, scrollPosition));
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, searchParams]);

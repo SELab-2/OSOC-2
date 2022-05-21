@@ -16,6 +16,7 @@ import {
 import { registerLoginUserHandlers } from "./websocket_events/login_user";
 import { registerStudentHandlers } from "./websocket_events/student";
 import { registerProjectHandlers } from "./websocket_events/project";
+import { registerOsocHandlers } from "./websocket_events/osoc";
 
 export const app: express.Application = express();
 export const port: number = config.global.port;
@@ -59,4 +60,5 @@ io.on("connection", (socket) => {
     registerLoginUserHandlers(io, socket);
     registerStudentHandlers(io, socket);
     registerProjectHandlers(io, socket);
+    registerOsocHandlers(io, socket);
 });

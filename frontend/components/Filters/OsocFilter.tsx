@@ -8,6 +8,7 @@ import {
 } from "../../types";
 import SessionContext from "../../contexts/sessionProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const OsocCreateFilter: React.FC<{
     search: (params: OsocFilterParams) => void;
@@ -17,6 +18,7 @@ export const OsocCreateFilter: React.FC<{
     const [yearSort, setYearSort] = useState<Sort>(Sort.NONE);
     const { getSession } = useContext(SessionContext);
     const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
 
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -92,6 +94,7 @@ export const OsocCreateFilter: React.FC<{
                 console.log(err);
             });
         if (response && response.success) {
+            socket.emit("osocCreated");
             const params: OsocFilterParams = {
                 yearFilter: yearFilter,
                 yearSort: yearSort,
