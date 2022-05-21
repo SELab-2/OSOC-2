@@ -76,6 +76,11 @@ start the application **WITH DEBUGGER PORTS OPEN** in **local** docker container
 docker-compose -f "docker-compose.debug.yml"  up -d --build
 ```
 
+start only the database in **local** docker containers for faster debugging processes
+```
+docker-compose -f docker-compose.db.yml up -d --build
+```
+
 shut down the **local** application
  - shuts down the containers used in the application
  - removes the containers used in the application
