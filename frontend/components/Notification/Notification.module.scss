@@ -1,5 +1,6 @@
 .notification {
   animation: fadein 0.5s;
+  z-index: 5;
 }
 
 @keyframes fadein {
