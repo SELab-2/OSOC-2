@@ -403,17 +403,18 @@ export async function getProjectYear(projectId: number) {
  * @returns the deleted record from the person-table in a promise or an error in a promise if the person was not found
  */
 export async function deleteProjectFromDB(projectId: number) {
-    await prisma.project_user.deleteMany({
-        where: {
-            project_id: projectId,
-        },
-    });
-
-    await prisma.project_role.deleteMany({
-        where: {
-            project_id: projectId,
-        },
-    });
+    await Promise.all([
+        prisma.project_user.deleteMany({
+            where: {
+                project_id: projectId,
+            },
+        }),
+        prisma.project_role.deleteMany({
+            where: {
+                project_id: projectId,
+            },
+        }),
+    ]);
 
     await prisma.project.delete({
         where: {

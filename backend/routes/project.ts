@@ -396,6 +396,7 @@ export async function deleteProject(
         .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
+            console.log(parsed.id);
             return ormPr
                 .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
@@ -418,7 +419,8 @@ export async function getDraftedStudents(
         .then(async (parsed) => {
             const prName = await ormPr
                 .getProjectById(parsed.data.id)
-                .then((pr) => pr?.name);
+                .then(util.getOrReject)
+                .then((pr) => pr.name);
 
             return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
                 Promise.resolve({
@@ -676,32 +678,26 @@ export async function unAssignStudent(
                                 contr.student?.student_id,
                                 contr.project_role.project.osoc_id
                             )
-                            .then((evl) => {
-                                if (evl.length != 1) {
-                                    return Promise.reject({
-                                        http: 400,
-                                        reason: "Multiple evaluations match.",
+                            .then(async (evl) => {
+                                for (let i = 0; i < evl.length; i++) {
+                                    await ormEv.updateEvaluationForStudent({
+                                        evaluation_id: evl[i].evaluation_id,
+                                        loginUserId: checked.userId,
+                                        motivation:
+                                            util.getOrDefault(
+                                                evl[i].motivation,
+                                                ""
+                                            ) +
+                                            " [Removed assignee from project " +
+                                            checked.data.id +
+                                            "]",
                                     });
                                 }
-
-                                return ormEv.updateEvaluationForStudent({
-                                    evaluation_id: evl[0].evaluation_id,
-                                    loginUserId: checked.userId,
-                                    motivation:
-                                        util.getOrDefault(
-                                            evl[0].motivation,
-                                            ""
-                                        ) +
-                                        " [Removed assignee from project " +
-                                        checked.data.id +
-                                        "]",
-                                });
                             })
                             .then(() =>
                                 ormCtr.removeContract(contr.contract_id)
                             );
                     }
-
                     return Promise.resolve({});
                 });
         });
@@ -765,7 +761,7 @@ export async function assignStudent(
                 .then(() => ormRole.getRole(r.role))
         )
         .then(util.getOrReject)
-        .then((r) => Promise.resolve({ drafted: true, role: r?.name }));
+        .then((r) => Promise.resolve({ drafted: true, role: r.name }));
 }
 
 /**

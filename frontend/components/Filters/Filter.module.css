@@ -84,7 +84,7 @@
     display: contents;
 }
 
-.studentfilter div, .osocfilter div, .userfilter div {
+.studentfilter div, .osocfilter div, .userfilter div, .projectfilter div {
     justify-content: flex-start;
     gap: 0.5rem;
 }
