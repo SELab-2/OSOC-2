@@ -183,6 +183,7 @@ beforeEach(() => {
     osocMock.getLatestOsoc.mockResolvedValue(osocdat);
     osocMock.getOsocById.mockResolvedValue(osocdat);
     jappMock.getJobApplicationByYear.mockResolvedValue(jobapps);
+    jappMock.getJobApplication.mockResolvedValue(jobapps[0]);
     jappMock.getLatestJobApplicationOfStudent.mockImplementation((v) =>
         v == 5
             ? Promise.resolve(jobapps[0])
@@ -213,6 +214,7 @@ afterEach(() => {
     osocMock.getLatestOsoc.mockReset();
     osocMock.getOsocById.mockReset();
     jappMock.getJobApplicationByYear.mockReset();
+    jappMock.getJobApplication.mockReset();
     jappMock.getLatestJobApplicationOfStudent.mockReset();
     jappMock.changeEmailStatusOfJobApplication.mockReset();
 
@@ -262,7 +264,7 @@ test("Can get single followup", async () => {
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
-    expectCall(jappMock.getLatestJobApplicationOfStudent, 5);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
     expectNoCall(utilMock.isAdmin);
 });
 
@@ -277,7 +279,7 @@ test("Cannot get single followup because invalid year permissions", async () => 
     );
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
-    expectCall(jappMock.getLatestJobApplicationOfStudent, 5);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
     expectNoCall(utilMock.isAdmin);
 });
 

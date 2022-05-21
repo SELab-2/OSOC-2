@@ -69,7 +69,7 @@ export async function getFollowup(
         .then((parsed) => util.checkSessionKey(parsed))
         .then((checked) =>
             ormJA
-                .getLatestJobApplicationOfStudent(checked.data.id)
+                .getJobApplication(checked.data.id)
                 .then((data) => util.getOrReject(data))
                 .then(async (data) => {
                     // check if this last year is visible for the loginUser
@@ -104,11 +104,11 @@ export async function updateFollowup(
 ): Promise<Responses.SingleFollowup> {
     return rq
         .parseSetFollowupStudentRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
+        .then((parsed) => util.checkSessionKey(parsed))
         .then(checkYearPermissionStudent)
         .then((checked) =>
             ormJA
-                .getLatestJobApplicationOfStudent(checked.data.id)
+                .getJobApplication(checked.data.id)
                 .then((ja) => util.getOrReject(ja))
                 .then((ja) =>
                     ormJA.changeEmailStatusOfJobApplication(
