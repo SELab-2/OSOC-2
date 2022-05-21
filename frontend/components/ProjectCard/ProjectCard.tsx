@@ -304,17 +304,19 @@ export const ProjectCard: React.FC<{
 
             <div className={styles.description}>
                 <h2>Project Description</h2>
-                <p>{project.description}</p>
-                <div>
-                    <button
-                        onClick={() =>
-                            router.push(`projects/${project.id}/change`)
-                        }
-                    >
-                        Change
-                    </button>
-                    <button onClick={() => toggleDeleteModal()}>Delete</button>
-                </div>
+                <p>
+                    {project.description}
+                    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                </p>
+            </div>
+
+            <div className={styles.buttons}>
+                <button
+                    onClick={() => router.push(`projects/${project.id}/change`)}
+                >
+                    Change
+                </button>
+                <button onClick={() => toggleDeleteModal()}>Delete</button>
             </div>
         </div>
     );
