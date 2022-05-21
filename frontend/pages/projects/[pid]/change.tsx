@@ -49,6 +49,7 @@ const Change: NextPage = () => {
     const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
     const [coachesActive, setCoachesActive] = useState<boolean>(false);
     const [originalCoaches] = useState<number[]>([]);
+    const [osocYear, setOsocYear] = useState<number>(0);
 
     const fetchProject = async () => {
         if (getSession !== undefined && pid !== undefined) {
@@ -142,11 +143,39 @@ const Change: NextPage = () => {
         }
     };
 
+    const fetchLatestOsocEdition = async () => {
+        if (getSession != undefined) {
+            getSession().then(async ({ sessionKey }) => {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `auth/osoc2 ${sessionKey}`,
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .catch((error) => console.log(error));
+                if (response !== undefined && response.success) {
+                    let latestYear = 0;
+                    for (const osoc of response.data) {
+                        if (osoc.year > latestYear) {
+                            latestYear = osoc.year;
+                        }
+                    }
+                    setOsocYear(latestYear);
+                }
+            });
+        }
+    };
+
     useEffect(() => {
         if (router.isReady) {
             fetchProject().then();
             fetchRoles().then();
             fetchCoaches().then();
+            fetchLatestOsocEdition().then();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.isReady]);
@@ -238,7 +267,7 @@ const Change: NextPage = () => {
                         if (!isNaN(pidNumber)) {
                             socket.emit("projectModified", pidNumber);
                         }
-                    } else if (notify && response !== null) {
+                    } else if (notify && response !== undefined) {
                         notify(response.reason, NotificationType.ERROR, 2000);
                     }
                     router.push("/projects").then();
@@ -345,6 +374,8 @@ const Change: NextPage = () => {
                     <button onClick={() => addNewRole()}>Add Role</button>
                 </div>
             </Modal>
+
+            <p>OSOC Edition: {osocYear}</p>
 
             <label>
                 <h1>Project name</h1>

@@ -41,35 +41,12 @@ const Create: NextPage = () => {
     const [coaches, setCoaches] = useState<Coach[]>([]);
     const [selectedCoaches, setSelectedCoaches] = useState<number[]>([]);
     const [coachesActive, setCoachesActive] = useState<boolean>(false);
+    const [osocId, setOsoscId] = useState<number>(0);
+    const [osocYear, setOsocYear] = useState<number>(0);
 
     const updateNewRolePositions = (positions: string) => {
         if (Number(positions) < 0) return; // Only allow positive values
         setNewRolePositions(positions);
-    };
-
-    const fetchRoles = async () => {
-        if (getSession != undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `auth/osoc2 ${sessionKey}`,
-                        },
-                    }
-                )
-                    .then((response) => response.json())
-                    .catch((error) => console.log(error));
-                if (response !== undefined && response.success) {
-                    const roleMap: { [K: string]: string } = {};
-                    for (const role of response.data) {
-                        roleMap[role.name] = "0";
-                    }
-                    setRolePositions(roleMap);
-                }
-            });
-        }
     };
 
     const fetchCoaches = async () => {
@@ -98,9 +75,65 @@ const Create: NextPage = () => {
         }
     };
 
+    const fetchRoles = async () => {
+        if (getSession != undefined) {
+            getSession().then(async ({ sessionKey }) => {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/role/all`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `auth/osoc2 ${sessionKey}`,
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .catch((error) => console.log(error));
+                if (response !== undefined && response.success) {
+                    const roleMap: { [K: string]: string } = {};
+                    for (const role of response.data) {
+                        roleMap[role.name] = "0";
+                    }
+                    setRolePositions(roleMap);
+                }
+            });
+        }
+    };
+
+    const fetchLatestOsocEdition = async () => {
+        if (getSession != undefined) {
+            getSession().then(async ({ sessionKey }) => {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/osoc/all`,
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `auth/osoc2 ${sessionKey}`,
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .catch((error) => console.log(error));
+                if (response !== undefined && response.success) {
+                    let latestYearId = 0;
+                    let latestYear = 0;
+                    for (const osoc of response.data) {
+                        if (osoc.year > latestYear) {
+                            latestYearId = osoc.osoc_id;
+                            latestYear = osoc.year;
+                        }
+                    }
+                    setOsoscId(latestYearId);
+                    setOsocYear(latestYear);
+                }
+            });
+        }
+    };
+
     useEffect(() => {
         fetchRoles().then();
         fetchCoaches().then();
+        fetchLatestOsocEdition().then();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -122,7 +155,7 @@ const Create: NextPage = () => {
                                 partner: partner,
                                 start: startDate,
                                 end: endDate,
-                                osocId: 1,
+                                osocId: osocId,
                                 positions: getTotalPositions(),
                                 roles: { roles: getRoleList() },
                                 description: description,
@@ -276,6 +309,8 @@ const Create: NextPage = () => {
                     <button onClick={() => addNewRole()}>Add Role</button>
                 </div>
             </Modal>
+
+            <p>OSOC Edition: {osocYear}</p>
 
             <label>
                 <h1>Project name</h1>
