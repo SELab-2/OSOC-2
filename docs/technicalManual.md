@@ -226,8 +226,13 @@ To learn more about Next.js, take a look at the following resources:
 
 ## Testing <a name="testing"></a>
 In order to run the tests, make sure the docker daemon is running.  
-The tests are performed with npm, if it is the first time you want to run the test, consider running `npm install` in the `/backend` folder first.  
-The test can be executed by running the `npm run integrationTests` command in the `/backend` folder.
+The tests are performed with npm, if it is the first time you want to run the test, consider running `npm install` in the folder first.  
+
+### Backend
+The tests can be executed by running the `npm run integrationTests` command in the `/backend` folder.
+
+### Frontend
+The tests can be executed by running the `npm run tests` command in the `/frontend` folder.
 
 ### Form
 When creating a new form instance the key for each question will change.
