@@ -7,7 +7,8 @@ import { Responses } from "../types";
 import * as util from "../utility";
 import { checkYearPermissionStudent, errors } from "../utility";
 import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
-import { getOsocById } from "../orm_functions/osoc";
+import { getLatestOsoc, getOsocById } from "../orm_functions/osoc";
+import { getJobApplication } from "../orm_functions/job_application";
 
 /**
  *  Attempts to list all followups in the system.
@@ -106,9 +107,23 @@ export async function updateFollowup(
         .parseSetFollowupStudentRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
         .then(checkYearPermissionStudent)
-        .then((checked) =>
-            ormJA
-                .getJobApplication(checked.data.id)
+        .then(async (checked) => {
+            // modifications to a job application is only allowed if the job application is of the most recent osoc year
+            const [jobApplication, latestOsoc] = await Promise.all([
+                getJobApplication(checked.data.id),
+                getLatestOsoc(),
+            ]);
+
+            if (jobApplication === null || latestOsoc === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (jobApplication.osoc.year !== latestOsoc.year) {
+                return Promise.reject(errors.cookWrongOsocYear());
+            }
+
+            // do the modifications itself
+            return Promise.resolve(jobApplication)
                 .then((ja) => util.getOrReject(ja))
                 .then((ja) =>
                     ormJA.changeEmailStatusOfJobApplication(
@@ -122,8 +137,8 @@ export async function updateFollowup(
                         application: res.job_application_id,
                         status: res.email_status,
                     })
-                )
-        );
+                );
+        });
 }
 
 export function getRouter() {
