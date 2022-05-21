@@ -181,7 +181,7 @@ export interface Student {
         phone_number: string;
         pronouns: string;
         student_id: number;
-    };
+    } | null;
 }
 
 export interface LoginUser {
@@ -299,7 +299,7 @@ export interface Contract {
     contract_id: number;
     contract_status: ContractStatus;
     project_role: ProjectRole;
-    student: Student;
+    student: Student | null;
     login_user: LoginUser;
 }
 
