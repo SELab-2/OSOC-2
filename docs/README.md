@@ -1,4 +1,4 @@
-# Documentations
+# Documentation
 This folder contains all the required documentations:
 - [Mock Ups](Mock%20Ups)
 - [Domain Model](Domain%20Model)
