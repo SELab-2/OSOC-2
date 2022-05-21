@@ -39,7 +39,6 @@ export const StudentOverview: React.FC<{
     const [studentcard, setStudentcard] = useState<Student>(student);
 
     const fetchEvals = async () => {
-        console.log("fetching");
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -68,7 +67,10 @@ export const StudentOverview: React.FC<{
             setEvaluations(response.evaluation.evaluations);
             setStudentcard((student) => {
                 return {
-                    evaluation: response.evaluation,
+                    evaluation: {
+                        evaluations: response.evaluation.evaluations,
+                        osoc: student.evaluation.osoc,
+                    },
                     jobApplication: student.jobApplication,
                     roles: student.roles,
                     student: student.student,
