@@ -88,3 +88,7 @@
 .delete {
     padding: 0;
 }
+
+.description {
+    max-height: fit-content;
+}

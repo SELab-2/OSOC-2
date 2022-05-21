@@ -5,8 +5,8 @@ import { Header } from "../components/Header/Header";
 import { Footer } from "../components/Footer/Footer";
 import { SocketsProvider } from "../contexts/socketProvider";
 import { NotificationProvider } from "../contexts/notificationProvider";
-import {DndProvider} from "react-dnd";
-import {HTML5Backend} from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 function App({ Component, pageProps }: AppProps) {
     return (
@@ -19,7 +19,6 @@ function App({ Component, pageProps }: AppProps) {
                     </NotificationProvider>
                     <Footer />
                 </DndProvider>
-
             </SocketsProvider>
         </SessionProvider>
     );
