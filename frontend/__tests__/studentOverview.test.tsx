@@ -4,6 +4,8 @@ import { act, render, screen } from "@testing-library/react";
 import { StudentOverview } from "../components/StudentOverview/StudentOverview";
 import { AttachmentType, EmailStatus, Student } from "../types";
 import fireEvent from "@testing-library/user-event";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 jest.mock("next/router", () => require("next-router-mock"));
 
@@ -93,7 +95,11 @@ describe("student filter tests", () => {
                     evaluation: { evaluations: [] },
                 })
             );
-            await render(<StudentOverview student={student} />);
+            await render(
+                <DndProvider backend={HTML5Backend}>
+                    <StudentOverview student={student} />
+                </DndProvider>
+            );
         });
     });
     afterEach(() => {
