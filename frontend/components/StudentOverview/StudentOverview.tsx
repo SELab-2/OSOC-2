@@ -3,6 +3,7 @@ import {
     AttachmentType,
     Decision,
     Display,
+    EmailStatus,
     Evaluation,
     NotificationType,
     Student,
@@ -37,6 +38,10 @@ export const StudentOverview: React.FC<{
     const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
     const [studentcard, setStudentcard] = useState<Student>(student);
+    const [emailStatusActive, setEmailStatusActive] = useState<boolean>(false);
+    const [emailStatus, setEmailStatus] = useState<EmailStatus>(
+        EmailStatus.NONE
+    );
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
@@ -91,6 +96,11 @@ export const StudentOverview: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [student]);
 
+    useEffect(() => {
+        setEmailStatus(student.jobApplication.email_status);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     /**
      * Call the `updateEvaluations` callback when the evaluations change
      */
@@ -102,7 +112,6 @@ export const StudentOverview: React.FC<{
     }, [evaluations]);
 
     const makeSuggestion = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -290,6 +299,51 @@ export const StudentOverview: React.FC<{
         }
     };
 
+    const changeEmailStatus = async (status: EmailStatus) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/followup/${student.jobApplication.job_application_id}`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    type: status,
+                }),
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined) {
+            if (response.success) {
+                setEmailStatus(status);
+                socket.emit(
+                    "studentSuggestionSent",
+                    student.student.student_id
+                );
+                // The creation was successful, we can update the evaluation bar
+                fetchEvals().then();
+                if (notify) {
+                    notify(
+                        "Successfully changed the email status",
+                        NotificationType.SUCCESS,
+                        2000
+                    );
+                }
+            } else {
+                if (notify) {
+                    notify(response.reason, NotificationType.WARNING, 3000);
+                }
+            }
+        }
+    };
+
     return (
         <div>
             <Modal
@@ -443,6 +497,137 @@ export const StudentOverview: React.FC<{
                         );
                     }
                 })}
+
+                <div
+                    className={`dropdown is-right ${
+                        emailStatusActive ? "is-active" : "is-hoverable"
+                    }`}
+                >
+                    <div
+                        data-testid={"statusFilterDisplay"}
+                        className={`dropdown-trigger ${
+                            emailStatusActive ||
+                            emailStatus !== EmailStatus.NONE
+                                ? styles.active
+                                : styles.inactive
+                        } ${styles.dropdownTrigger}`}
+                        onClick={() => setEmailStatusActive(!emailStatusActive)}
+                    >
+                        {emailStatus === EmailStatus.NONE
+                            ? "No status"
+                            : emailStatus}
+                        <div className={styles.triangleContainer}>
+                            <div className={styles.triangle} />
+                        </div>
+                    </div>
+                    <div className="dropdown-menu">
+                        <div className="dropdown-content">
+                            <div
+                                data-testid={"statusApplied"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.APPLIED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(EmailStatus.APPLIED)
+                                }
+                            >
+                                {EmailStatus.APPLIED}
+                            </div>
+                            <div
+                                data-testid={"statusApproved"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.APPROVED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(EmailStatus.APPROVED)
+                                }
+                            >
+                                {EmailStatus.APPROVED}
+                            </div>
+                            <div
+                                data-testid={"statusAwaiting"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.AWAITING_PROJECT
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(
+                                        EmailStatus.AWAITING_PROJECT
+                                    )
+                                }
+                            >
+                                {EmailStatus.AWAITING_PROJECT}
+                            </div>
+                            <div
+                                data-testid={"statusConfirmed"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.CONTRACT_CONFIRMED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(
+                                        EmailStatus.CONTRACT_CONFIRMED
+                                    )
+                                }
+                            >
+                                {EmailStatus.CONTRACT_CONFIRMED}
+                            </div>
+                            <div
+                                data-testid={"statusDeclined"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.CONTRACT_DECLINED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(
+                                        EmailStatus.CONTRACT_DECLINED
+                                    )
+                                }
+                            >
+                                {EmailStatus.CONTRACT_DECLINED}
+                            </div>
+                            <div
+                                data-testid={"statusRejected"}
+                                className={`${
+                                    styles.dropdownItem
+                                } dropdown-item 
+                            ${
+                                emailStatus === EmailStatus.REJECTED
+                                    ? styles.selected
+                                    : ""
+                            }`}
+                                onClick={() =>
+                                    changeEmailStatus(EmailStatus.REJECTED)
+                                }
+                            >
+                                {EmailStatus.REJECTED}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <h2>Job Application</h2>
                 <div className={styles.jobapplication}>
                     {student.jobApplication.attachment
