@@ -50,7 +50,10 @@ const Osocs: NextPage = () => {
         // add new listener
         socket.on("osocWasCreatedOrDeleted", () => {
             if (params !== undefined) {
-                search(params, pagination.page).then();
+                const scrollPosition = window.scrollY;
+                search(params, pagination.page).then(() =>
+                    window.scrollTo(0, scrollPosition)
+                );
             }
         });
     });
