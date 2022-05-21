@@ -21,6 +21,7 @@ import { NotificationContext } from "../../contexts/notificationProvider";
 import { useSockets } from "../../contexts/socketProvider";
 import { defaultUser } from "../../defaultUser";
 import { useRouter } from "next/router";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -485,6 +486,9 @@ export const StudentOverview: React.FC<{
                 <div>
                     {evaluations.map((evaluation) => {
                         if (evaluation.is_final) {
+                            if (evaluation.login_user === null) {
+                                evaluation.login_user = defaultLoginUser;
+                            }
                             return (
                                 <div
                                     data-testid={"finalEvaluation"}
@@ -539,6 +543,9 @@ export const StudentOverview: React.FC<{
                 </div>
                 {evaluations.map((evaluation) => {
                     if (!evaluation.is_final) {
+                        if (evaluation.login_user === null) {
+                            evaluation.login_user = defaultLoginUser;
+                        }
                         return (
                             <div
                                 className={styles.suggestion}
