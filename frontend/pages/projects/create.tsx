@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { Coach, NotificationType } from "../../types";
+import { Coach, NotificationType, AccountStatus } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 import { NotificationContext } from "../../contexts/notificationProvider";
@@ -87,7 +87,12 @@ const Create: NextPage = () => {
                     .then((response) => response.json())
                     .catch((error) => console.log(error));
                 if (response !== undefined && response.success) {
-                    setCoaches(response.data);
+                    for (const coach of response.data) {
+                        if (coach.activated === AccountStatus.ACTIVATED) {
+                            coaches.push(coach);
+                        }
+                    }
+                    setCoaches([...coaches]);
                 }
             });
         }
