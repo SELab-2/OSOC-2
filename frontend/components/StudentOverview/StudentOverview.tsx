@@ -24,7 +24,8 @@ export const StudentOverview: React.FC<{
     year?: string;
     updateEvaluations?: (studentId: number, evalutations: Evaluation[]) => void;
     clearSelection?: () => void;
-}> = ({ student, year, updateEvaluations, clearSelection }) => {
+    studentDeleted?: () => void;
+}> = ({ student, year, updateEvaluations, clearSelection, studentDeleted }) => {
     const myRef = React.createRef<HTMLInputElement>();
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     // the counter is used to check if the evaluations' data is updated because putting
@@ -37,6 +38,7 @@ export const StudentOverview: React.FC<{
     const { notify } = useContext(NotificationContext);
     const { socket } = useSockets();
     const [studentcard, setStudentcard] = useState<Student>(student);
+    const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession
@@ -290,6 +292,46 @@ export const StudentOverview: React.FC<{
         }
     };
 
+    const deleteStudent = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/student/${student.student.student_id}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            }
+        )
+            .then((res) => res.json())
+            .catch((err) => console.log(err));
+        if (response.success) {
+            if (notify) {
+                notify(
+                    `Succesfully deleted ${student.student.person.name}`,
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+            // We need to let the encompassing component know the current student was deleted
+            if (studentDeleted !== undefined) {
+                studentDeleted();
+            }
+        } else if (response.reason) {
+            if (notify) {
+                notify(
+                    `Could not delete ${student.student.person.name}: ${response.reason}`,
+                    NotificationType.ERROR,
+                    3000
+                );
+            }
+        }
+    };
+
     return (
         <div>
             <Modal
@@ -316,6 +358,21 @@ export const StudentOverview: React.FC<{
                     >
                         CONFIRM
                     </button>
+                </div>
+            </Modal>
+            <Modal
+                visible={deleteModal}
+                handleClose={() => setDeleteModal(false)}
+                title={"Student deletion"}
+            >
+                <div className={styles.modalContent}>
+                    <p>
+                        Warning! You are about to delete{" "}
+                        {student.student.person.name}. Deleting a student will
+                        result in data loss. Are you sure that you wish to
+                        continue?
+                    </p>
+                    <button onClick={() => deleteStudent()}>DELETE</button>
                 </div>
             </Modal>
             {clearSelection !== undefined ? (
@@ -479,6 +536,15 @@ export const StudentOverview: React.FC<{
                     </div>
                 </div>
             </div>
+            {/* Only admins are allowed to delete students */}
+            {isAdmin ? (
+                <button
+                    className={styles.delete}
+                    onClick={() => setDeleteModal(true)}
+                >
+                    DELETE
+                </button>
+            ) : null}
         </div>
     );
 };

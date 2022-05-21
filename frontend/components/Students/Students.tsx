@@ -121,14 +121,14 @@ export const Students: React.FC<{
      */
     const handleKeyPress = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
-            clearSelection();
+            clearSelection().then();
         }
     };
 
     /**
      * Clears the current selection
      */
-    const clearSelection = () => {
+    const clearSelection = async () => {
         if (!alwaysLimited) {
             setDisplay(Display.FULL);
         }
@@ -137,7 +137,20 @@ export const Students: React.FC<{
         const params = new URLSearchParams(window.location.search);
         params.delete("id");
         // push the url
-        router.push(`${window.location.pathname}?${params.toString()}`).then();
+        return await router.push(
+            `${window.location.pathname}?${params.toString()}`
+        );
+    };
+
+    /**
+     * Called when the current selected student is deleted
+     */
+    const studentDeleted = () => {
+        clearSelection().then(() => {
+            if (params !== undefined) {
+                search(params, pagination.page).then();
+            }
+        });
     };
 
     /**
@@ -216,7 +229,7 @@ export const Students: React.FC<{
      */
     const filterManual = async (params: StudentFilterParams) => {
         setParams(params);
-        clearSelection();
+        clearSelection().then();
         setSelectedStudent(-1);
         search(params, 0).then();
     };
@@ -232,7 +245,7 @@ export const Students: React.FC<{
             "currentPageStudent"
         );
         const currentPageInt =
-            currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
+            currentPageStr !== null && new RegExp("d+").test(currentPageStr) // check if the argument only exists out of numbers
                 ? Number(currentPageStr)
                 : 0;
         setPagination({
@@ -446,6 +459,7 @@ export const Students: React.FC<{
                     student={students[selectedStudent]}
                     year={params?.osocYear}
                     clearSelection={clearSelection}
+                    studentDeleted={studentDeleted}
                 />
             ) : null}
         </div>

@@ -132,3 +132,8 @@
   align-items: center;
   gap: 1rem;
 }
+
+.delete {
+  background-color: var(--error-100);
+  margin-left: 1rem;
+}
