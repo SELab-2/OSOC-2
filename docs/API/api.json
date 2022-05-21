@@ -310,7 +310,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/LoginUser"
+                        "$ref": "#/components/schemas/CoachUser"
                       }
                     }
                   }
@@ -468,153 +468,18 @@
         }
       }
     },
-    "/coach/request": {
-      "get": {
-        "tags": [
-          "coach"
-        ],
-        "description": "Lists all coach requests.",
-        "operationId": "all_coach_requests",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data list contains info of all coach requests.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "activated": {
-                            "type": "string"
-                          },
-                          "admin": {
-                            "type": "boolean"
-                          },
-                          "coach": {
-                            "type": "boolean"
-                          },
-                          "person_data": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "number"
-                              },
-                              "name": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "403": {
-            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
-    "/followup/all": {
+    "/followup/<job-application-id>": {
       "get": {
         "tags": [
           "followup"
         ],
-        "description": "Returns a list of all the followups in the system.",
-        "operationId": "all_followups",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data list contains info of all followups in the system.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Followup"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "403": {
-            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "412": {
-            "description": "The data you requested does not exist (yet)."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
-    "/followup/<followup-id>": {
-      "get": {
-        "tags": [
-          "followup"
-        ],
-        "description": "Lists all details about the followup with the given id.",
+        "description": "Lists all details about the followup matching the job application with the given id.",
         "operationId": "followup_id_get",
         "parameters": [
           {
             "name": "id",
             "in": "header",
-            "description": "The id of the followup.",
+            "description": "The id of the job application.",
             "required": true,
             "schema": {
               "type": "number"
@@ -665,13 +530,13 @@
         "tags": [
           "followup"
         ],
-        "description": "Attempts to update a followup with the given id and type.",
+        "description": "Attempts to update a followup matching the job application with the given id and type.",
         "operationId": "followup_id_post",
         "parameters": [
           {
             "name": "id",
             "in": "header",
-            "description": "The id of the followup.",
+            "description": "The id of the job application.",
             "required": true,
             "schema": {
               "type": "number"
@@ -694,11 +559,12 @@
             "schema": {
               "type": "string",
               "enum": [
-                "DRAFT",
-                "FAILED",
-                "NONE",
-                "SCHEDULED",
-                "SENT"
+                "APPLIED",
+                "AWAITING_PROJECT",
+                "APPROVED",
+                "CONTRACT_CONFIRMED",
+                "CONTRACT_DECLINED",
+                "REJECTED"
               ]
             }
           }
@@ -853,7 +719,7 @@
           {
             "name": "password",
             "in": "header",
-            "description": "The hashed password of the user to log in.",
+            "description": "The password of the user to log in.",
             "required": true,
             "schema": {
               "type": "string"
@@ -976,14 +842,14 @@
               }
             }
           },
-          "204": {
-            "description": "This endpoint requires an ID. The ID you provided was invalid."
-          },
           "400": {
             "description": "One of the arguments is incorrect or not present."
           },
           "401": {
             "description": "The user has to log in first."
+          },
+          "403": {
+            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1110,14 +976,14 @@
                           }
                         }
                       }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
                     }
                   }
                 }
               }
             }
-          },
-          "204": {
-            "description": "This endpoint requires an ID. The ID you provided was invalid."
           },
           "401": {
             "description": "The user has to log in first."
@@ -1163,14 +1029,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The specified osoc edition was removed. The response is an empty object.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "The specified osoc edition was removed. The response is an empty object."
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -1214,6 +1073,15 @@
         "operationId": "create_project",
         "parameters": [
           {
+            "name": "sessionkey",
+            "in": "header",
+            "description": "Your current session key.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "end",
             "in": "header",
             "description": "The end date of this project.",
@@ -1250,12 +1118,15 @@
             }
           },
           {
-            "name": "positions",
+            "name": "coaches",
             "in": "header",
-            "description": "The amount of positions for the project.",
+            "description": "The coaches for this project.",
             "required": true,
             "schema": {
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             }
           },
           {
@@ -1287,6 +1158,15 @@
             "name": "start",
             "in": "header",
             "description": "The start date of this project.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "header",
+            "description": "The description of this project.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1462,22 +1342,6 @@
             }
           },
           {
-            "name": "deleteRoles",
-            "in": "header",
-            "description": "The id of the roles to delete.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "roles": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          {
             "name": "end",
             "in": "header",
             "description": "The end date of this project.",
@@ -1486,7 +1350,7 @@
             }
           },
           {
-            "name": "modifyRoles",
+            "name": "roles",
             "in": "header",
             "description": "The roles to modify.",
             "schema": {
@@ -1497,8 +1361,8 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": {
-                        "type": "number"
+                      "name": {
+                        "type": "string"
                       },
                       "positions": {
                         "type": "number"
@@ -1539,6 +1403,38 @@
             "description": "The start date of this project.",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "addCoaches",
+            "in": "header",
+            "description": "The ID's of the coaches to add to this project.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coaches": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "removeCoaches",
+            "in": "header",
+            "description": "The ID's of the coaches to remove from this project.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "coaches": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
             }
           }
         ],
@@ -1627,137 +1523,6 @@
         }
       }
     },
-    "/project/<project-id>/draft": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Lists all drafted students of the selected project.",
-        "operationId": "all_students_project",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "header",
-            "description": "The id of the project.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The students list contains info about all drafted students of this project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Drafted_students_project"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Add the student to the selected project.",
-        "operationId": "add_student_to_project",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "header",
-            "description": "The id of the project.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "role",
-            "in": "header",
-            "description": "The selected role for this student.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "studentId",
-            "in": "header",
-            "description": "The id of the selected student.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data object contains the role of the student if the student contributes to the project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Draft_student_project"
-                }
-              }
-            }
-          },
-          "204": {
-            "description": "The selected student is not assigned to this project."
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "403": {
-            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "409": {
-            "description": "That role doesn't exist."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
     "/project/<project-id>/assignee": {
       "delete": {
         "tags": [
@@ -1803,53 +1568,6 @@
           },
           "401": {
             "description": "The user has to log in first."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
-    "/project/conflicts": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Returns a list of all project conflicts.",
-        "operationId": "project_conflicts",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data list contains the conflicting projects for the student with id 'student'.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Project_conflicts"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "412": {
-            "description": "The data you requested does not exist (yet)."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -1946,7 +1664,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Updated sessionkey as hex string E.g. \"A1BEF4\".",
+            "description": "A new session key.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2331,6 +2049,15 @@
             }
           },
           {
+            "name": "job_application_id",
+            "in": "header",
+            "description": "The id of the student's job application.",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
             "name": "suggestion",
             "in": "header",
             "description": "The suggestion for the student.",
@@ -2351,40 +2078,7 @@
         ],
         "responses": {
           "200": {
-            "description": "This contains info about a suggestion.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "decision": {
-                      "type": "string",
-                      "enum": [
-                        "YES",
-                        "MAYBE",
-                        "NO"
-                      ]
-                    },
-                    "evaluation_id": {
-                      "type": "number"
-                    },
-                    "isFinal": {
-                      "type": "boolean"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "senderFirstname": {
-                      "type": "string"
-                    },
-                    "senderLastname": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "This contains info about a suggestion. The response is an empty object"
           },
           "204": {
             "description": "This endpoint requires an ID. The ID you provided was invalid."
@@ -2418,7 +2112,7 @@
             "description": "The id of the student.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           },
           {
@@ -2428,6 +2122,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "job_application_id",
+            "in": "header",
+            "description": "The id of the student's job application.",
+            "required": true,
+            "schema": {
+              "type": "number"
             }
           },
           {
@@ -3024,6 +2727,9 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
                     }
                   }
                 }
@@ -3289,68 +2995,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "login_user": {
-                          "type": "object",
-                          "properties": {
-                            "account_status": {
-                              "type": "string",
-                              "enum": [
-                                "ACTIVATED",
-                                "DISABLED",
-                                "PENDING"
-                              ]
-                            },
-                            "is_admin": {
-                              "type": "boolean"
-                            },
-                            "is_coach": {
-                              "type": "boolean"
-                            },
-                            "login_user_id": {
-                              "type": "number"
-                            },
-                            "password": {
-                              "type": "string"
-                            },
-                            "person": {
-                              "type": "object",
-                              "properties": {
-                                "email": {
-                                  "type": "string"
-                                },
-                                "firstname": {
-                                  "type": "string"
-                                },
-                                "github": {
-                                  "type": "string"
-                                },
-                                "github_id": {
-                                  "type": "string"
-                                },
-                                "lastname": {
-                                  "type": "string"
-                                },
-                                "person_id": {
-                                  "type": "number"
-                                }
-                              }
-                            },
-                            "person_id": {
-                              "type": "number"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "sessionkey": {
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/LoginUser"
                 }
               }
             }
@@ -3417,7 +3062,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The user associated with the session key has been modified. The response is an empty object.",
+            "description": "The user associated with the session key has been modified. The response contains either the old session key, or a new one if the password has been changed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3549,6 +3194,9 @@
                       "items": {
                         "$ref": "#/components/schemas/LoginUser"
                       }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
                     }
                   }
                 }
@@ -3633,6 +3281,48 @@
       "LoginUser": {
         "type": "object",
         "properties": {
+          "login_user_id": {
+            "type": "number"
+          },
+          "account_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "DISABLED",
+              "PENDING"
+            ]
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_coach": {
+            "type": "boolean"
+          },
+          "person": {
+            "type": "object",
+            "properties": {
+              "person_id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              },
+              "github": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "xml": {
+          "name": "LoginUser"
+        }
+      },
+      "CoachUser": {
+        "type": "object",
+        "properties": {
           "activated": {
             "type": "string",
             "enum": [
@@ -3646,6 +3336,9 @@
           },
           "coach": {
             "type": "boolean"
+          },
+          "login_user_id": {
+            "type": "number"
           },
           "person_data": {
             "type": "object",
@@ -3720,11 +3413,12 @@
           "status": {
             "type": "string",
             "enum": [
-              "DRAFT",
-              "FAILED",
-              "NONE",
-              "SCHEDULED",
-              "SENT"
+              "APPLIED",
+              "AWAITING_PROJECT",
+              "APPROVED",
+              "CONTRACT_CONFIRMED",
+              "CONTRACT_DECLINED",
+              "REJECTED"
             ]
           },
           "student": {
@@ -3753,9 +3447,6 @@
           "partner": {
             "type": "string"
           },
-          "positions": {
-            "type": "number"
-          },
           "roles": {
             "type": "array",
             "items": {
@@ -3781,6 +3472,9 @@
       "Project_coach": {
         "type": "object",
         "properties": {
+          "project_user_id": {
+            "type": "number"
+          },
           "login_user": {
             "type": "object",
             "properties": {
@@ -3801,62 +3495,6 @@
         },
         "xml": {
           "name": "Project_coach"
-        }
-      },
-      "Project_contracts": {
-        "type": "array",
-        "xml": {
-          "name": "Project_students"
-        },
-        "items": {
-          "type": "object",
-          "properties": {
-            "contract_id": {
-              "type": "number"
-            },
-            "contract_status": {
-              "type": "string",
-              "enum": [
-                "APPROVED",
-                "CANCELLED",
-                "DRAFT",
-                "SENT",
-                "SIGNED",
-                "WAIT_APPROVAL"
-              ]
-            },
-            "project_role": {
-              "type": "object",
-              "properties": {
-                "positions": {
-                  "type": "number"
-                },
-                "project_id": {
-                  "type": "number"
-                },
-                "project_role_id": {
-                  "type": "number"
-                },
-                "role_id": {
-                  "type": "number"
-                },
-                "role": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            },
-            "student": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/StudentInfo"
-              }
-            }
-          }
         }
       },
       "Project_coaches": {
@@ -3886,9 +3524,6 @@
           "partner": {
             "type": "string"
           },
-          "positions": {
-            "type": "number"
-          },
           "description": {
             "type": "string",
             "nullable": true
@@ -3911,7 +3546,94 @@
             "type": "string"
           },
           "contracts": {
-            "$ref": "#/components/schemas/Project_contracts"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "student": {
+                  "type": "object",
+                  "properties": {
+                    "student_id": {
+                      "type": "number"
+                    },
+                    "person": {
+                      "$ref": "#/components/schemas/PersonAndID"
+                    },
+                    "alumni": {
+                      "type": "boolean"
+                    },
+                    "nickname": {
+                      "type": "string"
+                    },
+                    "gender": {
+                      "type": "string"
+                    },
+                    "pronouns": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "project_role": {
+                  "type": "object",
+                  "properties": {
+                    "positions": {
+                      "type": "number"
+                    },
+                    "project_id": {
+                      "type": "number"
+                    },
+                    "project_role_id": {
+                      "type": "number"
+                    },
+                    "role_id": {
+                      "type": "number"
+                    },
+                    "role": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "contract_id": {
+                  "type": "number"
+                },
+                "contract_status": {
+                  "type": "string",
+                  "enum": [
+                    "DRAFT",
+                    "APPROVED",
+                    "CANCELLED",
+                    "WAIT_APPROVAL",
+                    "SIGNED",
+                    "SENT"
+                  ]
+                },
+                "login_user": {
+                  "type": "object",
+                  "properties": {
+                    "login_user_id": {
+                      "type": "number"
+                    },
+                    "is_admin": {
+                      "type": "boolean"
+                    },
+                    "is_coach": {
+                      "type": "boolean"
+                    },
+                    "person": {
+                      "$ref": "#/components/schemas/PersonAndID"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "xml": {
@@ -3932,6 +3654,9 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Project_list"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
           }
         },
         "xml": {
@@ -3956,8 +3681,8 @@
           "end_date": {
             "type": "string"
           },
-          "positions": {
-            "type": "number"
+          "description": {
+            "type": "string"
           },
           "osoc_id": {
             "type": "number"
@@ -3975,93 +3700,38 @@
                 }
               }
             }
+          },
+          "coaches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "project_user_id": {
+                  "type": "number"
+                },
+                "login_user": {
+                  "type": "object",
+                  "properties": {
+                    "person": {
+                      "$ref": "#/components/schemas/Person"
+                    },
+                    "is_coach": {
+                      "type": "boolean"
+                    },
+                    "is_admin": {
+                      "type": "boolean"
+                    },
+                    "login_user_id": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "xml": {
           "name": "Modify_project"
-        }
-      },
-      "Drafted_students_project": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "students": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "APPROVED",
-                    "CANCELLED",
-                    "DRAFT",
-                    "SENT",
-                    "SIGNED",
-                    "WAIT_APPROVAL"
-                  ]
-                },
-                "student": {
-                  "$ref": "#/components/schemas/StudentInfo"
-                }
-              }
-            }
-          }
-        },
-        "xml": {
-          "name": "Drafted_students_project"
-        }
-      },
-      "Draft_student_project": {
-        "type": "object",
-        "properties": {
-          "drafted": {
-            "type": "boolean"
-          },
-          "role": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Draft_student_project"
-        }
-      },
-      "Project_conflicts": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "projects": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "number"
-                      },
-                      "name": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "student": {
-                  "type": "number"
-                }
-              }
-            }
-          }
-        },
-        "xml": {
-          "name": "Project_conflicts"
         }
       },
       "All_roles": {
@@ -4300,6 +3970,36 @@
               }
             }
           },
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evaluation": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "login_user": {
+                        "type": "object",
+                        "properties": {
+                          "login_user_id": {
+                            "type": "number"
+                          },
+                          "person": {
+                            "$ref": "#/components/schemas/Person"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "osoc": {
+                  "type": "number"
+                }
+              }
+            }
+          },
           "jobApplication": {
             "type": "object",
             "properties": {
@@ -4343,13 +4043,14 @@
               },
               "email_status": {
                 "type": "string",
-                "default": "NONE",
+                "default": "APPLIED",
                 "enum": [
-                  "DRAFT",
-                  "FAILED",
-                  "NONE",
-                  "SCHEDULED",
-                  "SENT"
+                  "APPLIED",
+                  "AWAITITING_PROJECT",
+                  "APPROVED",
+                  "CONTRACT_CONFIRMED",
+                  "CONTRACT_DECLINED",
+                  "REJECTED"
                 ]
               },
               "fun_fact": {
@@ -4434,6 +4135,9 @@
             "items": {
               "$ref": "#/components/schemas/StudentInfo"
             }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
           }
         },
         "xml": {
@@ -4443,31 +4147,34 @@
       "AllStudentSuggestions": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "decision": {
-                  "type": "string",
-                  "enum": [
-                    "MAYBE"
-                  ]
-                },
-                "evaluation_id": {
-                  "type": "number"
-                },
-                "isFinal": {
-                  "type": "boolean"
-                },
-                "reason": {
-                  "type": "string"
-                },
-                "senderFirstname": {
-                  "type": "string"
-                },
-                "senderLastname": {
-                  "type": "string"
+          "evaluation": {
+            "type": "object",
+            "properties": {
+              "evaluations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "login_user": {
+                      "type": "object",
+                      "properties": {
+                        "login_user_id": {
+                          "type": "number"
+                        },
+                        "person": {
+                          "$ref": "#/components/schemas/Person"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "osoc": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "number"
+                  }
                 }
               }
             }
@@ -4475,6 +4182,31 @@
         },
         "xml": {
           "name": "AllStudentSuggestions"
+        }
+      },
+      "PersonAndID": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "github": {
+            "type": "string",
+            "nullable": true
+          },
+          "github_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "PersonAndID"
         }
       },
       "Person": {
@@ -4490,9 +4222,6 @@
           "github_id": {
             "type": "string",
             "nullable": true
-          },
-          "person_id": {
-            "type": "number"
           },
           "name": {
             "type": "string"
@@ -4688,6 +4417,17 @@
         "properties": {
           "valid": {
             "type": "boolean"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "count": {
+            "type": "number"
           }
         }
       }

@@ -265,6 +265,7 @@ export interface ClientToServerEvents {
     studentDecisionSent: (studentId: number) => void;
     studentDelete: (studentId: number) => void;
     projectCreated: () => void;
+    projectDeleted: () => void;
     projectModified: (projectId: number) => void;
     osocDeleted: () => void;
     osocCreated: () => void;

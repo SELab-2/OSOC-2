@@ -768,7 +768,7 @@ export namespace InternalTypes {
             role_id: number;
             positions: number;
             role: { name: string };
-        };
+        } | null;
         contract_id: number;
         contract_status: contract_status_enum;
         login_user: {

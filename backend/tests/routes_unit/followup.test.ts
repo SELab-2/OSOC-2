@@ -183,6 +183,7 @@ beforeEach(() => {
     osocMock.getLatestOsoc.mockResolvedValue(osocdat);
     osocMock.getOsocById.mockResolvedValue(osocdat);
     jappMock.getJobApplicationByYear.mockResolvedValue(jobapps);
+    jappMock.getJobApplication.mockResolvedValue(jobapps[0]);
     jappMock.getLatestJobApplicationOfStudent.mockImplementation((v) =>
         v == 5
             ? Promise.resolve(jobapps[0])
@@ -213,44 +214,11 @@ afterEach(() => {
     osocMock.getLatestOsoc.mockReset();
     osocMock.getOsocById.mockReset();
     jappMock.getJobApplicationByYear.mockReset();
+    jappMock.getJobApplication.mockReset();
     jappMock.getLatestJobApplicationOfStudent.mockReset();
     jappMock.changeEmailStatusOfJobApplication.mockReset();
 
     ormlMock.getOsocYearsForLoginUser.mockReset();
-});
-
-test("Can get all followup data", async () => {
-    const req: express.Request = getMockReq();
-
-    await expect(followup.listFollowups(req)).resolves.toStrictEqual({
-        data: jobapps.map((x) => ({
-            student: x.student_id,
-            application: x.job_application_id,
-            status: x.email_status,
-        })),
-    });
-    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
-    expectCall(reqMock.parseFollowupAllRequest, req);
-    expect(osocMock.getLatestOsoc).toHaveBeenCalledTimes(1);
-    expectCall(jappMock.getJobApplicationByYear, osocdat.year);
-    expectNoCall(utilMock.isAdmin);
-});
-
-test("Cannot get all followup data because invalid year permissions", async () => {
-    const req: express.Request = getMockReq();
-
-    // set the visible years NOT to 2022
-    ormlMock.getOsocYearsForLoginUser.mockReset();
-    ormlMock.getOsocYearsForLoginUser.mockResolvedValue([2000, 2001]);
-
-    await expect(followup.listFollowups(req)).rejects.toBe(
-        errors.cookInsufficientRights()
-    );
-    expectCall(utilMock.checkSessionKey, { sessionkey: "abcd" });
-    expectCall(reqMock.parseFollowupAllRequest, req);
-    expect(osocMock.getLatestOsoc).toHaveBeenCalledTimes(1);
-    expectNoCall(jappMock.getJobApplicationByYear);
-    expectNoCall(utilMock.isAdmin);
 });
 
 test("Can get single followup", async () => {
@@ -262,7 +230,7 @@ test("Can get single followup", async () => {
     });
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
-    expectCall(jappMock.getLatestJobApplicationOfStudent, 5);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
     expectNoCall(utilMock.isAdmin);
 });
 
@@ -277,7 +245,7 @@ test("Cannot get single followup because invalid year permissions", async () => 
     );
     expectCall(utilMock.checkSessionKey, { sessionkey: "abcd", id: 5 });
     expectCall(reqMock.parseGetFollowupStudentRequest, req);
-    expectCall(jappMock.getLatestJobApplicationOfStudent, 5);
+    expect(jappMock.getJobApplication).toHaveBeenCalledTimes(1);
     expectNoCall(utilMock.isAdmin);
 });
 

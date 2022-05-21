@@ -6,6 +6,7 @@ import * as ormOsoc from "../orm_functions/osoc";
 import * as ormPr from "../orm_functions/project";
 import * as ormPrRole from "../orm_functions/project_role";
 import * as ormPU from "../orm_functions/project_user";
+import * as ormC from "../orm_functions/contract";
 import * as ormOs from "../orm_functions/osoc";
 import * as ormRole from "../orm_functions/role";
 import * as rq from "../request";
@@ -14,7 +15,6 @@ import * as util from "../utility";
 import { checkYearPermissionProject, errors } from "../utility";
 import { getOsocById } from "../orm_functions/osoc";
 import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
-import * as ormJo from "../orm_functions/job_application";
 import { getJobApplication } from "../orm_functions/job_application";
 
 /**
@@ -286,15 +286,15 @@ export async function modProject(
         .then(checkYearPermissionProject)
         .then((checked) => util.isValidID(checked.data, "project"));
 
-    const jobApplication = await ormJo.getJobApplication(checkedId.id);
+    const project = await ormPr.getProjectById(checkedId.id);
 
     const osoc = await ormOsoc.getLatestOsoc();
 
-    if (jobApplication === null) {
+    if (project === null) {
         return Promise.reject(errors.cookInvalidID());
     }
 
-    if (osoc === null || jobApplication.osoc.year !== osoc.year) {
+    if (osoc === null || project.osoc.year !== osoc.year) {
         return Promise.reject(errors.cookWrongOsocYear());
     }
 
@@ -416,41 +416,25 @@ export async function deleteProject(
         .then(checkYearPermissionProject)
         .then((parsed) => util.isValidID(parsed.data, "project"))
         .then(async (parsed) => {
+            const [project, latestOsoc] = await Promise.all([
+                ormPr.getProjectById(parsed.id),
+                ormOsoc.getLatestOsoc(),
+            ]);
+
+            if (project === null || latestOsoc === null) {
+                return Promise.reject(errors.cookInvalidID());
+            }
+
+            if (project.osoc.year === latestOsoc.year) {
+                for (const contract of await ormC.contractsByProject(
+                    parsed.id
+                )) {
+                    await ormCtr.removeContract(contract.contract_id);
+                }
+            }
             return ormPr
-                .deleteProject(parsed.id)
+                .deleteProjectFromDB(parsed.id)
                 .then(() => Promise.resolve({}));
-        });
-}
-
-/**
- *  Attempts to get all drafted students in the system for a project.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function getDraftedStudents(
-    req: express.Request
-): Promise<Responses.ProjectDraftedStudents> {
-    return rq
-        .parseGetDraftedStudentsRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(checkYearPermissionProject)
-        .then(async (parsed) => {
-            const prName = await ormPr
-                .getProjectById(parsed.data.id)
-                .then(util.getOrReject)
-                .then((pr) => pr.name);
-
-            return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
-                Promise.resolve({
-                    id: parsed.data.id,
-                    name: util.getOrDefault(prName, "(unnamed project)"),
-                    students: arr.map((obj) => ({
-                        student: obj.student,
-                        status: obj.contract_status,
-                    })),
-                })
-            );
         });
 }
 
@@ -515,73 +499,6 @@ export async function createProjectRoleFor(
                 project_role_id: res.project_role_id,
             })
         );
-}
-
-export async function modProjectStudent(
-    req: express.Request
-): Promise<Responses.ModProjectStudent> {
-    return rq
-        .parseDraftStudentRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(checkYearPermissionProject)
-        .then(async (parsed) => {
-            return ormCtr
-                .contractsByProject(parsed.data.id)
-                .then((arr) =>
-                    arr.filter(
-                        (v) => v.student?.student_id == parsed.data.studentId
-                    )
-                )
-                .then((arr) => {
-                    if (arr.length == 0) {
-                        return Promise.reject({
-                            http: 204,
-                            reason: "The selected student is not assigned to this project.",
-                        });
-                    }
-
-                    if (arr.length > 1) {
-                        return Promise.reject({
-                            http: 409,
-                            reason: "The request is ambiguous.",
-                        });
-                    }
-
-                    return Promise.resolve(arr[0]);
-                })
-                .then(async (ctr) => {
-                    return getFreeSpotsFor(parsed.data.role, parsed.data.id)
-                        .catch(() =>
-                            createProjectRoleFor(
-                                parsed.data.id,
-                                parsed.data.role
-                            )
-                        )
-                        .then((remaining) => {
-                            if (remaining.count <= 0) {
-                                return Promise.reject({
-                                    http: 409,
-                                    reason: "Can't add this role to the student. There are no more vacant spots.",
-                                });
-                            }
-
-                            return ormCtr.updateContract({
-                                contractId: ctr.contract_id,
-                                loginUserId: parsed.userId,
-                                projectRoleId: remaining.project_role_id,
-                            });
-                        });
-                })
-                .then((res) =>
-                    ormPrRole.getProjectRoleById(res.project_role_id)
-                )
-                .then((res) =>
-                    Promise.resolve({
-                        drafted: true,
-                        role: util.getOrDefault(res?.role.name, ""),
-                    })
-                );
-        });
 }
 
 export async function unAssignCoach(
@@ -706,6 +623,16 @@ export async function unAssignStudent(
             return ormCtr
                 .contractsForStudent(Number(checked.data.studentId))
                 .then((ctrs) =>
+                    Promise.all(
+                        ctrs.map((x) =>
+                            util.getOrReject(x.project_role).then((y) => ({
+                                ...x,
+                                project_role: y,
+                            }))
+                        )
+                    )
+                )
+                .then((ctrs) =>
                     ctrs.filter(
                         (contr) =>
                             contr.project_role.project_id == checked.data.id
@@ -804,10 +731,11 @@ export async function assignStudent(
     // check if no contracts yet
     await ormCtr
         .contractsForStudent(checked.data.studentId)
+        .then((data) =>
+            Promise.all(data.map((x) => util.getOrReject(x.project_role)))
+        )
         .then((data) => {
-            return data.filter(
-                (x) => x.project_role.project.osoc_id === latestOsoc.osoc_id
-            );
+            return data.filter((x) => x.project.osoc_id === latestOsoc.osoc_id);
         })
         .then((filtered) => {
             return filtered.length > 0
@@ -966,9 +894,6 @@ export function getRouter(): express.Router {
 
     util.route(router, "post", "/:id", modProject);
     util.route(router, "delete", "/:id", deleteProject);
-
-    util.route(router, "get", "/:id/draft", getDraftedStudents);
-    util.route(router, "post", "/:id/draft", modProjectStudent);
 
     util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);

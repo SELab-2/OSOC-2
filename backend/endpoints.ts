@@ -40,6 +40,17 @@ export function attach(app: express.Application): void {
         app.use(home + "/verify", verify.getRouter());
     });
 
+    app.use(config.global.preferred + "/coffee", (req, res) => {
+        res.status(418).send({
+            steps: [
+                "you try to make coffee",
+                "I'm a teapot",
+                "this operation fails :(",
+                "try again next time :(",
+            ],
+        });
+    });
+
     app.use(
         (req: express.Request, res: express.Response): Promise<void> =>
             util.replyError(res, util.errors.cookNonExistent(req.url))
