@@ -310,9 +310,12 @@ export const StudentOverview: React.FC<{
             .then((res) => res.json())
             .catch((err) => console.log(err));
         if (response.success) {
+            if (student.student?.student_id) {
+                socket.emit("studentDelete", student.student?.student_id);
+            }
             if (notify) {
                 notify(
-                    `Succesfully deleted ${student.student.person.name}`,
+                    `Successfully deleted ${student.student.person.name}`,
                     NotificationType.SUCCESS,
                     2000
                 );

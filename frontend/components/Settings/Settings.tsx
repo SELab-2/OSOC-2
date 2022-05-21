@@ -145,7 +145,7 @@ export const Settings: React.FC<{
                 await fetchUser();
                 if (notify) {
                     notify(
-                        "Your credentials are succesfully changed",
+                        "Your credentials are successfully changed",
                         NotificationType.SUCCESS,
                         2000
                     );

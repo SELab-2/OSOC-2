@@ -93,6 +93,7 @@ export const Students: React.FC<{
         return () => {
             document.body.removeEventListener("keydown", handleKeyPress);
             socket.off("studentSuggestionCreated");
+            socket.off("studentWasDeleted");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -101,7 +102,11 @@ export const Students: React.FC<{
      * update on websocket event if the student with the id that was changed is the student that is currently loaded
      */
     useEffect(() => {
+        // delete old listeners
         socket.off("studentSuggestionCreated");
+        socket.off("studentWasDeleted");
+
+        // add new listeners
         socket.on("studentSuggestionCreated", (studentId: number) => {
             if (params !== undefined) {
                 for (const student of students) {
@@ -112,6 +117,12 @@ export const Students: React.FC<{
                 }
             }
         });
+
+        socket.on("studentWasDeleted", () => {
+            if (params !== undefined) {
+                filterAutomatic(params).then();
+            }
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, params, pagination]);
 

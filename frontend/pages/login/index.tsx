@@ -122,7 +122,7 @@ const Index: NextPage = () => {
             if (response && !response.success) {
                 setLoginBackendError(`Failed to login. ${response.reason}`);
             }
-            // The user is succesfully logged in and we can use the sessionkey provided by the backend
+            // The user is successfully logged in and we can use the sessionkey provided by the backend
             if (response.success) {
                 if (setSessionKey) {
                     setSessionKey(response.sessionkey);

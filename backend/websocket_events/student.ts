@@ -5,6 +5,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from "../types";
+import {student} from "@prisma/client";
 /* istanbul ignore file */
 
 /**
@@ -30,7 +31,11 @@ export function registerStudentHandlers(
     const studentSuggestionCreated = (studentId: number) => {
         socket.broadcast.emit("studentSuggestionCreated", studentId);
     };
+    const studentDeleted = (studentId: number) => {
+        socket.broadcast.emit("studentWasDeleted", studentId);
+    };
 
     socket.on("studentSuggestionSent", studentSuggestionCreated);
     socket.on("studentDecisionSent", studentSuggestionCreated);
+    socket.on("studentDelete", studentDeleted);
 }
