@@ -37,6 +37,7 @@ export const Projects: React.FC = () => {
         return () => {
             socket.off("projectWasCreatedOrDeleted");
             socket.off("projectWasModified");
+            socket.off("studentWasDeleted");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -45,6 +46,7 @@ export const Projects: React.FC = () => {
         // remove earlier listeners
         socket.off("projectWasCreatedOrDeleted");
         socket.off("projectWasModified");
+        socket.off("studentWasDeleted");
 
         // add the new listeners
         socket.on("projectWasCreatedOrDeleted", () => {
@@ -58,6 +60,20 @@ export const Projects: React.FC = () => {
                     if (project.id === projectId) {
                         filterAutomatic(params).then();
                         break;
+                    }
+                }
+            }
+        });
+        socket.on("studentWasDeleted", (studentId: number) => {
+            if (params !== undefined) {
+                for (const project of projects) {
+                    for (const contract of project.contracts) {
+                        if (
+                            contract.student?.student.student_id === studentId
+                        ) {
+                            filterAutomatic(params).then();
+                            break;
+                        }
                     }
                 }
             }
