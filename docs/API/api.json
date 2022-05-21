@@ -1400,22 +1400,6 @@
             }
           },
           {
-            "name": "deleteRoles",
-            "in": "header",
-            "description": "The id of the roles to delete.",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "roles": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  }
-                }
-              }
-            }
-          },
-          {
             "name": "end",
             "in": "header",
             "description": "The end date of this project.",
@@ -1424,7 +1408,7 @@
             }
           },
           {
-            "name": "modifyRoles",
+            "name": "roles",
             "in": "header",
             "description": "The roles to modify.",
             "schema": {
@@ -1484,9 +1468,14 @@
             "in": "header",
             "description": "The ID's of the coaches to add to this project.",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "number"
+              "type": "object",
+              "properties": {
+                "coaches": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
               }
             }
           },
@@ -1495,9 +1484,14 @@
             "in": "header",
             "description": "The ID's of the coaches to remove from this project.",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "number"
+              "type": "object",
+              "properties": {
+                "coaches": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
               }
             }
           }
@@ -3719,9 +3713,6 @@
           "partner": {
             "type": "string"
           },
-          "positions": {
-            "type": "number"
-          },
           "description": {
             "type": "string",
             "nullable": true
@@ -3755,7 +3746,7 @@
                       "type": "number"
                     },
                     "person": {
-                      "$ref": "#/components/schemas/Person"
+                      "$ref": "#/components/schemas/PersonAndID"
                     },
                     "alumni": {
                       "type": "boolean"
@@ -3771,6 +3762,62 @@
                     },
                     "phone_number": {
                       "type": "string"
+                    }
+                  }
+                },
+                "project_role": {
+                  "type": "object",
+                  "properties": {
+                    "positions": {
+                      "type": "number"
+                    },
+                    "project_id": {
+                      "type": "number"
+                    },
+                    "project_role_id": {
+                      "type": "number"
+                    },
+                    "role_id": {
+                      "type": "number"
+                    },
+                    "role": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "contract_id": {
+                  "type": "number"
+                },
+                "contract_status": {
+                  "type": "string",
+                  "enum": [
+                    "DRAFT",
+                    "APPROVED",
+                    "CANCELLED",
+                    "WAIT_APPROVAL",
+                    "SIGNED",
+                    "SENT"
+                  ]
+                },
+                "login_user": {
+                  "type": "object",
+                  "properties": {
+                    "login_user_id": {
+                      "type": "number"
+                    },
+                    "is_admin": {
+                      "type": "boolean"
+                    },
+                    "is_coach": {
+                      "type": "boolean"
+                    },
+                    "person": {
+                      "$ref": "#/components/schemas/PersonAndID"
                     }
                   }
                 }
@@ -4399,6 +4446,31 @@
           "name": "AllStudentSuggestions"
         }
       },
+      "PersonAndID": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "github": {
+            "type": "string",
+            "nullable": true
+          },
+          "github_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "xml": {
+          "name": "PersonAndID"
+        }
+      },
       "Person": {
         "type": "object",
         "properties": {
@@ -4412,9 +4484,6 @@
           "github_id": {
             "type": "string",
             "nullable": true
-          },
-          "person_id": {
-            "type": "number"
           },
           "name": {
             "type": "string"
