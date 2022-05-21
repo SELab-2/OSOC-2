@@ -21,6 +21,7 @@ import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
 import { useSockets } from "../../contexts/socketProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultUser } from "../../defaultUser";
 
 /**
  * Constructs the complete students page with filter included
@@ -65,9 +66,13 @@ export const Students: React.FC<{
                 const id_number = Number(id);
                 if (!isNaN(id_number)) {
                     for (let i = 0; i < filteredStudents.length; i++) {
-                        if (
-                            filteredStudents[i].student.student_id === id_number
-                        ) {
+                        let student;
+                        if (filteredStudents[i] === null) {
+                            student = defaultUser;
+                        } else {
+                            student = filteredStudents[i];
+                        }
+                        if (student.student.student_id === id_number) {
                             setSelectedStudent(i);
                             index = i;
                         }
@@ -109,7 +114,10 @@ export const Students: React.FC<{
         // add new listeners
         socket.on("studentSuggestionCreated", (studentId: number) => {
             if (params !== undefined) {
-                for (const student of students) {
+                for (let student of students) {
+                    if (student === null) {
+                        student = defaultUser;
+                    }
                     if (student.student.student_id === studentId) {
                         filterAutomatic(params).then();
                         break;
@@ -122,7 +130,7 @@ export const Students: React.FC<{
             if (params !== undefined) {
                 filterAutomatic(params).then();
             }
-        })
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [socket, params, pagination]);
 
@@ -424,6 +432,9 @@ export const Students: React.FC<{
                         }`}
                     >
                         {students.map((student, index) => {
+                            if (student === null) {
+                                student = defaultUser;
+                            }
                             const id = student.student.student_id;
                             id_to_index[id] = index;
                             return (

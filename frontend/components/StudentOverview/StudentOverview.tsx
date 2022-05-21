@@ -18,6 +18,7 @@ import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import Image from "next/image";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { useSockets } from "../../contexts/socketProvider";
+import { defaultUser } from "../../defaultUser";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -39,6 +40,10 @@ export const StudentOverview: React.FC<{
     const { socket } = useSockets();
     const [studentcard, setStudentcard] = useState<Student>(student);
     const [deleteModal, setDeleteModal] = useState<boolean>(false);
+
+    if (student === null) {
+        student = defaultUser;
+    }
 
     const fetchEvals = async () => {
         const { sessionKey } = getSession

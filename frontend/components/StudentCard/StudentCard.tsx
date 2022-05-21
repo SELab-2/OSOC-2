@@ -9,11 +9,16 @@ import CheckIconColor from "../../public/images/green_check_mark_color.png";
 import ExclamationIconColor from "../../public/images/exclamation_mark_color.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import { useDrag } from "react-dnd";
+import { defaultUser } from "../../defaultUser";
 
 export const StudentCard: React.FC<{ student: Student; display: Display }> = ({
     student,
     display,
 }) => {
+    if (student === null) {
+        student = defaultUser;
+    }
+
     const decision_to_image = {
         [Decision.YES]: CheckIconColor,
         [Decision.MAYBE]: ExclamationIconColor,
