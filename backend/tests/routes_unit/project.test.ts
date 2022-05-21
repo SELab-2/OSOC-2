@@ -1547,7 +1547,38 @@ test("Can assign students", async () => {
         id: 0,
         sessionkey: "key",
         role: "dev",
+        jobApplicationId: 0,
     };
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
 
     await expect(project.assignStudent(req)).resolves.toStrictEqual({
         drafted: true,
@@ -1563,6 +1594,8 @@ test("Can assign students", async () => {
         loginUserId: 0,
         contractStatus: "DRAFT",
     });
+
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can't assign students (no places)", async () => {
@@ -1573,7 +1606,38 @@ test("Can't assign students (no places)", async () => {
         id: 0,
         sessionkey: "key",
         role: "dev",
+        jobApplicationId: 0,
     };
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
 
     await expect(project.assignStudent(req)).rejects.toStrictEqual({
         http: 409,
@@ -1584,6 +1648,8 @@ test("Can't assign students (no places)", async () => {
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
+
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can't assign students (no such role)", async () => {
@@ -1594,7 +1660,38 @@ test("Can't assign students (no such role)", async () => {
         id: 0,
         sessionkey: "key",
         role: "dev",
+        jobApplicationId: 0,
     };
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
 
     await expect(project.assignStudent(req)).rejects.toStrictEqual({
         http: 404,
@@ -1605,6 +1702,8 @@ test("Can't assign students (no such role)", async () => {
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
+
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can't assign students (already used)", async () => {
@@ -1618,7 +1717,38 @@ test("Can't assign students (already used)", async () => {
         id: 0,
         sessionkey: "key",
         role: "dev",
+        jobApplicationId: 0,
     };
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
 
     await expect(project.assignStudent(req)).rejects.toStrictEqual({
         http: 409,
@@ -1629,6 +1759,8 @@ test("Can't assign students (already used)", async () => {
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
+
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Can filter projects", async () => {
@@ -2571,6 +2703,36 @@ test("Assign student, project year not equal to latest osoc year", async () => {
         jobApplicationId: 0,
     });
 
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
     ormOMock.getLatestOsoc.mockResolvedValue({
         osoc_id: 1,
         year: 2023,
@@ -2587,6 +2749,7 @@ test("Assign student, project year not equal to latest osoc year", async () => {
     reqMock.parseDraftStudentRequest.mockReset();
     ormPrMock.getProjectById.mockReset();
     ormOMock.getLatestOsoc.mockReset();
+    ormJMock.getJobApplication.mockReset();
 });
 
 test("Assign student, project is null", async () => {
@@ -2928,4 +3091,96 @@ test("Modify projects, job application is null", async () => {
     utilMock.checkYearPermissionProject.mockReset();
     ormJMock.getJobApplication.mockReset();
     ormOMock.getLatestOsoc.mockReset();
+});
+
+test("Assign student, project year not equal to job application year", async () => {
+    const req = getMockReq();
+    req.body = {
+        sessionkey: "some-key",
+        osocId: 0,
+        name: "Operation Ivy",
+        partner: "US Goverment",
+        description:
+            "Let's build a thermonuclear warhead! What could go wrong?",
+        start: new Date("January 31, 1950"),
+        end: new Date("November 15, 1952 23:30:00.0"),
+        roles: {
+            roles: [
+                { name: "dev", positions: 8 },
+                { name: "nuclear bomb engineer", positions: 2 },
+            ],
+        },
+        coaches: {
+            coaches: [0],
+        },
+    };
+
+    reqMock.parseDraftStudentRequest.mockResolvedValue({
+        id: 0,
+        sessionkey: "some-key",
+        studentId: 0,
+        role: "dev",
+        jobApplicationId: 0,
+    });
+
+    ormJMock.getJobApplication.mockResolvedValue({
+        applied_role: [
+            {
+                applied_role_id: 0,
+                job_application_id: 0,
+                role_id: 0,
+            },
+        ],
+        attachment: [],
+        created_at: new Date("2022-03-14T22:10:00.000Z"),
+        edu_duration: 4,
+        edu_institute: "UGent",
+        edu_level: "Master",
+        edu_year: "4",
+        edus: ["Edu0"],
+        email_status: "APPLIED",
+        fun_fact: "Funfact0",
+        job_application_id: 0,
+        job_application_skill: [],
+        osoc_id: 1,
+        responsibilities: "Responsibiliy0",
+        student_coach: true,
+        student_id: 0,
+        student_volunteer_info: "Volunteer0",
+        osoc: {
+            osoc_id: 0,
+            year: 2022,
+        },
+    });
+
+    ormOMock.getLatestOsoc.mockResolvedValue({
+        osoc_id: 1,
+        year: 2023,
+    });
+
+    ormPrMock.getProjectById.mockImplementation(() => {
+        return Promise.resolve({
+            project_id: 0,
+            name: "sample project",
+            osoc_id: 0,
+            partner: "jefke",
+            description: null,
+            start_date: new Date(Date.now()),
+            end_date: new Date(Date.now()),
+            osoc: {
+                osoc_id: 0,
+                year: 2023,
+            },
+        });
+    });
+
+    await expect(project.assignStudent(req)).rejects.toStrictEqual({
+        http: 403,
+        reason: "Student application and project are from different osoc editions",
+    });
+
+    reqMock.parseDraftStudentRequest.mockReset();
+    ormPrMock.getProjectById.mockReset();
+    ormOMock.getLatestOsoc.mockReset();
+    ormJMock.getJobApplication.mockReset();
 });
