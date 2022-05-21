@@ -77,7 +77,6 @@ export const StudentOverview: React.FC<{
             response.success &&
             Array.isArray(response.evaluation.evaluations)
         ) {
-            console.log(response.evaluation);
             setEvaluations(response.evaluation.evaluations);
             setStudentcard((student) => {
                 return {
@@ -485,7 +484,6 @@ export const StudentOverview: React.FC<{
                             if (evaluation.login_user === null) {
                                 evaluation.login_user = defaultLoginUser;
                             }
-                            console.log(evaluation.login_user);
                             return (
                                 <div
                                     data-testid={"finalEvaluation"}
