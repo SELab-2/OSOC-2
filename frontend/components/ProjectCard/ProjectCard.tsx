@@ -19,6 +19,7 @@ export const ProjectCard: React.FC<{
     const { notify } = useContext(NotificationContext);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [droppedStudent, setDroppedStudent] = useState<Student>();
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
 
     const postAssign = async (student: Student, role: string) => {
         setShowModal(false);
@@ -110,6 +111,46 @@ export const ProjectCard: React.FC<{
         }
     };
 
+    const deleteProject = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                },
+            }
+        )
+            .then((response) => response.json())
+            .catch((err) => console.log(err));
+        if (response !== undefined && response.success) {
+            updateProject();
+            if (notify) {
+                notify(
+                    `Project '${project.name}' successfully deleted!`,
+                    NotificationType.SUCCESS,
+                    3000
+                );
+            }
+        } else if (response !== undefined && !response.success) {
+            if (notify) {
+                notify(
+                    `Could not delete project ${project.name}: 
+                ${response.reason}`,
+                    NotificationType.ERROR,
+                    3000
+                );
+            }
+        }
+    };
+
+    const toggleDeleteModal = () => {
+        setShowDeleteModal(true);
+    };
+
     const [{ isOver }, drop] = useDrop(() => ({
         // The type (or types) to accept - strings or symbols
         accept: "Student",
@@ -147,6 +188,20 @@ export const ProjectCard: React.FC<{
             className={`${styles.body} ${isOver ? styles.over : ""}`}
             ref={drop}
         >
+            <Modal
+                handleClose={() => setShowDeleteModal(false)}
+                visible={showDeleteModal}
+                title={`Delete Project ${project.name}`}
+            >
+                <p>
+                    You are about to delete a project! Deleting a project will
+                    result in data loss. Are you certain that you wish to delete
+                    project {project.name}?
+                </p>
+                <button data-testid={"confirmDelete"} onClick={deleteProject}>
+                    DELETE
+                </button>
+            </Modal>
             <Modal
                 handleClose={() => setShowModal(false)}
                 title="Assign Student"
@@ -245,13 +300,17 @@ export const ProjectCard: React.FC<{
             <div className={styles.description}>
                 <h2>Project Description</h2>
                 <p>{project.description}</p>
+                <div>
+                    <button
+                        onClick={() =>
+                            router.push(`projects/${project.id}/change`)
+                        }
+                    >
+                        Change
+                    </button>
+                    <button onClick={() => toggleDeleteModal()}>Delete</button>
+                </div>
             </div>
-
-            <button
-                onClick={() => router.push(`projects/${project.id}/change`)}
-            >
-                Change
-            </button>
         </div>
     );
 };
