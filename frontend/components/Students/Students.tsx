@@ -222,9 +222,7 @@ export const Students: React.FC<{
     const id_to_index: Record<string, number> = {};
 
     const navigator = (page: number) => {
-        if (page !== pagination.page) {
-            setSelectedStudent(-1);
-        }
+        setSelectedStudent(-1);
         if (params !== undefined) {
             search(params, page).then();
         }
