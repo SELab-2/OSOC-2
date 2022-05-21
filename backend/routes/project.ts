@@ -438,38 +438,6 @@ export async function deleteProject(
         });
 }
 
-/**
- *  Attempts to get all drafted students in the system for a project.
- *  @param req The Express.js request to extract all required data from.
- *  @returns See the API documentation. Successes are passed using
- * `Promise.resolve`, failures using `Promise.reject`.
- */
-export async function getDraftedStudents(
-    req: express.Request
-): Promise<Responses.ProjectDraftedStudents> {
-    return rq
-        .parseGetDraftedStudentsRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
-        .then(checkYearPermissionProject)
-        .then(async (parsed) => {
-            const prName = await ormPr
-                .getProjectById(parsed.data.id)
-                .then(util.getOrReject)
-                .then((pr) => pr.name);
-
-            return ormCtr.contractsByProject(parsed.data.id).then(async (arr) =>
-                Promise.resolve({
-                    id: parsed.data.id,
-                    name: util.getOrDefault(prName, "(unnamed project)"),
-                    students: arr.map((obj) => ({
-                        student: obj.student,
-                        status: obj.contract_status,
-                    })),
-                })
-            );
-        });
-}
-
 export async function getFreeSpotsFor(
     role: string,
     project: number
@@ -531,72 +499,6 @@ export async function createProjectRoleFor(
                 project_role_id: res.project_role_id,
             })
         );
-}
-
-export async function modProjectStudent(
-    req: express.Request
-): Promise<Responses.ModProjectStudent> {
-    return rq
-        .parseDraftStudentRequest(req)
-        .then((parsed) => util.isAdmin(parsed))
-        .then(checkYearPermissionProject)
-        .then(async (parsed) => {
-            return ormCtr
-                .contractsByProject(parsed.data.id)
-                .then((arr) =>
-                    arr.filter(
-                        (v) => v.student?.student_id == parsed.data.studentId
-                    )
-                )
-                .then((arr) => {
-                    if (arr.length == 0) {
-                        return Promise.reject({
-                            http: 204,
-                            reason: "The selected student is not assigned to this project.",
-                        });
-                    }
-
-                    if (arr.length > 1) {
-                        return Promise.reject({
-                            http: 409,
-                            reason: "The request is ambiguous.",
-                        });
-                    }
-
-                    return Promise.resolve(arr[0]);
-                })
-                .then(async (ctr) => {
-                    return getFreeSpotsFor(parsed.data.role, parsed.data.id)
-                        .catch(() =>
-                            createProjectRoleFor(
-                                parsed.data.id,
-                                parsed.data.role
-                            )
-                        )
-                        .then((remaining) => {
-                            if (remaining.count <= 0) {
-                                return Promise.reject({
-                                    http: 409,
-                                    reason: "Can't add this role to the student. There are no more vacant spots.",
-                                });
-                            }
-
-                            return ormCtr.updateContract({
-                                contractId: ctr.contract_id,
-                                loginUserId: parsed.userId,
-                                projectRoleId: remaining.project_role_id,
-                            });
-                        });
-                })
-                .then((res) => util.getOrReject(res.project_role_id))
-                .then((res) => ormPrRole.getProjectRoleById(res))
-                .then((res) =>
-                    Promise.resolve({
-                        drafted: true,
-                        role: util.getOrDefault(res?.role.name, ""),
-                    })
-                );
-        });
 }
 
 export async function unAssignCoach(
@@ -992,9 +894,6 @@ export function getRouter(): express.Router {
 
     util.route(router, "post", "/:id", modProject);
     util.route(router, "delete", "/:id", deleteProject);
-
-    util.route(router, "get", "/:id/draft", getDraftedStudents);
-    util.route(router, "post", "/:id/draft", modProjectStudent);
 
     util.route(router, "post", "/:id/assignee", assignStudent);
     util.route(router, "delete", "/:id/assignee", unAssignStudent);

@@ -468,76 +468,18 @@
         }
       }
     },
-    "/followup/all": {
+    "/followup/<job-application-id>": {
       "get": {
         "tags": [
           "followup"
         ],
-        "description": "Returns a list of all the followups in the system.",
-        "operationId": "all_followups",
-        "parameters": [
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data list contains info of all followups in the system.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Followup"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "403": {
-            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "412": {
-            "description": "The data you requested does not exist (yet)."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
-    "/followup/<followup-id>": {
-      "get": {
-        "tags": [
-          "followup"
-        ],
-        "description": "Lists all details about the followup with the given id.",
+        "description": "Lists all details about the followup matching the job application with the given id.",
         "operationId": "followup_id_get",
         "parameters": [
           {
             "name": "id",
             "in": "header",
-            "description": "The id of the followup.",
+            "description": "The id of the job application.",
             "required": true,
             "schema": {
               "type": "number"
@@ -588,13 +530,13 @@
         "tags": [
           "followup"
         ],
-        "description": "Attempts to update a followup with the given id and type.",
+        "description": "Attempts to update a followup matching the job application with the given id and type.",
         "operationId": "followup_id_post",
         "parameters": [
           {
             "name": "id",
             "in": "header",
-            "description": "The id of the followup.",
+            "description": "The id of the job application.",
             "required": true,
             "schema": {
               "type": "number"
@@ -1571,137 +1513,6 @@
           },
           "403": {
             "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      }
-    },
-    "/project/<project-id>/draft": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "description": "Lists all drafted students of the selected project.",
-        "operationId": "all_students_project",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "header",
-            "description": "The id of the project.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The students list contains info about all drafted students of this project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Drafted_students_project"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "423": {
-            "description": "Your account was deactivated. Please contact the webmaster."
-          },
-          "424": {
-            "description": "Your account hasn't been activated yet. Please try again later."
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "description": "Add the student to the selected project.",
-        "operationId": "add_student_to_project",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "header",
-            "description": "The id of the project.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "role",
-            "in": "header",
-            "description": "The selected role for this student.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionkey",
-            "in": "header",
-            "description": "Your current session key.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "studentId",
-            "in": "header",
-            "description": "The id of the selected student.",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The data object contains the role of the student if the student contributes to the project.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Draft_student_project"
-                }
-              }
-            }
-          },
-          "204": {
-            "description": "The selected student is not assigned to this project."
-          },
-          "400": {
-            "description": "One of the arguments is incorrect or not present."
-          },
-          "401": {
-            "description": "The user has to log in first."
-          },
-          "403": {
-            "description": "Unauthorized request. You do not have sufficient rights to access this endpoint."
-          },
-          "409": {
-            "description": "That role doesn't exist."
           },
           "423": {
             "description": "Your account was deactivated. Please contact the webmaster."
@@ -3921,79 +3732,6 @@
         },
         "xml": {
           "name": "Modify_project"
-        }
-      },
-      "Drafted_students_project": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "students": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string",
-                  "enum": [
-                    "APPROVED",
-                    "CANCELLED",
-                    "DRAFT",
-                    "SENT",
-                    "SIGNED",
-                    "WAIT_APPROVAL"
-                  ]
-                },
-                "student": {
-                  "type": "object",
-                  "properties": {
-                    "student_id": {
-                      "type": "number"
-                    },
-                    "nickname": {
-                      "type": "string"
-                    },
-                    "person": {
-                      "$ref": "#/components/schemas/Person"
-                    },
-                    "gender": {
-                      "type": "string"
-                    },
-                    "alumni": {
-                      "type": "boolean"
-                    },
-                    "phone_number": {
-                      "type": "string"
-                    },
-                    "pronouns": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "xml": {
-          "name": "Drafted_students_project"
-        }
-      },
-      "Draft_student_project": {
-        "type": "object",
-        "properties": {
-          "drafted": {
-            "type": "boolean"
-          },
-          "role": {
-            "type": "string"
-          }
-        },
-        "xml": {
-          "name": "Draft_student_project"
         }
       },
       "All_roles": {
