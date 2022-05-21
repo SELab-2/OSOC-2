@@ -21,6 +21,7 @@ const Pid: NextPage = () => {
     useEffect(() => {
         return () => {
             socket.off("studentSuggestionCreated");
+            socket.off("studentWasDeleted");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -29,9 +30,19 @@ const Pid: NextPage = () => {
      * update on websocket event if the student with the id that was changed is the student that is currently loaded
      */
     useEffect(() => {
+        // remove old listeners
         socket.off("studentSuggestionCreated");
+        socket.off("studentWasDeleted");
+
+        // set new listeners
         socket.on("studentSuggestionCreated", (studentId: number) => {
-            if (studentId === student?.student.student_id) {
+            if (studentId === student?.student?.student_id) {
+                const scrollPosition = window.scrollY;
+                fetchStudent().then(() => window.scrollTo(0, scrollPosition));
+            }
+        });
+        socket.on("studentWasDeleted", (studentId: number) => {
+            if (studentId === student?.student?.student_id) {
                 const scrollPosition = window.scrollY;
                 fetchStudent().then(() => window.scrollTo(0, scrollPosition));
             }

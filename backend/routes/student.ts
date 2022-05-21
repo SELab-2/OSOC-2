@@ -11,7 +11,6 @@ import * as rq from "../request";
 import { Responses, InternalTypes } from "../types";
 import * as util from "../utility";
 import { checkYearPermissionStudent, errors } from "../utility";
-import * as ormP from "../orm_functions/person";
 import { login_user, person } from "@prisma/client";
 
 /**
@@ -109,12 +108,8 @@ export async function deleteStudent(
         .then(checkYearPermissionStudent)
         .then(async (parsed) => {
             return ormSt
-                .deleteStudent(parsed.data.id)
-                .then((student) =>
-                    ormP
-                        .deletePersonById(student.person_id)
-                        .then(() => Promise.resolve({}))
-                );
+                .deleteStudentFromDB(parsed.data.id)
+                .then(() => Promise.resolve({}));
         });
 }
 

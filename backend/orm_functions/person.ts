@@ -159,6 +159,11 @@ export async function deletePersonFromDB(personId: number) {
 
             // Remove all the linked password reset
             await Promise.all([
+                prisma.login_user_osoc.deleteMany({
+                    where: {
+                        login_user_id: loginUserId,
+                    },
+                }),
                 prisma.password_reset.deleteMany({
                     where: {
                         login_user_id: loginUserId,
@@ -205,6 +210,12 @@ export async function deletePersonFromDB(personId: number) {
                             (X) => X.job_application_id
                         ),
                     },
+                },
+            });
+
+            await prisma.contract.deleteMany({
+                where: {
+                    student_id: studentId,
                 },
             });
 

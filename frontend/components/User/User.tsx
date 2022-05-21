@@ -18,12 +18,16 @@ import { useSockets } from "../../contexts/socketProvider";
 import { Modal } from "../Modal/Modal";
 import triangle from "../Filters/Filter.module.css";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const User: React.FC<{
     user: LoginUser;
     editions: OsocEdition[];
     removeUser: (user: LoginUser) => void;
 }> = ({ user, removeUser, editions }) => {
+    if (user == null) {
+        user = defaultLoginUser;
+    }
     const [name] = useState<string>(user.person.name);
     const [email] = useState<string>(user.person.email);
     const [isAdmin, setIsAdmin] = useState<boolean>(user.is_admin);

@@ -4,6 +4,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import styles from "../../pages/login/login.module.scss";
 import isStrongPassword from "validator/lib/isStrongPassword";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const Settings: React.FC<{
     person: LoginUser;
@@ -20,6 +21,9 @@ export const Settings: React.FC<{
     const { getSession, setSessionKey } = useContext(SessionContext);
     const { notify } = useContext(NotificationContext);
 
+    if (person === null) {
+        person = defaultLoginUser;
+    }
     /**
      * Gets called everytime the new password input field's value changes
      * Calculates the password score and set the corresponding error messages
@@ -145,7 +149,7 @@ export const Settings: React.FC<{
                 await fetchUser();
                 if (notify) {
                     notify(
-                        "Your credentials are succesfully changed",
+                        "Your credentials are successfully changed",
                         NotificationType.SUCCESS,
                         2000
                     );

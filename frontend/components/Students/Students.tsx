@@ -21,6 +21,7 @@ import { Paginator } from "../Paginator/Paginator";
 import { useRouter } from "next/router";
 import { useSockets } from "../../contexts/socketProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { defaultUser } from "../../defaultUser";
 
 /**
  * Constructs the complete students page with filter included
@@ -65,9 +66,13 @@ export const Students: React.FC<{
                 const id_number = Number(id);
                 if (!isNaN(id_number)) {
                     for (let i = 0; i < filteredStudents.length; i++) {
-                        if (
-                            filteredStudents[i].student.student_id === id_number
-                        ) {
+                        let student;
+                        if (filteredStudents[i] === null) {
+                            student = defaultUser;
+                        } else {
+                            student = filteredStudents[i];
+                        }
+                        if (student.student.student_id === id_number) {
                             setSelectedStudent(i);
                             index = i;
                         }
@@ -93,6 +98,7 @@ export const Students: React.FC<{
         return () => {
             document.body.removeEventListener("keydown", handleKeyPress);
             socket.off("studentSuggestionCreated");
+            socket.off("studentWasDeleted");
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -101,15 +107,28 @@ export const Students: React.FC<{
      * update on websocket event if the student with the id that was changed is the student that is currently loaded
      */
     useEffect(() => {
+        // delete old listeners
         socket.off("studentSuggestionCreated");
+        socket.off("studentWasDeleted");
+
+        // add new listeners
         socket.on("studentSuggestionCreated", (studentId: number) => {
             if (params !== undefined) {
-                for (const student of students) {
+                for (let student of students) {
+                    if (student === null) {
+                        student = defaultUser;
+                    }
                     if (student.student.student_id === studentId) {
                         filterAutomatic(params).then();
                         break;
                     }
                 }
+            }
+        });
+
+        socket.on("studentWasDeleted", () => {
+            if (params !== undefined) {
+                filterAutomatic(params).then();
             }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,14 +140,14 @@ export const Students: React.FC<{
      */
     const handleKeyPress = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
-            clearSelection();
+            clearSelection().then();
         }
     };
 
     /**
      * Clears the current selection
      */
-    const clearSelection = () => {
+    const clearSelection = async () => {
         if (!alwaysLimited) {
             setDisplay(Display.FULL);
         }
@@ -137,7 +156,20 @@ export const Students: React.FC<{
         const params = new URLSearchParams(window.location.search);
         params.delete("id");
         // push the url
-        router.push(`${window.location.pathname}?${params.toString()}`).then();
+        return await router.push(
+            `${window.location.pathname}?${params.toString()}`
+        );
+    };
+
+    /**
+     * Called when the current selected student is deleted
+     */
+    const studentDeleted = () => {
+        clearSelection().then(() => {
+            if (params !== undefined) {
+                search(params, pagination.page).then();
+            }
+        });
     };
 
     /**
@@ -216,7 +248,7 @@ export const Students: React.FC<{
      */
     const filterManual = async (params: StudentFilterParams) => {
         setParams(params);
-        clearSelection();
+        clearSelection().then();
         setSelectedStudent(-1);
         search(params, 0).then();
     };
@@ -232,7 +264,7 @@ export const Students: React.FC<{
             "currentPageStudent"
         );
         const currentPageInt =
-            currentPageStr !== null && new RegExp("[0-9]+").test(currentPageStr) // check if the argument only exists out of numbers
+            currentPageStr !== null && new RegExp("d+").test(currentPageStr) // check if the argument only exists out of numbers
                 ? Number(currentPageStr)
                 : 0;
         setPagination({
@@ -400,6 +432,9 @@ export const Students: React.FC<{
                         }`}
                     >
                         {students.map((student, index) => {
+                            if (student === null) {
+                                student = defaultUser;
+                            }
                             const id = student.student.student_id;
                             id_to_index[id] = index;
                             return (
@@ -446,6 +481,7 @@ export const Students: React.FC<{
                     student={students[selectedStudent]}
                     year={params?.osocYear}
                     clearSelection={clearSelection}
+                    studentDeleted={studentDeleted}
                 />
             ) : null}
         </div>

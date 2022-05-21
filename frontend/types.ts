@@ -184,19 +184,6 @@ export interface Student {
     };
 }
 
-export interface LoginUser {
-    person: {
-        person_id: number;
-        email: string;
-        name: string;
-        github: string;
-    };
-    login_user_id: number;
-    is_coach: boolean;
-    is_admin: boolean;
-    account_status: AccountStatus;
-}
-
 export interface Coach {
     person_data: {
         person_id: number;
@@ -247,6 +234,7 @@ export interface ServerToClientEvents {
     loginUserDisabled: () => void;
     registrationReceived: () => void;
     studentSuggestionCreated: (studentId: number) => void;
+    studentWasDeleted: (studentId: number) => void;
     projectWasCreatedOrDeleted: () => void;
     projectWasModified: (projectId: number) => void;
     osocWasCreatedOrDeleted: () => void;
@@ -262,6 +250,7 @@ export interface ClientToServerEvents {
     submitRegistration: () => void;
     studentSuggestionSent: (studentId: number) => void;
     studentDecisionSent: (studentId: number) => void;
+    studentDelete: (studentId: number) => void;
     projectCreated: () => void;
     projectDeleted: () => void;
     projectModified: (projectId: number) => void;
@@ -300,7 +289,7 @@ export interface Contract {
     contract_id: number;
     contract_status: ContractStatus;
     project_role: ProjectRole;
-    student: Student;
+    student: Student | null;
     login_user: LoginUser;
 }
 

@@ -9,6 +9,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { Modal } from "../Modal/Modal";
 import { useSockets } from "../../contexts/socketProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const ProjectCard: React.FC<{
     project: Project;
@@ -24,6 +25,7 @@ export const ProjectCard: React.FC<{
     const { socket } = useSockets();
 
     const postAssign = async (student: Student, role: string) => {
+        if (student === null || student.student === null) return;
         setShowModal(false);
         const { sessionKey } = getSession
             ? await getSession()
@@ -75,6 +77,8 @@ export const ProjectCard: React.FC<{
     };
 
     const removeStudent = async (contract: Contract) => {
+        if (contract.student === null || contract.student.student === null)
+            return;
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -173,8 +177,13 @@ export const ProjectCard: React.FC<{
     const calculateRoleMap = () => {
         const map: { [K: string]: number } = {};
         for (const contract of project.contracts) {
-            map[contract.project_role.role.name] =
-                (map[contract.project_role.role.name] || 0) + 1;
+            if (
+                contract.student !== null &&
+                contract.student.student !== null
+            ) {
+                map[contract.project_role.role.name] =
+                    (map[contract.project_role.role.name] || 0) + 1;
+            }
         }
         setRoleMap(map);
     };
@@ -275,6 +284,14 @@ export const ProjectCard: React.FC<{
                 <h2>Assignees</h2>
                 <div className={styles.assignees}>
                     {project.contracts.map((contract) => {
+                        if (
+                            contract.student === null ||
+                            contract.student.student === null
+                        )
+                            return null;
+                        if (contract.login_user === null) {
+                            contract.login_user = defaultLoginUser;
+                        }
                         return (
                             <div
                                 className={`${styles.assignee} ${styles.card}`}
