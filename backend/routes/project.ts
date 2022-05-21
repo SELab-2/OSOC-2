@@ -441,7 +441,6 @@ export async function getFreeSpotsFor(
     return ormPrRole
         .getProjectRolesByProject(project)
         .then((roles) => {
-            console.log(roles);
             return Promise.all(
                 roles.map(async (r) =>
                     ormRole.getRole(r.role_id).then((upd) =>
@@ -455,16 +454,13 @@ export async function getFreeSpotsFor(
             );
         })
         .then((roles) => {
-            console.log(roles);
             return roles.filter((r) => r.block?.name == role);
         })
         .then(async (rest) => {
-            console.log(rest);
             if (rest.length != 1) return Promise.reject();
             return ormPrRole
                 .getNumberOfFreePositions(rest[0].project_role_id)
                 .then((n) => {
-                    console.log(n);
                     if (n == null) return Promise.reject();
                     return Promise.resolve({
                         count: n,
@@ -731,13 +727,11 @@ export async function assignStudent(
     await ormCtr
         .contractsForStudent(checked.data.studentId)
         .then((data) => {
-            console.log(data);
             return data.filter(
                 (x) => x.project_role.project.osoc_id === latestOsoc.osoc_id
             );
         })
         .then((filtered) => {
-            console.log(filtered);
             return filtered.length > 0
                 ? Promise.reject(alreadyContract)
                 : Promise.resolve();
@@ -760,7 +754,6 @@ export async function assignStudent(
                     contractStatus: "DRAFT",
                 })
                 .then(() => {
-                    console.log(r.role_id);
                     return ormRole.getRole(r.role_id);
                 })
         )
