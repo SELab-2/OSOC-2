@@ -4,6 +4,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import { NotificationType, OsocEdition } from "../../types";
 import { Modal } from "../Modal/Modal";
 import { NotificationContext } from "../../contexts/notificationProvider";
+import { useSockets } from "../../contexts/socketProvider";
 
 export const Osoc: React.FC<{
     osoc: OsocEdition;
@@ -15,6 +16,7 @@ export const Osoc: React.FC<{
     const osocId = osoc.osoc_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
 
     const deleteOsoc = async (e: SyntheticEvent) => {
         e.preventDefault();
@@ -47,6 +49,7 @@ export const Osoc: React.FC<{
                 return { success: false };
             });
         if (response && response.success && notify) {
+            socket.emit("osocDeleted", osocId);
             notify(
                 "Successfully deleted osoc edition!",
                 NotificationType.SUCCESS,

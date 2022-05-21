@@ -6,13 +6,14 @@ import {
     Sort,
 } from "../types";
 import { NextPage } from "next";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styles from "../styles/users.module.css";
 import { OsocCreateFilter } from "../components/Filters/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
 import { Paginator } from "../components/Paginator/Paginator";
 import { Pagination } from "../types";
 import { NotificationContext } from "../contexts/notificationProvider";
+import { useSockets } from "../contexts/socketProvider";
 
 /**
  * The `osoc edition` page, only accessible for admins
@@ -31,6 +32,28 @@ const Osocs: NextPage = () => {
     // 20 items per page
     const pageSize = 20;
     const { notify } = useContext(NotificationContext);
+    const { socket } = useSockets();
+
+    /**
+     * remove the listeners when leaving the page
+     */
+    useEffect(() => {
+        return () => {
+            socket.off("osocWasCreatedOrDeleted");
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        socket.off("osocWasCreatedOrDeleted"); // remove old listener
+
+        // add new listener
+        socket.on("osocWasCreatedOrDeleted", () => {
+            if (params !== undefined) {
+                search(params, pagination.page).then();
+            }
+        });
+    });
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {

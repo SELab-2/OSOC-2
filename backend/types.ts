@@ -1520,6 +1520,7 @@ export interface ServerToClientEvents {
     studentSuggestionCreated: (studentId: number) => void;
     projectWasCreatedOrDeleted: () => void;
     projectWasModified: (projectId: number) => void;
+    osocWasCreatedOrDeleted: () => void;
 }
 
 /**
@@ -1537,6 +1538,8 @@ export interface ClientToServerEvents {
     coachAssignedToProjectChange: (projectId: number) => void;
     studentAssignedToProjectChange: (projectId: number) => void;
     projectDeleted: () => void;
+    osocDeleted: () => void;
+    osocCreated: () => void;
 }
 
 /**
