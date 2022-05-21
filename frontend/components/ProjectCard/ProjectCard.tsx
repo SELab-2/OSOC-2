@@ -181,7 +181,7 @@ export const ProjectCard: React.FC<{
     useEffect(() => {
         calculateRoleMap();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [project]);
 
     const formatDate = (date: string) => {
         const dateParts = date.split(" ");
