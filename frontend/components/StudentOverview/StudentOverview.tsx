@@ -20,6 +20,7 @@ import Image from "next/image";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { useSockets } from "../../contexts/socketProvider";
 import { defaultUser } from "../../defaultUser";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const StudentOverview: React.FC<{
     student: Student;
@@ -76,6 +77,7 @@ export const StudentOverview: React.FC<{
             response.success &&
             Array.isArray(response.evaluation.evaluations)
         ) {
+            console.log(response.evaluation);
             setEvaluations(response.evaluation.evaluations);
             setStudentcard((student) => {
                 return {
@@ -480,6 +482,10 @@ export const StudentOverview: React.FC<{
                 <div>
                     {evaluations.map((evaluation) => {
                         if (evaluation.is_final) {
+                            if (evaluation.login_user === null) {
+                                evaluation.login_user = defaultLoginUser;
+                            }
+                            console.log(evaluation.login_user);
                             return (
                                 <div
                                     data-testid={"finalEvaluation"}
@@ -534,6 +540,9 @@ export const StudentOverview: React.FC<{
                 </div>
                 {evaluations.map((evaluation) => {
                     if (!evaluation.is_final) {
+                        if (evaluation.login_user === null) {
+                            evaluation.login_user = defaultLoginUser;
+                        }
                         return (
                             <div
                                 className={styles.suggestion}

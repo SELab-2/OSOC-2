@@ -9,6 +9,7 @@ import SessionContext from "../../contexts/sessionProvider";
 import { NotificationContext } from "../../contexts/notificationProvider";
 import { Modal } from "../Modal/Modal";
 import { useSockets } from "../../contexts/socketProvider";
+import { defaultLoginUser } from "../../defaultLoginUser";
 
 export const ProjectCard: React.FC<{
     project: Project;
@@ -288,6 +289,9 @@ export const ProjectCard: React.FC<{
                             contract.student.student === null
                         )
                             return null;
+                        if (contract.login_user === null) {
+                            contract.login_user = defaultLoginUser;
+                        }
                         return (
                             <div
                                 className={`${styles.assignee} ${styles.card}`}
