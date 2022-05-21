@@ -55,6 +55,10 @@ import * as ormoRole from "../../orm_functions/role";
 jest.mock("../../orm_functions/role");
 const ormoMockRole = ormoRole as jest.Mocked<typeof ormoRole>;
 
+import * as ormoSt from "../../orm_functions/student";
+jest.mock("../../orm_functions/student");
+const ormoMockStudent = ormoSt as jest.Mocked<typeof ormoSt>;
+
 import * as ormoLanguage from "../../orm_functions/language";
 jest.mock("../../orm_functions/language");
 const ormoMockLanguage = ormoLanguage as jest.Mocked<typeof ormoLanguage>;
@@ -1224,10 +1228,12 @@ test("Can delete a student by id", async () => {
         sessionkey: "abcd",
         id: 0,
     };
+    ormoMockStudent.deleteStudentFromDB.mockResolvedValue();
     await expect(student.deleteStudent(r)).resolves.toStrictEqual({});
     expectCall(reqMock.parseDeleteStudentRequest, r);
     expectCall(utilMock.isAdmin, r.body);
-    expectCall(ormoMock.deleteStudent, 0);
+    expectCall(ormoMock.deleteStudentFromDB, 0);
+    ormoMockStudent.deleteStudentFromDB.mockReset();
 });
 
 test("Job application is null for filterStudents", async () => {

@@ -167,7 +167,6 @@ export const StudentOverview: React.FC<{
     };
 
     const makeDecision = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -451,34 +450,178 @@ export const StudentOverview: React.FC<{
             </div>
 
             <div className={styles.body}>
-                <div className={styles.finaldecision}>
-                    <h2>Status</h2>
-                    <div className={styles.dropdown}>
-                        {/* Only admins can make a final decision */}
-                        {isAdmin ? (
-                            <button className={styles.dropbtn}>
-                                Set Status
-                            </button>
-                        ) : null}
-                        <div className={styles.dropdownContent}>
-                            <a
-                                data-testid={"permanentYes"}
-                                onClick={() => enumDecision(Decision.YES)}
+                <div className={styles.dropdowns}>
+                    <div className={styles.finaldecision}>
+                        <h2>Status</h2>
+                        <div className={styles.dropdown}>
+                            {/* Only admins can make a final decision */}
+                            {isAdmin ? (
+                                <button className={styles.dropbtn}>
+                                    Set Status
+                                </button>
+                            ) : null}
+                            <div className={styles.dropdownContent}>
+                                <a
+                                    data-testid={"permanentYes"}
+                                    onClick={() => enumDecision(Decision.YES)}
+                                >
+                                    YES
+                                </a>
+                                <a
+                                    data-testid={"permanentNo"}
+                                    onClick={() => enumDecision(Decision.NO)}
+                                >
+                                    NO
+                                </a>
+                                <a
+                                    data-testid={"permanentMaybe"}
+                                    onClick={() => enumDecision(Decision.MAYBE)}
+                                >
+                                    MAYBE
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div className={styles.finaldecision}>
+                        <h2>Email status </h2>
+                        <div
+                            className={`dropdown is-right ${
+                                emailStatusActive ? "is-active" : "is-hoverable"
+                            }`}
+                        >
+                            <div
+                                data-testid={"statusFilterDisplay"}
+                                className={`dropdown-trigger ${
+                                    emailStatusActive ||
+                                    emailStatus !== EmailStatus.NONE
+                                        ? styles.active
+                                        : styles.inactive
+                                } ${styles.dropdownTrigger}`}
+                                onClick={() =>
+                                    setEmailStatusActive(!emailStatusActive)
+                                }
                             >
-                                YES
-                            </a>
-                            <a
-                                data-testid={"permanentNo"}
-                                onClick={() => enumDecision(Decision.NO)}
-                            >
-                                NO
-                            </a>
-                            <a
-                                data-testid={"permanentMaybe"}
-                                onClick={() => enumDecision(Decision.MAYBE)}
-                            >
-                                MAYBE
-                            </a>
+                                {emailStatus === EmailStatus.NONE
+                                    ? "No status"
+                                    : emailStatus}
+                                <div className={styles.triangleContainer}>
+                                    <div className={styles.triangle} />
+                                </div>
+                            </div>
+                            <div className="dropdown-menu">
+                                <div className="dropdown-content">
+                                    <div
+                                        data-testid={"statusApplied"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus === EmailStatus.APPLIED
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.APPLIED
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.APPLIED}
+                                    </div>
+                                    <div
+                                        data-testid={"statusApproved"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus === EmailStatus.APPROVED
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.APPROVED
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.APPROVED}
+                                    </div>
+                                    <div
+                                        data-testid={"statusAwaiting"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus === EmailStatus.AWAITING_PROJECT
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.AWAITING_PROJECT
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.AWAITING_PROJECT}
+                                    </div>
+                                    <div
+                                        data-testid={"statusConfirmed"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus ===
+                                    EmailStatus.CONTRACT_CONFIRMED
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.CONTRACT_CONFIRMED
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.CONTRACT_CONFIRMED}
+                                    </div>
+                                    <div
+                                        data-testid={"statusDeclined"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus ===
+                                    EmailStatus.CONTRACT_DECLINED
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.CONTRACT_DECLINED
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.CONTRACT_DECLINED}
+                                    </div>
+                                    <div
+                                        data-testid={"statusRejected"}
+                                        className={`${
+                                            styles.dropdownItem
+                                        } dropdown-item 
+                                ${
+                                    emailStatus === EmailStatus.REJECTED
+                                        ? styles.selected
+                                        : ""
+                                }`}
+                                        onClick={() =>
+                                            changeEmailStatus(
+                                                EmailStatus.REJECTED
+                                            )
+                                        }
+                                    >
+                                        {EmailStatus.REJECTED}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -571,143 +714,6 @@ export const StudentOverview: React.FC<{
                         );
                     }
                 })}
-
-                <div className={styles.finaldecision}>
-                    <h2>Email status </h2>
-                    <div
-                        className={`dropdown is-right ${
-                            emailStatusActive ? "is-active" : "is-hoverable"
-                        }`}
-                    >
-                        <div
-                            data-testid={"statusFilterDisplay"}
-                            className={`dropdown-trigger ${
-                                emailStatusActive ||
-                                emailStatus !== EmailStatus.NONE
-                                    ? styles.active
-                                    : styles.inactive
-                            } ${styles.dropdownTrigger}`}
-                            onClick={() =>
-                                setEmailStatusActive(!emailStatusActive)
-                            }
-                        >
-                            {emailStatus === EmailStatus.NONE
-                                ? "No status"
-                                : emailStatus}
-                            <div className={styles.triangleContainer}>
-                                <div className={styles.triangle} />
-                            </div>
-                        </div>
-                        <div className="dropdown-menu">
-                            <div className="dropdown-content">
-                                <div
-                                    data-testid={"statusApplied"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus === EmailStatus.APPLIED
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(EmailStatus.APPLIED)
-                                    }
-                                >
-                                    {EmailStatus.APPLIED}
-                                </div>
-                                <div
-                                    data-testid={"statusApproved"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus === EmailStatus.APPROVED
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(EmailStatus.APPROVED)
-                                    }
-                                >
-                                    {EmailStatus.APPROVED}
-                                </div>
-                                <div
-                                    data-testid={"statusAwaiting"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus === EmailStatus.AWAITING_PROJECT
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(
-                                            EmailStatus.AWAITING_PROJECT
-                                        )
-                                    }
-                                >
-                                    {EmailStatus.AWAITING_PROJECT}
-                                </div>
-                                <div
-                                    data-testid={"statusConfirmed"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus ===
-                                    EmailStatus.CONTRACT_CONFIRMED
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(
-                                            EmailStatus.CONTRACT_CONFIRMED
-                                        )
-                                    }
-                                >
-                                    {EmailStatus.CONTRACT_CONFIRMED}
-                                </div>
-                                <div
-                                    data-testid={"statusDeclined"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus ===
-                                    EmailStatus.CONTRACT_DECLINED
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(
-                                            EmailStatus.CONTRACT_DECLINED
-                                        )
-                                    }
-                                >
-                                    {EmailStatus.CONTRACT_DECLINED}
-                                </div>
-                                <div
-                                    data-testid={"statusRejected"}
-                                    className={`${
-                                        styles.dropdownItem
-                                    } dropdown-item 
-                                ${
-                                    emailStatus === EmailStatus.REJECTED
-                                        ? styles.selected
-                                        : ""
-                                }`}
-                                    onClick={() =>
-                                        changeEmailStatus(EmailStatus.REJECTED)
-                                    }
-                                >
-                                    {EmailStatus.REJECTED}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <h2>Job Application</h2>
                 <div className={styles.jobapplication}>
