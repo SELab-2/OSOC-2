@@ -1066,6 +1066,10 @@ test("utility.isValidID checks IDs", async () => {
                 start_date: new Date(Date.now()),
                 end_date: new Date(Date.now()),
                 positions: 42069,
+                osoc: {
+                    osoc_id: 516645164126546,
+                    year: 2022,
+                },
             });
         }
         return Promise.resolve(null);

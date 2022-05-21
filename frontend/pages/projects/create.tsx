@@ -141,8 +141,10 @@ const Create: NextPage = () => {
                             );
                         }
                         socket.emit("projectCreated");
-                        router.push("/projects").then();
+                    } else if (notify && response !== null) {
+                        notify(response.reason, NotificationType.ERROR, 5000);
                     }
+                    router.push("/projects").then();
                 }
             });
         }

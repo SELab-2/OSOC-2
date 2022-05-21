@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useContext, useState, SyntheticEvent } from "react";
+import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
 import {
     Project,
@@ -238,8 +238,10 @@ const Change: NextPage = () => {
                         if (!isNaN(pidNumber)) {
                             socket.emit("projectModified", pidNumber);
                         }
-                        router.push("/projects").then();
+                    } else if (notify && response !== null) {
+                        notify(response.reason, NotificationType.ERROR, 2000);
                     }
+                    router.push("/projects").then();
                 }
             });
         }
@@ -457,6 +459,7 @@ const Change: NextPage = () => {
                             <input
                                 className="input"
                                 type="number"
+                                min={0}
                                 value={getRolePositions(role)}
                                 onChange={(e) =>
                                     changeRole(role, e.target.value)

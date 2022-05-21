@@ -1,4 +1,10 @@
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import React, {
+    createContext,
+    ReactNode,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { INotification, NotificationType } from "../types";
 import { Notification } from "../components/Notification/Notification";
 import styles from "./notificationProvider.module.scss";
@@ -21,14 +27,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
     const [notifications, setNotifications] = useState<INotification[]>([]);
-    let interval: NodeJS.Timer | undefined = undefined;
+    const interval = useRef<NodeJS.Timer>();
 
     useEffect(() => {
         // Every time the notifications change we set an interval
         // Delete the oldest notfication after it's duration
-        if (notifications.length > 0 && interval === undefined) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            interval = setInterval(
+        if (notifications.length > 0) {
+            interval.current = setInterval(
                 () => deleteNotification(notifications.length - 1),
                 notifications[notifications.length - 1].duration
             );
@@ -40,8 +45,8 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
      * @param index
      */
     const deleteNotification = (index: number) => {
-        clearInterval(interval);
-        interval = undefined;
+        if (index < 0) return;
+        clearInterval(interval.current);
         const newnotifs = [];
         for (let i = 0; i < index; i++) {
             newnotifs.push(notifications[i]);
@@ -69,6 +74,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
         type: NotificationType,
         duration: number
     ) => {
+        clearInterval(interval.current);
         const newnotifs = [];
         newnotifs.push({
             message: message,

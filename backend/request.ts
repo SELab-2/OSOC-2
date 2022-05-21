@@ -744,13 +744,18 @@ export async function parseFilterProjectsRequest(
 export async function parseDraftStudentRequest(
     req: express.Request
 ): Promise<Requests.Draft> {
-    return hasFields(req, ["studentId", "role"], types.id).then(() =>
+    return hasFields(
+        req,
+        ["studentId", "role", "jobApplicationId"],
+        types.id
+    ).then(() =>
         Promise.resolve({
             sessionkey: getSessionKey(req),
             id: Number(req.params.id),
             studentId: Number(req.body.studentId),
+            jobApplicationId: Number(req.body.jobApplicationId),
             role: req.body.role,
-        }).then((o) => allNonNaN(["id", "studentId"], o))
+        }).then((o) => allNonNaN(["id", "studentId", "jobApplicationId"], o))
     );
 }
 
