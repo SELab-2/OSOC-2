@@ -269,6 +269,7 @@ export async function getJobApplication(jobApplicationId: number) {
             attachment: true,
             job_application_skill: true,
             applied_role: true,
+            osoc: true,
         },
     });
 }

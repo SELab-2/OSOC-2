@@ -1,11 +1,12 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useContext, useState, SyntheticEvent } from "react";
+import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import SessionContext from "../../../contexts/sessionProvider";
-import { OsocEdition, Project, Coach } from "../../../types";
+import { Coach, NotificationType, OsocEdition, Project } from "../../../types";
 import { Modal } from "../../../components/Modal/Modal";
 import styles from "./change.module.scss";
 import { useSockets } from "../../../contexts/socketProvider";
+import { NotificationContext } from "../../../contexts/notificationProvider";
 
 const Change: NextPage = () => {
     const router = useRouter();
@@ -13,6 +14,7 @@ const Change: NextPage = () => {
     const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
     const originalRoles: { [K: string]: number } = {};
+    const { notify } = useContext(NotificationContext);
 
     const formatDate = (date: string) => {
         const full_date = new Date(date);
@@ -247,8 +249,10 @@ const Change: NextPage = () => {
                         if (!isNaN(pidNumber)) {
                             socket.emit("projectModified", pidNumber);
                         }
-                        router.push("/projects").then();
+                    } else if (notify && response !== null) {
+                        notify(response.reason, NotificationType.ERROR, 2000);
                     }
+                    router.push("/projects").then();
                 }
             });
         }
@@ -502,6 +506,7 @@ const Change: NextPage = () => {
                             <input
                                 className="input"
                                 type="number"
+                                min={0}
                                 value={getRolePositions(role)}
                                 onChange={(e) =>
                                     changeRole(role, e.target.value)

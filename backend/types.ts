@@ -55,6 +55,10 @@ export interface Errors {
      */
     cookWrongSuggestionYear: () => ApiError;
     /**
+     * Cooks up a wrong osoc request response.
+     */
+    cookWrongOsocYear: () => ApiError;
+    /**
      *  Cooks up a Non-existent Endpoint response.
      *  @param url The requested endpoint URL.
      */
@@ -1400,6 +1404,7 @@ export namespace Requests {
     export interface Draft extends IdRequest {
         studentId: number;
         role: string;
+        jobApplicationId: number;
     }
 
     export interface Followup extends IdRequest {

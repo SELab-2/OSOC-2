@@ -351,37 +351,6 @@ it("should update the email status of the job application", async () => {
     );
 });
 
-it("should delete the job application", async () => {
-    const [students, osocs, applics] = await Promise.all([
-        prisma.student.findMany(),
-        prisma.osoc.findMany(),
-        prisma.job_application.findMany(),
-    ]);
-
-    const app = {
-        student_id: students[2].student_id,
-        student_volunteer_info: "no volunteer",
-        responsibilities: "no responsibilities",
-        fun_fact: "this is a fun fact",
-        student_coach: false,
-        osoc_id: osocs[0].osoc_id,
-        edus: ["something something"],
-        edu_level: "higher education",
-        edu_duration: 5,
-        edu_institute: "Ugent",
-        edu_year: "3",
-        email_status: email_status_enum.APPROVED,
-        created_at: new Date("December 25, 2021 14:24:00"),
-    };
-
-    const deleted = await deleteJobApplication(applics[3].job_application_id);
-    job_application_check(app, deleted);
-    expect(deleted).toHaveProperty("email_status", app.email_status);
-    await prisma.job_application.create({
-        data: app,
-    });
-});
-
 it("should create a new job_application", async () => {
     const [students, osocs] = await Promise.all([
         prisma.student.findMany(),

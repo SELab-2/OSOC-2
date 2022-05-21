@@ -2,12 +2,14 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext, SyntheticEvent } from "react";
 import SessionContext from "../../contexts/sessionProvider";
-import { OsocEdition, Coach } from "../../types";
+import { OsocEdition, Coach, NotificationType } from "../../types";
 import { Modal } from "../../components/Modal/Modal";
 import styles from "./create.module.scss";
 import { useSockets } from "../../contexts/socketProvider";
+import { NotificationContext } from "../../contexts/notificationProvider";
 
 const Create: NextPage = () => {
+    const { notify } = useContext(NotificationContext);
     const router = useRouter();
     const { getSession } = useContext(SessionContext);
     const { socket } = useSockets();
@@ -151,8 +153,10 @@ const Create: NextPage = () => {
                     if (response !== undefined && response.success) {
                         alert("Project successfully created!");
                         socket.emit("projectCreated");
-                        router.push("/projects").then();
+                    } else if (notify && response !== null) {
+                        notify(response.reason, NotificationType.ERROR, 5000);
                     }
+                    router.push("/projects").then();
                 }
             });
         }
