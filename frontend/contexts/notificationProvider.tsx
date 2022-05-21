@@ -38,6 +38,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
                 notifications[notifications.length - 1].duration
             );
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [notifications]);
 
     /**

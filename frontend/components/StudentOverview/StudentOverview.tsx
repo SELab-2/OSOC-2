@@ -167,7 +167,6 @@ export const StudentOverview: React.FC<{
     };
 
     const makeDecision = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
