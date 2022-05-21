@@ -81,6 +81,9 @@ test("utility.errors.cook* work as expected", () => {
     expect(util.errors.cookPendingAccount()).toBe(
         config.apiErrors.pendingAccount
     );
+    expect(util.errors.cookWrongOsocYear()).toBe(
+        config.apiErrors.modifyProject.insufficientRights
+    );
 
     // annoying ones
     // non-existent endpoint
