@@ -385,3 +385,16 @@
   gap: 1rem !important;
   justify-content: space-between;
 }
+
+.delete {
+  margin-left: 1rem;
+  background-color: var(--error-100);
+}
+
+.dropdowns {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 4vw;
+}
