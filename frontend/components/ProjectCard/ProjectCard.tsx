@@ -304,10 +304,7 @@ export const ProjectCard: React.FC<{
 
             <div className={styles.description}>
                 <h2>Project Description</h2>
-                <p>
-                    {project.description}
-                    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                </p>
+                <p>{project.description}</p>
             </div>
 
             <div className={styles.buttons}>
