@@ -38,7 +38,6 @@ export const Paginator: React.FC<{
             className="is-centered pagination"
             role="navigation"
             aria-label="pagination"
-            style={{ zIndex: -1 }}
         >
             <a
                 onClick={previousPage}
