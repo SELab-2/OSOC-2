@@ -109,7 +109,6 @@ export const User: React.FC<{
     useEffect(() => {
         socket.off("yearPermissionUpdated");
         socket.on("yearPermissionUpdated", (loginUserId: number) => {
-            console.log("update");
             if (user.login_user_id === loginUserId) {
                 fetchUserEditions().then();
             }
