@@ -166,7 +166,7 @@ export const User: React.FC<{
             socket.emit("updateRoleUser");
             if (notify) {
                 notify(
-                    `Successfully updated ${name} authorities`,
+                    `Successfully updated the permissions of ${name}`,
                     NotificationType.SUCCESS,
                     2000
                 );
