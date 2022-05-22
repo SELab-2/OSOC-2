@@ -133,7 +133,7 @@ export const ProjectFilter: React.FC<{
     return (
         <div className={styles.projectfilter}>
             <div className={styles.query}>
-                <div onClick={toggleNameSort}>
+                <div data-testid={"nameSort"} onClick={toggleNameSort}>
                     Project Name
                     <div className={styles.triangleContainer}>
                         <div
@@ -150,6 +150,7 @@ export const ProjectFilter: React.FC<{
                     </div>
                 </div>
                 <input
+                    data-testid={"nameInput"}
                     className={`input ${styles.input}`}
                     type="text"
                     value={projectNameFilter}
@@ -159,7 +160,7 @@ export const ProjectFilter: React.FC<{
             </div>
 
             <div className={styles.query}>
-                <div onClick={toggleClientSort}>
+                <div data-testid={"clientSort"} onClick={toggleClientSort}>
                     Client
                     <div className={styles.triangleContainer}>
                         <div
@@ -174,6 +175,7 @@ export const ProjectFilter: React.FC<{
                     </div>
                 </div>
                 <input
+                    data-testid={"clientInput"}
                     className={`input ${styles.input}`}
                     type="text"
                     value={clientFilter}
@@ -186,6 +188,7 @@ export const ProjectFilter: React.FC<{
                 Osoc Edition
                 {/* Maybe dropdown */}
                 <input
+                    data-testid={"osocInput"}
                     className={`input ${styles.input}`}
                     type="text"
                     value={osocYear}
@@ -195,12 +198,18 @@ export const ProjectFilter: React.FC<{
             </div>
 
             <button
+                data-testid={"assignedButton"}
                 className={`${fullyAssigned ? styles.active : styles.inactive}`}
                 onClick={toggleFullyAssigned}
             >
                 Fully assigned
             </button>
-            <button onClick={searchPress}>Search</button>
+            <button
+                data-testid={"searchButtonProjectFilter"}
+                onClick={searchPress}
+            >
+                Search
+            </button>
         </div>
     );
 };

@@ -31,6 +31,7 @@ export const ProjectCard: React.FC<{
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
+        console.log("test");
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/project/${project.id}/assignee`,
             {
