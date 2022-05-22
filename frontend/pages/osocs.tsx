@@ -76,7 +76,6 @@ const Osocs: NextPage = () => {
      */
     const search = useCallback(
         async (params: OsocFilterParams, page: number) => {
-            console.log("callback");
             if (loading) return;
             isLoading(true);
             const filters = [];

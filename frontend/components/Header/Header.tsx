@@ -64,13 +64,7 @@ export const Header: React.FC = () => {
                     Accept: "application/json",
                     Authorization: `auth/osoc2 ${sessionKey}`,
                 },
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        console.log(response);
-                    }
-                })
-                .catch((error) => console.log(error));
+            }).catch((error) => console.log(error));
         });
     };
 

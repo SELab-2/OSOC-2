@@ -228,7 +228,7 @@ export const Students: React.FC<{
         paramsQuery.delete("id");
         // push the url
         router
-            .push(`/${window.location.pathname}?${paramsQuery.toString()}`)
+            .push(`${window.location.pathname}?${paramsQuery.toString()}`)
             .then();
 
         if (params !== undefined) {
