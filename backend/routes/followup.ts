@@ -4,7 +4,7 @@ import * as ormJA from "../orm_functions/job_application";
 import * as rq from "../request";
 import { Responses } from "../types";
 import * as util from "../utility";
-import { checkYearPermissionStudent, errors } from "../utility";
+import { checkYearPermissionsFollowup, errors } from "../utility";
 import { getOsocYearsForLoginUser } from "../orm_functions/login_user";
 import { getLatestOsoc, getOsocById } from "../orm_functions/osoc";
 import { getJobApplication } from "../orm_functions/job_application";
@@ -21,6 +21,7 @@ export async function getFollowup(
     return rq
         .parseGetFollowupStudentRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
+        .then(checkYearPermissionsFollowup)
         .then((checked) =>
             ormJA
                 .getJobApplication(checked.data.id)
@@ -59,7 +60,7 @@ export async function updateFollowup(
     return rq
         .parseSetFollowupStudentRequest(req)
         .then((parsed) => util.checkSessionKey(parsed))
-        .then(checkYearPermissionStudent)
+        .then(checkYearPermissionsFollowup)
         .then(async (checked) => {
             // modifications to a job application is only allowed if the job application is of the most recent osoc year
             const [jobApplication, latestOsoc] = await Promise.all([
