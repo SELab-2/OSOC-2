@@ -1,7 +1,7 @@
 {
     "apiErrors": {
         "invalidID": {
-            "http": 204,
+            "http": 423,
             "reason": "This endpoint requires an ID. The ID you provided was invalid."
         },
         "argumentError": {

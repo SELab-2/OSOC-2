@@ -205,6 +205,7 @@ const Index: NextPage = () => {
             error = true;
         } else if (!validator.default.isEmail(registerEmail)) {
             setRegisterEmailError("No valid email address");
+            error = true;
         } else {
             setRegisterEmailError("");
         }
