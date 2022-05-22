@@ -264,7 +264,6 @@ test("Can parse login request", () => {
     unvalid.body.pass = "Pass #2";
     unvalid.body.name = "Name.email.be";
 
-    // TODO
     return Promise.all([
         expect(Rq.parseLoginRequest(valid)).resolves.toStrictEqual({
             name: "alice.student@hotmail.be",
