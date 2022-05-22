@@ -221,6 +221,7 @@ export const Projects: React.FC = () => {
 
     const navigator = (page: number) => {
         if (params !== undefined) {
+            window.scrollTo(0, 0);
             search(params, page).then();
         }
     };
