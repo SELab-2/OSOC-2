@@ -32,8 +32,8 @@ describe("project create test", () => {
     };
     test("test inputs", async () => {
         const input = "aaa";
-        const date1 = "2022-05-21";
-        const date2 = "2022-05-22";
+        const date1 = new Date().toString();
+        const date2 = new Date().toString();
         await testInput("nameInput", input);
         await testInput("partnerInput", input);
         await testInput("descriptionInput", input);
