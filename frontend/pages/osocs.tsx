@@ -56,7 +56,7 @@ const Osocs: NextPage = () => {
                 );
             }
         });
-    });
+    }, [params, getSession, socket, pagination.page]);
 
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
