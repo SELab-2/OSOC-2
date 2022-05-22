@@ -294,7 +294,7 @@ export interface Contract {
 }
 
 export interface Project {
-    coaches: [ProjectLoginUser];
+    coaches: [ProjectLoginUser] | [];
     end_date: string;
     id: number;
     name: string;
@@ -303,7 +303,7 @@ export interface Project {
     positions: number;
     start_date: string;
     description: string | null;
-    contracts: [Contract];
+    contracts: [Contract] | [];
     roles: [
         {
             name: string;

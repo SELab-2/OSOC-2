@@ -137,50 +137,49 @@ const Create: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleConfirm = () => {
-        if (getSession !== undefined) {
-            getSession().then(async ({ sessionKey }) => {
-                if (sessionKey != "") {
-                    const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/project`,
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: `auth/osoc2 ${sessionKey}`,
-                                "Content-Type": "application/json",
-                                Accept: "application/json",
-                            },
-                            body: JSON.stringify({
-                                name: projectName,
-                                partner: partner,
-                                start: startDate,
-                                end: endDate,
-                                osocId: osocId,
-                                positions: getTotalPositions(),
-                                roles: { roles: getRoleList() },
-                                description: description,
-                                coaches: { coaches: selectedCoaches },
-                            }),
-                        }
-                    )
-                        .then((response) => response.json())
-                        .catch((error) => console.log(error));
-                    if (response !== undefined && response.success) {
-                        if (notify) {
-                            notify(
-                                "Project succesfully created!",
-                                NotificationType.SUCCESS,
-                                2000
-                            );
-                        }
-                        socket.emit("projectCreated");
-                    } else if (notify && response !== null) {
-                        notify(response.reason, NotificationType.ERROR, 5000);
-                    }
-                    router.push("/projects").then();
-                }
-            });
+    const handleConfirm = async () => {
+        const { sessionKey } = getSession
+            ? await getSession()
+            : { sessionKey: "" };
+
+        console.log(startDate);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/project`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `auth/osoc2 ${sessionKey}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    name: projectName,
+                    partner: partner,
+                    start: startDate,
+                    end: endDate,
+                    osocId: osocId,
+                    positions: getTotalPositions(),
+                    roles: { roles: getRoleList() },
+                    description: description,
+                    coaches: { coaches: selectedCoaches },
+                }),
+            }
+        )
+            .then((response) => response.json())
+            .catch((error) => console.log(error));
+        if (response !== undefined && response.success) {
+            if (notify) {
+                notify(
+                    "Project succesfully created!",
+                    NotificationType.SUCCESS,
+                    2000
+                );
+            }
+            socket.emit("projectCreated");
+        } else if (notify && response !== null) {
+            notify(response.reason, NotificationType.ERROR, 5000);
         }
+        router.push("/projects").then();
     };
 
     const getTotalPositions = () => {
@@ -315,6 +314,7 @@ const Create: NextPage = () => {
             <label>
                 <h1>Project name</h1>
                 <input
+                    data-testid={"nameInput"}
                     className="input"
                     type="text"
                     name="project_name"
@@ -327,6 +327,7 @@ const Create: NextPage = () => {
             <label>
                 <h1>Partner</h1>
                 <input
+                    data-testid={"partnerInput"}
                     className="input"
                     type="text"
                     name="partner"
@@ -339,6 +340,7 @@ const Create: NextPage = () => {
             <label>
                 <h1>Short description</h1>
                 <input
+                    data-testid={"descriptionInput"}
                     className="input"
                     type="text"
                     name="description"
@@ -351,6 +353,7 @@ const Create: NextPage = () => {
             <label>
                 <h1>Start date</h1>
                 <input
+                    data-testid={"startDateInput"}
                     className="input"
                     type="date"
                     name="start_date"
@@ -362,6 +365,7 @@ const Create: NextPage = () => {
             <label>
                 <h1>End date</h1>
                 <input
+                    data-testid={"endDateInput"}
                     className="input"
                     type="date"
                     name="end_date"
@@ -450,7 +454,9 @@ const Create: NextPage = () => {
             </div>
 
             <br />
-            <button onClick={handleConfirm}>CONFIRM</button>
+            <button data-testid={"confirmButton"} onClick={handleConfirm}>
+                CONFIRM
+            </button>
         </div>
     );
 };
