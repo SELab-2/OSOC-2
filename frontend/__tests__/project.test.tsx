@@ -5,6 +5,7 @@ import fireEvent from "@testing-library/user-event";
 import Projects from "../pages/projects";
 import { defaultUser } from "../defaultUser";
 import { Project } from "../types";
+import { wrapWithTestBackend } from "react-dnd-test-utils";
 
 jest.mock("next/router", () => require("next-router-mock"));
 
@@ -55,9 +56,10 @@ describe("project filter tests", () => {
         fetchMock.mockOnce(responseStudents);
         fetchMock.mockOnce(response);
         fetchMock.mockOnce(responseProject);
+        const [BoxContext] = wrapWithTestBackend(Projects);
 
         await act(() => {
-            render(<Projects />);
+            render(<BoxContext />);
         });
     });
 
