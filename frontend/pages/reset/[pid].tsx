@@ -123,7 +123,6 @@ const Pid: NextPage = () => {
                 .catch((error) => console.log(error));
             if (response.success) {
                 setBackendError("");
-                // TODO -- Notification
                 router.push("/login").then();
             } else {
                 setBackendError(response.reason);

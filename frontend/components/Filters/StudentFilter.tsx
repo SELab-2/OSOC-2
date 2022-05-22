@@ -18,6 +18,8 @@ import ExclamationIconColor from "../../public/images/exclamation_mark_color.png
 import ExclamationIcon from "../../public/images/exclamation_mark.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
+import CrossIconColor from "../../public/images/close_icon_red.png";
+import CrossIcon from "../../public/images/close_icon.png";
 import { NotificationContext } from "../../contexts/notificationProvider";
 
 export const StudentFilter: React.FC<{
@@ -265,6 +267,33 @@ export const StudentFilter: React.FC<{
         let newVal;
         if (statusFilter !== StudentStatus.NO) {
             newVal = StudentStatus.NO;
+        } else {
+            newVal = StudentStatus.EMPTY;
+        }
+        setStatusFilter(newVal);
+
+        setEmailStatusActive(false);
+        setRolesActive(false);
+        const params: StudentFilterParams = {
+            nameFilter: nameFilter,
+            emailFilter: emailFilter,
+            nameSort: nameSort,
+            emailSort: emailSort,
+            alumni: alumni,
+            studentCoach: studentCoach,
+            statusFilter: newVal,
+            osocYear: osocYear,
+            emailStatus: emailStatus,
+            selectedRoles: selectedRoles,
+        };
+        searchManual(params);
+    };
+
+    const toggleFilterNone = async (e: SyntheticEvent) => {
+        e.preventDefault();
+        let newVal;
+        if (statusFilter !== StudentStatus.NONE) {
+            newVal = StudentStatus.NONE;
         } else {
             newVal = StudentStatus.EMPTY;
         }
@@ -806,9 +835,9 @@ export const StudentFilter: React.FC<{
                                     ? CheckIconColor
                                     : CheckIcon
                             }
+                            alt="YesDecision"
                             width={30}
                             height={30}
-                            alt={"Disabled"}
                             onClick={toggleFilterYes}
                         />
                         <p>YES</p>
@@ -823,9 +852,9 @@ export const StudentFilter: React.FC<{
                                     ? ExclamationIconColor
                                     : ExclamationIcon
                             }
+                            alt="MaybeDecision"
                             width={30}
                             height={30}
-                            alt={"Disabled"}
                             onClick={toggleFilterMaybe}
                         />
                         <p>MAYBE</p>
@@ -840,12 +869,28 @@ export const StudentFilter: React.FC<{
                                     ? ForbiddenIconColor
                                     : ForbiddenIcon
                             }
+                            alt="NoDecision"
                             width={30}
                             height={30}
-                            alt={"Disabled"}
                             onClick={toggleFilterNo}
                         />
                         <p>NO</p>
+                    </div>
+
+                    <div className={styles.buttonContainer}>
+                        <Image
+                            className={styles.buttonImage}
+                            src={
+                                statusFilter === StudentStatus.NONE
+                                    ? CrossIconColor
+                                    : CrossIcon
+                            }
+                            alt="NoneDecision"
+                            width={30}
+                            height={30}
+                            onClick={toggleFilterNone}
+                        />
+                        <p>NONE</p>
                     </div>
                 </div>
 

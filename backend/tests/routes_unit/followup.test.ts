@@ -30,7 +30,8 @@ jest.mock("../../utility", () => {
         checkSessionKey: jest.fn(),
         isAdmin: jest.fn(),
         checkYearPermissionStudent: jest.fn(),
-    }; // we want to only mock checkSessionKey, isAdmin and checkYearPermissionStudent
+        checkYearPermissionsFollowup: jest.fn(),
+    }; // we want to only mock checkSessionKey, isAdmin, checkYearPermissionStudent and checkYearPermissionsFollowup
 });
 export const utilMock = util as jest.Mocked<typeof util>;
 
@@ -179,6 +180,9 @@ beforeEach(() => {
     utilMock.checkYearPermissionStudent.mockImplementation((v) =>
         Promise.resolve(v)
     );
+    utilMock.checkYearPermissionsFollowup.mockImplementation((v) =>
+        Promise.resolve(v)
+    );
 
     osocMock.getLatestOsoc.mockResolvedValue(osocdat);
     osocMock.getOsocById.mockResolvedValue(osocdat);
@@ -210,6 +214,7 @@ afterEach(() => {
     utilMock.checkSessionKey.mockReset();
     utilMock.isAdmin.mockReset();
     utilMock.checkYearPermissionStudent.mockReset();
+    utilMock.checkYearPermissionsFollowup.mockReset();
 
     osocMock.getLatestOsoc.mockReset();
     osocMock.getOsocById.mockReset();

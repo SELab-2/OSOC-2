@@ -5,7 +5,13 @@ import CoachIconColor from "../../public/images/coach_icon_color.png";
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
+import React, {
+    SyntheticEvent,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import {
@@ -38,7 +44,7 @@ export const User: React.FC<{
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { notify } = useContext(NotificationContext);
-
+    const [hasYearPermListener, setYearPermListener] = useState(false);
     // a set of edition ids the user is allowed to see
     const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
     // dropdown open or closed
@@ -50,6 +56,16 @@ export const User: React.FC<{
         setIsCoach(user.is_coach);
         setStatus(user.account_status);
     }, [user]);
+
+    /**
+     * remove the listeners when dismounting the component
+     */
+    useEffect(() => {
+        return () => {
+            socket.off("yearPermissionUpdated");
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!isAdmin && !isCoach) {
@@ -63,7 +79,7 @@ export const User: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchUserEditions = async () => {
+    const fetchUserEditions = useCallback(async () => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -85,7 +101,24 @@ export const User: React.FC<{
             }
             setUserEditions(new Set(ids));
         }
-    };
+    }, [getSession, userId]);
+
+    /**
+     * websocket listeners that update the visible years for a loginUser
+     * we use the state to check if there is already a listener in this User
+     * If there is no listener we register a new one
+     */
+    useEffect(() => {
+        if (hasYearPermListener) {
+            return;
+        }
+        setYearPermListener(true);
+        socket.on("yearPermissionUpdated", (loginUserId: number) => {
+            if (user.login_user_id === loginUserId) {
+                fetchUserEditions().then();
+            }
+        });
+    }, [user, socket, fetchUserEditions, hasYearPermListener]);
 
     const setUserRole = async (
         route: string,
@@ -133,7 +166,7 @@ export const User: React.FC<{
             socket.emit("updateRoleUser");
             if (notify) {
                 notify(
-                    `Successfully updated ${name} authorities`,
+                    `Successfully updated the permissions of ${name}`,
                     NotificationType.SUCCESS,
                     2000
                 );
@@ -304,15 +337,19 @@ export const User: React.FC<{
                 Accept: "application/json",
                 Authorization: `auth/osoc2 ${sessionKey}`,
             },
-        }).catch((reason) => {
-            console.log(reason);
-            if (method === "POST") {
-                userEditions.delete(id);
-            } else {
-                userEditions.add(id);
-            }
-            setUserEditions(new Set(userEditions));
-        });
+        })
+            .then(() => {
+                socket.emit("yearPermissionUpdate", user.login_user_id);
+            })
+            .catch((reason) => {
+                console.log(reason);
+                if (method === "POST") {
+                    userEditions.delete(id);
+                } else {
+                    userEditions.add(id);
+                }
+                setUserEditions(new Set(userEditions));
+            });
     };
 
     return (

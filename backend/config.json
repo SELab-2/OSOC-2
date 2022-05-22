@@ -1,7 +1,7 @@
 {
     "apiErrors": {
         "invalidID": {
-            "http": 204,
+            "http": 423,
             "reason": "This endpoint requires an ID. The ID you provided was invalid."
         },
         "argumentError": {
@@ -95,7 +95,7 @@
         ],
         "preferred": "/api-osoc",
         "authScheme": "auth/osoc2",
-        "defaultUserId": 3,
+        "defaultUserId": 1,
         "port": 4096,
         "pageSize": 10
     },

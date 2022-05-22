@@ -7,7 +7,7 @@ services:
       - '4096:4096' # 4096 is the port used by express, we map this to 4096
     depends_on:
       - db
-    deploy: # TODO: maybe change the restart policy later?
+    deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -19,7 +19,7 @@ services:
       - '3000:3000' # 3000 is used by next, we keep using this one
     depends_on:
       - backend
-    deploy: # TODO: maybe change the restart policy later?
+    deploy:
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -31,7 +31,7 @@ services:
       - data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
-    deploy: # TODO: maybe change the restart policy later?
+    deploy:
       restart_policy:
         condition: on-failure
         delay: 5s

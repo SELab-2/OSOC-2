@@ -933,7 +933,7 @@ test("Can get single project", async () => {
 
     await expect(project.getProject(req)).resolves.toStrictEqual(res);
     expectCall(reqMock.parseSingleProjectRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
     expectCall(ormPrMock.getProjectById, 0);
     expectCall(ormCMock.contractsByProject, 0);
@@ -956,7 +956,7 @@ test("Can't get single project (role error)", async () => {
 
     await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseSingleProjectRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
     expectCall(ormPrMock.getProjectById, 0);
     expectCall(ormCMock.contractsByProject, 0);
@@ -978,7 +978,7 @@ test("Can't get single project (ID error)", async () => {
 
     await expect(project.getProject(req)).rejects.toStrictEqual(undefined);
     expectCall(reqMock.parseSingleProjectRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(utilMock.isValidID).toHaveBeenCalledTimes(1);
     expectCall(ormPrMock.getProjectById, 0);
     expect(ormCMock.contractsByProject).not.toHaveBeenCalled();
@@ -1242,7 +1242,7 @@ test("Can un-assign coaches", async () => {
     // await project.unAssignCoach(req);
     await expect(project.unAssignCoach(req)).resolves.toStrictEqual({});
     expectCall(reqMock.parseRemoveCoachRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(utilMock.isAdmin, req.body);
     expectCall(ormPUMock.getUsersFor, 0);
     expectCall(ormPUMock.deleteProjectUser, {
         loginUserId: req.body.loginUserId,
@@ -1263,7 +1263,7 @@ test("Can't un-assign coaches (invalid id)", async () => {
         reason: "The coach with ID 7 is not assigned to project 0",
     });
     expectCall(reqMock.parseRemoveCoachRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(utilMock.isAdmin, req.body);
     expectCall(ormPUMock.getUsersFor, 0);
     expect(ormPUMock.deleteProjectUser).not.toHaveBeenCalled();
 });
@@ -1282,7 +1282,7 @@ test("Can assign coaches", async () => {
         project_id: 0,
     });
     expectCall(reqMock.parseAssignCoachRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(utilMock.isAdmin, req.body);
     expectCall(ormPUMock.getUsersFor, 0);
     expectCall(ormPUMock.createProjectUser, { projectId: 0, loginUserId: 7 });
 });
@@ -1300,7 +1300,7 @@ test("Can't assign coaches (already assigned)", async () => {
         reason: "The coach with ID 0 is already assigned to project 0",
     });
     expectCall(reqMock.parseAssignCoachRequest, req);
-    expectCall(utilMock.checkSessionKey, req.body);
+    expectCall(utilMock.isAdmin, req.body);
     expectCall(ormPUMock.getUsersFor, 0);
     expect(ormPUMock.createProjectUser).not.toHaveBeenCalled();
 });
@@ -1401,7 +1401,7 @@ test("Can assign students", async () => {
         role: "dev",
     });
     expectCall(reqMock.parseDraftStudentRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expectCall(ormCMock.createContract, {
@@ -1460,7 +1460,7 @@ test("Can't assign students (no places)", async () => {
         reason: "There are no more free spaces for that role",
     });
     expectCall(reqMock.parseDraftStudentRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
@@ -1514,7 +1514,7 @@ test("Can't assign students (no such role)", async () => {
         reason: "That role doesn't exist",
     });
     expectCall(reqMock.parseDraftStudentRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
@@ -1571,7 +1571,7 @@ test("Can't assign students (already used)", async () => {
         reason: "This student does already have a contract",
     });
     expectCall(reqMock.parseDraftStudentRequest, req);
-    expectCall(utilMock.isAdmin, req.body);
+    expectCall(utilMock.checkSessionKey, req.body);
     expect(ormOMock.getLatestOsoc).toHaveBeenCalledTimes(1);
     expectCall(ormCMock.contractsForStudent, req.body.studentId);
     expect(ormCMock.createContract).not.toHaveBeenCalled();
