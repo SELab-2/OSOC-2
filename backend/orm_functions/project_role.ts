@@ -87,7 +87,7 @@ export async function updateProjectRole(projectRole: UpdateProjectRole) {
  *
  * @param projectRoleId the projectRole we are deleting from the project
  *     role-table
- * @returns TODO: what does this return?
+ * @returns a promise with the deleted record
  */
 export async function deleteProjectRole(projectRoleId: number) {
     const result = await prisma.project_role.delete({

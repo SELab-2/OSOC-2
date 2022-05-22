@@ -222,7 +222,15 @@ export const Students: React.FC<{
     const id_to_index: Record<string, number> = {};
 
     const navigator = (page: number) => {
+        setSelectedStudent(-1);
+        // get the current url and delete the id field
+        const paramsQuery = new URLSearchParams(window.location.search);
+        paramsQuery.delete("id");
+        // push the url
+        router.push(`/students?${paramsQuery.toString()}`).then();
+
         if (params !== undefined) {
+            window.scrollTo(0, 0);
             search(params, page).then();
         }
     };
@@ -269,7 +277,7 @@ export const Students: React.FC<{
                 : 0;
         setPagination({
             page: currentPageInt,
-            count: 0, //TODO: what value should this be? I thought this would have to be currentPageInt * pageSize + 1
+            count: 0,
         });
         search(params, currentPageInt).then();
     };

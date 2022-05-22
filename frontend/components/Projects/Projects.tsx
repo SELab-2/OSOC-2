@@ -108,7 +108,7 @@ export const Projects: React.FC = () => {
                 : 0;
         setPagination({
             page: currentPageInt,
-            count: 0, //TODO: what value should this be? I thought this would have to be currentPageInt * pageSize + 1
+            count: 0,
         });
         search(params, currentPageInt).then();
     };

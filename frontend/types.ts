@@ -34,6 +34,7 @@ export enum StudentStatus {
     YES = "YES",
     MAYBE = "MAYBE",
     NO = "NO",
+    NONE = "NONE",
 }
 
 export enum ContractStatus {

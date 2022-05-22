@@ -12,6 +12,7 @@ import {
 } from "./orm_types";
 import { getOsocYearsForLoginUser } from "./login_user";
 import { deletePersonFromDB } from "./person";
+import { Decision } from "../types";
 
 /**
  *
@@ -179,7 +180,13 @@ export async function filterStudents(
     // manually create filter object for evaluation because evaluation doesn't need to exist
     // and then the whole object needs to be undefined
     let evaluationFilter;
-    if (statusFilter) {
+    if ((statusFilter as Decision) === Decision.NONE) {
+        evaluationFilter = {
+            none: {
+                is_final: true,
+            },
+        };
+    } else if (statusFilter) {
         evaluationFilter = {
             some: {
                 decision: statusFilter,
