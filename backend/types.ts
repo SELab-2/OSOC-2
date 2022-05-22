@@ -1567,6 +1567,7 @@ export enum Decision {
     YES = "YES",
     MAYBE = "MAYBE",
     NO = "NO",
+    NONE = "NONE",
 }
 
 export enum AccountStatus {
