@@ -122,7 +122,7 @@ const Users: NextPage = () => {
             );
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket, searchParams]);
+    }, [socket, searchParams, pagination]);
 
     /**
      * Gets all osoc editions from the backend

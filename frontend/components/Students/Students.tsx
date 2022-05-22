@@ -227,7 +227,9 @@ export const Students: React.FC<{
         const paramsQuery = new URLSearchParams(window.location.search);
         paramsQuery.delete("id");
         // push the url
-        router.push(`/students?${paramsQuery.toString()}`).then();
+        router
+            .push(`/${window.location.pathname}?${paramsQuery.toString()}`)
+            .then();
 
         if (params !== undefined) {
             window.scrollTo(0, 0);

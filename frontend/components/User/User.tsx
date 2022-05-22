@@ -44,7 +44,7 @@ export const User: React.FC<{
     const userId = user.login_user_id;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { notify } = useContext(NotificationContext);
-
+    const [hasYearPermListener, setYearPermListener] = useState(false);
     // a set of edition ids the user is allowed to see
     const [userEditions, setUserEditions] = useState<Set<number>>(new Set());
     // dropdown open or closed
@@ -105,15 +105,20 @@ export const User: React.FC<{
 
     /**
      * websocket listeners that update the visible years for a loginUser
+     * we use the state to check if there is already a listener in this User
+     * If there is no listener we register a new one
      */
     useEffect(() => {
-        socket.off("yearPermissionUpdated");
+        if (hasYearPermListener) {
+            return;
+        }
+        setYearPermListener(true);
         socket.on("yearPermissionUpdated", (loginUserId: number) => {
             if (user.login_user_id === loginUserId) {
                 fetchUserEditions().then();
             }
         });
-    }, [user, socket, fetchUserEditions]);
+    }, [user, socket, fetchUserEditions, hasYearPermListener]);
 
     const setUserRole = async (
         route: string,
