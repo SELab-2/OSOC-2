@@ -835,6 +835,7 @@ export const StudentFilter: React.FC<{
                                     ? CheckIconColor
                                     : CheckIcon
                             }
+                            alt="YesDecision"
                             width={30}
                             height={30}
                             onClick={toggleFilterYes}
@@ -851,6 +852,7 @@ export const StudentFilter: React.FC<{
                                     ? ExclamationIconColor
                                     : ExclamationIcon
                             }
+                            alt="MaybeDecision"
                             width={30}
                             height={30}
                             onClick={toggleFilterMaybe}
@@ -867,6 +869,7 @@ export const StudentFilter: React.FC<{
                                     ? ForbiddenIconColor
                                     : ForbiddenIcon
                             }
+                            alt="NoDecision"
                             width={30}
                             height={30}
                             onClick={toggleFilterNo}
@@ -882,6 +885,7 @@ export const StudentFilter: React.FC<{
                                     ? CrossIconColor
                                     : CrossIcon
                             }
+                            alt="NoneDecision"
                             width={30}
                             height={30}
                             onClick={toggleFilterNone}
