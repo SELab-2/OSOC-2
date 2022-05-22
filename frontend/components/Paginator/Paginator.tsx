@@ -29,7 +29,7 @@ export const Paginator: React.FC<{
     };
 
     const nextPage = () => {
-        if (pagination.page === pages - 1) return;
+        if (pagination.page === pages - 1 || pages === 0) return;
         navigator(pagination.page + 1);
     };
 
