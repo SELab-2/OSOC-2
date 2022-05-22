@@ -29,7 +29,7 @@ export const Paginator: React.FC<{
     };
 
     const nextPage = () => {
-        if (pagination.page === pages - 1) return;
+        if (pagination.page === pages - 1 || pages === 0) return;
         navigator(pagination.page + 1);
     };
 
@@ -38,7 +38,6 @@ export const Paginator: React.FC<{
             className="is-centered pagination"
             role="navigation"
             aria-label="pagination"
-            style={{ zIndex: -1 }}
         >
             <a
                 onClick={previousPage}

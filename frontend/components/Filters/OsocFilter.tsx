@@ -94,7 +94,25 @@ export const OsocCreateFilter: React.FC<{
                 console.log(err);
             });
         if (response && response.success) {
+            // get the current userId. This is needed to notify the other users on the manage user screen.
+            // this loginUser id is used to notify which user year permissions need to be refetched there.
+            const currentUser = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/self`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                    },
+                }
+            )
+                .then((res) => res.json())
+                .catch((err) => {
+                    console.log(err);
+                });
             socket.emit("osocCreated");
+            socket.emit("yearPermissionUpdate", currentUser.login_user_id);
             const params: OsocFilterParams = {
                 yearFilter: yearFilter,
                 yearSort: yearSort,

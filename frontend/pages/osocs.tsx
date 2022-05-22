@@ -6,7 +6,7 @@ import {
     Sort,
 } from "../types";
 import { NextPage } from "next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import styles from "../styles/users.module.css";
 import { OsocCreateFilter } from "../components/Filters/OsocFilter";
 import SessionContext from "../contexts/sessionProvider";
@@ -44,20 +44,6 @@ const Osocs: NextPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        socket.off("osocWasCreatedOrDeleted"); // remove old listener
-
-        // add new listener
-        socket.on("osocWasCreatedOrDeleted", () => {
-            if (params !== undefined) {
-                const scrollPosition = window.scrollY;
-                search(params, pagination.page).then(() =>
-                    window.scrollTo(0, scrollPosition)
-                );
-            }
-        });
-    });
-
     const removeOsoc = (osoc: OsocEdition) => {
         if (osocEditions !== undefined) {
             const index = osocEditions.indexOf(osoc, 0);
@@ -88,54 +74,72 @@ const Osocs: NextPage = () => {
      * @param params
      * @param page
      */
-    const search = async (params: OsocFilterParams, page: number) => {
-        if (loading) return;
-        isLoading(true);
-        const filters = [];
+    const search = useCallback(
+        async (params: OsocFilterParams, page: number) => {
+            console.log("callback");
+            if (loading) return;
+            isLoading(true);
+            const filters = [];
 
-        if (params.yearFilter !== "") {
-            filters.push(`yearFilter=${params.yearFilter}`);
-        }
-
-        if (params.yearSort !== Sort.NONE) {
-            filters.push(`yearSort=${params.yearSort}`);
-        }
-
-        filters.push(`currentPage=${page}`);
-        filters.push(`pageSize=${pageSize}`);
-
-        const query = filters.length > 0 ? `?${filters.join("&")}` : "";
-
-        const { sessionKey } = getSession
-            ? await getSession()
-            : { sessionKey: "" };
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
-            {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Authorization: `auth/osoc2 ${sessionKey}`,
-                },
+            if (params.yearFilter !== "") {
+                filters.push(`yearFilter=${params.yearFilter}`);
             }
-        )
-            .then((response) => response.json())
-            .catch((err) => {
-                console.log(err);
-            });
-        if (response.data && response.pagination) {
-            setEditions(response.data);
-            setPagination(response.pagination);
-        } else if (!response.success && notify) {
-            notify(
-                "Something went wrong:" + response.reason,
-                NotificationType.ERROR,
-                2000
-            );
-        }
-        isLoading(false);
-    };
+
+            if (params.yearSort !== Sort.NONE) {
+                filters.push(`yearSort=${params.yearSort}`);
+            }
+
+            filters.push(`currentPage=${page}`);
+            filters.push(`pageSize=${pageSize}`);
+
+            const query = filters.length > 0 ? `?${filters.join("&")}` : "";
+
+            const { sessionKey } = getSession
+                ? await getSession()
+                : { sessionKey: "" };
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/osoc/filter` + query,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: `auth/osoc2 ${sessionKey}`,
+                    },
+                }
+            )
+                .then((response) => response.json())
+                .catch((err) => {
+                    console.log(err);
+                });
+            if (response.data && response.pagination) {
+                setEditions(response.data);
+                setPagination(response.pagination);
+            } else if (!response.success && notify) {
+                notify(
+                    "Something went wrong:" + response.reason,
+                    NotificationType.ERROR,
+                    2000
+                );
+            }
+            isLoading(false);
+        },
+        [getSession, loading, notify]
+    );
+
+    useEffect(() => {
+        socket.off("osocWasCreatedOrDeleted"); // remove old listener
+
+        // add new listener
+        socket.on("osocWasCreatedOrDeleted", () => {
+            if (params !== undefined) {
+                const scrollPosition = window.scrollY;
+                search(params, pagination.page).then(() =>
+                    window.scrollTo(0, scrollPosition)
+                );
+            }
+        });
+    }, [params, getSession, socket, search, pagination.page]);
 
     return (
         <div className={styles.body}>

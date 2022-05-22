@@ -25,7 +25,7 @@ import { NotificationContext } from "../contexts/notificationProvider";
 const Users: NextPage = () => {
     const [users, setUsers] = useState<Array<LoginUser>>();
     const [loading, isLoading] = useState<boolean>(false); // Check if we are executing a request
-    const { getSession } = useContext(SessionContext);
+    const { getSession, sessionKey } = useContext(SessionContext);
     const router = useRouter();
     const [pagination, setPagination] = useState<Pagination>({
         page: 0,
@@ -48,11 +48,15 @@ const Users: NextPage = () => {
     const { socket } = useSockets();
     const { notify } = useContext(NotificationContext);
 
+    /**
+     * remove the listeners when dismounting the component
+     */
     useEffect(() => {
         return () => {
             socket.off("loginUserUpdated");
             socket.off("registrationReceived");
-        }; // disconnect from the socket on dismount
+            socket.off("osocWasCreatedOrDeleted");
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -77,6 +81,7 @@ const Users: NextPage = () => {
     useEffect(() => {
         socket.off("loginUserUpdated"); // remove the earlier added listeners
         socket.off("registrationReceived");
+        socket.off("osocWasCreatedOrDeleted");
         // add new listener
         socket.on("loginUserUpdated", () => {
             const scrollPosition = window.scrollY;
@@ -109,8 +114,15 @@ const Users: NextPage = () => {
                 pagination.page
             ).then(() => window.scrollTo(0, scrollPosition));
         });
+        // when an osoc edition is deleted or removed this should be updated in the dropdown
+        socket.on("osocWasCreatedOrDeleted", () => {
+            const scrollPosition = window.scrollY;
+            fetchAllOsocEditions(sessionKey).then(() =>
+                window.scrollTo(0, scrollPosition)
+            );
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [socket, searchParams]);
+    }, [socket, searchParams, pagination]);
 
     /**
      * Gets all osoc editions from the backend

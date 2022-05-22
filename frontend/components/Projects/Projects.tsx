@@ -24,6 +24,7 @@ export const Projects: React.FC = () => {
         page: 0,
         count: 0,
     });
+    const { isAdmin } = useContext(SessionContext);
 
     // 5 projects per page
     const pageSize = 5;
@@ -220,19 +221,22 @@ export const Projects: React.FC = () => {
 
     const navigator = (page: number) => {
         if (params !== undefined) {
+            window.scrollTo(0, 0);
             search(params, page).then();
         }
     };
 
     return (
         <div className={styles.projects}>
-            <button
-                onClick={() => {
-                    router.push("/projects/create").then();
-                }}
-            >
-                Add Project
-            </button>
+            {isAdmin ? (
+                <button
+                    onClick={() => {
+                        router.push("/projects/create").then();
+                    }}
+                >
+                    Add Project
+                </button>
+            ) : null}
             <ProjectFilter
                 searchManual={filterManual}
                 searchAutomatic={filterAutomatic}

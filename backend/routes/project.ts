@@ -203,7 +203,7 @@ export async function getProject(
 ): Promise<Responses.ProjectAndContracts> {
     const parsedRequest = await rq.parseSingleProjectRequest(req);
     const checkedId = await util
-        .isAdmin(parsedRequest)
+        .checkSessionKey(parsedRequest)
         .then(checkYearPermissionProject)
         .then((v) => util.isValidID(v.data, "project"));
 
@@ -506,7 +506,7 @@ export async function unAssignCoach(
 ): Promise<Responses.Empty> {
     return rq
         .parseRemoveCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async (checked) => {
             const project = await ormPr.getProjectById(checked.data.id);
 
@@ -555,7 +555,7 @@ export async function assignCoach(
 ): Promise<Responses.ProjectUser> {
     return rq
         .parseAssignCoachRequest(req)
-        .then((parsed) => util.checkSessionKey(parsed))
+        .then((parsed) => util.isAdmin(parsed))
         .then(async (checked) => {
             const project = await ormPr.getProjectById(checked.data.id);
 
@@ -701,7 +701,7 @@ export async function assignStudent(
     // authenticate, parse, ...
     const checked = await rq
         .parseDraftStudentRequest(req)
-        .then((parsed) => util.isAdmin(parsed));
+        .then((parsed) => util.checkSessionKey(parsed));
 
     // check if edition is ready
     const latestOsoc = await ormOsoc

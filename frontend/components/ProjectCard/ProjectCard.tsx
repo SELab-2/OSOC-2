@@ -23,6 +23,7 @@ export const ProjectCard: React.FC<{
     const [droppedStudent, setDroppedStudent] = useState<Student>();
     const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const { socket } = useSockets();
+    const { isAdmin } = useContext(SessionContext);
 
     const postAssign = async (student: Student, role: string) => {
         if (student === null || student.student === null) return;
@@ -326,14 +327,18 @@ export const ProjectCard: React.FC<{
                 <p>{project.description}</p>
             </div>
 
-            <div className={styles.buttons}>
-                <button
-                    onClick={() => router.push(`projects/${project.id}/change`)}
-                >
-                    Change
-                </button>
-                <button onClick={() => toggleDeleteModal()}>Delete</button>
-            </div>
+            {isAdmin ? (
+                <div className={styles.buttons}>
+                    <button
+                        onClick={() =>
+                            router.push(`projects/${project.id}/change`)
+                        }
+                    >
+                        Change
+                    </button>
+                    <button onClick={() => toggleDeleteModal()}>Delete</button>
+                </div>
+            ) : null}
         </div>
     );
 };
