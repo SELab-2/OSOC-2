@@ -5,7 +5,13 @@ import CoachIconColor from "../../public/images/coach_icon_color.png";
 import CoachIcon from "../../public/images/coach_icon.png";
 import ForbiddenIconColor from "../../public/images/forbidden_icon_color.png";
 import ForbiddenIcon from "../../public/images/forbidden_icon.png";
-import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
+import React, {
+    SyntheticEvent,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import Image from "next/image";
 import SessionContext from "../../contexts/sessionProvider";
 import {
@@ -51,6 +57,16 @@ export const User: React.FC<{
         setStatus(user.account_status);
     }, [user]);
 
+    /**
+     * remove the listeners when dismounting the component
+     */
+    useEffect(() => {
+        return () => {
+            socket.off("yearPermissionUpdated");
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     useEffect(() => {
         if (!isAdmin && !isCoach) {
             setStatus(() => AccountStatus.DISABLED);
@@ -63,7 +79,7 @@ export const User: React.FC<{
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const fetchUserEditions = async () => {
+    const fetchUserEditions = useCallback(async () => {
         const { sessionKey } = getSession
             ? await getSession()
             : { sessionKey: "" };
@@ -85,7 +101,20 @@ export const User: React.FC<{
             }
             setUserEditions(new Set(ids));
         }
-    };
+    }, [getSession, userId]);
+
+    /**
+     * websocket listeners that update the visible years for a loginUser
+     */
+    useEffect(() => {
+        socket.off("yearPermissionUpdated");
+        socket.on("yearPermissionUpdated", (loginUserId: number) => {
+            console.log("update");
+            if (user.login_user_id === loginUserId) {
+                fetchUserEditions().then();
+            }
+        });
+    }, [user, socket, fetchUserEditions]);
 
     const setUserRole = async (
         route: string,
@@ -304,15 +333,19 @@ export const User: React.FC<{
                 Accept: "application/json",
                 Authorization: `auth/osoc2 ${sessionKey}`,
             },
-        }).catch((reason) => {
-            console.log(reason);
-            if (method === "POST") {
-                userEditions.delete(id);
-            } else {
-                userEditions.add(id);
-            }
-            setUserEditions(new Set(userEditions));
-        });
+        })
+            .then(() => {
+                socket.emit("yearPermissionUpdate", user.login_user_id);
+            })
+            .catch((reason) => {
+                console.log(reason);
+                if (method === "POST") {
+                    userEditions.delete(id);
+                } else {
+                    userEditions.add(id);
+                }
+                setUserEditions(new Set(userEditions));
+            });
     };
 
     return (

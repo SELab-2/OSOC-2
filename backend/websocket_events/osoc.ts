@@ -29,7 +29,11 @@ export function registerOsocHandlers(
     const OsocCreatedOrDeleted = () => {
         socket.broadcast.emit("osocWasCreatedOrDeleted");
     };
+    const yearPermissionUpdated = (loginUserId: number) => {
+        socket.broadcast.emit("yearPermissionUpdated", loginUserId);
+    };
 
     socket.on("osocDeleted", OsocCreatedOrDeleted);
     socket.on("osocCreated", OsocCreatedOrDeleted);
+    socket.on("yearPermissionUpdate", yearPermissionUpdated);
 }

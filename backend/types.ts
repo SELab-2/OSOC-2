@@ -1527,6 +1527,7 @@ export interface ServerToClientEvents {
     projectWasCreatedOrDeleted: () => void;
     projectWasModified: (projectId: number) => void;
     osocWasCreatedOrDeleted: () => void;
+    yearPermissionUpdated: (loginUserId: number) => void;
 }
 
 /**
@@ -1547,6 +1548,7 @@ export interface ClientToServerEvents {
     projectDeleted: () => void;
     osocDeleted: () => void;
     osocCreated: () => void;
+    yearPermissionUpdate: (loginUserId: number) => void;
 }
 
 /**
