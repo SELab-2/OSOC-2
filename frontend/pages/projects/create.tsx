@@ -142,7 +142,6 @@ const Create: NextPage = () => {
             ? await getSession()
             : { sessionKey: "" };
 
-        console.log(startDate);
         const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/project`,
             {
