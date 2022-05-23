@@ -36,7 +36,7 @@
     "@types/react-dom": "^18.0.4",
     "@types/validator": "^13.7.2",
     "cross-env": "^7.0.3",
-    "eslint": "8.15.0",
+    "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
     "jest": "^28.1.0",
     "react-dnd-test-backend": "^16.0.1",
